@@ -1,4 +1,4 @@
-di - disk information utility (version 3.10).
+di - disk information utility (version 3.11).
 
 DESCRIPTION
 
@@ -138,6 +138,9 @@ BUGS
 
 CHANGES
 
+    3.11
+        Fixed bug checking mount options to see if partition
+        was read-only (bsd style get/set/endmntent).
     3.10
         Added German .po file (Many thanks to Hartmut Haase).
         Added -64 to Build for 64 bit binaries.
