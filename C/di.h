@@ -14,11 +14,7 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 /******************************************************/
 /* create 'Configure' forwards compatibility w/'iffe' */
 /* until we know how portable iffe is...              */
-#if ! defined (_config_by_iffe_)   /* created by Configure, not iffe */
-# define _hdr_ctype 1
-# define _hdr_errno 1
-# define _hdr_stdlib 1
-#endif
+
 #if defined (CAN_PROTOTYPE)
 # define _proto_stdc 1
 #endif
@@ -34,8 +30,14 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (HAS_ENDMNTENT)
 # define _lib_endmntent 1
 #endif
+#if defined (HAS_ERRNO)
+# define _lib_errno 1
+#endif
 #if defined (HAS_FS_INFO)
 # define _lib_fs_info 1
+#endif
+#if defined (HAS_FS_STAT_DEV)
+# define _lib_fs_stat_dev 1
 #endif
 #if defined (HAS_GETFSSTAT)
 # define _lib_getfsstat 1
@@ -51,6 +53,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (HAS_GETMNTINFO)
 # define _lib_getmntinfo 1
+#endif
+#if defined (HAS_GETOPT)
+# define _lib_getopt 1
 #endif
 #if defined (HAS_HASMNTOPT)
 # define _lib_hasmntopt 1
@@ -72,6 +77,11 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (HAS_SETMNTENT)
 # define _lib_setmntent 1
+#endif
+#if defined (HAS_SETMNTENT_1ARG)
+# define _setmntent_1arg 1
+#endif
+#if defined (HAS_SETMNTENT_2ARG)
 # define _setmntent_2arg 1
 #endif
 #if defined (HAS_SNPRINTF)
@@ -83,43 +93,29 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (HAS_SYSFS)
 # define _lib_sysfs 1
 #endif
-#if defined (HAS_64BIT_STATFS_FLDS)
-# define _siz_long_long 8
-#endif
 #if defined (HAS_TEXTDOMAIN)
 # define _lib_textdomain 1
 #endif
-#if defined (HAS_GETMNTINFO_BSIZE)
-# define _mem_f_bsize_statfs 1
-#endif
-#if defined (HAS_GETMNTINFO_FSIZE)
-# define _mem_f_fsize_statfs 1
-#endif
-#if defined (HAS_GETMNTINFO_FSTYPENAME)
-# define _mem_f_fstypename_statfs 1
-#endif
-#if defined (HAS_STATFS_FRSIZE)
-# define _mem_f_frsize_statfs 1
-#endif
 #if defined (HAS_OPTIND)
-# define _lib_getopt 1
 # define _dcl_optind 1
+#endif
+#if defined (HAS_OPTARG)
 # define _dcl_optarg 1
 #endif
-#if defined (HAS_STATFS_BSD)
+#if defined (HAS_STATFS_2ARG)
 # define _statfs_2arg 1
 #endif
-#if defined (HAS_STATFS_SYSV3)
+#if defined (HAS_STATFS_3ARG)
+# define _statfs_3arg 1
+#endif
+#if defined (HAS_STATFS_4ARG)
 # define _statfs_4arg 1
 #endif
-#if defined (NEED_GETENV_DEFS)
-# define _npt_getenv 1
+#if defined (I_CTYPE)
+# define _hdr_ctype 1
 #endif
-#if defined (NEED_STATFS_DEFS)
-# define _npt_statfs 1
-#endif
-#if ! defined (NEED_ERRNO_DEFS)
-# define _lib_errno 1
+#if defined (I_ERRNO)
+# define _hdr_errno 1
 #endif
 #if defined (I_FSHELP)
 # define _hdr_fshelp 1
@@ -155,7 +151,6 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 # define _hdr_getopt 1
 #endif
 #if defined (I_STOR_DIRECTORY)
-# define _lib_fs_stat_dev 1
 # define _hdr_storage_Directory 1
 #endif
 #if defined (I_STOR_ENTRY)
@@ -166,12 +161,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (I_STRING)
 # define _hdr_string 1
-# undef _hdr_strings
-#else
-# if ! defined (_config_by_iffe_)   /* are we using configure? */
-#  define _hdr_strings 1
-#  undef _hdr_string
-# endif
+#endif
+#if defined (I_STRINGS)
+# define _hdr_strings 1
 #endif
 #if defined (I_SYS_FSTYP)
 # define _sys_fstyp 1
@@ -227,13 +219,49 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (I_UNISTD)
 # define _hdr_unistd 1
 #endif
+#if defined (I_WINDOWS)
+# define _hdr_windows 1
+#endif
+#if defined (INCLUDE_MALLOC)
+# define _include_malloc 1
+#endif
+#if defined (INCLUDE_STRING)
+# define _include_string 1
+#endif
+#if defined (MEM_F_BSIZE_STATFS)
+# define _mem_f_bsize_statfs 1
+#endif
+#if defined (MEM_F_FSIZE_STATFS)
+# define _mem_f_fsize_statfs 1
+#endif
+#if defined (MEM_F_FRSIZE_STATFS)
+# define _mem_f_frsize_statfs 1
+#endif
+#if defined (MEM_F_FSTYPENAME_STATFS)
+# define _mem_f_fstypename_statfs 1
+#endif
+#if defined (MEM_F_IOSIZE_STATFS)
+# define _mem_f_iosize_statfs 1
+#endif
 #if defined (MEM_MOUNT_INFO_STATFS)
 # define _mem_mount_info_statfs 1
 #endif
-#if defined (HAS_SETMNTENT_ONE_ARG)
-# undef _setmntent_2arg
-# define _setmntent_1arg 1
+#if defined (MEM_MNT_TIME_MNTTAB)
+# define _mem_mnt_time_mnttab 1
 #endif
+#if defined (MEM_VMT_TIME_VMOUNT)
+# define _mem_vmt_time_vmount 1
+#endif
+#if defined (NPT_GETENV)
+# define _npt_getenv 1
+#endif
+#if defined (NPT_STATFS)
+# define _npt_statfs 1
+#endif
+#if defined (SIZ_LONG_LONG)
+# define _siz_long_long SIZ_LONG_LONG
+#endif
+
 #if ! defined (_config_by_iffe_)   /* are we using configure? */
 # if _lib_bindtextdomain && \
 	_lib_gettext && \
@@ -321,7 +349,7 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #define DI_OPT_LEN             MAXPATHLEN
 #define DI_MNT_TIME_LEN        24
 
-#if _siz_long_long == 8
+#if _siz_long_long >= 8
     typedef unsigned long long _fs_size_t;
     typedef long long _s_fs_size_t;
 #else
@@ -329,7 +357,7 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
     typedef long _s_fs_size_t;
 #endif
 
-typedef unsigned long _ulong;
+typedef unsigned long __ulong;
 
 #if ! defined (TRUE)
 # define TRUE             1
@@ -351,9 +379,9 @@ typedef struct
     _fs_size_t      totalInodes;
     _fs_size_t      freeInodes;
     _fs_size_t      availInodes;
-    _ulong          st_dev;                      /* disk device number   */
-    _ulong          sp_dev;                      /* special device number*/
-    _ulong          sp_rdev;                     /* special rdev #       */
+    __ulong         st_dev;                      /* disk device number   */
+    __ulong         sp_dev;                      /* special device number*/
+    __ulong         sp_rdev;                     /* special rdev #       */
     char            printFlag;                   /* do we want to print  */
                                                  /* this entry?          */
     char            isLocal;                     /* is this mount point  */
