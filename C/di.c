@@ -196,7 +196,9 @@ extern int bcopy (char *, char *, int);
 #endif
 #include <ctype.h>
 #include <sys/types.h>
-#include <sys/param.h>
+#if ! defined (HAS_NO_SYSPARAM_H)
+# include <sys/param.h>
+#endif
 #include <sys/stat.h>
 
 #if defined (_POSIX_SOURCE) && defined (NEED_ULONG_DEF)
@@ -269,6 +271,10 @@ extern int statfs PROTO ((char *, struct statfs *));
 #  define TYPE_LEN         FSTYPSZ
 # endif
 # define VFSTAB_FILE       "/etc/vfstab"
+#endif
+
+#if defined (HAS_GETDISKFREESPACE)
+# include <windows.h>            /* ms-dos */
 #endif
 
 #if ! defined (TYPE_LEN)
@@ -444,7 +450,7 @@ static char         inodeFormat [20];
 static char         inodeLabelFormat [20];
 static char         **ignoreList = { (char **) NULL };
 static char         **includeList = { (char **) NULL };
-static double       dispBlockSize = { ONE_K };
+static double       dispBlockSize = { ONE_MEG };
 static int          remoteFileSystemCount = { 0 };
 static char         remoteFileSystemTypes [MAX_REMOTE_TYPES][TYPE_LEN];
 
@@ -494,7 +500,7 @@ main (argc, argv)
     processArgs (argc, argv);
     if (debug > 0)
     {
-        printf ("di ver 1.21\n");
+        printf ("di ver $Revision$\n");
     }
 
     if (getDiskEntries () < 0)
@@ -821,7 +827,7 @@ printTitle ()
 
     if ((flags & F_DEBUG_HDR) == F_DEBUG_HDR)
     {
-        printf ("di ver 1.21           Default Format: %s\n", DEFAULT_FORMAT);
+        printf ("di ver $Revision$ Default Format: %s\n", DEFAULT_FORMAT);
     }
 
     ptr = formatString;
@@ -1263,7 +1269,8 @@ checkDiskInfo ()
         {
             printf ("chk: total: %f\n", diskInfo [i].totalBlocks);
         }
-        if (diskInfo [i].totalBlocks <= 0.0)
+        if (diskInfo [i].totalBlocks <= 0.0 &&
+            diskInfo [i].printFlag != DI_BAD)
         {
             diskInfo [i].printFlag = DI_IGNORE;
         }
@@ -1341,7 +1348,7 @@ checkDiskInfo ()
 static void
 usage ()
 {
-    printf ("di ver 1.21           Default Format: %s\n", DEFAULT_FORMAT);
+    printf ("di ver $Revision$    Default Format: %s\n", DEFAULT_FORMAT);
          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
     printf ("Usage: di [-ant] [-f format] [-s sort-type] [-i ignore-fstyp-list]\n");
     printf ("       [-I include-fstyp-list] [-w kbyte-width] [-W inode-width] [file [...]]\n");
@@ -2896,3 +2903,116 @@ getDiskInfo ()
 }
 
 #endif /* HAS_SYSV_STATFS */
+
+
+#if defined (HAS_GETDISKFREESPACE)
+
+
+/*
+ * getDiskEntries
+ *
+ * MS-DOS uses a long for the available local drives.
+ *
+ */
+
+static int
+getDiskEntries ()
+{
+    return 0;
+}
+
+
+/*
+ * getDiskInfo
+ *
+ * MS-DOS.
+ *
+ */
+
+# define NUM_MSDOS_FSTYPES          7
+static char *MSDOS_fsType [NUM_MSDOS_FSTYPES] =
+    { "unknown", "", "removable", "fixed", "remote", "cdrom", "ramdisk" };
+# define MSDOS_BUFFER_SIZE          128
+# define BYTES_PER_LOGICAL_DRIVE    4
+
+static void
+getDiskInfo ()
+{
+    int                 i;
+    int                 rc;
+    double              mult;
+    unsigned long       sectorspercluster;
+    unsigned long       bytespersector;
+    unsigned long       totalclusters;
+    unsigned long       freeclusters;
+    char                buff [MSDOS_BUFFER_SIZE];
+    char                *p;
+
+
+    rc = GetLogicalDriveStrings (MSDOS_BUFFER_SIZE, buff);
+    diCount = rc / BYTES_PER_LOGICAL_DRIVE;
+
+    diskInfo = (DiskInfo *) calloc (sizeof (DiskInfo), diCount);
+    if (diskInfo == (DiskInfo *) NULL)
+    {
+        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+        return;
+    }
+
+    for (i = 0; i < diCount; ++i)
+    {
+        p = buff + (BYTES_PER_LOGICAL_DRIVE * i);
+        strcpy (diskInfo [i].name, p);
+        rc = GetDriveType (p);
+        diskInfo [i].printFlag = DI_OK;
+        if (rc == DRIVE_NO_ROOT_DIR)
+        {
+            diskInfo [i].printFlag = DI_BAD;
+        }
+        if (rc == DRIVE_REMOVABLE)
+        {
+            diskInfo [i].printFlag = DI_IGNORE;
+        }
+        strcpy (diskInfo [i].fsType, MSDOS_fsType [rc]);
+
+        if (diskInfo [i].printFlag == DI_OK || (flags & F_ALL) == F_ALL)
+        {
+            rc = GetDiskFreeSpace (p, &sectorspercluster, &bytespersector,
+                    &freeclusters, &totalclusters);
+            if (rc > 0)
+            {
+                mult = (double) (sectorspercluster *
+                        bytespersector) / dispBlockSize;
+                diskInfo [i].totalBlocks = ((double) (_s_fs_size_t) totalclusters * mult);
+                diskInfo [i].freeBlocks = ((double) (_s_fs_size_t) freeclusters * mult);
+                diskInfo [i].availBlocks = ((double) (_s_fs_size_t) freeclusters * mult);
+
+                diskInfo [i].totalInodes = 0;
+                diskInfo [i].freeInodes = 0;
+                diskInfo [i].availInodes = 0;
+
+                if (debug > 1)
+                {
+                    printf ("%s: %s\n", diskInfo [i].name, diskInfo [i].fsType);
+                    printf ("\ts/c:%ld  b/s:%ld\n", sectorspercluster,
+                        bytespersector);
+                    printf ("\tmult:%f\n", mult);
+                    printf ("\tclusters: tot:%ld free:%ld\n",
+                        totalclusters, freeclusters);
+                }
+            }
+            else
+            {
+                diskInfo [i].printFlag = DI_BAD;
+                if (debug)
+                {
+                    printf ("disk %s; could not get disk space\n", p);
+                }
+            }
+        } /* if printable drive */
+    } /* for each mounted drive */
+}
+
+#endif /* HAS_GETDISKFREESPACE */
+
+
