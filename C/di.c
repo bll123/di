@@ -17,25 +17,37 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
  *            -a   : print all mounted devices; normally, those
  *                   with 0 total blocks are not printed.  e.g.
  *                   /dev/proc, /dev/fd.
- *            -d x : size to print blocks in (p, k, m, g, <n>)
+ *            -d x : size to print blocks in (p, k, m, g, t, P, <n>)
  *            -f x : use format string <x>
+ *            -g   : -dg
+ *            -h   : usage
+ *            -H   : "human readable"
  *            -i x : ignore filesystem type(s) x, where x is a comma
  *                   separated list.
  *            -I x : include only filesystem type(s) x, where x is a
  *                   separated list.
  *            -l   : local filesystems only
+ *            -m   : -dm
  *            -n   : don't print header
- *            -s t : sort type
+ *            -s t : sort type (n, s, S, (r))
  *            -t   : print totals
  *            -w n : use <n> for the block print width (default 8).
  *            -W n : use <n> for the inode print width (default 7).
  *            -x n : debug level <n>
  *
- *  All values are reported in K (1024 bytes).
+ *  Display sizes:
+ *      p - posix (512 bytes)
+ *      k - kilobytes
+ *      m - megabytes
+ *      g - gigabytes
+ *      t - terabytes
+ *      P - petabytes
+ *      h - "human readable"
  *
  *  Sort types (by name is default):
  *      n - none (mount order)
  *      s - special
+ *      S - size (available blocks)
  *      r - reverse sort
  *
  *  Format string values:
@@ -83,6 +95,11 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
  *  equal to the number of free blocks.
  *
  *  HISTORY:
+ *     14 apr 2002 bll
+ *          Rewrite ignore/include list stuff to allow multiple
+ *          command line options.
+ *          Fix sort command line option.  Add sort size.
+ *          Add petas.
  *     24 feb 2000 bll
  *          Updated for BeOS.  This required changes to support c++
  *          compilation (ansi style functions).  Fixes for linux.
@@ -277,6 +294,7 @@ extern int     errno;
 #define DI_SORT_NONE            0
 #define DI_SORT_NAME            1
 #define DI_SORT_SPECIAL         2
+#define DI_SORT_AVAIL           3
 
 #define DI_SORT_ASCENDING       1
 #define DI_SORT_DESCENDING      -1
@@ -291,6 +309,9 @@ extern int     errno;
 #define DI_ONE_MEG              1048576.0
 #define DI_ONE_GIG              1073241824.0
 #define DI_ONE_TERA             1099511627776.0
+#define DI_ONE_PETA             1125899906842624.0
+#define DI_ONE_EXA              1152921504606846976.0
+#define DI_DISP_HR              0
 
    /* you may want to change some of these values.  Be sure to change all */
    /* related entries.                                                    */
@@ -311,6 +332,21 @@ extern int     errno;
 
 typedef int (*DI_SORT_FUNC) _((char *, char *));
 
+typedef struct
+{
+    int		    count;
+    char        **list;
+} iList;
+
+typedef struct
+{
+    double          low;
+    double          high;
+    double          dbs;
+    char            *format;
+    char            *suffix;
+} sizeTable_t;
+
 static int          debug = { 0 };
 static _ulong       flags = { 0 };
 static int          sortType = { DI_SORT_NAME };
@@ -325,15 +361,28 @@ static char         mTimeFormat [20];
 static int          width = { 8 };
 static int          inodeWidth = { 7 };
 static char         blockFormat [40];
+static char         blockFormatNR [40];   /* no radix */
 static char         blockLabelFormat [40];
 static char         inodeFormat [40];
 static char         inodeLabelFormat [40];
 static double       dispBlockSize = { DI_ONE_MEG };
+static int          sizeTableCount = { 6 };
+
+sizeTable_t sizeTable [] =
+{
+    { 0,           DI_ONE_K,    1,           blockFormatNR, " " },
+    { DI_ONE_K,    DI_ONE_MEG,  DI_ONE_K,    blockFormat,   "k" },
+    { DI_ONE_MEG,  DI_ONE_GIG,  DI_ONE_MEG,  blockFormat,   "M" },
+    { DI_ONE_GIG,  DI_ONE_TERA, DI_ONE_GIG,  blockFormat,   "G" },
+    { DI_ONE_TERA, DI_ONE_PETA, DI_ONE_TERA, blockFormat,   "T" },
+    { DI_ONE_PETA, DI_ONE_EXA,  DI_ONE_PETA, blockFormat,   "P" }
+};
 
 
-static void cleanup             _((di_DiskInfo *, char **, char **));
+static void cleanup             _((di_DiskInfo *, iList *, iList *));
 static void printDiskInfo       _((di_DiskInfo *, int));
 static void printInfo           _((di_DiskInfo *));
+static void printBlocks          _((_fs_size_t, _fs_size_t));
 static void addTotals           _((di_DiskInfo *, di_DiskInfo *));
 static void printTitle          _((void));
 static void printPerc           _((_fs_size_t, _fs_size_t, char *));
@@ -342,13 +391,14 @@ static int  diCompare           _((char *, char *));
 static void getDiskStatInfo     _((di_DiskInfo *, int));
 static void getDiskSpecialInfo  _((di_DiskInfo *, int));
 static void checkFileInfo       _((di_DiskInfo *, int, int, int, char *[]));
-static void preCheckDiskInfo    _((di_DiskInfo *, char **, char **, int));
-static void checkDiskInfo       _((di_DiskInfo *, char **, int));
+static void preCheckDiskInfo    _((di_DiskInfo *, iList *, iList *, int));
+static void checkDiskInfo       _((di_DiskInfo *, iList *, int));
 static void usage               _((void));
-static void processArgs         _((int, char *[], char ***, char ***));
-static void parseList           _((char ***, char *));
-static void checkIgnoreList     _((di_DiskInfo *, char **));
-static void checkIncludeList    _((di_DiskInfo *, char **));
+static void processArgs         _((int, char *[], iList *, iList *));
+static void parseList           _((iList *, char *));
+static void checkIgnoreList     _((di_DiskInfo *, iList *));
+static void checkIncludeList    _((di_DiskInfo *, iList *));
+static void setDispBlockSize    _((char *));
 
 int
 #if _proto_stdc
@@ -361,23 +411,18 @@ main (argc, argv)
 {
     di_DiskInfo         *diskInfo = { (di_DiskInfo *) NULL };
     int                 diCount = { 0 };
-    char                **ignoreList = { (char **) NULL };
-    char                **includeList = { (char **) NULL };
+    iList               ignoreList = { 0, (char **) NULL };
+    iList               includeList = { 0, (char **) NULL };
     char                *ptr;
 
 
 #if _lib_setlocale && defined (LC_ALL)
     ptr = setlocale (LC_ALL, "");
-    /* printf ("setlocale:%s\n", ptr == (char *) NULL ? "null" : ptr); */
 #endif
 #if _enable_nls
     ptr = bindtextdomain (PROG, DI_LOCALE_DIR);
-    /* printf ("bindtextdomain:%s\n", ptr); */
     ptr = textdomain (PROG);
-    /* printf ("textdomain:%s\n", ptr); */
 #endif
-
-    processArgs (argc, argv, &ignoreList, &includeList);
 
     ptr = argv [0] + strlen (argv [0]) - 2;
     if (memcmp (ptr, MPROG, 2) == 0)
@@ -392,6 +437,26 @@ main (argc, argv)
         }
     }
 
+        /* gnu df */
+    if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL)
+    {
+        dispBlockSize = DI_HALF_K;
+    }
+
+        /* bsd df */
+    if ((ptr = getenv ("BLOCKSIZE")) != (char *) NULL)
+    {
+        setDispBlockSize (ptr);
+    }
+
+        /* gnu df */
+    if ((ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL)
+    {
+        setDispBlockSize (ptr);
+    }
+
+    processArgs (argc, argv, &ignoreList, &includeList);
+
     if (debug > 0)
     {
         printf ("di ver %s\n", DI_VERSION);
@@ -399,11 +464,11 @@ main (argc, argv)
 
     if (di_getDiskEntries (&diskInfo, &diCount) < 0)
     {
-        cleanup (diskInfo, ignoreList, includeList);
+        cleanup (diskInfo, &ignoreList, &includeList);
         exit (1);
     }
 
-    preCheckDiskInfo (diskInfo, ignoreList, includeList, diCount);
+    preCheckDiskInfo (diskInfo, &ignoreList, &includeList, diCount);
     if (optind < argc)
     {
         getDiskStatInfo (diskInfo, diCount);
@@ -411,10 +476,10 @@ main (argc, argv)
     }
     di_getDiskInfo (&diskInfo, &diCount);
     getDiskSpecialInfo (diskInfo, diCount);
-    checkDiskInfo (diskInfo, includeList, diCount);
+    checkDiskInfo (diskInfo, &includeList, diCount);
     printDiskInfo (diskInfo, diCount);
 
-    cleanup (diskInfo, ignoreList, includeList);
+    cleanup (diskInfo, &ignoreList, &includeList);
     exit (0);
 }
 
@@ -427,15 +492,16 @@ main (argc, argv)
 
 static void
 #if _proto_stdc
-cleanup (di_DiskInfo *diskInfo, char **ignoreList, char **includeList)
+cleanup (di_DiskInfo *diskInfo, iList *ignoreList, iList *includeList)
 #else
 cleanup (diskInfo, ignoreList, includeList)
     di_DiskInfo     *diskInfo;
-    char            **ignoreList;
-    char            **includeList;
+    iList           *ignoreList;
+    iList           *includeList;
 #endif
 {
-    char        **lptr;
+    char        *lptr;
+    int         i;
 
 
     if (diskInfo != (di_DiskInfo *) NULL)
@@ -443,26 +509,16 @@ cleanup (diskInfo, ignoreList, includeList)
         free ((char *) diskInfo);
     }
 
-    if (ignoreList != (char **) NULL)
+    if (ignoreList != (iList *) NULL && ignoreList->count > 0 &&
+        ignoreList->list != (char **) NULL)
     {
-        lptr = ignoreList;
-        while (*lptr != (char *) NULL)
-        {
-            free ((char *) *lptr);
-            ++lptr;
-        }
-        free ((char *) ignoreList);
+        free ((char *) ignoreList->list);
     }
 
-    if (includeList != (char **) NULL)
+    if (includeList != (iList *) NULL && includeList->count > 0 &&
+        includeList->list != (char **) NULL)
     {
-        lptr = includeList;
-        while (*lptr != (char *) NULL)
-        {
-            free ((char *) *lptr);
-            ++lptr;
-        }
-        free ((char *) includeList);
+        free ((char *) includeList->list);
     }
 }
 
@@ -549,13 +605,10 @@ printInfo (diskInfo)
     di_DiskInfo         *diskInfo;
 #endif
 {
-    _fs_size_t        used;
-    _fs_size_t        totAvail;
+    _fs_size_t          used;
+    _fs_size_t          totAvail;
     char                *ptr;
     int                 valid;
-    double              mult;
-
-    mult = (double) diskInfo->blockSize / dispBlockSize;
 
     ptr = formatString;
     while (*ptr)
@@ -578,39 +631,41 @@ printInfo (diskInfo)
 
             case DI_FMT_BTOT:
             {
-                printf (blockFormat, (double) diskInfo->totalBlocks * mult);
+                printBlocks (diskInfo->totalBlocks, diskInfo->blockSize);
                 break;
             }
 
             case DI_FMT_BTOT_AVAIL:
             {
-                printf (blockFormat, (double) (diskInfo->totalBlocks -
-                        (diskInfo->freeBlocks - diskInfo->availBlocks)) * mult);
+                printBlocks (diskInfo->totalBlocks -
+                    (diskInfo->freeBlocks - diskInfo->availBlocks),
+                    diskInfo->blockSize);
                 break;
             }
 
             case DI_FMT_BUSED:
             {
-                printf (blockFormat, (double) (diskInfo->totalBlocks -
-                        diskInfo->freeBlocks) * mult);
+                printBlocks (diskInfo->totalBlocks - diskInfo->freeBlocks,
+                            diskInfo->blockSize);
                 break;
             }
 
             case DI_FMT_BCUSED:
             {
-                printf (blockFormat, (double) (diskInfo->totalBlocks - diskInfo->availBlocks) * mult);
+                printBlocks (diskInfo->totalBlocks - diskInfo->availBlocks,
+                            diskInfo->blockSize);
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printf (blockFormat, (double) diskInfo->freeBlocks * mult);
+                printBlocks (diskInfo->freeBlocks, diskInfo->blockSize);
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
-                printf (blockFormat, (double) diskInfo->availBlocks * mult);
+                printBlocks (diskInfo->availBlocks, diskInfo->blockSize);
                 break;
             }
 
@@ -721,6 +776,47 @@ printInfo (diskInfo)
     printf ("\n");
 }
 
+static void
+#if _proto_stdc
+printBlocks (_fs_size_t blocks, _fs_size_t blockSize)
+#else
+printBlocks (blocks, blockSize)
+    _fs_size_t         blocks;
+    _fs_size_t         blockSize;
+#endif
+{
+    double          tdbs;
+    double          mult;
+    double          temp;
+    char            *suffix;
+    char            *format;
+    int             i;
+
+
+    suffix = "";
+    format = blockFormat;
+    tdbs = dispBlockSize;
+
+    if (dispBlockSize == DI_DISP_HR)
+    {
+        for (i = 0; i < sizeTableCount; ++i)
+        {
+            temp = (double) blocks * (double) blockSize;
+            if (temp >= sizeTable [i].low && temp < sizeTable [i].high)
+            {
+                tdbs = sizeTable [i].dbs;
+                format = sizeTable [i].format;
+                suffix = sizeTable [i].suffix;
+                break;
+            }
+        }
+    }
+    mult = (double) blockSize / tdbs;
+    printf (format, (double) blocks * mult, suffix);
+}
+
+
+
 /*
  * addTotals
  *
@@ -773,6 +869,7 @@ printTitle ()
 #endif
 {
     char                *ptr;
+    char                *tptr;
     int                 valid;
     char                tbuff [20];
 
@@ -807,29 +904,38 @@ printTitle ()
             {
                 if (dispBlockSize == DI_ONE_K)
                 {
-                    printf (blockLabelFormat, GT("Kbytes"));
+                    tptr = GT("Kbytes");
                 }
                 else if (dispBlockSize == DI_ONE_MEG)
                 {
-                    printf (blockLabelFormat, GT("  Megs"));
+                    tptr = GT("Megs");
                 }
                 else if (dispBlockSize == DI_ONE_GIG)
                 {
-                    printf (blockLabelFormat, GT("  Gigs"));
+                    tptr = GT("Gigs");
                 }
                 else if (dispBlockSize == DI_ONE_TERA)
                 {
-                    printf (blockLabelFormat, GT(" Teras"));
+                    tptr = GT("Teras");
+                }
+                else if (dispBlockSize == DI_ONE_PETA)
+                {
+                    tptr = GT("Petas");
+                }
+                else if (dispBlockSize == DI_DISP_HR)
+                {
+                    tptr = GT("Size");
                 }
                 else if (dispBlockSize == DI_HALF_K)
                 {
-                    printf (blockLabelFormat, "  512b");
+                    tptr = "512b";
                 }
                 else
                 {
                     sprintf (tbuff, "%6.0f", dispBlockSize);
-                    printf (blockLabelFormat, tbuff);
+                    tptr = tbuff;
                 }
+                printf (blockLabelFormat, tptr);
                 break;
             }
 
@@ -1101,12 +1207,13 @@ diCompare (a, b)
 {
     di_DiskInfo *di1;
     di_DiskInfo *di2;
+    int         rc;
 
 
     di1 = (di_DiskInfo *) a;
     di2 = (di_DiskInfo *) b;
 
-
+    rc = 0;
     switch (sortType)
     {
         case DI_SORT_NONE:
@@ -1116,16 +1223,26 @@ diCompare (a, b)
 
         case DI_SORT_NAME:
         {
-            return (strcmp (di1->name, di2->name) * sortOrder);
+            rc = strcmp (di1->name, di2->name);
+            break;
         }
 
         case DI_SORT_SPECIAL:
         {
-            return (strcmp (di1->special, di2->special) * sortOrder);
+            rc = strcmp (di1->special, di2->special);
+            break;
+        }
+
+        case DI_SORT_AVAIL:
+        {
+            rc = (int) ((di1->availBlocks * di1->blockSize) -
+                    (di2->availBlocks * di2->blockSize));
+            break;
         }
     } /* switch on sort type */
 
-    return 0;
+    rc *= sortOrder;
+    return rc;
 }
 
 
@@ -1218,11 +1335,11 @@ getDiskSpecialInfo (diskInfo, diCount)
 
 static void
 #if _proto_stdc
-checkDiskInfo (di_DiskInfo *diskInfo, char **includeList, int diCount)
+checkDiskInfo (di_DiskInfo *diskInfo, iList *includeList, int diCount)
 #else
 checkDiskInfo (diskInfo, includeList, diCount)
     di_DiskInfo         *diskInfo;
-    char                **includeList;
+    iList               *includeList;
     int                 diCount;
 #endif
 {
@@ -1412,14 +1529,26 @@ checkDiskInfo (diskInfo, includeList, diCount)
     sprintf (optFormat, "%%-%d.%ds", maxOptString, maxOptString);
     sprintf (mTimeFormat, "%%-%d.%ds", maxMntTimeString, maxMntTimeString);
 
-    if (dispBlockSize <= DI_ONE_K)
+    if (dispBlockSize == DI_DISP_HR)
     {
-        sprintf (blockFormat, "%%%d.0f", width);
+        --width;
+    }
+
+    if (dispBlockSize != DI_DISP_HR && dispBlockSize <= DI_ONE_K)
+    {
+        sprintf (blockFormat, "%%%d.0f%%s", width);
     }
     else
     {
-        sprintf (blockFormat, "%%%d.1f", width);
+        sprintf (blockFormatNR, "%%%d.0f%%s", width);
+        sprintf (blockFormat, "%%%d.1f%%s", width);
     }
+
+    if (dispBlockSize == DI_DISP_HR)
+    {
+        ++width;
+    }
+
     sprintf (blockLabelFormat, "%%%ds", width);
 #if _siz_long_long == 8
     sprintf (inodeFormat, "%%%dllu", inodeWidth);
@@ -1439,13 +1568,13 @@ checkDiskInfo (diskInfo, includeList, diCount)
 
 static void
 #if _proto_stdc
-preCheckDiskInfo (di_DiskInfo *diskInfo, char **ignoreList,
-        char **includeList, int diCount)
+preCheckDiskInfo (di_DiskInfo *diskInfo, iList *ignoreList,
+        iList *includeList, int diCount)
 #else
 preCheckDiskInfo (diskInfo, ignoreList, includeList, diCount)
     di_DiskInfo         *diskInfo;
-    char                **ignoreList;
-    char                **includeList;
+    iList               *ignoreList;
+    iList               *includeList;
     int                 diCount;
 #endif
 {
@@ -1487,21 +1616,18 @@ usage ()
 #endif
 {
     printf (GT("di ver %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
-         /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
-    printf (GT("Usage: di [-ant] [-f format] [-s sort-type] [-i ignore-fstyp-list]\n"));
-    printf (GT("       [-I include-fstyp-list] [-w kbyte-width] [-W inode-width] [file [...]]\n"));
+            /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
+    printf (GT("Usage: di [-ant] [-d display-size] [-f format] [-i ignore-fstyp-list]\n"));
+    printf (GT("       [-I include-fstyp-list] [file [...]]\n"));
     printf (GT("   -a   : print all mounted devices\n"));
     printf (GT("   -d x : size to print blocks in (p - posix (512), k - kbytes,\n"));
-    printf (GT("          m - megabytes, g - gigabytes, <x> - numeric size).\n"));
+    printf (GT("          m - megabytes, g - gigabytes, t - terabytes, h - human readable).\n"));
     printf (GT("   -f x : use format string <x>\n"));
     printf (GT("   -i x : ignore file system types in <x>\n"));
     printf (GT("   -I x : include only file system types in <x>\n"));
     printf (GT("   -l   : display local filesystems only\n"));
     printf (GT("   -n   : don't print header\n"));
-    printf (GT("   -s t : sort type; n - no sort, s - by special device, r - reverse\n"));
     printf (GT("   -t   : print totals\n"));
-    printf (GT("   -w n : use width <n> for kbytes\n"));
-    printf (GT("   -W n : use width <n> for i-nodes\n"));
     printf (GT(" Format string values:\n"));
     printf (GT("    m - mount point                     M - mount point, full length\n"));
     printf (GT("    b - total kbytes                    B - kbytes available for use\n"));
@@ -1513,24 +1639,25 @@ usage ()
     printf (GT("    F - free file slots                 P - percentage file slots used\n"));
     printf (GT("    s - filesystem name                 S - filesystem name, full length\n"));
     printf (GT("    t - disk partition type             T - partition type, full length\n"));
+    printf (GT("See manual page for more options.\n"));
 }
 
 
 static void
 #if _proto_stdc
-processArgs (int argc, char *argv [], char ***ignoreList, char ***includeList)
+processArgs (int argc, char *argv [], iList *ignoreList, iList *includeList)
 #else
 processArgs (argc, argv, ignoreList, includeList)
     int         argc;
     char        *argv [];
-    char        ***ignoreList;
-    char        ***includeList;
+    iList       *ignoreList;
+    iList       *includeList;
 #endif
 {
     int         ch;
 
 
-    while ((ch = getopt (argc, argv, "Aad:f:ghi:I:Flmns:tw:W:x:")) != -1)
+    while ((ch = getopt (argc, argv, "Aad:f:ghHi:I:Flmns:tw:W:x:")) != -1)
     {
         switch (ch)
         {
@@ -1552,7 +1679,7 @@ processArgs (argc, argv, ignoreList, includeList)
 
             case 'd':
             {
-                switch (tolower (*optarg))
+                switch (*optarg)
                 {
                     case 'p':
                     {
@@ -1561,18 +1688,21 @@ processArgs (argc, argv, ignoreList, includeList)
                     }
 
                     case 'k':
+                    case 'K':
                     {
                         dispBlockSize = DI_ONE_K;
                         break;
                     }
 
                     case 'm':
+                    case 'M':
                     {
                         dispBlockSize = DI_ONE_MEG;
                         break;
                     }
 
                     case 'g':
+                    case 'G':
                     {
                         dispBlockSize = DI_ONE_GIG;
                         break;
@@ -1581,6 +1711,19 @@ processArgs (argc, argv, ignoreList, includeList)
                     case 't':
                     {
                         dispBlockSize = DI_ONE_TERA;
+                        break;
+                    }
+
+                    case 'P':
+                    {
+                        dispBlockSize = DI_ONE_PETA;
+                        break;
+                    }
+
+                    case 'h':
+                    case 'H':
+                    {
+                        dispBlockSize = DI_DISP_HR;
                         break;
                     }
 
@@ -1614,6 +1757,12 @@ processArgs (argc, argv, ignoreList, includeList)
                 exit (0);
             }
 
+            case 'H':
+            {
+                dispBlockSize = DI_DISP_HR;
+                break;
+            }
+
             case 'i':
             {
                 parseList (ignoreList, optarg);
@@ -1628,6 +1777,7 @@ processArgs (argc, argv, ignoreList, includeList)
 
             case 'l':
             {
+                parseList (ignoreList, "nfs");
                 flags |= DI_F_LOCAL_ONLY;
                 break;
             }
@@ -1646,25 +1796,35 @@ processArgs (argc, argv, ignoreList, includeList)
 
             case 's':
             {
-                switch (ch)
+                while (*optarg)
                 {
-                    case 's':
+                    switch (*optarg)
                     {
-                        sortType = DI_SORT_SPECIAL;
-                        break;
-                    }
+                        case 's':
+                        {
+                            sortType = DI_SORT_SPECIAL;
+                            break;
+                        }
 
-                    case 'n':
-                    {
-                        sortType = DI_SORT_NONE;
-                        break;
-                    }
+                        case 'n':
+                        {
+                            sortType = DI_SORT_NONE;
+                            break;
+                        }
 
-                    case 'r':
-                    {
-                        sortOrder = DI_SORT_DESCENDING;
-                        break;
+                        case 'a':
+                        {
+                            sortType = DI_SORT_AVAIL;
+                            break;
+                        }
+
+                        case 'r':
+                        {
+                            sortOrder = DI_SORT_DESCENDING;
+                            break;
+                        }
                     }
+                    ++optarg;
                 }
                 break;
             }
@@ -1703,20 +1863,21 @@ processArgs (argc, argv, ignoreList, includeList)
     }
 }
 
-    /* list is assumed to be global */
 static void
 #if _proto_stdc
-parseList (char ***list, char *str)
+parseList (iList *list, char *str)
 #else
 parseList (list, str)
-    char        ***list;
+    iList       *list;
     char        *str;
 #endif
 {
     char        *dstr;
     char        *ptr;
-    char        **lptr;
+    char        *lptr;
     int         count;
+    int         ocount;
+    int         ncount;
     int         i;
     int         len;
 
@@ -1725,11 +1886,11 @@ parseList (list, str)
     if (dstr == (char *) NULL)
     {
         fprintf (stderr, "malloc failed in parseList() (1).  errno %d\n", errno);
-        cleanup ((di_DiskInfo *) NULL, (char **) NULL, (char **) NULL);
+        cleanup ((di_DiskInfo *) NULL, (iList *) NULL, (iList *) NULL);
         exit (1);
     }
-
-    memcpy (dstr, str, i + 1);
+    memcpy (dstr, str, i);
+    dstr [i] = '\0';
 
     ptr = strtok (dstr, DI_LIST_SEP);
     count = 0;
@@ -1739,60 +1900,64 @@ parseList (list, str)
         ptr = strtok ((char *) NULL, DI_LIST_SEP);
     }
 
-    *list = (char **) malloc ((count + 1) * sizeof (char *));
-    if (*list == (char **) NULL)
+    ocount = list->count;
+    list->count += count;
+    ncount = list->count;
+    list->list = (char **) Realloc ((char *) list->list,
+            list->count * sizeof (char *));
+    if (list->list == (char **) NULL)
     {
         fprintf (stderr, "malloc failed in parseList() (2).  errno %d\n", errno);
-        cleanup ((di_DiskInfo *) NULL, (char **) NULL, (char **) NULL);
+        cleanup ((di_DiskInfo *) NULL, (iList *) NULL, (iList *) NULL);
         exit (1);
     }
 
     ptr = dstr;
-    lptr = *list;
-    for (i = 0; i < count; ++i)
+    for (i = ocount; i < ncount; ++i)
     {
         len = strlen (ptr);
-        *lptr = (char *) malloc (len + 1);
-        if (*lptr == (char *) NULL)
+        lptr = (char *) malloc (len + 1);
+        if (lptr == (char *) NULL)
         {
             fprintf (stderr, "malloc failed in parseList() (3).  errno %d\n",
                     errno);
-            cleanup ((di_DiskInfo *) NULL, (char **) NULL, (char **) NULL);
+            cleanup ((di_DiskInfo *) NULL, list, (iList *) NULL);
             exit (1);
         }
-        strncpy (*lptr, ptr, len);
+        strncpy (lptr, ptr, len);
+        lptr[len] = '\0';
+        list->list [i] = lptr;
         ptr += len + 1;
-        ++lptr;
     }
 
-    *lptr = (char *) NULL;
     free ((char *) dstr);
 }
 
 
 static void
 #if _proto_stdc
-checkIgnoreList (di_DiskInfo *diskInfo, char **ignoreList)
+checkIgnoreList (di_DiskInfo *diskInfo, iList *ignoreList)
 #else
 checkIgnoreList (diskInfo, ignoreList)
     di_DiskInfo     *diskInfo;
-    char            **ignoreList;
+    iList           *ignoreList;
 #endif
 {
-    char            **ptr;
+    char            *ptr;
+    int             i;
 
         /* if the file system type is in the ignore list, skip it */
-    if (ignoreList != (char **) NULL)
+    if (ignoreList->count > 0)
     {
-        ptr = ignoreList;
-        while (*ptr != (char *) NULL)
+        for (i = 0; i < ignoreList->count; ++i)
         {
+            ptr = ignoreList->list [i];
             if (debug > 2)
             {
                 printf ("chkign: test: fstype %s/%s : %s\n", *ptr,
                         diskInfo->fsType, diskInfo->name);
             }
-            if (strcmp (*ptr, diskInfo->fsType) == 0)
+            if (strcmp (ptr, diskInfo->fsType) == 0)
             {
                 diskInfo->printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
@@ -1802,34 +1967,35 @@ checkIgnoreList (diskInfo, ignoreList)
                 }
                 break;
             }
-            ++ptr;
         }
     } /* if an ignore list was specified */
 }
 
 static void
 #if _proto_stdc
-checkIncludeList (di_DiskInfo *diskInfo, char **includeList)
+checkIncludeList (di_DiskInfo *diskInfo, iList *includeList)
 #else
 checkIncludeList (diskInfo, includeList)
     di_DiskInfo     *diskInfo;
-    char            **includeList;
+    iList           *includeList;
 #endif
 {
-    char            **ptr;
+    char            *ptr;
+    int             i;
 
         /* if the file system type is not in the include list, skip it */
-    if (includeList != (char **) NULL)
+    if (includeList->count > 0)
     {
-        ptr = includeList;
-        while (*ptr != (char *) NULL)
+        for (i = 0; i < includeList->count; ++i)
         {
+            ptr = includeList->list [i];
             if (debug > 2)
             {
                 printf ("chkinc: test: fstype %s/%s : %s\n", *ptr,
                         diskInfo->fsType, diskInfo->name);
             }
-            if (strcmp (*ptr, diskInfo->fsType) == 0)
+
+            if (strcmp (ptr, diskInfo->fsType) == 0)
             {
                 diskInfo->printFlag = DI_PRNT_OK;
                 break;
@@ -1843,9 +2009,55 @@ checkIncludeList (diskInfo, includeList)
                             diskInfo->name);
                 }
             }
-            ++ptr;
         }
     } /* if an include list was specified */
 }
 
+static void
+#if _proto_stdc
+setDispBlockSize (char *ptr)
+#else
+setDispBlockSize (*ptr)
+    char    *ptr;
+#endif
+{
+    if (isdigit ((int) (*ptr)))
+    {
+        dispBlockSize = (_fs_size_t) atof (ptr);
+    }
+    else
+    {
+        switch (tolower (*ptr))
+        {
+            case 'k':
+            {
+                dispBlockSize = DI_ONE_K;
+                break;
+            }
 
+            case 'm':
+            {
+                dispBlockSize = DI_ONE_MEG;
+                break;
+            }
+
+            case 'g':
+            {
+                dispBlockSize = DI_ONE_GIG;
+                break;
+            }
+
+            case 't':
+            {
+                dispBlockSize = DI_ONE_TERA;
+                break;
+            }
+
+            case 'p':
+            {
+                dispBlockSize = DI_ONE_PETA;
+                break;
+            }
+        }
+    }
+}
