@@ -1,4 +1,4 @@
-di - disk information utility (version 3.9).
+di - disk information utility (version 3.10).
 
 DESCRIPTION
 
@@ -17,7 +17,6 @@ INSTALLATION
   it have been resolved.
 
   Instructions for iffe:
-
                                   Example w/gcc and different prefix.
       ./Build distclean             ./Build distclean
       ./Build                       CC=gcc prefix=/usr/lbin ./Build
@@ -28,9 +27,16 @@ INSTALLATION
     The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment variables
     can be set and exported prior to running 'Build'.
 
+    The SHAREDIR environment variable may be set to the installation
+    directory for the locale files.  Default is ${prefix}/lib/di,
+    the locale directory ${SHAREDIR}/locale is created.
+
     If you want the internationalization directory installed, do:
 
-      ./Build install-po [Only en_US is available 27-Aug-2002].
+      ./Build install-po [en_US: 27-Aug-2002, de_DE: 26-Feb-2004]
+
+    To force a 64 bit binary build:
+      ./Build -64 [<args>]
 
   Instructions for Configure:
 
@@ -83,7 +89,11 @@ INSTALLATION
         ./Build distclean
         CC=gcc ./Build
     Alternative 3)
-        Configure no longer works under Cygwin.
+        Unpacking the tar file overwrites 'Configure' with 'configure'.
+        Unpack 'Configure' as a separate step.
+        ./Configure -d -s -e -Dcc=gcc
+        make
+        make install
 
 BUGS
 
@@ -129,6 +139,10 @@ BUGS
 
 CHANGES
 
+    3.10
+        Added German .po file (Many thanks to Hartmut Haase).
+        Added -64 to Build for 64 bit binaries.
+        Added missing internationalization calls in di.c
     3.9
         Fixed bug with uninitialized 'dbsstr' variable.
         iffe: upgraded to 2002-03-06.
