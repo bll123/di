@@ -4,17 +4,17 @@
 .\"
 .\" di.1
 .\"
-.\" Copyright 1994-1999 Brad Lanam  Walnut Creek CA USA
+.\" Copyright 1994-2002 Brad Lanam  Walnut Creek CA USA
 .\"
 .\" bll@gentoo.com
 .\"
 .\" for di version 2.0
 .\"
-.TH di 1 "12 February 2001"
+.TH di 1 "26 February 2002"
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-Aahlnt] [-d display-size] [-f format] [-i ignore-fstyp-list]
+.\" di [-Aaghlmnt] [-d display-size] [-f format] [-i ignore-fstyp-list]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x level] [file [...]]
 .B di
@@ -77,6 +77,9 @@ of one decimal place after the radix.
 Use the specified format string \fIformat\fP.  Format strings are
 described below.
 .TP
+.B \-g
+Display sizes in gigabytes.  An alias for -dg.
+.TP
 .B \-h
 Print out the usage for
 .I di
@@ -94,6 +97,9 @@ The list is a comma separated list of file system types.  e.g.
 .B \-l
 Display only local file systems.  This option is not fully implemented
 for all systems as of version 1.17.
+.TP
+.B \-m
+Display sizes in megabytes.  An alias for -dm.
 .TP
 .B \-n
 Do not print a header line above the list of file systems.  Useful when
