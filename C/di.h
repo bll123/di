@@ -46,7 +46,7 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 # define _lib_endmntent 1
 #endif
 #if defined (HAS_FMOD)
-# define _lib_fmod 1
+# define _mth_fmod 1
 #endif
 #if defined (HAS_FSHELP)
 # define _lib_fshelp 1
