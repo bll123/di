@@ -116,8 +116,10 @@ _command_msgfmt
 # define _enable_nls 0
 #endif
 
-#if ! defined (_typ_statvfs_t)
-typedef struct statvfs statvfs_t;
+#if _typ_statvfs_t
+# define Statvfs_t statvfs_t
+#else
+# define Statvfs_t struct statvfs
 #endif
 
 #define _config_by_iffe_ 1
