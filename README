@@ -1,4 +1,4 @@
-di - disk information utility (version 3.11).
+di - disk information utility (version 3.12).
 
 DESCRIPTION
 
@@ -10,52 +10,26 @@ DESCRIPTION
 
 INSTALLATION
 
-  The installation process has been completely revamped
-  beginning with version 3.0.  You now have a choice of
-  'Configure' (dist 3.0PL70) or 'iffe'.  It is the intention
-  to switch over to 'iffe' completely, once all issues with
-  it have been resolved.
-
-  Instructions for iffe:
+  Instructions:
                                   Example w/gcc and different prefix.
-      ./Build distclean             ./Build distclean
-      ./Build                       CC=gcc prefix=/usr/lbin ./Build
-      ./Build install               CC=gcc prefix=/usr/lbin ./Build install
+      make distclean                make distclean
+      make                          make CC=gcc prefix=/usr/lbin
+      make install                  make CC=gcc prefix=/usr/lbin install
 
     features/cflags.sh sets the various compiler flags.
 
-    The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment variables
-    can be set and exported prior to running 'Build'.
+    The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment
+    variables may be set and exported prior to running make.
 
     The LOCALEDIR environment variable may be set to the installation
     directory for the locale files.  Default is ${prefix}/lib/di/locale.
 
     If you want the internationalization directory installed, do:
 
-      ./Build install-po [en_US: 27-Aug-2002, de_DE: 26-Feb-2004]
+      make install-po [en_US: 27-Aug-2002, de_DE: 26-Feb-2004]
 
     To force a 64 bit binary build:
       ./Build -64 [<args>]
-
-  Instructions for Configure:
-
-    ./Configure -d -s -e          # non-interactive
-    ./Configure -d -s -e -Dcc=gcc # non-interactive, and you want to use gcc
-    ./Configure -d -s -e -Dcc=gcc -Dprefix=/usr/lbin
-                                  # non-interactive, w/gcc, set prefix
-    ./Configure                   # interactive
-
-    Do your make:
-
-        make
-
-    And install:
-
-        make install
-
-    If you want the internationalization directory installed, do:
-
-        make install-po
 
   Installation Permissions:
     Some systems (Sys V variants) only allow root to read the
@@ -66,7 +40,7 @@ INSTALLATION
 
     If this is needed on your system, do:
 
-    make -f Makefile.iffe installperms
+    make installperms
 
   Windows installation:
 
@@ -82,17 +56,11 @@ INSTALLATION
     then re-run the build.
 
     Alternative 1)
-        Cygnus gcc: make -f Makefile.iffe windows-gcc
-        MS VC++:    nmake -f Makefile.iffe windows
+        Cygnus gcc: make windows-gcc
+        MS VC++:    nmake windows
     Alternative 2)
         ./Build distclean
         CC=gcc ./Build
-    Alternative 3)
-        Unpacking the tar file overwrites 'Configure' with 'configure'.
-        Unpack 'Configure' as a separate step.
-        ./Configure -d -s -e -Dcc=gcc
-        make
-        make install
 
 BUGS
 
@@ -101,8 +69,7 @@ BUGS
 
 PORTING
 
-    di 3.9 has been tested on the following platforms (both
-    Configure and iffe):
+    di 3.9 has been tested on the following platforms:
         FreeBSD 4.7 (gcc 2.95.4)
         HP-UX B.11.22 U (ansi C)
         Linux 2.0.35 (gcc 2.7.2.3), 2.4.18 [RH7.3] (gcc 3.2, 2.96),
@@ -130,39 +97,50 @@ BUGS
 
         di-bugs@gentoo.com
 
-    If the Configure/Build script doesn't set up the 'config.h'
+    If the Build script doesn't set up the 'config.h'
     file correctly, please let me know.  E-mail me the incorrect
     (and corrected if possible) config.h file, and any other
     information as appropriate.  The goal is to be able to run
-    Configure/Build in non-interactive mode for any system.
+    Build in non-interactive mode for any system.
 
 CHANGES
 
-    3.11
+    4.0
+        No more support for metadist (yay!).
+        Only the iffe configuration method is now available.
+        Removed -h help flag, changed it to be scaled alternative 1
+        display to match other 'df' programs.
+
+    3.11                                    [11 mar 2004]
         Fixed bug checking mount options to see if partition
         was read-only (bsd style get/set/endmntent).
-    3.10
+
+    3.10                                    [26 feb 2004]
         Added German .po file (Many thanks to Hartmut Haase).
         Added -64 to Build for 64 bit binaries.
-        Added missing internationalization calls in di.c
-    3.9
+        Added missing internationalization calls in di.c.
+
+    3.9                                     [25 may 2003]
         Fixed bug with uninitialized 'dbsstr' variable.
         iffe: upgraded to 2002-03-06.
             Don't need to include stdio.h in most di.iffe tests.
             lib test fixed for cygwin.
-    3.8
+
+    3.8                                     [12 jan 2003]
         Rewrote block size display processing.  It did not match the
         *BSD implementation of the BLOCKSIZE environment variable.
         Latest metaconfig (Configure)
         Add -k alias for -dk.
-    3.7
+
+    3.7                                     [4 sep 2002]
         Check for initial '/' character in special device name
         before doing stat().   Otherwise we pick up normal files.
         Update iffe.
         Add exa, zetta, yotta support (-de, -dz, -dy).
         Add support for 1000 byte base block size (and others) (-b option).
         Add alternative scaled format (-dH, -H).
-    3.6
+
+    3.6                                     [30 jul 2002]
         Change to use mntctl() in preference to set/get/endmntent()
             for AIX.
         AIX: fix to display hostname in special device name for
@@ -170,7 +148,8 @@ CHANGES
         README updated for cygwin Configure/configure problem.
         Workaround in di.h for cygwin/Configure getopt() problem.
         Converted all strcpy() to strncpy().
-    3.5
+
+    3.5                                     [17 jul 2002]
         Change 'memfs' to 'mfs' for memory file system (FreeBSD).
             Not added to totals.
         Added License.
@@ -178,7 +157,8 @@ CHANGES
         Update 'Configure' to match 'iffe' build as closely as possible.
         Fix C code to compile w/non-ansi compiler (HP-UX bundled).
         Many configuration fixes (hp-ux, aix, et.al.).
-    3.4
+
+    3.4                                     [20 apr 2002]
         Fix bugs in include/ignore list generation.
         Rewrite ignore/include lists to allow multiple command line
             specification of ignore/include lists.
@@ -186,110 +166,139 @@ CHANGES
         Fix bugs in -s command line option.  Make more friendly.
         Add -H (-dh) scaled display format.
         nfs mounts are always remote.
-    3.3
+
+    3.3                                     [1 apr 2002]
         Bug fixes for AIX, HP/UX installation.
-    3.2
+
+    3.2                                     [27 feb 2002]
         Add internationalization code.
         Update windows code.
         cleanup.
-    3.1
+
+    3.1                                     [15 nov 2001]
         Bug fixes for SunOS 4.
-    3.0
+
+    3.0                                     [7 aug 2001]
         Added getfsstat() for Compaq Tru-64 (and FreeBSD, etc.) systems.
         Compaq Tru-64 code cleaned up.
         Thanks to Compaq for their test drive program!
         More cleanup.  Added iffe configuration.
-    2.4
+
+    2.4                                     [12 feb 2001]
         Fixed so di doesn't statfs() the disks it doesn't need to.
         Removed fs basetype stuff.
         Split out disk routines into separate module.  Lots of cleanup.
         Totals: fix to take into account block size of partition.
         Totals: ignore read-only, partitions not normally printed.
         Totals: ignore memory filesystems (tmpfs, memfs).
-    2.3
+
+    2.3                                     [24 feb 2000]
         Modified hints for solaris to do 64 bit compilation.
         Removed extra libc setting for linux.
         Added support for BeOS.  This required ansi function headers.
-    2.2
+
+    2.2                                     [24 dec 1999]
         Hints for dec_osf added.
         Changed HAS_GETMNTINFOFSIZE to be preferred over
         HAS_GETMNTINFOBSIZE; modified bsdos hints appropriately.
         Look for <sys/fs_types.h> include file.
-    2.1
+
+    2.1                                     [24 dec 1999]
         Added +DAportable for HP-UX.
         Hints for openbsd added.
         Made installperm as separate target in makefile.
         Modified duplicate checking slightly.
         Changed MNT_NOWAIT to MNT_WAIT.  This will work better
         on FreeBSD.  Hopefully will work w/nfs mounts.
-    2.0
+
+    2.0                                     [15 apr 1999]
         Now uses dist 3.0PL70 for configuration.
         Duplicate filesystems (automounted) are not displayed.
         This probably does not work for Digital's advfs.
+
     1.24
         Added Windows w/gcc.
         The Solaris 2.6 statvfs() bug has a patch out for it.
         Patch #105572-05 (?).
-    1.23
+
+    1.23                                    [6 jul 1998]
         Improved Windows.
-    1.22
+
+    1.22                                    [1 jul 1998]
         Added Windows.  Don't know the routines to get the number
         of file slots or the file system type (FAT12/16/32).
         Changed default to display megabytes.
-    1.21
+
+    1.21                                    [8 sep 1997]
         Fixed AIX typo.
         Linux 2.x
+
     1.20
         Added Solaris large file system support.  Note that
         ver 2.6 Beta_Update has a bug in the statvfs() routine,
         and the non-root available disk space is improperly
         reported.
-    1.19
+
+    1.19                                    [4 feb 1996]
         Added mount time, mount options.  Link di to the mi command.
-    1.18
+
+    1.18                                    [21 aug 1995]
         Fixed some ignore/include list problems.  Fixed local mount
         flag for OSF/1.
-    1.17
+
+    1.17                                    [10 aug 1995]
         Changed block values from unsigned long to doubles so that we
         can display using different block sizes (-d flag).
         Added -l flag for local filesystems only.
-    1.16
-        Added A/UX  [ blemoine@atheist.tamu.edu (Brett G. Lemoine) ]
-        Added convex [ "Schilperoort J.W." <J.W.Schilperoort@research.ptt.nl> ]
-    1.15
+
+    1.16                                    [8 aug 1995]
+        Added A/UX  [ blemoine@-NOSPAM-atheist.tamu.edu (Brett G. Lemoine) ]
+        Added convex [ "Schilperoort J.W." <J.W.Schilperoort@-NOSPAM-research.ptt.nl> ]
+
+    1.15                                    [1 aug 1995]
     	Fixed bsdi 1.x and bsdi 2.x.  Fragments weren't supported.
     	Fixed FreeBSD 1.x and 2.x; same problem.
         Changed sco_sl makefile entry.
-    1.14
+
+    1.14                                    [22 jul 1995]
         Fixed problem with display widths in conjunction with
         ignore/include lists.
-    1.13
+
+    1.13                                    [17 mar 1995]
         changed default length of filesystem type field to 7.
         new debug 'all' format.
         check for 0 fragment size; replace w/block size if we have it.
-    1.12
+
+    1.12                                    [28 jan 1995]
         sco nfs 'nothing' fix.
         freebsd 2.x; better freebsd filesystem types.
-    1.11
+
+    1.11                                    [3 dec 1994]
         bsdi
-    1.10
+
+    1.10                                    [24 nov 1994]
         added freebsd.
-    1.9
+
+    1.9                                     [30 aug 1994]
         makefile fixes.
-    1.8
+
+    1.8                                     [28 may 1994]
         removed mount option junk.
         added AIX.
-    1.7
+
+    1.7                                     [2 may 1994]
         cleaned up sgi in the makefile.
         changed linux to be w/o need_statfs_defs.
         solaris cdrom returning all sorts of negative values.
         T format option.
         mount options.
         SunOs filesystem type info.
+
     1.6
         ultrix bug fixes.
         add dynix to makefile.
-    1.5
+
+    1.5                                     [26 mar 1994]
         sun had f_bfree instead of f_bavail!
         xenix, linux, sco
         -w, -W, -B.
@@ -299,22 +308,26 @@ CHANGES
         1.51 (local, pat@rwing)
             SunOS *does* support filesystem type info.  Its all in the
             mntent structure, but requires a small bit of work (see source).
-    1.4
+
+    1.4                                     [4 mar 1994]
         -f B
         bcopy.
         solaris cdrom reports -2 for free blocks.
-    1.3
+
+    1.3                                     [3 mar 1994]
         Command line specification of filenames.
         sort output.
         osf/1, ultrix.
         -F, -f M, -F S.
-    1.2
+
+    1.2                                     [2 mar 1994]
         # of inodes can be -1L
         return code for getDiskInfo shouldn't be checked.
         name of mount point must be maxpathlen.
         error conditions.
         pyramid.
-    1.1
+
+    1.1                                     [27 feb 1994]
         initial release
 
 ACKNOWLEDGEMENTS
@@ -367,7 +380,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2003 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2004 Brad Lanam, Walnut Creek, CA, USA
     bll@gentoo.com
     http://www.gentoo.com/di/
-    http://www.gentoo.com/di/di-3.7.tar.gz
