@@ -76,6 +76,11 @@ INSTALLATION
             windows API, edit config.h, and undefine _hdr_windows,
             and _lib_GetDiskFreeSpace, then re-run the build.
 
+BUGS
+
+    submit bugs to di-bugs@NOSPAM-gentoo.com, or
+    visit http://www.gentoo.com/cgi-bin/jb/di
+    
 PORTING
 
     di 3.0 has been tested on the following platforms (both
@@ -293,45 +298,45 @@ ACKNOWLEDGEMENTS
     And for their comments and/or source and/or
     manual pages and/or bug fixes, thanks!
 
-        jjb@NOSSPAM-jagware.bcc.com (J.J.Bailey)
-        vogelke@NOSSPAM-c-17igp.wpafb.af.mil (Contr Karl Vogel)
+        jjb@NOSPAM-jagware.bcc.com (J.J.Bailey)
+        vogelke@NOSPAM-c-17igp.wpafb.af.mil (Contr Karl Vogel)
             [pyramid]
-        costales@NOSSPAM-ICSI.Berkeley.EDU (Bryan Costales)
-        Mark Neale <mark@NOSSPAM-edscom.demon.co.uk>
-        Pat Myrto <pat@NOSSPAM-rwing.uucp>
+        costales@NOSPAM-ICSI.Berkeley.EDU (Bryan Costales)
+        Mark Neale <mark@NOSPAM-edscom.demon.co.uk>
+        Pat Myrto <pat@NOSPAM-rwing.uucp>
             [sunOS filesystem type stuff]
-        henrikar@NOSSPAM-utctu1.ct.utwente.nl (Henri Karrenbeld)
+        henrikar@NOSPAM-utctu1.ct.utwente.nl (Henri Karrenbeld)
             [sgi]
-        Peter Bray <Peter.Bray@NOSSPAM-serg.cse.unsw.edu.au>
-        gsipe@NOSSPAM-pyramid.com (George M. Sipe)
+        Peter Bray <Peter.Bray@NOSPAM-serg.cse.unsw.edu.au>
+        gsipe@NOSPAM-pyramid.com (George M. Sipe)
             [manual page]
-        Jeffrey Mogul <mogul@NOSSPAM-pa.dec.com>
+        Jeffrey Mogul <mogul@NOSPAM-pa.dec.com>
             [ultrix, osf/1, manual page, new format options]
-        thomas@NOSSPAM-idx.kodak.com (Th. Bullinger)
+        thomas@NOSPAM-idx.kodak.com (Th. Bullinger)
             [help usage]
-        Seth Theriault <seth@NOSSPAM-connact.com>
+        Seth Theriault <seth@NOSPAM-connact.com>
             [next, tru64]
-        steve@NOSSPAM-nshore.org (Stephen J. Walick)
+        steve@NOSPAM-nshore.org (Stephen J. Walick)
             [SCO]
-        Gerald Rinske <gerald@NOSSPAM-D012F291.mch.sni.de>
+        Gerald Rinske <gerald@NOSPAM-D012F291.mch.sni.de>
             [sgi]
-        Mike Grupenhoff <kashmir@NOSSPAM-snare.dorm.umd.edu>
+        Mike Grupenhoff <kashmir@NOSPAM-snare.dorm.umd.edu>
             [linux]
-        R.K.Lloyd@NOSSPAM-csc.liv.ac.uk
+        R.K.Lloyd@NOSPAM-csc.liv.ac.uk
             [hpux]
-        "William Gibbs" <bill@NOSSPAM-wgc386.MV.COM>
+        "William Gibbs" <bill@NOSPAM-wgc386.MV.COM>
             [xenix]
-        Randy Thompson <randyt@NOSSPAM-sequent.com>
+        Randy Thompson <randyt@NOSPAM-sequent.com>
             [sequent]
-        eriko@NOSSPAM-risc.austin.ibm.com (O'Shaughnessy Erik)
+        eriko@NOSPAM-risc.austin.ibm.com (O'Shaughnessy Erik)
             [aix]
-        Bill Davidsen <davidsen@NOSSPAM-tmr.com>
+        Bill Davidsen <davidsen@NOSPAM-tmr.com>
             [linux, SCO, etc., new format options]
-        fredex@NOSSPAM-fcshome.stoneham.ma.us (fred smith)
+        fredex@NOSPAM-fcshome.stoneham.ma.us (fred smith)
             [coherent 4.2.05]
-        bag@NOSSPAM-clipper.cs.kiev.ua (Andrey Blochintsev)
+        bag@NOSPAM-clipper.cs.kiev.ua (Andrey Blochintsev)
             [bsdi]
-        ginsbach@NOSSPAM-spacestar.net (Brian Ginsbach)
+        ginsbach@NOSPAM-spacestar.net (Brian Ginsbach)
             [netbsd, irix, unicos]
 
         et. al.
