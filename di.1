@@ -10,7 +10,7 @@
 .\"
 .\" for di version 2.0
 .\"
-.TH di 1 "7 January 1999"
+.TH di 1 "12 February 2001"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -112,6 +112,7 @@ command line, no sorting is done.
 .TP
 .B \-t
 Print a totals line below the list of file systems.
+Memory filesystems (tmpfs, memfs) are not added to the totals.
 .TP
 .B \-w\ \fIblock-width\fR
 Set the print width for block values.  Default is eight.
