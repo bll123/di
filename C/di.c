@@ -1722,7 +1722,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
     int         ch;
 
 
-    while ((ch = getopt (argc, argv, "Aab:d:f:ghHi:I:klmnPs:tw:W:x:")) != -1)
+    while ((ch = getopt (argc, argv, "Aab:d:f:F:ghHi:I:klmnPs:tw:W:x:")) != -1)
     {
         switch (ch)
         {
@@ -1802,6 +1802,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
                 break;
             }
 
+            case 'F':
             case 'I':
             {
                 parseList (includeList, optarg);
