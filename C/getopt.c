@@ -5,6 +5,7 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 */
 
 #include "config.h"
+#include "di.h"    /* for macro conversions */
 
 #if ! defined (_lib_getopt)
 
