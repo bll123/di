@@ -38,4 +38,5 @@ man/
 man/iffe.html		iffe manual page
 po/                     internationalization files
 po/en_US.po
+po/de_DE.po
 version.h		di source
