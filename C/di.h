@@ -255,6 +255,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (MEM_F_IOSIZE_STATFS)
 # define _mem_f_iosize_statfs 1
 #endif
+#if defined (MEM_F_TYPE_STATFS)
+# define _mem_f_type_statfs 1
+#endif
 #if defined (MEM_MOUNT_INFO_STATFS)
 # define _mem_mount_info_statfs 1
 #endif
