@@ -1,7 +1,7 @@
 /*
 $Id$
 $Source$
-Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
+Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 */
 
 #ifndef __INC_DI_H_
@@ -76,8 +76,6 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (HAS_64BIT_STATFS_FLDS)
 # define _siz_long_long 8
-# define _siz_f_blocks_statfs 8
-# define _siz_f_blocks_statvfs 8
 #endif
 #if defined (HAS_GETMNTINFO_BSIZE)
 # define _mem_f_bsize_statfs 1
@@ -293,9 +291,7 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #define DI_OPT_LEN             MAXPATHLEN
 #define DI_MNT_TIME_LEN        24
 
-#if _siz_long_long == 8 && \
-    (_siz_f_blocks_statfs == 8 || \
-    _siz_f_blocks_statvfs == 8)
+#if _siz_long_long == 8
     typedef unsigned long long _fs_size_t;
     typedef long long _s_fs_size_t;
 #else
