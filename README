@@ -27,9 +27,8 @@ INSTALLATION
     The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment variables
     can be set and exported prior to running 'Build'.
 
-    The SHAREDIR environment variable may be set to the installation
-    directory for the locale files.  Default is ${prefix}/lib/di,
-    the locale directory ${SHAREDIR}/locale is created.
+    The LOCALEDIR environment variable may be set to the installation
+    directory for the locale files.  Default is ${prefix}/lib/di/locale.
 
     If you want the internationalization directory installed, do:
 
