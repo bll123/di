@@ -23,7 +23,7 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #if _hdr_string 
 # include <string.h>
 #endif
-#if ! defined (_hdr_string) && _hdr_strings
+#if _hdr_strings && ((! defined (_hdr_string)) || (_include_string))
 # include <strings.h>
 #endif
 
