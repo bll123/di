@@ -1,4 +1,4 @@
-di - disk information utility (version 3.1).
+di - disk information utility (version 3.2).
 
 DESCRIPTION
 
@@ -18,15 +18,20 @@ INSTALLATION
 
   Instructions for iffe:
 
+                                  Example w/gcc and different prefix.
     ./Build distclean             ./Build distclean
     ./Build                       CC=gcc prefix=/usr/lbin ./Build
     ./Build install               CC=gcc prefix=/usr/lbin ./Build install
     ./Build install-man           CC=gcc prefix=/usr/lbin ./Build install-man
 
+    If you want the internationalization directory installed, do:
+
+    ./Build install-po 
+
     The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment variables
     can be set and exported prior to running 'Build'. 
 
-    If you don't have an C compiler that supports prototypes, you'll
+    If you don't have a C compiler that supports prototypes, you'll
     have to edit the config.h file by hand after it is created.
 
     features/cflags.sh messes with the various compiler flags.
@@ -35,22 +40,28 @@ INSTALLATION
 
     ./Configure -d -s -e          # non-interactive
     ./Configure -d -s -e -Dcc=gcc # non-interactive, and you want to use gcc
+    ./Configure -d -s -e -Dcc=gcc -Dprefix=/usr/lbin
+                                  # non-interactive, w/gcc, set prefix
     ./Configure                   # interactive
 
-    Then, do your make:
+    Do your make:
 
-    make
+        make
 
     And install:
 
     ( AIX versions prior to 4.3 had a 'di' command.  di is installed
     as 'diskinfo' instead for these AIX versions. )
 
-    make install
+        make install
 
     To install the manual pages:
 
-    make install-man
+        make install-man
+
+    If you want the internationalization directory installed, do:
+
+        make install-po 
 
   Installation Permissions:
     Some systems (Sys V variants) only allow root to read the
@@ -61,20 +72,22 @@ INSTALLATION
 
     If this is needed on your system, do:
 
-    make -f Makefile.iffe installperm
+    make -f Makefile.iffe installperms
 
   Windows installation:
 
     Alternative 1)
-        cp config.win95 config.h
         Cygnus gcc: make -f Makefile.iffe windows-gcc
         MS VC++:    nmake -f Makefile.iffe windows
+        *** you may need to undefine _lib_GetDiskFreeSpaceEX
+            in the config.h file.
     Alternative 2)
         CC=gcc ./Build distclean
         CC=gcc ./Build
         *** if you prefer to use the cygwin API rather than the
             windows API, edit config.h, and undefine _hdr_windows,
-            and _lib_GetDiskFreeSpace, then re-run the build.
+            _lib_GetDiskFreeSpace, and _lib_GetDiskFreeSpaceEx,
+            then re-run the build.
 
 BUGS
 
@@ -168,6 +181,10 @@ BUGS
 
 CHANGES
 
+    3.2
+        Add internationalization code.
+        Update windows code.
+        Minor cleanup.
     3.1
         Bug fixes for SunOS 4.
     3.0
