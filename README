@@ -1,4 +1,4 @@
-di - disk information utility (version 3.0).
+di - disk information utility (version 3.1).
 
 DESCRIPTION
 
@@ -163,6 +163,8 @@ BUGS
 
 CHANGES
 
+    3.1
+        Bug fixes for SunOS 4.
     3.0
         Added getfsstat() for Compaq Tru-64 (and FreeBSD, etc.) systems.
         Compaq Tru-64 code cleaned up.
