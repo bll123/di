@@ -358,14 +358,17 @@ main (argc, argv)
 
 
 #if _lib_setlocale && defined (LC_ALL)
-    setlocale (LC_ALL, "");
+    ptr = setlocale (LC_ALL, "");
+    /* printf ("setlocale:%s\n", ptr == (char *) NULL ? "null" : ptr); */
 #endif
 #if _enable_nls
     ptr = bindtextdomain (PROG, DI_LOCALE_DIR);
-    if (debug > 2) { printf ("bindtextdomain:%s\n", ptr); }
+    /* printf ("bindtextdomain:%s\n", ptr); */
     ptr = textdomain (PROG);
-    if (debug > 2) { printf ("textdomain:%s\n", ptr); }
+    /* printf ("textdomain:%s\n", ptr); */
 #endif
+
+    processArgs (argc, argv, &ignoreList, &includeList);
 
     ptr = argv [0] + strlen (argv [0]) - 2;
     if (memcmp (ptr, MPROG, 2) == 0)
@@ -379,8 +382,6 @@ main (argc, argv)
             formatString = ptr;
         }
     }
-
-    processArgs (argc, argv, &ignoreList, &includeList);
 
     if (debug > 0)
     {
@@ -1480,8 +1481,7 @@ usage ()
          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
     printf (GT("Usage: di [-ant] [-f format] [-s sort-type] [-i ignore-fstyp-list]\n"));
     printf (GT("       [-I include-fstyp-list] [-w kbyte-width] [-W inode-width] [file [...]]\n"));
-    printf (GT("   -a   : print all mounted devices; normally, those with 0 total blocks are\n"));
-    printf (GT("          not printed.  e.g. /dev/proc, /dev/fd.\n"));
+    printf (GT("   -a   : print all mounted devices\n"));
     printf (GT("   -d x : size to print blocks in (p - posix (512), k - kbytes,\n"));
     printf (GT("          m - megabytes, g - gigabytes, <x> - numeric size).\n"));
     printf (GT("   -f x : use format string <x>\n"));
