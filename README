@@ -1,4 +1,4 @@
-di - disk information utility (version 3.8).
+di - disk information utility (version 3.9).
 
 DESCRIPTION
 
@@ -87,24 +87,20 @@ INSTALLATION
 
 BUGS
 
-    submit bugs to di-bugs@gentoo.com, or
-    visit http://www.gentoo.com/cgi-bin/jb/di/
+    submit bugs to di-bugs@gentoo.com
 
 PORTING
 
-    di 3.8 has been tested on the following platforms (both
+    di 3.9 has been tested on the following platforms (both
     Configure and iffe):
-        AIX 4.3.3.0
         FreeBSD 4.7 (gcc 2.95.4)
-        HP-UX B.11.20 U (ansi C)
+        HP-UX B.11.22 U (ansi C)
         Linux 2.0.35 (gcc 2.7.2.3), 2.4.18 [RH7.3] (gcc 3.2, 2.96),
-            2.4.9 [RH7.2] (gcc 2.96), 2.2.18 [Debian] (gcc 2.95.2),
-            2.4.19 (Slackware 8.1) (gcc 2.95.3)
+            2.4.9 [RH7.2] (gcc 2.96), 2.2.18 [Debian] (gcc 2.95.2)
         NetBSD 1.6 (gcc 2.95.3)
         OpenBSD 3.1 (gcc 2.95.3)
         Solaris 9 (cc 5.0, gcc 2.95.3)
-        Tru64 Unix 4.0g (C V6.3)
-        Windows 2000 (cygwin gcc 2.95.3-5 [no Configure])
+        Tru64 Unix 4.0g (C V6.3), 5.1a (C T6.5)
 
     di has been ported to the following systems in the past:
 
@@ -113,10 +109,6 @@ PORTING
         NetBSD 1.x, Next 3.x, OSF/1, Pyramid, SCO 3.2.2 & 3.2.4,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Sys V.3,
         Sys V.4, Ultrix, Windows, Xenix
-
-    Due to the revamped configuration process, some of these systems
-    may not be properly configured as I don't have access to all of the
-    platforms to test on.
 
 BUGS
 
@@ -136,6 +128,11 @@ BUGS
 
 CHANGES
 
+    3.9
+        Fixed bug with uninitialized 'dbsstr' variable.
+        iffe: upgraded to 2002-03-06.
+            Don't need to include stdio.h in most di.iffe tests.
+            lib test fixed for cygwin.
     3.8
         Rewrote block size display processing.  It did not match the
         *BSD implementation of the BLOCKSIZE environment variable.
