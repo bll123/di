@@ -97,6 +97,8 @@ Copyright 1994-2003 Brad Lanam, Walnut Creek, CA
  *  equal to the number of free blocks.
  *
  *  HISTORY:
+ *      6 Mar 2003 bll
+ *          Fixed bug w/uninitialized var.
  *     12 Jan 2003 bll
  *          Rewrite display block size handling.
  *     11 Jul 2002 bll
@@ -459,6 +461,7 @@ main (argc, argv)
     char                *ptr;
     char                dbsstr [30];
 
+    *dbsstr = '\0';
     ignoreList.count = 0;
     ignoreList.list = (char **) NULL;
     includeList.count = 0;
@@ -2163,7 +2166,8 @@ setDispBlockSize (ptr)
     int         len;
     double      val;
 
-    if (ptr == (char *) NULL)
+    if (ptr == (char *) NULL ||
+        *ptr == '\0')
     {
         return;
     }
