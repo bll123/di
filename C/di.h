@@ -429,7 +429,9 @@ extern void di_getDiskInfo         _((di_DiskInfo **, int *));
 extern void di_testRemoteDisk      _((di_DiskInfo *));
 extern void *Realloc               _((void *, Size_t));
 
-# if ! defined (_lib_getopt)
+/* workaround for cygwin/Configure.                                   */
+/* if we have a getopt header, there's probably a getopt lib function */
+# if ! defined (_lib_getopt) && ! defined (_hdr_getopt)
 extern int getopt _((int argc, char *argv [], char *optstring));
 # endif
 
