@@ -18,11 +18,11 @@ di \- disk information
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x level] [file [...]]
 .B di
-[\fB-Aahlnt\fR] [\fB-d\fR \fIdisplay-size\fR] [\fB-f\fR \fIformat\fR]
-[\fB-i\fR \fIignore-fstyp-list\fR] [\fB-I\fR \fIinclude-fstyp-list\fR]
-[\fB-s\fR \fIsort-type\fR]
-[\fB-w\fR \fIblock-width\fR] [\fB-W\fR \fIinode-width\fR] [\fB-x\fR \fIlevel\fR]
-[\fIfile\fR [...]]
+[\fB-Aahlnt\fP] [\fB-d\fP \fIdisplay-size\fP] [\fB-f\fP \fIformat\fP]
+[\fB-i\fP \fIignore-fstyp-list\fP] [\fB-I\fP \fIinclude-fstyp-list\fP]
+[\fB-s\fP \fIsort-type\fP]
+[\fB-w\fP \fIblock-width\fP] [\fB-W\fP \fIinode-width\fP] [\fB-x\fP \fIlevel\fP]
+[\fIfile\fP [...]]
 .PP
 .B mi
 .SH Description
@@ -32,8 +32,8 @@ di \- disk information
 .I di
 Displays usage information on mounted filesystems.  Block values are
 reported in megabytes (1024k bytes) by default, but may be changed.
-If \fIfile\fR is specified,
-the usage information for the partition on which \fIfile\fR is
+If \fIfile\fP is specified,
+the usage information for the partition on which \fIfile\fP is
 located is printed.
 .PP
 Unless the \-a flag is specified, certain mounted filesystems
@@ -56,7 +56,7 @@ Several switches may be specified to
 control the output of
 .I di
 and
-.I mi\fR:
+.I mi\fP:
 .TP
 .B \-A
 Print all fields (used for debugging).  Mount points and special
@@ -64,30 +64,30 @@ device names are printed at full width.  The \-a flag is set.
 .TP
 .B \-a
 Prints all mounted devices (normally, those with 0 total blocks are not
-printed - e.g. \fB/dev/proc\fR, \fB/dev/fd\fR).
+printed - e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .TP
-.B \-d\ \fIdisplay-size\fR
-Display the blocks in units specified by \fIdisplay-size\fR.  \fIdisplay-size\fR
+.B \-d\ \fIdisplay-size\fP
+Display the blocks in units specified by \fIdisplay-size\fP.  \fIdisplay-size\fP
 may be one of: p \- posix (512 bytes), k \- kilobytes,
 m \- megabytes, g - gigabytes, or a specific value to use as the block size.
 Block display sizes greater than 1024 bytes are displayed with a precision
 of one decimal place after the radix.
 .TP
-.B \-f\ \fIformat\fR
-Use the specified format string \fIformat\fR.  Format strings are
+.B \-f\ \fIformat\fP
+Use the specified format string \fIformat\fP.  Format strings are
 described below.
 .TP
 .B \-h
 Print out the usage for
 .I di
 .TP
-.B \-i \fIignore-fstype-list\fR
-Ignore the file system types listed in \fIignore-fstyp-list\fR.
+.B \-i \fIignore-fstype-list\fP
+Ignore the file system types listed in \fIignore-fstyp-list\fP.
 The list is a comma separated list of file system types.  e.g.
 \-i nfs,rfs
 .TP
-.B \-I \fIinclude-fstype-list\fR
-Include only the file system types listed in \fIinclude-fstyp-list\fR.
+.B \-I \fIinclude-fstype-list\fP
+Include only the file system types listed in \fIinclude-fstyp-list\fP.
 The list is a comma separated list of file system types.  e.g.
 \-I nfs,rfs
 .TP
@@ -97,35 +97,35 @@ for all systems as of version 1.17.
 .TP
 .B \-n
 Do not print a header line above the list of file systems.  Useful when
-parsing the output of \fIdi\fR.
+parsing the output of \fIdi\fP.
 .TP
-.B \-s\ \fIsort-type\fR
-Use \fIsort-type\fR to sort the output.
-The output of \fIdi\fR is normally sorted by name.  The output may
-be left unsorted (\fB-s\ n\fR command line switch) i.e. as it appears
+.B \-s\ \fIsort-type\fP
+Use \fIsort-type\fP to sort the output.
+The output of \fIdi\fP is normally sorted by name.  The output may
+be left unsorted (\fB-s\ n\fP command line switch) i.e. as it appears
 in the mount table or may be
 sorted by the special device name
-(\fB-s\ s\fR command line switch).  If the \fB-s \ r\fR command line
+(\fB-s\ s\fP command line switch).  If the \fB-s \ r\fP command line
 switch is used, the sort order will be reversed.
-If \fIfile\fR is specifed on the
+If \fIfile\fP is specifed on the
 command line, no sorting is done.
 .TP
 .B \-t
 Print a totals line below the list of file systems.
 Memory filesystems (tmpfs, memfs) are not added to the totals.
 .TP
-.B \-w\ \fIblock-width\fR
+.B \-w\ \fIblock-width\fP
 Set the print width for block values.  Default is eight.
 .TP
-.B \-W\ \fIinode-width\fR
+.B \-W\ \fIinode-width\fP
 Set the print width for inode values.  Default is seven.
 .TP
-.B \-x\ \fIlevel\fR
-Set the program's debugging level to \fIdebug-level\fR.
+.B \-x\ \fIlevel\fP
+Set the program's debugging level to \fIdebug-level\fP.
 .SH Format strings
-The output of \fIdi\fR may be specified via a format string.  This
-string may be given either via the \fB-f\fR command line switch or by
-the \fBDIFMT\fR environment variable.  The format string may specify the
+The output of \fIdi\fP may be specified via a format string.  This
+string may be given either via the \fB-f\fP command line switch or by
+the \fBDIFMT\fP environment variable.  The format string may specify the
 following columns:
 .TP
 .B m
@@ -222,12 +222,12 @@ not supported on all systems.
 .B O
 Print the filesystem mount options.
 .PP
-The default format string for \fIdi\fR is \fBsmbuvpT\fR.
+The default format string for \fIdi\fP is \fBsmbuvpT\fP.
 .PP
-The default format string for \fImi\fR is \fBMSTIO\fR.
+The default format string for \fImi\fP is \fBMSTIO\fP.
 .PP
 The format string may also contain any other character not listed
-above.  The character will be printed as is.  e.g. \fBdi -f 'mbuvp|iUFP'\fR
+above.  The character will be printed as is.  e.g. \fBdi -f 'mbuvp|iUFP'\fP
 will print the character '|' between the disk usage and the file slot
 usage.  The command sequence (Bourne Shell):
 .RS
@@ -239,15 +239,15 @@ usage.  The command sequence (Bourne Shell):
 .RE
 will print two lines of data for each filesystem.
 .SH Examples
-Various \fIdf\fR
+Various \fIdf\fP
 equivalent format strings for System V release 4 are:
 .PP
 .RS
-\fI/usr/bin/df -v\fR     di -dp \-f msbuf1
+\fI/usr/bin/df -v\fP     di -dp \-f msbuf1
 .br
-\fI/usr/bin/df -k\fR     di -dk \-f sbcvpm
+\fI/usr/bin/df -k\fP     di -dk \-f sbcvpm
 .br
-\fI/usr/ucb/df\fR        di -dk \-f sbuv2m
+\fI/usr/ucb/df\fP        di -dk \-f sbuv2m
 .RE
 .PP
 If you like your numbers to add up/calculate the percentage
@@ -266,7 +266,7 @@ For filesystems that do not report available blocks (e.g. System V
 release 3), the number of available blocks is considered to be the
 number of free blocks.
 .SH WARNING
-Do not replace your system's \fIdf\fR command with this program.  You
+Do not replace your system's \fIdf\fP command with this program.  You
 will in all likelihood break your installation procedures.
 .SH See Also
 df(1), fstab(5), getmnt(2), getmntinfo(2), mnttab(4), mount(1M)
