@@ -500,10 +500,6 @@ cleanup (diskInfo, ignoreList, includeList)
     iList           *includeList;
 #endif
 {
-    char        *lptr;
-    int         i;
-
-
     if (diskInfo != (di_DiskInfo *) NULL)
     {
         free ((char *) diskInfo);
@@ -1954,7 +1950,7 @@ checkIgnoreList (diskInfo, ignoreList)
             ptr = ignoreList->list [i];
             if (debug > 2)
             {
-                printf ("chkign: test: fstype %s/%s : %s\n", *ptr,
+                printf ("chkign: test: fstype %s/%s : %s\n", ptr,
                         diskInfo->fsType, diskInfo->name);
             }
             if (strcmp (ptr, diskInfo->fsType) == 0)
@@ -1962,7 +1958,7 @@ checkIgnoreList (diskInfo, ignoreList)
                 diskInfo->printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
                 {
-                    printf ("chkign: ignore: fstype %s match: %s\n", *ptr,
+                    printf ("chkign: ignore: fstype %s match: %s\n", ptr,
                             diskInfo->name);
                 }
                 break;
@@ -1991,7 +1987,7 @@ checkIncludeList (diskInfo, includeList)
             ptr = includeList->list [i];
             if (debug > 2)
             {
-                printf ("chkinc: test: fstype %s/%s : %s\n", *ptr,
+                printf ("chkinc: test: fstype %s/%s : %s\n", ptr,
                         diskInfo->fsType, diskInfo->name);
             }
 
@@ -2005,7 +2001,7 @@ checkIncludeList (diskInfo, includeList)
                 diskInfo->printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
                 {
-                    printf ("chkinc: ! include: fstype %s match: %s\n", *ptr,
+                    printf ("chkinc: ! include: fstype %s match: %s\n", ptr,
                             diskInfo->name);
                 }
             }
