@@ -1310,7 +1310,9 @@ getDiskSpecialInfo (diskInfo, diCount)
 
     for (i = 0; i < diCount; ++i)
     {
-        if (stat (diskInfo [i].special, &statBuf) == 0)
+           /* check for initial slash; otherwise we can pick up normal files */
+        if (*diskInfo [i].special == '/' &&
+            stat (diskInfo [i].special, &statBuf) == 0)
         {
             diskInfo [i].sp_dev = (__ulong) statBuf.st_dev;
             diskInfo [i].sp_rdev = (__ulong) statBuf.st_rdev;
@@ -1459,8 +1461,8 @@ checkDiskInfo (diskInfo, includeList, diCount)
 
             if (debug > 2)
             {
-                printf ("dup: chk: %s %ld %ld dup: %d\n", diskInfo [i].name,
-                    sp_dev, sp_rdev, dupCount);
+                printf ("dup: chk: i: %s dev: %ld rdev: %ld dup: %d\n",
+                    diskInfo [i].name, sp_dev, sp_rdev, dupCount);
             }
 
             for (j = 0; dupCount > 0 && j < diCount; ++j)
@@ -1471,8 +1473,10 @@ checkDiskInfo (diskInfo, includeList, diCount)
                     diskInfo [j].printFlag = DI_PRNT_IGNORE;
                     if (debug > 2)
                     {
-                        printf ("chk: ignore: duplicate: %s\n",
-                                diskInfo [j].name);
+                        printf ("chk: ignore: duplicate: %s of %s\n",
+                                diskInfo [j].name, diskInfo [i].name);
+                        printf ("dup: ign: j: rdev: %ld dev: %ld\n",
+                                diskInfo [j].sp_dev, diskInfo [j].sp_rdev);
                     }
                 }
             } /* duplicate check for each disk */
