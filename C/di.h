@@ -14,7 +14,7 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 /******************************************************/
 /* create 'Configure' forwards compatibility w/'iffe' */
 /* until we know how portable iffe is...              */
-#if defined (_)   /* created by Configure, not iffe */
+#if ! defined (_config_by_iffe_)   /* created by Configure, not iffe */
 # define _hdr_ctype 1
 # define _hdr_errno 1
 # define _hdr_stdlib 1
@@ -24,6 +24,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (HAS_BCOPY)
 # define _lib_bcopy 1
+#endif
+#if defined (HAS_BINDTEXTDOMAIN)
+# define _lib_bindtextdomain 1
 #endif
 #if defined (HAS_BZERO)
 # define _lib_bzero 1
@@ -39,6 +42,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (HAS_GETMNT)
 # define _lib_getmnt 1
+#endif
+#if defined (HAS_GETTEXT)
+# define _lib_gettext 1
 #endif
 #if defined (HAS_GETMNTENT)
 # define _lib_getmntent 1
@@ -61,6 +67,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (HAS_MNT_TIME)
 # define _lib_mnt_time 1
 #endif
+#if defined (HAS_SETLOCALE)
+# define _lib_setlocale 1
+#endif
 #if defined (HAS_SETMNTENT)
 # define _lib_setmntent 1
 # define _setmntent_2arg 1
@@ -76,6 +85,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (HAS_64BIT_STATFS_FLDS)
 # define _siz_long_long 8
+#endif
+#if defined (HAS_TEXTDOMAIN)
+# define _lib_textdomain 1
 #endif
 #if defined (HAS_GETMNTINFO_BSIZE)
 # define _mem_f_bsize_statfs 1
@@ -115,8 +127,14 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (I_KERNFSINFO)
 # define _hdr_kernel_fs_info 1
 #endif
+#if defined (I_LIBINTL)
+# define _hdr_libintl 1
+#endif
 #if defined (I_LIMITS)
 # define _hdr_limits 1
+#endif
+#if defined (I_LOCALE)
+# define _hdr_locale 1
 #endif
 #if defined (I_MALLOC)
 # define _hdr_malloc 1
@@ -150,7 +168,7 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 # define _hdr_string 1
 # undef _hdr_strings
 #else
-# if defined (_)   /* are we using configure? */
+# if ! defined (_config_by_iffe_)   /* are we using configure? */
 #  define _hdr_strings 1
 #  undef _hdr_string
 # endif
@@ -215,6 +233,18 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (HAS_SETMNTENT_ONE_ARG)
 # undef _setmntent_2arg
 # define _setmntent_1arg 1
+#endif
+#if ! defined (_config_by_iffe_)   /* are we using configure? */
+# if _lib_bindtextdomain && \
+	_lib_gettext && \
+	_lib_setlocale && \
+	_lib_textdomain && \
+	_hdr_libintl && \
+	_hdr_locale
+#  define _enable_nls 1
+# else
+#  define _enable_nls 0
+# endif
 #endif
 
 /*****************************************************/
