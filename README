@@ -1,4 +1,4 @@
-di - disk information utility (version 3.3).
+di - disk information utility (version 3.4).
 
 DESCRIPTION
 
@@ -100,61 +100,6 @@ PORTING
             2.4.2 [RH7.1] (gcc 2.96), 2.4.9 (gcc 2.96)
         Windows 2000 (cygwin gcc 2.95.3-5) [iffe only]
 
-    di 3.0 has been tested on the following platforms (both
-    Configure and iffe):
-        Solaris 8 (cc 5.0, gcc 2.95.3)
-           gcc on Solaris does things differently with the include
-           files than cc 5.0 when large file support is defined.
-        Tru64 Unix 4.0g (C V6.3-129 (1530)), 5.1a (C T6.4-212 (1278))
-        FreeBSD 4.3 (gcc 2.95.3), 4.2 (gcc 2.95.2)
-        NetBSD 1.5 (egcs 2.91.66)
-        Linux 2.0.35 (gcc 2.7.2.3), 2.2.14 (gcc 2.91.66),
-            2.4.2 [RH7.1] (gcc 2.96-81), 2.2.17 [Debian] (gcc 2.95.2),
-            2.4.3 [RH7.1] (gcc 2.96-85)
-        Windows95 (cygwin-95-4.0 gcc 2.95.3-5)
-
-    di 2.4 has been tested on the following platforms:
-        AIX 4.3.2
-        BSD/OS 4.0.1 (gcc 2.7.2.1)
-        FreeBSD 2.1.5 (gcc 2.6.3), 2.2.7 (gcc 2.7.2.1),
-                3.4 (gcc 2.8.1, gcc 2.7.2.3)
-        Solaris 2.6 (gcc 2.95.1)
-        Solaris 8 (cc 5.0, gcc 2.95.2)
-        Linux 2.0.35 (gcc 2.7.2.3), 2.2.12 (gcc 2.91.66),
-                2.2.14 (gcc 2.91.66)
-        Windows95 (cygnus gcc B19)
-
-    di 2.3 has been tested on the following platforms:
-        AIX 4.3.2
-        BSD/OS 4.0.1 (gcc 2.7.2.1)
-        FreeBSD 2.1.5 (gcc 2.6.3), 2.2.6 (gcc 2.7.2.1), 2.2.7 (gcc 2.7.2.1),
-                3.3 (gcc 2.7.2.3), 3.3 (gcc 2.8.1)
-        Solaris 7 (cc 5.0, gcc 2.8.1)
-        Solaris 8 (cc 5.0, gcc 2.8.1)
-        BeOS 4.5.2 intel (g++ 2.9-beos-980929)
-        Linux 2.0.35 (gcc 2.7.2.3), 2.2.12 (gcc 2.91.66)
-        Windows NTsp5 (vc 6.0)
-
-    di 2.2 has been tested on the following platforms:
-
-        BSD/OS 4.0.1 (gcc 2.7.2.1)
-        FreeBSD 2.1.5 (gcc 2.6.3), 2.2.6 (gcc 2.7.2.1), 2.2.7 (gcc 2.7.2.1),
-                3.2 (gcc 2.95.1), 3.3 (gcc 2.7.2.3), 3.3 (gcc 2.8.1)
-        Linux 2.0.35 (gcc 2.7.2.3)
-        Linux 2.0.36 (gcc 2.7.2.3)
-        Solaris 7 (SC3.0.1), 7 (gcc 2.95.1)
-        Compaq Tru64 (Digital Unix, OSF/1) 4.0D, 4.0F
-
-    di 2.0 has been tested on the following platforms:
-
-        AIX 4.1.4.0, 4.3.0.0, 4.3.1.0 (egcs-1.1.1.1)
-        BSD/OS 2.1 (gcc 1.42)
-        IRIX 6.2, 6.5
-        NetBSD 1.3.3
-        HP/UX B.10.20
-        UNICOS 10.0.0.3
-        Windows95 (cygnus gcc B19)
-
     di has been ported to the following systems in the past:
 
         A/UX, AIX, BSDI 1.x & 2.x, Convex, Cray UNICOS 9 & 10,
@@ -175,7 +120,7 @@ BUGS
     Send bug reports along with the output from 'di -A -x 2' and the
     output from your standard df command (as verbose as possible) to:
 
-        bll@gentoo.com
+        di-bugs@gentoo.com
 
     If the Configure/Build script doesn't set up the 'config.h'
     file correctly, please let me know.  E-mail me the incorrect
@@ -185,6 +130,14 @@ BUGS
 
 CHANGES
 
+    3.4
+        Fix bugs in include/ignore list generation.
+        Rewrite ignore/include lists to allow multiple command line
+        specification of ignore/include lists.
+        Change so -f overrides DIFMT environment variable.
+        Fix bugs in -s command line option.  Make more friendly.
+        Add -H (-dh) "human readable" display format.
+        nfs mounts are always remote.
     3.3
         Bug fixes for AIX, HP/UX installation.
     3.2
@@ -369,4 +322,4 @@ COPYRIGHT
     Copyright 1994-2001 Brad Lanam, Walnut Creek, CA, USA
     bll@gentoo.com
     http://www.gentoo.com/di/
-    http://www.gentoo.com/di/di-3.0.tar.gz
+    http://www.gentoo.com/di/di-3.3.tar.gz
