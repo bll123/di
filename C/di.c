@@ -78,7 +78,7 @@ static char    copyright [] =
  *  System V.4 `/usr/bin/df -k` Has format: sbcvpm
  *  System V.4 `/usr/ucb/df`    Has format: sbuv2m
  *
- *  The default format string for this program is: mbuvpiUFP
+ *  The default format string for this program is: smbuvpT
  *
  *  The environment variable "DIFMT" may be set to the desired format
  *  string.
@@ -88,6 +88,8 @@ static char    copyright [] =
  *  equal to the number of free blocks.
  *
  *  HISTORY:
+ *     17 dec 99 bll
+ *          Added sys/fs_types.h (Digital Unix (tru64)).
  *     3 jan 99 bll
  *          Finalize changes for metaconfig.
  *          Always get stat() for disk device.
@@ -223,6 +225,9 @@ static char    copyright [] =
 #if defined (I_SYS_FSTYPES)
 # include <sys/fstypes.h>
 #endif
+#if defined (I_SYS_FS_TYPES)
+# include <sys/fs_types.h>
+#endif
 #if defined (I_SYS_MNTCTL)
 # include <sys/mntctl.h>
 #endif
@@ -330,7 +335,8 @@ static char    copyright [] =
 extern int     errno;
 #endif
 
-#if defined (_LARGEFILE_SOURCE) && _FILE_OFFSET_BITS == 64
+#if (defined (_LARGEFILE_SOURCE) || defined (_LARGEFILE64_SOURCE)) && \
+        _FILE_OFFSET_BITS == 64
 # define HAS_64BIT_STATFS_FLDS 1
 #endif
 
