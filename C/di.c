@@ -5,12 +5,14 @@ static char    di_c_rcsid [] =
 "$Id$";
 static char    di_c_source [] =
 "$Source$";
+static char    copyright [] =
+"Copyright 1994-1998 Brad Lanam, Walnut Creek, CA";
 #endif
 
 /*
  * di.c
  *
- *   Copyright 1994, 1995 Brad Lanam,  Walnut Creek, CA
+ *   Copyright 1994-1998 Brad Lanam,  Walnut Creek, CA
  *
  *  Warning: Do not replace your systems 'df' command with this program.
  *           You will in all likelihood break your installation procedures.
@@ -374,7 +376,9 @@ extern int bzero (char *, int);
    /* you may want to change some of these values.  Be sure to change all */
    /* related entries.                                                    */
 /* #define DEFAULT_FORMAT      "mbuvpiUFP" */
-#define DEFAULT_FORMAT      "smbuvpT"
+#if ! defined (DEFAULT_FORMAT)
+# define DEFAULT_FORMAT      "smbuvpT"
+#endif
 #if defined (NO_MOUNT_TIME)
 # define DEF_MOUNT_FORMAT    "MSTO"
 #else
@@ -1983,7 +1987,8 @@ getDiskEntries ()
         }
 #endif
 
-        if (diskInfo [idx].isLocal == FALSE && (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+        if (diskInfo [idx].isLocal == FALSE && 
+                (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
         {
             diskInfo [idx].printFlag = DI_IGNORE;
         }
@@ -2399,7 +2404,8 @@ getDiskEntries ()
             diskInfo [idx].isLocal = FALSE;
         }
 
-        if (diskInfo [idx].isLocal == FALSE && (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+        if (diskInfo [idx].isLocal == FALSE && 
+                (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
         {
             diskInfo [idx].printFlag = DI_IGNORE;
         }
@@ -2688,7 +2694,8 @@ getDiskEntries ()
                 strncpy (diskInfo [i].mountTime, ctime (&vmtp->vmt_time),
                         MNT_TIME_LEN);
 
-                if (diskInfo [i].isLocal == FALSE && (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+                if (diskInfo [i].isLocal == FALSE &&
+                        (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
                 {
                     diskInfo [i].printFlag = DI_IGNORE;
                 }
@@ -2729,7 +2736,8 @@ getDiskInfo ()
 
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].isLocal == FALSE && (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+        if (diskInfo [i].isLocal == FALSE &&
+                (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
         {
             diskInfo [i].printFlag = DI_IGNORE;
         }
@@ -2907,33 +2915,79 @@ getDiskInfo ()
 
 #if defined (HAS_GETDISKFREESPACE)
 
-
-/*
- * getDiskEntries
- *
- * MS-DOS uses a long for the available local drives.
- *
- */
-
-static int
-getDiskEntries ()
-{
-    return 0;
-}
-
-
 /*
  * getDiskInfo
  *
- * MS-DOS.
+ * Windows
  *
  */
 
 # define NUM_MSDOS_FSTYPES          7
-static char *MSDOS_fsType [NUM_MSDOS_FSTYPES] =
+static char *MSDOS_diskType [NUM_MSDOS_FSTYPES] =
     { "unknown", "", "removable", "fixed", "remote", "cdrom", "ramdisk" };
 # define MSDOS_BUFFER_SIZE          128
 # define BYTES_PER_LOGICAL_DRIVE    4
+
+static int
+getDiskEntries ()
+{
+    int             i;
+    int             diskflag;
+    int             rc;
+    char            *p;
+    char            buff [MSDOS_BUFFER_SIZE];
+
+
+    diskflag = DI_IGNORE;
+    rc = GetLogicalDriveStrings (MSDOS_BUFFER_SIZE, buff);
+    diCount = rc / BYTES_PER_LOGICAL_DRIVE;
+
+    diskInfo = (DiskInfo *) calloc (sizeof (DiskInfo), diCount);
+    if (diskInfo == (DiskInfo *) NULL)
+    {
+        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+        return -1;
+    }
+
+    for (i = 0; i < diCount; ++i)
+    {
+        p = buff + (BYTES_PER_LOGICAL_DRIVE * i);
+        strncpy (diskInfo [i].name, p, NAME_LEN);
+        rc = GetDriveType (p);
+        diskInfo [i].printFlag = DI_OK;
+
+        if (rc == DRIVE_NO_ROOT_DIR)
+        {
+            diskInfo [i].printFlag = DI_BAD;
+        }
+
+            /* assume that any removable drives before the  */
+            /* first non-removable disk are floppies...     */
+        else if (rc == DRIVE_REMOVABLE)
+        {
+            diskInfo [i].printFlag = diskflag;
+        }
+        else
+        {
+            diskflag = DI_OK;
+        }
+
+        if (rc != DRIVE_REMOTE)
+        {
+            diskInfo [i].isLocal = TRUE;
+        }
+        /* strncpy (diskInfo [i].fsType, MSDOS_diskType [rc], TYPE_LEN); */
+    } /* for each mounted drive */
+
+    return diCount;
+}
+
+/*
+ * getDiskInfo
+ *
+ * Windows
+ *
+ */
 
 static void
 getDiskInfo ()
@@ -2945,40 +2999,36 @@ getDiskInfo ()
     unsigned long       bytespersector;
     unsigned long       totalclusters;
     unsigned long       freeclusters;
-    char                buff [MSDOS_BUFFER_SIZE];
-    char                *p;
+    char                tbuff [MSDOS_BUFFER_SIZE];
+    char                volName [MSDOS_BUFFER_SIZE];
+    char                fsName [MSDOS_BUFFER_SIZE];
+    DWORD               serialNo;
+    DWORD               maxCompLen;
+    DWORD               fsFlags;
 
-
-    rc = GetLogicalDriveStrings (MSDOS_BUFFER_SIZE, buff);
-    diCount = rc / BYTES_PER_LOGICAL_DRIVE;
-
-    diskInfo = (DiskInfo *) calloc (sizeof (DiskInfo), diCount);
-    if (diskInfo == (DiskInfo *) NULL)
-    {
-        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-        return;
-    }
 
     for (i = 0; i < diCount; ++i)
     {
-        p = buff + (BYTES_PER_LOGICAL_DRIVE * i);
-        strcpy (diskInfo [i].name, p);
-        rc = GetDriveType (p);
-        diskInfo [i].printFlag = DI_OK;
-        if (rc == DRIVE_NO_ROOT_DIR)
-        {
-            diskInfo [i].printFlag = DI_BAD;
-        }
-        if (rc == DRIVE_REMOVABLE)
+        if (diskInfo [i].isLocal == FALSE && 
+                (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
         {
             diskInfo [i].printFlag = DI_IGNORE;
         }
-        strcpy (diskInfo [i].fsType, MSDOS_fsType [rc]);
 
         if (diskInfo [i].printFlag == DI_OK || (flags & F_ALL) == F_ALL)
         {
-            rc = GetDiskFreeSpace (p, &sectorspercluster, &bytespersector,
+            rc = GetVolumeInformation (diskInfo [i].name,
+                    volName, MSDOS_BUFFER_SIZE, &serialNo, &maxCompLen,
+                    &fsFlags, fsName, MSDOS_BUFFER_SIZE);
+            /* strcpy (tbuff, diskInfo [i].fsType); */
+            /* strcat (tbuff, " "); */
+            strncpy (diskInfo [i].fsType, fsName, TYPE_LEN);
+            strncpy (diskInfo [i].special, volName, SPEC_NAME_LEN);
+
+            rc = GetDiskFreeSpace (diskInfo [i].name,
+                    &sectorspercluster, &bytespersector,
                     &freeclusters, &totalclusters);
+
             if (rc > 0)
             {
                 mult = (double) (sectorspercluster *
@@ -3006,7 +3056,8 @@ getDiskInfo ()
                 diskInfo [i].printFlag = DI_BAD;
                 if (debug)
                 {
-                    printf ("disk %s; could not get disk space\n", p);
+                    printf ("disk %s; could not get disk space\n",
+                            diskInfo [i].name);
                 }
             }
         } /* if printable drive */
@@ -3014,5 +3065,3 @@ getDiskInfo ()
 }
 
 #endif /* HAS_GETDISKFREESPACE */
-
-
