@@ -516,7 +516,7 @@ main (argc, argv)
     {
         dispTable [i].size = dispTable [i - 1].size * baseDispSize;
     }
-    strncpy (dispBlockLabel, dispTable [DI_ONE_MEG].disp,   /* default */
+    strncpy (dispBlockLabel, GT(dispTable [DI_ONE_MEG].disp),  /* default */
              sizeof (dispBlockLabel));
 
         /* do this afterwards, because we need to know what the */
@@ -2275,13 +2275,13 @@ setDispBlockSize (ptr)
         {
             if (val == 1.0)
             {
-                strncpy (dispBlockLabel, dispTable [idx].disp,
+                strncpy (dispBlockLabel, GT(dispTable [idx].disp),
                     sizeof (dispBlockLabel));
             }
             else
             {
                 Snprintf (SPF (dispBlockLabel, sizeof (dispBlockLabel),
-                    "%.0f %s"), val, dispTable [idx].disp);
+                    "%.0f %s"), val, GT(dispTable [idx].disp));
             }
             val *= dispTable [idx].size;
         } /* known size multiplier */
@@ -2296,7 +2296,7 @@ setDispBlockSize (ptr)
         {
             if (val == dispTable [i].size)
             {
-                strncpy (dispBlockLabel, dispTable [i].disp,
+                strncpy (dispBlockLabel, GT(dispTable [i].disp),
                      sizeof (dispBlockLabel));
                 ok = 1;
                 break;
