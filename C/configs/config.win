@@ -1,0 +1,22 @@
+/* config.h for win95 */
+/* $Id$ */
+
+#ifndef _config_h_
+#define _config_h_
+
+#define _(args)	args
+
+#define I_MALLOC
+#define I_MEMORY
+#define I_STDLIB
+#define I_STRING
+#define I_SYS_TYPES
+#define I_SYS_STAT
+#define I_TIME
+#define I_WINDOWS
+
+#define HAS_GETDISKFREESPACE
+#define HAS_MEMCPY
+#define HAS_MEMSET
+
+#endif /* _config_h_ */
