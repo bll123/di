@@ -1,13 +1,13 @@
 /*
 $Id$
 $Source$
-Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
+Copyright 1994-2003 Brad Lanam, Walnut Creek, CA
 */
 
 /*
  * di.c
  *
- *   Copyright 1994-1999 Brad Lanam,  Walnut Creek, CA
+ *   Copyright 1994-2003 Brad Lanam,  Walnut Creek, CA
  *
  *  Warning: Do not replace your systems 'df' command with this program.
  *           You will in all likelihood break your installation procedures.
