@@ -1,4 +1,4 @@
-/* config.h for win95 */
+/* windows config.h file */
 /* $Id$ */
 
 /* : : generated from features/di.iffe by iffe version 2001-05-31 : : */
@@ -10,6 +10,7 @@
 #define _hdr_ctype	1	/* #include <ctype.h> ok */
 #define _hdr_errno	1	/* #include <errno.h> ok */
 #undef	_hdr_fshelp		/* #include <fshelp.h> not ok */
+#define _hdr_getopt	1	/* #include <getopt.h> ok */
 #undef	_hdr_kernel_fs_info		/* #include <kernel/fs_info.h> not ok */
 #define _hdr_limits	1	/* #include <limits.h> ok */
 #define _hdr_malloc	1	/* #include <malloc.h> ok */
@@ -25,6 +26,7 @@
 #define _hdr_strings	1	/* #include <strings.h> ok */
 #define _hdr_time	1	/* #include <time.h> ok */
 #define _hdr_unistd	1	/* #include <unistd.h> ok */
+#define _hdr_windows	1	/* #include <windows.h> ok */
 #undef	_sys_fs_types		/* #include <sys/fs_types.h> not ok */
 #undef	_sys_fstyp		/* #include <sys/fstyp.h> not ok */
 #undef	_sys_fstypes		/* #include <sys/fstypes.h> not ok */
@@ -46,10 +48,9 @@
 #define _lib_bcopy	1	/* bcopy() in default lib(s) */
 #define _lib_bzero	1	/* bzero() in default lib(s) */
 #define _lib_endmntent	1	/* endmntent() in default lib(s) */
-#undef	_lib_fs_stat_dev	/* fs_stat_dev() not in default lib(s) */
+#undef	_lib_fs_stat_dev		/* fs_stat_dev() not in default lib(s) */
 #undef	_lib_fshelp		/* fshelp() not in default lib(s) */
-#define	_hdr_windows	1	/* #include <windows.h> ok */
-#define _lib_GetDiskFreeSpace	1	/* GetDiskFreeSpace() in default lib(s) */
+#define _lib_GetDiskFreeSpace	1	/* link{ passed */
 #undef	_lib_getfsstat		/* getfsstat() not in default lib(s) */
 #undef	_lib_getmnt		/* getmnt() not in default lib(s) */
 #define _lib_getmntent	1	/* getmntent() in default lib(s) */
@@ -65,16 +66,12 @@
 #undef	_lib_sysfs		/* sysfs() not in default lib(s) */
 #define _lib_errno	1	/* errno() in default lib(s) */
 #undef	_setmntent_1arg		/* does setmntent take one arg? failed */
-#undef	_setmntent_2arg		/* does setmntent take two args? failed */
+#define _setmntent_2arg	1	/* does setmntent take two args? */
 #define _statfs_2arg	1	/* does statfs take 2 args? */
 #undef	_statfs_3arg		/* does statfs take 3 args? failed */
 #undef	_statfs_4arg		/* does statfs take 4 args? failed */
-#undef _setmntent_1arg
-#undef _setmntent_2arg
-#define _setmntent_2147483647arg 1
-#define _user_prompt	1	/* ask user for args in setmntent/statfs */
-#undef	_dcl_optind		/* is optind declared? failed */
-#undef	_dcl_optarg		/* is optarg declared? failed */
+#define _dcl_optind	1	/* is optind declared? */
+#define _dcl_optarg	1	/* is optarg declared? */
 #define _mem_f_bsize_statfs	1	/* f_bsize is a member of struct statfs */
 #undef	_mem_f_fsize_statfs		/* f_fsize is not a member of struct statfs */
 #undef	_mem_f_iosize_statfs		/* f_iosize is not a member of struct statfs */
