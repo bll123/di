@@ -8,8 +8,9 @@
 .\"
 .\" bll@gentoo.com
 .\"
+.\" for di version 2.0
 .\"
-.TH di 1 "1 November 1995"
+.TH di 1 "7 January 1999"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -30,10 +31,23 @@ di \- disk information
 .NXR "disk" "displaying free space"
 .I di
 Displays usage information on mounted filesystems.  Block values are
-reported in kilobytes (1024 bytes) by default, but may be changed.
+reported in megabytes (1024k bytes) by default, but may be changed.
 If \fIfile\fR is specified,
 the usage information for the partition on which \fIfile\fR is
 located is printed.
+.PP
+Unless the \-a flag is specified, certain mounted filesystems
+will not normally be displayed.
+.IP
+Filesystems that have a total
+block count of 0 will not be displayed.
+.IP
+Filesystems that have a mount option of 'ignore' set will not
+be displayed.
+.IP
+Filesystems that are automounted, and are duplicates of an 
+existing filesystem are not displayed.  (May not work on
+all systems).
 .PP
 .I mi
 Displays the mounted filesystem information.
@@ -123,41 +137,43 @@ point name.
 .TP
 .B b
 Print the total number of Kbytes on the file system.
+See also the \-d option.
 .TP
 .B B
 Print the total number of Kbytes on the file system
 available for use by normal
 users.
+See also the \-d option.
 .TP
 .B u
 Print the number of Kbytes in use on the file system
 (actual number of kbytes used = total - free).
-See the \-d option also.
+See also the \-d option.
 .TP
 .B c
 Print the number of Kbytes not available for use by normal users
 (total - available).
-See the \-d option also.
+See also the \-d option.
 .TP
 .B f
 Print the number of free (unused) Kbytes on the file system.
-See the \-d option also.
+See also the \-d option.
 .TP
 .B v
 Print the number of Kbytes available for use by normal users.
-See the \-d option also.
+See also the \-d option.
 .TP
 .B p
 Print the percentage of Kbytes not available for use by normal users
 (number of
 kbytes not available for use / total disk space).
-See the \-d option also.
+See also the \-d option.
 .TP
 .B 1
 Print the percentage of total Kbytes in use
 (actual number of
 kbytes used / total disk space).
-See the \-d option also.
+See also the \-d option.
 .TP
 .B 2
 Print the percentage of Kbytes in use, BSD-style.  Represents the
@@ -165,7 +181,7 @@ percentage of user-available space in use.  Note that values over 100%
 are possible
 (actual number of kbytes used / disk
 space available to non-root users).
-See the \-d option also.
+See also the \-d option.
 .TP
 .B i
 Print the total number of file slots (inodes) that can be created on the file
@@ -204,7 +220,7 @@ Print the time the filesystem was mounted.
 .B O
 Print the filesystem mount options.
 .PP
-The default format string for \fIdi\fR is \fBmbuvpiUFP\fR.
+The default format string for \fIdi\fR is \fBsmbuvpT\fR.
 .PP
 The default format string for \fImi\fR is \fBMSTIO\R.
 .PP
@@ -225,11 +241,11 @@ Various \fIdf\fR
 equivalent format strings for System V release 4 are:
 .PP
 .RS
-\fI/usr/bin/df -v\fR     \fBmsbuf1\fR (with -d512 option: 512 byte blocks)
+\fI/usr/bin/df -v\fR     di -dp \-f Bmsbuf1
 .br
-\fI/usr/bin/df -k\fR     \fBsbcvpm\fR
+\fI/usr/bin/df -k\fR     di -dk \-f Bsbcvpm
 .br
-\fI/usr/ucb/df\fR        \fBsbuv2m\fR
+\fI/usr/ucb/df\fR        di -dk \-f Bsbuv2m
 .RE
 .PP
 If you like your numbers to add up/calculate the percentage
@@ -254,6 +270,6 @@ will in all likelihood break your installation procedures.
 df(1), fstab(5), getmnt(2), getmntinfo(2), mnttab(4), mount(1M)
 statfs(2), statvfs(2)
 .SH Author
-This program is Copyright 1994-1998 by Brad Lanam.
+This program is Copyright 1994-1999 by Brad Lanam.
 .PP
 Brad Lanam, Walnut Creek, CA (bll@gentoo.com).
