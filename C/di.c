@@ -309,10 +309,10 @@ static char         optFormat [20];
 static char         mTimeFormat [20];
 static int          width = { 8 };
 static int          inodeWidth = { 7 };
-static char         blockFormat [20];
-static char         blockLabelFormat [20];
-static char         inodeFormat [20];
-static char         inodeLabelFormat [20];
+static char         blockFormat [40];
+static char         blockLabelFormat [40];
+static char         inodeFormat [40];
+static char         inodeLabelFormat [40];
 static double       dispBlockSize = { DI_ONE_MEG };
 
 
@@ -463,7 +463,7 @@ printDiskInfo (diskInfo, diCount)
 
     memset ((char *) &totals, '\0', sizeof (di_DiskInfo));
     totals.blockSize = 8192;
-    strcpy (totals.name, "Total");
+    strncpy (totals.name, "Total", DI_NAME_LEN);
     totals.printFlag = DI_PRNT_OK;
 
     if ((flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
@@ -1732,7 +1732,7 @@ parseList (list, str)
             cleanup ((di_DiskInfo *) NULL, (char **) NULL, (char **) NULL);
             exit (1);
         }
-        strcpy (*lptr, ptr);
+        strncpy (*lptr, ptr, len);
         ptr += len + 1;
         ++lptr;
     }
