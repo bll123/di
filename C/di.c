@@ -42,7 +42,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
  *      g - gigabytes
  *      t - terabytes
  *      P - petabytes
+ *      E - exabytes
  *      h - "human readable"
+ *      H - "human readable" format 2
  *
  *  Sort types (by name is default):
  *      n - none (mount order)
@@ -216,6 +218,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if _include_malloc && _hdr_malloc
 # include <malloc.h>
 #endif
+#if _hdr_math
+# include <math.h>
+#endif
 #if _hdr_unistd
 # include <unistd.h>
 #endif
@@ -306,18 +311,23 @@ extern int di_lib_debug;
 
 #define DI_ALL_FORMAT           "MTS\n\tIO\n\tbuf1\n\tbcvp\n\tBuv2\n\tiUFP"
 
-#define DI_HALF_K               512.0
-#define DI_ONE_K                1024.0
-#define DI_ONE_MEG              1048576.0
-#define DI_ONE_GIG              1073241824.0
-#define DI_ONE_TERA             1099511627776.0
-#define DI_ONE_PETA             1125899906842624.0
-#define DI_ONE_EXA              1152921504606846976.0
-#define DI_DISP_HR              0
+#define DI_VAL_HALF_K           512.0   /* posix */
+#define DI_VAL_1000             1000.0
+#define DI_VAL_1024             1024.0
+    /* these are indexes into the dispSizes array... */
+#define DI_ONE_K                -1
+#define DI_ONE_MEG              -2
+#define DI_ONE_GIG              -3
+#define DI_ONE_TERA             -4
+#define DI_ONE_PETA             -5
+#define DI_ONE_EXA              -6
+#define DI_ONE_ZETTA            -7
+#define DI_ONE_YOTTA            -8
+#define DI_DISP_HR              -20
+#define DI_DISP_HR_2            -21
 
    /* you may want to change some of these values.  Be sure to change all */
    /* related entries.                                                    */
-/* #define DI_DEFAULT_FORMAT      "mbuvpiUFP" */
 #if ! defined (DI_DEFAULT_FORMAT)
 # define DI_DEFAULT_FORMAT      "smbuvpT"
 #endif
@@ -368,23 +378,26 @@ static char         blockLabelFormat [40];
 static char         inodeFormat [40];
 static char         inodeLabelFormat [40];
 static double       dispBlockSize = { DI_ONE_MEG };
-static int          sizeTableCount = { 6 };
+static double       baseDispSize;
 
-sizeTable_t sizeTable [] =
+static sizeTable_t sizeTable [] =
 {
-    { 0,           DI_ONE_K,    1,           blockFormatNR, " " },
-    { DI_ONE_K,    DI_ONE_MEG,  DI_ONE_K,    blockFormat,   "k" },
-    { DI_ONE_MEG,  DI_ONE_GIG,  DI_ONE_MEG,  blockFormat,   "M" },
-    { DI_ONE_GIG,  DI_ONE_TERA, DI_ONE_GIG,  blockFormat,   "G" },
-    { DI_ONE_TERA, DI_ONE_PETA, DI_ONE_TERA, blockFormat,   "T" },
-    { DI_ONE_PETA, DI_ONE_EXA,  DI_ONE_PETA, blockFormat,   "P" }
+    { 0, 0, 1, blockFormatNR, " " },
+    { 0, 0, 0, blockFormat,   "k" },
+    { 0, 0, 0, blockFormat,   "M" },
+    { 0, 0, 0, blockFormat,   "G" },
+    { 0, 0, 0, blockFormat,   "T" },
+    { 0, 0, 0, blockFormat,   "P" },
+    { 0, 0, 0, blockFormat,   "E" },
+    { 0, 0, 0, blockFormat,   "Z" },
+    { 0, 0, 0, blockFormat,   "Y" }
 };
-
+#define DI_SIZETAB_SIZE (sizeof (sizeTable) / sizeof (sizeTable_t))
 
 static void cleanup             _((di_DiskInfo *, iList *, iList *));
 static void printDiskInfo       _((di_DiskInfo *, int));
 static void printInfo           _((di_DiskInfo *));
-static void printBlocks          _((_fs_size_t, _fs_size_t));
+static void printBlocks          _((_fs_size_t, _fs_size_t, int));
 static void addTotals           _((di_DiskInfo *, di_DiskInfo *));
 static void printTitle          _((void));
 static void printPerc           _((_fs_size_t, _fs_size_t, char *));
@@ -401,6 +414,10 @@ static void parseList           _((iList *, char *));
 static void checkIgnoreList     _((di_DiskInfo *, iList *));
 static void checkIncludeList    _((di_DiskInfo *, iList *));
 static void setDispBlockSize    _((char *));
+static int  findDispSize        _((double));
+#if ! _mth_fmod
+ static double fmod _((double, double));
+#endif
 
 int
 #if _proto_stdc
@@ -412,6 +429,7 @@ main (argc, argv)
 #endif
 {
     di_DiskInfo         *diskInfo = { (di_DiskInfo *) NULL };
+    int                 i;
     int                 diCount = { 0 };
     iList               ignoreList;
     iList               includeList;
@@ -430,6 +448,8 @@ main (argc, argv)
     ptr = textdomain (PROG);
 #endif
 
+    baseDispSize = DI_VAL_1024;
+
     ptr = argv [0] + strlen (argv [0]) - 2;
     if (memcmp (ptr, MPROG, 2) == 0)
     {
@@ -446,7 +466,7 @@ main (argc, argv)
         /* gnu df */
     if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL)
     {
-        dispBlockSize = DI_HALF_K;
+        dispBlockSize = DI_VAL_HALF_K;
     }
 
         /* bsd df */
@@ -462,6 +482,30 @@ main (argc, argv)
     }
 
     processArgs (argc, argv, &ignoreList, &includeList);
+
+        /* initialize display size tables */
+    sizeTable [0].high = baseDispSize;
+    sizeTable [1].low = baseDispSize;
+    sizeTable [1].high = baseDispSize * baseDispSize;
+    sizeTable [1].dbs = baseDispSize;
+    for (i = 2; i < DI_SIZETAB_SIZE; ++i)
+    {
+        sizeTable [i].low = sizeTable [i - 1].low * baseDispSize;
+        sizeTable [i].high = sizeTable [i - 1].high * baseDispSize;
+        sizeTable [i].dbs = sizeTable [i - 1].dbs * baseDispSize;
+    }
+
+    if (dispBlockSize > 0)
+    {
+        for (i = 0; i < DI_SIZETAB_SIZE; ++i)
+        {
+            if (dispBlockSize == sizeTable [i].dbs)
+            {
+                dispBlockSize = - i;
+                break;
+            }
+        }
+    }
 
     if (debug > 0)
     {
@@ -611,6 +655,79 @@ printInfo (diskInfo)
     _fs_size_t          totAvail;
     char                *ptr;
     int                 valid;
+    double              temp;
+    int                 idx;
+    int                 tidx;
+
+    idx = 0;
+    if (dispBlockSize == DI_DISP_HR_2)
+    {
+        idx = - DI_ONE_MEG;
+
+        ptr = formatString;
+        while (*ptr)
+        {
+            valid = FALSE;
+
+            switch (*ptr)
+            {
+                case DI_FMT_BTOT:
+                {
+                    temp = diskInfo->totalBlocks;
+                    valid = TRUE;
+                    break;
+                }
+
+                case DI_FMT_BTOT_AVAIL:
+                {
+                    temp = diskInfo->totalBlocks -
+                            (diskInfo->freeBlocks - diskInfo->availBlocks);
+                    valid = TRUE;
+                    break;
+                }
+
+                case DI_FMT_BUSED:
+                {
+                    temp = diskInfo->totalBlocks - diskInfo->freeBlocks;
+                    valid = TRUE;
+                    break;
+                }
+
+                case DI_FMT_BCUSED:
+                {
+                    temp = diskInfo->totalBlocks - diskInfo->availBlocks;
+                    valid = TRUE;
+                    break;
+                }
+
+                case DI_FMT_BFREE:
+                {
+                    temp = diskInfo->freeBlocks;
+                    valid = TRUE;
+                    break;
+                }
+
+                case DI_FMT_BAVAIL:
+                {
+                    temp = diskInfo->availBlocks;
+                    valid = TRUE;
+                    break;
+                }
+            }
+
+            if (valid)
+            {
+                temp *= diskInfo->blockSize;
+                tidx = findDispSize (temp);
+                    /* want largest index */
+                if (tidx > idx)
+                {
+                    idx = tidx;
+                }
+            }
+            ++ptr;
+        }
+    }
 
     ptr = formatString;
     while (*ptr)
@@ -633,7 +750,7 @@ printInfo (diskInfo)
 
             case DI_FMT_BTOT:
             {
-                printBlocks (diskInfo->totalBlocks, diskInfo->blockSize);
+                printBlocks (diskInfo->totalBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
@@ -641,33 +758,33 @@ printInfo (diskInfo)
             {
                 printBlocks (diskInfo->totalBlocks -
                     (diskInfo->freeBlocks - diskInfo->availBlocks),
-                    diskInfo->blockSize);
+                    diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BUSED:
             {
                 printBlocks (diskInfo->totalBlocks - diskInfo->freeBlocks,
-                            diskInfo->blockSize);
+                            diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BCUSED:
             {
                 printBlocks (diskInfo->totalBlocks - diskInfo->availBlocks,
-                            diskInfo->blockSize);
+                            diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printBlocks (diskInfo->freeBlocks, diskInfo->blockSize);
+                printBlocks (diskInfo->freeBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
-                printBlocks (diskInfo->availBlocks, diskInfo->blockSize);
+                printBlocks (diskInfo->availBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
@@ -780,11 +897,12 @@ printInfo (diskInfo)
 
 static void
 #if _proto_stdc
-printBlocks (_fs_size_t blocks, _fs_size_t blockSize)
+printBlocks (_fs_size_t blocks, _fs_size_t blockSize, int idx)
 #else
-printBlocks (blocks, blockSize)
-    _fs_size_t         blocks;
-    _fs_size_t         blockSize;
+printBlocks (blocks, blockSize, idx)
+    _fs_size_t          blocks;
+    _fs_size_t          blockSize;
+    int                 idx;
 #endif
 {
     double          tdbs;
@@ -797,27 +915,64 @@ printBlocks (blocks, blockSize)
 
     suffix = "";
     format = blockFormat;
-    tdbs = dispBlockSize;
+
+    if (dispBlockSize <= 0 &&
+        dispBlockSize != DI_DISP_HR &&
+        dispBlockSize != DI_DISP_HR_2)
+    {
+        i = - (int) dispBlockSize;
+        tdbs = sizeTable [i].dbs;
+    }
+    else
+    {
+        tdbs = dispBlockSize;
+    }
 
     if (dispBlockSize == DI_DISP_HR)
     {
-        for (i = 0; i < sizeTableCount; ++i)
+        temp = (double) blocks * (double) blockSize;
+        idx = findDispSize (temp);
+    }
+    if (dispBlockSize == DI_DISP_HR ||
+        dispBlockSize == DI_DISP_HR_2)
+    {
+        if (idx == -1)
         {
-            temp = (double) blocks * (double) blockSize;
-            if (temp >= sizeTable [i].low && temp < sizeTable [i].high)
-            {
-                tdbs = sizeTable [i].dbs;
-                format = sizeTable [i].format;
-                suffix = sizeTable [i].suffix;
-                break;
-            }
+            tdbs = sizeTable [- DI_ONE_MEG].dbs;
+        }
+        else
+        {
+            tdbs = sizeTable [idx].dbs;
+            format = sizeTable [idx].format;
+            suffix = sizeTable [idx].suffix;
         }
     }
+
     mult = (double) blockSize / tdbs;
     printf (format, (double) blocks * mult, suffix);
 }
 
 
+static int
+#if _proto_stdc
+findDispSize (double siz)
+#else
+findDispSize (siz)
+    double      siz;
+#endif
+{
+    int         i;
+
+    for (i = 0; i < DI_SIZETAB_SIZE; ++i)
+    {
+        if (siz >= sizeTable [i].low && siz < sizeTable [i].high)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
 
 /*
  * addTotals
@@ -924,11 +1079,24 @@ printTitle ()
                 {
                     tptr = GT("Petas");
                 }
-                else if (dispBlockSize == DI_DISP_HR)
+                else if (dispBlockSize == DI_ONE_EXA)
+                {
+                    tptr = GT("Exas");
+                }
+                else if (dispBlockSize == DI_ONE_ZETTA)
+                {
+                    tptr = GT("Zettas");
+                }
+                else if (dispBlockSize == DI_ONE_YOTTA)
+                {
+                    tptr = GT("Yottas");
+                }
+                else if (dispBlockSize == DI_DISP_HR ||
+                         dispBlockSize == DI_DISP_HR_2)
                 {
                     tptr = GT("Size");
                 }
-                else if (dispBlockSize == DI_HALF_K)
+                else if (dispBlockSize == DI_VAL_HALF_K)
                 {
                     tptr = "512b";
                 }
@@ -1540,12 +1708,16 @@ checkDiskInfo (diskInfo, includeList, diCount)
     Snprintf (SPF(mTimeFormat, sizeof (mTimeFormat), "%%-%d.%ds"),
               maxMntTimeString, maxMntTimeString);
 
-    if (dispBlockSize == DI_DISP_HR)
+    if (dispBlockSize == DI_DISP_HR ||
+        dispBlockSize == DI_DISP_HR_2)
     {
         --width;
     }
 
-    if (dispBlockSize != DI_DISP_HR && dispBlockSize <= DI_ONE_K)
+    if (dispBlockSize != DI_DISP_HR &&
+        dispBlockSize != DI_DISP_HR_2 &&
+        ((dispBlockSize > 0 && dispBlockSize <= DI_VAL_1024) ||
+         dispBlockSize == DI_ONE_K))
     {
         Snprintf (SPF(blockFormat, sizeof (blockFormat), "%%%d.0f%%s"), width);
     }
@@ -1556,7 +1728,8 @@ checkDiskInfo (diskInfo, includeList, diCount)
         Snprintf (SPF(blockFormat, sizeof (blockFormat), "%%%d.1f%%s"), width);
     }
 
-    if (dispBlockSize == DI_DISP_HR)
+    if (dispBlockSize == DI_DISP_HR ||
+        dispBlockSize == DI_DISP_HR_2)
     {
         ++width;
     }
@@ -1671,7 +1844,7 @@ processArgs (argc, argv, ignoreList, includeList)
     int         ch;
 
 
-    while ((ch = getopt (argc, argv, "Aad:f:ghHi:I:Flmns:tw:W:x:")) != -1)
+    while ((ch = getopt (argc, argv, "Aab:d:f:ghHi:I:Flmns:tw:W:x:")) != -1)
     {
         switch (ch)
         {
@@ -1691,13 +1864,50 @@ processArgs (argc, argv, ignoreList, includeList)
                 break;
             }
 
+            case 'b':
+            {
+                if (isdigit ((int) (*optarg)))
+                {
+                    baseDispSize = atof (optarg);
+                }
+                else if (*optarg == 'k')
+                {
+                    baseDispSize = DI_VAL_1024;
+                }
+                else if (*optarg == 'd')
+                {
+                    baseDispSize = DI_VAL_1000;
+                }
+                break;
+            }
+
             case 'd':
             {
                 switch (*optarg)
                 {
-                    case 'p':
+                    case 'e':
+                    case 'E':
                     {
-                        dispBlockSize = DI_HALF_K;
+                        dispBlockSize = DI_ONE_EXA;
+                        break;
+                    }
+
+                    case 'g':
+                    case 'G':
+                    {
+                        dispBlockSize = DI_ONE_GIG;
+                        break;
+                    }
+
+                    case 'h':
+                    {
+                        dispBlockSize = DI_DISP_HR;
+                        break;
+                    }
+
+                    case 'H':
+                    {
+                        dispBlockSize = DI_DISP_HR_2;
                         break;
                     }
 
@@ -1715,16 +1925,9 @@ processArgs (argc, argv, ignoreList, includeList)
                         break;
                     }
 
-                    case 'g':
-                    case 'G':
+                    case 'p':
                     {
-                        dispBlockSize = DI_ONE_GIG;
-                        break;
-                    }
-
-                    case 't':
-                    {
-                        dispBlockSize = DI_ONE_TERA;
+                        dispBlockSize = DI_VAL_HALF_K;
                         break;
                     }
 
@@ -1734,10 +1937,24 @@ processArgs (argc, argv, ignoreList, includeList)
                         break;
                     }
 
-                    case 'h':
-                    case 'H':
+                    case 't':
+                    case 'T':
                     {
-                        dispBlockSize = DI_DISP_HR;
+                        dispBlockSize = DI_ONE_TERA;
+                        break;
+                    }
+
+                    case 'y':
+                    case 'Y':
+                    {
+                        dispBlockSize = DI_ONE_YOTTA;
+                        break;
+                    }
+
+                    case 'z':
+                    case 'Z':
+                    {
+                        dispBlockSize = DI_ONE_ZETTA;
                         break;
                     }
 
@@ -2031,41 +2248,99 @@ setDispBlockSize (ptr)
 {
     if (isdigit ((int) (*ptr)))
     {
+        double  temp1;
+        int     i;
+
         dispBlockSize = (_fs_size_t) atof (ptr);
+        temp1 = fmod (dispBlockSize, DI_VAL_1000);
+        if (temp1 == 0)
+        {
+            baseDispSize = DI_VAL_1000;
+        }
     }
     else
     {
-        switch (tolower (*ptr))
+        switch (*ptr)
         {
             case 'k':
+            case 'K':
             {
                 dispBlockSize = DI_ONE_K;
                 break;
             }
 
             case 'm':
+            case 'M':
             {
                 dispBlockSize = DI_ONE_MEG;
                 break;
             }
 
             case 'g':
+            case 'G':
             {
                 dispBlockSize = DI_ONE_GIG;
                 break;
             }
 
             case 't':
+            case 'T':
             {
                 dispBlockSize = DI_ONE_TERA;
                 break;
             }
 
             case 'p':
+            case 'P':
             {
                 dispBlockSize = DI_ONE_PETA;
+                break;
+            }
+
+            case 'e':
+            case 'E':
+            {
+                dispBlockSize = DI_ONE_EXA;
+                break;
+            }
+
+            case 'z':
+            case 'Z':
+            {
+                dispBlockSize = DI_ONE_ZETTA;
+                break;
+            }
+
+            case 'y':
+            case 'Y':
+            {
+                dispBlockSize = DI_ONE_YOTTA;
+                break;
+            }
+
+            case 'h':
+            {
+                dispBlockSize = DI_DISP_HR;
+                break;
+            }
+
+            case 'H':
+            {
+                dispBlockSize = DI_DISP_HR_2;
                 break;
             }
         }
     }
 }
+
+#if ! _mth_fmod
+
+static double
+fmod (double a, double b)
+{
+    double temp;
+    temp = a - (int) (a/b) * b;
+    return temp;
+}
+
+#endif
