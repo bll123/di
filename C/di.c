@@ -95,6 +95,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
  *  equal to the number of free blocks.
  *
  *  HISTORY:
+ *     11 Jul 2002 bll
+ *          Snprintf stuff
+ *          cleanup.
  *     14 apr 2002 bll
  *          Rewrite ignore/include list stuff to allow multiple
  *          command line options.
@@ -330,7 +333,7 @@ extern int     errno;
 #define DI_MOUNT_FMT            "%-15.15s"
 #define DI_SPEC_FMT             "%-18.18s"
 
-typedef int (*DI_SORT_FUNC) _((char *, char *));
+typedef int (*DI_SORT_FUNC) _((void *, void *));
 
 typedef struct
 {
@@ -348,7 +351,7 @@ typedef struct
 } sizeTable_t;
 
 static int          debug = { 0 };
-static _ulong       flags = { 0 };
+static __ulong      flags = { 0 };
 static int          sortType = { DI_SORT_NAME };
 static int          sortOrder = { DI_SORT_ASCENDING };
 
@@ -386,8 +389,8 @@ static void printBlocks          _((_fs_size_t, _fs_size_t));
 static void addTotals           _((di_DiskInfo *, di_DiskInfo *));
 static void printTitle          _((void));
 static void printPerc           _((_fs_size_t, _fs_size_t, char *));
-static void sortArray           _((char *, int, int, DI_SORT_FUNC));
-static int  diCompare           _((char *, char *));
+static void sortArray           _((char *, Size_t, int, DI_SORT_FUNC));
+static int  diCompare           _((void *, void *));
 static void getDiskStatInfo     _((di_DiskInfo *, int));
 static void getDiskSpecialInfo  _((di_DiskInfo *, int));
 static void checkFileInfo       _((di_DiskInfo *, int, int, int, char *[]));
@@ -570,7 +573,7 @@ printDiskInfo (diskInfo, diCount)
                 /* don't add memory filesystems to totals. */
             if (diskInfo [i].printFlag == DI_PRNT_OK &&
                 strcmp (diskInfo [i].fsType, "tmpfs") != 0 &&
-                strcmp (diskInfo [i].fsType, "memfs") != 0 &&
+                strcmp (diskInfo [i].fsType, "mfs") != 0 &&
                 diskInfo [i].isReadOnly == FALSE)
             {
                 addTotals (&diskInfo [i], &totals);
@@ -835,7 +838,7 @@ addTotals (diskInfo, totals)
 
     if (debug > 2)
     {
-#if _siz_long_long == 8
+#if _siz_long_long >= 8
         printf ("totals:bs:%lld:mult:%f\n", diskInfo->blockSize, mult);
 #else
         printf ("totals:bs:%ld:mult:%f\n", diskInfo->blockSize, mult);
@@ -928,7 +931,8 @@ printTitle ()
                 }
                 else
                 {
-                    sprintf (tbuff, "%6.0f", dispBlockSize);
+                    Snprintf (SPF(tbuff, sizeof (tbuff), "%6.0f"),
+                              dispBlockSize);
                     tptr = tbuff;
                 }
                 printf (blockLabelFormat, tptr);
@@ -1106,7 +1110,7 @@ checkFileInfo (diskInfo, diCount, optidx, argc, argv)
             {
                 if (diskInfo [j].printFlag != DI_PRNT_BAD &&
                         diskInfo [j].st_dev != DI_UNKNOWN_DEV &&
-                        (_ulong) statBuf.st_dev == diskInfo [j].st_dev)
+                        (__ulong) statBuf.st_dev == diskInfo [j].st_dev)
                 {
                     diskInfo [j].printFlag = DI_PRNT_OK;
                     break; /* out of inner for */
@@ -1130,11 +1134,11 @@ checkFileInfo (diskInfo, diCount, optidx, argc, argv)
 
 static void
 #if _proto_stdc
-sortArray (char *data, int dataSize, int count, DI_SORT_FUNC compareFunc)
+sortArray (char *data, Size_t dataSize, int count, DI_SORT_FUNC compareFunc)
 #else
 sortArray (data, dataSize, count, compareFunc)
     char            *data;
-    int             dataSize;
+    Size_t          dataSize;
     int             count;
     DI_SORT_FUNC    compareFunc;
 #endif
@@ -1194,11 +1198,11 @@ sortArray (data, dataSize, count, compareFunc)
 
 static int
 #if _proto_stdc
-diCompare (char *a, char *b)
+diCompare (void *a, void *b)
 #else
 diCompare (a, b)
-    char        *a;
-    char        *b;
+    void        *a;
+    void        *b;
 #endif
 {
     di_DiskInfo *di1;
@@ -1263,11 +1267,11 @@ getDiskStatInfo (diskInfo, diCount)
 
     for (i = 0; i < diCount; ++i)
     {
-        diskInfo [i].st_dev = (_ulong) DI_UNKNOWN_DEV;
+        diskInfo [i].st_dev = (__ulong) DI_UNKNOWN_DEV;
 
         if (stat (diskInfo [i].name, &statBuf) == 0)
         {
-            diskInfo [i].st_dev = (_ulong) statBuf.st_dev;
+            diskInfo [i].st_dev = (__ulong) statBuf.st_dev;
             if (debug > 2)
             {
                 printf ("dev: %s: %ld\n", diskInfo [i].name,
@@ -1305,8 +1309,8 @@ getDiskSpecialInfo (diskInfo, diCount)
     {
         if (stat (diskInfo [i].special, &statBuf) == 0)
         {
-            diskInfo [i].sp_dev = (_ulong) statBuf.st_dev;
-            diskInfo [i].sp_rdev = (_ulong) statBuf.st_rdev;
+            diskInfo [i].sp_dev = (__ulong) statBuf.st_dev;
+            diskInfo [i].sp_rdev = (__ulong) statBuf.st_rdev;
             if (debug > 2)
             {
                 printf ("special dev: %s: %ld rdev: %ld\n",
@@ -1349,8 +1353,8 @@ checkDiskInfo (diskInfo, includeList, diCount)
     int           maxOptString;
     int           maxMntTimeString;
     _fs_size_t    temp;
-    _ulong        sp_dev;
-    _ulong        sp_rdev;
+    __ulong       sp_dev;
+    __ulong       sp_rdev;
 
 
     maxMountString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 5;
@@ -1375,7 +1379,7 @@ checkDiskInfo (diskInfo, includeList, diCount)
             /* -1 is returned.                                     */
         if (debug > 2)
         {
-#if _siz_long_long == 8
+#if _siz_long_long >= 8
             printf ("chk: %s free: %llu\n", diskInfo [i].name,
                 diskInfo [i].freeBlocks);
 #else
@@ -1392,7 +1396,7 @@ checkDiskInfo (diskInfo, includeList, diCount)
             diskInfo [i].availBlocks = 0L;
         }
 
-        temp = ~ 0;
+        temp = (_fs_size_t) ~ 0;
         if (diskInfo [i].totalInodes == temp)
         {
             diskInfo [i].totalInodes = 0;
@@ -1404,7 +1408,7 @@ checkDiskInfo (diskInfo, includeList, diCount)
         {
             if (debug > 2)
             {
-#if _siz_long_long == 8
+#if _siz_long_long >= 8
                 printf ("chk: %s total: %lld\n", diskInfo [i].name,
                         diskInfo [i].totalBlocks);
 #else
@@ -1518,12 +1522,16 @@ checkDiskInfo (diskInfo, includeList, diCount)
         } /* if we are printing this item */
     } /* for all disks */
 
-    sprintf (mountFormat, "%%-%d.%ds", maxMountString, maxMountString);
-    sprintf (specialFormat, "%%-%d.%ds", maxSpecialString,
-             maxSpecialString);
-    sprintf (typeFormat, "%%-%d.%ds", maxTypeString, maxTypeString);
-    sprintf (optFormat, "%%-%d.%ds", maxOptString, maxOptString);
-    sprintf (mTimeFormat, "%%-%d.%ds", maxMntTimeString, maxMntTimeString);
+    Snprintf (SPF(mountFormat, sizeof (mountFormat), "%%-%d.%ds"),
+              maxMountString, maxMountString);
+    Snprintf (SPF(specialFormat, sizeof (specialFormat), "%%-%d.%ds"),
+              maxSpecialString, maxSpecialString);
+    Snprintf (SPF(typeFormat, sizeof (typeFormat), "%%-%d.%ds"),
+              maxTypeString, maxTypeString);
+    Snprintf (SPF(optFormat, sizeof (optFormat), "%%-%d.%ds"),
+              maxOptString, maxOptString);
+    Snprintf (SPF(mTimeFormat, sizeof (mTimeFormat), "%%-%d.%ds"),
+              maxMntTimeString, maxMntTimeString);
 
     if (dispBlockSize == DI_DISP_HR)
     {
@@ -1532,12 +1540,13 @@ checkDiskInfo (diskInfo, includeList, diCount)
 
     if (dispBlockSize != DI_DISP_HR && dispBlockSize <= DI_ONE_K)
     {
-        sprintf (blockFormat, "%%%d.0f%%s", width);
+        Snprintf (SPF(blockFormat, sizeof (blockFormat), "%%%d.0f%%s"), width);
     }
     else
     {
-        sprintf (blockFormatNR, "%%%d.0f%%s", width);
-        sprintf (blockFormat, "%%%d.1f%%s", width);
+        Snprintf (SPF(blockFormatNR, sizeof (blockFormatNR), "%%%d.0f%%s"),
+                  width);
+        Snprintf (SPF(blockFormat, sizeof (blockFormat), "%%%d.1f%%s"), width);
     }
 
     if (dispBlockSize == DI_DISP_HR)
@@ -1545,13 +1554,15 @@ checkDiskInfo (diskInfo, includeList, diCount)
         ++width;
     }
 
-    sprintf (blockLabelFormat, "%%%ds", width);
-#if _siz_long_long == 8
-    sprintf (inodeFormat, "%%%dllu", inodeWidth);
+    Snprintf (SPF(blockLabelFormat, sizeof (blockLabelFormat), "%%%ds"),
+              width);
+#if _siz_long_long >= 8
+    Snprintf (SPF(inodeFormat, sizeof (inodeFormat), "%%%dllu"), inodeWidth);
 #else
-    sprintf (inodeFormat, "%%%dlu", inodeWidth);
+    Snprintf (SPF(inodeFormat, sizeof (inodeFormat), "%%%dlu"), inodeWidth);
 #endif
-    sprintf (inodeLabelFormat, "%%%ds", inodeWidth);
+    Snprintf (SPF(inodeLabelFormat, sizeof (inodeLabelFormat), "%%%ds"),
+              inodeWidth);
 }
 
 /*
@@ -1748,9 +1759,10 @@ processArgs (argc, argv, ignoreList, includeList)
             }
 
             case 'h':
+            case '?':
             {
                 usage ();
-                exit (0);
+                exit (1);
             }
 
             case 'H':
@@ -1773,7 +1785,6 @@ processArgs (argc, argv, ignoreList, includeList)
 
             case 'l':
             {
-                parseList (ignoreList, "nfs");
                 flags |= DI_F_LOCAL_ONLY;
                 break;
             }
@@ -1849,12 +1860,6 @@ processArgs (argc, argv, ignoreList, includeList)
                 di_lib_debug = atoi (optarg);
                 break;
             }
-
-            case '?':
-            {
-                usage ();
-                exit (1);
-            }
         }
     }
 }
@@ -1878,14 +1883,14 @@ parseList (list, str)
     int         len;
 
     i = strlen (str);
-    dstr = (char *) malloc (i + 1);
+    dstr = (char *) malloc ((Size_t) i + 1);
     if (dstr == (char *) NULL)
     {
         fprintf (stderr, "malloc failed in parseList() (1).  errno %d\n", errno);
         cleanup ((di_DiskInfo *) NULL, (iList *) NULL, (iList *) NULL);
         exit (1);
     }
-    memcpy (dstr, str, i);
+    memcpy (dstr, str, (Size_t) i);
     dstr [i] = '\0';
 
     ptr = strtok (dstr, DI_LIST_SEP);
@@ -1912,7 +1917,7 @@ parseList (list, str)
     for (i = ocount; i < ncount; ++i)
     {
         len = strlen (ptr);
-        lptr = (char *) malloc (len + 1);
+        lptr = (char *) malloc ((Size_t) len + 1);
         if (lptr == (char *) NULL)
         {
             fprintf (stderr, "malloc failed in parseList() (3).  errno %d\n",
@@ -1920,7 +1925,7 @@ parseList (list, str)
             cleanup ((di_DiskInfo *) NULL, list, (iList *) NULL);
             exit (1);
         }
-        strncpy (lptr, ptr, len);
+        strncpy (lptr, ptr, (Size_t) len);
         lptr[len] = '\0';
         list->list [i] = lptr;
         ptr += len + 1;
