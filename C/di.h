@@ -71,6 +71,7 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 # define _lib_sysfs 1
 #endif
 #if defined (HAS_64BIT_STATFS_FLDS)
+# define _siz_long_long 8
 # define _siz_f_blocks_statfs 8
 # define _siz_f_blocks_statvfs 8
 #endif
@@ -87,14 +88,17 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 # define _mem_f_frsize_statfs 1
 #endif
 #if defined (HAS_OPTIND)
+# define _lib_getopt 1
 # define _dcl_optind 1
 # define _dcl_optarg 1
 #endif
 #if defined (HAS_SETMNTENT_ONE_ARG)
 #endif
 #if defined (HAS_STATFS_BSD)
+# define _statfs_2arg 1
 #endif
 #if defined (HAS_STATFS_SYSV3)
+# define _statfs_4arg 1
 #endif
 #if defined (NEED_GETENV_DEFS)
 # define _npt_getenv 1
@@ -199,10 +203,16 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #if defined (I_UNISTD)
 # define _hdr_unistd 1
 #endif
+#if defined (MEM_MOUNT_INFO_STATFS)
+# define _mem_mount_info_statfs 1
+#endif
 
 /*****************************************************/
 
 #include <stdio.h>
+#if _sys_types
+# include <sys/types.h>
+#endif
 #if _hdr_limits
 # include <limits.h>        /* has PATH_MAX */
 #endif
@@ -230,6 +240,10 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #if _sys_fstyp
 # include <sys/fstyp.h>
 # define DI_TYPE_LEN          FSTYPSZ
+#endif
+#if _sys_mount
+# include <sys/mount.h>
+# define DI_TYPE_LEN          MFSNAMELEN
 #endif
 #if _sys_vfstab
 # include <sys/vfstab.h>
