@@ -958,7 +958,6 @@ printBlocks (blocks, blockSize, idx)
     double          temp;
     char            *suffix;
     char            *format;
-    int             i;
 
 
     suffix = "";
