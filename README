@@ -1,40 +1,58 @@
-di - disk information utility (version 2.4).
+di - disk information utility (version 3.0).
 
 DESCRIPTION
 
-    'di' is a disk information utility, displaying everything
-    (and more) that your 'df' command does. It features the
-    ability to display your disk usage in whatever format you
-    desire/prefer/are used to. It is designed to be portable
-    across many platforms.
+  'di' is a disk information utility, displaying everything
+  (and more) that your 'df' command does. It features the
+  ability to display your disk usage in whatever format you
+  desire/prefer/are used to. It is designed to be portable
+  across many platforms.
 
 INSTALLATION
 
-    The installation process has been completely revamped
-    beginning with version 2.0.  di now uses dist 3.0PL70 to
-    do its configuration.
+  The installation process has been completely revamped
+  beginning with version 3.0.  You now have a choice of
+  'dist 3.0PL70' (Configure) or 'iffe'.  It is the intention
+  to switch over to 'iffe' completely, once all issues with
+  it have been resolved.
 
-    First, run Configure:
+  Instructions for iffe:
 
-      ./Configure -d -s -e          # non-interactive
-      ./Configure -d -s -e -Dcc=gcc # non-interactive, and you want to use gcc
-      ./Configure                   # interactive
+    ./Build distclean             ./Build distclean
+    ./Build                       CC=gcc prefix=/usr/lbin ./Build
+    ./Build install               CC=gcc prefix=/usr/lbin ./Build install
+    ./Build install-man           CC=gcc prefix=/usr/lbin ./Build install-man
+
+    The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment variables
+    can be set and exported prior to running 'Build'. 
+
+    If you don't have an C compiler that supports prototypes, you'll
+    have to edit the config.h file by hand after it is created.
+
+    features/cflags.sh messes with the various compiler flags.
+
+  Instructions for Configure:
+
+    ./Configure -d -s -e          # non-interactive
+    ./Configure -d -s -e -Dcc=gcc # non-interactive, and you want to use gcc
+    ./Configure                   # interactive
 
     Then, do your make:
 
-        make
+    make
 
     And install:
 
-    AIX versions prior to 4.3 had a 'di' command.  di is installed
-    as 'diskinfo' instead for these AIX versions.
+    ( AIX versions prior to 4.3 had a 'di' command.  di is installed
+    as 'diskinfo' instead for these AIX versions. )
 
-        make install
+    make install
 
     To install the manual pages:
 
-        make install.man
+    make install-man
 
+  Installation Permissions:
     Some systems (Sys V variants) only allow root to read the
     mount table.  If this is the case, change the INSTPERM macro
     in the Makefile should be set to 4111, and the USER macro to root.
@@ -43,14 +61,35 @@ INSTALLATION
 
     If this is needed on your system, do:
 
-        make installperm
+    make -f Makefile.iffe installperm
 
-    Windows installation:
+  Windows installation:
 
-        Cygnus gcc: make -f win95.mak windows-gcc
-        MS VC++:    nmake -f win95.mak windows
+    Alternative 1)
+        cp config.win95 config.h
+        Cygnus gcc: make -f Makefile.iffe windows-gcc
+        MS VC++:    nmake -f Makefile.iffe windows
+    Alternative 2)
+        CC=gcc ./Build distclean
+        CC=gcc ./Build
+        *** if you prefer to use the cygwin API rather than the
+            windows API, edit config.h, and undefine _hdr_windows,
+            and _lib_GetDiskFreeSpace, then re-run the build.
 
 PORTING
+
+    di 3.0 has been tested on the following platforms (both
+    Configure and iffe):
+        Solaris 8 (cc 5.0, gcc 2.95.3)
+           gcc on Solaris does things differently with the include
+           files than cc 5.0 when large file support is defined. 
+        Tru64 Unix 4.0g (C V6.3-129 (1530)), 5.1a (C T6.4-212 (1278))
+        FreeBSD 4.3 (gcc 2.95.3), 4.2 (gcc 2.95.2)
+        NetBSD 1.5 (egcs 2.91.66)
+        Linux 2.0.35 (gcc 2.7.2.3), 2.2.14 (gcc 2.91.66),
+            2.4.2 [RH7.1] (gcc 2.96-81), 2.2.17 [Debian] (gcc 2.95.2),
+            2.4.3 [RH7.1] (gcc 2.96-85)
+        Windows95 (cygwin-95-4.0 gcc 2.95.3-5)
 
     di 2.4 has been tested on the following platforms:
         AIX 4.3.2
@@ -124,6 +163,11 @@ BUGS
 
 CHANGES
 
+    3.0
+        Added getfsstat() for Compaq Tru-64 (and FreeBSD, etc.) systems.
+        Compaq Tru-64 code cleaned up.
+        Thanks to Compaq for their test drive program.
+        More cleanup.  Added iffe configuration.
     2.4
         Fixed so di doesn't statfs() the disks it doesn't need to.
         Removed fs basetype stuff.
@@ -247,52 +291,52 @@ ACKNOWLEDGEMENTS
     And for their comments and/or source and/or
     manual pages and/or bug fixes, thanks!
 
-        jjb@jagware.bcc.com (J.J.Bailey)
-        vogelke@c-17igp.wpafb.af.mil (Contr Karl Vogel)
+        jjb@NOSSPAM-jagware.bcc.com (J.J.Bailey)
+        vogelke@NOSSPAM-c-17igp.wpafb.af.mil (Contr Karl Vogel)
             [pyramid]
-        costales@ICSI.Berkeley.EDU (Bryan Costales)
-        Mark Neale <mark@edscom.demon.co.uk>
-        Pat Myrto <pat@rwing.uucp>
+        costales@NOSSPAM-ICSI.Berkeley.EDU (Bryan Costales)
+        Mark Neale <mark@NOSSPAM-edscom.demon.co.uk>
+        Pat Myrto <pat@NOSSPAM-rwing.uucp>
             [sunOS filesystem type stuff]
-        henrikar@utctu1.ct.utwente.nl (Henri Karrenbeld)
+        henrikar@NOSSPAM-utctu1.ct.utwente.nl (Henri Karrenbeld)
             [sgi]
-        Peter Bray <Peter.Bray@serg.cse.unsw.edu.au>
-        gsipe@pyramid.com (George M. Sipe)
+        Peter Bray <Peter.Bray@NOSSPAM-serg.cse.unsw.edu.au>
+        gsipe@NOSSPAM-pyramid.com (George M. Sipe)
             [manual page]
-        Jeffrey Mogul <mogul@pa.dec.com>
+        Jeffrey Mogul <mogul@NOSSPAM-pa.dec.com>
             [ultrix, osf/1, manual page, new format options]
-        thomas@idx.kodak.com (Th. Bullinger)
+        thomas@NOSSPAM-idx.kodak.com (Th. Bullinger)
             [help usage]
-        Seth Theriault <seth@connact.com>
+        Seth Theriault <seth@NOSSPAM-connact.com>
             [next, tru64]
-        steve@nshore.org (Stephen J. Walick)
+        steve@NOSSPAM-nshore.org (Stephen J. Walick)
             [SCO]
-        Gerald Rinske <gerald@D012F291.mch.sni.de>
+        Gerald Rinske <gerald@NOSSPAM-D012F291.mch.sni.de>
             [sgi]
-        Mike Grupenhoff <kashmir@snare.dorm.umd.edu>
+        Mike Grupenhoff <kashmir@NOSSPAM-snare.dorm.umd.edu>
             [linux]
-        R.K.Lloyd@csc.liv.ac.uk
+        R.K.Lloyd@NOSSPAM-csc.liv.ac.uk
             [hpux]
-        "William Gibbs" <bill@wgc386.MV.COM>
+        "William Gibbs" <bill@NOSSPAM-wgc386.MV.COM>
             [xenix]
-        Randy Thompson <randyt@sequent.com>
+        Randy Thompson <randyt@NOSSPAM-sequent.com>
             [sequent]
-        eriko@risc.austin.ibm.com (O'Shaughnessy Erik)
+        eriko@NOSSPAM-risc.austin.ibm.com (O'Shaughnessy Erik)
             [aix]
-        Bill Davidsen <davidsen@tmr.com>
+        Bill Davidsen <davidsen@NOSSPAM-tmr.com>
             [linux, SCO, etc., new format options]
-        fredex@fcshome.stoneham.ma.us (fred smith)
+        fredex@NOSSPAM-fcshome.stoneham.ma.us (fred smith)
             [coherent 4.2.05]
-        bag@clipper.cs.kiev.ua (Andrey Blochintsev)
+        bag@NOSSPAM-clipper.cs.kiev.ua (Andrey Blochintsev)
             [bsdi]
-        ginsbach@spacestar.net (Brian Ginsbach)
+        ginsbach@NOSSPAM-spacestar.net (Brian Ginsbach)
             [netbsd, irix, unicos]
 
         et. al.
 
 COPYRIGHT
 
-    Copyright 1995-1999 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2001 Brad Lanam, Walnut Creek, CA, USA
     bll@gentoo.com
     http://www.gentoo.com/di/
-    http://www.gentoo.com/di/di-2.4.tar.gz
+    http://www.gentoo.com/di/di-3.0.tar.gz
