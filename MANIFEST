@@ -7,12 +7,8 @@ di.c			di source
 di.h			di source
 dilib.c			di source
 getopt.c		getopt source (from Cnews)
-Configure		Configuration script
-configure		gnu-like front-end for Configure
-config_h.SH		Produces config.h
 config.win95		config.h for win95
-Makefile.iffe		Main Makefile
-Makefile.SH		Produces Makefile
+Makefile		Main Makefile
 bin/
 bin/iffe		iffe config program
 features/
@@ -20,22 +16,6 @@ features/cflags.sh	cflags configuration
 features/di.iffe	iffe configuration
 features/obj_ext.sh	obj extension test
 LICENSE.iffe		iffe license
-hints/                  for Configure
-hints/aix.sh
-hints/beos.sh
-hints/bsdos.sh
-hints/dec_osf.sh
-hints/freebsd.sh
-hints/hpux.sh
-hints/linux.sh
-hints/dynix.sh
-hints/dynixptx.sh
-hints/irix.sh
-hints/openbsd.sh
-hints/solaris.sh
-hints/unicos.sh
-man/
-man/iffe.html		iffe manual page
 po/                     internationalization files
 po/en_US.po
 po/de_DE.po
