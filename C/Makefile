@@ -68,16 +68,18 @@ SED = sed
 
 ###
 
-all:	config.h $(PROG)$(EXE_EXT)
+# have to get various environment variables set up.
+all:
+	./Build
+
+di-all:	config.h $(PROG)$(EXE_EXT)
 
 config.h:	features/di.iffe features/cflags.sh
 	@-$(RM) -f config.h
-	$(SHELL) ./bin/iffe -c "$(CC) $(CFLAGS)" -u -v -o config.h \
-		run features/di.iffe
+	./Build config.h
 
 #config.h:	features/di.iffe features/cflags.sh
-#	$(SHELL) ./bin/iffe -d 2 -c "$(CC) $(CFLAGS)" -u -v -o config.h \
-#		run features/di.iffe 2>&1 | tee w
+#	./Build dconfig.h
 
 wconfig.h:	config.win95
 	$(CP) -f config.win95 config.h
@@ -100,7 +102,7 @@ windows-gcc:	wconfig.h
 
 ####################
 
-all:	$(PROG)$(EXE_EXT)
+di-exe:	$(PROG)$(EXE_EXT)
 	-$(LN) -f $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT)
 
 objclean:
