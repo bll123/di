@@ -1,18 +1,18 @@
-/* windows config.h file */
-/* $Id$ */
-
 /* : : generated from features/di.iffe by iffe version 2001-05-31 : : */
 #ifndef _config_H
 #define _config_H	1
 #define	_sys_types	1	/* #include <sys/types.h> ok */
 #define _proto_stdc	1	/* Standard-C prototypes ok */
 #define _key_void	1	/* void is a reserved keyword */
+#undef	_command_msgfmt		/* Is msgfmt available? failed */
 #define _hdr_ctype	1	/* #include <ctype.h> ok */
 #define _hdr_errno	1	/* #include <errno.h> ok */
 #undef	_hdr_fshelp		/* #include <fshelp.h> not ok */
 #define _hdr_getopt	1	/* #include <getopt.h> ok */
 #undef	_hdr_kernel_fs_info		/* #include <kernel/fs_info.h> not ok */
 #define _hdr_limits	1	/* #include <limits.h> ok */
+#undef	_hdr_libintl		/* #include <libintl.h> not ok */
+#define _hdr_locale	1	/* #include <locale.h> ok */
 #define _hdr_malloc	1	/* #include <malloc.h> ok */
 #define _hdr_memory	1	/* #include <memory.h> ok */
 #define _hdr_mntent	1	/* #include <mntent.h> ok */
@@ -42,34 +42,44 @@
 #define _sys_vfs	1	/* #include <sys/vfs.h> ok */
 #undef	_sys_vfstab		/* #include <sys/vfstab.h> not ok */
 #undef	_sys_vmount		/* #include <sys/vmount.h> not ok */
+#define _include_malloc	1	/* Is it safe to include malloc.h? */
+#define _include_string	1	/* Is it safe to include both string.h and strings.h? */
 #undef	_npt_getenv		/* getenv() does not need a prototype */
 #undef	_npt_statfs		/* statfs() does not need a prototype */
 #undef	_typ__ulong		/* _ulong is not a type */
+#undef	_typ_statvfs_t		/* statvfs_t is not a type */
 #define _lib_bcopy	1	/* bcopy() in default lib(s) */
+#undef	_lib_bindtextdomain		/* bindtextdomain() not in default lib(s) */
 #define _lib_bzero	1	/* bzero() in default lib(s) */
 #define _lib_endmntent	1	/* endmntent() in default lib(s) */
+#define _lib_errno	1	/* errno() in default lib(s) */
 #undef	_lib_fs_stat_dev		/* fs_stat_dev() not in default lib(s) */
 #undef	_lib_fshelp		/* fshelp() not in default lib(s) */
-#define _lib_GetDiskFreeSpace	1	/* link{ passed */
+#define _lib_GetDiskFreeSpace	1	/* is GetDiskFreeSpace a library function? */
+#define _lib_GetDiskFreeSpaceEx	1	/* is GetDiskFreeSpaceEx a library function? */
 #undef	_lib_getfsstat		/* getfsstat() not in default lib(s) */
 #undef	_lib_getmnt		/* getmnt() not in default lib(s) */
 #define _lib_getmntent	1	/* getmntent() in default lib(s) */
 #undef	_lib_getmntinfo		/* getmntinfo() not in default lib(s) */
 #define _lib_getopt	1	/* getopt() in default lib(s) */
+#undef	_lib_gettext		/* gettext() not in default lib(s) */
 #undef	_lib_hasmntopt		/* hasmntopt() not in default lib(s) */
 #define _lib_memcpy	1	/* memcpy() in default lib(s) */
 #define _lib_memset	1	/* memset() in default lib(s) */
 #undef	_lib_mntctl		/* mntctl() not in default lib(s) */
+#define _lib_setlocale	1	/* setlocale() in default lib(s) */
 #define _lib_setmntent	1	/* setmntent() in default lib(s) */
+#define _lib_snprintf	1	/* snprintf() in default lib(s) */
 #define _lib_statfs	1	/* statfs() in default lib(s) */
 #undef	_lib_statvfs		/* statvfs() not in default lib(s) */
 #undef	_lib_sysfs		/* sysfs() not in default lib(s) */
-#define _lib_errno	1	/* errno() in default lib(s) */
+#undef	_lib_textdomain		/* textdomain() not in default lib(s) */
 #undef	_setmntent_1arg		/* does setmntent take one arg? failed */
 #define _setmntent_2arg	1	/* does setmntent take two args? */
 #define _statfs_2arg	1	/* does statfs take 2 args? */
 #undef	_statfs_3arg		/* does statfs take 3 args? failed */
 #undef	_statfs_4arg		/* does statfs take 4 args? failed */
+#define _user_prompt	1	/* ask user for args in setmntent/statfs */
 #define _dcl_optind	1	/* is optind declared? */
 #define _dcl_optarg	1	/* is optarg declared? */
 #define _mem_f_bsize_statfs	1	/* f_bsize is a member of struct statfs */
@@ -81,9 +91,6 @@
 #undef	_mem_mnt_time_mnttab		/* mnt_time is not a member of struct mnttab */
 #undef	_mem_vmt_time_vmount		/* vmt_time is not a member of struct vmount */
 #define _siz_long_long	8	/* sizeof(long long) */
-#undef	_chksize_statfs_f_blocks		/* size of statfs.f_blocks failed */
-#undef	_chksize_statvfs_f_blocks		/* size of statvfs.f_blocks failed */
-#define _include_malloc	1	/* Is it safe to include malloc.h? */
 
 #if ! _key_void || ! _proto_stdc
 # define void int
@@ -96,5 +103,23 @@
 #  define _(args) ()
 # endif
 #endif
+
+#if _lib_bindtextdomain && \
+_lib_gettext && \
+_lib_setlocale && \
+_lib_textdomain && \
+_hdr_libintl && \
+_hdr_locale && \
+_command_msgfmt
+# define _enable_nls 1
+#else
+# define _enable_nls 0
+#endif
+
+#if ! defined (_typ_statvfs_t)
+typedef struct statvfs statvfs_t;
+#endif
+
+#define _config_by_iffe_ 1
 
 #endif
