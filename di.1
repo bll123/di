@@ -8,17 +8,19 @@
 .\"
 .\" bll@gentoo.com
 .\"
-.\" for di version 3.5
+.\" for di version 3.7
 .\"
-.TH di 1 "15 April 2002"
+.TH di 1 "27 August 2002"
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-Aaghlmnt] [-d display-size] [-f format] [-i ignore-fstyp-list]
+.\" di [-AaghkHlmnt] [-b block-size] [-d display-size]
+.\" [-f format] [-i ignore-fstyp-list]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x level] [file [...]]
 .B di
-[\fB-Aahlnt\fP] [\fB-d\fP \fIdisplay-size\fP] [\fB-f\fP \fIformat\fP]
+[\fB-Aahlnt\fP] [\fB-b\fP \fIblock-size\fP] [\fB-d\fP \fIdisplay-size\fP]
+[\fB-f\fP \fIformat\fP]
 [\fB-i\fP \fIignore-fstyp-list\fP] [\fB-I\fP \fIinclude-fstyp-list\fP]
 [\fB-s\fP \fIsort-type\fP]
 [\fB-w\fP \fIblock-width\fP] [\fB-W\fP \fIinode-width\fP] [\fB-x\fP \fIlevel\fP]
@@ -64,23 +66,35 @@ device names are printed at full width.  The \-a flag is set.
 .TP
 .B \-a
 Prints all mounted devices (normally, those with 0 total blocks are not
-printed - e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
+printed \- e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
+.TP
+.B \-b\ \fIblock-size\fP
+Change the base block size from 1024 (default) to the size specified.
+\fIblock-size\fP may be one of: k\ \-\ 1024 bytes, d\ \-\ 1000 bytes,
+or a specific size. 
 .TP
 .B \-d\ \fIdisplay-size\fP
-Display the blocks in units specified by \fIdisplay-size\fP.  \fIdisplay-size\fP
-may be one of: p \- posix (512 bytes), k \- kilobytes,
-m \- megabytes, g - gigabytes, t - terabytes, P - petabytes,
-h - "human readable",
+Display the blocks in units specified by \fIdisplay-size\fP.
+\fIdisplay-size\fP
+may be one of: p\ \-\ posix\ (512\ bytes), k\ \-\ kilobytes,
+m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, P\ \-\ petabytes,
+E\ \-\ exabytes, Z\ \-\ zettabytes, Y\ \-\ yottabytes,
+h\ \-\ "human readable", H\ \-\ "human readable" format 2
 or a specific value to use as the block size.
 Block display sizes greater than 1024 bytes are displayed with a precision
 of one decimal place after the radix.
+.PP
+Human readable scales the size and appends a suffix (e.g. 48.0k, 3.4M).
+Sizes within a line may scale to different units.
+Human readable format 2 scales all the sizes in each individual line
+to the same unit size (the largest needed).
 .TP
 .B \-f\ \fIformat\fP
 Use the specified format string \fIformat\fP.  Format strings are
 described below.
 .TP
 .B \-g
-Display sizes in gigabytes.  An alias for -dg.
+Display sizes in gigabytes.  An alias for \-dg.
 .TP
 .B \-h
 Print out the usage for
@@ -107,7 +121,7 @@ Display only local file systems.  This option is not fully implemented
 for all systems as of version 1.17.
 .TP
 .B \-m
-Display sizes in megabytes.  An alias for -dm.
+Display sizes in megabytes.  An alias for \-dm.
 .TP
 .B \-n
 Do not print a header line above the list of file systems.  Useful when
@@ -162,12 +176,12 @@ See also the \-d option.
 .TP
 .B u
 Print the number of Kbytes in use on the file system
-(actual number of kbytes used = total - free).
+(actual number of kbytes used = total \- free).
 See also the \-d option.
 .TP
 .B c
 Print the number of Kbytes not available for use by normal users
-(total - available).
+(total \- available).
 See also the \-d option.
 .TP
 .B f
@@ -241,12 +255,12 @@ The default format string for \fIdi\fP is \fBsmbuvpT\fP.
 The default format string for \fImi\fP is \fBMSTIO\fP.
 .PP
 The format string may also contain any other character not listed
-above.  The character will be printed as is.  e.g. \fBdi -f 'mbuvp|iUFP'\fP
+above.  The character will be printed as is.  e.g. \fBdi \-f 'mbuvp|iUFP'\fP
 will print the character '|' between the disk usage and the file slot
 usage.  The command sequence (Bourne Shell):
 .RS
 .br
-.B di -f 'mbuvp
+.B di \-f 'mbuvp
 .br
 .B miUFP'
 .br
@@ -257,11 +271,11 @@ Various \fIdf\fP
 equivalent format strings for System V release 4 are:
 .PP
 .RS
-\fI/usr/bin/df -v\fP     di -dp \-f msbuf1
+\fI/usr/bin/df \-v\fP     di \-dp \-f msbuf1
 .br
-\fI/usr/bin/df -k\fP     di -dk \-f sbcvpm
+\fI/usr/bin/df \-k\fP     di \-dk \-f sbcvpm
 .br
-\fI/usr/ucb/df\fP        di -dk \-f sbuv2m
+\fI/usr/ucb/df\fP        di \-dk \-f sbuv2m
 .RE
 .PP
 If you like your numbers to add up/calculate the percentage
@@ -269,11 +283,11 @@ correctly, try one
 of the following format strings:
 .PP
 .RS
-.B di -f SMbuf1T
+.B di \-f SMbuf1T
 .br
-.B di -f SMbcvpT
+.B di \-f SMbcvpT
 .br
-.B di -f SMBuv2T
+.B di \-f SMBuv2T
 .RE
 .SH Environment Variables
 The DIFMT environment variable may be used to specify the default
