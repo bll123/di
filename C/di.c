@@ -166,6 +166,7 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 
 #include "config.h"
 #include "di.h"
+#include "version.h"
 
 #include <stdio.h>
 #if _hdr_ctype
@@ -367,7 +368,7 @@ main (argc, argv)
 
     if (debug > 0)
     {
-        printf ("di ver $Revision$\n");
+        printf ("di ver %s\n", DI_VERSION);
     }
 
     if (di_getDiskEntries (&diskInfo, &diCount) < 0)
@@ -753,8 +754,8 @@ printTitle ()
 
     if ((flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
     {
-        printf ("di ver $Revision$ Default Format: %s\n",
-                DI_DEFAULT_FORMAT);
+        printf ("di ver %s Default Format: %s\n",
+                DI_VERSION, DI_DEFAULT_FORMAT);
     }
 
     ptr = formatString;
@@ -1467,7 +1468,7 @@ usage (void)
 usage ()
 #endif
 {
-    printf ("di ver $Revision$    Default Format: %s\n", DI_DEFAULT_FORMAT);
+    printf ("di ver %s    Default Format: %s\n", DI_VERSION, DI_DEFAULT_FORMAT);
          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
     printf ("Usage: di [-ant] [-f format] [-s sort-type] [-i ignore-fstyp-list]\n");
     printf ("       [-I include-fstyp-list] [-w kbyte-width] [-W inode-width] [file [...]]\n");
