@@ -1,0 +1,298 @@
+di - disk information utility (version 2.4).
+
+DESCRIPTION
+
+    'di' is a disk information utility, displaying everything
+    (and more) that your 'df' command does. It features the
+    ability to display your disk usage in whatever format you
+    desire/prefer/are used to. It is designed to be portable
+    across many platforms.
+
+INSTALLATION
+
+    The installation process has been completely revamped
+    beginning with version 2.0.  di now uses dist 3.0PL70 to
+    do its configuration.
+
+    First, run Configure:
+
+      ./Configure -d -s -e          # non-interactive
+      ./Configure -d -s -e -Dcc=gcc # non-interactive, and you want to use gcc
+      ./Configure                   # interactive
+
+    Then, do your make:
+
+        make
+
+    And install:
+
+    AIX versions prior to 4.3 had a 'di' command.  di is installed
+    as 'diskinfo' instead for these AIX versions.
+
+        make install
+
+    To install the manual pages:
+
+        make install.man
+
+    Some systems (Sys V variants) only allow root to read the
+    mount table.  If this is the case, change the INSTPERM macro
+    in the Makefile should be set to 4111, and the USER macro to root.
+    In SysV.4 and Solaris, the mount command would reset the
+    permissions to be root readable only (fixed in Solaris 7).
+
+    If this is needed on your system, do:
+
+        make installperm
+
+    Windows installation:
+
+        Cygnus gcc: make -f win95.mak windows-gcc
+        MS VC++:    nmake -f win95.mak windows
+
+PORTING
+
+    di 2.4 has been tested on the following platforms:
+        AIX 4.3.2
+        BSD/OS 4.0.1 (gcc 2.7.2.1)
+        FreeBSD 2.1.5 (gcc 2.6.3), 2.2.7 (gcc 2.7.2.1),
+                3.4 (gcc 2.8.1, gcc 2.7.2.3)
+        Solaris 2.6 (gcc 2.95.1)
+        Solaris 8 (cc 5.0, gcc 2.95.2)
+        Linux 2.0.35 (gcc 2.7.2.3), 2.2.12 (gcc 2.91.66),
+                2.2.14 (gcc 2.91.66)
+        Windows95 (cygnus gcc B19)
+
+    di 2.3 has been tested on the following platforms:
+        AIX 4.3.2
+        BSD/OS 4.0.1 (gcc 2.7.2.1)
+        FreeBSD 2.1.5 (gcc 2.6.3), 2.2.6 (gcc 2.7.2.1), 2.2.7 (gcc 2.7.2.1),
+                3.3 (gcc 2.7.2.3), 3.3 (gcc 2.8.1)
+        Solaris 7 (cc 5.0, gcc 2.8.1)
+        Solaris 8 (cc 5.0, gcc 2.8.1)
+        BeOS 4.5.2 intel (g++ 2.9-beos-980929)
+        Linux 2.0.35 (gcc 2.7.2.3), 2.2.12 (gcc 2.91.66)
+        Windows NTsp5 (vc 6.0)
+
+    di 2.2 has been tested on the following platforms:
+
+        BSD/OS 4.0.1 (gcc 2.7.2.1)
+        FreeBSD 2.1.5 (gcc 2.6.3), 2.2.6 (gcc 2.7.2.1), 2.2.7 (gcc 2.7.2.1),
+                3.2 (gcc 2.95.1), 3.3 (gcc 2.7.2.3), 3.3 (gcc 2.8.1)
+        Linux 2.0.35 (gcc 2.7.2.3)
+        Linux 2.0.36 (gcc 2.7.2.3)
+        Solaris 7 (SC3.0.1), 7 (gcc 2.95.1)
+        Compaq Tru64 (Digital Unix, OSF/1) 4.0D, 4.0F
+
+    di 2.0 has been tested on the following platforms:
+
+        AIX 4.1.4.0, 4.3.0.0, 4.3.1.0 (egcs-1.1.1.1)
+        BSD/OS 2.1 (gcc 1.42)
+        IRIX 6.2, 6.5
+        NetBSD 1.3.3
+        HP/UX B.10.20
+        UNICOS 10.0.0.3
+        Windows95 (cygnus gcc B19)
+
+    di has been ported to the following systems in the past:
+
+        A/UX, AIX, BSDI 1.x & 2.x, Convex, Cray UNICOS 9 & 10,
+        Cray UNICOS/mk, FreeBSD 1.x and 2.x, HP/UX, Linux,
+        NetBSD 1.x, Next 3.x, OSF/1, Pyramid, SCO 3.2.2 & 3.2.4,
+        Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Sys V.3,
+        Sys V.4, Ultrix, Windows, Xenix
+
+    Due to the revamped configuration process, some of these systems
+    may not be properly configured as I don't have access to all of the
+    platforms to test on.
+
+BUGS
+
+    Solaris 2.6 has a bug in the kernel and reports the reserved
+    space incorrectly.  There is a kernel patch available (105572-05?).
+
+    Send bug reports along with the output from 'di -A -x 2' and the
+    output from your standard df command (as verbose as possible) to:
+
+        bll@gentoo.com
+
+    If the Configure script doesn't set up the 'config.h' file
+    correctly, please let me know.  E-mail me the incorrect (and
+    corrected if possible) config.h file, and any other information
+    as appropriate.  The goal is to be able to run Configure in
+    non-interactive mode for any system.
+
+CHANGES
+
+    2.4
+        Fixed so di doesn't statfs() the disks it doesn't need to.
+        Removed fs basetype stuff.
+        Split out disk routines into separate module.  Lots of cleanup.
+        Totals: fix to take into account block size of partition.
+        Totals: ignore read-only, partitions not normally printed.
+        Totals: ignore memory filesystems (tmpfs, memfs).
+    2.3
+        Modified hints for solaris to do 64 bit compilation.
+        Removed extra libc setting for linux.
+        Added support for BeOS.  This required ansi function headers.
+    2.2
+        Hints for dec_osf added.
+        Changed HAS_GETMNTINFOFSIZE to be preferred over
+        HAS_GETMNTINFOBSIZE; modified bsdos hints appropriately.
+        Look for <sys/fs_types.h> include file.
+    2.1
+        Added +DAportable for HP-UX.
+        Hints for openbsd added.
+        Made installperm as separate target in makefile.
+        Modified duplicate checking slightly.
+        Changed MNT_NOWAIT to MNT_WAIT.  This will work better
+        on FreeBSD.  Hopefully will work w/nfs mounts.
+    2.0
+        Now uses dist 3.0PL70 for configuration.
+        Duplicate filesystems (automounted) are not displayed.
+        This probably does not work for Digital's advfs.
+    1.24
+        Added Windows w/gcc.
+        The Solaris 2.6 statvfs() bug has a patch out for it.
+        Patch #105572-05 (?).
+    1.23
+        Improved Windows.
+    1.22
+        Added Windows.  Don't know the routines to get the number
+        of file slots or the file system type (FAT12/16/32).
+        Changed default to display megabytes.
+    1.21
+        Fixed AIX typo.
+        Linux 2.x
+    1.20
+        Added Solaris large file system support.  Note that
+        ver 2.6 Beta_Update has a bug in the statvfs() routine,
+        and the non-root available disk space is improperly
+        reported.
+    1.19
+        Added mount time, mount options.  Link di to the mi command.
+    1.18
+        Fixed some ignore/include list problems.  Fixed local mount
+        flag for OSF/1.
+    1.17
+        Changed block values from unsigned long to doubles so that we
+        can display using different block sizes (-d flag).
+        Added -l flag for local filesystems only.
+    1.16
+        Added A/UX  [ blemoine@atheist.tamu.edu (Brett G. Lemoine) ]
+        Added convex [ "Schilperoort J.W." <J.W.Schilperoort@research.ptt.nl> ]
+    1.15
+	Fixed bsdi 1.x and bsdi 2.x.  Fragments weren't supported.
+	Fixed FreeBSD 1.x and 2.x; same problem.
+        Changed sco_sl makefile entry.
+    1.14
+        Fixed problem with display widths in conjunction with
+        ignore/include lists.
+    1.13
+        changed default length of filesystem type field to 7.
+        new debug 'all' format.
+        check for 0 fragment size; replace w/block size if we have it.
+    1.12
+        sco nfs 'nothing' fix.
+        freebsd 2.x; better freebsd filesystem types.
+    1.11
+        bsdi
+    1.10
+        added freebsd.
+    1.9
+        makefile fixes.
+    1.8
+        removed mount option junk.
+        added AIX.
+    1.7
+        cleaned up sgi in the makefile.
+        changed linux to be w/o need_statfs_defs.
+        solaris cdrom returning all sorts of negative values.
+        T format option.
+        mount options.
+        sunOs filesystem type info.
+    1.6
+        ultrix bug fixes.
+        add dynix to makefile.
+    1.5
+        sun had f_bfree instead of f_bavail!
+        xenix, linux, sco
+        -w, -W, -B.
+        fixed width for -f M, -f S.
+        usage.
+        Allow other characters in format string.
+        1.51 (local, pat@rwing)
+            SunOS *does* support filesystem type info.  Its all in the
+            mntent structure, but requires a small bit of work (see source).
+    1.4
+        -f B
+        bcopy.
+        solaris cdrom reports -2 for free blocks.
+    1.3
+        Command line specification of filenames.
+        sort output.
+        osf/1, ultrix.
+        -F, -f M, -F S.
+    1.2
+        # of inodes can be -1L
+        return code for getDiskInfo shouldn't be checked.
+        name of mount point must be maxpathlen.
+        error conditions.
+        pyramid.
+    1.1
+        initial release
+
+ACKNOWLEDGEMENTS
+
+    And for their comments and/or source and/or
+    manual pages and/or bug fixes, thanks!
+
+        jjb@jagware.bcc.com (J.J.Bailey)
+        vogelke@c-17igp.wpafb.af.mil (Contr Karl Vogel)
+            [pyramid]
+        costales@ICSI.Berkeley.EDU (Bryan Costales)
+        Mark Neale <mark@edscom.demon.co.uk>
+        Pat Myrto <pat@rwing.uucp>
+            [sunOS filesystem type stuff]
+        henrikar@utctu1.ct.utwente.nl (Henri Karrenbeld)
+            [sgi]
+        Peter Bray <Peter.Bray@serg.cse.unsw.edu.au>
+        gsipe@pyramid.com (George M. Sipe)
+            [manual page]
+        Jeffrey Mogul <mogul@pa.dec.com>
+            [ultrix, osf/1, manual page, new format options]
+        thomas@idx.kodak.com (Th. Bullinger)
+            [help usage]
+        Seth Theriault <seth@connact.com>
+            [next, tru64]
+        steve@nshore.org (Stephen J. Walick)
+            [SCO]
+        Gerald Rinske <gerald@D012F291.mch.sni.de>
+            [sgi]
+        Mike Grupenhoff <kashmir@snare.dorm.umd.edu>
+            [linux]
+        R.K.Lloyd@csc.liv.ac.uk
+            [hpux]
+        "William Gibbs" <bill@wgc386.MV.COM>
+            [xenix]
+        Randy Thompson <randyt@sequent.com>
+            [sequent]
+        eriko@risc.austin.ibm.com (O'Shaughnessy Erik)
+            [aix]
+        Bill Davidsen <davidsen@tmr.com>
+            [linux, SCO, etc., new format options]
+        fredex@fcshome.stoneham.ma.us (fred smith)
+            [coherent 4.2.05]
+        bag@clipper.cs.kiev.ua (Andrey Blochintsev)
+            [bsdi]
+        ginsbach@spacestar.net (Brian Ginsbach)
+            [netbsd, irix, unicos]
+
+        et. al.
+
+COPYRIGHT
+
+    Copyright 1995-1999 Brad Lanam, Walnut Creek, CA, USA
+    bll@gentoo.com
+    http://secure.gentoo.com/di/
+    http://secure.gentoo.com/di/di-2.2.tar.gz
