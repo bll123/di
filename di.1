@@ -10,7 +10,7 @@
 .\"
 .\" for di version 2.0
 .\"
-.TH di 1 "26 February 2002"
+.TH di 1 "15 April 2002"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -69,7 +69,9 @@ printed - e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .B \-d\ \fIdisplay-size\fP
 Display the blocks in units specified by \fIdisplay-size\fP.  \fIdisplay-size\fP
 may be one of: p \- posix (512 bytes), k \- kilobytes,
-m \- megabytes, g - gigabytes, or a specific value to use as the block size.
+m \- megabytes, g - gigabytes, t - terabytes, P - petabytes,
+h - "human readable",
+or a specific value to use as the block size.
 Block display sizes greater than 1024 bytes are displayed with a precision
 of one decimal place after the radix.
 .TP
@@ -84,13 +86,19 @@ Display sizes in gigabytes.  An alias for -dg.
 Print out the usage for
 .I di
 .TP
+.B \-H
+Display partition sizes in "human readable" fashion.
+Partition sizes are displayed
+with the suffix: k (kilobytes), M (megabytes), G (gigabytes), T (terabytes)
+or P (petabytes).  No suffix is displayed if the size is in bytes.
+.TP
 .B \-i \fIignore-fstype-list\fP
 Ignore the file system types listed in \fIignore-fstyp-list\fP.
 The list is a comma separated list of file system types.  e.g.
 \-i nfs,rfs
 .TP
 .B \-I \fIinclude-fstype-list\fP
-Include only the file system types listed in \fIinclude-fstyp-list\fP.
+Include \fIonly\fP the file system types listed in \fIinclude-fstyp-list\fP.
 The list is a comma separated list of file system types.  e.g.
 \-I nfs,rfs
 .TP
@@ -267,6 +275,12 @@ of the following format strings:
 .br
 .B di -f SMBuv2T
 .RE
+.SH Environment Variables
+The DIFMT environment variable may be used to specify the default
+display format string.
+.PP
+The GNU df POSIXLY_CORRECT, and DF_BLOCK_SIZE and the BSD BLOCKSIZE
+environment variables are honored.
 .SH Note
 For filesystems that do not report available blocks (e.g. System V
 release 3), the number of available blocks is considered to be the
@@ -278,6 +292,6 @@ will in all likelihood break your installation procedures.
 df(1), fstab(5), getmnt(2), getmntinfo(2), mnttab(4), mount(1M)
 statfs(2), statvfs(2)
 .SH Author
-This program is Copyright 1994-1999 by Brad Lanam.
+This program is Copyright 1994-2002 by Brad Lanam.
 .PP
-Brad Lanam, Walnut Creek, CA (bll@gentoo.com).
+Brad Lanam, Walnut Creek, CA (bll@gentoo.com)
