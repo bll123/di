@@ -13,7 +13,7 @@ Copyright 1994-2004 Brad Lanam, Walnut Creek, CA
  *           You will in all likelihood break your installation procedures.
  *
  *  Display sizes:
- *      p - posix (512 bytes)
+ *      512 - posix (512 bytes)
  *      k - kilobytes
  *      m - megabytes
  *      g - gigabytes
@@ -34,7 +34,7 @@ Copyright 1994-2004 Brad Lanam, Walnut Creek, CA
  *      M - mount point, full length
  *      b - total kbytes
  *      B - total kbytes available for use by the user.
- *             [ (tot - (free - avail) ]
+ *             [ (tot - (free - avail)) ]
  *      u - kbytes used (actual number of kbytes used) [ (tot - free) ]
  *      c - calculated number of kbytes used [ (tot - avail) ]
  *      f - kbytes free
@@ -200,7 +200,6 @@ extern int di_lib_debug;
 
 #define DI_ALL_FORMAT           "MTS\n\tIO\n\tbuf1\n\tbcvp\n\tBuv2\n\tiUFP"
 
-#define DI_VAL_HALF_K           512.0   /* posix */
 #define DI_VAL_1000             1000.0
 #define DI_VAL_1024             1024.0
     /* these are indexes into the dispTable array... */
@@ -378,7 +377,7 @@ main (argc, argv)
         /* gnu df */
     if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL)
     {
-        strncpy (dbsstr, "p", sizeof (dbsstr));
+        strncpy (dbsstr, "512", sizeof (dbsstr));
     }
 
         /* bsd df */
@@ -1679,14 +1678,14 @@ usage ()
 {
     printf (GT("di ver %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
             /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
-    printf (GT("Usage: di [-ant] [-d display-size] [-f format] [-i ignore-fstyp-list]\n"));
+    printf (GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
     printf (GT("       [-I include-fstyp-list] [file [...]]\n"));
     printf (GT("   -a   : print all mounted devices\n"));
-    printf (GT("   -d x : size to print blocks in (p - posix (512), k - kbytes,\n"));
+    printf (GT("   -d x : size to print blocks in (512 - POSIX, k - kbytes,\n"));
     printf (GT("          m - megabytes, g - gigabytes, t - terabytes, h - human readable).\n"));
     printf (GT("   -f x : use format string <x>\n"));
-    printf (GT("   -i x : ignore file system types in <x>\n"));
     printf (GT("   -I x : include only file system types in <x>\n"));
+    printf (GT("   -x x : exclude file system types in <x>\n"));
     printf (GT("   -l   : display local filesystems only\n"));
     printf (GT("   -n   : don't print header\n"));
     printf (GT("   -t   : print totals\n"));
@@ -1723,7 +1722,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
     int         ch;
 
 
-    while ((ch = getopt (argc, argv, "Aab:d:f:ghHi:I:klmns:tw:W:x:")) != -1)
+    while ((ch = getopt (argc, argv, "Aab:d:f:ghHi:I:klmnPs:tw:W:x:")) != -1)
     {
         switch (ch)
         {
@@ -1778,12 +1777,6 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
                 break;
             }
 
-            case '?':
-            {
-                usage ();
-                exit (1);
-            }
-
             case 'h':
             {
                 strncpy (dbsstr, "h", sizeof (dbsstr));
@@ -1796,6 +1789,13 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
                 break;
             }
 
+            case 'm':
+            {
+                strncpy (dbsstr, "m", sizeof (dbsstr));
+                break;
+            }
+
+            case 'x':
             case 'i':
             {
                 parseList (ignoreList, optarg);
@@ -1820,15 +1820,15 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
                 break;
             }
 
-            case 'm':
-            {
-                strncpy (dbsstr, "m", sizeof (dbsstr));
-                break;
-            }
-
             case 'n':
             {
                 flags |= DI_F_NO_HEADER;
+                break;
+            }
+
+            case 'P':
+            {
+                strncpy (dbsstr, "512", sizeof (dbsstr));
                 break;
             }
 
@@ -1885,11 +1885,17 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
                 break;
             }
 
-            case 'x':
+            case 'X':
             {
                 debug = atoi (optarg);
                 di_lib_debug = atoi (optarg);
                 break;
+            }
+
+            case '?':
+            {
+                usage ();
+                exit (1);
             }
         }
     }
