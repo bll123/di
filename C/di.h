@@ -65,6 +65,9 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 # define _lib_setmntent 1
 # define _setmntent_2arg 1
 #endif
+#if defined (HAS_SNPRINTF)
+# define _lib_snprintf 1
+#endif
 #if defined (HAS_STATVFS)
 # define _lib_statvfs 1
 #endif
@@ -149,8 +152,10 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 # define _hdr_string 1
 # undef _hdr_strings
 #else
-# define _hdr_strings 1
-# undef _hdr_string
+# if defined (_)   /* are we using configure? */
+#  define _hdr_strings 1
+#  undef _hdr_string
+# endif
 #endif
 #if defined (I_SYS_FSTYP)
 # define _sys_fstyp 1
