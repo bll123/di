@@ -1,7 +1,7 @@
 /*
 $Id$
 $Source$
-Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
+Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 */
 
 /*
@@ -187,7 +187,7 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #if _hdr_string
 # include <string.h>
 #endif
-#if _hdr_strings && ! defined (_hdr_string)
+#if _hdr_strings && ((! defined (_hdr_string)) || (_include_string))
 # include <strings.h>
 #endif
 #if _hdr_memory
@@ -207,6 +207,12 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #endif
 #if _sys_stat
 # include <sys/stat.h>
+#endif
+#if _hdr_libintl
+# include <libintl.h>
+#endif
+#if _hdr_locale
+# include <locale.h>
 #endif
 
 extern int di_lib_debug;
@@ -321,7 +327,7 @@ static void printDiskInfo       _((di_DiskInfo *, int));
 static void printInfo           _((di_DiskInfo *));
 static void addTotals           _((di_DiskInfo *, di_DiskInfo *));
 static void printTitle          _((void));
-static void printPerc           _((_s_fs_size_t, _s_fs_size_t, char *));
+static void printPerc           _((_fs_size_t, _fs_size_t, char *));
 static void sortArray           _((char *, int, int, DI_SORT_FUNC));
 static int  diCompare           _((char *, char *));
 static void getDiskStatInfo     _((di_DiskInfo *, int));
@@ -350,6 +356,16 @@ main (argc, argv)
     char                **includeList = { (char **) NULL };
     char                *ptr;
 
+
+#if _lib_setlocale && defined (LC_ALL)
+    setlocale (LC_ALL, "");
+#endif
+#if _enable_nls
+    ptr = bindtextdomain (PROG, DI_LOCALE_DIR);
+    if (debug > 2) { printf ("bindtextdomain:%s\n", ptr); }
+    ptr = textdomain (PROG);
+    if (debug > 2) { printf ("textdomain:%s\n", ptr); }
+#endif
 
     ptr = argv [0] + strlen (argv [0]) - 2;
     if (memcmp (ptr, MPROG, 2) == 0)
@@ -463,7 +479,7 @@ printDiskInfo (diskInfo, diCount)
 
     memset ((char *) &totals, '\0', sizeof (di_DiskInfo));
     totals.blockSize = 8192;
-    strncpy (totals.name, "Total", DI_NAME_LEN);
+    strncpy (totals.name, GT("Total"), DI_NAME_LEN);
     totals.printFlag = DI_PRNT_OK;
 
     if ((flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
@@ -523,8 +539,8 @@ printInfo (diskInfo)
     di_DiskInfo         *diskInfo;
 #endif
 {
-    _s_fs_size_t        used;
-    _s_fs_size_t        totAvail;
+    _fs_size_t        used;
+    _fs_size_t        totAvail;
     char                *ptr;
     int                 valid;
     double              mult;
@@ -717,9 +733,7 @@ addTotals (diskInfo, totals)
 
     if (debug > 2)
     {
-#if _siz_long_long == 8 && \
-    (_siz_f_blocks_statfs == 8 || \
-    _siz_f_blocks_statvfs == 8)
+#if _siz_long_long == 8
         printf ("totals:bs:%lld:mult:%f\n", diskInfo->blockSize, mult);
 #else
         printf ("totals:bs:%ld:mult:%f\n", diskInfo->blockSize, mult);
@@ -754,7 +768,7 @@ printTitle ()
 
     if ((flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
     {
-        printf ("di ver %s Default Format: %s\n",
+        printf (GT("di ver %s Default Format: %s\n"),
                 DI_VERSION, DI_DEFAULT_FORMAT);
     }
 
@@ -768,13 +782,13 @@ printTitle ()
         {
             case DI_FMT_MOUNT:
             {
-                printf (DI_MOUNT_FMT, "Mount");
+                printf (DI_MOUNT_FMT, GT("Mount"));
                 break;
             }
 
             case DI_FMT_MOUNT_FULL:
             {
-                printf (mountFormat, "Mount");
+                printf (mountFormat, GT("Mount"));
                 break;
             }
 
@@ -783,19 +797,19 @@ printTitle ()
             {
                 if (dispBlockSize == DI_ONE_K)
                 {
-                    printf (blockLabelFormat, "Kbytes");
+                    printf (blockLabelFormat, GT("Kbytes"));
                 }
                 else if (dispBlockSize == DI_ONE_MEG)
                 {
-                    printf (blockLabelFormat, "  Megs");
+                    printf (blockLabelFormat, GT("  Megs"));
                 }
                 else if (dispBlockSize == DI_ONE_GIG)
                 {
-                    printf (blockLabelFormat, "  Gigs");
+                    printf (blockLabelFormat, GT("  Gigs"));
                 }
                 else if (dispBlockSize == DI_ONE_TERA)
                 {
-                    printf (blockLabelFormat, " Teras");
+                    printf (blockLabelFormat, GT(" Teras"));
                 }
                 else if (dispBlockSize == DI_HALF_K)
                 {
@@ -812,19 +826,19 @@ printTitle ()
             case DI_FMT_BUSED:
             case DI_FMT_BCUSED:
             {
-                printf (blockLabelFormat, "Used");
+                printf (blockLabelFormat, GT("Used"));
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printf (blockLabelFormat, "Free");
+                printf (blockLabelFormat, GT("Free"));
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
-                printf (blockLabelFormat, "Avail");
+                printf (blockLabelFormat, GT("Avail"));
                 break;
             }
 
@@ -832,68 +846,68 @@ printTitle ()
             case DI_FMT_BPERC_FREE:
             case DI_FMT_BPERC_BSD:
             {
-                printf (DI_PERC_LBL_FMT, "%used");
+                printf (DI_PERC_LBL_FMT, GT("%used"));
                 break;
             }
 
             case DI_FMT_ITOT:
             {
-                printf (inodeLabelFormat, "Inodes");
+                printf (inodeLabelFormat, GT("Inodes"));
                 break;
             }
 
             case DI_FMT_IUSED:
             {
-                printf (inodeLabelFormat, "Used");
+                printf (inodeLabelFormat, GT("Used"));
                 break;
             }
 
             case DI_FMT_IFREE:
             {
-                printf (inodeLabelFormat, "Free");
+                printf (inodeLabelFormat, GT("Free"));
                 break;
             }
 
             case DI_FMT_IPERC:
             {
-                printf (DI_PERC_LBL_FMT, "%used");
+                printf (DI_PERC_LBL_FMT, GT("%used"));
                 break;
             }
 
             case DI_FMT_SPECIAL:
             {
-                printf (DI_SPEC_FMT, "Filesystem");
+                printf (DI_SPEC_FMT, GT("Filesystem"));
                 break;
             }
 
             case DI_FMT_SPECIAL_FULL:
             {
-                printf (specialFormat, "Filesystem");
+                printf (specialFormat, GT("Filesystem"));
                 break;
             }
 
             case DI_FMT_TYPE:
             {
-                printf (DI_FSTYPE_FMT, "fsType");
+                printf (DI_FSTYPE_FMT, GT("fsType"));
                 break;
             }
 
             case DI_FMT_TYPE_FULL:
             {
-                printf (typeFormat, "fs Type");
+                printf (typeFormat, GT("fs Type"));
                 break;
             }
 
             case DI_FMT_MOUNT_OPTIONS:
             {
-                printf (optFormat, "Options");
+                printf (optFormat, GT("Options"));
                 break;
             }
 
             case DI_FMT_MOUNT_TIME:
             {
 #if _lib_mnt_time
-                printf (mTimeFormat, "Mount Time");
+                printf (mTimeFormat, GT("Mount Time"));
 #endif
                 break;
             }
@@ -925,11 +939,11 @@ printTitle ()
 
 static void
 #if _proto_stdc
-printPerc (_s_fs_size_t used, _s_fs_size_t totAvail, char *format)
+printPerc (_fs_size_t used, _fs_size_t totAvail, char *format)
 #else
 printPerc (used, totAvail, format)
-    _s_fs_size_t    used;
-    _s_fs_size_t    totAvail;
+    _fs_size_t      used;
+    _fs_size_t      totAvail;
     char            *format;
 #endif
 {
@@ -1238,9 +1252,7 @@ checkDiskInfo (diskInfo, includeList, diCount)
             /* -1 is returned.                                     */
         if (debug > 2)
         {
-#if _siz_long_long == 8 && \
-    (_siz_f_blocks_statfs == 8 || \
-    _siz_f_blocks_statvfs == 8)
+#if _siz_long_long == 8
             printf ("chk: %s free: %llu\n", diskInfo [i].name,
                 diskInfo [i].freeBlocks);
 #else
@@ -1248,11 +1260,11 @@ checkDiskInfo (diskInfo, includeList, diCount)
                 diskInfo [i].freeBlocks);
 #endif
         }
-        if (diskInfo [i].freeBlocks < 0L)
+        if ((_s_fs_size_t) diskInfo [i].freeBlocks < 0L)
         {
             diskInfo [i].freeBlocks = 0L;
         }
-        if (diskInfo [i].availBlocks < 0L)
+        if ((_s_fs_size_t) diskInfo [i].availBlocks < 0L)
         {
             diskInfo [i].availBlocks = 0L;
         }
@@ -1269,9 +1281,7 @@ checkDiskInfo (diskInfo, includeList, diCount)
         {
             if (debug > 2)
             {
-#if _siz_long_long == 8 && \
-    (_siz_f_blocks_statfs == 8 || \
-    _siz_f_blocks_statvfs == 8)
+#if _siz_long_long == 8
                 printf ("chk: %s total: %lld\n", diskInfo [i].name,
                         diskInfo [i].totalBlocks);
 #else
@@ -1401,9 +1411,7 @@ checkDiskInfo (diskInfo, includeList, diCount)
         sprintf (blockFormat, "%%%d.1f", width);
     }
     sprintf (blockLabelFormat, "%%%ds", width);
-#if _siz_long_long == 8 && \
-    (_siz_f_blocks_statfs == 8 || \
-    _siz_f_blocks_statvfs == 8)
+#if _siz_long_long == 8
     sprintf (inodeFormat, "%%%dllu", inodeWidth);
 #else
     sprintf (inodeFormat, "%%%dlu", inodeWidth);
@@ -1468,34 +1476,34 @@ usage (void)
 usage ()
 #endif
 {
-    printf ("di ver %s    Default Format: %s\n", DI_VERSION, DI_DEFAULT_FORMAT);
+    printf (GT("di ver %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
-    printf ("Usage: di [-ant] [-f format] [-s sort-type] [-i ignore-fstyp-list]\n");
-    printf ("       [-I include-fstyp-list] [-w kbyte-width] [-W inode-width] [file [...]]\n");
-    printf ("   -a   : print all mounted devices; normally, those with 0 total blocks are\n");
-    printf ("          not printed.  e.g. /dev/proc, /dev/fd.\n");
-    printf ("   -d x : size to print blocks in (p - posix (512), k - kbytes,\n");
-    printf ("          m - megabytes, g - gigabytes, <x> - numeric size).\n");
-    printf ("   -f x : use format string <x>\n");
-    printf ("   -i x : ignore file system types in <x>\n");
-    printf ("   -I x : include only file system types in <x>\n");
-    printf ("   -l   : display local filesystems only\n");
-    printf ("   -n   : don't print header\n");
-    printf ("   -s t : sort type; n - no sort, s - by special device, r - reverse\n");
-    printf ("   -t   : print totals\n");
-    printf ("   -w n : use width <n> for kbytes\n");
-    printf ("   -W n : use width <n> for i-nodes\n");
-    printf (" Format string values:\n");
-    printf ("    m - mount point                     M - mount point, full length\n");
-    printf ("    b - total kbytes                    B - kbytes available for use\n");
-    printf ("    u - used kbytes                     c - calculated kbytes in use\n");
-    printf ("    f - kbytes free                     v - kbytes available\n");
-    printf ("    p - percentage not avail. for use   1 - percentage used\n");
-    printf ("    2 - percentage of user-available space in use.\n");
-    printf ("    i - total file slots (i-nodes)      U - used file slots\n");
-    printf ("    F - free file slots                 P - percentage file slots used\n");
-    printf ("    s - filesystem name                 S - filesystem name, full length\n");
-    printf ("    t - disk partition type             T - partition type, full length\n");
+    printf (GT("Usage: di [-ant] [-f format] [-s sort-type] [-i ignore-fstyp-list]\n"));
+    printf (GT("       [-I include-fstyp-list] [-w kbyte-width] [-W inode-width] [file [...]]\n"));
+    printf (GT("   -a   : print all mounted devices; normally, those with 0 total blocks are\n"));
+    printf (GT("          not printed.  e.g. /dev/proc, /dev/fd.\n"));
+    printf (GT("   -d x : size to print blocks in (p - posix (512), k - kbytes,\n"));
+    printf (GT("          m - megabytes, g - gigabytes, <x> - numeric size).\n"));
+    printf (GT("   -f x : use format string <x>\n"));
+    printf (GT("   -i x : ignore file system types in <x>\n"));
+    printf (GT("   -I x : include only file system types in <x>\n"));
+    printf (GT("   -l   : display local filesystems only\n"));
+    printf (GT("   -n   : don't print header\n"));
+    printf (GT("   -s t : sort type; n - no sort, s - by special device, r - reverse\n"));
+    printf (GT("   -t   : print totals\n"));
+    printf (GT("   -w n : use width <n> for kbytes\n"));
+    printf (GT("   -W n : use width <n> for i-nodes\n"));
+    printf (GT(" Format string values:\n"));
+    printf (GT("    m - mount point                     M - mount point, full length\n"));
+    printf (GT("    b - total kbytes                    B - kbytes available for use\n"));
+    printf (GT("    u - used kbytes                     c - calculated kbytes in use\n"));
+    printf (GT("    f - kbytes free                     v - kbytes available\n"));
+    printf (GT("    p - percentage not avail. for use   1 - percentage used\n"));
+    printf (GT("    2 - percentage of user-available space in use.\n"));
+    printf (GT("    i - total file slots (i-nodes)      U - used file slots\n"));
+    printf (GT("    F - free file slots                 P - percentage file slots used\n"));
+    printf (GT("    s - filesystem name                 S - filesystem name, full length\n"));
+    printf (GT("    t - disk partition type             T - partition type, full length\n"));
 }
 
 
@@ -1513,7 +1521,7 @@ processArgs (argc, argv, ignoreList, includeList)
     int         ch;
 
 
-    while ((ch = getopt (argc, argv, "Aad:f:hi:I:Flns:tw:W:x:")) != -1)
+    while ((ch = getopt (argc, argv, "Aad:f:ghi:I:Flmns:tw:W:x:")) != -1)
     {
         switch (ch)
         {
@@ -1585,6 +1593,12 @@ processArgs (argc, argv, ignoreList, includeList)
                 break;
             }
 
+            case 'g':
+            {
+                dispBlockSize = DI_ONE_GIG;
+                break;
+            }
+
             case 'h':
             {
                 usage ();
@@ -1606,6 +1620,12 @@ processArgs (argc, argv, ignoreList, includeList)
             case 'l':
             {
                 flags |= DI_F_LOCAL_ONLY;
+                break;
+            }
+
+            case 'm':
+            {
+                dispBlockSize = DI_ONE_MEG;
                 break;
             }
 
