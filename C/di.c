@@ -232,6 +232,15 @@ extern int     errno;
   extern char *optarg;
 #endif
 
+     /* macro for gettext() */
+#ifndef GT
+# if _enable_nls
+#  define GT(args) gettext (args)
+# else
+#  define GT(args) (args)
+# endif
+#endif
+
 /* end of system specific includes/configurations */
 
 #define DI_F_ALL               0x00000001
@@ -1688,7 +1697,6 @@ processArgs (argc, argv, ignoreList, includeList)
             case '?':
             {
                 usage ();
-                cleanup ((di_DiskInfo *) NULL, (char **) NULL, (char **) NULL);
                 exit (1);
             }
         }
