@@ -1,7 +1,7 @@
 /*
 $Id$
 $Source$
-Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
+Copyright 1994-2004 Brad Lanam, Walnut Creek, CA
 */
 
 #include "config.h"
@@ -20,7 +20,7 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
  */
 
 #include <stdio.h>
-#if _hdr_string 
+#if _hdr_string
 # include <string.h>
 #endif
 #if _hdr_strings && ((! defined (_hdr_string)) || (_include_string))
