@@ -10,7 +10,6 @@ Configure		Configuration script
 configure		gnu-like front-end for Configure
 config_h.SH		Produces config.h
 config.win95		config.h for win95
-config.win95.cygwin	config.h for win95/cygwin
 Makefile.iffe		Main Makefile
 Makefile.SH		Produces Makefile
 bin/
