@@ -415,7 +415,7 @@ static void checkIgnoreList     _((di_DiskInfo *, iList *));
 static void checkIncludeList    _((di_DiskInfo *, iList *));
 static void setDispBlockSize    _((char *));
 static int  findDispSize        _((double));
-#if ! _mth_fmod
+#if ! _mth_fmod && ! _lib_fmod
  static double fmod _((double, double));
 #endif
 
@@ -2333,7 +2333,7 @@ setDispBlockSize (ptr)
     }
 }
 
-#if ! _mth_fmod
+#if ! _mth_fmod && ! _lib_fmod
 
 static double
 fmod (double a, double b)
