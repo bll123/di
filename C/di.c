@@ -413,10 +413,14 @@ main (argc, argv)
 {
     di_DiskInfo         *diskInfo = { (di_DiskInfo *) NULL };
     int                 diCount = { 0 };
-    iList               ignoreList = { 0, (char **) NULL };
-    iList               includeList = { 0, (char **) NULL };
+    iList               ignoreList;
+    iList               includeList;
     char                *ptr;
 
+    ignoreList.count = 0;
+    ignoreList.list = (char **) NULL;
+    includeList.count = 0;
+    includeList.list = (char **) NULL;
 
 #if _lib_setlocale && defined (LC_ALL)
     ptr = setlocale (LC_ALL, "");
@@ -2017,7 +2021,7 @@ static void
 #if _proto_stdc
 setDispBlockSize (char *ptr)
 #else
-setDispBlockSize (*ptr)
+setDispBlockSize (ptr)
     char    *ptr;
 #endif
 {
