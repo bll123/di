@@ -102,6 +102,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (HAS_OPTARG)
 # define _dcl_optarg 1
 #endif
+#if defined (HAS_STATFS)
+# define _lib_statfs 1
+#endif
 #if defined (HAS_STATFS_2ARG)
 # define _statfs_2arg 1
 #endif
