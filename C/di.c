@@ -177,6 +177,9 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
+#if _hdr_getopt
+# include <getopt.h>
+#endif
 #if _sys_types
 # include <sys/types.h>
 #endif
