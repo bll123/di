@@ -370,7 +370,7 @@ typedef struct
 extern int  di_getDiskEntries      _((di_DiskInfo **, int *));
 extern void di_getDiskInfo         _((di_DiskInfo **, int *));
 extern void di_testRemoteDisk      _((di_DiskInfo *));
-extern void *Realloc               _((void *, long));
+extern void *Realloc               _((void *, Size_t));
 
 # if ! defined (_lib_getopt)
 extern int getopt _((int argc, char *argv [], char *optstring));
