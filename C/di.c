@@ -660,6 +660,7 @@ printInfo (diskInfo)
     int                 tidx;
 
     idx = 0;
+    temp = 0.0;  /* gcc compile warning */
     if (dispBlockSize == DI_DISP_HR_2)
     {
         idx = - DI_ONE_MEG;
@@ -2249,7 +2250,6 @@ setDispBlockSize (ptr)
     if (isdigit ((int) (*ptr)))
     {
         double  temp1;
-        int     i;
 
         dispBlockSize = (_fs_size_t) atof (ptr);
         temp1 = fmod (dispBlockSize, DI_VAL_1000);
