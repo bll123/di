@@ -132,6 +132,9 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #if defined (I_STDLIB)
 # define _hdr_stdlib 1
 #endif
+#if defined (I_GETOPT)
+# define _hdr_getopt 1
+#endif
 #if defined (I_STOR_DIRECTORY)
 # define _lib_fs_stat_dev 1
 # define _hdr_storage_Directory 1
