@@ -46,7 +46,7 @@
 #define _lib_bcopy	1	/* bcopy() in default lib(s) */
 #define _lib_bzero	1	/* bzero() in default lib(s) */
 #define _lib_endmntent	1	/* endmntent() in default lib(s) */
-#undef	_lib_fs_info		/* fs_info() not in default lib(s) */
+#undef	_lib_fs_stat_dev	/* fs_stat_dev() not in default lib(s) */
 #undef	_lib_fshelp		/* fshelp() not in default lib(s) */
 #define	_hdr_windows	1	/* #include <windows.h> ok */
 #define _lib_GetDiskFreeSpace	1	/* GetDiskFreeSpace() in default lib(s) */

@@ -63,6 +63,7 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (HAS_SETMNTENT)
 # define _lib_setmntent 1
+# define _setmntent_2arg 1
 #endif
 #if defined (HAS_STATVFS)
 # define _lib_statvfs 1
@@ -91,8 +92,6 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 # define _lib_getopt 1
 # define _dcl_optind 1
 # define _dcl_optarg 1
-#endif
-#if defined (HAS_SETMNTENT_ONE_ARG)
 #endif
 #if defined (HAS_STATFS_BSD)
 # define _statfs_2arg 1
@@ -134,6 +133,7 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 # define _hdr_stdlib 1
 #endif
 #if defined (I_STOR_DIRECTORY)
+# define _lib_fs_stat_dev 1
 # define _hdr_storage_Directory 1
 #endif
 #if defined (I_STOR_ENTRY)
@@ -206,6 +206,10 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 #if defined (MEM_MOUNT_INFO_STATFS)
 # define _mem_mount_info_statfs 1
 #endif
+#if defined (HAS_SETMNTENT_ONE_ARG)
+# undef _setmntent_2arg
+# define _setmntent_1arg 1
+#endif
 
 /*****************************************************/
 
@@ -239,15 +243,19 @@ Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
 
 #if _sys_fstyp
 # include <sys/fstyp.h>
-# define DI_TYPE_LEN          FSTYPSZ
+# if defined (FSTYPSZ)
+#  define DI_TYPE_LEN          FSTYPSZ
+# endif
 #endif
 #if _sys_mount
 # include <sys/mount.h>
-# define DI_TYPE_LEN          MFSNAMELEN
+# if ! defined (DI_TYPE_LEN) && defined (MFSNAMELEN)
+#  define DI_TYPE_LEN          MFSNAMELEN
+# endif
 #endif
 #if _sys_vfstab
 # include <sys/vfstab.h>
-# if ! defined (DI_TYPE_LEN)
+# if ! defined (DI_TYPE_LEN) && defined (FSTYPSZ)
 #  define DI_TYPE_LEN         FSTYPSZ
 # endif
 #endif
