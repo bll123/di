@@ -1,11 +1,8 @@
-#ifndef lint
-static char    di_c_rcsid [] =
-"$Id$";
-static char    di_c_source [] =
-"$Source$";
-static char    copyright [] =
-"Copyright 1994-1999 Brad Lanam, Walnut Creek, CA";
-#endif
+/*
+$Id$
+$Source$
+Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
+*/
 
 /*
  * di.c
@@ -168,53 +165,60 @@ static char    copyright [] =
  */
 
 #include "config.h"
+#include "di.h"
 
 #include <stdio.h>
-#include <ctype.h>
-#include <errno.h>
-#if defined (I_STDLIB)
+#if _hdr_ctype
+# include <ctype.h>
+#endif
+#if _hdr_errno
+# include <errno.h>
+#endif
+#if _hdr_stdlib
 # include <stdlib.h>
 #endif
-#if defined (I_SYS_TYPES)
+#if _sys_types
 # include <sys/types.h>
 #endif
-#if defined (I_STRING)
+#if _hdr_string
 # include <string.h>
-#else
+#endif
+#if _hdr_strings && ! defined (_hdr_string)
 # include <strings.h>
 #endif
-#if defined (I_MEMORY)
+#if _hdr_memory
 # include <memory.h>
 #endif
-#if defined (I_MALLOC)
+#if _include_malloc && _hdr_malloc
 # include <malloc.h>
 #endif
-#if defined (I_UNISTD)
+#if _hdr_unistd
 # include <unistd.h>
 #endif
-#if defined (I_TIME)
+#if _hdr_time
 # include <time.h>
 #endif
-#if defined (I_SYS_TIME)
+#if _sys_time
 # include <sys/time.h>
 #endif
-#if defined (I_SYS_STAT)
+#if _sys_stat
 # include <sys/stat.h>
 #endif
 
-#include "di.h"
 extern int di_lib_debug;
 
-#if defined (NEED_GETENV_DEF)
+#if _npt_getenv
   extern char *getenv _((char *));
 #endif
 
-#if defined (NEED_ERRNO_DEFS)
+#if ! defined (_lib_errno)
 extern int     errno;
 #endif
 
-#if ! defined (HAS_OPTIND)
+#if ! defined (_dcl_optind)
   extern int optind;
+#endif
+#if ! defined (_dcl_optarg)
   extern char *optarg;
 #endif
 
@@ -275,7 +279,7 @@ extern int     errno;
 #if ! defined (DI_DEFAULT_FORMAT)
 # define DI_DEFAULT_FORMAT      "smbuvpT"
 #endif
-#if defined (HAS_MNT_TIME)
+#if _lib_mnt_time
 # define DI_DEF_MOUNT_FORMAT    "MST\n\tI\n\tO"
 #else
 # define DI_DEF_MOUNT_FORMAT    "MST\n\tO"
@@ -328,7 +332,7 @@ static void checkIgnoreList     _((di_DiskInfo *, char **));
 static void checkIncludeList    _((di_DiskInfo *, char **));
 
 int
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 main (int argc, char *argv [])
 #else
 main (argc, argv)
@@ -392,7 +396,7 @@ main (argc, argv)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 cleanup (di_DiskInfo *diskInfo, char **ignoreList, char **includeList)
 #else
 cleanup (diskInfo, ignoreList, includeList)
@@ -441,7 +445,7 @@ cleanup (diskInfo, ignoreList, includeList)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 printDiskInfo (di_DiskInfo *diskInfo, int diCount)
 #else
 printDiskInfo (diskInfo, diCount)
@@ -508,7 +512,7 @@ printDiskInfo (diskInfo, diCount)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 printInfo (di_DiskInfo *diskInfo)
 #else
 printInfo (diskInfo)
@@ -663,7 +667,7 @@ printInfo (diskInfo)
 
             case DI_FMT_MOUNT_TIME:
             {
-#if defined (HAS_MNT_TIME)
+#if _lib_mnt_time
                 printf (mTimeFormat, diskInfo->mountTime);
 #endif
                 break;
@@ -695,7 +699,7 @@ printInfo (diskInfo)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 addTotals (di_DiskInfo *diskInfo, di_DiskInfo *totals)
 #else
 addTotals (diskInfo, totals)
@@ -709,7 +713,13 @@ addTotals (diskInfo, totals)
 
     if (debug > 2)
     {
+#if _siz_long_long == 8 && \
+    (_siz_f_blocks_statfs == 8 || \
+    _siz_f_blocks_statvfs == 8)
         printf ("totals:bs:%lld:mult:%f\n", diskInfo->blockSize, mult);
+#else
+        printf ("totals:bs:%ld:mult:%f\n", diskInfo->blockSize, mult);
+#endif
     }
 
     totals->totalBlocks += diskInfo->totalBlocks * mult;
@@ -728,7 +738,7 @@ addTotals (diskInfo, totals)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 printTitle (void)
 #else
 printTitle ()
@@ -878,7 +888,7 @@ printTitle ()
 
             case DI_FMT_MOUNT_TIME:
             {
-#if defined (HAS_MNT_TIME)
+#if _lib_mnt_time
                 printf (mTimeFormat, "Mount Time");
 #endif
                 break;
@@ -910,7 +920,7 @@ printTitle ()
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 printPerc (_s_fs_size_t used, _s_fs_size_t totAvail, char *format)
 #else
 printPerc (used, totAvail, format)
@@ -936,7 +946,7 @@ printPerc (used, totAvail, format)
 
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 checkFileInfo (di_DiskInfo *diskInfo, int diCount,
         int optidx, int argc, char *argv [])
 #else
@@ -989,7 +999,7 @@ checkFileInfo (diskInfo, diCount, optidx, argc, argv)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 sortArray (char *data, int dataSize, int count, DI_SORT_FUNC compareFunc)
 #else
 sortArray (data, dataSize, count, compareFunc)
@@ -1053,7 +1063,7 @@ sortArray (data, dataSize, count, compareFunc)
 
 
 static int
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 diCompare (char *a, char *b)
 #else
 diCompare (a, b)
@@ -1099,7 +1109,7 @@ diCompare (a, b)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 getDiskStatInfo (di_DiskInfo *diskInfo, int diCount)
 #else
 getDiskStatInfo (diskInfo, diCount)
@@ -1139,7 +1149,7 @@ getDiskStatInfo (diskInfo, diCount)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 getDiskSpecialInfo (di_DiskInfo *diskInfo, int diCount)
 #else
 getDiskSpecialInfo (diskInfo, diCount)
@@ -1179,7 +1189,7 @@ getDiskSpecialInfo (diskInfo, diCount)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 checkDiskInfo (di_DiskInfo *diskInfo, char **includeList, int diCount)
 #else
 checkDiskInfo (diskInfo, includeList, diCount)
@@ -1224,8 +1234,15 @@ checkDiskInfo (diskInfo, includeList, diCount)
             /* -1 is returned.                                     */
         if (debug > 2)
         {
+#if _siz_long_long == 8 && \
+    (_siz_f_blocks_statfs == 8 || \
+    _siz_f_blocks_statvfs == 8)
             printf ("chk: %s free: %llu\n", diskInfo [i].name,
                 diskInfo [i].freeBlocks);
+#else
+            printf ("chk: %s free: %lu\n", diskInfo [i].name,
+                diskInfo [i].freeBlocks);
+#endif
         }
         if (diskInfo [i].freeBlocks < 0L)
         {
@@ -1248,8 +1265,15 @@ checkDiskInfo (diskInfo, includeList, diCount)
         {
             if (debug > 2)
             {
+#if _siz_long_long == 8 && \
+    (_siz_f_blocks_statfs == 8 || \
+    _siz_f_blocks_statvfs == 8)
                 printf ("chk: %s total: %lld\n", diskInfo [i].name,
                         diskInfo [i].totalBlocks);
+#else
+                printf ("chk: %s total: %ld\n", diskInfo [i].name,
+                        diskInfo [i].totalBlocks);
+#endif
             }
             if (diskInfo [i].totalBlocks <= 0L &&
                 diskInfo [i].printFlag != DI_PRNT_BAD)
@@ -1373,7 +1397,9 @@ checkDiskInfo (diskInfo, includeList, diCount)
         sprintf (blockFormat, "%%%d.1f", width);
     }
     sprintf (blockLabelFormat, "%%%ds", width);
-#if defined (HAS_64BIT_STATFS_FLDS)
+#if _siz_long_long == 8 && \
+    (_siz_f_blocks_statfs == 8 || \
+    _siz_f_blocks_statvfs == 8)
     sprintf (inodeFormat, "%%%dllu", inodeWidth);
 #else
     sprintf (inodeFormat, "%%%dlu", inodeWidth);
@@ -1390,7 +1416,7 @@ checkDiskInfo (diskInfo, includeList, diCount)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 preCheckDiskInfo (di_DiskInfo *diskInfo, char **ignoreList,
         char **includeList, int diCount)
 #else
@@ -1432,7 +1458,7 @@ preCheckDiskInfo (diskInfo, ignoreList, includeList, diCount)
  */
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 usage (void)
 #else
 usage ()
@@ -1470,7 +1496,7 @@ usage ()
 
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 processArgs (int argc, char *argv [], char ***ignoreList, char ***includeList)
 #else
 processArgs (argc, argv, ignoreList, includeList)
@@ -1647,7 +1673,7 @@ processArgs (argc, argv, ignoreList, includeList)
 
     /* list is assumed to be global */
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 parseList (char ***list, char *str)
 #else
 parseList (list, str)
@@ -1713,7 +1739,7 @@ parseList (list, str)
 
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 checkIgnoreList (di_DiskInfo *diskInfo, char **ignoreList)
 #else
 checkIgnoreList (diskInfo, ignoreList)
@@ -1750,7 +1776,7 @@ checkIgnoreList (diskInfo, ignoreList)
 }
 
 static void
-#if defined (CAN_PROTOTYPE)
+#if _proto_stdc
 checkIncludeList (di_DiskInfo *diskInfo, char **includeList)
 #else
 checkIncludeList (diskInfo, includeList)

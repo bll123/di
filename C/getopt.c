@@ -1,4 +1,14 @@
 /*
+$Id$
+$Source$
+Copyright 1994-2001 Brad Lanam, Walnut Creek, CA
+*/
+
+#include "config.h"
+
+#if ! defined (_lib_getopt)
+
+/*
  *
  * $Id$
  *
@@ -8,26 +18,28 @@
  *
  */
 
-#ifndef lint
-static char    getopt_c_rcsid [] =
-"$Id$";
-static char    getopt_c_source [] =
-"$Source$";
+#include <stdio.h>
+#if _hdr_string 
+# include <string.h>
+#endif
+#if ! defined (_hdr_string) && _hdr_strings
+# include <strings.h>
 #endif
 
-#include <stdio.h>
-#include <string.h>
-
 char    *optarg;    /* Global argument pointer. */
-int optind = 0; /* Global argv index. */
+int     optind = 0; /* Global argv index. */
 
 static char *scan = NULL;   /* Private scan pointer. */
 
 int
-getopt(argc, argv, optstring)
-int argc;
-char *argv[];
-char *optstring;
+#if _proto_stdc
+getopt (int argc, char *argv [], char *optstring)
+#else
+getopt (argc, argv, optstring)
+    int argc;
+    char *argv[];
+    char *optstring;
+#endif
 {
     char c;
     char *place;
@@ -89,3 +101,9 @@ char *optstring;
 
     return(c);
 }
+
+#else
+
+extern int di_lib_debug;
+
+#endif
