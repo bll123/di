@@ -4,14 +4,14 @@
 #define	_sys_types	1	/* #include <sys/types.h> ok */
 #define _proto_stdc	1	/* Standard-C prototypes ok */
 #define _key_void	1	/* void is a reserved keyword */
-#undef	_command_msgfmt		/* Is msgfmt available? failed */
+#define _command_msgfmt	1	/* Is msgfmt available? */
 #define _hdr_ctype	1	/* #include <ctype.h> ok */
 #define _hdr_errno	1	/* #include <errno.h> ok */
 #undef	_hdr_fshelp		/* #include <fshelp.h> not ok */
 #define _hdr_getopt	1	/* #include <getopt.h> ok */
 #undef	_hdr_kernel_fs_info		/* #include <kernel/fs_info.h> not ok */
 #define _hdr_limits	1	/* #include <limits.h> ok */
-#undef	_hdr_libintl		/* #include <libintl.h> not ok */
+#define _hdr_libintl	1	/* #include <libintl.h> ok */
 #define _hdr_locale	1	/* #include <locale.h> ok */
 #define _hdr_malloc	1	/* #include <malloc.h> ok */
 #define _hdr_memory	1	/* #include <memory.h> ok */
@@ -36,7 +36,7 @@
 #define _sys_mount	1	/* #include <sys/mount.h> ok */
 #define _sys_param	1	/* #include <sys/param.h> ok */
 #define _sys_stat	1	/* #include <sys/stat.h> ok */
-#undef	_sys_statfs		/* #include <sys/statfs.h> not ok */
+#define _sys_statfs	1	/* #include <sys/statfs.h> ok */
 #undef	_sys_statvfs		/* #include <sys/statvfs.h> not ok */
 #define _sys_time	1	/* #include <sys/time.h> ok */
 #define _sys_vfs	1	/* #include <sys/vfs.h> ok */
@@ -46,13 +46,12 @@
 #define _include_string	1	/* Is it safe to include both string.h and strings.h? */
 #undef	_npt_getenv		/* getenv() does not need a prototype */
 #undef	_npt_statfs		/* statfs() does not need a prototype */
-#undef	_typ__ulong		/* _ulong is not a type */
 #undef	_typ_statvfs_t		/* statvfs_t is not a type */
+#define _typ_size_t	1	/* size_t is a type */
 #define _lib_bcopy	1	/* bcopy() in default lib(s) */
 #undef	_lib_bindtextdomain		/* bindtextdomain() not in default lib(s) */
 #define _lib_bzero	1	/* bzero() in default lib(s) */
 #define _lib_endmntent	1	/* endmntent() in default lib(s) */
-#define _lib_errno	1	/* errno() in default lib(s) */
 #undef	_lib_fs_stat_dev		/* fs_stat_dev() not in default lib(s) */
 #undef	_lib_fshelp		/* fshelp() not in default lib(s) */
 #define _lib_GetDiskFreeSpace	1	/* is GetDiskFreeSpace a library function? */
@@ -80,6 +79,7 @@
 #undef	_statfs_3arg		/* does statfs take 3 args? failed */
 #undef	_statfs_4arg		/* does statfs take 4 args? failed */
 #define _user_prompt	1	/* ask user for args in setmntent/statfs */
+#define _dcl_errno	1	/* is errno declared? */
 #define _dcl_optind	1	/* is optind declared? */
 #define _dcl_optarg	1	/* is optarg declared? */
 #define _mem_f_bsize_statfs	1	/* f_bsize is a member of struct statfs */
@@ -88,6 +88,7 @@
 #undef	_mem_f_frsize_statfs		/* f_frsize is not a member of struct statfs */
 #undef	_mem_f_fstypename_statfs		/* f_fstypename is not a member of struct statfs */
 #undef	_mem_mount_info_statfs		/* mount_info is not a member of struct statfs */
+#define _mem_f_type_statfs	1	/* f_type is a member of struct statfs */
 #undef	_mem_mnt_time_mnttab		/* mnt_time is not a member of struct mnttab */
 #undef	_mem_vmt_time_vmount		/* vmt_time is not a member of struct vmount */
 #define _siz_long_long	8	/* sizeof(long long) */
@@ -120,6 +121,20 @@ _command_msgfmt
 # define Statvfs_t statvfs_t
 #else
 # define Statvfs_t struct statvfs
+#endif
+
+#if _typ_size_t
+# define Size_t size_t
+#else
+# define Size_t unsigned int
+#endif
+
+#if _lib_snprintf
+# define Snprintf snprintf
+# define SPF(a1,a2,a3)      a1,a2,a3
+#else
+# define Snprintf sprintf
+# define SPF(a1,a2,a3)      a1,a3
 #endif
 
 #define _config_by_iffe_ 1
