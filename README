@@ -1,4 +1,4 @@
-di - disk information utility (version 3.2).
+di - disk information utility (version 3.3).
 
 DESCRIPTION
 
@@ -185,6 +185,8 @@ BUGS
 
 CHANGES
 
+    3.3
+        Bug fixes for AIX, HP/UX installation.
     3.2
         Add internationalization code.
         Update windows code.
