@@ -88,6 +88,9 @@ static char    copyright [] =
  *  equal to the number of free blocks.
  *
  *  HISTORY:
+ *     24 feb 2000 bll
+ *          Updated for BeOS.  This required changes to support c++
+ *          compilation (ansi style functions).  Fixes for linux.
  *     17 dec 99 bll
  *          Added sys/fs_types.h (Digital Unix (tru64)).
  *     3 jan 99 bll
@@ -262,6 +265,21 @@ static char    copyright [] =
 
 #if defined (I_WINDOWS)
 # include <windows.h>            /* windows */
+#endif
+#if defined (I_KERNFSINFO)
+# include <kernel/fs_info.h>
+#endif
+#if defined (I_STOR_DIRECTORY)
+# include <storage/Directory.h>
+#endif
+#if defined (I_STOR_ENTRY)
+# include <storage/Entry.h>
+#endif
+/*#if defined (I_STOR_NODE)
+# include <storage/Node.h>
+#endif  */
+#if defined (I_STOR_PATH)
+# include <storage/Path.h>
 #endif
 
 #if ! defined (HAS_MEMCPY) && ! defined (memcpy)
@@ -517,9 +535,13 @@ static int  getDiskEntries      _((void));
 static void getDiskInfo         _((void));
 
 int
+#if defined (CAN_PROTOTYPE)
+main (int argc, char *argv [])
+#else
 main (argc, argv)
     int                 argc;
     char                *argv [];
+#endif
 {
     char                *ptr;
 
@@ -574,7 +596,11 @@ main (argc, argv)
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+cleanup (void)
+#else
 cleanup ()
+#endif
 {
     char        **lptr;
 
@@ -616,7 +642,11 @@ cleanup ()
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+printDiskInfo (void)
+#else
 printDiskInfo ()
+#endif
 {
     int                 i;
     DiskInfo            totals;
@@ -663,8 +693,12 @@ printDiskInfo ()
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+printInfo (DiskInfo *diskInfo)
+#else
 printInfo (diskInfo)
     DiskInfo            *diskInfo;
+#endif
 {
     double              used;
     double              totAvail;
@@ -844,9 +878,13 @@ printInfo (diskInfo)
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+addTotals (DiskInfo *diskInfo, DiskInfo *totals)
+#else
 addTotals (diskInfo, totals)
     DiskInfo      *diskInfo;
     DiskInfo      *totals;
+#endif
 {
     totals->totalBlocks += diskInfo->totalBlocks;
     totals->freeBlocks += diskInfo->freeBlocks;
@@ -864,7 +902,11 @@ addTotals (diskInfo, totals)
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+printTitle (void)
+#else
 printTitle ()
+#endif
 {
     char                *ptr;
     int                 valid;
@@ -1038,10 +1080,14 @@ printTitle ()
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+printPerc (double used, double totAvail, char *format)
+#else
 printPerc (used, totAvail, format)
     double      used;
     double      totAvail;
     char        *format;
+#endif
 {
     double      perc;
 
@@ -1067,9 +1113,13 @@ printPerc (used, totAvail, format)
  */
 
 static char *
+#if defined (CAN_PROTOTYPE)
+Realloc (char *ptr, long size)
+#else
 Realloc (ptr, size)
     char      *ptr;
     long      size;
+#endif
 {
     if (ptr == (char *) NULL)
     {
@@ -1085,10 +1135,14 @@ Realloc (ptr, size)
 
 
 static void
+#if defined (CAN_PROTOTYPE)
+printFileInfo (int optind, int argc, char *argv [])
+#else
 printFileInfo (optind, argc, argv)
     int                 optind;
     int                 argc;
     char                *argv [];
+#endif
 {
     int                 i;
     int                 j;
@@ -1142,11 +1196,15 @@ printFileInfo (optind, argc, argv)
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+sortArray (char *data, int dataSize, int count, DI_SORT_FUNC compareFunc)
+#else
 sortArray (data, dataSize, count, compareFunc)
     char            *data;
     int             dataSize;
     int             count;
     DI_SORT_FUNC    compareFunc;
+#endif
 {
     register int    j;
     char            *tempData;
@@ -1203,9 +1261,13 @@ sortArray (data, dataSize, count, compareFunc)
 
 
 static int
+#if defined (CAN_PROTOTYPE)
+diCompare (char *a, char *b)
+#else
 diCompare (a, b)
     char        *a;
     char        *b;
+#endif
 {
     DiskInfo    *di1;
     DiskInfo    *di2;
@@ -1245,14 +1307,18 @@ diCompare (a, b)
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+getDiskStatInfo (void)
+#else
 getDiskStatInfo ()
+#endif
 {
     int         i;
     struct stat statBuf;
 
     for (i = 0; i < diCount; ++i)
     {
-        diskInfo [i].st_dev = DI_UNKNOWN_DEV;
+        diskInfo [i].st_dev = (_ulong) DI_UNKNOWN_DEV;
 
         if (stat (diskInfo [i].name, &statBuf) == 0)
         {
@@ -1279,7 +1345,11 @@ getDiskStatInfo ()
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+getDiskSpecialInfo (void)
+#else
 getDiskSpecialInfo ()
+#endif
 {
     int         i;
     struct stat statBuf;
@@ -1312,7 +1382,11 @@ getDiskSpecialInfo ()
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+checkDiskInfo (void)
+#else
 checkDiskInfo ()
+#endif
 {
     int           i;
     int           j;
@@ -1501,7 +1575,11 @@ checkDiskInfo ()
  */
 
 static void
+#if defined (CAN_PROTOTYPE)
+usage (void)
+#else
 usage ()
+#endif
 {
     printf ("di ver $Revision$    Default Format: %s\n", DI_DEFAULT_FORMAT);
          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
@@ -1535,9 +1613,13 @@ usage ()
 
 
 static void
+#if defined (CAN_PROTOTYPE)
+processArgs (int argc, char *argv [])
+#else
 processArgs (argc, argv)
     int         argc;
     char        *argv [];
+#endif
 {
     int         ch;
 
@@ -1700,9 +1782,13 @@ processArgs (argc, argv)
 
     /* list is assumed to be global */
 static void
+#if defined (CAN_PROTOTYPE)
+parseList (char ***list, char *str)
+#else
 parseList (list, str)
     char        ***list;
     char        *str;
+#endif
 {
     char        *dstr;
     char        *ptr;
@@ -1762,8 +1848,12 @@ parseList (list, str)
 
 
 static void
+#if defined (CAN_PROTOTYPE)
+checkIgnoreList (DiskInfo *diskInfo)
+#else
 checkIgnoreList (diskInfo)
     DiskInfo        *diskInfo;
+#endif
 {
     char            **ptr;
 
@@ -1789,8 +1879,12 @@ checkIgnoreList (diskInfo)
 }
 
 static void
+#if defined (CAN_PROTOTYPE)
+checkIncludeList (DiskInfo *diskInfo)
+#else
 checkIncludeList (diskInfo)
     DiskInfo        *diskInfo;
+#endif
 {
     char            **ptr;
 
@@ -1819,6 +1913,95 @@ checkIncludeList (diskInfo)
     } /* if an include list was specified */
 }
 
+
+#if defined (HAS_FS_INFO)
+
+/*
+ * getDiskEntries
+ *
+ * For BeOS.
+ *
+ */
+
+static int
+getDiskEntries (void)
+{
+    status_t        stat;
+    int             idx;
+    int32           count;
+    dev_t           dev;
+    char            buff [B_FILE_NAME_LENGTH];
+    fs_info         fsinfo;
+    double          mult;
+    node_ref        nref;
+    BDirectory      *dir;
+    BEntry          entry;
+    BPath           path;
+
+    count = 0;
+    while ((dev = next_dev (&count)) != B_BAD_VALUE)
+    {
+        if ((stat = fs_stat_dev (dev, &fsinfo)) == B_BAD_VALUE)
+        {
+            break;
+        }
+
+        idx = diCount;
+        ++diCount;
+        diskInfo = (DiskInfo *) Realloc ((char *) diskInfo,
+                sizeof (DiskInfo) * diCount);
+        memset ((char *) &diskInfo [idx], '\0', sizeof (DiskInfo));
+        diskInfo [idx].printFlag = DI_OK;
+        *buff = '\0';
+        nref.device = dev;
+        nref.node = fsinfo.root;
+        dir = new BDirectory (&nref);
+        stat = dir->GetEntry (&entry);
+        stat = entry.GetPath (&path);
+        strncpy (diskInfo [idx].name, path.Path (), DI_NAME_LEN);
+        strncpy (diskInfo [idx].special, fsinfo.device_name, DI_SPEC_NAME_LEN);
+        strncpy (diskInfo [idx].fsType, fsinfo.fsh_name, DI_TYPE_LEN);
+        diskInfo [idx].isLocal = TRUE;
+        mult = (double) (long) fsinfo.block_size / dispBlockSize;
+        diskInfo [idx].totalBlocks =
+                ((double) (_s_fs_size_t) fsinfo.total_blocks * mult);
+        diskInfo [idx].freeBlocks =
+                ((double) (_s_fs_size_t) fsinfo.free_blocks * mult);
+        diskInfo [idx].availBlocks =
+                ((double) (_s_fs_size_t) fsinfo.free_blocks * mult);
+        diskInfo [idx].totalInodes = fsinfo.total_nodes;
+        diskInfo [idx].freeInodes = fsinfo.free_nodes;
+        diskInfo [idx].availInodes = fsinfo.free_nodes;
+
+        checkIgnoreList (&diskInfo [idx]);
+        checkIncludeList (&diskInfo [idx]);
+
+        if (debug > 0)
+        {
+            printf ("mnt:%s - %s\n", diskInfo [idx].name,
+                    diskInfo [idx].special);
+            printf ("dev:%d fs:%s\n", dev, diskInfo [idx].fsType);
+        }
+        if (debug > 1)
+        {
+            printf ("%s: %s\n", diskInfo [idx].name, diskInfo [idx].fsType);
+            printf ("\tmult:%f\n", mult);
+            printf ("\tblocks: tot:%ld free:%ld\n",
+                    fsinfo.total_blocks, fsinfo.free_blocks);
+            printf ("\tinodes: tot:%ld free:%ld\n",
+                    fsinfo.total_nodes, fsinfo.free_nodes);
+        }
+    }
+    return 0;
+}
+
+static void
+getDiskInfo (void)
+{
+    return;
+}
+
+#endif
 
 #if defined (HAS_GETMNTENT) && ! defined (HAS_SETMNTENT)
 
@@ -1939,7 +2122,7 @@ getDiskEntries ()
 
 #if ! defined (HAS_GETMNTENT) && ! defined (HAS_MNTCTL) && \
         ! defined (HAS_GETMNTINFO) && ! defined (HAS_GETMNT) && \
-	! defined (HAS_GETDISKFREESPACE)
+	! defined (HAS_GETDISKFREESPACE) && ! defined (HAS_FS_INFO)
 
 /*
  * getDiskEntries
@@ -2988,7 +3171,9 @@ getDiskInfo ()
                 diskInfo [i].freeInodes = statBuf.f_ffree;
                 diskInfo [i].availInodes = statBuf.f_favail;
 
+#if defined (HAS_STATVFS_BASETYPE)
                 strncpy (diskInfo [i].fsType, statBuf.f_basetype, DI_TYPE_LEN);
+#endif
 
                 if (debug > 1)
                 {
