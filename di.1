@@ -4,7 +4,7 @@
 .\"
 .\" di.1
 .\"
-.\" Copyright 1994, 1995, 1996, 1997, 1998 Brad Lanam  Walnut Creek CA USA
+.\" Copyright 1994-1999 Brad Lanam  Walnut Creek CA USA
 .\"
 .\" bll@gentoo.com
 .\"
@@ -45,7 +45,7 @@ block count of 0 will not be displayed.
 Filesystems that have a mount option of 'ignore' set will not
 be displayed.
 .IP
-Filesystems that are automounted, and are duplicates of an 
+Filesystems that are automounted, and are duplicates of an
 existing filesystem are not displayed.  (May not work on
 all systems).
 .PP
@@ -215,7 +215,8 @@ is formatted to the maximum width necessary for the longest file system
 type.
 .TP
 .B I
-Print the time the filesystem was mounted.
+Print the time the filesystem was mounted.  This column is
+not supported on all systems.
 .TP
 .B O
 Print the filesystem mount options.
@@ -241,11 +242,11 @@ Various \fIdf\fR
 equivalent format strings for System V release 4 are:
 .PP
 .RS
-\fI/usr/bin/df -v\fR     di -dp \-f Bmsbuf1
+\fI/usr/bin/df -v\fR     di -dp \-f msbuf1
 .br
-\fI/usr/bin/df -k\fR     di -dk \-f Bsbcvpm
+\fI/usr/bin/df -k\fR     di -dk \-f sbcvpm
 .br
-\fI/usr/ucb/df\fR        di -dk \-f Bsbuv2m
+\fI/usr/ucb/df\fR        di -dk \-f sbuv2m
 .RE
 .PP
 If you like your numbers to add up/calculate the percentage
