@@ -6,13 +6,13 @@ static char    di_c_rcsid [] =
 static char    di_c_source [] =
 "$Source$";
 static char    copyright [] =
-"Copyright 1994-1998 Brad Lanam, Walnut Creek, CA";
+"Copyright 1994-1999 Brad Lanam, Walnut Creek, CA";
 #endif
 
 /*
  * di.c
  *
- *   Copyright 1994-1998 Brad Lanam,  Walnut Creek, CA
+ *   Copyright 1994-1999 Brad Lanam,  Walnut Creek, CA
  *
  *  Warning: Do not replace your systems 'df' command with this program.
  *           You will in all likelihood break your installation procedures.
@@ -88,6 +88,11 @@ static char    copyright [] =
  *  equal to the number of free blocks.
  *
  *  HISTORY:
+ *     3 jan 99 bll
+ *          Finalize changes for metaconfig.
+ *          Always get stat() for disk device.
+ *          Remove duplicate disks from display.
+ *          Add NetBSD, Unicos, IRIX changes
  *     8 sep 97 bll
  *          Solaris large file version; AIX typo fix
  *     15 aug 95 bll
@@ -159,143 +164,188 @@ static char    copyright [] =
  *
  */
 
-#if defined (__STDC__) || defined (M_XENIX)
-# define PROTO(x)         x
-#endif
-
-#if ! defined (PROTO)
-# define PROTO(x)         ()
-#endif
+#include "config.h"
 
 #include <stdio.h>
-#if ! defined (HAS_NO_STDLIB_H)
-# include <stdlib.h>
-#else
-extern char *getenv PROTO ((char *));
-#endif
+#include <ctype.h>
 #include <errno.h>
-#if ! defined (HAS_NO_MALLOC_H)
+#if defined (I_STDLIB)
+# include <stdlib.h>
+#endif
+#if defined (I_SYS_TYPES)
+# include <sys/types.h>
+#endif
+#if defined (I_LIMITS)
+# include <limits.h>
+#endif
+#if defined (I_STRING)
+# include <string.h>
+#else
+# include <strings.h>
+#endif
+#if defined (I_MEMORY)
+# include <memory.h>
+#endif
+#if defined (I_MALLOC)
 # include <malloc.h>
 #endif
-#if ! defined (HAS_NO_MEMORY_H)
-# include <memory.h>
-#else
-# define memcpy(dst, src, cnt)     (bcopy((src), (dst), (cnt)), dst)
-# if defined (NEED_BCOPY_DEFS)
-extern int bcopy (char *, char *, int);
-# endif
-#endif
-#if defined (HAS_STRINGS_H)
-# include <strings.h>
-#else
-# include <string.h>
-#endif
-#if ! defined (HAS_NO_UNISTD_H)
+#if defined (I_UNISTD)
 # include <unistd.h>
 #endif
-#if defined (NEED_TIME_H)
+#if defined (I_TIME)
 # include <time.h>
 #endif
-#include <ctype.h>
-#include <sys/types.h>
-#if ! defined (HAS_NO_SYSPARAM_H)
+#if defined (I_SYS_TIME)
+# include <sys/time.h>
+#endif
+#if defined (I_SYS_STAT)
+# include <sys/stat.h>
+#endif
+#if defined (I_SYS_PARAM)
 # include <sys/param.h>
 #endif
-#include <sys/stat.h>
 
-#if defined (_POSIX_SOURCE) && defined (NEED_ULONG_DEF)
-typedef ulong_t u_long;
-#endif
-
-#if defined (HAS_MNTTAB)
+#if defined (I_SYS_MNTTAB)
 # include <sys/mnttab.h>
 #endif
-#if defined (HAS_SVR3_MNTTAB)
+#if defined (I_MNTTAB)
 # include <mnttab.h>
-# if ! defined (M_XENIX)
-#  include <limits.h>
-#  ifdef PATH_MAX
-#   define MAXPATHLEN        PATH_MAX
-#  endif
-#  ifdef _POSIX_PATH_MAX
-#   define MAXPATHLEN        _POSIX_PATH_MAX
-#  endif
-# else
-#  define MAXPATHLEN         LPNMAX
-# endif
 #endif
-
-#if defined (HAS_MNTENT)
-# define NO_MOUNT_TIME
+#if defined (I_MNTENT)
 # include <mntent.h>
 #endif
-
-#if defined (HAS_GETMNTINFO)
-# define NO_MOUNT_TIME
-# include <sys/mount.h>
-# if ! defined (HAS_NO_FSTYPES_H)
-#  include <sys/fs_types.h>
-# endif
+#if defined (I_SYS_MNTENT)
+# include <sys/mntent.h>
 #endif
-#if defined (HAS_GETMNT)
-# include <limits.h>
+#if defined (I_SYS_MOUNT)
 # include <sys/mount.h>
-# include <sys/fs_types.h>
 #endif
-#if defined (HAS_MNTCTL)          /* AIX v3.2 */
+#if defined (I_SYS_FSTYPES)
+# include <sys/fstypes.h>
+#endif
+#if defined (I_SYS_MNTCTL)
 # include <sys/mntctl.h>
+#endif
+#if defined (I_SYS_VMOUNT)
 # include <sys/vmount.h>
+#endif
+#if defined (I_SYS_STATFS) && ! defined (I_SYS_STATVFS)
 # include <sys/statfs.h>
+#endif
+#if defined (I_FSHELP)
 # include <fshelp.h>
-# define FSMAGIC 5      /* base AIX configuration has 5 file systems */
-#endif /* HAS_MNTCTL */
-
-#if defined (HAS_STATVFS)
+#endif
+#if defined (I_SYS_STATVFS)
 # include <sys/statvfs.h>
 #endif
-#if defined (HAS_SYSFS)
+#if defined (I_SYS_FSTYP)
 # include <sys/fstyp.h>
-# define TYPE_LEN          FSTYPSZ
+# define DI_TYPE_LEN          FSTYPSZ
 #endif
-#if defined (HAS_STATFS)
+#if defined (I_SYS_VFS)
 # include <sys/vfs.h>
-# if defined (NEED_STATFS_DEFS)
-extern int statfs PROTO ((char *, struct statfs *));
-# endif
 #endif
-#if defined (HAS_SYSV_STATFS)
-# include <sys/statfs.h>
-#endif
-
-#if defined (HAS_VFSTAB)
+#if defined (I_SYS_VFSTAB)
 # include <sys/vfstab.h>
-# if ! defined (TYPE_LEN)
-#  define TYPE_LEN         FSTYPSZ
+# if ! defined (DI_TYPE_LEN)
+#  define DI_TYPE_LEN         FSTYPSZ
 # endif
-# define VFSTAB_FILE       "/etc/vfstab"
+#endif
+#if defined (I_FSHELP)
+# include <fshelp.h>
 #endif
 
-#if defined (HAS_GETDISKFREESPACE)
-# include <windows.h>            /* ms-dos */
+#if defined (I_WINDOWS)
+# include <windows.h>            /* windows */
 #endif
 
-#if ! defined (TYPE_LEN)
-# define TYPE_LEN          16
+#if ! defined (HAS_MEMCPY) && ! defined (memcpy)
+# define memcpy(dst, src, cnt)     (bcopy((src), (dst), (cnt)), dst)
+# if ! defined (HAS_BCOPY)
+   error No memcpy/bcopy available.
+# endif
 #endif
 
-#if ! defined (UBSIZE)
-# define UBSIZE            512
-#endif
-
-#if defined (MOUNTED)
-# define MOUNT_FILE        MOUNTED
-#else
-# if defined (MNTTAB)
-#  define MOUNT_FILE       MNTTAB
+#if ! defined (MAXPATHLEN)
+# if defined (_POSIX_PATH_MAX)
+#  define MAXPATHLEN        _POSIX_PATH_MAX
 # else
-#  define MOUNT_FILE       "/etc/mnttab"
+#  if defined (PATH_MAX)
+#   define MAXPATHLEN        PATH_MAX
+#  endif
+#  if defined (LPNMAX)
+#   define MAXPATHLEN         LPNMAX
+#  endif
 # endif
 #endif
+
+#if ! defined (DI_TYPE_LEN)
+# define DI_TYPE_LEN          16
+#endif
+
+#define DI_FSMAGIC 5   /* base AIX configuration has 5 file systems */
+
+#if defined (HAS_STATFS_SYSV3) && ! defined (HAS_STATVFS) && \
+    ! defined (HAS_GETMNTINFO) && ! defined (HAS_GETMNT) /* SYSV.3 */
+# if defined (Ubsize) && Ubsize != ""
+#  define UBSIZE            Ubsize
+# endif
+# if ! defined (UBSIZE)
+#  define UBSIZE            512
+# endif
+#endif
+
+#if (defined (HAS_GETMNTENT) || defined (HAS_STATFS_BSD) || \
+        defined (HAS_STATFS_SYSV3)) && ! defined (HAS_GETMNTINFO) && \
+        ! defined (HAS_GETMNT)
+# if defined (MOUNTED)
+#  define DI_MOUNT_FILE        MOUNTED
+# else
+#  if defined (MNTTAB)
+#   define DI_MOUNT_FILE       MNTTAB
+#  else
+#   define DI_MOUNT_FILE       "/etc/mnttab"
+#  endif
+# endif
+#endif
+
+#if ! defined (HAS_MEMSET) && ! defined (memset)
+# define memset(s,c,n)    (bzero ((s), (n)), s)
+# if ! defined (HAS_BZERO)
+   error No memset/bzero available.
+# endif
+#endif
+
+#if defined (NEED_GETENV_DEF)
+  extern char *getenv _((char *));
+#endif
+
+#if defined (NEED_STATFS_DEFS)
+  extern int statfs _((char *, struct statfs *));
+#endif
+
+#if defined (NEED_ERRNO_DEFS)
+extern int     errno;
+#endif
+
+#if defined (_LARGEFILE_SOURCE) && _FILE_OFFSET_BITS == 64
+# define HAS_64BIT_STATFS_FLDS 1
+#endif
+
+#if defined (HAS_64BIT_STATFS_FLDS)
+typedef unsigned long long _fs_size_t;
+typedef long long _s_fs_size_t;
+#else
+typedef unsigned long _fs_size_t;
+typedef long _s_fs_size_t;
+#endif
+
+#if ! defined (HAS_OPTIND)
+  extern int optind;
+  extern char *optarg;
+#endif
+
+/* end of system specific includes/configurations */
 
 #if ! defined (TRUE)
 # define TRUE             1
@@ -304,43 +354,36 @@ extern int statfs PROTO ((char *, struct statfs *));
 # define FALSE            0
 #endif
 
-#if defined (HAS_BZERO)
-# if defined (NEED_BZERO_DEFS)
-extern int bzero (char *, int);
-# endif
-#  define memset(s,c,n)    (bzero ((s), (n)), s)
-#endif
-
-#define F_ALL               0x00000001
-#define F_LOCAL_ONLY        0x00000002
-#define F_TOTAL             0x00000010
-#define F_NO_HEADER         0x00000020
-#define F_DEBUG_HDR         0x00000040
+#define DI_F_ALL               0x00000001
+#define DI_F_LOCAL_ONLY        0x00000002
+#define DI_F_TOTAL             0x00000010
+#define DI_F_NO_HEADER         0x00000020
+#define DI_F_DEBUG_HDR         0x00000040
 
     /* mount information */
-#define FMT_MOUNT           'm'
-#define FMT_MOUNT_FULL      'M'
-#define FMT_SPECIAL         's'
-#define FMT_SPECIAL_FULL    'S'
-#define FMT_TYPE            't'
-#define FMT_TYPE_FULL       'T'
+#define DI_FMT_MOUNT           'm'
+#define DI_FMT_MOUNT_FULL      'M'
+#define DI_FMT_SPECIAL         's'
+#define DI_FMT_SPECIAL_FULL    'S'
+#define DI_FMT_TYPE            't'
+#define DI_FMT_TYPE_FULL       'T'
 
     /* disk information */
-#define FMT_BTOT            'b'
-#define FMT_BTOT_AVAIL      'B'
-#define FMT_BUSED           'u'
-#define FMT_BCUSED          'c'
-#define FMT_BFREE           'f'
-#define FMT_BAVAIL          'v'
-#define FMT_BPERC_AVAIL     'p'
-#define FMT_BPERC_FREE      '1'
-#define FMT_BPERC_BSD       '2'
-#define FMT_ITOT            'i'
-#define FMT_IUSED           'U'
-#define FMT_IFREE           'F'
-#define FMT_IPERC           'P'
-#define FMT_MOUNT_TIME      'I'
-#define FMT_MOUNT_OPTIONS   'O'
+#define DI_FMT_BTOT            'b'
+#define DI_FMT_BTOT_AVAIL      'B'
+#define DI_FMT_BUSED           'u'
+#define DI_FMT_BCUSED          'c'
+#define DI_FMT_BFREE           'f'
+#define DI_FMT_BAVAIL          'v'
+#define DI_FMT_BPERC_AVAIL     'p'
+#define DI_FMT_BPERC_FREE      '1'
+#define DI_FMT_BPERC_BSD       '2'
+#define DI_FMT_ITOT            'i'
+#define DI_FMT_IUSED           'U'
+#define DI_FMT_IFREE           'F'
+#define DI_FMT_IPERC           'P'
+#define DI_FMT_MOUNT_TIME      'I'
+#define DI_FMT_MOUNT_OPTIONS   'O'
 
 #define DI_IGNORE           0
 #define DI_OK               1
@@ -356,63 +399,45 @@ extern int bzero (char *, int);
 #define DI_UNKNOWN_DEV      -1L
 #define DI_LIST_SEP         ","
 
-#define ALL_FORMAT          "MTS\n\tIO\n\tbuf1\n\tbcvp\n\tBuv2\n\tiUFP"
+#define DI_ALL_FORMAT          "MTS\n\tIO\n\tbuf1\n\tbcvp\n\tBuv2\n\tiUFP"
 
-#define HALF_K              512.0
-#define ONE_K               1024.0
-#define ONE_MEG             1048576.0
-#define ONE_GIG             1073241824.0
+#define DI_HALF_K              512.0
+#define DI_ONE_K               1024.0
+#define DI_ONE_MEG             1048576.0
+#define DI_ONE_GIG             1073241824.0
 
 #if ! defined (MAXPATHLEN)
 # define MAXPATHLEN         255
 #endif
-#define SPEC_NAME_LEN       MAXPATHLEN
-#define OPT_LEN             MAXPATHLEN
-#define MNT_TIME_LEN        24
+#define DI_SPEC_NAME_LEN       MAXPATHLEN
+#define DI_OPT_LEN             MAXPATHLEN
+#define DI_MNT_TIME_LEN        24
 
-#define RETRY_COUNT         5
-#define MAX_REMOTE_TYPES    20
+#define DI_RETRY_COUNT         5
+#define DI_MAX_REMOTE_TYPES    20
 
    /* you may want to change some of these values.  Be sure to change all */
    /* related entries.                                                    */
-/* #define DEFAULT_FORMAT      "mbuvpiUFP" */
-#if ! defined (DEFAULT_FORMAT)
-# define DEFAULT_FORMAT      "smbuvpT"
+/* #define DI_DEFAULT_FORMAT      "mbuvpiUFP" */
+#if ! defined (DI_DEFAULT_FORMAT)
+# define DI_DEFAULT_FORMAT      "smbuvpT"
 #endif
-#if defined (NO_MOUNT_TIME)
-# define DEF_MOUNT_FORMAT    "MSTO"
+#if defined (HAS_MNT_TIME)
+# define DI_DEF_MOUNT_FORMAT    "MSTIO"
 #else
-# define DEF_MOUNT_FORMAT    "MSTIO"
+# define DI_DEF_MOUNT_FORMAT    "MSTO"
 #endif
-#define PERC_FMT            "%3.0f%% "
-#define PERC_LBL_FMT        "%5s"
-#define NAME_LEN            MAXPATHLEN
-#define FSTYPE_FMT          "%-7.7s"
-#define MOUNT_FMT           "%-15.15s"
-#define SPEC_FMT            "%-18.18s"
+#define DI_PERC_FMT            "%3.0f%% "
+#define DI_PERC_LBL_FMT        "%5s"
+#define DI_NAME_LEN            MAXPATHLEN
+#define DI_FSTYPE_FMT          "%-7.7s"
+#define DI_MOUNT_FMT           "%-15.15s"
+#define DI_SPEC_FMT            "%-18.18s"
 
-#define UNKNOWN_FSTYPE      "Unknown fstyp %.2d"
+#define DI_UNKNOWN_FSTYPE      "Unknown fstyp %.2d"
 
 typedef unsigned long _ulong;
-typedef int (*SORT_FUNC) PROTO ((char *, char *));
-
-#if defined (NEED_GETOPT_DEFS)
-extern char    *optarg;
-extern int     optind;
-    /* SCO will throw up on this...just comment it out */
-extern int     getopt PROTO ((int, char *[], const char *));
-#endif
-#if defined (NEED_ERRNO_DEFS)
-extern int     errno;
-#endif
-
-#if defined (_LARGEFILE_SOURCE) && _FILE_OFFSET_BITS == 64
-typedef unsigned long long _fs_size_t;
-typedef long long _s_fs_size_t;
-#else
-typedef unsigned long _fs_size_t;
-typedef long _s_fs_size_t;
-#endif
+typedef int (*DI_SORT_FUNC) _((char *, char *));
 
 typedef struct
 {
@@ -422,16 +447,18 @@ typedef struct
     _fs_size_t      totalInodes;
     _fs_size_t      freeInodes;
     _fs_size_t      availInodes;
-    long            st_dev;                      /* disk device number   */
+    _ulong          st_dev;                      /* disk device number   */
+    _ulong          sp_dev;                      /* special device number*/
+    _ulong          sp_rdev;                     /* special rdev #       */
     char            printFlag;                   /* do we want to print  */
                                                  /* this entry?          */
     char            isLocal;                     /* is this mount point  */
                                                  /* local?               */
-    char            name [NAME_LEN + 1];         /* mount point          */
-    char            special [SPEC_NAME_LEN + 1]; /* special device name  */
-    char            fsType [TYPE_LEN + 1];       /* type of file system  */
-    char            options [OPT_LEN + 1];
-    char            mountTime [MNT_TIME_LEN + 1];
+    char            name [DI_NAME_LEN + 1];         /* mount point          */
+    char            special [DI_SPEC_NAME_LEN + 1]; /* special device name  */
+    char            fsType [DI_TYPE_LEN + 1];       /* type of file system  */
+    char            options [DI_OPT_LEN + 1];
+    char            mountTime [DI_MNT_TIME_LEN + 1];
 } DiskInfo;
 
 static DiskInfo     *diskInfo = { (DiskInfo *) NULL };
@@ -440,7 +467,7 @@ static int          debug = { 0 };
 static _ulong       flags = { 0 };
 static int          sortType = { DI_SORT_NAME };
 static int          sortOrder = { DI_SORT_ASCENDING };
-static char         *formatString = { DEFAULT_FORMAT };
+static char         *formatString = { DI_DEFAULT_FORMAT };
 static char         mountFormat [20];
  static char         specialFormat [20];
 static char         typeFormat [20];
@@ -454,31 +481,32 @@ static char         inodeFormat [20];
 static char         inodeLabelFormat [20];
 static char         **ignoreList = { (char **) NULL };
 static char         **includeList = { (char **) NULL };
-static double       dispBlockSize = { ONE_MEG };
+static double       dispBlockSize = { DI_ONE_MEG };
 static int          remoteFileSystemCount = { 0 };
-static char         remoteFileSystemTypes [MAX_REMOTE_TYPES][TYPE_LEN];
+static char         remoteFileSystemTypes [DI_MAX_REMOTE_TYPES][DI_TYPE_LEN];
 
 
-static void cleanup             PROTO ((void));
-static void printDiskInfo       PROTO ((void));
-static void printInfo           PROTO ((DiskInfo *));
-static void addTotals           PROTO ((DiskInfo *, DiskInfo *));
-static void printTitle          PROTO ((void));
-static void printPerc           PROTO ((double, double, char *));
-static char *Realloc            PROTO ((char *, long));
-static void sortArray           PROTO ((char *, int, int, SORT_FUNC));
-static int  diCompare           PROTO ((char *, char *));
-static void getDiskStatInfo     PROTO ((void));
-static void printFileInfo       PROTO ((int, int, char *[]));
-static void checkDiskInfo       PROTO ((void));
-static void usage               PROTO ((void));
-static void processArgs         PROTO ((int, char *[]));
-static void parseList           PROTO ((char ***, char *));
-static void checkIgnoreList     PROTO ((DiskInfo *));
-static void checkIncludeList    PROTO ((DiskInfo *));
+static void cleanup             _((void));
+static void printDiskInfo       _((void));
+static void printInfo           _((DiskInfo *));
+static void addTotals           _((DiskInfo *, DiskInfo *));
+static void printTitle          _((void));
+static void printPerc           _((double, double, char *));
+static char *Realloc            _((char *, long));
+static void sortArray           _((char *, int, int, DI_SORT_FUNC));
+static int  diCompare           _((char *, char *));
+static void getDiskStatInfo     _((void));
+static void getDiskSpecialInfo  _((void));
+static void printFileInfo       _((int, int, char *[]));
+static void checkDiskInfo       _((void));
+static void usage               _((void));
+static void processArgs         _((int, char *[]));
+static void parseList           _((char ***, char *));
+static void checkIgnoreList     _((DiskInfo *));
+static void checkIncludeList    _((DiskInfo *));
 
-static int  getDiskEntries      PROTO ((void));
-static void getDiskInfo         PROTO ((void));
+static int  getDiskEntries      _((void));
+static void getDiskInfo         _((void));
 
 int
 main (argc, argv)
@@ -491,7 +519,7 @@ main (argc, argv)
     ptr = argv [0] + strlen (argv [0]) - 2;
     if (memcmp (ptr, MPROG, 2) == 0)
     {
-        formatString = DEF_MOUNT_FORMAT;
+        formatString = DI_DEF_MOUNT_FORMAT;
     }
     else    /* don't use DIFMT env var if running mi. */
     {
@@ -514,6 +542,7 @@ main (argc, argv)
     }
 
     getDiskInfo ();
+    getDiskSpecialInfo ();
     checkDiskInfo ();
     if (optind < argc)
     {
@@ -589,7 +618,7 @@ printDiskInfo ()
     strcpy (totals.name, "Total");
     totals.printFlag = DI_OK;
 
-    if ((flags & F_NO_HEADER) != F_NO_HEADER)
+    if ((flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
     {
         printTitle ();
     }
@@ -601,7 +630,8 @@ printDiskInfo ()
 
     for (i = 0; i < diCount; ++i)
     {
-        if (( (flags & F_ALL) == F_ALL && diskInfo [i].printFlag != DI_BAD) ||
+        if (( (flags & DI_F_ALL) == DI_F_ALL &&
+                diskInfo [i].printFlag != DI_BAD) ||
                 diskInfo [i].printFlag == DI_OK)
         {
             printInfo (&diskInfo [i]);
@@ -609,7 +639,8 @@ printDiskInfo ()
         }
     }
 
-    if ((flags & F_TOTAL) == F_TOTAL && (flags & F_NO_HEADER) != F_NO_HEADER)
+    if ((flags & DI_F_TOTAL) == DI_F_TOTAL &&
+            (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
     {
         printInfo (&totals);
     }
@@ -640,140 +671,142 @@ printInfo (diskInfo)
 
         switch (*ptr)
         {
-            case FMT_MOUNT:
+            case DI_FMT_MOUNT:
             {
-                printf (MOUNT_FMT, diskInfo->name);
+                printf (DI_MOUNT_FMT, diskInfo->name);
                 break;
             }
 
-            case FMT_MOUNT_FULL:
+            case DI_FMT_MOUNT_FULL:
             {
                 printf (mountFormat, diskInfo->name);
                 break;
             }
 
-            case FMT_BTOT:
+            case DI_FMT_BTOT:
             {
                 printf (blockFormat, diskInfo->totalBlocks);
                 break;
             }
 
-            case FMT_BTOT_AVAIL:
+            case DI_FMT_BTOT_AVAIL:
             {
                 printf (blockFormat, diskInfo->totalBlocks -
                         (diskInfo->freeBlocks - diskInfo->availBlocks));
                 break;
             }
 
-            case FMT_BUSED:
+            case DI_FMT_BUSED:
             {
                 printf (blockFormat, diskInfo->totalBlocks -
                         diskInfo->freeBlocks);
                 break;
             }
 
-            case FMT_BCUSED:
+            case DI_FMT_BCUSED:
             {
                 printf (blockFormat, diskInfo->totalBlocks - diskInfo->availBlocks);
                 break;
             }
 
-            case FMT_BFREE:
+            case DI_FMT_BFREE:
             {
                 printf (blockFormat, diskInfo->freeBlocks);
                 break;
             }
 
-            case FMT_BAVAIL:
+            case DI_FMT_BAVAIL:
             {
                 printf (blockFormat, diskInfo->availBlocks);
                 break;
             }
 
-            case FMT_BPERC_AVAIL:
+            case DI_FMT_BPERC_AVAIL:
             {
                 used = diskInfo->totalBlocks - diskInfo->availBlocks;
                 totAvail = diskInfo->totalBlocks;
-                printPerc (used, totAvail, PERC_FMT);
+                printPerc (used, totAvail, DI_PERC_FMT);
                 break;
             }
 
-            case FMT_BPERC_FREE:
+            case DI_FMT_BPERC_FREE:
             {
                 used = diskInfo->totalBlocks - diskInfo->freeBlocks;
                 totAvail = diskInfo->totalBlocks;
-                printPerc (used, totAvail, PERC_FMT);
+                printPerc (used, totAvail, DI_PERC_FMT);
                 break;
             }
 
-            case FMT_BPERC_BSD:
+            case DI_FMT_BPERC_BSD:
             {
                 used = diskInfo->totalBlocks - diskInfo->freeBlocks;
                 totAvail = diskInfo->totalBlocks -
                         (diskInfo->freeBlocks - diskInfo->availBlocks);
-                printPerc (used, totAvail, PERC_FMT);
+                printPerc (used, totAvail, DI_PERC_FMT);
                 break;
             }
 
-            case FMT_ITOT:
+            case DI_FMT_ITOT:
             {
                 printf (inodeFormat, diskInfo->totalInodes);
                 break;
             }
 
-            case FMT_IUSED:
+            case DI_FMT_IUSED:
             {
                 printf (inodeFormat, diskInfo->totalInodes - diskInfo->freeInodes);
                 break;
             }
 
-            case FMT_IFREE:
+            case DI_FMT_IFREE:
             {
                 printf (inodeFormat, diskInfo->freeInodes);
                 break;
             }
 
-            case FMT_IPERC:
+            case DI_FMT_IPERC:
             {
                 used = diskInfo->totalInodes - diskInfo->availInodes;
                 totAvail = diskInfo->totalInodes;
-                printPerc (used, totAvail, PERC_FMT);
+                printPerc (used, totAvail, DI_PERC_FMT);
                 break;
             }
 
-            case FMT_SPECIAL:
+            case DI_FMT_SPECIAL:
             {
-                printf (SPEC_FMT, diskInfo->special);
+                printf (DI_SPEC_FMT, diskInfo->special);
                 break;
             }
 
-            case FMT_SPECIAL_FULL:
+            case DI_FMT_SPECIAL_FULL:
             {
                 printf (specialFormat, diskInfo->special);
                 break;
             }
 
-            case FMT_TYPE:
+            case DI_FMT_TYPE:
             {
-                printf (FSTYPE_FMT, diskInfo->fsType);
+                printf (DI_FSTYPE_FMT, diskInfo->fsType);
                 break;
             }
 
-            case FMT_TYPE_FULL:
+            case DI_FMT_TYPE_FULL:
             {
                 printf (typeFormat, diskInfo->fsType);
                 break;
             }
 
-            case FMT_MOUNT_OPTIONS:
+            case DI_FMT_MOUNT_OPTIONS:
             {
                 printf (optFormat, diskInfo->options);
                 break;
             }
 
-            case FMT_MOUNT_TIME:
+            case DI_FMT_MOUNT_TIME:
             {
+#if defined (HAS_MNT_TIME)
                 printf (mTimeFormat, diskInfo->mountTime);
+#endif
                 break;
             }
 
@@ -829,9 +862,10 @@ printTitle ()
     int                 valid;
     char                tbuff [20];
 
-    if ((flags & F_DEBUG_HDR) == F_DEBUG_HDR)
+    if ((flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
     {
-        printf ("di ver $Revision$ Default Format: %s\n", DEFAULT_FORMAT);
+        printf ("di ver $Revision$ Default Format: %s\n",
+                DI_DEFAULT_FORMAT);
     }
 
     ptr = formatString;
@@ -842,34 +876,34 @@ printTitle ()
 
         switch (*ptr)
         {
-            case FMT_MOUNT:
+            case DI_FMT_MOUNT:
             {
-                printf (MOUNT_FMT, "Mount");
+                printf (DI_MOUNT_FMT, "Mount");
                 break;
             }
 
-            case FMT_MOUNT_FULL:
+            case DI_FMT_MOUNT_FULL:
             {
                 printf (mountFormat, "Mount");
                 break;
             }
 
-            case FMT_BTOT:
-            case FMT_BTOT_AVAIL:
+            case DI_FMT_BTOT:
+            case DI_FMT_BTOT_AVAIL:
             {
-                if (dispBlockSize == ONE_K)
+                if (dispBlockSize == DI_ONE_K)
                 {
                     printf (blockLabelFormat, "Kbytes");
                 }
-                else if (dispBlockSize == ONE_MEG)
+                else if (dispBlockSize == DI_ONE_MEG)
                 {
                     printf (blockLabelFormat, "  Megs");
                 }
-                else if (dispBlockSize == ONE_GIG)
+                else if (dispBlockSize == DI_ONE_GIG)
                 {
                     printf (blockLabelFormat, "  Gigs");
                 }
-                else if (dispBlockSize == HALF_K)
+                else if (dispBlockSize == DI_HALF_K)
                 {
                     printf (blockLabelFormat, "  512b");
                 }
@@ -881,90 +915,92 @@ printTitle ()
                 break;
             }
 
-            case FMT_BUSED:
-            case FMT_BCUSED:
+            case DI_FMT_BUSED:
+            case DI_FMT_BCUSED:
             {
                 printf (blockLabelFormat, "Used");
                 break;
             }
 
-            case FMT_BFREE:
+            case DI_FMT_BFREE:
             {
                 printf (blockLabelFormat, "Free");
                 break;
             }
 
-            case FMT_BAVAIL:
+            case DI_FMT_BAVAIL:
             {
                 printf (blockLabelFormat, "Avail");
                 break;
             }
 
-            case FMT_BPERC_AVAIL:
-            case FMT_BPERC_FREE:
-            case FMT_BPERC_BSD:
+            case DI_FMT_BPERC_AVAIL:
+            case DI_FMT_BPERC_FREE:
+            case DI_FMT_BPERC_BSD:
             {
-                printf (PERC_LBL_FMT, "%used");
+                printf (DI_PERC_LBL_FMT, "%used");
                 break;
             }
 
-            case FMT_ITOT:
+            case DI_FMT_ITOT:
             {
                 printf (inodeLabelFormat, "Inodes");
                 break;
             }
 
-            case FMT_IUSED:
+            case DI_FMT_IUSED:
             {
                 printf (inodeLabelFormat, "Used");
                 break;
             }
 
-            case FMT_IFREE:
+            case DI_FMT_IFREE:
             {
                 printf (inodeLabelFormat, "Free");
                 break;
             }
 
-            case FMT_IPERC:
+            case DI_FMT_IPERC:
             {
-                printf (PERC_LBL_FMT, "%used");
+                printf (DI_PERC_LBL_FMT, "%used");
                 break;
             }
 
-            case FMT_SPECIAL:
+            case DI_FMT_SPECIAL:
             {
-                printf (SPEC_FMT, "Filesystem");
+                printf (DI_SPEC_FMT, "Filesystem");
                 break;
             }
 
-            case FMT_SPECIAL_FULL:
+            case DI_FMT_SPECIAL_FULL:
             {
                 printf (specialFormat, "Filesystem");
                 break;
             }
 
-            case FMT_TYPE:
+            case DI_FMT_TYPE:
             {
-                printf (FSTYPE_FMT, "fsType");
+                printf (DI_FSTYPE_FMT, "fsType");
                 break;
             }
 
-            case FMT_TYPE_FULL:
+            case DI_FMT_TYPE_FULL:
             {
                 printf (typeFormat, "fs Type");
                 break;
             }
 
-            case FMT_MOUNT_OPTIONS:
+            case DI_FMT_MOUNT_OPTIONS:
             {
                 printf (optFormat, "Options");
                 break;
             }
 
-            case FMT_MOUNT_TIME:
+            case DI_FMT_MOUNT_TIME:
             {
+#if defined (HAS_MNT_TIME)
                 printf (mTimeFormat, "Mount Time");
+#endif
                 break;
             }
 
@@ -1056,7 +1092,7 @@ printFileInfo (optind, argc, argv)
     strcpy (totals.name, "Total");
     totals.printFlag = DI_OK;
 
-    if ((flags & F_NO_HEADER) != F_NO_HEADER)
+    if ((flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
     {
         printTitle ();
     }
@@ -1069,7 +1105,7 @@ printFileInfo (optind, argc, argv)
             {
                 if (diskInfo [j].printFlag != DI_BAD &&
                         diskInfo [j].st_dev != DI_UNKNOWN_DEV &&
-                        (long) statBuf.st_dev == diskInfo [j].st_dev)
+                        (_ulong) statBuf.st_dev == diskInfo [j].st_dev)
                 {
                     printInfo (&diskInfo [j]);
                     addTotals (&diskInfo [j], &totals);
@@ -1079,11 +1115,12 @@ printFileInfo (optind, argc, argv)
         } /* if stat ok */
         else
         {
-            perror (argv [i]);
+            fprintf (stderr, "stat: %s ", argv[i]);
+            perror ("");
         }
     } /* for each file specified on command line */
 
-    if ((flags & F_TOTAL) == F_TOTAL && (flags & F_NO_HEADER) != F_NO_HEADER)
+    if ((flags & DI_F_TOTAL) == DI_F_TOTAL && (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
     {
         printInfo (&totals);
     }
@@ -1101,7 +1138,7 @@ sortArray (data, dataSize, count, compareFunc)
     char            *data;
     int             dataSize;
     int             count;
-    SORT_FUNC       compareFunc;
+    DI_SORT_FUNC    compareFunc;
 {
     register int    j;
     char            *tempData;
@@ -1132,20 +1169,23 @@ sortArray (data, dataSize, count, compareFunc)
     {
         for (i = gap; i < count; ++i)
         {
-            memcpy ((char *) tempData, (char *) &(data [i * dataSize]), dataSize);
+            memcpy ((char *) tempData, (char *) &(data [i * dataSize]),
+                    dataSize);
             j = i - gap;
 
             while (j >= 0 &&
                 compareFunc (&(data [j * dataSize]), tempData) > 0)
             {
-                memcpy ((char *) &(data [(j + gap) * dataSize]), (char *) &(data [j * dataSize]), dataSize);
+                memcpy ((char *) &(data [(j + gap) * dataSize]),
+                        (char *) &(data [j * dataSize]), dataSize);
                 j -= gap;
             }
 
             j += gap;
             if (j != i)
             {
-                memcpy ((char *) &(data [j * dataSize]), (char *) tempData, dataSize);
+                memcpy ((char *) &(data [j * dataSize]),
+                        (char *) tempData, dataSize);
             }
         }
     }
@@ -1208,11 +1248,50 @@ getDiskStatInfo ()
 
         if (stat (diskInfo [i].name, &statBuf) == 0)
         {
-            diskInfo [i].st_dev = (long) statBuf.st_dev;
+            diskInfo [i].st_dev = (_ulong) statBuf.st_dev;
+            if (debug > 2)
+            {
+                printf ("dev: %s: %ld\n", diskInfo [i].name,
+                    diskInfo [i].st_dev);
+            }
         }
         else
         {
-            perror (diskInfo [i].name);
+            fprintf (stderr, "stat: %s ", diskInfo [i].name);
+            perror ("");
+        }
+    }
+}
+
+/*
+ * getDiskSpecialInfo
+ *
+ * gets the disk device number for each entry.
+ *
+ */
+
+static void
+getDiskSpecialInfo ()
+{
+    int         i;
+    struct stat statBuf;
+
+    for (i = 0; i < diCount; ++i)
+    {
+        if (stat (diskInfo [i].special, &statBuf) == 0)
+        {
+            diskInfo [i].sp_dev = (_ulong) statBuf.st_dev;
+            diskInfo [i].sp_rdev = (_ulong) statBuf.st_rdev;
+            if (debug > 2)
+            {
+                printf ("special dev: %s: %ld rdev: %ld\n", diskInfo [i].special,
+                        diskInfo [i].sp_dev, diskInfo [i].sp_rdev);
+            }
+        }
+        else
+        {
+            diskInfo [i].sp_dev = 0;
+            diskInfo [i].sp_rdev = 0;
         }
     }
 }
@@ -1228,6 +1307,8 @@ static void
 checkDiskInfo ()
 {
     int           i;
+    int           j;
+    int           dupCount;
     int           len;
     int           maxMountString;
     int           maxSpecialString;
@@ -1235,13 +1316,15 @@ checkDiskInfo ()
     int           maxOptString;
     int           maxMntTimeString;
     _fs_size_t    temp;
+    _ulong        sp_dev;
+    _ulong        sp_rdev;
 
 
-    maxMountString = (flags & F_NO_HEADER) == F_NO_HEADER ? 0 : 5;
-    maxSpecialString = (flags & F_NO_HEADER) == F_NO_HEADER ? 0 : 10;
-    maxTypeString = (flags & F_NO_HEADER) == F_NO_HEADER ? 0 : 7;
-    maxOptString = (flags & F_NO_HEADER) == F_NO_HEADER ? 0 : 7;
-    maxMntTimeString = (flags & F_NO_HEADER) == F_NO_HEADER ? 0 : 26;
+    maxMountString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 5;
+    maxSpecialString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 10;
+    maxTypeString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7;
+    maxOptString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7;
+    maxMntTimeString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 26;
 
     for (i = 0; i < diCount; ++i)
     {
@@ -1250,7 +1333,8 @@ checkDiskInfo ()
             /* -1 is returned.                                     */
         if (debug > 2)
         {
-            printf ("chk: free: %f\n", diskInfo [i].freeBlocks);
+            printf ("chk: %s free: %f\n", diskInfo [i].name,
+                diskInfo [i].freeBlocks);
         }
         if (diskInfo [i].freeBlocks < 0.0)
         {
@@ -1271,22 +1355,77 @@ checkDiskInfo ()
 
         if (debug > 2)
         {
-            printf ("chk: total: %f\n", diskInfo [i].totalBlocks);
+            printf ("chk: %s total: %f\n", diskInfo [i].name,
+                    diskInfo [i].totalBlocks);
         }
         if (diskInfo [i].totalBlocks <= 0.0 &&
             diskInfo [i].printFlag != DI_BAD)
         {
             diskInfo [i].printFlag = DI_IGNORE;
+            if (debug > 2)
+            {
+                printf ("chk: ignore: totalBlocks <= 0: %s\n",
+                        diskInfo [i].name);
+            }
         }
 
         checkIgnoreList (&diskInfo [i]);
         checkIncludeList (&diskInfo [i]);
     } /* for all disks */
 
+        /* this loop sets duplicate entries that are not char special to */
+        /* be ignored.                                                   */
+    for (i = 0; i < diCount; ++i)
+    {
+        if (diskInfo [i].sp_rdev != 0 && (diskInfo [i].printFlag == DI_OK ||
+            ((flags & DI_F_ALL) == DI_F_ALL && diskInfo [i].printFlag != DI_BAD)))
+        {
+            sp_dev = diskInfo [i].sp_dev;
+            sp_rdev = diskInfo [i].sp_rdev;
+            dupCount = 0;
+
+            for (j = 0; j < diCount; ++j)
+            {
+                if (diskInfo [j].sp_dev == sp_rdev)
+                {
+                    ++dupCount;
+                }
+            }
+
+            if (debug > 2)
+            {
+                printf ("dup: chk: %s %ld %ld dup: %d\n", diskInfo [i].name,
+                    sp_dev, sp_rdev, dupCount);
+            }
+
+            for (j = 0; dupCount > 0 && j < diCount; ++j)
+            {
+                if (diskInfo [j].sp_dev == sp_rdev && diskInfo [j].sp_rdev == 0)
+                {
+                    diskInfo [j].printFlag = DI_IGNORE;
+                    if (debug > 2)
+                    {
+                        printf ("chk: ignore: duplicate: %s\n",
+                                diskInfo [j].name);
+                    }
+                }
+            } /* duplicate check for each disk */
+        } /* if this is a printable disk */
+        else
+        {
+            if (debug > 2)
+            {
+                printf ("chk: dup not checked: %s prnt: %d dev: %ld rdev: %ld\n",
+                        diskInfo [i].name, diskInfo [i].printFlag,
+                        diskInfo [i].sp_dev, diskInfo [i].sp_rdev);
+            }
+        }
+    } /* for each disk */
+
         /* this loop gets the max string lengths */
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].printFlag == DI_OK || (flags & F_ALL) == F_ALL)
+        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
         {
             len = strlen (diskInfo [i].name);
             if (len > maxMountString)
@@ -1327,7 +1466,7 @@ checkDiskInfo ()
     sprintf (optFormat, "%%-%d.%ds", maxOptString, maxOptString);
     sprintf (mTimeFormat, "%%-%d.%ds", maxMntTimeString, maxMntTimeString);
 
-    if (dispBlockSize <= ONE_K)
+    if (dispBlockSize <= DI_ONE_K)
     {
         sprintf (blockFormat, "%%%d.0f", width);
     }
@@ -1336,7 +1475,7 @@ checkDiskInfo ()
         sprintf (blockFormat, "%%%d.1f", width);
     }
     sprintf (blockLabelFormat, "%%%ds", width);
-#if defined (_LARGEFILE_SOURCE) && _FILE_OFFSET_BITS == 64
+#if defined (HAS_64BIT_STATFS_FLDS)
     sprintf (inodeFormat, "%%%dllu", inodeWidth);
 #else
     sprintf (inodeFormat, "%%%dlu", inodeWidth);
@@ -1352,7 +1491,7 @@ checkDiskInfo ()
 static void
 usage ()
 {
-    printf ("di ver $Revision$    Default Format: %s\n", DEFAULT_FORMAT);
+    printf ("di ver $Revision$    Default Format: %s\n", DI_DEFAULT_FORMAT);
          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
     printf ("Usage: di [-ant] [-f format] [-s sort-type] [-i ignore-fstyp-list]\n");
     printf ("       [-I include-fstyp-list] [-w kbyte-width] [-W inode-width] [file [...]]\n");
@@ -1397,9 +1536,9 @@ processArgs (argc, argv)
         {
             case 'A':
             {
-                formatString = ALL_FORMAT;
-                flags |= F_ALL | F_DEBUG_HDR | F_TOTAL;
-                flags &= ~ F_NO_HEADER;
+                formatString = DI_ALL_FORMAT;
+                flags |= DI_F_ALL | DI_F_DEBUG_HDR | DI_F_TOTAL;
+                flags &= ~ DI_F_NO_HEADER;
                 width = 10;
                 inodeWidth = 10;
                 break;
@@ -1407,7 +1546,7 @@ processArgs (argc, argv)
 
             case 'a':
             {
-                flags |= F_ALL;
+                flags |= DI_F_ALL;
                 break;
             }
 
@@ -1417,31 +1556,31 @@ processArgs (argc, argv)
                 {
                     case 'p':
                     {
-                        dispBlockSize = HALF_K;
+                        dispBlockSize = DI_HALF_K;
                         break;
                     }
 
                     case 'k':
                     {
-                        dispBlockSize = ONE_K;
+                        dispBlockSize = DI_ONE_K;
                         break;
                     }
 
                     case 'm':
                     {
-                        dispBlockSize = ONE_MEG;
+                        dispBlockSize = DI_ONE_MEG;
                         break;
                     }
 
                     case 'g':
                     {
-                        dispBlockSize = ONE_GIG;
+                        dispBlockSize = DI_ONE_GIG;
                         break;
                     }
 
                     default:
                     {
-                        if (isdigit (*optarg))
+                        if (isdigit ((int) (*optarg)))
                         {
                             dispBlockSize = atof (optarg);
                         }
@@ -1478,13 +1617,13 @@ processArgs (argc, argv)
 
             case 'l':
             {
-                flags |= F_LOCAL_ONLY;
+                flags |= DI_F_LOCAL_ONLY;
                 break;
             }
 
             case 'n':
             {
-                flags |= F_NO_HEADER;
+                flags |= DI_F_NO_HEADER;
                 break;
             }
 
@@ -1515,7 +1654,7 @@ processArgs (argc, argv)
 
             case 't':
             {
-                flags |= F_TOTAL;
+                flags |= DI_F_TOTAL;
                 break;
             }
 
@@ -1625,6 +1764,11 @@ checkIgnoreList (diskInfo)
             if (strcmp (*ptr, diskInfo->fsType) == 0)
             {
                 diskInfo->printFlag = DI_IGNORE;
+                if (debug > 2)
+                {
+                    printf ("chkign: ignore: fstype %s match: %s\n", *ptr,
+                            diskInfo->name);
+                }
                 break;
             }
             ++ptr;
@@ -1652,6 +1796,11 @@ checkIncludeList (diskInfo)
             else
             {
                 diskInfo->printFlag = DI_IGNORE;
+                if (debug > 2)
+                {
+                    printf ("chkinc: ! include: fstype %s match: %s\n", *ptr,
+                            diskInfo->name);
+                }
             }
             ++ptr;
         }
@@ -1659,9 +1808,9 @@ checkIncludeList (diskInfo)
 }
 
 
-#if defined (HAS_MNTTAB)
+#if defined (HAS_GETMNTENT) && ! defined (HAS_SETMNTENT)
 
-#define DFS_FS_TABLE 	"/etc/dfs/fstypes"
+# define DFS_FS_TABLE        "/etc/dfs/fstypes"
 
 /*
  * getDiskEntries
@@ -1682,7 +1831,7 @@ getDiskEntries ()
     char            *devp;   /* local ptr to dev entry */
 
 
-    if ((flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+    if ((flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
     {
         i = remoteFileSystemCount;
 
@@ -1700,9 +1849,9 @@ getDiskEntries ()
         remoteFileSystemCount = i;
     }
 
-    if ((f = fopen (MOUNT_FILE, "r")) == (FILE *) NULL)
+    if ((f = fopen (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
     {
-        fprintf (stderr, "Unable to open: %s errno %d\n", MOUNT_FILE, errno);
+        fprintf (stderr, "Unable to open: %s errno %d\n", DI_MOUNT_FILE, errno);
         return -1;
     }
 
@@ -1715,9 +1864,28 @@ getDiskEntries ()
         memset ((char *) &diskInfo [idx], '\0', sizeof (DiskInfo));
         diskInfo [idx].printFlag = DI_OK;
 
-        strncpy (diskInfo [idx].special, mntEntry.mnt_special, SPEC_NAME_LEN);
-        strncpy (diskInfo [idx].name, mntEntry.mnt_mountp, NAME_LEN);
-        if (devp = strstr (mntEntry.mnt_mntopts, "dev"))
+        strncpy (diskInfo [idx].special, mntEntry.mnt_special,
+                DI_SPEC_NAME_LEN);
+        strncpy (diskInfo [idx].name, mntEntry.mnt_mountp, DI_NAME_LEN);
+# if defined (MNTOPT_IGNORE)
+        if (strstr (mntEntry.mnt_mntopts, MNTOPT_IGNORE) != (char *) NULL)
+# else
+        if (strstr (mntEntry.mnt_mntopts, "ignore") != (char *) NULL)
+# endif
+        {
+            diskInfo [idx].printFlag = DI_IGNORE;
+            if (debug > 2)
+            {
+                printf ("mnt: ignore: mntopt 'ignore': %s\n",
+                        diskInfo [idx].name);
+            }
+        }
+# if defined (MNTOPT_DEV)
+        sprintf (buff, "%s=", MNTOPT_DEV);
+        if ((devp = strstr (mntEntry.mnt_mntopts, buff)) != (char *) NULL)
+# else
+        if ((devp = strstr (mntEntry.mnt_mntopts, "dev=")) != (char *) NULL)
+# endif
         {
             if (devp != mntEntry.mnt_mntopts)
             {
@@ -1725,12 +1893,12 @@ getDiskEntries ()
             }
             *devp = 0;   /* point to preceeding comma and cut off */
         }
-        strncpy (diskInfo [idx].options, mntEntry.mnt_mntopts, OPT_LEN);
+        strncpy (diskInfo [idx].options, mntEntry.mnt_mntopts, DI_OPT_LEN);
         mtime = atol (mntEntry.mnt_time);
-        strncpy (diskInfo [idx].mountTime, ctime (&mtime), MNT_TIME_LEN);
+        strncpy (diskInfo [idx].mountTime, ctime (&mtime), DI_MNT_TIME_LEN);
 
             /* get the file system type now... */
-        strncpy (diskInfo [idx].fsType, mntEntry.mnt_fstype, TYPE_LEN);
+        strncpy (diskInfo [idx].fsType, mntEntry.mnt_fstype, DI_TYPE_LEN);
 
         diskInfo [idx].isLocal = TRUE;
         for (i = 0; i < remoteFileSystemCount; ++i)
@@ -1755,9 +1923,11 @@ getDiskEntries ()
     return 0;
 }
 
-#endif /* HAS_MNTTAB */
+#endif /* HAS_GETMNTENT */
 
-#if defined (HAS_SVR3_MNTTAB)
+#if ! defined (HAS_GETMNTENT) && ! defined (HAS_MNTCTL) && \
+        ! defined (HAS_GETMNTINFO) && ! defined (HAS_GETMNT) && \
+	! defined (HAS_GETDISKFREESPACE)
 
 /*
  * getDiskEntries
@@ -1774,9 +1944,9 @@ getDiskEntries ()
     struct mnttab    mntEntry;
 
 
-    if ((f = fopen (MOUNT_FILE, "r")) == (FILE *) NULL)
+    if ((f = fopen (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
     {
-        fprintf (stderr, "Unable to open: %s errno %d\n", MOUNT_FILE, errno);
+        fprintf (stderr, "Unable to open: %s errno %d\n", DI_MOUNT_FILE, errno);
         return -1;
     }
 
@@ -1797,15 +1967,15 @@ getDiskEntries ()
 
 # if defined (COHERENT)
                 /* Coherent seems to have these fields reversed. oh well. */
-            strncpy (diskInfo [idx].name, mntEntry.mt_dev, NAME_LEN);
-            strncpy (diskInfo [idx].special, mntEntry.mt_filsys, SPEC_NAME_LEN);
+            strncpy (diskInfo [idx].name, mntEntry.mt_dev, DI_NAME_LEN);
+            strncpy (diskInfo [idx].special, mntEntry.mt_filsys, DI_SPEC_NAME_LEN);
 # else
-            strncpy (diskInfo [idx].special, mntEntry.mt_dev, SPEC_NAME_LEN);
-            strncpy (diskInfo [idx].name, mntEntry.mt_filsys, NAME_LEN);
+            strncpy (diskInfo [idx].special, mntEntry.mt_dev, DI_SPEC_NAME_LEN);
+            strncpy (diskInfo [idx].name, mntEntry.mt_filsys, DI_NAME_LEN);
 # endif
-            strncpy (diskInfo [idx].options, mntEntry.mnt_mntopts, OPT_LEN);
+            strncpy (diskInfo [idx].options, mntEntry.mnt_mntopts, DI_OPT_LEN);
             strncpy (diskInfo [idx].mountTime, mntEntry.mnt_time,
-                    MNT_TIME_LEN);
+                    DI_MNT_TIME_LEN);
         }
 
         if (debug > 0)
@@ -1819,9 +1989,10 @@ getDiskEntries ()
     return 0;
 }
 
-#endif /* HAS_MNTTAB */
+#endif /* Sys V.3 */
 
-#if defined (HAS_MNTENT)
+#if defined (HAS_GETMNTENT) && defined (HAS_SETMNTENT) && \
+        defined (HAS_ENDMNTENT)
 
 /*
  * getDiskEntries
@@ -1839,9 +2010,13 @@ getDiskEntries ()
     char            *devp;   /* local ptr to dev entry */
 
 
-    if ((f = setmntent (MOUNT_FILE, "r")) == (FILE *) NULL)
+#if defined (HAS_SETMNTENT_ONE_ARG)
+    if ((f = setmntent (DI_MOUNT_FILE)) == (FILE *) NULL)
+#else
+    if ((f = setmntent (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
+#endif
     {
-        fprintf (stderr, "Unable to open: %s errno %d\n", MOUNT_FILE, errno);
+        fprintf (stderr, "Unable to open: %s errno %d\n", DI_MOUNT_FILE, errno);
         return -1;
     }
 
@@ -1855,16 +2030,21 @@ getDiskEntries ()
         diskInfo [idx].printFlag = DI_OK;
         diskInfo [idx].isLocal = TRUE;
 
-        strncpy (diskInfo [idx].special, mntEntry->mnt_fsname, SPEC_NAME_LEN);
-        strncpy (diskInfo [idx].name, mntEntry->mnt_dir, NAME_LEN);
-        strncpy (diskInfo [idx].fsType, mntEntry->mnt_type, TYPE_LEN);
+        strncpy (diskInfo [idx].special, mntEntry->mnt_fsname, DI_SPEC_NAME_LEN);
+        strncpy (diskInfo [idx].name, mntEntry->mnt_dir, DI_NAME_LEN);
+        strncpy (diskInfo [idx].fsType, mntEntry->mnt_type, DI_TYPE_LEN);
 
         if (strcmp (mntEntry->mnt_type, MNTTYPE_IGNORE) == 0)
         {
             diskInfo [idx].printFlag = DI_IGNORE;
+            if (debug > 2)
+            {
+                printf ("mnt: ignore: mntopt 'ignore': %s\n",
+                        diskInfo [idx].name);
+            }
         }
 
-        if (devp = strstr (mntEntry->mnt_opts, "dev"))
+        if ((devp = strstr (mntEntry->mnt_opts, "dev=")) != (char *) NULL)
         {
             if (devp != mntEntry->mnt_opts)
             {
@@ -1872,7 +2052,7 @@ getDiskEntries ()
             }
             *devp = 0;   /* point to preceeding comma and cut off */
         }
-        strncpy (diskInfo [idx].options, mntEntry->mnt_opts, OPT_LEN);
+        strncpy (diskInfo [idx].options, mntEntry->mnt_opts, DI_OPT_LEN);
 
         checkIgnoreList (&diskInfo [idx]);
         checkIncludeList (&diskInfo [idx]);
@@ -1888,7 +2068,7 @@ getDiskEntries ()
     return 0;
 }
 
-#endif /* HAS_MNTENT */
+#endif /* HAS_GETMNTENT && HAS_SETMNTENT && HAS_ENDMNTENT */
 
 #if defined (HAS_GETMNTINFO)
 
@@ -1900,7 +2080,7 @@ getDiskEntries ()
  *                  [mogul@wrl.dec.com (Jeffrey Mogul)]
  */
 
-#if defined (HAS_INITMOUNTNAMES) && defined (INITMOUNTNAMES)
+#if defined (INITMOUNTNAMES)
 static char *mnt_names [] = INITMOUNTNAMES;
 # define MNT_NUMTYPES (MOUNT_MAXTYPE + 1)
 #endif
@@ -1972,8 +2152,8 @@ getDiskEntries ()
 
     if (debug > 1)
     {
-        printf ("type_len %d name_len %d spec_name_len %d\n", TYPE_LEN,
-                NAME_LEN, SPEC_NAME_LEN);
+        printf ("type_len %d name_len %d spec_name_len %d\n", DI_TYPE_LEN,
+                DI_NAME_LEN, DI_SPEC_NAME_LEN);
     }
 
     for (idx = 0; idx < count; idx++)
@@ -1987,15 +2167,20 @@ getDiskEntries ()
         }
 #endif
 
-        if (diskInfo [idx].isLocal == FALSE && 
-                (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+        if (diskInfo [idx].isLocal == FALSE &&
+                (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
         {
             diskInfo [idx].printFlag = DI_IGNORE;
+            if (debug > 2)
+            {
+                printf ("mnt: ignore: remote: %s\n",
+                        diskInfo [idx].name);
+            }
         }
 
         strncpy (diskInfo [idx].special, mntbufp [idx].f_mntfromname,
-                SPEC_NAME_LEN);
-        strncpy (diskInfo [idx].name, mntbufp [idx].f_mntonname, NAME_LEN);
+                DI_SPEC_NAME_LEN);
+        strncpy (diskInfo [idx].name, mntbufp [idx].f_mntonname, DI_NAME_LEN);
 
         mult = 1.0;
 
@@ -2014,7 +2199,8 @@ getDiskEntries ()
         diskInfo [idx].availInodes = mntbufp [idx].f_ffree;
 
         fstype = mntbufp [idx].f_type;
-# if defined (HAS_NO_FSTYPES_H) && ! defined (HAS_INITMOUNTNAMES)
+# if ! defined (I_SYS_FSTYP) && ! defined (INITMOUNTNAMES) && \
+    ! defined (HAS_GETMNTINFO_FSTYPENAME)
         if ((fstype >= 0) && (fstype <= MOUNT_MAXTYPE))
         {
             switch (fstype)
@@ -2022,7 +2208,7 @@ getDiskEntries ()
 #  if defined (MOUNT_NONE)
                 case MOUNT_NONE:         /* No Filesystem */
                 {
-                    strncpy (diskInfo [idx].fsType, "none", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "none", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2030,7 +2216,7 @@ getDiskEntries ()
 #  if defined (MOUNT_UFS)
                 case MOUNT_UFS:         /* UNIX "Fast" Filesystem */
                 {
-                    strncpy (diskInfo [idx].fsType, "ufs", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "ufs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2038,7 +2224,7 @@ getDiskEntries ()
 #  if defined (MOUNT_NFS)
                 case MOUNT_NFS:         /* Network Filesystem */
                 {
-                    strncpy (diskInfo [idx].fsType, "nfs", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "nfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2046,7 +2232,7 @@ getDiskEntries ()
 #  if defined (MOUNT_MFS)
                 case MOUNT_MFS:         /* Memory Filesystem */
                 {
-                    strncpy (diskInfo [idx].fsType, "mfs", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "mfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2054,7 +2240,7 @@ getDiskEntries ()
 #  if defined (MOUNT_MSDOS)
                 case MOUNT_MSDOS:       /* MSDOS Filesystem */
                 {
-                    strncpy (diskInfo [idx].fsType, "msdos", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "msdos", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2062,7 +2248,7 @@ getDiskEntries ()
 #  if defined (MOUNT_LFS)
                 case MOUNT_LFS:
                 {
-                    strncpy (diskInfo [idx].fsType, "lfs", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "lfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2070,7 +2256,7 @@ getDiskEntries ()
 #  if defined (MOUNT_LOFS)
                 case MOUNT_LOFS:
                 {
-                    strncpy (diskInfo [idx].fsType, "lofs", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "lofs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2078,7 +2264,7 @@ getDiskEntries ()
 #  if defined (MOUNT_FDESC)
                 case MOUNT_FDESC:
                 {
-                    strncpy (diskInfo [idx].fsType, "fdesc", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "fdesc", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2086,7 +2272,7 @@ getDiskEntries ()
 #  if defined (MOUNT_PORTAL)
                 case MOUNT_PORTAL:
                 {
-                    strncpy (diskInfo [idx].fsType, "portal", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "portal", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2094,7 +2280,7 @@ getDiskEntries ()
 #  if defined (MOUNT_NULL)
                 case MOUNT_NULL:
                 {
-                    strncpy (diskInfo [idx].fsType, "null", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "null", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2102,7 +2288,7 @@ getDiskEntries ()
 #  if defined (MOUNT_UMAP)
                 case MOUNT_UMAP:
                 {
-                    strncpy (diskInfo [idx].fsType, "umap", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "umap", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2110,7 +2296,7 @@ getDiskEntries ()
 #  if defined (MOUNT_KERNFS)
                 case MOUNT_KERNFS:
                 {
-                    strncpy (diskInfo [idx].fsType, "kernfs", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "kernfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2118,7 +2304,7 @@ getDiskEntries ()
 #  if defined (MOUNT_PROCFS)
                 case MOUNT_PROCFS:      /* proc filesystem */
                 {
-                    strncpy (diskInfo [idx].fsType, "pfs", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "pfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2126,7 +2312,7 @@ getDiskEntries ()
 #  if defined (MOUNT_AFS)
                 case MOUNT_AFS:
                 {
-                    strncpy (diskInfo [idx].fsType, "afs", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "afs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2134,7 +2320,7 @@ getDiskEntries ()
 #  if defined (MOUNT_ISOFS)
                 case MOUNT_ISOFS:       /* iso9660 cdrom */
                 {
-                    strncpy (diskInfo [idx].fsType, "iso9660fs", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "iso9660fs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2142,7 +2328,7 @@ getDiskEntries ()
 #  if defined (MOUNT_ISO9660) && ! defined (MOUNT_CD9660)
                 case MOUNT_ISO9660:       /* iso9660 cdrom */
                 {
-                    strncpy (diskInfo [idx].fsType, "iso9660", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "iso9660", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2150,7 +2336,7 @@ getDiskEntries ()
 #  if defined (MOUNT_CD9660)
                 case MOUNT_CD9660:       /* iso9660 cdrom */
                 {
-                    strncpy (diskInfo [idx].fsType, "cd9660", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "cd9660", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -2158,22 +2344,26 @@ getDiskEntries ()
 #  if defined (MOUNT_UNION)
                 case MOUNT_UNION:
                 {
-                    strncpy (diskInfo [idx].fsType, "union", TYPE_LEN);
+                    strncpy (diskInfo [idx].fsType, "union", DI_TYPE_LEN);
                     break;
                 }
 #  endif
             } /* switch on mount type */
         }
 # else
+#  if defined (HAS_GETMNTINFO_FSTYPENAME)
+        strncpy (diskInfo [idx].fsType, mntbufp [idx].f_fstypename, DI_TYPE_LEN);
+#  else
             /* could use getvfsbytype here... */
         if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
         {
-            strncpy (diskInfo [idx].fsType, mnt_names [fstype], TYPE_LEN);
+            strncpy (diskInfo [idx].fsType, mnt_names [fstype], DI_TYPE_LEN);
         }
         else
         {
-            sprintf (diskInfo [idx].fsType, UNKNOWN_FSTYPE, fstype);
+            sprintf (diskInfo [idx].fsType, DI_UNKNOWN_FSTYPE, fstype);
         }
+#  endif
 # endif /* has fs_types.h */
 
 #if defined (MNT_RDONLY)
@@ -2237,14 +2427,14 @@ getDiskEntries ()
 #if defined (MNT_EXPORTED)
         if ((mntbufp [idx].f_flags & MNT_EXPORTED) == MNT_EXPORTED)
         {
-            strcat (diskInfo [idx].options, "exported");
+            strcat (diskInfo [idx].options, "exported,");
         }
 #endif
 #if defined (MNT_EXRDMOSTLY)
         if ((mntbufp [idx].f_flags & MNT_EXRDMOSTLY) == MNT_EXRDMOSTLY)
         {
                 /* what's read-mostly ? */
-            strcat (diskInfo [idx].options, "exported read-mostly");
+            strcat (diskInfo [idx].options, "exported read-mostly,");
         }
 #endif
 #if defined (MNT_DEFEXPORTED)
@@ -2404,19 +2594,24 @@ getDiskEntries ()
             diskInfo [idx].isLocal = FALSE;
         }
 
-        if (diskInfo [idx].isLocal == FALSE && 
-                (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+        if (diskInfo [idx].isLocal == FALSE &&
+                (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
         {
             diskInfo [idx].printFlag = DI_IGNORE;
+            if (debug > 2)
+            {
+                printf ("mnt: ignore: remote: %s\n",
+                        diskInfo [idx].name);
+            }
         }
 
-        strncpy (diskInfo [idx].special, fsdbuf [idx].fd_devname, SPEC_NAME_LEN);
-        strncpy (diskInfo [idx].name, fsdbuf [idx].fd_path, NAME_LEN);
+        strncpy (diskInfo [idx].special, fsdbuf [idx].fd_devname, DI_SPEC_NAME_LEN);
+        strncpy (diskInfo [idx].name, fsdbuf [idx].fd_path, DI_NAME_LEN);
 
             /* ULTRIX keeps these fields in units of 1K byte */
         diskInfo [idx].totalBlocks = fsdbuf [idx].fd_btot;
         diskInfo [idx].freeBlocks = fsdbuf [idx].fd_bfree;
-        diskInfo [idx].availBlocks = fsdbuf [idx].fd_bfreen;
+        diskInfo [idx].availBlocks = (int) fsdbuf [idx].fd_bfreen;
 
         diskInfo [idx].totalInodes = fsdbuf [idx].fd_gtot;
         diskInfo [idx].freeInodes = fsdbuf [idx].fd_gfree;
@@ -2426,10 +2621,15 @@ getDiskEntries ()
         if (fstype == GT_UNKWN)
         {
             diskInfo [idx].printFlag = DI_IGNORE;
+            if (debug > 2)
+            {
+                printf ("mnt: ignore: disk type unknown: %s\n",
+                        diskInfo [idx].name);
+            }
         }
         else if ((fstype > 0) && (fstype < GT_NUMTYPES))
         {
-            strncpy (diskInfo [idx].fsType, gt_names [fstype], TYPE_LEN);
+            strncpy (diskInfo [idx].fsType, gt_names [fstype], DI_TYPE_LEN);
         }
         else
         {
@@ -2500,7 +2700,7 @@ getDiskEntries ()
             printf ("%s: %s\n", diskInfo [idx].name, diskInfo [idx].fsType);
             printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
                     fsdbuf [idx].fd_btot, fsdbuf [idx].fd_bfree,
-                    fsdbuf [idx].fd_bfreen);
+                    (int) fsdbuf [idx].fd_bfreen);
             printf ("\tinodes: tot:%ld free:%ld\n",
                     fsdbuf [idx].fd_gtot, fsdbuf [idx].fd_gfree);
         }
@@ -2557,7 +2757,7 @@ getDiskEntries ()
 
 
     i = 0;
-    vmbufsz = sizeof (struct vmount) * FSMAGIC; /* initial vmount buffer */
+    vmbufsz = sizeof (struct vmount) * DI_FSMAGIC; /* initial vmount buffer */
 
     do
     {
@@ -2585,9 +2785,9 @@ getDiskEntries ()
             free ((char *) vmbuf); /* free this last, it's still being used! */
             ++i;
         }
-    } while (num == 0 && i < RETRY_COUNT);
+    } while (num == 0 && i < DI_RETRY_COUNT);
 
-    if (i >= RETRY_COUNT)
+    if (i >= DI_RETRY_COUNT)
     {
         free ((char *) vmbuf);
         fprintf (stderr, "unable to allocate adequate buffer for mntctl\n");
@@ -2623,9 +2823,10 @@ getDiskEntries ()
                 diskInfo [i].isLocal = TRUE;
 
                 strncpy (diskInfo [i].special,
-                        (char *) vmt2dataptr (vmtp, VMT_OBJECT), SPEC_NAME_LEN);
+                        (char *) vmt2dataptr (vmtp, VMT_OBJECT),
+                        DI_SPEC_NAME_LEN);
                 strncpy (diskInfo [i].name,
-                        (char *) vmt2dataptr (vmtp, VMT_STUB), NAME_LEN);
+                        (char *) vmt2dataptr (vmtp, VMT_STUB), DI_NAME_LEN);
 
                 ve = getvfsbytype (vmtp->vmt_gfstype);
                 if (ve == (struct vfs_ent *) NULL || *ve->vfsent_name == '\0')
@@ -2634,12 +2835,12 @@ getDiskEntries ()
                             (vmtp->vmt_gfstype < NUM_AIX_FSTYPES))
                     {
                         strncpy (diskInfo [i].fsType,
-                                AIX_fsType [vmtp->vmt_gfstype], TYPE_LEN);
+                                AIX_fsType [vmtp->vmt_gfstype], DI_TYPE_LEN);
                     }
                 }
                 else
                 {
-                    strncpy (diskInfo [i].fsType, ve->vfsent_name, TYPE_LEN);
+                    strncpy (diskInfo [i].fsType, ve->vfsent_name, DI_TYPE_LEN);
                 }
 
                 if ((vmtp->vmt_flags & MNT_READONLY) == MNT_READONLY)
@@ -2692,12 +2893,17 @@ getDiskEntries ()
                 }
 
                 strncpy (diskInfo [i].mountTime, ctime (&vmtp->vmt_time),
-                        MNT_TIME_LEN);
+                        DI_MNT_TIME_LEN);
 
                 if (diskInfo [i].isLocal == FALSE &&
-                        (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+                        (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
                 {
                     diskInfo [i].printFlag = DI_IGNORE;
+                    if (debug > 2)
+                    {
+                        printf ("mnt: ignore: remote: %s\n",
+                                diskInfo [i].name);
+                    }
                 }
 
                 bufp += vmtp->vmt_length;
@@ -2737,12 +2943,17 @@ getDiskInfo ()
     for (i = 0; i < diCount; ++i)
     {
         if (diskInfo [i].isLocal == FALSE &&
-                (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+                (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
         {
             diskInfo [i].printFlag = DI_IGNORE;
+            if (debug > 2)
+            {
+                printf ("mnt: ignore: remote: %s\n",
+                        diskInfo [i].name);
+            }
         }
 
-        if (diskInfo [i].printFlag == DI_OK || (flags & F_ALL) == F_ALL)
+        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
         {
             if (statvfs (diskInfo [i].name, &statBuf) == 0)
             {
@@ -2765,7 +2976,7 @@ getDiskInfo ()
                 diskInfo [i].freeInodes = statBuf.f_ffree;
                 diskInfo [i].availInodes = statBuf.f_favail;
 
-                strncpy (diskInfo [i].fsType, statBuf.f_basetype, TYPE_LEN);
+                strncpy (diskInfo [i].fsType, statBuf.f_basetype, DI_TYPE_LEN);
 
                 if (debug > 1)
                 {
@@ -2773,22 +2984,23 @@ getDiskInfo ()
                     printf ("\tmult:%f\n", mult);
                     printf ("\tbsize:%ld  frsize:%ld\n", statBuf.f_bsize,
                             statBuf.f_frsize);
-#if defined (_LARGEFILE_SOURCE) && _FILE_OFFSET_BITS == 64
-                    printf ("\tblocks: tot:%lld free:%lld avail:%lld\n",
+#if defined (HAS_64BIT_STATFS_FLDS)
+                    printf ("\tblocks: tot:%llu free:%lld avail:%llu\n",
                             statBuf.f_blocks, statBuf.f_bfree, statBuf.f_bavail);
-                    printf ("\tinodes: tot:%lld free:%lld avail:%lld\n",
+                    printf ("\tinodes: tot:%llu free:%lld avail:%llu\n",
                             statBuf.f_files, statBuf.f_ffree, statBuf.f_favail);
 #else
-                    printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
+                    printf ("\tblocks: tot:%lu free:%ld avail:%lu\n",
                             statBuf.f_blocks, statBuf.f_bfree, statBuf.f_bavail);
-                    printf ("\tinodes: tot:%ld free:%ld avail:%ld\n",
+                    printf ("\tinodes: tot:%lu free:%ld avail:%lu\n",
                             statBuf.f_files, statBuf.f_ffree, statBuf.f_favail);
 #endif
                 }
             }
             else
             {
-                perror (diskInfo [i].name);
+                fprintf (stderr, "statvfs: %s ", diskInfo [i].name);
+                perror ("");
             }
         }
     } /* for each entry */
@@ -2797,7 +3009,8 @@ getDiskInfo ()
 #endif /* HAS_STATVFS */
 
 
-#if defined (HAS_STATFS)
+#if defined (HAS_STATFS_BSD) && ! defined (HAS_STATVFS) && \
+        ! defined (HAS_GETMNTINFO) && ! defined (HAS_GETMNT)
 
 /*
  * getDiskInfo
@@ -2815,7 +3028,7 @@ getDiskInfo ()
 
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].printFlag == DI_OK || (flags & F_ALL) == F_ALL)
+        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
         {
             if (statfs (diskInfo [i].name, &statBuf) == 0)
             {
@@ -2844,15 +3057,17 @@ getDiskInfo ()
             } /* if we got the info */
             else
             {
-                perror (diskInfo [i].name);
+                fprintf (stderr, "statfs: %s ", diskInfo [i].name);
+                perror ("");
             }
         }
     } /* for each entry */
 }
 
-#endif /* HAS_STATFS */
+#endif /* HAS_STATFS_BSD */
 
-#if defined (HAS_SYSV_STATFS)
+#if defined (HAS_STATFS_SYSV3) && ! defined (HAS_STATVFS) && \
+        ! defined (HAS_GETMNTINFO) && ! defined (HAS_GETMNT)
 
 /*
  * getDiskInfo
@@ -2871,11 +3086,22 @@ getDiskInfo ()
 
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].printFlag == DI_OK || (flags & F_ALL) == F_ALL)
+        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
         {
             if (statfs (diskInfo [i].name, &statBuf, sizeof (statBuf), 0) == 0)
             {
+# if defined (HAS_STATFS_FRSIZE)
+                if (statBuf.f_frsize == 0 && statBuf.f_bsize != 0)
+                {
+                    mult = (double) (long) statBuf.f_bsize / dispBlockSize;
+                }
+                else
+                {
+                    mult = (double) (long) statBuf.f_frsize / dispBlockSize;
+                }
+# else
                 mult = (double) UBSIZE / dispBlockSize;
+# endif
                 diskInfo [i].totalBlocks = ((double) (_s_fs_size_t) statBuf.f_blocks * mult);
                 diskInfo [i].freeBlocks = ((double) (_s_fs_size_t) statBuf.f_bfree * mult);
                 diskInfo [i].availBlocks = ((double) (_s_fs_size_t) statBuf.f_bfree * mult);
@@ -2891,10 +3117,11 @@ getDiskInfo ()
                 {
                     printf ("%s: %s\n", diskInfo [i].name, diskInfo [i].fsType);
                     printf ("\tmult:%f\n", mult);
-                    printf ("\tUBSIZE:%ld\n", UBSIZE);
-# if defined (HAS_FRSIZE)
+# if defined (HAS_STATFS_FRSIZE)
                     printf ("\tbsize:%ld\n", statBuf.f_bsize);
                     printf ("\tfrsize:%ld\n", statBuf.f_frsize);
+# else
+                    printf ("\tUBSIZE:%ld\n", UBSIZE);
 # endif
                     printf ("\tblocks: tot:%ld free:%ld\n",
                             statBuf.f_blocks, statBuf.f_bfree);
@@ -2904,13 +3131,14 @@ getDiskInfo ()
             } /* if we got the info */
             else
             {
-                perror (diskInfo [i].name);
+                fprintf (stderr, "statfs: %s ", diskInfo [i].name);
+                perror ("");
             }
         }
     } /* for each entry */
 }
 
-#endif /* HAS_SYSV_STATFS */
+#endif /* HAS_STATFS_SYSV3 */
 
 
 #if defined (HAS_GETDISKFREESPACE)
@@ -2952,7 +3180,7 @@ getDiskEntries ()
     for (i = 0; i < diCount; ++i)
     {
         p = buff + (BYTES_PER_LOGICAL_DRIVE * i);
-        strncpy (diskInfo [i].name, p, NAME_LEN);
+        strncpy (diskInfo [i].name, p, DI_NAME_LEN);
         rc = GetDriveType (p);
         diskInfo [i].printFlag = DI_OK;
 
@@ -2976,7 +3204,7 @@ getDiskEntries ()
         {
             diskInfo [i].isLocal = TRUE;
         }
-        /* strncpy (diskInfo [i].fsType, MSDOS_diskType [rc], TYPE_LEN); */
+        /* strncpy (diskInfo [i].fsType, MSDOS_diskType [rc], DI_TYPE_LEN); */
     } /* for each mounted drive */
 
     return diCount;
@@ -3009,25 +3237,30 @@ getDiskInfo ()
 
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].isLocal == FALSE && 
-                (flags & F_LOCAL_ONLY) == F_LOCAL_ONLY)
+        if (diskInfo [i].isLocal == FALSE &&
+                (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
         {
             diskInfo [i].printFlag = DI_IGNORE;
+            if (debug > 2)
+            {
+                printf ("mnt: ignore: remote: %s\n",
+                        diskInfo [i].name);
+            }
         }
 
-        if (diskInfo [i].printFlag == DI_OK || (flags & F_ALL) == F_ALL)
+        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
         {
             rc = GetVolumeInformation (diskInfo [i].name,
                     volName, MSDOS_BUFFER_SIZE, &serialNo, &maxCompLen,
                     &fsFlags, fsName, MSDOS_BUFFER_SIZE);
             /* strcpy (tbuff, diskInfo [i].fsType); */
             /* strcat (tbuff, " "); */
-            strncpy (diskInfo [i].fsType, fsName, TYPE_LEN);
-            strncpy (diskInfo [i].special, volName, SPEC_NAME_LEN);
+            strncpy (diskInfo [i].fsType, fsName, DI_TYPE_LEN);
+            strncpy (diskInfo [i].special, volName, DI_SPEC_NAME_LEN);
 
             rc = GetDiskFreeSpace (diskInfo [i].name,
-                    &sectorspercluster, &bytespersector,
-                    &freeclusters, &totalclusters);
+                    (LPDWORD) &sectorspercluster, (LPDWORD) &bytespersector,
+                    (LPDWORD) &freeclusters, (LPDWORD) &totalclusters);
 
             if (rc > 0)
             {
