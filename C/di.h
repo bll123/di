@@ -45,6 +45,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (HAS_ENDMNTENT)
 # define _lib_endmntent 1
 #endif
+#if defined (HAS_FMOD)
+# define _lib_fmod 1
+#endif
 #if defined (HAS_FSHELP)
 # define _lib_fshelp 1
 #endif
@@ -146,6 +149,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (I_MALLOC)
 # define _hdr_malloc 1
+#endif
+#if defined (I_MATH)
+# define _hdr_math 1
 #endif
 #if defined (I_MEMORY)
 # define _hdr_memory 1
