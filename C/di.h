@@ -45,6 +45,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (HAS_ENDMNTENT)
 # define _lib_endmntent 1
 #endif
+#if defined (HAS_FSHELP)
+# define _lib_fshelp 1
+#endif
 #if defined (HAS_FS_INFO)
 # define _lib_fs_info 1
 #endif
