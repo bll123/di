@@ -9,31 +9,8 @@ Copyright 1994-2003 Brad Lanam, Walnut Creek, CA
  *
  *   Copyright 1994-2003 Brad Lanam,  Walnut Creek, CA
  *
- *  Warning: Do not replace your systems 'df' command with this program.
+ *  Warning: Do not replace your system's 'df' command with this program.
  *           You will in all likelihood break your installation procedures.
- *
- *  Usage: di -AafntwWx [file [...]]
- *            -A   : print all fields (used for debugging)
- *            -a   : print all mounted devices; normally, those
- *                   with 0 total blocks are not printed.  e.g.
- *                   /dev/proc, /dev/fd.
- *            -d x : size to print blocks in (p, k, m, g, t, P, <n>)
- *            -f x : use format string <x>
- *            -g   : -dg
- *            -h   : usage
- *            -H   : "human readable"
- *            -i x : ignore filesystem type(s) x, where x is a comma
- *                   separated list.
- *            -I x : include only filesystem type(s) x, where x is a
- *                   separated list.
- *            -l   : local filesystems only
- *            -m   : -dm
- *            -n   : don't print header
- *            -s t : sort type (n, s, S, (r))
- *            -t   : print totals
- *            -w n : use <n> for the block print width (default 8).
- *            -W n : use <n> for the inode print width (default 7).
- *            -x n : debug level <n>
  *
  *  Display sizes:
  *      p - posix (512 bytes)
@@ -43,8 +20,8 @@ Copyright 1994-2003 Brad Lanam, Walnut Creek, CA
  *      t - terabytes
  *      P - petabytes
  *      E - exabytes
- *      h - "human readable"
- *      H - "human readable" format 2
+ *      h - "human readable" scaled alternative 1
+ *      H - "human readable" scaled alternative 2
  *
  *  Sort types (by name is default):
  *      n - none (mount order)
@@ -83,7 +60,7 @@ Copyright 1994-2003 Brad Lanam, Walnut Creek, CA
  *      I - mount time
  *      O - mount options.
  *
- *  System V.4 `/usr/bin/df -v` Has format: msbuf1 (w/-d512 option: 512 byte blocks)
+ *  System V.4 `/usr/bin/df -v` Has format: msbuf1 (w/-dp option: 512 byte blocks)
  *  System V.4 `/usr/bin/df -k` Has format: sbcvpm
  *  System V.4 `/usr/ucb/df`    Has format: sbuv2m
  *
@@ -95,98 +72,6 @@ Copyright 1994-2003 Brad Lanam, Walnut Creek, CA
  *  Note that for filesystems that do not have (S512K fs) or systems (SysV.3)
  *  that do not report available blocks, the number of available blocks is
  *  equal to the number of free blocks.
- *
- *  HISTORY:
- *      6 Mar 2003 bll
- *          Fixed bug w/uninitialized var.
- *     12 Jan 2003 bll
- *          Rewrite display block size handling.
- *     11 Jul 2002 bll
- *          Snprintf stuff
- *          cleanup.
- *     14 apr 2002 bll
- *          Rewrite ignore/include list stuff to allow multiple
- *          command line options.
- *          Fix sort command line option.  Add sort size.
- *          Add petas.
- *     24 feb 2000 bll
- *          Updated for BeOS.  This required changes to support c++
- *          compilation (ansi style functions).  Fixes for linux.
- *     17 dec 99 bll
- *          Added sys/fs_types.h (Digital Unix (tru64)).
- *     3 jan 99 bll
- *          Finalize changes for metaconfig.
- *          Always get stat() for disk device.
- *          Remove duplicate disks from display.
- *          Add NetBSD, Unicos, IRIX changes
- *     8 sep 97 bll
- *          Solaris large file version; AIX typo fix
- *     15 aug 95 bll
- *          Ignore will check the file system type beforehand if possible.
- *          Fixed local mount stuff for osf1.
- *     9 aug 95 bll
- *          Changed totals to use double; the totals can now be displayed with
- *          any wanted block size; sizes > one k have a single decimal point.
- *          -d option specifies block size.
- *          -l option for local file systems only.
- *     7 aug 95 bll
- *          convex fix.
- *     29 jul 95 bll
- *          Fixed bsdi variants.  The fragment size wasn't being supported.
- *     22 jul 95 bll
- *          fix problem with display widths in conjunction with ignore/include
- *     20 feb 95 bll
- *          added ignore/include file system type lists.
- *     8 jan 95 bll
- *          Added FreeBsd 2.x
- *     6 dec 94 bll
- *          sco nfs 'nothing' fix.
- *     28 nov 94 bll
- *          bsdi [bag@-nospam-clipper.cs.kiev.ua (Andrey Blochintsev)]
- *     24 nov 94 bll
- *          Added FreeBsd - like OSF/1, but w/o nice mount name table.
- *     1 may 94 bll
- *          removed ill conceived mount options stuff.  Added AIX
- *          (Erik O'Shaughnessy eriko@-nospam-risc.austin.ibm.com).
- *          Added coherent.
- *     9 apr 94 bll
- *          T format from Bill Davidsen. SunOS file system type.
- *          mount options.
- *     7 apr 94 bll
- *          cdrom under solaris returning -1 in addition to -2.
- *          Changed the test to test for any negative value.
- *    5 apr 94 pm
- *         Filesystem type info, and whether its read-write, readonly
- *         etc is in the mntent structure.  Added code to support it.
- *                  [Pat Myrto <pat@-nospam-rwing.uucp>]
- *    25 mar 94 bll
- *          sun had f_bfree instead of f_bavail!
- *          Xenix, linux.
- *          -w, -W options, -B option, fixed width for -f M, -f S.
- *          Usage.  Allow other characters in format string.
- *     4 mar 94 bll
- *          -f B, bug fixes. bcopy.
- *          Solaris cdrom reports total, not free or avail.
- *          Allow command line specification of file names.
- *     3 mar 94 bll
- *          support for OSF/1 and ULTRIX, -F, -f M, -f S
- *                  [mogul@-nospam-wrl.dec.com (Jeffrey Mogul)]
- *     3 mar 94   bll
- *          Allow command line specification of filename (s).
- *          Sort output.  Test of nonexistent return code removed.
- *     1 mar 94   bll
- *          # of inodes can be -1L if unreportable.
- *                  [jjb@-nospam-jagware.bcc.com (J.J.Bailey)]
- *                  [Mark Neale <mark@-nospam-edscom.demon.co.uk>]
- *          di_getDiskInfo () returning garbage
- *                  [costales@-nospam-ICSI.Berkeley.EDU (Bryan Costales)]
- *                  [Mark Neale <mark@-nospam-edscom.demon.co.uk>]
- *          pyramid #ifdefs
- *                  [vogelke@-nospam-c-17igp.wpafb.af.mil (Contr Karl Vogel)]
- *          name must be maxpathlen
- *                  [Mark Neale <mark@-nospam-edscom.demon.co.uk>]
- *          error prints/compile warnings.
- *                  [Mark Neale <mark@-nospam-edscom.demon.co.uk>]
  *
  */
 
@@ -1893,11 +1778,16 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
                 break;
             }
 
-            case 'h':
             case '?':
             {
                 usage ();
                 exit (1);
+            }
+
+            case 'h':
+            {
+                strncpy (dbsstr, "h", sizeof (dbsstr));
+                break;
             }
 
             case 'H':
