@@ -14,16 +14,16 @@
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-AaghkHlmnt] [-b block-size] [-d display-size]
-.\" [-f format] [-i ignore-fstyp-list]
+.\" di [-AaghHklmnPt] [-b block-size] [-d display-size] [-f format]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
-.\" [-W inode-width] [-x level] [file [...]]
+.\" [-W inode-width] [-x exclude-fstyp-list] [-X level] [file [...]]
 .B di
 [\fB-Aahlnt\fP] [\fB-b\fP \fIblock-size\fP] [\fB-d\fP \fIdisplay-size\fP]
 [\fB-f\fP \fIformat\fP]
-[\fB-i\fP \fIignore-fstyp-list\fP] [\fB-I\fP \fIinclude-fstyp-list\fP]
+[\fB-I\fP \fIinclude-fstyp-list\fP]
 [\fB-s\fP \fIsort-type\fP]
-[\fB-w\fP \fIblock-width\fP] [\fB-W\fP \fIinode-width\fP] [\fB-x\fP \fIlevel\fP]
+[\fB-w\fP \fIblock-width\fP] [\fB-W\fP \fIinode-width\fP]
+[\fB-x\fP \fIexclude-fstyp-list\fP] [\fB-X\fP \fIlevel\fP]
 [\fIfile\fP [...]]
 .PP
 .B mi
@@ -76,7 +76,7 @@ or a specific size.
 .B \-d\ \fIdisplay-size\fP
 Display the blocks in units specified by \fIdisplay-size\fP.
 \fIdisplay-size\fP
-may be one of: p\ \-\ posix\ (512\ bytes), k\ \-\ kilobytes,
+may be one of: 512\ \-\ POSIX, k\ \-\ kilobytes,
 m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, P\ \-\ petabytes,
 E\ \-\ exabytes, Z\ \-\ zettabytes, Y\ \-\ yottabytes,
 h\ \-\ Scaled alternative 1, H\ \-\ Scaled alternative 2,
@@ -98,6 +98,9 @@ to the same unit size (the largest needed).
 Use the specified format string \fIformat\fP.  Format strings are
 described below.
 .TP
+.B \-F \fIinclude-fstype-list\fP
+An alias for -I.  See below.
+.TP
 .B \-g
 Display sizes in gigabytes.  An alias for \-dg.
 .TP
@@ -108,11 +111,6 @@ An alias for \-dh.
 .B \-H
 Display partition sizes in scaled alternative 2 format.
 An alias for \-dH.
-.TP
-.B \-i \fIignore-fstype-list\fP
-Ignore the file system types listed in \fIignore-fstyp-list\fP.
-The list is a comma separated list of file system types.  e.g.
-\-i nfs,rfs
 .TP
 .B \-I \fIinclude-fstype-list\fP
 Include \fIonly\fP the file system types listed in \fIinclude-fstyp-list\fP.
@@ -132,6 +130,10 @@ Display sizes in megabytes.  An alias for \-dm.
 .B \-n
 Do not print a header line above the list of file systems.  Useful when
 parsing the output of \fIdi\fP.
+.TP
+.B \-P
+Display partition sizes in POSIX 512 byte format
+An alias for \-d512.
 .TP
 .B \-s\ \fIsort-type\fP
 Use \fIsort-type\fP to sort the output.
@@ -154,7 +156,12 @@ Set the print width for block values.  Default is eight.
 .B \-W\ \fIinode-width\fP
 Set the print width for inode values.  Default is seven.
 .TP
-.B \-x\ \fIlevel\fP
+.B \-x \fIexclude-fstype-list\fP
+Exclude the file system types listed in \fIexclude-fstyp-list\fP.
+The list is a comma separated list of file system types.  e.g.
+\-i nfs,rfs
+.TP
+.B \-X\ \fIlevel\fP
 Set the program's debugging level to \fIdebug-level\fP.
 .SH Format strings
 The output of \fIdi\fP may be specified via a format string.  This
@@ -171,50 +178,50 @@ is formatted to the maximum width necessary for the longest mount
 point name.
 .TP
 .B b
-Print the total number of Kbytes on the file system.
+Print the total number of megabytes on the file system.
 See also the \-d option.
 .TP
 .B B
-Print the total number of Kbytes on the file system
+Print the total number of megabytes on the file system
 available for use by normal
 users.
 See also the \-d option.
 .TP
 .B u
-Print the number of Kbytes in use on the file system
-(actual number of kbytes used = total \- free).
+Print the number of megabytes in use on the file system
+(actual number of megabytes used = total \- free).
 See also the \-d option.
 .TP
 .B c
-Print the number of Kbytes not available for use by normal users
+Print the number of megabytes not available for use by normal users
 (total \- available).
 See also the \-d option.
 .TP
 .B f
-Print the number of free (unused) Kbytes on the file system.
+Print the number of free (unused) megabytes on the file system.
 See also the \-d option.
 .TP
 .B v
-Print the number of Kbytes available for use by normal users.
+Print the number of megabytes available for use by normal users.
 See also the \-d option.
 .TP
 .B p
-Print the percentage of Kbytes not available for use by normal users
+Print the percentage of megabytes not available for use by normal users
 (number of
-kbytes not available for use / total disk space).
+megabytes not available for use / total disk space).
 See also the \-d option.
 .TP
 .B 1
-Print the percentage of total Kbytes in use
+Print the percentage of total megabytes in use
 (actual number of
-kbytes used / total disk space).
+megabytes used / total disk space).
 See also the \-d option.
 .TP
 .B 2
-Print the percentage of Kbytes in use, BSD-style.  Represents the
+Print the percentage of megabytes in use, BSD-style.  Represents the
 percentage of user-available space in use.  Note that values over 100%
 are possible
-(actual number of kbytes used / disk
+(actual number of megabytes used / disk
 space available to non-root users).
 See also the \-d option.
 .TP
