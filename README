@@ -1,4 +1,4 @@
-di - disk information utility (version 3.6).
+di - disk information utility (version 3.7).
 
 DESCRIPTION
 
@@ -30,7 +30,7 @@ INSTALLATION
 
     If you want the internationalization directory installed, do:
 
-      ./Build install-po [Only en_US is available 26-Feb-2002].
+      ./Build install-po [Only en_US is available 27-Aug-2002].
 
   Instructions for Configure:
 
@@ -70,6 +70,7 @@ INSTALLATION
 
     (1) and (2) will build using the windows API.
     (3) Doesn't find the windows API, and uses the cygwin API.
+
     If you prefer to use the cygwin API rather than the
     windows API, edit config.h, and undefine _hdr_windows,
     _lib_GetDiskFreeSpace, and _lib_GetDiskFreeSpaceEx,
@@ -97,15 +98,14 @@ BUGS
 
 PORTING
 
-    di 3.6 has been tested on the following platforms (both
+    di 3.7 has been tested on the following platforms (both
     Configure and iffe):
         AIX 4.3.3.0
         FreeBSD 4.6 (gcc 2.95.3)
-        HP-UX B.11.00 U (ansi C), HP-UX B.11.20 U (bundled C) [iffe only],
-            HP-UX B.11.11 (ansi C)
+        HP-UX B.11.00 U (ansi C)
         Linux 2.0.35 (gcc 2.7.2.3), 2.4.18 [RH7.3] (gcc 3.1, 2.96),
             2.4.9 [RH7.2] (gcc 2.96), 2.2.17 [Debian] (gcc 2.95.2),
-            2.2.19 [SuSe 7.1] (gcc 2.96), 2.4.18 [SuSe 8.0] (gcc 2.95.3),
+            2.4.18 [SuSe 8.0] (gcc 2.95.3),
             2.4.18 [Slackware 8.1] (gcc 2.95.3)
         NetBSD 1.5 (egcs 2.91.66)
         OpenBSD 3.1 (gcc 2.95.3)
@@ -143,6 +143,13 @@ BUGS
 
 CHANGES
 
+    3.7
+        Check for initial '/' character in special device name
+        before doing stat().   Otherwise we pick up normal files.
+        Update iffe.
+        Add exa, zetta, yotta support (-de, -dz, -dy).
+        Add support for 1000 byte base block size (and others) (-b option).
+        Add second human readable format (-dH).
     3.6
         Change to use mntctl() in preference to set/get/endmntent()
             for AIX.
@@ -351,4 +358,4 @@ COPYRIGHT
     Copyright 1994-2002 Brad Lanam, Walnut Creek, CA, USA
     bll@gentoo.com
     http://www.gentoo.com/di/
-    http://www.gentoo.com/di/di-3.6.tar.gz
+    http://www.gentoo.com/di/di-3.7.tar.gz
