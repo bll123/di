@@ -1,6 +1,4 @@
 #ifndef lint
-static char    di_c_sccsid [] =
-"@(#)di.c	1.21";
 static char    di_c_rcsid [] =
 "$Id$";
 static char    di_c_source [] =
@@ -157,7 +155,7 @@ static char    copyright [] =
  *          # of inodes can be -1L if unreportable.
  *                  [jjb@jagware.bcc.com (J.J.Bailey)]
  *                  [Mark Neale <mark@edscom.demon.co.uk>]
- *          getDiskInfo () returning garbage
+ *          di_getDiskInfo () returning garbage
  *                  [costales@ICSI.Berkeley.EDU (Bryan Costales)]
  *                  [Mark Neale <mark@edscom.demon.co.uk>]
  *          pyramid #ifdefs
@@ -179,9 +177,6 @@ static char    copyright [] =
 #endif
 #if defined (I_SYS_TYPES)
 # include <sys/types.h>
-#endif
-#if defined (I_LIMITS)
-# include <limits.h>
 #endif
 #if defined (I_STRING)
 # include <string.h>
@@ -206,164 +201,16 @@ static char    copyright [] =
 #if defined (I_SYS_STAT)
 # include <sys/stat.h>
 #endif
-#if defined (I_SYS_PARAM)
-# include <sys/param.h>
-#endif
 
-#if defined (I_SYS_MNTTAB)
-# include <sys/mnttab.h>
-#endif
-#if defined (I_MNTTAB)
-# include <mnttab.h>
-#endif
-#if defined (I_MNTENT)
-# include <mntent.h>
-#endif
-#if defined (I_SYS_MNTENT)
-# include <sys/mntent.h>
-#endif
-#if defined (I_SYS_MOUNT)
-# include <sys/mount.h>
-#endif
-#if defined (I_SYS_FSTYPES)
-# include <sys/fstypes.h>
-#endif
-#if defined (I_SYS_FS_TYPES)
-# include <sys/fs_types.h>
-#endif
-#if defined (I_SYS_MNTCTL)
-# include <sys/mntctl.h>
-#endif
-#if defined (I_SYS_VMOUNT)
-# include <sys/vmount.h>
-#endif
-#if defined (I_SYS_STATFS) && ! defined (I_SYS_STATVFS)
-# include <sys/statfs.h>
-#endif
-#if defined (I_FSHELP)
-# include <fshelp.h>
-#endif
-#if defined (I_SYS_STATVFS)
-# include <sys/statvfs.h>
-#endif
-#if defined (I_SYS_FSTYP)
-# include <sys/fstyp.h>
-# define DI_TYPE_LEN          FSTYPSZ
-#endif
-#if defined (I_SYS_VFS)
-# include <sys/vfs.h>
-#endif
-#if defined (I_SYS_VFSTAB)
-# include <sys/vfstab.h>
-# if ! defined (DI_TYPE_LEN)
-#  define DI_TYPE_LEN         FSTYPSZ
-# endif
-#endif
-#if defined (I_FSHELP)
-# include <fshelp.h>
-#endif
-
-#if defined (I_WINDOWS)
-# include <windows.h>            /* windows */
-#endif
-#if defined (I_KERNFSINFO)
-# include <kernel/fs_info.h>
-#endif
-#if defined (I_STOR_DIRECTORY)
-# include <storage/Directory.h>
-#endif
-#if defined (I_STOR_ENTRY)
-# include <storage/Entry.h>
-#endif
-/*#if defined (I_STOR_NODE)
-# include <storage/Node.h>
-#endif  */
-#if defined (I_STOR_PATH)
-# include <storage/Path.h>
-#endif
-
-#if ! defined (HAS_MEMCPY) && ! defined (memcpy)
-# if ! defined (HAS_BCOPY)
-   error No memcpy/bcopy available.
-# else
-#  define memcpy(dst, src, cnt)     (bcopy((src), (dst), (cnt)), dst)
-# endif
-#endif
-
-#if ! defined (MAXPATHLEN)
-# if defined (_POSIX_PATH_MAX)
-#  define MAXPATHLEN        _POSIX_PATH_MAX
-# else
-#  if defined (PATH_MAX)
-#   define MAXPATHLEN        PATH_MAX
-#  endif
-#  if defined (LPNMAX)
-#   define MAXPATHLEN         LPNMAX
-#  endif
-# endif
-#endif
-
-#if ! defined (DI_TYPE_LEN)
-# define DI_TYPE_LEN          16
-#endif
-
-#define DI_FSMAGIC 5   /* base AIX configuration has 5 file systems */
-
-#if defined (HAS_STATFS_SYSV3) && ! defined (HAS_STATVFS) && \
-    ! defined (HAS_GETMNTINFO) && ! defined (HAS_GETMNT) /* SYSV.3 */
-# if defined (Ubsize) && Ubsize != ""
-#  define UBSIZE            Ubsize
-# endif
-# if ! defined (UBSIZE)
-#  define UBSIZE            512
-# endif
-#endif
-
-#if (defined (HAS_GETMNTENT) || defined (HAS_STATFS_BSD) || \
-        defined (HAS_STATFS_SYSV3)) && ! defined (HAS_GETMNTINFO) && \
-        ! defined (HAS_GETMNT)
-# if defined (MOUNTED)
-#  define DI_MOUNT_FILE        MOUNTED
-# else
-#  if defined (MNTTAB)
-#   define DI_MOUNT_FILE       MNTTAB
-#  else
-#   define DI_MOUNT_FILE       "/etc/mnttab"
-#  endif
-# endif
-#endif
-
-#if ! defined (HAS_MEMSET) && ! defined (memset)
-# if ! defined (HAS_BZERO)
-   error No memset/bzero available.
-# else
-#  define memset(s,c,n)    (bzero ((s), (n)), s)
-# endif
-#endif
+#include "di.h"
+extern int di_lib_debug;
 
 #if defined (NEED_GETENV_DEF)
   extern char *getenv _((char *));
 #endif
 
-#if defined (NEED_STATFS_DEFS)
-  extern int statfs _((char *, struct statfs *));
-#endif
-
 #if defined (NEED_ERRNO_DEFS)
 extern int     errno;
-#endif
-
-#if (defined (_LARGEFILE_SOURCE) || defined (_LARGEFILE64_SOURCE)) && \
-        _FILE_OFFSET_BITS == 64
-# define HAS_64BIT_STATFS_FLDS 1
-#endif
-
-#if defined (HAS_64BIT_STATFS_FLDS)
-typedef unsigned long long _fs_size_t;
-typedef long long _s_fs_size_t;
-#else
-typedef unsigned long _fs_size_t;
-typedef long _s_fs_size_t;
 #endif
 
 #if ! defined (HAS_OPTIND)
@@ -372,13 +219,6 @@ typedef long _s_fs_size_t;
 #endif
 
 /* end of system specific includes/configurations */
-
-#if ! defined (TRUE)
-# define TRUE             1
-#endif
-#if ! defined (FALSE)
-# define FALSE            0
-#endif
 
 #define DI_F_ALL               0x00000001
 #define DI_F_LOCAL_ONLY        0x00000002
@@ -411,36 +251,23 @@ typedef long _s_fs_size_t;
 #define DI_FMT_MOUNT_TIME      'I'
 #define DI_FMT_MOUNT_OPTIONS   'O'
 
-#define DI_IGNORE           0
-#define DI_OK               1
-#define DI_BAD              2
+#define DI_SORT_NONE            0
+#define DI_SORT_NAME            1
+#define DI_SORT_SPECIAL         2
 
-#define DI_SORT_NONE        0
-#define DI_SORT_NAME        1
-#define DI_SORT_SPECIAL     2
+#define DI_SORT_ASCENDING       1
+#define DI_SORT_DESCENDING      -1
 
-#define DI_SORT_ASCENDING   1
-#define DI_SORT_DESCENDING  -1
+#define DI_UNKNOWN_DEV          -1L
+#define DI_LIST_SEP             ","
 
-#define DI_UNKNOWN_DEV      -1L
-#define DI_LIST_SEP         ","
+#define DI_ALL_FORMAT           "MTS\n\tIO\n\tbuf1\n\tbcvp\n\tBuv2\n\tiUFP"
 
-#define DI_ALL_FORMAT          "MTS\n\tIO\n\tbuf1\n\tbcvp\n\tBuv2\n\tiUFP"
-
-#define DI_HALF_K              512.0
-#define DI_ONE_K               1024.0
-#define DI_ONE_MEG             1048576.0
-#define DI_ONE_GIG             1073241824.0
-
-#if ! defined (MAXPATHLEN)
-# define MAXPATHLEN         255
-#endif
-#define DI_SPEC_NAME_LEN       MAXPATHLEN
-#define DI_OPT_LEN             MAXPATHLEN
-#define DI_MNT_TIME_LEN        24
-
-#define DI_RETRY_COUNT         5
-#define DI_MAX_REMOTE_TYPES    20
+#define DI_HALF_K               512.0
+#define DI_ONE_K                1024.0
+#define DI_ONE_MEG              1048576.0
+#define DI_ONE_GIG              1073241824.0
+#define DI_ONE_TERA             1099511627776.0
 
    /* you may want to change some of these values.  Be sure to change all */
    /* related entries.                                                    */
@@ -449,53 +276,26 @@ typedef long _s_fs_size_t;
 # define DI_DEFAULT_FORMAT      "smbuvpT"
 #endif
 #if defined (HAS_MNT_TIME)
-# define DI_DEF_MOUNT_FORMAT    "MSTIO"
+# define DI_DEF_MOUNT_FORMAT    "MST\n\tI\n\tO"
 #else
-# define DI_DEF_MOUNT_FORMAT    "MSTO"
+# define DI_DEF_MOUNT_FORMAT    "MST\n\tO"
 #endif
-#define DI_PERC_FMT            "%3.0f%% "
-#define DI_PERC_LBL_FMT        "%5s"
-#define DI_NAME_LEN            MAXPATHLEN
-#define DI_FSTYPE_FMT          "%-7.7s"
-#define DI_MOUNT_FMT           "%-15.15s"
-#define DI_SPEC_FMT            "%-18.18s"
+#define DI_PERC_FMT             "%3.0f%% "
+#define DI_PERC_LBL_FMT         "%5s"
+#define DI_FSTYPE_FMT           "%-7.7s"
+#define DI_MOUNT_FMT            "%-15.15s"
+#define DI_SPEC_FMT             "%-18.18s"
 
-#define DI_UNKNOWN_FSTYPE      "Unknown fstyp %.2d"
-
-typedef unsigned long _ulong;
 typedef int (*DI_SORT_FUNC) _((char *, char *));
 
-typedef struct
-{
-    double          totalBlocks;
-    double          freeBlocks;
-    double          availBlocks;
-    _fs_size_t      totalInodes;
-    _fs_size_t      freeInodes;
-    _fs_size_t      availInodes;
-    _ulong          st_dev;                      /* disk device number   */
-    _ulong          sp_dev;                      /* special device number*/
-    _ulong          sp_rdev;                     /* special rdev #       */
-    char            printFlag;                   /* do we want to print  */
-                                                 /* this entry?          */
-    char            isLocal;                     /* is this mount point  */
-                                                 /* local?               */
-    char            name [DI_NAME_LEN + 1];         /* mount point          */
-    char            special [DI_SPEC_NAME_LEN + 1]; /* special device name  */
-    char            fsType [DI_TYPE_LEN + 1];       /* type of file system  */
-    char            options [DI_OPT_LEN + 1];
-    char            mountTime [DI_MNT_TIME_LEN + 1];
-} DiskInfo;
-
-static DiskInfo     *diskInfo = { (DiskInfo *) NULL };
-static int          diCount = { 0 };
 static int          debug = { 0 };
 static _ulong       flags = { 0 };
 static int          sortType = { DI_SORT_NAME };
 static int          sortOrder = { DI_SORT_ASCENDING };
+
 static char         *formatString = { DI_DEFAULT_FORMAT };
 static char         mountFormat [20];
- static char         specialFormat [20];
+static char         specialFormat [20];
 static char         typeFormat [20];
 static char         optFormat [20];
 static char         mTimeFormat [20];
@@ -505,34 +305,27 @@ static char         blockFormat [20];
 static char         blockLabelFormat [20];
 static char         inodeFormat [20];
 static char         inodeLabelFormat [20];
-static char         **ignoreList = { (char **) NULL };
-static char         **includeList = { (char **) NULL };
 static double       dispBlockSize = { DI_ONE_MEG };
-static int          remoteFileSystemCount = { 0 };
-static char         remoteFileSystemTypes [DI_MAX_REMOTE_TYPES][DI_TYPE_LEN];
 
 
-static void cleanup             _((void));
-static void printDiskInfo       _((void));
-static void printInfo           _((DiskInfo *));
-static void addTotals           _((DiskInfo *, DiskInfo *));
+static void cleanup             _((di_DiskInfo *, char **, char **));
+static void printDiskInfo       _((di_DiskInfo *, int));
+static void printInfo           _((di_DiskInfo *));
+static void addTotals           _((di_DiskInfo *, di_DiskInfo *));
 static void printTitle          _((void));
-static void printPerc           _((double, double, char *));
-static char *Realloc            _((char *, long));
+static void printPerc           _((_s_fs_size_t, _s_fs_size_t, char *));
 static void sortArray           _((char *, int, int, DI_SORT_FUNC));
 static int  diCompare           _((char *, char *));
-static void getDiskStatInfo     _((void));
-static void getDiskSpecialInfo  _((void));
-static void printFileInfo       _((int, int, char *[]));
-static void checkDiskInfo       _((void));
+static void getDiskStatInfo     _((di_DiskInfo *, int));
+static void getDiskSpecialInfo  _((di_DiskInfo *, int));
+static void checkFileInfo       _((di_DiskInfo *, int, int, int, char *[]));
+static void preCheckDiskInfo    _((di_DiskInfo *, char **, char **, int));
+static void checkDiskInfo       _((di_DiskInfo *, char **, int));
 static void usage               _((void));
-static void processArgs         _((int, char *[]));
+static void processArgs         _((int, char *[], char ***, char ***));
 static void parseList           _((char ***, char *));
-static void checkIgnoreList     _((DiskInfo *));
-static void checkIncludeList    _((DiskInfo *));
-
-static int  getDiskEntries      _((void));
-static void getDiskInfo         _((void));
+static void checkIgnoreList     _((di_DiskInfo *, char **));
+static void checkIncludeList    _((di_DiskInfo *, char **));
 
 int
 #if defined (CAN_PROTOTYPE)
@@ -543,6 +336,10 @@ main (argc, argv)
     char                *argv [];
 #endif
 {
+    di_DiskInfo         *diskInfo = { (di_DiskInfo *) NULL };
+    int                 diCount = { 0 };
+    char                **ignoreList = { (char **) NULL };
+    char                **includeList = { (char **) NULL };
     char                *ptr;
 
 
@@ -559,32 +356,31 @@ main (argc, argv)
         }
     }
 
-    processArgs (argc, argv);
+    processArgs (argc, argv, &ignoreList, &includeList);
+
     if (debug > 0)
     {
         printf ("di ver $Revision$\n");
     }
 
-    if (getDiskEntries () < 0)
+    if (di_getDiskEntries (&diskInfo, &diCount) < 0)
     {
-        cleanup ();
+        cleanup (diskInfo, ignoreList, includeList);
         exit (1);
     }
 
-    getDiskInfo ();
-    getDiskSpecialInfo ();
-    checkDiskInfo ();
+    preCheckDiskInfo (diskInfo, ignoreList, includeList, diCount);
     if (optind < argc)
     {
-        getDiskStatInfo ();
-        printFileInfo (optind, argc, argv);
+        getDiskStatInfo (diskInfo, diCount);
+        checkFileInfo (diskInfo, diCount, optind, argc, argv);
     }
-    else
-    {
-        printDiskInfo ();
-    }
+    di_getDiskInfo (&diskInfo, &diCount);
+    getDiskSpecialInfo (diskInfo, diCount);
+    checkDiskInfo (diskInfo, includeList, diCount);
+    printDiskInfo (diskInfo, diCount);
 
-    cleanup ();
+    cleanup (diskInfo, ignoreList, includeList);
     exit (0);
 }
 
@@ -597,15 +393,18 @@ main (argc, argv)
 
 static void
 #if defined (CAN_PROTOTYPE)
-cleanup (void)
+cleanup (di_DiskInfo *diskInfo, char **ignoreList, char **includeList)
 #else
-cleanup ()
+cleanup (diskInfo, ignoreList, includeList)
+    di_DiskInfo     *diskInfo;
+    char            **ignoreList;
+    char            **includeList;
 #endif
 {
     char        **lptr;
 
 
-    if (diskInfo != (DiskInfo *) NULL)
+    if (diskInfo != (di_DiskInfo *) NULL)
     {
         free ((char *) diskInfo);
     }
@@ -643,18 +442,21 @@ cleanup ()
 
 static void
 #if defined (CAN_PROTOTYPE)
-printDiskInfo (void)
+printDiskInfo (di_DiskInfo *diskInfo, int diCount)
 #else
-printDiskInfo ()
+printDiskInfo (diskInfo, diCount)
+    di_DiskInfo     *diskInfo;
+    int             diCount;
 #endif
 {
     int                 i;
-    DiskInfo            totals;
+    di_DiskInfo         totals;
 
 
-    memset ((char *) &totals, '\0', sizeof (DiskInfo));
+    memset ((char *) &totals, '\0', sizeof (di_DiskInfo));
+    totals.blockSize = 8192;
     strcpy (totals.name, "Total");
-    totals.printFlag = DI_OK;
+    totals.printFlag = DI_PRNT_OK;
 
     if ((flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
     {
@@ -663,17 +465,30 @@ printDiskInfo ()
 
     if (sortType != DI_SORT_NONE)
     {
-        sortArray ((char *) diskInfo, sizeof (DiskInfo), diCount, diCompare);
+        sortArray ((char *) diskInfo, sizeof (di_DiskInfo), diCount, diCompare);
     }
 
     for (i = 0; i < diCount; ++i)
     {
         if (( (flags & DI_F_ALL) == DI_F_ALL &&
-                diskInfo [i].printFlag != DI_BAD) ||
-                diskInfo [i].printFlag == DI_OK)
+                diskInfo [i].printFlag != DI_PRNT_BAD) ||
+                diskInfo [i].printFlag == DI_PRNT_OK)
         {
             printInfo (&diskInfo [i]);
-            addTotals (&diskInfo [i], &totals);
+        }
+
+        if ((flags & DI_F_TOTAL) == DI_F_TOTAL &&
+                (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
+        {
+                /* only total the disks that make sense! */
+                /* don't add memory filesystems to totals. */
+            if (diskInfo [i].printFlag == DI_PRNT_OK &&
+                strcmp (diskInfo [i].fsType, "tmpfs") != 0 &&
+                strcmp (diskInfo [i].fsType, "memfs") != 0 &&
+                diskInfo [i].isReadOnly == FALSE)
+            {
+                addTotals (&diskInfo [i], &totals);
+            }
         }
     }
 
@@ -694,17 +509,19 @@ printDiskInfo ()
 
 static void
 #if defined (CAN_PROTOTYPE)
-printInfo (DiskInfo *diskInfo)
+printInfo (di_DiskInfo *diskInfo)
 #else
 printInfo (diskInfo)
-    DiskInfo            *diskInfo;
+    di_DiskInfo         *diskInfo;
 #endif
 {
-    double              used;
-    double              totAvail;
+    _s_fs_size_t        used;
+    _s_fs_size_t        totAvail;
     char                *ptr;
     int                 valid;
+    double              mult;
 
+    mult = (double) diskInfo->blockSize / dispBlockSize;
 
     ptr = formatString;
     while (*ptr)
@@ -727,39 +544,39 @@ printInfo (diskInfo)
 
             case DI_FMT_BTOT:
             {
-                printf (blockFormat, diskInfo->totalBlocks);
+                printf (blockFormat, (double) diskInfo->totalBlocks * mult);
                 break;
             }
 
             case DI_FMT_BTOT_AVAIL:
             {
-                printf (blockFormat, diskInfo->totalBlocks -
-                        (diskInfo->freeBlocks - diskInfo->availBlocks));
+                printf (blockFormat, (double) (diskInfo->totalBlocks -
+                        (diskInfo->freeBlocks - diskInfo->availBlocks)) * mult);
                 break;
             }
 
             case DI_FMT_BUSED:
             {
-                printf (blockFormat, diskInfo->totalBlocks -
-                        diskInfo->freeBlocks);
+                printf (blockFormat, (double) (diskInfo->totalBlocks -
+                        diskInfo->freeBlocks) * mult);
                 break;
             }
 
             case DI_FMT_BCUSED:
             {
-                printf (blockFormat, diskInfo->totalBlocks - diskInfo->availBlocks);
+                printf (blockFormat, (double) (diskInfo->totalBlocks - diskInfo->availBlocks) * mult);
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printf (blockFormat, diskInfo->freeBlocks);
+                printf (blockFormat, (double) diskInfo->freeBlocks * mult);
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
-                printf (blockFormat, diskInfo->availBlocks);
+                printf (blockFormat, (double) diskInfo->availBlocks * mult);
                 break;
             }
 
@@ -879,16 +696,25 @@ printInfo (diskInfo)
 
 static void
 #if defined (CAN_PROTOTYPE)
-addTotals (DiskInfo *diskInfo, DiskInfo *totals)
+addTotals (di_DiskInfo *diskInfo, di_DiskInfo *totals)
 #else
 addTotals (diskInfo, totals)
-    DiskInfo      *diskInfo;
-    DiskInfo      *totals;
+    di_DiskInfo   *diskInfo;
+    di_DiskInfo   *totals;
 #endif
 {
-    totals->totalBlocks += diskInfo->totalBlocks;
-    totals->freeBlocks += diskInfo->freeBlocks;
-    totals->availBlocks += diskInfo->availBlocks;
+    double              mult;
+
+    mult = (double) diskInfo->blockSize / (double) totals->blockSize;
+
+    if (debug > 2)
+    {
+        printf ("totals:bs:%lld:mult:%f\n", diskInfo->blockSize, mult);
+    }
+
+    totals->totalBlocks += diskInfo->totalBlocks * mult;
+    totals->freeBlocks += diskInfo->freeBlocks * mult;
+    totals->availBlocks += diskInfo->availBlocks * mult;
     totals->totalInodes += diskInfo->totalInodes;
     totals->freeInodes += diskInfo->freeInodes;
     totals->availInodes += diskInfo->availInodes;
@@ -952,6 +778,10 @@ printTitle ()
                 else if (dispBlockSize == DI_ONE_GIG)
                 {
                     printf (blockLabelFormat, "  Gigs");
+                }
+                else if (dispBlockSize == DI_ONE_TERA)
+                {
+                    printf (blockLabelFormat, " Teras");
                 }
                 else if (dispBlockSize == DI_HALF_K)
                 {
@@ -1081,20 +911,20 @@ printTitle ()
 
 static void
 #if defined (CAN_PROTOTYPE)
-printPerc (double used, double totAvail, char *format)
+printPerc (_s_fs_size_t used, _s_fs_size_t totAvail, char *format)
 #else
 printPerc (used, totAvail, format)
-    double      used;
-    double      totAvail;
-    char        *format;
+    _s_fs_size_t    used;
+    _s_fs_size_t    totAvail;
+    char            *format;
 #endif
 {
     double      perc;
 
 
-    if (totAvail > 0.0)
+    if (totAvail > 0L)
     {
-        perc = used / totAvail;
+        perc = (double) used / (double) totAvail;
         perc *= 100.0;
     }
     else
@@ -1105,41 +935,15 @@ printPerc (used, totAvail, format)
 }
 
 
-/*
- * Realloc
- *
- * portable realloc
- *
- */
-
-static char *
-#if defined (CAN_PROTOTYPE)
-Realloc (char *ptr, long size)
-#else
-Realloc (ptr, size)
-    char      *ptr;
-    long      size;
-#endif
-{
-    if (ptr == (char *) NULL)
-    {
-        ptr = (char *) malloc (size);
-    }
-    else
-    {
-        ptr = (char *) realloc (ptr, size);
-    }
-
-    return ptr;
-}
-
-
 static void
 #if defined (CAN_PROTOTYPE)
-printFileInfo (int optind, int argc, char *argv [])
+checkFileInfo (di_DiskInfo *diskInfo, int diCount,
+        int optidx, int argc, char *argv [])
 #else
-printFileInfo (optind, argc, argv)
-    int                 optind;
+checkFileInfo (diskInfo, diCount, optidx, argc, argv)
+    di_DiskInfo         *diskInfo;
+    int                 diCount;
+    int                 optidx;
     int                 argc;
     char                *argv [];
 #endif
@@ -1147,30 +951,24 @@ printFileInfo (optind, argc, argv)
     int                 i;
     int                 j;
     struct stat         statBuf;
-    DiskInfo            totals;
 
 
-    memset ((char *) &totals, '\0', sizeof (DiskInfo));
-    strcpy (totals.name, "Total");
-    totals.printFlag = DI_OK;
-
-    if ((flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
+    for (j = 0; j < diCount; ++j)
     {
-        printTitle ();
+        diskInfo [j].printFlag = DI_PRNT_IGNORE;
     }
 
-    for (i = optind; i < argc; ++i)
+    for (i = optidx; i < argc; ++i)
     {
         if (stat (argv [i], &statBuf) == 0)
         {
             for (j = 0; j < diCount; ++j)
             {
-                if (diskInfo [j].printFlag != DI_BAD &&
+                if (diskInfo [j].printFlag != DI_PRNT_BAD &&
                         diskInfo [j].st_dev != DI_UNKNOWN_DEV &&
                         (_ulong) statBuf.st_dev == diskInfo [j].st_dev)
                 {
-                    printInfo (&diskInfo [j]);
-                    addTotals (&diskInfo [j], &totals);
+                    diskInfo [j].printFlag = DI_PRNT_OK;
                     break; /* out of inner for */
                 }
             }
@@ -1181,11 +979,6 @@ printFileInfo (optind, argc, argv)
             perror ("");
         }
     } /* for each file specified on command line */
-
-    if ((flags & DI_F_TOTAL) == DI_F_TOTAL && (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
-    {
-        printInfo (&totals);
-    }
 }
 
 /*
@@ -1221,7 +1014,6 @@ sortArray (data, dataSize, count, compareFunc)
     if (tempData == (char *) NULL)
     {
         fprintf (stderr, "malloc failed in sortArray().  errno %d\n", errno);
-        cleanup ();
         exit (1);
     }
 
@@ -1269,12 +1061,12 @@ diCompare (a, b)
     char        *b;
 #endif
 {
-    DiskInfo    *di1;
-    DiskInfo    *di2;
+    di_DiskInfo *di1;
+    di_DiskInfo *di2;
 
 
-    di1 = (DiskInfo *) a;
-    di2 = (DiskInfo *) b;
+    di1 = (di_DiskInfo *) a;
+    di2 = (di_DiskInfo *) b;
 
 
     switch (sortType)
@@ -1308,9 +1100,11 @@ diCompare (a, b)
 
 static void
 #if defined (CAN_PROTOTYPE)
-getDiskStatInfo (void)
+getDiskStatInfo (di_DiskInfo *diskInfo, int diCount)
 #else
-getDiskStatInfo ()
+getDiskStatInfo (diskInfo, diCount)
+    di_DiskInfo             *diskInfo;
+    int                     diCount;
 #endif
 {
     int         i;
@@ -1346,9 +1140,11 @@ getDiskStatInfo ()
 
 static void
 #if defined (CAN_PROTOTYPE)
-getDiskSpecialInfo (void)
+getDiskSpecialInfo (di_DiskInfo *diskInfo, int diCount)
 #else
-getDiskSpecialInfo ()
+getDiskSpecialInfo (diskInfo, diCount)
+    di_DiskInfo         *diskInfo;
+    int                 diCount;
 #endif
 {
     int         i;
@@ -1362,8 +1158,9 @@ getDiskSpecialInfo ()
             diskInfo [i].sp_rdev = (_ulong) statBuf.st_rdev;
             if (debug > 2)
             {
-                printf ("special dev: %s: %ld rdev: %ld\n", diskInfo [i].special,
-                        diskInfo [i].sp_dev, diskInfo [i].sp_rdev);
+                printf ("special dev: %s: %ld rdev: %ld\n",
+                        diskInfo [i].special, diskInfo [i].sp_dev,
+                        diskInfo [i].sp_rdev);
             }
         }
         else
@@ -1383,9 +1180,12 @@ getDiskSpecialInfo ()
 
 static void
 #if defined (CAN_PROTOTYPE)
-checkDiskInfo (void)
+checkDiskInfo (di_DiskInfo *diskInfo, char **includeList, int diCount)
 #else
-checkDiskInfo ()
+checkDiskInfo (diskInfo, includeList, diCount)
+    di_DiskInfo         *diskInfo;
+    char                **includeList;
+    int                 diCount;
 #endif
 {
     int           i;
@@ -1410,21 +1210,30 @@ checkDiskInfo ()
 
     for (i = 0; i < diCount; ++i)
     {
+        if (diskInfo [i].printFlag == DI_PRNT_IGNORE)
+        {
+            if (debug > 2)
+            {
+                printf ("chk: skipping:%s\n", diskInfo [i].name);
+            }
+            continue;
+        }
+
             /* Solaris reports a cdrom as having no free blocks,   */
             /* no available.  Their df doesn't always work right!  */
             /* -1 is returned.                                     */
         if (debug > 2)
         {
-            printf ("chk: %s free: %f\n", diskInfo [i].name,
+            printf ("chk: %s free: %llu\n", diskInfo [i].name,
                 diskInfo [i].freeBlocks);
         }
-        if (diskInfo [i].freeBlocks < 0.0)
+        if (diskInfo [i].freeBlocks < 0L)
         {
-            diskInfo [i].freeBlocks = 0.0;
+            diskInfo [i].freeBlocks = 0L;
         }
-        if (diskInfo [i].availBlocks < 0.0)
+        if (diskInfo [i].availBlocks < 0L)
         {
-            diskInfo [i].availBlocks = 0.0;
+            diskInfo [i].availBlocks = 0L;
         }
 
         temp = ~ 0;
@@ -1435,24 +1244,27 @@ checkDiskInfo ()
             diskInfo [i].availInodes = 0;
         }
 
-        if (debug > 2)
+        if ((flags & DI_F_ALL) != DI_F_ALL)
         {
-            printf ("chk: %s total: %f\n", diskInfo [i].name,
-                    diskInfo [i].totalBlocks);
-        }
-        if (diskInfo [i].totalBlocks <= 0.0 &&
-            diskInfo [i].printFlag != DI_BAD)
-        {
-            diskInfo [i].printFlag = DI_IGNORE;
             if (debug > 2)
             {
-                printf ("chk: ignore: totalBlocks <= 0: %s\n",
-                        diskInfo [i].name);
+                printf ("chk: %s total: %lld\n", diskInfo [i].name,
+                        diskInfo [i].totalBlocks);
+            }
+            if (diskInfo [i].totalBlocks <= 0L &&
+                diskInfo [i].printFlag != DI_PRNT_BAD)
+            {
+                diskInfo [i].printFlag = DI_PRNT_IGNORE;
+                if (debug > 2)
+                {
+                    printf ("chk: ignore: totalBlocks <= 0: %s\n",
+                            diskInfo [i].name);
+                }
             }
         }
 
-        checkIgnoreList (&diskInfo [i]);
-        checkIncludeList (&diskInfo [i]);
+        /* make sure anything in the include list didn't get turned off */
+        checkIncludeList (&diskInfo [i], includeList);
     } /* for all disks */
 
         /* this loop sets duplicate entries to be ignored. */
@@ -1461,9 +1273,9 @@ checkDiskInfo ()
             /* don't need to bother checking real partitions */
             /* don't bother if already ignored               */
         if (diskInfo [i].sp_rdev != 0 &&
-            (diskInfo [i].printFlag == DI_OK ||
+            (diskInfo [i].printFlag == DI_PRNT_OK ||
             ((flags & DI_F_ALL) == DI_F_ALL &&
-            diskInfo [i].printFlag != DI_BAD)))
+            diskInfo [i].printFlag != DI_PRNT_BAD)))
         {
             sp_dev = diskInfo [i].sp_dev;
             sp_rdev = diskInfo [i].sp_rdev;
@@ -1488,7 +1300,7 @@ checkDiskInfo ()
                 if (diskInfo [j].sp_rdev == 0 &&
                     diskInfo [j].sp_dev == sp_rdev)
                 {
-                    diskInfo [j].printFlag = DI_IGNORE;
+                    diskInfo [j].printFlag = DI_PRNT_IGNORE;
                     if (debug > 2)
                     {
                         printf ("chk: ignore: duplicate: %s\n",
@@ -1511,7 +1323,7 @@ checkDiskInfo ()
         /* this loop gets the max string lengths */
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
+        if (diskInfo [i].printFlag == DI_PRNT_OK || (flags & DI_F_ALL) == DI_F_ALL)
         {
             len = strlen (diskInfo [i].name);
             if (len > maxMountString)
@@ -1570,6 +1382,51 @@ checkDiskInfo ()
 }
 
 /*
+ * preCheckDiskInfo
+ *
+ * checks for ignore/include list; check for remote filesystems
+ * and local only flag set.
+ *
+ */
+
+static void
+#if defined (CAN_PROTOTYPE)
+preCheckDiskInfo (di_DiskInfo *diskInfo, char **ignoreList,
+        char **includeList, int diCount)
+#else
+preCheckDiskInfo (diskInfo, ignoreList, includeList, diCount)
+    di_DiskInfo         *diskInfo;
+    char                **ignoreList;
+    char                **includeList;
+    int                 diCount;
+#endif
+{
+    int           i;
+
+    for (i = 0; i < diCount; ++i)
+    {
+        if ((flags & DI_F_ALL) != DI_F_ALL)
+        {
+            di_testRemoteDisk (&diskInfo [i]);
+
+            if (diskInfo [i].isLocal == FALSE &&
+                    (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
+            {
+                diskInfo [i].printFlag = DI_PRNT_IGNORE;
+                if (debug > 2)
+                {
+                    printf ("prechk: ignore: remote disk; local flag set: %s\n",
+                        diskInfo [i].name);
+                }
+            }
+
+            checkIgnoreList (&diskInfo [i], ignoreList);
+            checkIncludeList (&diskInfo [i], includeList);
+        }
+    } /* for all disks */
+}
+
+/*
  * usage
  *
  */
@@ -1614,11 +1471,13 @@ usage ()
 
 static void
 #if defined (CAN_PROTOTYPE)
-processArgs (int argc, char *argv [])
+processArgs (int argc, char *argv [], char ***ignoreList, char ***includeList)
 #else
-processArgs (argc, argv)
+processArgs (argc, argv, ignoreList, includeList)
     int         argc;
     char        *argv [];
+    char        ***ignoreList;
+    char        ***includeList;
 #endif
 {
     int         ch;
@@ -1672,6 +1531,12 @@ processArgs (argc, argv)
                         break;
                     }
 
+                    case 't':
+                    {
+                        dispBlockSize = DI_ONE_TERA;
+                        break;
+                    }
+
                     default:
                     {
                         if (isdigit ((int) (*optarg)))
@@ -1693,19 +1558,18 @@ processArgs (argc, argv)
             case 'h':
             {
                 usage ();
-                cleanup ();
                 exit (0);
             }
 
             case 'i':
             {
-                parseList (&ignoreList, optarg);
+                parseList (ignoreList, optarg);
                 break;
             }
 
             case 'I':
             {
-                parseList (&includeList, optarg);
+                parseList (includeList, optarg);
                 break;
             }
 
@@ -1767,13 +1631,14 @@ processArgs (argc, argv)
             case 'x':
             {
                 debug = atoi (optarg);
+                di_lib_debug = atoi (optarg);
                 break;
             }
 
             case '?':
             {
                 usage ();
-                cleanup ();
+                cleanup ((di_DiskInfo *) NULL, (char **) NULL, (char **) NULL);
                 exit (1);
             }
         }
@@ -1802,7 +1667,7 @@ parseList (list, str)
     if (dstr == (char *) NULL)
     {
         fprintf (stderr, "malloc failed in parseList() (1).  errno %d\n", errno);
-        cleanup ();
+        cleanup ((di_DiskInfo *) NULL, (char **) NULL, (char **) NULL);
         exit (1);
     }
 
@@ -1820,7 +1685,7 @@ parseList (list, str)
     if (*list == (char **) NULL)
     {
         fprintf (stderr, "malloc failed in parseList() (2).  errno %d\n", errno);
-        cleanup ();
+        cleanup ((di_DiskInfo *) NULL, (char **) NULL, (char **) NULL);
         exit (1);
     }
 
@@ -1834,7 +1699,7 @@ parseList (list, str)
         {
             fprintf (stderr, "malloc failed in parseList() (3).  errno %d\n",
                     errno);
-            cleanup ();
+            cleanup ((di_DiskInfo *) NULL, (char **) NULL, (char **) NULL);
             exit (1);
         }
         strcpy (*lptr, ptr);
@@ -1849,10 +1714,11 @@ parseList (list, str)
 
 static void
 #if defined (CAN_PROTOTYPE)
-checkIgnoreList (DiskInfo *diskInfo)
+checkIgnoreList (di_DiskInfo *diskInfo, char **ignoreList)
 #else
-checkIgnoreList (diskInfo)
-    DiskInfo        *diskInfo;
+checkIgnoreList (diskInfo, ignoreList)
+    di_DiskInfo     *diskInfo;
+    char            **ignoreList;
 #endif
 {
     char            **ptr;
@@ -1863,9 +1729,14 @@ checkIgnoreList (diskInfo)
         ptr = ignoreList;
         while (*ptr != (char *) NULL)
         {
+            if (debug > 2)
+            {
+                printf ("chkign: test: fstype %s/%s : %s\n", *ptr,
+                        diskInfo->fsType, diskInfo->name);
+            }
             if (strcmp (*ptr, diskInfo->fsType) == 0)
             {
-                diskInfo->printFlag = DI_IGNORE;
+                diskInfo->printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
                 {
                     printf ("chkign: ignore: fstype %s match: %s\n", *ptr,
@@ -1880,10 +1751,11 @@ checkIgnoreList (diskInfo)
 
 static void
 #if defined (CAN_PROTOTYPE)
-checkIncludeList (DiskInfo *diskInfo)
+checkIncludeList (di_DiskInfo *diskInfo, char **includeList)
 #else
-checkIncludeList (diskInfo)
-    DiskInfo        *diskInfo;
+checkIncludeList (diskInfo, includeList)
+    di_DiskInfo     *diskInfo;
+    char            **includeList;
 #endif
 {
     char            **ptr;
@@ -1894,14 +1766,19 @@ checkIncludeList (diskInfo)
         ptr = includeList;
         while (*ptr != (char *) NULL)
         {
+            if (debug > 2)
+            {
+                printf ("chkinc: test: fstype %s/%s : %s\n", *ptr,
+                        diskInfo->fsType, diskInfo->name);
+            }
             if (strcmp (*ptr, diskInfo->fsType) == 0)
             {
-                diskInfo->printFlag = DI_OK;
+                diskInfo->printFlag = DI_PRNT_OK;
                 break;
             }
             else
             {
-                diskInfo->printFlag = DI_IGNORE;
+                diskInfo->printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
                 {
                     printf ("chkinc: ! include: fstype %s match: %s\n", *ptr,
@@ -1914,1584 +1791,3 @@ checkIncludeList (diskInfo)
 }
 
 
-#if defined (HAS_FS_INFO)
-
-/*
- * getDiskEntries
- *
- * For BeOS.
- *
- */
-
-static int
-getDiskEntries (void)
-{
-    status_t        stat;
-    int             idx;
-    int32           count;
-    dev_t           dev;
-    char            buff [B_FILE_NAME_LENGTH];
-    fs_info         fsinfo;
-    double          mult;
-    node_ref        nref;
-    BDirectory      *dir;
-    BEntry          entry;
-    BPath           path;
-
-    count = 0;
-    while ((dev = next_dev (&count)) != B_BAD_VALUE)
-    {
-        if ((stat = fs_stat_dev (dev, &fsinfo)) == B_BAD_VALUE)
-        {
-            break;
-        }
-
-        idx = diCount;
-        ++diCount;
-        diskInfo = (DiskInfo *) Realloc ((char *) diskInfo,
-                sizeof (DiskInfo) * diCount);
-        memset ((char *) &diskInfo [idx], '\0', sizeof (DiskInfo));
-        diskInfo [idx].printFlag = DI_OK;
-        *buff = '\0';
-        nref.device = dev;
-        nref.node = fsinfo.root;
-        dir = new BDirectory (&nref);
-        stat = dir->GetEntry (&entry);
-        stat = entry.GetPath (&path);
-        strncpy (diskInfo [idx].name, path.Path (), DI_NAME_LEN);
-        strncpy (diskInfo [idx].special, fsinfo.device_name, DI_SPEC_NAME_LEN);
-        strncpy (diskInfo [idx].fsType, fsinfo.fsh_name, DI_TYPE_LEN);
-        diskInfo [idx].isLocal = TRUE;
-        mult = (double) (long) fsinfo.block_size / dispBlockSize;
-        diskInfo [idx].totalBlocks =
-                ((double) (_s_fs_size_t) fsinfo.total_blocks * mult);
-        diskInfo [idx].freeBlocks =
-                ((double) (_s_fs_size_t) fsinfo.free_blocks * mult);
-        diskInfo [idx].availBlocks =
-                ((double) (_s_fs_size_t) fsinfo.free_blocks * mult);
-        diskInfo [idx].totalInodes = fsinfo.total_nodes;
-        diskInfo [idx].freeInodes = fsinfo.free_nodes;
-        diskInfo [idx].availInodes = fsinfo.free_nodes;
-
-        checkIgnoreList (&diskInfo [idx]);
-        checkIncludeList (&diskInfo [idx]);
-
-        if (debug > 0)
-        {
-            printf ("mnt:%s - %s\n", diskInfo [idx].name,
-                    diskInfo [idx].special);
-            printf ("dev:%d fs:%s\n", dev, diskInfo [idx].fsType);
-        }
-        if (debug > 1)
-        {
-            printf ("%s: %s\n", diskInfo [idx].name, diskInfo [idx].fsType);
-            printf ("\tmult:%f\n", mult);
-            printf ("\tblocks: tot:%ld free:%ld\n",
-                    fsinfo.total_blocks, fsinfo.free_blocks);
-            printf ("\tinodes: tot:%ld free:%ld\n",
-                    fsinfo.total_nodes, fsinfo.free_nodes);
-        }
-    }
-    return 0;
-}
-
-static void
-getDiskInfo (void)
-{
-    return;
-}
-
-#endif
-
-#if defined (HAS_GETMNTENT) && ! defined (HAS_SETMNTENT)
-
-# define DFS_FS_TABLE        "/etc/dfs/fstypes"
-
-/*
- * getDiskEntries
- *
- * For SysV.4, we open the file and call getmntent () repeatedly.
- *
- */
-
-static int
-getDiskEntries ()
-{
-    FILE            *f;
-    int             idx;
-    int             i;
-    struct mnttab   mntEntry;
-    char            buff [80];
-    time_t          mtime;
-    char            *devp;   /* local ptr to dev entry */
-
-
-    if ((flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
-    {
-        i = remoteFileSystemCount;
-
-        if ((f = fopen (DFS_FS_TABLE, "r")) != (FILE *) NULL)
-        {
-            fgets (buff, 80, f);
-            if (debug > 1)
-            {
-                printf ("remote file system type: %s\n", buff);
-            }
-            sscanf (buff, "%s", remoteFileSystemTypes [i++]);
-            fclose (f);
-        }
-
-        remoteFileSystemCount = i;
-    }
-
-    if ((f = fopen (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
-    {
-        fprintf (stderr, "Unable to open: %s errno %d\n", DI_MOUNT_FILE, errno);
-        return -1;
-    }
-
-    while (getmntent (f, &mntEntry) == 0)
-    {
-        idx = diCount;
-        ++diCount;
-        diskInfo = (DiskInfo *) Realloc ((char *) diskInfo,
-                sizeof (DiskInfo) * diCount);
-        memset ((char *) &diskInfo [idx], '\0', sizeof (DiskInfo));
-        diskInfo [idx].printFlag = DI_OK;
-
-        strncpy (diskInfo [idx].special, mntEntry.mnt_special,
-                DI_SPEC_NAME_LEN);
-        strncpy (diskInfo [idx].name, mntEntry.mnt_mountp, DI_NAME_LEN);
-# if defined (MNTOPT_IGNORE)
-        if (strstr (mntEntry.mnt_mntopts, MNTOPT_IGNORE) != (char *) NULL)
-# else
-        if (strstr (mntEntry.mnt_mntopts, "ignore") != (char *) NULL)
-# endif
-        {
-            diskInfo [idx].printFlag = DI_IGNORE;
-            if (debug > 2)
-            {
-                printf ("mnt: ignore: mntopt 'ignore': %s\n",
-                        diskInfo [idx].name);
-            }
-        }
-# if defined (MNTOPT_DEV)
-        sprintf (buff, "%s=", MNTOPT_DEV);
-        if ((devp = strstr (mntEntry.mnt_mntopts, buff)) != (char *) NULL)
-# else
-        if ((devp = strstr (mntEntry.mnt_mntopts, "dev=")) != (char *) NULL)
-# endif
-        {
-            if (devp != mntEntry.mnt_mntopts)
-            {
-                --devp;
-            }
-            *devp = 0;   /* point to preceeding comma and cut off */
-        }
-        strncpy (diskInfo [idx].options, mntEntry.mnt_mntopts, DI_OPT_LEN);
-        mtime = atol (mntEntry.mnt_time);
-        strncpy (diskInfo [idx].mountTime, ctime (&mtime), DI_MNT_TIME_LEN);
-
-            /* get the file system type now... */
-        strncpy (diskInfo [idx].fsType, mntEntry.mnt_fstype, DI_TYPE_LEN);
-
-        diskInfo [idx].isLocal = TRUE;
-        for (i = 0; i < remoteFileSystemCount; ++i)
-        {
-            if (strcmp (diskInfo [idx].fsType, remoteFileSystemTypes [i]) == 0)
-            {
-                diskInfo [idx].isLocal = FALSE;
-            }
-        }
-
-        checkIgnoreList (&diskInfo [idx]);
-        checkIncludeList (&diskInfo [idx]);
-
-        if (debug > 0)
-        {
-            printf ("mnt:%s - %s\n", diskInfo [idx].name,
-                    diskInfo [idx].special);
-        }
-    }
-
-    fclose (f);
-    return 0;
-}
-
-#endif /* HAS_GETMNTENT */
-
-#if ! defined (HAS_GETMNTENT) && ! defined (HAS_MNTCTL) && \
-        ! defined (HAS_GETMNTINFO) && ! defined (HAS_GETMNT) && \
-	! defined (HAS_GETDISKFREESPACE) && ! defined (HAS_FS_INFO)
-
-/*
- * getDiskEntries
- *
- * For SysV.3 we open the file and read it ourselves.
- *
- */
-
-static int
-getDiskEntries ()
-{
-    FILE             *f;
-    int              idx;
-    struct mnttab    mntEntry;
-
-
-    if ((f = fopen (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
-    {
-        fprintf (stderr, "Unable to open: %s errno %d\n", DI_MOUNT_FILE, errno);
-        return -1;
-    }
-
-    while (fread ((char *) &mntEntry, sizeof (struct mnttab), 1, f) == 1)
-    {
-            /* xenix allows null mount table entries */
-            /* sco nfs background mounts are marked as "nothing" */
-        if (mntEntry.mt_filsys [0] &&
-                strcmp (mntEntry.mt_filsys, "nothing") != 0)
-        {
-            idx = diCount;
-            ++diCount;
-            diskInfo = (DiskInfo *) Realloc ((char *) diskInfo,
-                                             sizeof (DiskInfo) * diCount);
-            memset ((char *) &diskInfo [idx], '\0', sizeof (DiskInfo));
-            diskInfo [idx].printFlag = DI_OK;
-            diskInfo [idx].isLocal = TRUE;
-
-# if defined (COHERENT)
-                /* Coherent seems to have these fields reversed. oh well. */
-            strncpy (diskInfo [idx].name, mntEntry.mt_dev, DI_NAME_LEN);
-            strncpy (diskInfo [idx].special, mntEntry.mt_filsys, DI_SPEC_NAME_LEN);
-# else
-            strncpy (diskInfo [idx].special, mntEntry.mt_dev, DI_SPEC_NAME_LEN);
-            strncpy (diskInfo [idx].name, mntEntry.mt_filsys, DI_NAME_LEN);
-# endif
-            strncpy (diskInfo [idx].options, mntEntry.mnt_mntopts, DI_OPT_LEN);
-            strncpy (diskInfo [idx].mountTime, mntEntry.mnt_time,
-                    DI_MNT_TIME_LEN);
-        }
-
-        if (debug > 0)
-        {
-            printf ("mnt:%s - %s\n", diskInfo [idx].name,
-                    diskInfo [idx].special);
-        }
-    }
-
-    fclose (f);
-    return 0;
-}
-
-#endif /* Sys V.3 */
-
-#if defined (HAS_GETMNTENT) && defined (HAS_SETMNTENT) && \
-        defined (HAS_ENDMNTENT)
-
-/*
- * getDiskEntries
- *
- * SunOS supplies an open and close routine for the mount table.
- *
- */
-
-static int
-getDiskEntries ()
-{
-    FILE            *f;
-    int             idx;
-    struct mntent   *mntEntry;
-    char            *devp;   /* local ptr to dev entry */
-
-
-#if defined (HAS_SETMNTENT_ONE_ARG)
-    if ((f = setmntent (DI_MOUNT_FILE)) == (FILE *) NULL)
-#else
-    if ((f = setmntent (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
-#endif
-    {
-        fprintf (stderr, "Unable to open: %s errno %d\n", DI_MOUNT_FILE, errno);
-        return -1;
-    }
-
-    while ((mntEntry = getmntent (f)) != (struct mntent *) NULL)
-    {
-        idx = diCount;
-        ++diCount;
-        diskInfo = (DiskInfo *) Realloc ((char *) diskInfo,
-                sizeof (DiskInfo) * diCount);
-        memset ((char *) &diskInfo [idx], '\0', sizeof (DiskInfo));
-        diskInfo [idx].printFlag = DI_OK;
-        diskInfo [idx].isLocal = TRUE;
-
-        strncpy (diskInfo [idx].special, mntEntry->mnt_fsname, DI_SPEC_NAME_LEN);
-        strncpy (diskInfo [idx].name, mntEntry->mnt_dir, DI_NAME_LEN);
-        strncpy (diskInfo [idx].fsType, mntEntry->mnt_type, DI_TYPE_LEN);
-
-        if (strcmp (mntEntry->mnt_type, MNTTYPE_IGNORE) == 0)
-        {
-            diskInfo [idx].printFlag = DI_IGNORE;
-            if (debug > 2)
-            {
-                printf ("mnt: ignore: mntopt 'ignore': %s\n",
-                        diskInfo [idx].name);
-            }
-        }
-
-        if ((devp = strstr (mntEntry->mnt_opts, "dev=")) != (char *) NULL)
-        {
-            if (devp != mntEntry->mnt_opts)
-            {
-                --devp;
-            }
-            *devp = 0;   /* point to preceeding comma and cut off */
-        }
-        strncpy (diskInfo [idx].options, mntEntry->mnt_opts, DI_OPT_LEN);
-
-        checkIgnoreList (&diskInfo [idx]);
-        checkIncludeList (&diskInfo [idx]);
-
-        if (debug > 0)
-        {
-            printf ("mnt:%s - %s : %s\n", diskInfo [idx].name,
-                    diskInfo [idx].special, diskInfo [idx].fsType);
-        }
-    }
-
-    endmntent (f);
-    return 0;
-}
-
-#endif /* HAS_GETMNTENT && HAS_SETMNTENT && HAS_ENDMNTENT */
-
-#if defined (HAS_GETMNTINFO)
-
-/*
- * getDiskEntries
- *
- * OSF/1 does this with a system call and library routine
- *
- *                  [mogul@wrl.dec.com (Jeffrey Mogul)]
- */
-
-#if defined (INITMOUNTNAMES)
-static char *mnt_names [] = INITMOUNTNAMES;
-# define MNT_NUMTYPES (MOUNT_MAXTYPE + 1)
-#endif
-
-    /* osf/1 mount flags start w/M_ vs. MNT_     */
-    /* this saves us from lots of duplicate code */
-#if defined (M_RDONLY)
-# define MNT_RDONLY M_RDONLY
-#endif
-#if defined (M_SYNCHRONOUS)
-# define MNT_SYNCHRONOUS M_SYNCHRONOUS
-#endif
-#if defined (M_NOEXEC)
-# define MNT_NOEXEC M_NOEXEC
-#endif
-#if defined (M_NOSUID)
-# define MNT_NOSUID M_NOSUID
-#endif
-#if defined (M_NODEV)
-# define MNT_NODEV M_NODEV
-#endif
-#if defined (M_GRPID)
-# define MNT_GRPID M_GRPID
-#endif
-#if defined (M_EXPORTED)
-# define MNT_EXPORTED M_EXPORTED
-#endif
-#if defined (M_EXRDONLY)
-# define MNT_EXRDONLY M_EXRDONLY
-#endif
-#if defined (M_EXRDMOSTLY)
-# define MNT_EXRDMOSTLY M_EXRDMOSTLY
-#endif
-#if defined (M_SECURE)
-# define MNT_SECURE M_SECURE
-#endif
-#if defined (M_LOCAL)
-# define MNT_LOCAL M_LOCAL
-#endif
-#if defined (M_QUOTA)
-# define MNT_QUOTA M_QUOTA
-#endif
-
-static int
-getDiskEntries ()
-{
-    int             count;
-    int             idx;
-    int             len;
-    short           fstype;
-    struct statfs   *mntbufp;
-    double          mult;
-
-    count = getmntinfo (&mntbufp, MNT_WAIT);
-    if (count < 1)
-    {
-        fprintf (stderr, "Unable to do getmntinfo () errno %d\n", errno);
-        return -1;
-    }
-
-    diCount = count;
-    diskInfo = (DiskInfo *) malloc (sizeof (DiskInfo) * count);
-    if (diskInfo == (DiskInfo *) NULL)
-    {
-        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-        return -1;
-    }
-    memset ((char *) diskInfo, '\0', sizeof (DiskInfo) * count);
-
-    if (debug > 1)
-    {
-        printf ("type_len %d name_len %d spec_name_len %d\n", DI_TYPE_LEN,
-                DI_NAME_LEN, DI_SPEC_NAME_LEN);
-    }
-
-    for (idx = 0; idx < count; idx++)
-    {
-        diskInfo [idx].printFlag = DI_OK;
-        diskInfo [idx].isLocal = FALSE;
-#if defined (MNT_LOCAL)
-        if ((mntbufp [idx].f_flags & MNT_LOCAL) == MNT_LOCAL)
-        {
-            diskInfo [idx].isLocal = TRUE;
-        }
-#endif
-
-        if (diskInfo [idx].isLocal == FALSE &&
-                (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
-        {
-            diskInfo [idx].printFlag = DI_IGNORE;
-            if (debug > 2)
-            {
-                printf ("mnt: ignore: remote: %s\n",
-                        diskInfo [idx].name);
-            }
-        }
-
-        strncpy (diskInfo [idx].special, mntbufp [idx].f_mntfromname,
-                DI_SPEC_NAME_LEN);
-        strncpy (diskInfo [idx].name, mntbufp [idx].f_mntonname, DI_NAME_LEN);
-
-        mult = 1.0;
-
-#  if defined (HAS_GETMNTINFO_FSIZE) /* 1.x */
-        mult = (double) mntbufp [idx].f_fsize / dispBlockSize;
-#  endif
-#  if defined (HAS_GETMNTINFO_BSIZE) /* 2.x */
-        mult = (double) mntbufp [idx].f_bsize / dispBlockSize;
-#  endif
-        diskInfo [idx].totalBlocks = ((double) (_s_fs_size_t) mntbufp [idx].f_blocks * mult);
-        diskInfo [idx].freeBlocks = ((double) (_s_fs_size_t) mntbufp [idx].f_bfree * mult);
-        diskInfo [idx].availBlocks = ((double) (_s_fs_size_t) mntbufp [idx].f_bavail * mult);
-
-        diskInfo [idx].totalInodes = mntbufp [idx].f_files;
-        diskInfo [idx].freeInodes = mntbufp [idx].f_ffree;
-        diskInfo [idx].availInodes = mntbufp [idx].f_ffree;
-
-        fstype = mntbufp [idx].f_type;
-# if ! defined (I_SYS_FSTYP) && ! defined (INITMOUNTNAMES) && \
-    ! defined (HAS_GETMNTINFO_FSTYPENAME)
-        if ((fstype >= 0) && (fstype <= MOUNT_MAXTYPE))
-        {
-            switch (fstype)
-            {
-#  if defined (MOUNT_NONE)
-                case MOUNT_NONE:         /* No Filesystem */
-                {
-                    strncpy (diskInfo [idx].fsType, "none", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_UFS)
-                case MOUNT_UFS:         /* UNIX "Fast" Filesystem */
-                {
-                    strncpy (diskInfo [idx].fsType, "ufs", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_NFS)
-                case MOUNT_NFS:         /* Network Filesystem */
-                {
-                    strncpy (diskInfo [idx].fsType, "nfs", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_MFS)
-                case MOUNT_MFS:         /* Memory Filesystem */
-                {
-                    strncpy (diskInfo [idx].fsType, "mfs", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_MSDOS)
-                case MOUNT_MSDOS:       /* MSDOS Filesystem */
-                {
-                    strncpy (diskInfo [idx].fsType, "msdos", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_LFS)
-                case MOUNT_LFS:
-                {
-                    strncpy (diskInfo [idx].fsType, "lfs", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_LOFS)
-                case MOUNT_LOFS:
-                {
-                    strncpy (diskInfo [idx].fsType, "lofs", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_FDESC)
-                case MOUNT_FDESC:
-                {
-                    strncpy (diskInfo [idx].fsType, "fdesc", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_PORTAL)
-                case MOUNT_PORTAL:
-                {
-                    strncpy (diskInfo [idx].fsType, "portal", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_NULL)
-                case MOUNT_NULL:
-                {
-                    strncpy (diskInfo [idx].fsType, "null", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_UMAP)
-                case MOUNT_UMAP:
-                {
-                    strncpy (diskInfo [idx].fsType, "umap", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_KERNFS)
-                case MOUNT_KERNFS:
-                {
-                    strncpy (diskInfo [idx].fsType, "kernfs", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_PROCFS)
-                case MOUNT_PROCFS:      /* proc filesystem */
-                {
-                    strncpy (diskInfo [idx].fsType, "pfs", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_AFS)
-                case MOUNT_AFS:
-                {
-                    strncpy (diskInfo [idx].fsType, "afs", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_ISOFS)
-                case MOUNT_ISOFS:       /* iso9660 cdrom */
-                {
-                    strncpy (diskInfo [idx].fsType, "iso9660fs", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_ISO9660) && ! defined (MOUNT_CD9660)
-                case MOUNT_ISO9660:       /* iso9660 cdrom */
-                {
-                    strncpy (diskInfo [idx].fsType, "iso9660", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_CD9660)
-                case MOUNT_CD9660:       /* iso9660 cdrom */
-                {
-                    strncpy (diskInfo [idx].fsType, "cd9660", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-
-#  if defined (MOUNT_UNION)
-                case MOUNT_UNION:
-                {
-                    strncpy (diskInfo [idx].fsType, "union", DI_TYPE_LEN);
-                    break;
-                }
-#  endif
-            } /* switch on mount type */
-        }
-# else
-#  if defined (HAS_GETMNTINFO_FSTYPENAME)
-        strncpy (diskInfo [idx].fsType, mntbufp [idx].f_fstypename, DI_TYPE_LEN);
-#  else
-            /* could use getvfsbytype here... */
-        if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
-        {
-            strncpy (diskInfo [idx].fsType, mnt_names [fstype], DI_TYPE_LEN);
-        }
-        else
-        {
-            sprintf (diskInfo [idx].fsType, DI_UNKNOWN_FSTYPE, fstype);
-        }
-#  endif
-# endif /* has fs_types.h */
-
-#if defined (MNT_RDONLY)
-        if ((mntbufp [idx].f_flags & MNT_RDONLY) == MNT_RDONLY)
-        {
-            strcat (diskInfo [idx].options, "ro,");
-        }
-        else
-        {
-            strcat (diskInfo [idx].options, "rw,");
-        }
-#endif
-#if defined (MNT_SYNCHRONOUS)
-        if ((mntbufp [idx].f_flags & MNT_SYNCHRONOUS) == MNT_SYNCHRONOUS)
-        {
-            strcat (diskInfo [idx].options, "sync,");
-        }
-#endif
-#if defined (MNT_NOEXEC)
-        if ((mntbufp [idx].f_flags & MNT_NOEXEC) == MNT_NOEXEC)
-        {
-            strcat (diskInfo [idx].options, "noexec,");
-        }
-#endif
-#if defined (MNT_NOSUID)
-        if ((mntbufp [idx].f_flags & MNT_NOSUID) != MNT_NOSUID)
-        {
-            strcat (diskInfo [idx].options, "suid,");
-        }
-#endif
-#if defined (MNT_NODEV)
-        if ((mntbufp [idx].f_flags & MNT_NODEV) == MNT_NODEV)
-        {
-            strcat (diskInfo [idx].options, "nodev,");
-        }
-#endif
-#if defined (MNT_GRPID)
-        if ((mntbufp [idx].f_flags & MNT_GRPID) == MNT_GRPID)
-        {
-            strcat (diskInfo [idx].options, "grpid,");
-        }
-#endif
-#if defined (MNT_UNION)
-        if ((mntbufp [idx].f_flags & MNT_UNION) == MNT_UNION)
-        {
-            strcat (diskInfo [idx].options, "union,");
-        }
-#endif
-#if defined (MNT_ASYNC)
-        if ((mntbufp [idx].f_flags & MNT_ASYNC) == MNT_ASYNC)
-        {
-            strcat (diskInfo [idx].options, "async,");
-        }
-#endif
-#if defined (MNT_EXRDONLY)
-        if ((mntbufp [idx].f_flags & MNT_EXRDONLY) == MNT_EXRDONLY)
-        {
-            strcat (diskInfo [idx].options, "exported ro,");
-        }
-#endif
-#if defined (MNT_EXPORTED)
-        if ((mntbufp [idx].f_flags & MNT_EXPORTED) == MNT_EXPORTED)
-        {
-            strcat (diskInfo [idx].options, "exported,");
-        }
-#endif
-#if defined (MNT_EXRDMOSTLY)
-        if ((mntbufp [idx].f_flags & MNT_EXRDMOSTLY) == MNT_EXRDMOSTLY)
-        {
-                /* what's read-mostly ? */
-            strcat (diskInfo [idx].options, "exported read-mostly,");
-        }
-#endif
-#if defined (MNT_DEFEXPORTED)
-        if ((mntbufp [idx].f_flags & MNT_DEFEXPORTED) == MNT_DEFEXPORTED)
-        {
-                /* what's this ? */
-            strcat (diskInfo [idx].options, "exported world,");
-        }
-#endif
-#if defined (MNT_EXPORTANON)
-        if ((mntbufp [idx].f_flags & MNT_EXPORTANON) == MNT_EXPORTANON)
-        {
-            strcat (diskInfo [idx].options, "exported anon,");
-        }
-#endif
-#if defined (MNT_EXKERB)
-        if ((mntbufp [idx].f_flags & MNT_EXKERB) == MNT_EXKERB)
-        {
-            strcat (diskInfo [idx].options, "exported kerberos,");
-        }
-#endif
-#if defined (MNT_LOCAL)
-        if ((mntbufp [idx].f_flags & MNT_LOCAL) == MNT_LOCAL)
-        {
-            strcat (diskInfo [idx].options, "local,");
-        }
-#endif
-#if defined (MNT_QUOTA)
-        if ((mntbufp [idx].f_flags & MNT_QUOTA) == MNT_QUOTA)
-        {
-            strcat (diskInfo [idx].options, "quota,");
-        }
-#endif
-#if defined (MNT_ROOTFS)
-        if ((mntbufp [idx].f_flags & MNT_ROOTFS) == MNT_ROOTFS)
-        {
-            strcat (diskInfo [idx].options, "root,");
-        }
-#endif
-#if defined (MNT_USER)
-        if ((mntbufp [idx].f_flags & MNT_USER) == MNT_USER)
-        {
-            strcat (diskInfo [idx].options, "user,");
-        }
-#endif
-#if defined (MNT_SECURE)
-        if ((mntbufp [idx].f_flags & MNT_SECURE) == MNT_SECURE)
-        {
-            strcat (diskInfo [idx].options, "secure,");
-        }
-#endif
-
-        len = strlen (diskInfo [idx].options);
-        if (len > 0)
-        {
-            --len;
-        }
-        if (diskInfo [idx].options [len]==',')
-        {
-            diskInfo [idx].options [len] = '\0';
-        }
-
-        if (debug > 1)
-        {
-            printf ("%s: %s\n", diskInfo [idx].name, diskInfo [idx].fsType);
-            printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
-                    mntbufp [idx].f_blocks, mntbufp [idx].f_bfree,
-                    mntbufp [idx].f_bavail);
-            printf ("\tmult: %f\n", mult);
-# if defined (HAS_GETMNTINFO_FSIZE)
-            printf ("\tfsize:%ld \n", mntbufp [idx].f_fsize);
-            printf ("\tbsize:%ld \n", mntbufp [idx].f_bsize);
-# endif
-# if defined (HAS_GETMNTINFO_BSIZE)
-            printf ("\tbsize:%ld \n", mntbufp [idx].f_bsize);
-            printf ("\tiosize:%ld \n", mntbufp [idx].f_iosize);
-# endif
-            printf ("\tinodes: tot:%ld free:%ld\n",
-                    mntbufp [idx].f_files, mntbufp [idx].f_ffree);
-        }
-    }
-
-    free ((char *) mntbufp);  /* man page says this can't be freed. */
-                              /* is it ok to try?                   */
-    return 0;
-}
-
-/* this is a no-op; we have already done all the work */
-static void
-getDiskInfo ()
-{
-}
-
-#endif /* HAS_GETMNTINFO */
-
-#if defined (HAS_GETMNT)
-
-/*
- * getDiskEntries
- *
- * ULTRIX does this with a system call.  The system call allows one
- * to retrieve the information in a series of calls, but coding that
- * looks a little tricky; I just allocate a huge buffer and do it in
- * one shot.
- *
- *                  [mogul@wrl.dec.com (Jeffrey Mogul)]
- */
-
-static int
-getDiskEntries ()
-{
-    int             count;
-    int             bufsize;
-    int             idx;
-    short           fstype;
-    struct fs_data  *fsdbuf;
-    int             start;
-    int             len;
-
-
-    bufsize = NMOUNT * sizeof (struct fs_data);  /* enough for max # mounts */
-    fsdbuf = (struct fs_data *) malloc (bufsize);
-    if (fsdbuf == (struct fs_data *) NULL)
-    {
-        fprintf (stderr, "malloc (%d) for getmnt () failed errno %d\n",
-                 bufsize, errno);
-        return -1;
-    }
-
-    start = 0;
-    count = getmnt (&start, fsdbuf, bufsize, STAT_MANY, 0);
-    if (count < 1)
-    {
-        fprintf (stderr, "Unable to do getmnt () [= %d] errno %d\n",
-                 count, errno);
-        free ((char *) fsdbuf);
-        return -1;
-    }
-
-    diCount = count;
-    diskInfo = (DiskInfo *) malloc (sizeof (DiskInfo) * count);
-    if (diskInfo == (DiskInfo *) NULL)
-    {
-        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-        free ((char *) fsdbuf);
-        return -1;
-    }
-    memset ((char *) diskInfo, '\0', sizeof (DiskInfo) * count);
-
-    for (idx = 0; idx < count; idx++)
-    {
-        diskInfo [idx].printFlag = DI_OK;
-        diskInfo [idx].isLocal = TRUE;
-
-        if ((fsdbuf [idx].fd_req.flags & M_LOCAL) != M_LOCAL)
-        {
-            diskInfo [idx].isLocal = FALSE;
-        }
-
-        if (diskInfo [idx].isLocal == FALSE &&
-                (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
-        {
-            diskInfo [idx].printFlag = DI_IGNORE;
-            if (debug > 2)
-            {
-                printf ("mnt: ignore: remote: %s\n",
-                        diskInfo [idx].name);
-            }
-        }
-
-        strncpy (diskInfo [idx].special, fsdbuf [idx].fd_devname, DI_SPEC_NAME_LEN);
-        strncpy (diskInfo [idx].name, fsdbuf [idx].fd_path, DI_NAME_LEN);
-
-            /* ULTRIX keeps these fields in units of 1K byte */
-        diskInfo [idx].totalBlocks = fsdbuf [idx].fd_btot;
-        diskInfo [idx].freeBlocks = fsdbuf [idx].fd_bfree;
-        diskInfo [idx].availBlocks = (int) fsdbuf [idx].fd_bfreen;
-
-        diskInfo [idx].totalInodes = fsdbuf [idx].fd_gtot;
-        diskInfo [idx].freeInodes = fsdbuf [idx].fd_gfree;
-        diskInfo [idx].availInodes = fsdbuf [idx].fd_gfree;
-
-        fstype = fsdbuf [idx].fd_fstype;
-        if (fstype == GT_UNKWN)
-        {
-            diskInfo [idx].printFlag = DI_IGNORE;
-            if (debug > 2)
-            {
-                printf ("mnt: ignore: disk type unknown: %s\n",
-                        diskInfo [idx].name);
-            }
-        }
-        else if ((fstype > 0) && (fstype < GT_NUMTYPES))
-        {
-            strncpy (diskInfo [idx].fsType, gt_names [fstype], DI_TYPE_LEN);
-        }
-        else
-        {
-            sprintf (diskInfo [idx].fsType, "Unknown fstyp %.2d", fstype);
-        }
-
-        if ((fsdbuf [idx].fd_req.flags & M_RONLY) == M_RONLY)
-        {
-            strcat (diskInfo [idx].options, "ro,");
-        }
-        else
-        {
-            strcat (diskInfo [idx].options, "rw,");
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_NOSUID) != M_NOSUID)
-        {
-            strcat (diskInfo [idx].options, "suid,");
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_QUOTA) == M_QUOTA)
-        {
-            strcat (diskInfo [idx].options, "quota,");
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_LOCAL) != M_LOCAL)
-        {
-            strcat (diskInfo [idx].options, "remote,");
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_NODEV) == M_NODEV)
-        {
-            strcat (diskInfo [idx].options, "nodev,");
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_FORCE) == M_FORCE)
-        {
-            strcat (diskInfo [idx].options, "force,");
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_SYNC) == M_SYNC)
-        {
-            strcat (diskInfo [idx].options, "sync,");
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_NOCACHE) == M_NOCACHE)
-        {
-            strcat (diskInfo [idx].options, "nocache,");
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_EXPORTED) == M_EXPORTED)
-        {
-            strcat (diskInfo [idx].options, "exported," );
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_EXRONLY) == M_EXRONLY)
-        {
-            strcat (diskInfo [idx].options, "exported ro,");
-        }
-        if ((fsdbuf [idx].fd_req.flags & M_NOEXEC) == M_NOEXEC)
-        {
-            strcat (diskInfo [idx].options, "noexec,");
-        }
-
-        len = strlen (diskInfo [idx].options);
-        if (len > 0)
-        {
-            --len;
-        }
-        if (diskInfo [idx].options [len]==',')
-        {
-            diskInfo [idx].options [len] = '\0';
-        }
-
-        if (debug > 1)
-        {
-            printf ("%s: %s\n", diskInfo [idx].name, diskInfo [idx].fsType);
-            printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
-                    fsdbuf [idx].fd_btot, fsdbuf [idx].fd_bfree,
-                    (int) fsdbuf [idx].fd_bfreen);
-            printf ("\tinodes: tot:%ld free:%ld\n",
-                    fsdbuf [idx].fd_gtot, fsdbuf [idx].fd_gfree);
-        }
-    }
-
-    free ((char *) fsdbuf);
-    return 0;
-}
-
-/* this is a no-op; we have already done all the work */
-static void
-getDiskInfo ()
-{
-}
-
-#endif /* HAS_GETMNT */
-
-
-#if defined (HAS_MNTCTL)
-
-/*
- * getDiskEntries
- *
- * AIX V3.2 uses mntctl to find out about mounted file systems
- *
- */
-
-# define NUM_AIX_FSTYPES         6
-static char *AIX_fsType [NUM_AIX_FSTYPES] =
-    { "oaix", "", "nfs", "jfs", "", "cdrom" };
-
-/*
- * from xfsm-1.80:
- *
- * MNT_AIX - "aix"
- * MNT_NFS - "nfs"
- * MNT_JFS - "jfs"
- * MNT_CDROM - "cdrom"
- * other - "user defined"
- *
- */
-
-static int
-getDiskEntries ()
-{
-    int             num;        /* number of vmount structs returned    */
-    char            *vmbuf;     /* buffer for vmount structs returned   */
-    int             vmbufsz;    /* size in bytes of vmbuf               */
-    int             i;          /* index for looping and stuff          */
-    char            *bufp;      /* pointer into vmbuf                   */
-    struct vmount   *vmtp;      /* pointer into vmbuf                   */
-    struct vfs_ent  *ve;        /* pointer for file system type entry   */
-    int             len;
-
-
-    i = 0;
-    vmbufsz = sizeof (struct vmount) * DI_FSMAGIC; /* initial vmount buffer */
-
-    do
-    {
-        if ((vmbuf = (char *) malloc (vmbufsz)) == (char *) NULL)
-        {
-            fprintf (stderr, "malloc (%d) for mntctl() failed errno %d\n",
-                    vmbufsz, errno);
-            return -1;
-        }
-
-        num = mntctl (MCTL_QUERY, vmbufsz, vmbuf);
-            /*
-             * vmbuf is too small, could happen for
-             * following reasons:
-             * - inital buffer is too small
-             * - newly mounted file system
-             */
-        if (num == 0)
-        {
-            memcpy (&vmbufsz, vmbuf, sizeof (vmbufsz)); /* see mntctl(2) */
-            if (debug > 0)
-            {
-                printf ("vmbufsz too small, new size: %d\n", vmbufsz);
-            }
-            free ((char *) vmbuf); /* free this last, it's still being used! */
-            ++i;
-        }
-    } while (num == 0 && i < DI_RETRY_COUNT);
-
-    if (i >= DI_RETRY_COUNT)
-    {
-        free ((char *) vmbuf);
-        fprintf (stderr, "unable to allocate adequate buffer for mntctl\n");
-        return -1;
-    }
-
-    switch (num)
-    {
-            /* error happened, probably null vmbuf */
-        case -1:
-        {
-            free ((char *) vmbuf);
-            fprintf (stderr,"%s errno %d\n", strerror (errno), errno);
-            return -1;
-        }
-
-            /* 'num' vmount structs returned in vmbuf */
-        default:
-        {
-            diCount = num;
-            diskInfo = (DiskInfo *) calloc (sizeof (DiskInfo), diCount);
-            if (diskInfo == (DiskInfo *) NULL)
-            {
-                fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-                return -1;
-            }
-
-            bufp = vmbuf;
-            for (i = 0; i < num; i++)
-            {
-                vmtp = (struct vmount *) bufp;
-                diskInfo [i].printFlag = DI_OK;
-                diskInfo [i].isLocal = TRUE;
-
-                strncpy (diskInfo [i].special,
-                        (char *) vmt2dataptr (vmtp, VMT_OBJECT),
-                        DI_SPEC_NAME_LEN);
-                strncpy (diskInfo [i].name,
-                        (char *) vmt2dataptr (vmtp, VMT_STUB), DI_NAME_LEN);
-
-                ve = getvfsbytype (vmtp->vmt_gfstype);
-                if (ve == (struct vfs_ent *) NULL || *ve->vfsent_name == '\0')
-                {
-                    if (vmtp->vmt_gfstype >= 0 &&
-                            (vmtp->vmt_gfstype < NUM_AIX_FSTYPES))
-                    {
-                        strncpy (diskInfo [i].fsType,
-                                AIX_fsType [vmtp->vmt_gfstype], DI_TYPE_LEN);
-                    }
-                }
-                else
-                {
-                    strncpy (diskInfo [i].fsType, ve->vfsent_name, DI_TYPE_LEN);
-                }
-
-                if ((vmtp->vmt_flags & MNT_READONLY) == MNT_READONLY)
-                {
-                    strcat (diskInfo [i].options, "ro,");
-                }
-                else
-                {
-                    strcat (diskInfo [i].options, "rw,");
-                }
-                if ((vmtp->vmt_flags & MNT_NOSUID) != MNT_NOSUID)
-                {
-                    strcat (diskInfo [i].options, "suid,");
-                }
-                if ((vmtp->vmt_flags & MNT_REMOVABLE) == MNT_REMOVABLE)
-                {
-                    strcat (diskInfo [i].options, "removable,");
-                }
-                if ((vmtp->vmt_flags & MNT_DEVICE) == MNT_DEVICE)
-                {
-                    strcat (diskInfo [i].options, "device,");
-                }
-                if ((vmtp->vmt_flags & MNT_REMOTE) == MNT_REMOTE)
-                {
-                    strcat (diskInfo [i].options, "remote,");
-                    diskInfo [i].isLocal = FALSE;
-                }
-                if ((vmtp->vmt_flags & MNT_UNMOUNTING) == MNT_UNMOUNTING)
-                {
-                    strcat (diskInfo [i].options, "unmounting,");
-                }
-                if ((vmtp->vmt_flags & MNT_SYSV_MOUNT) == MNT_SYSV_MOUNT)
-                {
-                    strcat (diskInfo [i].options, "sysv mount,");
-                }
-                if ((vmtp->vmt_flags & MNT_NODEV) == MNT_NODEV)
-                {
-                    strcat (diskInfo [i].options, "nodev,");
-                }
-
-                    /* remove trailing comma */
-                len = strlen (diskInfo [i].options);
-                if (len > 0)
-                {
-                    --len;
-                }
-                if (diskInfo [i].options [len] == ',')
-                {
-                    diskInfo [i].options [len] = '\0';
-                }
-
-                strncpy (diskInfo [i].mountTime, ctime (&vmtp->vmt_time),
-                        DI_MNT_TIME_LEN);
-
-                if (diskInfo [i].isLocal == FALSE &&
-                        (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
-                {
-                    diskInfo [i].printFlag = DI_IGNORE;
-                    if (debug > 2)
-                    {
-                        printf ("mnt: ignore: remote: %s\n",
-                                diskInfo [i].name);
-                    }
-                }
-
-                bufp += vmtp->vmt_length;
-            }
-
-            if (debug > 0)
-            {
-                printf ("mnt:%s - %s : %s\n", diskInfo [i].name,
-                        diskInfo [i].special, diskInfo [i].fsType);
-                printf ("\t%s\n", (char *) vmt2dataptr (vmtp, VMT_ARGS));
-            }
-
-            break;
-        } /* valid value returned */
-    } /* switch on num */
-}
-
-#endif  /* HAS_MNTCTL */
-
-
-#if defined (HAS_STATVFS)
-
-/*
- * getDiskInfo
- *
- * SysV.4.  statvfs () returns both the free and available blocks.
- *
- */
-
-static void
-getDiskInfo ()
-{
-    int             i;
-    double          mult;
-    struct statvfs  statBuf;
-
-    for (i = 0; i < diCount; ++i)
-    {
-        if (diskInfo [i].isLocal == FALSE &&
-                (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
-        {
-            diskInfo [i].printFlag = DI_IGNORE;
-            if (debug > 2)
-            {
-                printf ("mnt: ignore: remote: %s\n",
-                        diskInfo [i].name);
-            }
-        }
-
-        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
-        {
-            if (statvfs (diskInfo [i].name, &statBuf) == 0)
-            {
-                    /* data general DG/UX 5.4R3.00 sometime returns 0   */
-                    /* in the fragment size field.                      */
-                if (statBuf.f_frsize == 0 && statBuf.f_bsize != 0)
-                {
-                    mult = (double) (long) statBuf.f_bsize / dispBlockSize;
-                }
-                else
-                {
-                    mult = (double) (long) statBuf.f_frsize / dispBlockSize;
-                }
-
-                diskInfo [i].totalBlocks = ((double) (_s_fs_size_t) statBuf.f_blocks * mult);
-                diskInfo [i].freeBlocks = ((double) (_s_fs_size_t) statBuf.f_bfree * mult);
-                diskInfo [i].availBlocks = ((double) (_s_fs_size_t) statBuf.f_bavail * mult);
-
-                diskInfo [i].totalInodes = statBuf.f_files;
-                diskInfo [i].freeInodes = statBuf.f_ffree;
-                diskInfo [i].availInodes = statBuf.f_favail;
-
-#if defined (HAS_STATVFS_BASETYPE)
-                strncpy (diskInfo [i].fsType, statBuf.f_basetype, DI_TYPE_LEN);
-#endif
-
-                if (debug > 1)
-                {
-                    printf ("%s: %s\n", diskInfo [i].name, diskInfo [i].fsType);
-                    printf ("\tmult:%f\n", mult);
-                    printf ("\tbsize:%ld  frsize:%ld\n", statBuf.f_bsize,
-                            statBuf.f_frsize);
-#if defined (HAS_64BIT_STATFS_FLDS)
-                    printf ("\tblocks: tot:%llu free:%lld avail:%llu\n",
-                            statBuf.f_blocks, statBuf.f_bfree, statBuf.f_bavail);
-                    printf ("\tinodes: tot:%llu free:%lld avail:%llu\n",
-                            statBuf.f_files, statBuf.f_ffree, statBuf.f_favail);
-#else
-                    printf ("\tblocks: tot:%lu free:%ld avail:%lu\n",
-                            statBuf.f_blocks, statBuf.f_bfree, statBuf.f_bavail);
-                    printf ("\tinodes: tot:%lu free:%ld avail:%lu\n",
-                            statBuf.f_files, statBuf.f_ffree, statBuf.f_favail);
-#endif
-                }
-            }
-            else
-            {
-                fprintf (stderr, "statvfs: %s ", diskInfo [i].name);
-                perror ("");
-            }
-        }
-    } /* for each entry */
-}
-
-#endif /* HAS_STATVFS */
-
-
-#if defined (HAS_STATFS_BSD) && ! defined (HAS_STATVFS) && \
-        ! defined (HAS_GETMNTINFO) && ! defined (HAS_GETMNT)
-
-/*
- * getDiskInfo
- *
- * SunOS/BSD/Pyramid
- *
- */
-
-static void
-getDiskInfo ()
-{
-    int             i;
-    double          mult;
-    struct statfs   statBuf;
-
-    for (i = 0; i < diCount; ++i)
-    {
-        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
-        {
-            if (statfs (diskInfo [i].name, &statBuf) == 0)
-            {
-                mult = (double) statBuf.f_bsize / dispBlockSize;
-                diskInfo [i].totalBlocks = ((double) (_s_fs_size_t) statBuf.f_blocks * mult);
-                diskInfo [i].freeBlocks = ((double) (_s_fs_size_t) statBuf.f_bfree * mult);
-                diskInfo [i].availBlocks = ((double) (_s_fs_size_t) statBuf.f_bavail * mult);
-
-                diskInfo [i].totalInodes = statBuf.f_files;
-                diskInfo [i].freeInodes = statBuf.f_ffree;
-                diskInfo [i].availInodes = statBuf.f_ffree;
-# if defined (HAS_SYSFS)
-                sysfs (GETFSTYP, statBuf.f_fstyp, diskInfo [i].fsType);
-# endif
-
-                if (debug > 1)
-                {
-                    printf ("%s: %s\n", diskInfo [i].name, diskInfo [i].fsType);
-                    printf ("\tmult:%f\n", mult);
-                    printf ("\tbsize:%ld\n", statBuf.f_bsize);
-                    printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
-                            statBuf.f_blocks, statBuf.f_bfree, statBuf.f_bavail);
-                    printf ("\tinodes: tot:%ld free:%ld\n",
-                            statBuf.f_files, statBuf.f_ffree);
-                }
-            } /* if we got the info */
-            else
-            {
-                fprintf (stderr, "statfs: %s ", diskInfo [i].name);
-                perror ("");
-            }
-        }
-    } /* for each entry */
-}
-
-#endif /* HAS_STATFS_BSD */
-
-#if defined (HAS_STATFS_SYSV3) && ! defined (HAS_STATVFS) && \
-        ! defined (HAS_GETMNTINFO) && ! defined (HAS_GETMNT)
-
-/*
- * getDiskInfo
- *
- * SysV.3.  We don't have available blocks; just set it to free blocks.
- * The sysfs () call is used to get the disk type name.
- *
- */
-
-static void
-getDiskInfo ()
-{
-    int             i;
-    double          mult;
-    struct statfs   statBuf;
-
-    for (i = 0; i < diCount; ++i)
-    {
-        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
-        {
-            if (statfs (diskInfo [i].name, &statBuf, sizeof (statBuf), 0) == 0)
-            {
-# if defined (HAS_STATFS_FRSIZE)
-                if (statBuf.f_frsize == 0 && statBuf.f_bsize != 0)
-                {
-                    mult = (double) (long) statBuf.f_bsize / dispBlockSize;
-                }
-                else
-                {
-                    mult = (double) (long) statBuf.f_frsize / dispBlockSize;
-                }
-# else
-                mult = (double) UBSIZE / dispBlockSize;
-# endif
-                diskInfo [i].totalBlocks = ((double) (_s_fs_size_t) statBuf.f_blocks * mult);
-                diskInfo [i].freeBlocks = ((double) (_s_fs_size_t) statBuf.f_bfree * mult);
-                diskInfo [i].availBlocks = ((double) (_s_fs_size_t) statBuf.f_bfree * mult);
-
-                diskInfo [i].totalInodes = statBuf.f_files;
-                diskInfo [i].freeInodes = statBuf.f_ffree;
-                diskInfo [i].availInodes = statBuf.f_ffree;
-# if defined (HAS_SYSFS)
-                sysfs (GETFSTYP, statBuf.f_fstyp, diskInfo [i].fsType);
-# endif
-
-                if (debug > 1)
-                {
-                    printf ("%s: %s\n", diskInfo [i].name, diskInfo [i].fsType);
-                    printf ("\tmult:%f\n", mult);
-# if defined (HAS_STATFS_FRSIZE)
-                    printf ("\tbsize:%ld\n", statBuf.f_bsize);
-                    printf ("\tfrsize:%ld\n", statBuf.f_frsize);
-# else
-                    printf ("\tUBSIZE:%ld\n", UBSIZE);
-# endif
-                    printf ("\tblocks: tot:%ld free:%ld\n",
-                            statBuf.f_blocks, statBuf.f_bfree);
-                    printf ("\tinodes: tot:%ld free:%ld\n",
-                            statBuf.f_files, statBuf.f_ffree);
-                }
-            } /* if we got the info */
-            else
-            {
-                fprintf (stderr, "statfs: %s ", diskInfo [i].name);
-                perror ("");
-            }
-        }
-    } /* for each entry */
-}
-
-#endif /* HAS_STATFS_SYSV3 */
-
-
-#if defined (HAS_GETDISKFREESPACE)
-
-/*
- * getDiskInfo
- *
- * Windows
- *
- */
-
-# define NUM_MSDOS_FSTYPES          7
-static char *MSDOS_diskType [NUM_MSDOS_FSTYPES] =
-    { "unknown", "", "removable", "fixed", "remote", "cdrom", "ramdisk" };
-# define MSDOS_BUFFER_SIZE          128
-# define BYTES_PER_LOGICAL_DRIVE    4
-
-static int
-getDiskEntries ()
-{
-    int             i;
-    int             diskflag;
-    int             rc;
-    char            *p;
-    char            buff [MSDOS_BUFFER_SIZE];
-
-
-    diskflag = DI_IGNORE;
-    rc = GetLogicalDriveStrings (MSDOS_BUFFER_SIZE, buff);
-    diCount = rc / BYTES_PER_LOGICAL_DRIVE;
-
-    diskInfo = (DiskInfo *) calloc (sizeof (DiskInfo), diCount);
-    if (diskInfo == (DiskInfo *) NULL)
-    {
-        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-        return -1;
-    }
-
-    for (i = 0; i < diCount; ++i)
-    {
-        p = buff + (BYTES_PER_LOGICAL_DRIVE * i);
-        strncpy (diskInfo [i].name, p, DI_NAME_LEN);
-        rc = GetDriveType (p);
-        diskInfo [i].printFlag = DI_OK;
-
-        if (rc == DRIVE_NO_ROOT_DIR)
-        {
-            diskInfo [i].printFlag = DI_BAD;
-        }
-
-            /* assume that any removable drives before the  */
-            /* first non-removable disk are floppies...     */
-        else if (rc == DRIVE_REMOVABLE)
-        {
-            diskInfo [i].printFlag = diskflag;
-        }
-        else
-        {
-            diskflag = DI_OK;
-        }
-
-        if (rc != DRIVE_REMOTE)
-        {
-            diskInfo [i].isLocal = TRUE;
-        }
-        /* strncpy (diskInfo [i].fsType, MSDOS_diskType [rc], DI_TYPE_LEN); */
-    } /* for each mounted drive */
-
-    return diCount;
-}
-
-/*
- * getDiskInfo
- *
- * Windows
- *
- */
-
-static void
-getDiskInfo ()
-{
-    int                 i;
-    int                 rc;
-    double              mult;
-    unsigned long       sectorspercluster;
-    unsigned long       bytespersector;
-    unsigned long       totalclusters;
-    unsigned long       freeclusters;
-    char                tbuff [MSDOS_BUFFER_SIZE];
-    char                volName [MSDOS_BUFFER_SIZE];
-    char                fsName [MSDOS_BUFFER_SIZE];
-    DWORD               serialNo;
-    DWORD               maxCompLen;
-    DWORD               fsFlags;
-
-
-    for (i = 0; i < diCount; ++i)
-    {
-        if (diskInfo [i].isLocal == FALSE &&
-                (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
-        {
-            diskInfo [i].printFlag = DI_IGNORE;
-            if (debug > 2)
-            {
-                printf ("mnt: ignore: remote: %s\n",
-                        diskInfo [i].name);
-            }
-        }
-
-        if (diskInfo [i].printFlag == DI_OK || (flags & DI_F_ALL) == DI_F_ALL)
-        {
-            rc = GetVolumeInformation (diskInfo [i].name,
-                    volName, MSDOS_BUFFER_SIZE, &serialNo, &maxCompLen,
-                    &fsFlags, fsName, MSDOS_BUFFER_SIZE);
-            /* strcpy (tbuff, diskInfo [i].fsType); */
-            /* strcat (tbuff, " "); */
-            strncpy (diskInfo [i].fsType, fsName, DI_TYPE_LEN);
-            strncpy (diskInfo [i].special, volName, DI_SPEC_NAME_LEN);
-
-            rc = GetDiskFreeSpace (diskInfo [i].name,
-                    (LPDWORD) &sectorspercluster, (LPDWORD) &bytespersector,
-                    (LPDWORD) &freeclusters, (LPDWORD) &totalclusters);
-
-            if (rc > 0)
-            {
-                mult = (double) (sectorspercluster *
-                        bytespersector) / dispBlockSize;
-                diskInfo [i].totalBlocks = ((double) (_s_fs_size_t) totalclusters * mult);
-                diskInfo [i].freeBlocks = ((double) (_s_fs_size_t) freeclusters * mult);
-                diskInfo [i].availBlocks = ((double) (_s_fs_size_t) freeclusters * mult);
-
-                diskInfo [i].totalInodes = 0;
-                diskInfo [i].freeInodes = 0;
-                diskInfo [i].availInodes = 0;
-
-                if (debug > 1)
-                {
-                    printf ("%s: %s\n", diskInfo [i].name, diskInfo [i].fsType);
-                    printf ("\ts/c:%ld  b/s:%ld\n", sectorspercluster,
-                        bytespersector);
-                    printf ("\tmult:%f\n", mult);
-                    printf ("\tclusters: tot:%ld free:%ld\n",
-                        totalclusters, freeclusters);
-                }
-            }
-            else
-            {
-                diskInfo [i].printFlag = DI_BAD;
-                if (debug)
-                {
-                    printf ("disk %s; could not get disk space\n",
-                            diskInfo [i].name);
-                }
-            }
-        } /* if printable drive */
-    } /* for each mounted drive */
-}
-
-#endif /* HAS_GETDISKFREESPACE */
