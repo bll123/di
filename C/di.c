@@ -260,9 +260,10 @@ static char    copyright [] =
 #endif
 
 #if ! defined (HAS_MEMCPY) && ! defined (memcpy)
-# define memcpy(dst, src, cnt)     (bcopy((src), (dst), (cnt)), dst)
 # if ! defined (HAS_BCOPY)
    error No memcpy/bcopy available.
+# else
+#  define memcpy(dst, src, cnt)     (bcopy((src), (dst), (cnt)), dst)
 # endif
 #endif
 
@@ -310,9 +311,10 @@ static char    copyright [] =
 #endif
 
 #if ! defined (HAS_MEMSET) && ! defined (memset)
-# define memset(s,c,n)    (bzero ((s), (n)), s)
 # if ! defined (HAS_BZERO)
    error No memset/bzero available.
+# else
+#  define memset(s,c,n)    (bzero ((s), (n)), s)
 # endif
 #endif
 
@@ -1373,12 +1375,15 @@ checkDiskInfo ()
         checkIncludeList (&diskInfo [i]);
     } /* for all disks */
 
-        /* this loop sets duplicate entries that are not char special to */
-        /* be ignored.                                                   */
+        /* this loop sets duplicate entries to be ignored. */
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].sp_rdev != 0 && (diskInfo [i].printFlag == DI_OK ||
-            ((flags & DI_F_ALL) == DI_F_ALL && diskInfo [i].printFlag != DI_BAD)))
+            /* don't need to bother checking real partitions */
+            /* don't bother if already ignored               */
+        if (diskInfo [i].sp_rdev != 0 &&
+            (diskInfo [i].printFlag == DI_OK ||
+            ((flags & DI_F_ALL) == DI_F_ALL &&
+            diskInfo [i].printFlag != DI_BAD)))
         {
             sp_dev = diskInfo [i].sp_dev;
             sp_rdev = diskInfo [i].sp_rdev;
@@ -1400,7 +1405,8 @@ checkDiskInfo ()
 
             for (j = 0; dupCount > 0 && j < diCount; ++j)
             {
-                if (diskInfo [j].sp_dev == sp_rdev && diskInfo [j].sp_rdev == 0)
+                if (diskInfo [j].sp_rdev == 0 &&
+                    diskInfo [j].sp_dev == sp_rdev)
                 {
                     diskInfo [j].printFlag = DI_IGNORE;
                     if (debug > 2)
@@ -1415,7 +1421,7 @@ checkDiskInfo ()
         {
             if (debug > 2)
             {
-                printf ("chk: dup not checked: %s prnt: %d dev: %ld rdev: %ld\n",
+                printf ("chk: dup: not checked: %s prnt: %d dev: %ld rdev: %ld\n",
                         diskInfo [i].name, diskInfo [i].printFlag,
                         diskInfo [i].sp_dev, diskInfo [i].sp_rdev);
             }
@@ -2134,7 +2140,7 @@ getDiskEntries ()
     struct statfs   *mntbufp;
     double          mult;
 
-    count = getmntinfo (&mntbufp, MNT_NOWAIT);
+    count = getmntinfo (&mntbufp, MNT_WAIT);
     if (count < 1)
     {
         fprintf (stderr, "Unable to do getmntinfo () errno %d\n", errno);
