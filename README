@@ -1,4 +1,4 @@
-di - disk information utility (version 3.12).
+di - disk information utility (version 4.0).
 
 DESCRIPTION
 
@@ -69,21 +69,22 @@ BUGS
 
 PORTING
 
-    di 3.9 has been tested on the following platforms:
-        FreeBSD 4.7 (gcc 2.95.4)
-        HP-UX B.11.22 U (ansi C)
-        Linux 2.0.35 (gcc 2.7.2.3), 2.4.18 [RH7.3] (gcc 3.2, 2.96),
-            2.4.9 [RH7.2] (gcc 2.96), 2.2.18 [Debian] (gcc 2.95.2)
+    di 4.0 has been tested on the following platforms:
+        FreeBSD 4.9 (gcc 2.95.4), 5.1 (gcc 3.2.2)
+        HP-UX B.11.11, B.11.22 (cc, gcc 3.2), B.11.23 (cc, gcc 3.3.2)
+        Debian Linux 2.4.18 (gcc 3.3.2, gcc 3.3.1)
+        Red Hat Linux 2.0.35 (gcc 2.7.2.3),
+            2.4.9 (gcc 3.3.1, gcc 3.3.2), 2.4.18 (gcc 3.2.2)
+        SuSe Linux 2.4.19 (gcc 3.2)
         NetBSD 1.6 (gcc 2.95.3)
-        OpenBSD 3.1 (gcc 2.95.3)
-        Solaris 9 (cc 5.0, gcc 2.95.3)
-        Tru64 Unix 4.0g (C V6.3), 5.1a (C T6.5)
+        Solaris 8 (gcc 2.95.2), 9 (cc 5.5, gcc 2.95.4)
+        Tru64 Unix 4.0g (C V6.5), 5.1a (C T6.5)
 
     di has been ported to the following systems in the past:
 
-        A/UX, AIX, BSDI 1.x & 2.x, Convex, Cray UNICOS 9 & 10,
-        Cray UNICOS/mk, FreeBSD 1.x and 2.x, HP/UX, Linux,
-        NetBSD 1.x, Next 3.x, OSF/1, Pyramid, SCO 3.2.2 & 3.2.4,
+        A/UX, AIX, BSDI, Compaq Tru64, Convex, Cray UNICOS 9 & 10,
+        Cray UNICOS/mk, FreeBSD, HP/UX, Linux, NetBSD 1.x, Next 3.x,
+        OpenBSD, OSF/1, Pyramid, SCO 3.2.2 & 3.2.4,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Sys V.3,
         Sys V.4, Ultrix, Windows, Xenix
 
@@ -106,7 +107,7 @@ BUGS
 CHANGES
 
     4.0
-        No more support for metadist (yay!).
+        Metadist is no longer supported.
         Only the iffe configuration method is now available.
         Removed -h help flag, changed it to be scaled alternative 1
         display to match other 'df' programs.
