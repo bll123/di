@@ -19,6 +19,7 @@ features/
 features/cflags.sh	cflags configuration
 features/di.iffe	iffe configuration
 features/obj_ext.sh	obj extension test
+LICENSE.iffe		iffe license
 hints/                  for Configure
 hints/aix.sh
 hints/beos.sh
