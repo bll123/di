@@ -241,10 +241,9 @@ extern int di_lib_debug;
   extern char *getenv _((char *));
 #endif
 
-#if ! defined (_lib_errno)
-extern int     errno;
+#if ! defined (_dcl_errno)
+  extern int     errno;
 #endif
-
 #if ! defined (_dcl_optind)
   extern int optind;
 #endif

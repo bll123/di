@@ -24,6 +24,15 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (COMMAND_MSGFMT)
 # define _command_msgfmt 1
 #endif
+#if defined (DCL_ERRNO)
+# define _dcl_errno 1
+#endif
+#if defined (DCL_OPTIND)
+# define _dcl_optind 1
+#endif
+#if defined (DCL_OPTARG)
+# define _dcl_optarg 1
+#endif
 #if defined (HAS_BCOPY)
 # define _lib_bcopy 1
 #endif
@@ -35,9 +44,6 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (HAS_ENDMNTENT)
 # define _lib_endmntent 1
-#endif
-#if defined (HAS_ERRNO)
-# define _lib_errno 1
 #endif
 #if defined (HAS_FS_INFO)
 # define _lib_fs_info 1
@@ -101,12 +107,6 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (HAS_TEXTDOMAIN)
 # define _lib_textdomain 1
-#endif
-#if defined (HAS_OPTIND)
-# define _dcl_optind 1
-#endif
-#if defined (HAS_OPTARG)
-# define _dcl_optarg 1
 #endif
 #if defined (HAS_STATFS)
 # define _lib_statfs 1
