@@ -15,8 +15,14 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 /* create 'Configure' forwards compatibility w/'iffe' */
 /* until we know how portable iffe is...              */
 
+#if ! defined (_config_by_iffe_)   /* are we using configure? */
+# define _hdr_stdio 1
+#endif
 #if defined (CAN_PROTOTYPE)
 # define _proto_stdc 1
+#endif
+#if defined (COMMAND_MSGFMT)
+# define _command_msgfmt 1
 #endif
 #if defined (HAS_BCOPY)
 # define _lib_bcopy 1
@@ -168,6 +174,9 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #if defined (I_STRINGS)
 # define _hdr_strings 1
 #endif
+#if defined (I_TIME)
+# define _hdr_time 1
+#endif
 #if defined (I_SYS_FSTYP)
 # define _sys_fstyp 1
 #endif
@@ -263,6 +272,17 @@ Copyright 1994-2002 Brad Lanam, Walnut Creek, CA
 #endif
 #if defined (SIZ_LONG_LONG)
 # define _siz_long_long SIZ_LONG_LONG
+#endif
+#if defined (TYP_STATVFS_T)
+# define _typ_statvfs_t 1
+#endif
+#if defined (TYP_SIZE_T)
+# define _typ_size_t 1
+#endif
+#if defined (VOIDUSED) && defined (VOIDFLAGS)
+# if (VOIDFLAGS & VOIDUSED) == VOIDUSED
+#  define _key_void 1
+# endif
 #endif
 
 #if ! defined (_config_by_iffe_)   /* are we using configure? */
