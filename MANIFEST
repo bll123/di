@@ -10,17 +10,17 @@ Configure		Configuration script
 configure		gnu-like front-end for Configure
 config_h.SH		Produces config.h
 config.win95		config.h for win95
+config.win95.cygwin	config.h for win95/cygwin
 Makefile.iffe		Main Makefile
 Makefile.SH		Produces Makefile
 bin/
 bin/iffe		iffe config program
-man/
-man/iffe.1		iffe manual page
 features/
 features/cflags.sh	cflags configuration
 features/di.iffe	iffe configuration
+features/ec.sh		postprocess config.h
 features/obj_ext.sh	obj extension test
-hints/
+hints/                  for Configure
 hints/aix.sh
 hints/beos.sh
 hints/bsdos.sh
@@ -34,4 +34,8 @@ hints/irix.sh
 hints/openbsd.sh
 hints/solaris.sh
 hints/unicos.sh
+man/
+man/iffe.1		iffe manual page
+po/                     internationalization files
+po/en_US.po
 version.h		di source
