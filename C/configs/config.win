@@ -4,19 +4,34 @@
 #ifndef _config_h_
 #define _config_h_
 
-#define _(args)	args
+#define _proto_stdc 1
+#define _key_void 1
 
-#define I_MALLOC
-#define I_MEMORY
-#define I_STDLIB
-#define I_STRING
-#define I_SYS_TYPES
-#define I_SYS_STAT
-#define I_TIME
-#define I_WINDOWS
+#define _hdr_errno 1
+#define _hdr_malloc 1
+#define _hdr_memory 1
+#define _hdr_stdlib 1
+#define _hdr_string 1
+#define _hdr_time 1
+#define _hdr_windows 1
+#define _sys_types 1
+#define _sys_stat 1
 
-#define HAS_GETDISKFREESPACE
-#define HAS_MEMCPY
-#define HAS_MEMSET
+#define _include_malloc 1
+#define _lib_getdiskfreespace 1
+#define _lib_memcpy 1
+#define _lib_memset 1
+
+#if ! _key_void || ! _proto_stdc
+# define void int
+#endif
+
+#ifndef _
+# if _proto_stdc
+#  define _(args) args
+# else
+#  define _(args) ()
+# endif
+#endif
 
 #endif /* _config_h_ */
