@@ -10,7 +10,7 @@
 .\"
 .\" for di version 3.7
 .\"
-.TH di 1 "27 August 2002"
+.TH di 1 "12 January 2003"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -71,7 +71,7 @@ printed \- e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .B \-b\ \fIblock-size\fP
 Change the base block size from 1024 (default) to the size specified.
 \fIblock-size\fP may be one of: k\ \-\ 1024 bytes, d\ \-\ 1000 bytes,
-or a specific size. 
+or a specific size.
 .TP
 .B \-d\ \fIdisplay-size\fP
 Display the blocks in units specified by \fIdisplay-size\fP.
@@ -79,14 +79,19 @@ Display the blocks in units specified by \fIdisplay-size\fP.
 may be one of: p\ \-\ posix\ (512\ bytes), k\ \-\ kilobytes,
 m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, P\ \-\ petabytes,
 E\ \-\ exabytes, Z\ \-\ zettabytes, Y\ \-\ yottabytes,
-h\ \-\ "human readable", H\ \-\ "human readable" format 2
+h\ \-\ Scaled alternative 1, H\ \-\ Scaled alternative 2,
 or a specific value to use as the block size.
+.PP
 Block display sizes greater than 1024 bytes are displayed with a precision
 of one decimal place after the radix.
 .PP
-Human readable scales the size and appends a suffix (e.g. 48.0k, 3.4M).
-Sizes within a line may scale to different units.
-Human readable format 2 scales all the sizes in each individual line
+The Scaled alternatives scale the sizes displayed and
+appends a suffix (e.g. 48.0k, 3.4M).
+.PP
+With scaled alternative 1, sizes within a
+line may scale to different units.
+.PP
+Scaled alternative 2 scales all the sizes in each individual line
 to the same unit size (the largest needed).
 .TP
 .B \-f\ \fIformat\fP
@@ -101,10 +106,8 @@ Print out the usage for
 .I di
 .TP
 .B \-H
-Display partition sizes in "human readable" fashion.
-Partition sizes are displayed
-with the suffix: k (kilobytes), M (megabytes), G (gigabytes), T (terabytes)
-or P (petabytes).  No suffix is displayed if the size is in bytes.
+Display partition sizes in scaled alternative 2 format.
+An alias for \-dH.
 .TP
 .B \-i \fIignore-fstype-list\fP
 Ignore the file system types listed in \fIignore-fstyp-list\fP.
@@ -115,6 +118,9 @@ The list is a comma separated list of file system types.  e.g.
 Include \fIonly\fP the file system types listed in \fIinclude-fstyp-list\fP.
 The list is a comma separated list of file system types.  e.g.
 \-I nfs,rfs
+.TP
+.B \-k
+Display sizes in Kbytes.  An alias for \-dk.
 .TP
 .B \-l
 Display only local file systems.  This option is not fully implemented
