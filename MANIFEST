@@ -34,7 +34,7 @@ hints/openbsd.sh
 hints/solaris.sh
 hints/unicos.sh
 man/
-man/iffe.1		iffe manual page
+man/iffe.html		iffe manual page
 po/                     internationalization files
 po/en_US.po
 version.h		di source
