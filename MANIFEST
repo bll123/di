@@ -7,6 +7,7 @@ di.c			di source
 di.h			di source
 dilib.c			di source
 getopt.c		getopt source (from Cnews)
+hasnls.c		checks for NLS support.
 config.win95		config.h for win95
 Makefile		Main Makefile
 bin/
