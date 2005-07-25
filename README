@@ -25,7 +25,7 @@ INSTALLATION
     directory for the locale files.  Default is ${prefix}/share/locale.
 
     The internationalization files are automatically installed if
-    your system supports internationalization  [en_US: 27-Aug-2002, 
+    your system supports internationalization  [en_US: 27-Aug-2002,
     de_DE: 26-Feb-2004].
 
     To force a 64 bit binary build:
@@ -51,8 +51,9 @@ INSTALLATION
 
     If you prefer to use the cygwin API rather than the
     windows API, edit config.h, and undefine _hdr_windows,
-    _lib_GetDiskFreeSpace, and _lib_GetDiskFreeSpaceEx,
-    then re-run the build.
+    _lib_GetDiskFreeSpace, _lib_GetDiskFreeSpaceEx,
+    _lib_GetDriveType, _lib_GetLogicalDriveStrings and
+    _lib_GetVolumeInformation, then re-run the build.
 
     Alternative 1)
         Cygnus gcc: make windows-gcc
@@ -69,21 +70,20 @@ BUGS
 PORTING
 
     di 4.0 has been tested on the following platforms:
-        FreeBSD 4.9 (gcc 2.95.4), 5.1 (gcc 3.2.2)
-        HP-UX B.11.11, B.11.22 (cc, gcc 3.2), B.11.23 (cc, gcc 3.3.2)
-        Debian Linux 2.4.18 (gcc 3.3.2, gcc 3.3.1)
-        Red Hat Linux 2.0.35 (gcc 2.7.2.3),
-            2.4.9 (gcc 3.3.1, gcc 3.3.2), 2.4.18 (gcc 3.2.2)
-        SuSe Linux 2.4.19 (gcc 3.2)
-        NetBSD 1.6 (gcc 2.95.3)
-        Solaris 8 (gcc 2.95.2), 9 (cc 5.5, gcc 2.95.4)
-        Tru64 Unix 4.0g (C V6.5), 5.1a (C T6.5)
+        FreeBSD 5.4
+        HP-UX B.11.23
+        Debian Linux 2.4.27, 2.6.8
+        Red Hat Linux 2.4.9, 2.4.21, 2.6.9
+        SuSe Linux 2.6.5
+        NetBSD 2.0
+        Solaris 8, 9
+        Tru64 Unix 4.0g, 5.1b
 
     di has been ported to the following systems in the past:
 
         A/UX, AIX, BSDI, Compaq Tru64, Convex, Cray UNICOS 9 & 10,
-        Cray UNICOS/mk, FreeBSD, HP/UX, Linux, NetBSD 1.x, Next 3.x,
-        OpenBSD, OSF/1, Pyramid, SCO 3.2.2 & 3.2.4,
+        Cray UNICOS/mk, FreeBSD, HP/UX, Linux, NetBSD, Next 3.x,
+        OpenBSD, OSF/1, Pyramid, SCO Unix,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Sys V.3,
         Sys V.4, Ultrix, Windows, Xenix
 
@@ -106,17 +106,20 @@ BUGS
 CHANGES
 
     4.0
-        Metadist is no longer supported.
-        Only the iffe configuration method is now available.
+        Metadist is no longer supported; Only the iffe configuration
+            method is now available.
         Removed -h help flag, changed it to be scaled alternative 1
-        display to match other 'df' programs.
+            display to match other 'df' programs.
         Alias -x to -i to match other 'df' programs. -x will be preferred.
+            Old -x (debug) changed to -X.
         POSIX -dp flag was broken.  Removed.  Added -P option.
         Alias -F to -I for compatibility.
         Updates to manual page.
+        Internationalization files are now automatically installed if the 
+            NLS routines are detected.
 
     3.11                                    [11 mar 2004]
-        Fixed bug checking mount options to see if partition
+        Fixed bug: checking mount options to see if partition
         was read-only (bsd style get/set/endmntent).
 
     3.10                                    [26 feb 2004]
