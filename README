@@ -11,10 +11,10 @@ DESCRIPTION
 INSTALLATION
 
   Instructions:
-                                  Example w/gcc and different prefix.
-      make distclean                make distclean
-      make                          make CC=gcc prefix=/usr/lbin
-      make install                  make CC=gcc prefix=/usr/lbin install
+                              Example w/gcc and different prefix.
+      make distclean            make distclean
+      make                      make CC=gcc prefix=/usr/lbin
+      make install              make CC=gcc prefix=/usr/lbin install
 
     features/cflags.sh sets the various compiler flags.
 
@@ -22,11 +22,11 @@ INSTALLATION
     variables may be set and exported prior to running make.
 
     The LOCALEDIR environment variable may be set to the installation
-    directory for the locale files.  Default is ${prefix}/lib/di/locale.
+    directory for the locale files.  Default is ${prefix}/share/locale.
 
-    If you want the internationalization directory installed, do:
-
-      make install-po [en_US: 27-Aug-2002, de_DE: 26-Feb-2004]
+    The internationalization files are automatically installed if
+    your system supports internationalization  [en_US: 27-Aug-2002, 
+    de_DE: 26-Feb-2004].
 
     To force a 64 bit binary build:
       ./Build -64 [<args>]
@@ -48,7 +48,6 @@ INSTALLATION
     in the config.h file for older windows systems.
 
     (1) and (2) will build using the windows API.
-    (3) Doesn't find the windows API, and uses the cygwin API.
 
     If you prefer to use the cygwin API rather than the
     windows API, edit config.h, and undefine _hdr_windows,
