@@ -153,8 +153,8 @@ install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
 	-$(LN) -f $(TARGET) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old
-	-./hasnls$(EXE_EXT) && echo "NLS enabled"
-	-./hasnls$(EXE_EXT) || echo "NLS not enabled"
+	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
+	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 	-./hasnls$(EXE_EXT) && \
 		$(MAKE) LOCALEDIR="$(LOCALEDIR)" install-po
 
