@@ -21,7 +21,7 @@ LDFLAGS =
 #
 prefix = /usr/local
 INSTDIR = $(prefix)/bin
-LOCALEDIR = $(prefix)/lib/di
+LOCALEDIR = $(prefix)/share/locale
 PROG = di
 MPROG = mi
 TARGET = $(INSTDIR)/$(PROG)
@@ -45,7 +45,7 @@ INSTPERM = 4111   # install suid if your system has a mount table only root
 #
 # simple man page installation
 #
-MANPATH = $(prefix)/man
+MANPATH = $(prefix)/share/man
 MANDIR = $(MANPATH)/man1
 MANTARGET = $(PROG).1
 MANPERM = 644
@@ -72,13 +72,14 @@ SED = sed
 all:
 	./Build
 
-di-all:	config.h $(PROG)$(EXE_EXT)
+di-all:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
 config.h:	features/di.iffe features/cflags.sh
 	@-$(RM) -f config.h
 	./Build config.h
 
 #config.h:	features/di.iffe features/cflags.sh
+#	@-$(RM) -f config.h
 #	./Build dconfig.h
 
 wconfig.h:	config.win95
@@ -110,13 +111,14 @@ objclean:
 
 clean:
 	-$(RM) -f $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
-		*.o *.obj a.out \
+		hasnls$(EXE_EXT) *.o *.obj a.out \
 		>/dev/null 2>&1
 
 distclean:
 	$(MAKE) -f Makefile clean
 	-$(RM) -f config.h object_ext \
-		di$(EXE_EXT) diskinfo$(EXE_EXT) \
+		$(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
+		hasnls$(EXE_EXT) di$(EXE_EXT) diskinfo$(EXE_EXT) \
 		>/dev/null 2>&1
 
 realclean:
@@ -133,18 +135,17 @@ build-po:
 
 install-po: build-po
 	-$(TEST) -d $(LOCALEDIR) || $(MKDIR) -p $(LOCALEDIR)
-	-$(TEST) -d $(LOCALEDIR)/locale || $(MKDIR) -p $(LOCALEDIR)/locale
 	-(cd po;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
-		$(TEST) -d $(LOCALEDIR)/locale/$$j || \
-			$(MKDIR) $(LOCALEDIR)/locale/$$j; \
-		$(TEST) -d $(LOCALEDIR)/locale/$$j/LC_MESSAGES || \
-			$(MKDIR) $(LOCALEDIR)/locale/$$j/LC_MESSAGES; \
-		$(CP) -f $$j.mo $(LOCALEDIR)/locale/$$j/LC_MESSAGES/di.mo; \
+		$(TEST) -d $(LOCALEDIR)/$$j || \
+			$(MKDIR) $(LOCALEDIR)/$$j; \
+		$(TEST) -d $(LOCALEDIR)/$$j/LC_MESSAGES || \
+			$(MKDIR) $(LOCALEDIR)/$$j/LC_MESSAGES; \
+		$(CP) -f $$j.mo $(LOCALEDIR)/$$j/LC_MESSAGES/di.mo; \
         $(RM) -f $$j.mo; \
 	done)
 
-install-prog:	$(PROG)$(EXE_EXT)
+install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	-$(TEST) -d $(prefix) || $(MKDIR) $(prefix)
 	-$(TEST) -d $(INSTDIR) || $(MKDIR) $(INSTDIR)
 	-$(TEST) -f $(TARGET) && $(MV) -f $(TARGET) $(TARGET).old
@@ -152,10 +153,14 @@ install-prog:	$(PROG)$(EXE_EXT)
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
 	-$(LN) -f $(TARGET) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old
+	./hasnls$(EXE_EXT) && echo "NLS enabled"
+	./hasnls$(EXE_EXT) || echo "NLS not enabled"
+	./hasnls$(EXE_EXT) && \
+		$(MAKE) LOCALEDIR="$(LOCALEDIR)" install-po
 
 install-man:
-	-$(TEST) -d $(MANPATH) || $(MKDIR) $(MANPATH)
-	-$(TEST) -d $(MANDIR) || $(MKDIR) $(MANDIR)
+	-$(TEST) -d $(MANPATH) || $(MKDIR) -p $(MANPATH)
+	-$(TEST) -d $(MANDIR) || $(MKDIR) -p $(MANDIR)
 	$(CP) -f di.1 $(MANDIR)/$(MANTARGET)
 	$(CHMOD) $(MANPERM) $(MANDIR)/$(MANTARGET)
 
@@ -196,6 +201,11 @@ $(PROG)$(EXE_EXT):	di$(OBJ_EXT) dilib$(OBJ_EXT) \
 		di$(OBJ_EXT) dilib$(OBJ_EXT) \
 		getopt$(OBJ_EXT) $(LIBS)
 
+hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
+	$(CC) -o hasnls$(EXE_EXT) \
+		$(CFLAGS) $(LDFLAGS) \
+		hasnls$(OBJ_EXT)
+
 ###
 
 di$(OBJ_EXT):		di.c config.h di.h version.h
@@ -206,3 +216,7 @@ dilib$(OBJ_EXT):	dilib.c config.h di.h
 
 getopt$(OBJ_EXT):	getopt.c config.h di.h
 	$(CC) -c $(CFLAGS) getopt.c
+
+hasnls$(OBJ_EXT):	hasnls.c config.h
+	$(CC) -c $(CFLAGS) $(OTHERFLAGS) hasnls.c
+
