@@ -153,9 +153,9 @@ install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
 	-$(LN) -f $(TARGET) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old
-	./hasnls$(EXE_EXT) && echo "NLS enabled"
-	./hasnls$(EXE_EXT) || echo "NLS not enabled"
-	./hasnls$(EXE_EXT) && \
+	-./hasnls$(EXE_EXT) && echo "NLS enabled"
+	-./hasnls$(EXE_EXT) || echo "NLS not enabled"
+	-./hasnls$(EXE_EXT) && \
 		$(MAKE) LOCALEDIR="$(LOCALEDIR)" install-po
 
 install-man:
@@ -179,7 +179,7 @@ current-files:
 tar:	Build LICENSE LICENSE.iffe MANIFEST \
 		Makefile README bin config.win95 \
 		di.1 di.c \
-		di.h dilib.c features getopt.c \
+		di.h dilib.c features getopt.c hasnls.c \
 		po version.h
 	$(MAKE) -f Makefile current-files
 	$(SHELL) mktar.sh $?
@@ -187,7 +187,7 @@ tar:	Build LICENSE LICENSE.iffe MANIFEST \
 testtar:	Build LICENSE LICENSE.iffe MANIFEST \
 		Makefile README bin config.win95 \
 		di.1 di.c \
-		di.h dilib.c features getopt.c \
+		di.h dilib.c features getopt.c hasnls.c \
 		po version.h
 	$(MAKE) -f Makefile current-files
 	$(SHELL) mktar.sh $?
