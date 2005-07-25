@@ -4,7 +4,7 @@
 .\"
 .\" di.1
 .\"
-.\" Copyright 1994-2004 Brad Lanam  Walnut Creek CA USA
+.\" Copyright 1994-2005 Brad Lanam  Walnut Creek CA USA
 .\"
 .\" bll@gentoo.com
 .\"
@@ -117,6 +117,9 @@ Include \fIonly\fP the file system types listed in \fIinclude-fstyp-list\fP.
 The list is a comma separated list of file system types.  e.g.
 \-I nfs,rfs
 .TP
+.B \-i \fIexclude-fstype-list\fP
+An alias for -x.  See below.
+.TP
 .B \-k
 Display sizes in Kbytes.  An alias for \-dk.
 .TP
@@ -148,7 +151,8 @@ command line, no sorting is done.
 .TP
 .B \-t
 Print a totals line below the list of file systems.
-Memory filesystems (tmpfs, memfs) are not added to the totals.
+Memory filesystems (tmpfs, memfs) and read-only 
+filesystems are not added to the totals.
 .TP
 .B \-w\ \fIblock-width\fP
 Set the print width for block values.  Default is eight.
@@ -159,7 +163,7 @@ Set the print width for inode values.  Default is seven.
 .B \-x \fIexclude-fstype-list\fP
 Exclude the file system types listed in \fIexclude-fstyp-list\fP.
 The list is a comma separated list of file system types.  e.g.
-\-i nfs,rfs
+\-x nfs,rfs
 .TP
 .B \-X\ \fIlevel\fP
 Set the program's debugging level to \fIdebug-level\fP.
@@ -284,7 +288,7 @@ Various \fIdf\fP
 equivalent format strings for System V release 4 are:
 .PP
 .RS
-\fI/usr/bin/df \-v\fP     di \-dp \-f msbuf1
+\fI/usr/bin/df \-v\fP     di \-dP \-f msbuf1
 .br
 \fI/usr/bin/df \-k\fP     di \-dk \-f sbcvpm
 .br
@@ -321,7 +325,7 @@ statfs(2), statvfs(2)
 .SH Bugs
 Send bug reports to: di-bugs@gentoo.com
 .SH Author
-This program is Copyright 1994-2004 by Brad Lanam.
+This program is Copyright 1994-2005 by Brad Lanam.
 .PP
 Brad Lanam, Walnut Creek, CA (bll@gentoo.com)
 .PP
