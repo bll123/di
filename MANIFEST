@@ -10,6 +10,7 @@ getopt.c		getopt source (from Cnews)
 hasnls.c		checks for NLS support.
 config.win95		config.h for win95
 Makefile		Main Makefile
+mkconfig.pl		perl config program
 bin/
 bin/iffe		iffe config program
 features/
