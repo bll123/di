@@ -74,11 +74,11 @@ all:
 
 di-all:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
-config.h:	features/di.iffe features/cflags.sh
+config.h:	features/di.iffe features/cflags.sh mkconfig.pl
 	@-$(RM) -f config.h
 	./Build config.h
 
-#config.h:	features/di.iffe features/cflags.sh
+#config.h:	features/di.iffe features/cflags.sh mkconfig.pl
 #	@-$(RM) -f config.h
 #	./Build dconfig.h
 
@@ -111,7 +111,7 @@ objclean:
 
 clean:
 	-$(RM) -f $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
-		hasnls$(EXE_EXT) *.o *.obj a.out \
+		hasnls$(EXE_EXT) *.o *.obj a.out mkconfig.log \
 		>/dev/null 2>&1
 
 distclean:
@@ -122,8 +122,7 @@ distclean:
 		>/dev/null 2>&1
 
 realclean:
-	$(MAKE) -f Makefile \
-		distclean
+	$(MAKE) -f Makefile distclean
 
 install:	install-prog install-man
 
