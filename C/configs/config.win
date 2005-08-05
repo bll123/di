@@ -1,9 +1,12 @@
-/* : : generated from features/di.iffe by iffe version 2001-05-31 : : */
+
 #ifndef _config_H
 #define _config_H	1
 #define	_sys_types	1	/* #include <sys/types.h> ok */
-#define _proto_stdc	1	/* Standard-C prototypes ok */
+#define _hdr_stdio	1	/* #include <stdio.h> ok */
+#define _hdr_stdlib	1	/* #include <stdlib.h> ok */
+#define _sys_param	1	/* #include <sys/param.h> ok */
 #define _key_void	1	/* void is a reserved keyword */
+#define _proto_stdc	1	/* Standard-C prototypes ok */
 #define _command_msgfmt	1	/* Is msgfmt available? */
 #define _hdr_ctype	1	/* #include <ctype.h> ok */
 #define _hdr_errno	1	/* #include <errno.h> ok */
@@ -17,8 +20,6 @@
 #define _hdr_memory	1	/* #include <memory.h> ok */
 #define _hdr_mntent	1	/* #include <mntent.h> ok */
 #undef	_hdr_mnttab		/* #include <mnttab.h> not ok */
-#define _hdr_stdio	1	/* #include <stdio.h> ok */
-#define _hdr_stdlib	1	/* #include <stdlib.h> ok */
 #undef	_hdr_storage_Directory		/* #include <storage/Directory.h> not ok */
 #undef	_hdr_storage_Entry		/* #include <storage/Entry.h> not ok */
 #undef	_hdr_storage_Path		/* #include <storage/Path.h> not ok */
@@ -34,7 +35,6 @@
 #undef	_sys_mntent		/* #include <sys/mntent.h> not ok */
 #undef	_sys_mnttab		/* #include <sys/mnttab.h> not ok */
 #define _sys_mount	1	/* #include <sys/mount.h> ok */
-#define _sys_param	1	/* #include <sys/param.h> ok */
 #define _sys_stat	1	/* #include <sys/stat.h> ok */
 #define _sys_statfs	1	/* #include <sys/statfs.h> ok */
 #undef	_sys_statvfs		/* #include <sys/statvfs.h> not ok */
@@ -56,6 +56,9 @@
 #undef	_lib_fshelp		/* fshelp() not in default lib(s) */
 #define _lib_GetDiskFreeSpace	1	/* is GetDiskFreeSpace a library function? */
 #define _lib_GetDiskFreeSpaceEx	1	/* is GetDiskFreeSpaceEx a library function? */
+#define _lib_GetDriveType	1	/* GetDriveType() in default lib(s) */
+#define _lib_GetLogicalDriveStrings	1	/* GetLogicalDriveStrings() in default lib(s) */
+#define _lib_GetVolumeInformation	1	/* GetVolumeInformation() in default lib(s) */
 #undef	_lib_getfsstat		/* getfsstat() not in default lib(s) */
 #undef	_lib_getmnt		/* getmnt() not in default lib(s) */
 #define _lib_getmntent	1	/* getmntent() in default lib(s) */
@@ -138,5 +141,6 @@ _command_msgfmt
 #endif
 
 #define _config_by_iffe_ 1
+#define _config_by_mkconfig_pl_ 0
 
 #endif
