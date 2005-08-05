@@ -1,4 +1,4 @@
-di - disk information utility (version 4.0).
+di - disk information utility (version 4.1).
 
 DESCRIPTION
 
@@ -10,11 +10,18 @@ DESCRIPTION
 
 INSTALLATION
 
-  Instructions:
+  Instructions (iffe):
                               Example w/gcc and different prefix.
       make distclean            make distclean
       make                      make CC=gcc prefix=/usr/lbin
       make install              make CC=gcc prefix=/usr/lbin install
+
+  To build with mkconfig.pl (for those who don't like the iffe LICENSE)
+  (requires perl):
+
+      make distclean
+      ./Build -mkc              CC=gcc prefix=/usr/lbin ./Build -mkc
+      ./Build -mkc install      CC=gcc prefix=/usr/lbin ./Build -mkc install
 
     features/cflags.sh sets the various compiler flags.
 
@@ -25,8 +32,8 @@ INSTALLATION
     directory for the locale files.  Default is ${prefix}/share/locale.
 
     The internationalization files are automatically installed if
-    your system supports internationalization  [en_US: 27-Aug-2002,
-    de_DE: 26-Feb-2004].
+    your system supports internationalization.
+    [en_US: 27-Aug-2002, de_DE: 26-Feb-2004].
 
     To force a 64 bit binary build:
       ./Build -64 [<args>]
@@ -69,7 +76,7 @@ BUGS
 
 PORTING
 
-    di 4.0 has been tested on the following platforms:
+    di 4.1 has been tested on the following platforms:
         FreeBSD 5.4
         HP-UX B.11.23
         Debian Linux 2.4.27, 2.6.8
@@ -105,7 +112,13 @@ BUGS
 
 CHANGES
 
-    4.0
+    4.1                                     [5 Aug 2005]
+        Created a perl script as an alternative to iffe
+            to create the config.h file.
+        Internationalization build now works for Cygwin, FreeBSD,
+            NetBSD and HP/UX.
+
+    4.0                                     [26 Jul 2005]
         Metadist is no longer supported; Only the iffe configuration
             method is now available.
         Removed -h help flag, changed it to be scaled alternative 1
@@ -115,7 +128,7 @@ CHANGES
         POSIX -dp flag was broken.  Removed.  Added -P option.
         Alias -F to -I for compatibility.
         Updates to manual page.
-        Internationalization files are now automatically installed if the 
+        Internationalization files are now automatically installed if the
             NLS routines are detected.
 
     3.11                                    [11 mar 2004]
