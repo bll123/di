@@ -112,11 +112,11 @@ BUGS
 
 CHANGES
 
-    4.1                                     [5 Aug 2005]
+    4.1                                     [6 Aug 2005]
         Created a perl script as an alternative to iffe
             to create the config.h file.
-        Internationalization build now works for Cygwin, FreeBSD,
-            NetBSD and HP/UX.
+        Internationalization configuration now works for Cygwin,
+            FreeBSD, NetBSD and HP/UX.
 
     4.0                                     [26 Jul 2005]
         Metadist is no longer supported; Only the iffe configuration
