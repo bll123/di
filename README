@@ -1,4 +1,4 @@
-di - disk information utility (version 4.1).
+di - disk information utility (version 4.2).
 
 DESCRIPTION
 
@@ -19,9 +19,13 @@ INSTALLATION
   To build with mkconfig.pl (for those who don't like the iffe LICENSE)
   (requires perl):
 
-      make distclean
       ./Build -mkc              CC=gcc prefix=/usr/lbin ./Build -mkc
       ./Build -mkc install      CC=gcc prefix=/usr/lbin ./Build -mkc install
+
+  To turn off NLS (internationalization) (example w/iffe):
+
+      ./Build -nonls            CC=gcc prefix=/usr/lbin ./Build -nonls
+      ./Build -nonls install    CC=gcc prefix=/usr/lbin ./Build -nonls install
 
     features/cflags.sh sets the various compiler flags.
 
@@ -36,7 +40,7 @@ INSTALLATION
     [en_US: 27-Aug-2002, de_DE: 26-Feb-2004].
 
     To force a 64 bit binary build:
-      ./Build -64 [<args>]
+      ./Build -64
 
   Installation Permissions:
     Some systems (Sys V variants) only allow root to read the
@@ -76,15 +80,15 @@ BUGS
 
 PORTING
 
-    di 4.1 has been tested on the following platforms:
+    di 4.2 has been tested on the following platforms:
         FreeBSD 5.4
         HP-UX B.11.23
         Debian Linux 2.4.27, 2.6.8
-        Red Hat Linux 2.4.9, 2.4.21, 2.6.9
+        Red Hat Linux 2.4.21, 2.6.9
         SuSe Linux 2.6.5
         NetBSD 2.0
-        Solaris 8, 9
-        Tru64 Unix 4.0g, 5.1b
+        Solaris 9
+        Tru64 Unix 5.1b
 
     di has been ported to the following systems in the past:
 
@@ -111,6 +115,14 @@ BUGS
     Build in non-interactive mode for any system.
 
 CHANGES
+
+    4.2                                     [12 Oct 2005]
+        Added -nonls argument to 'Build' to turn off all NLS.
+        Add +DAportable for HP-UX 10.x.
+        Add -qmaxmem=-1 for AIX.
+        Fix compile warning in dilib.c for AIX.
+        Improve tests for libintl.sl for HP-UX.
+            Check /usr/local for libintl.sl also.
 
     4.1                                     [6 Aug 2005]
         Created a perl script as an alternative to iffe
@@ -400,6 +412,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2004 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2005 Brad Lanam, Walnut Creek, CA, USA
     bll@gentoo.com
     http://www.gentoo.com/di/
