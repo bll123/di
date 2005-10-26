@@ -177,9 +177,11 @@ extern int di_lib_debug;
 #define DI_FMT_BCUSED          'c'
 #define DI_FMT_BFREE           'f'
 #define DI_FMT_BAVAIL          'v'
-#define DI_FMT_BPERC_AVAIL     'p'
-#define DI_FMT_BPERC_FREE      '1'
+#define DI_FMT_BPERC_NAVAIL    'p'
+#define DI_FMT_BPERC_USED      '1'
 #define DI_FMT_BPERC_BSD       '2'
+#define DI_FMT_BPERC_AVAIL     'a'
+#define DI_FMT_BPERC_FREE      '3'
 #define DI_FMT_ITOT            'i'
 #define DI_FMT_IUSED           'U'
 #define DI_FMT_IFREE           'F'
@@ -198,7 +200,8 @@ extern int di_lib_debug;
 #define DI_UNKNOWN_DEV          -1L
 #define DI_LIST_SEP             ","
 
-#define DI_ALL_FORMAT           "MTS\n\tIO\n\tbuf1\n\tbcvp\n\tBuv2\n\tiUFP"
+#define DI_ALL_FORMAT           "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
+#define DI_POSIX_FORMAT         "SbuvpM"
 
 #define DI_VAL_1000             1000.0
 #define DI_VAL_1024             1024.0
@@ -225,6 +228,8 @@ extern int di_lib_debug;
 # define DI_DEF_MOUNT_FORMAT    "MST\n\tO"
 #endif
 #define DI_PERC_FMT             "%3.0f%% "
+#define DI_POSIX_PERC_FMT       "   %3.0f%% "
+#define DI_POSIX_PERC_LBL_FMT   "%8s"
 #define DI_PERC_LBL_FMT         "%5s"
 #define DI_FSTYPE_FMT           "%-7.7s"
 #define DI_MOUNT_FMT            "%-15.15s"
@@ -257,6 +262,7 @@ static int          debug = { 0 };
 static __ulong      flags = { 0 };
 static int          sortType = { DI_SORT_NAME };
 static int          sortOrder = { DI_SORT_ASCENDING };
+static int          posix_compat = { 0 };
 
 static char         *formatString = { DI_DEFAULT_FORMAT };
 static char         mountFormat [20];
@@ -378,6 +384,8 @@ main (argc, argv)
     if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL)
     {
         strncpy (dbsstr, "512", sizeof (dbsstr));
+        formatString = DI_POSIX_FORMAT;
+        posix_compat = 1;
     }
 
         /* bsd df */
@@ -723,19 +731,33 @@ printInfo (diskInfo)
                 break;
             }
 
-            case DI_FMT_BPERC_AVAIL:
+            case DI_FMT_BPERC_NAVAIL:
             {
                 used = diskInfo->totalBlocks - diskInfo->availBlocks;
                 totAvail = diskInfo->totalBlocks;
-                printPerc (used, totAvail, DI_PERC_FMT);
+                if (posix_compat == 1)
+                {
+                    printPerc (used, totAvail, DI_POSIX_PERC_FMT);
+                } 
+                else 
+                { 
+                    printPerc (used, totAvail, DI_PERC_FMT);
+                } 
                 break;
             }
 
-            case DI_FMT_BPERC_FREE:
+            case DI_FMT_BPERC_USED:
             {
                 used = diskInfo->totalBlocks - diskInfo->freeBlocks;
                 totAvail = diskInfo->totalBlocks;
-                printPerc (used, totAvail, DI_PERC_FMT);
+                if (posix_compat == 1)
+                {
+                    printPerc (used, totAvail, DI_POSIX_PERC_FMT);
+                } 
+                else 
+                { 
+                    printPerc (used, totAvail, DI_PERC_FMT);
+                } 
                 break;
             }
 
@@ -744,7 +766,32 @@ printInfo (diskInfo)
                 used = diskInfo->totalBlocks - diskInfo->freeBlocks;
                 totAvail = diskInfo->totalBlocks -
                         (diskInfo->freeBlocks - diskInfo->availBlocks);
-                printPerc (used, totAvail, DI_PERC_FMT);
+                if (posix_compat == 1)
+                {
+                    printPerc (used, totAvail, DI_POSIX_PERC_FMT);
+                } 
+                else 
+                { 
+                    printPerc (used, totAvail, DI_PERC_FMT);
+                } 
+                break;
+            }
+
+            case DI_FMT_BPERC_AVAIL:
+            {
+                _fs_size_t          bfree;
+                bfree = diskInfo->availBlocks;
+                totAvail = diskInfo->totalBlocks;
+                printPerc (bfree, totAvail, DI_PERC_FMT);
+                break;
+            }
+
+            case DI_FMT_BPERC_FREE:
+            {
+                _fs_size_t          bfree;
+                bfree = diskInfo->freeBlocks;
+                totAvail = diskInfo->totalBlocks;
+                printPerc (bfree, totAvail, DI_PERC_FMT);
                 break;
             }
 
@@ -974,7 +1021,14 @@ printTitle ()
 
             case DI_FMT_MOUNT_FULL:
             {
-                printf (mountFormat, GT("Mount"));
+                if (posix_compat == 1)
+                {
+                    printf (mountFormat, GT("Mounted On"));
+                }
+                else
+                {
+                    printf (mountFormat, GT("Mount"));
+                }
                 break;
             }
 
@@ -1000,15 +1054,36 @@ printTitle ()
 
             case DI_FMT_BAVAIL:
             {
-                printf (blockLabelFormat, GT("Avail"));
+                if (posix_compat == 1)
+                {
+                    printf (blockLabelFormat, GT("Available"));
+                }
+                else
+                {
+                    printf (blockLabelFormat, GT("Avail"));
+                }
+                break;
+            }
+
+            case DI_FMT_BPERC_NAVAIL:
+            case DI_FMT_BPERC_USED:
+            case DI_FMT_BPERC_BSD:
+            {
+                if (posix_compat == 1)
+                {
+                    printf (DI_POSIX_PERC_LBL_FMT, GT("Capacity"));
+                }
+                else
+                {
+                    printf (DI_PERC_LBL_FMT, GT("%Used"));
+                }
                 break;
             }
 
             case DI_FMT_BPERC_AVAIL:
             case DI_FMT_BPERC_FREE:
-            case DI_FMT_BPERC_BSD:
             {
-                printf (DI_PERC_LBL_FMT, GT("%used"));
+                printf (DI_PERC_LBL_FMT, GT("%Free"));
                 break;
             }
 
@@ -1032,7 +1107,7 @@ printTitle ()
 
             case DI_FMT_IPERC:
             {
-                printf (DI_PERC_LBL_FMT, GT("%used"));
+                printf (DI_PERC_LBL_FMT, GT("%Used"));
                 break;
             }
 
@@ -1535,6 +1610,15 @@ checkDiskInfo (diskInfo, includeList, diCount)
         }
     } /* for each disk */
 
+    if (posix_compat == 1)
+    {
+        /* Mounted On */
+        len = strlen (GT("Mounted On"));
+        maxMountString = maxMountString < len ? len : maxMountString;
+        len = strlen (dispBlockLabel);
+        width = width < len ? len : width;
+    }
+
         /* this loop gets the max string lengths */
     for (i = 0; i < diCount; ++i)
     {
@@ -1720,19 +1804,18 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
 #endif
 {
     int         ch;
+    int         hasdashk;
 
 
-    while ((ch = getopt (argc, argv, "Aab:d:f:F:ghHi:I:klmnPs:tw:W:x:")) != -1)
+    hasdashk = 0;
+    while ((ch = getopt (argc, argv, 
+        "Aab:B:d:f:F:ghHi:I:klmnPs:tvw:W:x:")) != -1)
     {
         switch (ch)
         {
-            case 'A':
+            case 'A':   /* for debugging */
             {
                 formatString = DI_ALL_FORMAT;
-                flags |= DI_F_ALL | DI_F_DEBUG_HDR | DI_F_TOTAL;
-                flags &= ~ DI_F_NO_HEADER;
-                width = 10;
-                inodeWidth = 10;
                 break;
             }
 
@@ -1743,6 +1826,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
             }
 
             case 'b':
+            case 'B':
             {
                 if (isdigit ((int) (*optarg)))
                 {
@@ -1795,14 +1879,14 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
                 break;
             }
 
-            case 'x':
-            case 'i':
+            case 'i':  /* backwards compatibility */
+            case 'x':  /* preferred */
             {
                 parseList (ignoreList, optarg);
                 break;
             }
 
-            case 'F':
+            case 'F':  /* compatibility w/other df */
             case 'I':
             {
                 parseList (includeList, optarg);
@@ -1812,6 +1896,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
             case 'k':
             {
                 strncpy (dbsstr, "k", sizeof (dbsstr));
+                hasdashk = 1;
                 break;
             }
 
@@ -1829,7 +1914,12 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
 
             case 'P':
             {
-                strncpy (dbsstr, "512", sizeof (dbsstr));
+                if (hasdashk == 0) /* don't override -k option */
+                {
+                    strncpy (dbsstr, "512", sizeof (dbsstr));
+                }
+                formatString = DI_POSIX_FORMAT;
+                posix_compat = 1;
                 break;
             }
 
@@ -1890,6 +1980,15 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
             {
                 debug = atoi (optarg);
                 di_lib_debug = atoi (optarg);
+                flags |= DI_F_ALL | DI_F_DEBUG_HDR | DI_F_TOTAL;
+                flags &= ~ DI_F_NO_HEADER;
+                width = 10;
+                inodeWidth = 10;
+                break;
+            }
+
+            case 'v':
+            {
                 break;
             }
 
@@ -2062,6 +2161,7 @@ setDispBlockSize (ptr)
 {
     int         len;
     double      val;
+    char        *tptr;
 
     if (ptr == (char *) NULL ||
         *ptr == '\0')
@@ -2078,15 +2178,16 @@ setDispBlockSize (ptr)
         val = 1.0;
     }
 
+    tptr = ptr;
     len = strlen (ptr);
-    ptr += len;
-    --ptr;
-    if (! isdigit ((int) *ptr))
+    tptr += len;
+    --tptr;
+    if (! isdigit ((int) *tptr))
     {
         int             idx;
 
         idx = -1;
-        switch (*ptr)
+        switch (*tptr)
         {
             case 'k':
             case 'K':
@@ -2162,8 +2263,15 @@ setDispBlockSize (ptr)
 
             default:
             {
-                /* some unknown string value */
-                val = dispBlockSize;
+                if (strncmp (ptr, "HUMAN", 5) == 0)
+                {
+                    val = DI_DISP_HR;
+                }
+                else
+                {
+                    /* some unknown string value */
+                    val = dispBlockSize;
+                }
                 break;
             }
         }
@@ -2206,6 +2314,17 @@ setDispBlockSize (ptr)
                 "%.0fb"), val);
         }
     }  /* some oddball block size */
+
+    if (posix_compat == 1 && val == 512)
+    {
+        strncpy (dispBlockLabel, GT ("512-blocks"),
+            sizeof (dispBlockLabel));
+    }
+    if (posix_compat == 1 && val == 1024)
+    {
+        strncpy (dispBlockLabel, GT ("1024-blocks"),
+            sizeof (dispBlockLabel));
+    }
 
     dispBlockSize = val;
 }
