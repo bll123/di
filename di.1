@@ -8,9 +8,9 @@
 .\"
 .\" bll@gentoo.com
 .\"
-.\" for di version 4.0
+.\" for di version 4.3
 .\"
-.TH di 1 "5 Aug 2005"
+.TH di 1 "26 Oct 2005"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -18,12 +18,12 @@ di \- disk information
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x exclude-fstyp-list] [-X level] [file [...]]
 .B di
-[\fB-Aahlnt\fP] [\fB-b\fP \fIblock-size\fP] [\fB-d\fP \fIdisplay-size\fP]
-[\fB-f\fP \fIformat\fP]
-[\fB-I\fP \fIinclude-fstyp-list\fP]
-[\fB-s\fP \fIsort-type\fP]
-[\fB-w\fP \fIblock-width\fP] [\fB-W\fP \fIinode-width\fP]
-[\fB-x\fP \fIexclude-fstyp-list\fP] [\fB-X\fP \fIlevel\fP]
+[\fB\-Aahlnt\fP] [\fB\-b\fP \fIblock\-size\fP] [\fB\-d\fP \fIdisplay\-size\fP]
+[\fB\-f\fP \fIformat\fP]
+[\fB\-I\fP \fIinclude\-fstyp\-list\fP]
+[\fB\-s\fP \fIsort\-type\fP]
+[\fB\-w\fP \fIblock\-width\fP] [\fB\-W\fP \fIinode\-width\fP]
+[\fB\-x\fP \fIexclude\-fstyp\-list\fP] [\fB\-X\fP \fIlevel\fP]
 [\fIfile\fP [...]]
 .PP
 .B mi
@@ -68,7 +68,7 @@ device names are printed at full width.  The \-a flag is set.
 Prints all mounted devices (normally, those with 0 total blocks are not
 printed \- e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .TP
-.B \-b\ \fIblock-size\fP
+.B \-b\ \fIblock-size\fP (compatibility: \-B)
 Change the base block size from 1024 (default) to the size specified.
 \fIblock-size\fP may be one of: k\ \-\ 1024 bytes, d\ \-\ 1000 bytes,
 or a specific size.
@@ -98,9 +98,6 @@ to the same unit size (the largest needed).
 Use the specified format string \fIformat\fP.  Format strings are
 described below.
 .TP
-.B \-F \fIinclude-fstype-list\fP
-An alias for -I.  See below.
-.TP
 .B \-g
 Display sizes in gigabytes.  An alias for \-dg.
 .TP
@@ -112,20 +109,16 @@ An alias for \-dh.
 Display partition sizes in scaled alternative 2 format.
 An alias for \-dH.
 .TP
-.B \-I \fIinclude-fstype-list\fP
+.B \-I \fIinclude-fstype-list\fP (compatibility: \-F)
 Include \fIonly\fP the file system types listed in \fIinclude-fstyp-list\fP.
 The list is a comma separated list of file system types.  e.g.
-\-I nfs,rfs
-.TP
-.B \-i \fIexclude-fstype-list\fP
-An alias for -x.  See below.
+\-I nfs,rfs.  Multiple -I options 
 .TP
 .B \-k
 Display sizes in Kbytes.  An alias for \-dk.
 .TP
 .B \-l
-Display only local file systems.  This option is not fully implemented
-for all systems as of version 1.17.
+Display only local file systems.
 .TP
 .B \-m
 Display sizes in megabytes.  An alias for \-dm.
@@ -135,8 +128,8 @@ Do not print a header line above the list of file systems.  Useful when
 parsing the output of \fIdi\fP.
 .TP
 .B \-P
-Display partition sizes in POSIX 512 byte format
-An alias for \-d512.
+Output format is POSIX standard.
+512 byte block size is the default.  The \-k option may be used.
 .TP
 .B \-s\ \fIsort-type\fP
 Use \fIsort-type\fP to sort the output.
@@ -160,7 +153,7 @@ Set the print width for block values.  Default is eight.
 .B \-W\ \fIinode-width\fP
 Set the print width for inode values.  Default is seven.
 .TP
-.B \-x \fIexclude-fstype-list\fP
+.B \-x \fIexclude-fstype-list\fP (old: \-i)
 Exclude the file system types listed in \fIexclude-fstyp-list\fP.
 The list is a comma separated list of file system types.  e.g.
 \-x nfs,rfs
@@ -211,14 +204,12 @@ See also the \-d option.
 .TP
 .B p
 Print the percentage of megabytes not available for use by normal users
-(number of
-megabytes not available for use / total disk space).
+(number of megabytes not available for use / total disk space).
 See also the \-d option.
 .TP
 .B 1
 Print the percentage of total megabytes in use
-(actual number of
-megabytes used / total disk space).
+(actual number of megabytes used / total disk space).
 See also the \-d option.
 .TP
 .B 2
@@ -227,6 +218,16 @@ percentage of user-available space in use.  Note that values over 100%
 are possible
 (actual number of megabytes used / disk
 space available to non-root users).
+See also the \-d option.
+.TP
+.B a
+Print the percentage of megabytes available for use by normal users
+(number of megabytes available for use / total disk space).
+See also the \-d option.
+.TP
+.B 3
+Print the percentage of total megabytes free
+(actual number of megabytes free / total disk space).
 See also the \-d option.
 .TP
 .B i
