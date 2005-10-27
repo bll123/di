@@ -1809,7 +1809,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
 
     hasdashk = 0;
     while ((ch = getopt (argc, argv, 
-        "Aab:B:d:f:F:ghHi:I:klmnPs:tvw:W:x:")) != -1)
+        "Aab:B:d:f:F:ghHi:I:klmnPs:tvw:W:x:X:")) != -1)
     {
         switch (ch)
         {
