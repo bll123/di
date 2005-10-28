@@ -199,6 +199,8 @@ extern int di_lib_debug;
 
 #define DI_UNKNOWN_DEV          -1L
 #define DI_LIST_SEP             ","
+#define DI_ARGV_SEP             " 	"  /* space, tab */
+#define DI_MAX_ARGV             30
 
 #define DI_ALL_FORMAT           "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 #define DI_POSIX_FORMAT         "SbuvpM"
@@ -349,6 +351,7 @@ main (argc, argv)
     iList               ignoreList;
     iList               includeList;
     char                *ptr;
+    char                *argvptr;
     char                dbsstr [30];
 
     *dbsstr = '\0';
@@ -398,6 +401,38 @@ main (argc, argv)
     if ((ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL)
     {
         strncpy (dbsstr, ptr, sizeof (dbsstr));
+    }
+
+    argvptr = (char *) NULL;
+    if ((ptr = getenv ("DI_ARGS")) != (char *) NULL)
+    {
+        char        *tptr;
+        int         nargc;
+        int         ooptind;
+        char        *ooptarg;
+        char        *nargv [DI_MAX_ARGV];
+
+        argvptr = strdup (ptr);
+        ooptind = optind;
+        ooptarg = optarg;
+        if (argvptr != (char *) NULL)
+        {
+            tptr = strtok (argvptr, DI_ARGV_SEP);
+            nargc = 1;
+            nargv[0] = argv[0];
+            while (tptr != (char *) NULL)
+            {
+                if (nargc >= DI_MAX_ARGV)
+                {
+                    break;
+                }
+                nargv[nargc++] = tptr;
+                tptr = strtok ((char *) NULL, DI_ARGV_SEP);
+            }
+            processArgs (nargc, nargv, &ignoreList, &includeList, dbsstr);
+            optind = ooptind;     /* reset so command line can be parsed */
+            optarg = ooptarg;
+        }
     }
 
     processArgs (argc, argv, &ignoreList, &includeList, dbsstr);
@@ -472,6 +507,10 @@ main (argc, argv)
     printDiskInfo (diskInfo, diCount);
 
     cleanup (diskInfo, &ignoreList, &includeList);
+    if (argvptr != (char *) NULL)
+    {
+        free ((char *) argvptr);
+    }
     exit (0);
 }
 
@@ -738,11 +777,11 @@ printInfo (diskInfo)
                 if (posix_compat == 1)
                 {
                     printPerc (used, totAvail, DI_POSIX_PERC_FMT);
-                } 
-                else 
-                { 
+                }
+                else
+                {
                     printPerc (used, totAvail, DI_PERC_FMT);
-                } 
+                }
                 break;
             }
 
@@ -753,11 +792,11 @@ printInfo (diskInfo)
                 if (posix_compat == 1)
                 {
                     printPerc (used, totAvail, DI_POSIX_PERC_FMT);
-                } 
-                else 
-                { 
+                }
+                else
+                {
                     printPerc (used, totAvail, DI_PERC_FMT);
-                } 
+                }
                 break;
             }
 
@@ -769,11 +808,11 @@ printInfo (diskInfo)
                 if (posix_compat == 1)
                 {
                     printPerc (used, totAvail, DI_POSIX_PERC_FMT);
-                } 
-                else 
-                { 
+                }
+                else
+                {
                     printPerc (used, totAvail, DI_PERC_FMT);
-                } 
+                }
                 break;
             }
 
@@ -1808,7 +1847,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
 
 
     hasdashk = 0;
-    while ((ch = getopt (argc, argv, 
+    while ((ch = getopt (argc, argv,
         "Aab:B:d:f:F:ghHi:I:klmnPs:tvw:W:x:X:")) != -1)
     {
         switch (ch)
