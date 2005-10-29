@@ -116,7 +116,7 @@ BUGS
 
 CHANGES
 
-    4.3                                     [27 Oct 2005]
+    4.3                                     [29 Oct 2005]
         Change -P option and POSIXLY_CORRECT environment
             variable to display POSIX standard output.
         Add 'a' and '3' format options to display %avail
