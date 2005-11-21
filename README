@@ -1,4 +1,4 @@
-di - disk information utility (version 4.3).
+di - disk information utility (version 4.4).
 
 DESCRIPTION
 
@@ -80,14 +80,14 @@ BUGS
 
 PORTING
 
-    di 4.3 has been tested on the following platforms:
+    di 4.4 has been tested on the following platforms:
         FreeBSD 5.4
         HP-UX B.11.23
         Debian Linux 2.4.27, 2.6.8
         Red Hat Linux 2.4.21, 2.6.9
         SuSe Linux 2.6.5
         NetBSD 2.0
-        Solaris 9
+        Solaris 8, 10
         Tru64 Unix 5.1b
 
     di has been ported to the following systems in the past:
@@ -115,6 +115,10 @@ BUGS
     Build in non-interactive mode for any system.
 
 CHANGES
+
+    4.4                                     [21 Nov 2005]
+        Add zone support for Solaris (-z).
+        Update mkconfig.pl for compatibility w/perl 5.005.
 
     4.3                                     [29 Oct 2005]
         Change -P option and POSIXLY_CORRECT environment
