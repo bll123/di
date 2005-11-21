@@ -8,22 +8,28 @@
 .\"
 .\" bll@gentoo.com
 .\"
-.\" for di version 4.3
+.\" for di version 4.4
 .\"
-.TH di 1 "28 Oct 2005"
+.TH di 1 "20 Nov 2005"
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-AaghHklmnPt] [-b block-size] [-d display-size] [-f format]
+.\" di [-AaghHklmnPtZ] [-b block-size] [-d display-size] [-f format]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
-.\" [-W inode-width] [-x exclude-fstyp-list] [-X level] [file [...]]
+.\" [-W inode-width] [-x exclude-fstyp-list] [-X debug-level]
+.\" [-z zone-name] [file [...]]
 .B di
-[\fB\-Aahlnt\fP] [\fB\-b\fP \fIblock\-size\fP] [\fB\-d\fP \fIdisplay\-size\fP]
+[\fB\-AaghHklmnPtZ\fP]
+[\fB\-b\fP \fIblock\-size\fP]
+[\fB\-d\fP \fIdisplay\-size\fP]
 [\fB\-f\fP \fIformat\fP]
 [\fB\-I\fP \fIinclude\-fstyp\-list\fP]
 [\fB\-s\fP \fIsort\-type\fP]
-[\fB\-w\fP \fIblock\-width\fP] [\fB\-W\fP \fIinode\-width\fP]
-[\fB\-x\fP \fIexclude\-fstyp\-list\fP] [\fB\-X\fP \fIlevel\fP]
+[\fB\-w\fP \fIblock\-width\fP]
+[\fB\-W\fP \fIinode\-width\fP]
+[\fB\-x\fP \fIexclude\-fstyp\-list\fP]
+[\fB\-X\fP \fIdebug-level\fP]
+[\fB\-z\fP \fIzone\-name\fP]
 [\fIfile\fP [...]]
 .PP
 .B mi
@@ -38,18 +44,13 @@ If \fIfile\fP is specified,
 the usage information for the partition on which \fIfile\fP is
 located is printed.
 .PP
-Unless the \-a flag is specified, certain mounted filesystems
-will not normally be displayed.
-.IP
-Filesystems that have a total
-block count of 0 will not be displayed.
-.IP
-Filesystems that have a mount option of 'ignore' set will not
-be displayed.
-.IP
-Filesystems that are automounted, and are duplicates of an
-existing filesystem are not displayed.  (May not work on
-all systems).
+Unless the \-a flag is specified, the following mounted
+filesystems will not
+normally be displayed: filesystems
+with total blocks <= 0; filesystems marked by the operating
+system as "ignore"; automounted filesystems that are duplicates
+of other normally mounted filesystems; loopback filesystems
+that are part of a zone (Solaris).
 .PP
 .I mi
 Displays the mounted filesystem information.
@@ -160,6 +161,13 @@ The list is a comma separated list of file system types.  e.g.
 .TP
 .B \-X\ \fIlevel\fP
 Set the program's debugging level to \fIdebug-level\fP.
+.TP
+.B \-z\ \fIzone-name\fP
+Display the filesystems for the specified zone.
+The zone must be visible to the user.
+.TP
+.B \-Z\ An alias for \-z all
+Display the filesystems for all visible zones.
 .SH Format strings
 The output of \fIdi\fP may be specified via a format string.  This
 string may be given either via the \fB-f\fP command line switch or by
