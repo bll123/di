@@ -128,6 +128,9 @@ Copyright 1994-2004 Brad Lanam, Walnut Creek, CA
 #if _hdr_locale
 # include <locale.h>
 #endif
+#if _hdr_zone
+# include <zone.h>
+#endif
 
 extern int di_lib_debug;
 
@@ -260,6 +263,27 @@ typedef struct
     char            *disp;
 } dispTable_t;
 
+#if ! _lib_zone_list
+# define zoneid_t       int
+# define ZONENAME_MAX   65
+#endif
+
+typedef struct {
+    zoneid_t    zoneid;
+    char        name[ZONENAME_MAX];
+    char        rootpath[MAXPATHLEN];
+    size_t      rootpathlen;
+} zoneSummary_t;
+
+typedef struct {
+    Uid_t           uid;
+    zoneid_t        myzoneid;
+    zoneSummary_t   *zones;
+    Uint_t          zoneCount;
+    char            zoneDisplay [MAXPATHLEN];
+    int             globalIdx;
+} zoneInfo_t;
+
 static int          debug = { 0 };
 static __ulong      flags = { 0 };
 static int          sortType = { DI_SORT_NAME };
@@ -311,7 +335,7 @@ static dispTable_t dispTable [] =
 };
 #define DI_DISPTAB_SIZE (sizeof (dispTable) / sizeof (dispTable_t))
 
-static void cleanup             _((di_DiskInfo *, iList *, iList *));
+static void cleanup             _((di_DiskInfo *, iList *, iList *, char *, zoneInfo_t *));
 static void printDiskInfo       _((di_DiskInfo *, int));
 static void printInfo           _((di_DiskInfo *));
 static void printBlocks          _((_fs_size_t, _fs_size_t, int));
@@ -322,14 +346,15 @@ static void sortArray           _((char *, Size_t, int, DI_SORT_FUNC));
 static int  diCompare           _((void *, void *));
 static void getDiskStatInfo     _((di_DiskInfo *, int));
 static void getDiskSpecialInfo  _((di_DiskInfo *, int));
-static void checkFileInfo       _((di_DiskInfo *, int, int, int, char *[]));
-static void preCheckDiskInfo    _((di_DiskInfo *, iList *, iList *, int));
+static int  checkFileInfo       _((di_DiskInfo *, int, int, int, char *[]));
+static void preCheckDiskInfo    _((di_DiskInfo *, iList *, iList *, int, zoneInfo_t *));
 static void checkDiskInfo       _((di_DiskInfo *, iList *, int));
 static void usage               _((void));
-static void processArgs         _((int, char *[], iList *, iList *, char *));
+static void processArgs         _((int, char *[], iList *, iList *, char *, char *));
 static void parseList           _((iList *, char *));
 static void checkIgnoreList     _((di_DiskInfo *, iList *));
 static void checkIncludeList    _((di_DiskInfo *, iList *));
+static void checkZone           _((di_DiskInfo *, zoneInfo_t *, int));
 static void setDispBlockSize    _((char *));
 static int  findDispSize        _((double));
 #if ! _mth_fmod && ! _lib_fmod
@@ -353,6 +378,7 @@ main (argc, argv)
     char                *ptr;
     char                *argvptr;
     char                dbsstr [30];
+    zoneInfo_t          zoneInfo;
 
     *dbsstr = '\0';
     ignoreList.count = 0;
@@ -367,7 +393,6 @@ main (argc, argv)
     ptr = bindtextdomain (PROG, DI_LOCALE_DIR);
     ptr = textdomain (PROG);
 #endif
-
     baseDispSize = DI_VAL_1024;
 
     ptr = argv [0] + strlen (argv [0]) - 2;
@@ -403,6 +428,7 @@ main (argc, argv)
         strncpy (dbsstr, ptr, sizeof (dbsstr));
     }
 
+    zoneInfo.zoneDisplay [0] = '\0';
     argvptr = (char *) NULL;
     if ((ptr = getenv ("DI_ARGS")) != (char *) NULL)
     {
@@ -429,13 +455,89 @@ main (argc, argv)
                 nargv[nargc++] = tptr;
                 tptr = strtok ((char *) NULL, DI_ARGV_SEP);
             }
-            processArgs (nargc, nargv, &ignoreList, &includeList, dbsstr);
+            processArgs (nargc, nargv, &ignoreList, &includeList, dbsstr,
+                         zoneInfo.zoneDisplay);
             optind = ooptind;     /* reset so command line can be parsed */
             optarg = ooptarg;
         }
     }
 
-    processArgs (argc, argv, &ignoreList, &includeList, dbsstr);
+    processArgs (argc, argv, &ignoreList, &includeList, dbsstr,
+            zoneInfo.zoneDisplay);
+
+    zoneInfo.uid = geteuid ();
+
+#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
+    {
+        zoneid_t        *zids = (zoneid_t *) NULL;
+
+        zoneInfo.myzoneid = getzoneid ();
+        zoneInfo.zoneCount = 0;
+        zoneInfo.zones = (zoneSummary_t *) NULL;
+
+        if (zone_list (zids, &zoneInfo.zoneCount) == 0)
+        {
+            if (zoneInfo.zoneCount > 0)
+            {
+                zids = malloc (sizeof (zoneid_t) * zoneInfo.zoneCount);
+                if (zids == (zoneid_t *) NULL)
+                {
+                    fprintf (stderr, "malloc failed in main() (1).  errno %d\n", errno);
+                    exit (1);
+                }
+                zone_list (zids, &zoneInfo.zoneCount);
+                zoneInfo.zones = malloc (sizeof (zoneSummary_t) * zoneInfo.zoneCount);
+                if (zoneInfo.zones == (zoneSummary_t *) NULL)
+                {
+                    fprintf (stderr, "malloc failed in main() (2).  errno %d\n", errno);
+                    exit (1);
+                }
+            }
+        }
+
+        for (i = 0; i < zoneInfo.zoneCount; ++i)
+        {
+            int     len;
+
+            zoneInfo.zones[i].zoneid = zids[i];
+            len = zone_getattr (zids[i], ZONE_ATTR_ROOT,
+                    zoneInfo.zones[i].rootpath, MAXPATHLEN);
+            if (len >= 0)
+            {
+                zoneInfo.zones[i].rootpathlen = len;
+                strncat (zoneInfo.zones[i].rootpath, "/", MAXPATHLEN - 1);
+                if (zoneInfo.zones[i].zoneid == 0)
+                {
+                    zoneInfo.globalIdx = i;
+                }
+
+                len = zone_getattr (zids[i], ZONE_ATTR_NAME,
+                        zoneInfo.zones[i].name, ZONENAME_MAX);
+                if (*zoneInfo.zoneDisplay == '\0' &&
+                    zoneInfo.myzoneid == zoneInfo.zones[i].zoneid)
+                {
+                    strncpy (zoneInfo.zoneDisplay, zoneInfo.zones[i].name,
+                             ZONENAME_MAX);
+                }
+                if (debug > 4)
+                {
+                    printf ("zone:%d:%s:%s:\n",
+                            (int) zoneInfo.zones[i].zoneid,
+                            zoneInfo.zones[i].name,
+                            zoneInfo.zones[i].rootpath);
+                }
+            }
+        }
+
+        free ((void *) zids);
+    }
+
+    if (debug > 4)
+    {
+        printf ("zone:my:%d:%s:glob:%d:\n", (int) zoneInfo.myzoneid,
+                zoneInfo.zoneDisplay, zoneInfo.globalIdx);
+    }
+#endif
 
         /* initialize dispTable array */
     dispTable [0].size = baseDispSize;
@@ -491,26 +593,29 @@ main (argc, argv)
 
     if (di_getDiskEntries (&diskInfo, &diCount) < 0)
     {
-        cleanup (diskInfo, &ignoreList, &includeList);
+        cleanup (diskInfo, &ignoreList, &includeList, argvptr, &zoneInfo);
         exit (1);
     }
 
-    preCheckDiskInfo (diskInfo, &ignoreList, &includeList, diCount);
+    preCheckDiskInfo (diskInfo, &ignoreList, &includeList, diCount, &zoneInfo);
     if (optind < argc)
     {
+        int     rc;
+
         getDiskStatInfo (diskInfo, diCount);
-        checkFileInfo (diskInfo, diCount, optind, argc, argv);
+        rc = checkFileInfo (diskInfo, diCount, optind, argc, argv);
+        if (rc < 0)
+        {
+            cleanup (diskInfo, &ignoreList, &includeList, argvptr, &zoneInfo);
+            exit (1);
+        }
     }
     di_getDiskInfo (&diskInfo, &diCount);
     getDiskSpecialInfo (diskInfo, diCount);
     checkDiskInfo (diskInfo, &includeList, diCount);
     printDiskInfo (diskInfo, diCount);
 
-    cleanup (diskInfo, &ignoreList, &includeList);
-    if (argvptr != (char *) NULL)
-    {
-        free ((char *) argvptr);
-    }
+    cleanup (diskInfo, &ignoreList, &includeList, argvptr, &zoneInfo);
     exit (0);
 }
 
@@ -523,12 +628,15 @@ main (argc, argv)
 
 static void
 #if _proto_stdc
-cleanup (di_DiskInfo *diskInfo, iList *ignoreList, iList *includeList)
+cleanup (di_DiskInfo *diskInfo, iList *ignoreList, iList *includeList,
+            char *argvptr, zoneInfo_t *zoneInfo)
 #else
-cleanup (diskInfo, ignoreList, includeList)
+cleanup (diskInfo, ignoreList, includeList, argvptr, zoneInfo)
     di_DiskInfo     *diskInfo;
     iList           *ignoreList;
     iList           *includeList;
+    char            *argvptr;
+    zoneInfo_t      *zoneInfo;
 #endif
 {
     if (diskInfo != (di_DiskInfo *) NULL)
@@ -546,6 +654,15 @@ cleanup (diskInfo, ignoreList, includeList)
         includeList->list != (char **) NULL)
     {
         free ((char *) includeList->list);
+    }
+
+    if (argvptr != (char *) NULL)
+    {
+        free ((char *) argvptr);
+    }
+    if (zoneInfo->zones != (zoneSummary_t *) NULL)
+    {
+        free ((void *) zoneInfo->zones);
     }
 }
 
@@ -587,20 +704,36 @@ printDiskInfo (diskInfo, diCount)
 
     for (i = 0; i < diCount; ++i)
     {
-        if (( (flags & DI_F_ALL) == DI_F_ALL &&
-                diskInfo [i].printFlag != DI_PRNT_BAD) ||
-                diskInfo [i].printFlag == DI_PRNT_OK)
+        if (debug > 5)
         {
-            printInfo (&diskInfo [i]);
+            int pf;
+            pf = diskInfo[i].printFlag;
+            printf ("pdi:%s:%s:\n", diskInfo[i].name,
+                pf == DI_PRNT_OK ? "ok" :
+                pf == DI_PRNT_BAD ? "bad" :
+                pf == DI_PRNT_IGNORE ? "ignore" :
+                pf == DI_PRNT_OUTOFZONE ? "outofzone" : "unknown");
+        }
+        if (diskInfo [i].printFlag == DI_PRNT_BAD ||
+            diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+        {
+            continue;
         }
 
+        if (diskInfo [i].printFlag == DI_PRNT_IGNORE &&
+            (flags & DI_F_ALL) != DI_F_ALL)
+        {
+            continue;
+        }
+
+        printInfo (&diskInfo [i]);
+
         if ((flags & DI_F_TOTAL) == DI_F_TOTAL &&
-                (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
+            (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
         {
                 /* only total the disks that make sense! */
                 /* don't add memory filesystems to totals. */
-            if (diskInfo [i].printFlag == DI_PRNT_OK &&
-                strcmp (diskInfo [i].fsType, "tmpfs") != 0 &&
+            if (strcmp (diskInfo [i].fsType, "tmpfs") != 0 &&
                 strcmp (diskInfo [i].fsType, "mfs") != 0 &&
                 diskInfo [i].isReadOnly == FALSE)
             {
@@ -1239,7 +1372,7 @@ printPerc (used, totAvail, format)
 }
 
 
-static void
+static int
 #if _proto_stdc
 checkFileInfo (di_DiskInfo *diskInfo, int diCount,
         int optidx, int argc, char *argv [])
@@ -1252,14 +1385,20 @@ checkFileInfo (diskInfo, diCount, optidx, argc, argv)
     char                *argv [];
 #endif
 {
+    int                 rc;
     int                 i;
     int                 j;
     struct stat         statBuf;
 
 
+    rc = 0;
+        /* turn everything off */
     for (j = 0; j < diCount; ++j)
     {
-        diskInfo [j].printFlag = DI_PRNT_IGNORE;
+        if (diskInfo [j].printFlag == DI_PRNT_OK)
+        {
+            diskInfo [j].printFlag = DI_PRNT_IGNORE;
+        }
     }
 
     for (i = optidx; i < argc; ++i)
@@ -1268,9 +1407,9 @@ checkFileInfo (diskInfo, diCount, optidx, argc, argv)
         {
             for (j = 0; j < diCount; ++j)
             {
-                if (diskInfo [j].printFlag != DI_PRNT_BAD &&
-                        diskInfo [j].st_dev != DI_UNKNOWN_DEV &&
-                        (__ulong) statBuf.st_dev == diskInfo [j].st_dev)
+                if (diskInfo [j].printFlag == DI_PRNT_IGNORE &&
+                    diskInfo [j].st_dev != DI_UNKNOWN_DEV &&
+                    (__ulong) statBuf.st_dev == diskInfo [j].st_dev)
                 {
                     diskInfo [j].printFlag = DI_PRNT_OK;
                     break; /* out of inner for */
@@ -1281,8 +1420,11 @@ checkFileInfo (diskInfo, diCount, optidx, argc, argv)
         {
             fprintf (stderr, "stat: %s ", argv[i]);
             perror ("");
+            rc = -1;
         }
     } /* for each file specified on command line */
+
+    return rc;
 }
 
 /*
@@ -1427,6 +1569,13 @@ getDiskStatInfo (diskInfo, diCount)
 
     for (i = 0; i < diCount; ++i)
     {
+            /* don't try to stat devices that are not accessible */
+        if (diskInfo [i].printFlag == DI_PRNT_BAD ||
+            diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+        {
+            continue;
+        }
+
         diskInfo [i].st_dev = (__ulong) DI_UNKNOWN_DEV;
 
         if (stat (diskInfo [i].name, &statBuf) == 0)
@@ -1527,7 +1676,8 @@ checkDiskInfo (diskInfo, includeList, diCount)
 
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].printFlag == DI_PRNT_IGNORE)
+        if (diskInfo [i].printFlag == DI_PRNT_BAD ||
+            diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
         {
             if (debug > 2)
             {
@@ -1566,7 +1716,9 @@ checkDiskInfo (diskInfo, includeList, diCount)
             diskInfo [i].availInodes = 0;
         }
 
-        if ((flags & DI_F_ALL) != DI_F_ALL)
+            /* if all flag is set, display filesystems w/0 blocks */
+        if (diskInfo [i].printFlag == DI_PRNT_OK &&
+            (flags & DI_F_ALL) != DI_F_ALL)
         {
             if (debug > 2)
             {
@@ -1578,8 +1730,7 @@ checkDiskInfo (diskInfo, includeList, diCount)
                         diskInfo [i].totalBlocks);
 #endif
             }
-            if (diskInfo [i].totalBlocks <= 0L &&
-                diskInfo [i].printFlag != DI_PRNT_BAD)
+            if (diskInfo [i].totalBlocks <= 0L)
             {
                 diskInfo [i].printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
@@ -1597,12 +1748,22 @@ checkDiskInfo (diskInfo, includeList, diCount)
         /* this loop sets duplicate entries to be ignored. */
     for (i = 0; i < diCount; ++i)
     {
+        if (diskInfo [i].printFlag == DI_PRNT_IGNORE ||
+            diskInfo [i].printFlag == DI_PRNT_BAD ||
+            diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+        {
+            if (debug > 2)
+            {
+                printf ("chk: skipping(2):%s\n", diskInfo [i].name);
+            }
+            continue;
+        }
+
             /* don't need to bother checking real partitions */
             /* don't bother if already ignored               */
         if (diskInfo [i].sp_rdev != 0 &&
-            (diskInfo [i].printFlag == DI_PRNT_OK ||
-            ((flags & DI_F_ALL) == DI_F_ALL &&
-            diskInfo [i].printFlag != DI_PRNT_BAD)))
+            diskInfo [i].printFlag == DI_PRNT_OK &&
+            (flags & DI_F_ALL) != DI_F_ALL)
         {
             sp_dev = diskInfo [i].sp_dev;
             sp_rdev = diskInfo [i].sp_rdev;
@@ -1624,8 +1785,10 @@ checkDiskInfo (diskInfo, includeList, diCount)
 
             for (j = 0; dupCount > 0 && j < diCount; ++j)
             {
+                    /* don't reset flags! */
                 if (diskInfo [j].sp_rdev == 0 &&
-                    diskInfo [j].sp_dev == sp_rdev)
+                    diskInfo [j].sp_dev == sp_rdev &&
+                    diskInfo [j].printFlag == DI_PRNT_OK)
                 {
                     diskInfo [j].printFlag = DI_PRNT_IGNORE;
                     if (debug > 2)
@@ -1661,7 +1824,8 @@ checkDiskInfo (diskInfo, includeList, diCount)
         /* this loop gets the max string lengths */
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].printFlag == DI_PRNT_OK || (flags & DI_F_ALL) == DI_F_ALL)
+        if (diskInfo [i].printFlag == DI_PRNT_OK ||
+            (flags & DI_F_ALL) == DI_F_ALL)
         {
             len = strlen (diskInfo [i].name);
             if (len > maxMountString)
@@ -1747,26 +1911,36 @@ checkDiskInfo (diskInfo, includeList, diCount)
  *
  * checks for ignore/include list; check for remote filesystems
  * and local only flag set.
+ * checks for zones (Solaris)
  *
  */
 
 static void
 #if _proto_stdc
 preCheckDiskInfo (di_DiskInfo *diskInfo, iList *ignoreList,
-        iList *includeList, int diCount)
+        iList *includeList, int diCount, zoneInfo_t *zoneInfo)
 #else
-preCheckDiskInfo (diskInfo, ignoreList, includeList, diCount)
+preCheckDiskInfo (diskInfo, ignoreList, includeList, diCount, zoneInfo)
     di_DiskInfo         *diskInfo;
     iList               *ignoreList;
     iList               *includeList;
     int                 diCount;
+    zoneInfo_t          *zoneInfo;
 #endif
 {
     int           i;
 
     for (i = 0; i < diCount; ++i)
     {
-        if ((flags & DI_F_ALL) != DI_F_ALL)
+        if (debug > 4)
+        {
+            printf ("## prechk:%s:\n", diskInfo[i].name);
+        }
+        checkZone (&diskInfo [i], zoneInfo,
+            ((flags & DI_F_ALL) == DI_F_ALL));
+
+        if (diskInfo [i].printFlag == DI_PRNT_OK &&
+            (flags & DI_F_ALL) != DI_F_ALL)
         {
             di_testRemoteDisk (&diskInfo [i]);
 
@@ -1832,14 +2006,16 @@ static void
 processArgs (int argc, char *argv [],
              iList *ignoreList,
              iList *includeList,
-             char *dbsstr)
+             char *dbsstr,
+             char *zoneDisplay)
 #else
-processArgs (argc, argv, ignoreList, includeList, dbsstr)
+processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
     int         argc;
     char        *argv [];
     iList       *ignoreList;
     iList       *includeList;
     char        *dbsstr;
+    char        *zoneDisplay;
 #endif
 {
     int         ch;
@@ -1848,7 +2024,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
 
     hasdashk = 0;
     while ((ch = getopt (argc, argv,
-        "Aab:B:d:f:F:ghHi:I:klmnPs:tvw:W:x:X:")) != -1)
+        "Aab:B:d:f:F:ghHi:I:klmnPs:tvw:W:x:X:z:Z")) != -1)
     {
         switch (ch)
         {
@@ -1861,6 +2037,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
             case 'a':
             {
                 flags |= DI_F_ALL;
+                strcpy (zoneDisplay, "all");
                 break;
             }
 
@@ -2003,6 +2180,11 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
                 break;
             }
 
+            case 'v':
+            {
+                break;
+            }
+
             case 'w':
             {
                 width = atoi (optarg);
@@ -2026,8 +2208,15 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr)
                 break;
             }
 
-            case 'v':
+            case 'z':
             {
+                strcpy (zoneDisplay, optarg);
+                break;
+            }
+
+            case 'Z':
+            {
+                strcpy (zoneDisplay, "all");
                 break;
             }
 
@@ -2063,7 +2252,6 @@ parseList (list, str)
     if (dstr == (char *) NULL)
     {
         fprintf (stderr, "malloc failed in parseList() (1).  errno %d\n", errno);
-        cleanup ((di_DiskInfo *) NULL, (iList *) NULL, (iList *) NULL);
         exit (1);
     }
     memcpy (dstr, str, (Size_t) i);
@@ -2085,7 +2273,6 @@ parseList (list, str)
     if (list->list == (char **) NULL)
     {
         fprintf (stderr, "malloc failed in parseList() (2).  errno %d\n", errno);
-        cleanup ((di_DiskInfo *) NULL, (iList *) NULL, (iList *) NULL);
         exit (1);
     }
 
@@ -2098,7 +2285,6 @@ parseList (list, str)
         {
             fprintf (stderr, "malloc failed in parseList() (3).  errno %d\n",
                     errno);
-            cleanup ((di_DiskInfo *) NULL, list, (iList *) NULL);
             exit (1);
         }
         strncpy (lptr, ptr, (Size_t) len);
@@ -2175,6 +2361,11 @@ checkIncludeList (diskInfo, includeList)
             if (strcmp (ptr, diskInfo->fsType) == 0)
             {
                 diskInfo->printFlag = DI_PRNT_OK;
+                if (debug > 2)
+                {
+                    printf ("chkinc:include:fstype %s match: %s\n", ptr,
+                            diskInfo->name);
+                }
                 break;
             }
             else
@@ -2182,13 +2373,124 @@ checkIncludeList (diskInfo, includeList)
                 diskInfo->printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
                 {
-                    printf ("chkinc: ! include: fstype %s match: %s\n", ptr,
+                    printf ("chkinc:!include:fstype %s no match: %s\n", ptr,
                             diskInfo->name);
                 }
             }
         }
     } /* if an include list was specified */
 }
+
+static void
+# if _proto_stdc
+checkZone (di_DiskInfo *diskInfo, zoneInfo_t *zoneInfo, int allFlag)
+# else
+checkZone (diskInfo, zoneInfo, allFlag)
+    di_DiskInfo *diskInfo;
+    zoneInfo_t  *zoneInfo;
+    int         allFlag;
+# endif
+{
+    int         i;
+    int         idx = { -1 };
+
+#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
+    if (strcmp (zoneInfo->zoneDisplay, "all") == 0 &&
+        zoneInfo->uid == 0)
+    {
+        return;
+    }
+
+    for (i = 0; i < zoneInfo->zoneCount; ++i)
+    {
+        /* find the zone the filesystem is in, if non-global */
+        if (di_lib_debug > 5)
+        {
+            printf (" lib:checkZone:%s:compare:%d:%s:\n",
+                    diskInfo->name,
+                    zoneInfo->zones[i].rootpathlen,
+                    zoneInfo->zones[i].rootpath);
+        }
+        if (strncmp (zoneInfo->zones[i].rootpath,
+             diskInfo->name, zoneInfo->zones[i].rootpathlen) == 0)
+        {
+            if (di_lib_debug > 4)
+            {
+                printf (" lib:checkZone:%s:found zone:%s:\n",
+                        diskInfo->name, zoneInfo->zones[i].name);
+            }
+            idx = i;
+            break;
+        }
+        if (idx == -1)
+        {
+            idx = zoneInfo->globalIdx;
+        }
+    }
+
+        /* no root access, ignore any zones     */
+        /* that don't match our zone id         */
+        /* this will override any ignore flags  */
+        /* already set                          */
+    if (zoneInfo->uid != 0)
+    {
+        if (di_lib_debug > 5)
+        {
+            printf (" lib:checkZone:uid non-zero:chk zone:%d:%d:\n",
+                    (int) zoneInfo->myzoneid,
+                    (int) zoneInfo->zones[idx].zoneid);
+        }
+        if (zoneInfo->myzoneid != zoneInfo->zones[idx].zoneid)
+        {
+            if (di_lib_debug > 4)
+            {
+                printf (" lib:checkZone:not root, not zone:%d:%d:outofzone:\n",
+                        (int) zoneInfo->myzoneid,
+                        (int) zoneInfo->zones[idx].zoneid);
+            }
+            diskInfo->printFlag = DI_PRNT_OUTOFZONE;
+        }
+    }
+
+    if (di_lib_debug > 5)
+    {
+        printf (" lib:checkZone:chk name:%s:%s:\n",
+                zoneInfo->zoneDisplay, zoneInfo->zones[idx].name);
+    }
+        /* not the zone we want. ignore */
+    if (! allFlag &&
+        diskInfo->printFlag == DI_PRNT_OK &&
+        strcmp (zoneInfo->zoneDisplay, "all") != 0 &&
+        strcmp (zoneInfo->zoneDisplay,
+                zoneInfo->zones[idx].name) != 0)
+    {
+        if (di_lib_debug > 4)
+        {
+            printf (" lib:checkZone:wrong zone:ignore:\n");
+        }
+
+        diskInfo->printFlag = DI_PRNT_IGNORE;
+    }
+
+        /* if displaying a non-global zone,   */
+        /* don't display loopback filesystems */
+    if (! allFlag &&
+        diskInfo->printFlag == DI_PRNT_OK &&
+        strcmp (zoneInfo->zoneDisplay, "global") != 0 &&
+        strcmp (diskInfo->fsType, "lofs") == 0)
+    {
+        if (di_lib_debug > 4)
+        {
+            printf (" lib:checkZone:non-global/lofs:ignore:\n");
+        }
+
+        diskInfo->printFlag = DI_PRNT_IGNORE;
+    }
+#endif
+
+    return;
+}
+
 
 static void
 #if _proto_stdc
