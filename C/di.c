@@ -428,7 +428,11 @@ main (argc, argv)
         strncpy (dbsstr, ptr, sizeof (dbsstr));
     }
 
+    zoneInfo.uid = geteuid ();
     zoneInfo.zoneDisplay [0] = '\0';
+    zoneInfo.zoneCount = 0;
+    zoneInfo.zones = (zoneSummary_t *) NULL;
+
     argvptr = (char *) NULL;
     if ((ptr = getenv ("DI_ARGS")) != (char *) NULL)
     {
@@ -465,15 +469,11 @@ main (argc, argv)
     processArgs (argc, argv, &ignoreList, &includeList, dbsstr,
             zoneInfo.zoneDisplay);
 
-    zoneInfo.uid = geteuid ();
-
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
     {
         zoneid_t        *zids = (zoneid_t *) NULL;
 
         zoneInfo.myzoneid = getzoneid ();
-        zoneInfo.zoneCount = 0;
-        zoneInfo.zones = (zoneSummary_t *) NULL;
 
         if (zone_list (zids, &zoneInfo.zoneCount) == 0)
         {
@@ -660,6 +660,7 @@ cleanup (diskInfo, ignoreList, includeList, argvptr, zoneInfo)
     {
         free ((char *) argvptr);
     }
+
     if (zoneInfo->zones != (zoneSummary_t *) NULL)
     {
         free ((void *) zoneInfo->zones);
@@ -2200,7 +2201,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
             case 'X':
             {
                 debug = atoi (optarg);
-                di_lib_debug = atoi (optarg);
+                di_lib_debug = debug;
                 flags |= DI_F_ALL | DI_F_DEBUG_HDR | DI_F_TOTAL;
                 flags &= ~ DI_F_NO_HEADER;
                 width = 10;
@@ -2404,9 +2405,9 @@ checkZone (diskInfo, zoneInfo, allFlag)
     for (i = 0; i < zoneInfo->zoneCount; ++i)
     {
         /* find the zone the filesystem is in, if non-global */
-        if (di_lib_debug > 5)
+        if (debug > 5)
         {
-            printf (" lib:checkZone:%s:compare:%d:%s:\n",
+            printf (" checkZone:%s:compare:%d:%s:\n",
                     diskInfo->name,
                     zoneInfo->zones[i].rootpathlen,
                     zoneInfo->zones[i].rootpath);
@@ -2414,9 +2415,9 @@ checkZone (diskInfo, zoneInfo, allFlag)
         if (strncmp (zoneInfo->zones[i].rootpath,
              diskInfo->name, zoneInfo->zones[i].rootpathlen) == 0)
         {
-            if (di_lib_debug > 4)
+            if (debug > 4)
             {
-                printf (" lib:checkZone:%s:found zone:%s:\n",
+                printf (" checkZone:%s:found zone:%s:\n",
                         diskInfo->name, zoneInfo->zones[i].name);
             }
             idx = i;
@@ -2434,17 +2435,17 @@ checkZone (diskInfo, zoneInfo, allFlag)
         /* already set                          */
     if (zoneInfo->uid != 0)
     {
-        if (di_lib_debug > 5)
+        if (debug > 5)
         {
-            printf (" lib:checkZone:uid non-zero:chk zone:%d:%d:\n",
+            printf (" checkZone:uid non-zero:chk zone:%d:%d:\n",
                     (int) zoneInfo->myzoneid,
                     (int) zoneInfo->zones[idx].zoneid);
         }
         if (zoneInfo->myzoneid != zoneInfo->zones[idx].zoneid)
         {
-            if (di_lib_debug > 4)
+            if (debug > 4)
             {
-                printf (" lib:checkZone:not root, not zone:%d:%d:outofzone:\n",
+                printf (" checkZone:not root, not zone:%d:%d:outofzone:\n",
                         (int) zoneInfo->myzoneid,
                         (int) zoneInfo->zones[idx].zoneid);
             }
@@ -2452,9 +2453,9 @@ checkZone (diskInfo, zoneInfo, allFlag)
         }
     }
 
-    if (di_lib_debug > 5)
+    if (debug > 5)
     {
-        printf (" lib:checkZone:chk name:%s:%s:\n",
+        printf (" checkZone:chk name:%s:%s:\n",
                 zoneInfo->zoneDisplay, zoneInfo->zones[idx].name);
     }
         /* not the zone we want. ignore */
@@ -2464,9 +2465,9 @@ checkZone (diskInfo, zoneInfo, allFlag)
         strcmp (zoneInfo->zoneDisplay,
                 zoneInfo->zones[idx].name) != 0)
     {
-        if (di_lib_debug > 4)
+        if (debug > 4)
         {
-            printf (" lib:checkZone:wrong zone:ignore:\n");
+            printf (" checkZone:wrong zone:ignore:\n");
         }
 
         diskInfo->printFlag = DI_PRNT_IGNORE;
@@ -2479,9 +2480,9 @@ checkZone (diskInfo, zoneInfo, allFlag)
         strcmp (zoneInfo->zoneDisplay, "global") != 0 &&
         strcmp (diskInfo->fsType, "lofs") == 0)
     {
-        if (di_lib_debug > 4)
+        if (debug > 4)
         {
-            printf (" lib:checkZone:non-global/lofs:ignore:\n");
+            printf (" checkZone:non-global/lofs:ignore:\n");
         }
 
         diskInfo->printFlag = DI_PRNT_IGNORE;
