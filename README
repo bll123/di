@@ -1,4 +1,4 @@
-di - disk information utility (version 4.4).
+di - disk information utility (version 4.5).
 
 DESCRIPTION
 
@@ -80,7 +80,7 @@ BUGS
 
 PORTING
 
-    di 4.4 has been tested on the following platforms:
+    di 4.5 has been tested on the following platforms:
         FreeBSD 5.4
         HP-UX B.11.23
         Debian Linux 2.4.27, 2.6.8
@@ -115,6 +115,10 @@ BUGS
     Build in non-interactive mode for any system.
 
 CHANGES
+
+    4.5                                     [29 Mar 2006]
+        Fix uninitialized variable.
+        Fix manual page formatting.
 
     4.4                                     [21 Nov 2005]
         Add zone support for Solaris (-z).
@@ -425,6 +429,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2005 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2006 Brad Lanam, Walnut Creek, CA, USA
     bll@gentoo.com
     http://www.gentoo.com/di/
