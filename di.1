@@ -37,12 +37,10 @@ di \- disk information
 .NXA "di command" "dumpfs command"
 .NXA "di command" "df command"
 .NXR "disk" "displaying free space"
-.I di
-Displays usage information on mounted filesystems.  Block values are
+\fIdi\fP Displays usage information on mounted filesystems.  Block values are
 reported in megabytes (1024k bytes) by default, but may be changed.
-If \fIfile\fP is specified,
-the usage information for the partition on which \fIfile\fP is
-located is printed.
+If \fIfile\fP is specified, the usage information for the partition on which
+\fIfile\fP is located is printed.
 .PP
 Unless the \-a flag is specified, the following mounted
 filesystems will not
@@ -52,14 +50,11 @@ system as "ignore"; automounted filesystems that are duplicates
 of other normally mounted filesystems; loopback filesystems
 that are part of a zone (Solaris).
 .PP
-.I mi
-Displays the mounted filesystem information.
+\fImi\fP Displays the mounted filesystem information.
 .PP
 Several switches may be specified to
 control the output of
-.I di
-and
-.I mi\fP:
+\fIdi\fP and \fImi\fP:
 .TP
 .B \-A
 Print all fields (used for debugging).  Mount points and special
@@ -69,60 +64,77 @@ device names are printed at full width.  The \-a flag is set.
 Prints all mounted devices (normally, those with 0 total blocks are not
 printed \- e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .TP
-.B \-b\ \fIblock-size\fP (compatibility: \-B)
+.B \-b
+.I block\-size
+(compatibility: \-B)
+.br
 Change the base block size from 1024 (default) to the size specified.
-\fIblock-size\fP may be one of: k\ \-\ 1024 bytes, d\ \-\ 1000 bytes,
+\fIblock\-size\fP may be one of: k\ \-\ 1024 bytes, d\ \-\ 1000 bytes,
 or a specific size.
 .TP
-.B \-d\ \fIdisplay-size\fP
-Display the blocks in units specified by \fIdisplay-size\fP.
-\fIdisplay-size\fP
+.B \-d
+.I display\-size
+Display the blocks in units specified by \fIdisplay\-size\fP.
+\fIdisplay\-size\fP
 may be one of: 512\ \-\ POSIX, k\ \-\ kilobytes,
 m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, P\ \-\ petabytes,
 E\ \-\ exabytes, Z\ \-\ zettabytes, Y\ \-\ yottabytes,
 h\ \-\ Scaled alternative 1, H\ \-\ Scaled alternative 2,
 or a specific value to use as the block size.
-.PP
+.IP
 Block display sizes greater than 1024 bytes are displayed with a precision
 of one decimal place after the radix.
-.PP
+.IP
 The Scaled alternatives scale the sizes displayed and
 appends a suffix (e.g. 48.0k, 3.4M).
-.PP
+.IP
 With scaled alternative 1, sizes within a
 line may scale to different units.
-.PP
+.IP
 Scaled alternative 2 scales all the sizes in each individual line
 to the same unit size (the largest needed).
 .TP
-.B \-f\ \fIformat\fP
+.B \-f
+.I format
 Use the specified format string \fIformat\fP.  Format strings are
 described below.
 .TP
 .B \-g
-Display sizes in gigabytes.  An alias for \-dg.
+(alias for: \-dg)
+.br
+Display sizes in gigabytes.
 .TP
 .B \-h
+(alias for: \-dh)
+.br
 Display partition sizes in scaled alternative 1 format.
-An alias for \-dh.
 .TP
 .B \-H
+(alias for: \-dH)
+.br
 Display partition sizes in scaled alternative 2 format.
-An alias for \-dH.
 .TP
-.B \-I \fIinclude-fstype-list\fP (compatibility: \-F)
-Include \fIonly\fP the file system types listed in \fIinclude-fstyp-list\fP.
-The list is a comma separated list of file system types.  e.g.
-\-I nfs,rfs.  Multiple -I options
+.B \-I
+.I include\-fstype\-list
+(compatibility: \-F)
+.br
+Include \fIonly\fP the file system types listed in \fIinclude\-fstyp\-list\fP.
+The list is a comma separated list of file system types.
+Multiple \-I options may be specified.
+e.g. \-I nfs,rfs or \-I nfs \-I rfs.
 .TP
 .B \-k
-Display sizes in Kbytes.  An alias for \-dk.
+(alias for: \-dk)
+.br
+Display sizes in Kbytes.
 .TP
 .B \-l
 Display only local file systems.
 .TP
 .B \-m
-Display sizes in megabytes.  An alias for \-dm.
+(alias for: \-dm)
+.br
+Display sizes in megabytes.
 .TP
 .B \-n
 Do not print a header line above the list of file systems.  Useful when
@@ -132,8 +144,10 @@ parsing the output of \fIdi\fP.
 Output format is POSIX standard.
 512 byte block size is the default.  The \-k option may be used.
 .TP
-.B \-s\ \fIsort-type\fP
-Use \fIsort-type\fP to sort the output.
+.B \-s
+.I sort\-type
+.br
+Use \fIsort\-type\fP to sort the output.
 The output of \fIdi\fP is normally sorted by name.  The output may
 be left unsorted (\fB-s\ n\fP command line switch) i.e. as it appears
 in the mount table or may be
@@ -148,31 +162,46 @@ Print a totals line below the list of file systems.
 Memory filesystems (tmpfs, mfs) and read-only
 filesystems are not added to the totals.
 .TP
-.B \-w\ \fIblock-width\fP
+.B \-w
+.I block\-width
+.br
 Set the print width for block values.  Default is eight.
 .TP
-.B \-W\ \fIinode-width\fP
+.B \-W
+.I inode\-width
+.br
 Set the print width for inode values.  Default is seven.
 .TP
-.B \-x \fIexclude-fstype-list\fP (old: \-i)
-Exclude the file system types listed in \fIexclude-fstyp-list\fP.
-The list is a comma separated list of file system types.  e.g.
-\-x nfs,rfs
+.B \-x
+.I exclude\-fstype\-list
+(old: \-i)
+.br
+Exclude the file system types listed in \fIexclude\-fstyp\-list\fP.
+The list is a comma separated list of file system types.
+Multiple \-x options may be specified.
+e.g. \-x nfs,rfs or \-x nfs \-x rfs.
 .TP
-.B \-X\ \fIlevel\fP
+.B \-X
+.I level
+.br
 Set the program's debugging level to \fIdebug-level\fP.
 .TP
-.B \-z\ \fIzone-name\fP
+.B \-z
+.I zone-name
+.br
 Display the filesystems for the specified zone.
 The zone must be visible to the user.
 .TP
-.B \-Z\ An alias for \-z all
+.B \-Z
+(alias for: \-z all)
+.br
 Display the filesystems for all visible zones.
 .SH Format strings
 The output of \fIdi\fP may be specified via a format string.  This
 string may be given either via the \fB-f\fP command line switch or by
 the \fBDIFMT\fP environment variable.  The format string may specify the
 following columns:
+.RS .5
 .TP
 .B m
 Print the name of the mount point.
@@ -275,6 +304,7 @@ not supported on all systems.
 .TP
 .B O
 Print the filesystem mount options.
+.RE
 .PP
 The default format string for \fIdi\fP is \fBsmbuvpT\fP.
 .PP
