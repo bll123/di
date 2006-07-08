@@ -74,11 +74,13 @@ all:
 
 di-all:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
-config.h:	features/di.iffe features/cflags.sh mkconfig.pl
+config.h:	features/di.iffe features/cflags.sh \
+		mkconfig.pl features/mkconfig.dat
 	@-$(RM) -f config.h
 	./Build config.h
 
-#config.h:	features/di.iffe features/cflags.sh mkconfig.pl
+#config.h:	features/di.iffe features/cflags.sh \
+#		mkconfig.pl features/mkconfig.dat
 #	@-$(RM) -f config.h
 #	./Build dconfig.h
 
@@ -173,7 +175,8 @@ installperms:
 current-files:
 	-$(RM) -f features/* > /dev/null 2>&1
 	$(CP) -f po.base/*.po po
-	$(CP) -f features.base/*.sh features.base/*.iffe features
+	$(CP) -f features.base/*.sh features.base/*.iffe features.base/*.dat \
+		features
 
 tar:	Build LICENSE LICENSE.iffe MANIFEST \
 		Makefile README bin config.win95 \
@@ -198,7 +201,7 @@ $(PROG)$(EXE_EXT):	di$(OBJ_EXT) dilib$(OBJ_EXT) \
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) \
 		di$(OBJ_EXT) dilib$(OBJ_EXT) \
-		getopt$(OBJ_EXT) $(LIBS)
+		getopt$(OBJ_EXT) $(LIBS) `./features/check_libs.sh`
 
 hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
 	$(CC) -o hasnls$(EXE_EXT) \
