@@ -62,13 +62,12 @@ sys     vfs.h
 sys     vfstab.h
 sys     vmount.h
 command msgfmt
-npt     getenv
-npt     statfs
 typ     statvfs_t
 typ     size_t
 typ     uint_t
 typ     uid_t
 lib     bcopy
+lib     bindtextdomain -lintl
 lib     bindtextdomain -lintl -liconv
 lib     bzero
 lib     endmntent
@@ -84,6 +83,7 @@ lib     getmnt
 lib     getmntent
 lib     getmntinfo
 lib     getopt
+lib     gettext -lintl
 lib     gettext -lintl -liconv
 lib     getvfsstat
 lib     getzoneid
@@ -91,16 +91,20 @@ lib     hasmntopt
 lib     memcpy
 lib     memset
 lib     mntctl
+lib     setlocale  -lintl
 lib     setlocale  -lintl -liconv
 lib     setmntent
 lib     snprintf
 lib     statfs
 lib     statvfs
 lib     sysfs
+lib     textdomain  -lintl
 lib     textdomain  -lintl -liconv
 lib     zone_getattr
 lib     zone_list
 mth     fmod
+npt     getenv
+npt     statfs _lib_statfs
 dcl     int  errno
 dcl     int  optind
 dcl     ptr  optarg
