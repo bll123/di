@@ -198,7 +198,7 @@ testtar:	Build LICENSE LICENSE.iffe MANIFEST \
 
 $(PROG)$(EXE_EXT):	di$(OBJ_EXT) dilib$(OBJ_EXT) \
 		getopt$(OBJ_EXT)
-	@echo "required libs: `test ! -f reqlibs.txt || cat reqlibs.txt`"
+	@test ! -f reqlibs.txt || echo "*** Using libs: `cat reqlibs.txt`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) \
 		di$(OBJ_EXT) dilib$(OBJ_EXT) \
