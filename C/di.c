@@ -1457,7 +1457,7 @@ sortArray (data, dataSize, count, compareFunc)
         return;
     }
 
-    tempData = (char *) malloc ((unsigned) dataSize);
+    tempData = (char *) malloc (dataSize);
     if (tempData == (char *) NULL)
     {
         fprintf (stderr, "malloc failed in sortArray().  errno %d\n", errno);
