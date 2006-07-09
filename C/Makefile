@@ -112,15 +112,15 @@ objclean:
 	-$(RM) -rf *.o *.obj
 
 clean:
-	-$(RM) -f $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
+	-$(RM) -rf $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
 		hasnls$(EXE_EXT) *.o *.obj a.out mkconfig.log \
+		reqlibs.txt _tmp \
 		>/dev/null 2>&1
 
 distclean:
 	$(MAKE) -f Makefile clean
 	-$(RM) -f config.h object_ext \
-		$(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
-		hasnls$(EXE_EXT) di$(EXE_EXT) diskinfo$(EXE_EXT) \
+		di$(EXE_EXT) diskinfo$(EXE_EXT) \
 		>/dev/null 2>&1
 
 realclean:
@@ -198,10 +198,12 @@ testtar:	Build LICENSE LICENSE.iffe MANIFEST \
 
 $(PROG)$(EXE_EXT):	di$(OBJ_EXT) dilib$(OBJ_EXT) \
 		getopt$(OBJ_EXT)
+	@echo "required libs: `test ! -f reqlibs.txt || cat reqlibs.txt`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) \
 		di$(OBJ_EXT) dilib$(OBJ_EXT) \
-		getopt$(OBJ_EXT) $(LIBS) `./features/check_libs.sh`
+		getopt$(OBJ_EXT) $(LIBS) \
+		`test ! -f reqlibs.txt || cat reqlibs.txt`
 
 hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
 	$(CC) -o hasnls$(EXE_EXT) \
