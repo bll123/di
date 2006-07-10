@@ -102,7 +102,7 @@ lib     textdomain  -lintl
 lib     textdomain  -lintl -liconv
 lib     zone_getattr
 lib     zone_list
-mth     fmod
+lib     fmod -lm
 npt     getenv
 npt     statfs _lib_statfs
 dcl     int  errno
