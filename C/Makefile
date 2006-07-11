@@ -114,13 +114,13 @@ objclean:
 clean:
 	-$(RM) -rf $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
 		hasnls$(EXE_EXT) *.o *.obj a.out mkconfig.log \
-		reqlibs.txt _tmp \
+		_tmp \
 		>/dev/null 2>&1
 
 distclean:
 	$(MAKE) -f Makefile clean
-	-$(RM) -f config.h object_ext \
-		di$(EXE_EXT) diskinfo$(EXE_EXT) \
+	-$(RM) -f config.h reqlibs.txt object_ext \
+		diskinfo$(EXE_EXT) \
 		>/dev/null 2>&1
 
 realclean:
