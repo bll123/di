@@ -6,9 +6,9 @@ Copyright 2005 Brad Lanam, Walnut Creek, CA
 
 #include "config.h"
 #include <stdio.h>
-#include <stdlib.h>
-
-extern int di_lib_debug;
+#if _hdr_stdlib
+# include <stdlib.h>
+#endif
 
 int
 #if _proto_stdc
