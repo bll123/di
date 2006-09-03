@@ -1,6 +1,9 @@
 #
 # $Id$
 #
+#   The four headers: stdio.h, stdlib.h, sys/types.h, and sys/param.h
+#   are always checked.
+#
 #   Commands:
 #   hdr     name-of-header
 #           check for a header. e.g.       hdr ctype.h
@@ -16,9 +19,6 @@
 #           check if function exists.
 #           if libs are specified, tests for function
 #           w/o the libraries, then with. e.g. lib gettext -lintl -liconv
-#   mth     function
-#           Like 'lib' w/-lm specified.  Check if function exists.
-#           Uses -lm to test if function is in the math library.
 #   dcl     {int|ptr} variable
 #           check if the variable is declared.          e.g. dcl int errno
 #   member  struct member
