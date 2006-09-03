@@ -1,4 +1,4 @@
-di - disk information utility (version 4.5).
+di - disk information utility (version 4.6).
 
 DESCRIPTION
 
@@ -10,36 +10,37 @@ DESCRIPTION
 
 INSTALLATION
 
-  Instructions (iffe):
-                              Example w/gcc and different prefix.
-      make distclean            make distclean
-      make                      make CC=gcc prefix=/usr/lbin
-      make install              make CC=gcc prefix=/usr/lbin install
+  To build with mkconfig.pl (requires perl):
 
-  To build with mkconfig.pl (for those who don't like the iffe LICENSE)
-  (requires perl):
-
+      ./Build distclean
       ./Build -mkc              CC=gcc prefix=/usr/lbin ./Build -mkc
       ./Build -mkc install      CC=gcc prefix=/usr/lbin ./Build -mkc install
 
-  To turn off NLS (internationalization) (example w/iffe):
+  To build with iffe:
+                              Example w/gcc and different prefix.
+      ./Build distclean
+      ./Build                   CC=gcc prefix=/usr/lbin ./Build
+      ./Build install           CC=gcc prefix=/usr/lbin ./Build install
+                         gcc sometimes requires -lintl for internationalization
+                                LIBS="-lintl" CC=gcc ./Build
+                                LIBS="-lintl" CC=gcc ./Build install
 
-      ./Build -nonls            CC=gcc prefix=/usr/lbin ./Build -nonls
-      ./Build -nonls install    CC=gcc prefix=/usr/lbin ./Build -nonls install
+  To turn off NLS (internationalization):
 
-    features/cflags.sh sets the various compiler flags.
+      ./Build -mkc -nonls            CC=gcc ./Build -mkc -nonls
+      ./Build -mkc -nonls install    CC=gcc ./Build -mkc -nonls install
 
-    The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment
-    variables may be set and exported prior to running make.
+  The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment
+  variables may be set and exported prior to running make.
 
-    The LOCALEDIR environment variable may be set to the installation
-    directory for the locale files.  Default is ${prefix}/share/locale.
+  The LOCALEDIR environment variable may be set to the installation
+  directory for the locale files.  Default is ${prefix}/share/locale.
 
-    The internationalization files are automatically installed if
-    your system supports internationalization.
-    [en_US: 27-Aug-2002, de_DE: 26-Feb-2004].
+  The internationalization files are automatically installed if
+  your system supports internationalization.
+  [en_US: 27-Aug-2002, de_DE: 26-Feb-2004].
 
-    To force a 64 bit binary build:
+  To force a 64 bit binary build:
       ./Build -64
 
   Installation Permissions:
@@ -80,20 +81,20 @@ BUGS
 
 PORTING
 
-    di 4.5 has been tested on the following platforms:
-        FreeBSD 5.4
-        HP-UX B.11.23
+    di 4.6 has been tested on the following platforms:
+        FreeBSD 6.1
+        HP-UX B.11.11, B.11.23
+        CentOS Linux 2.4.21
         Debian Linux 2.4.27, 2.6.8
-        Red Hat Linux 2.4.21, 2.6.9
-        SuSe Linux 2.6.5
-        NetBSD 2.0
+        Mandriva Linux 2.6.12
+        Red Hat Linux 2.6.9
+        SuSe Linux 2.6.16
         Solaris 8, 10
-        Tru64 Unix 5.1b
 
     di has been ported to the following systems in the past:
 
         A/UX, AIX, BSDI, Compaq Tru64, Convex, Cray UNICOS 9 & 10,
-        Cray UNICOS/mk, FreeBSD, HP/UX, Linux, NetBSD, Next 3.x,
+        Cray UNICOS/mk, FreeBSD, HP/UX, Linux, MacOS X, NetBSD, Next 3.x,
         OpenBSD, OSF/1, Pyramid, SCO Unix,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Sys V.3,
         Sys V.4, Ultrix, Windows, Xenix
@@ -115,6 +116,10 @@ BUGS
     Build in non-interactive mode for any system.
 
 CHANGES
+
+    4.6                                     [3 Sep 2006]
+        Improve mkconfig.pl configuration to be more robust,
+        find needed libraries.  Improve mkconfig.pl portability.
 
     4.5                                     [29 Mar 2006]
         Fix uninitialized variable.
