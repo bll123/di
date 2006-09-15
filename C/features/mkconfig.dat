@@ -2,27 +2,37 @@
 # $Id$
 #
 #   The four headers: stdio.h, stdlib.h, sys/types.h, and sys/param.h
-#   are always checked.
+#   are always checked.  FreeBSD has header inclusion bugs and requires
+#   sys/param.h.
 #
 #   Commands:
 #   hdr     name-of-header
-#           check for a header. e.g.       hdr ctype.h
+#           check for a header.
+#           e.g.: hdr ctype.h
 #   sys     name-of-sys-header
-#           check for a header in sys/. e.g.       sys types.h
+#           check for a header in sys/.
+#           e.g.: sys types.h
 #   command name-of-command
-#           check if command exists. e.g.        command msgfmt
+#           check if command exists.
+#           e.g.: command msgfmt
 #   npt     function
-#           check if function needs a prototype.  e.g.  npt getopt
+#           check if function needs a prototype.
+#           e.g.: npt getopt
 #   typ     type-name
-#           check if type-name exists.              e.g. typ size_t
+#           check if type-name exists.
+#           e.g.: typ size_t
 #   lib     function [libs]
 #           check if function exists.
 #           if libs are specified, tests for function
-#           w/o the libraries, then with. e.g. lib gettext -lintl -liconv
+#           w/o the libraries, then with.
+#           e.g.: lib gettext -lintl
+#                 lib gettext -lintl -liconv
 #   dcl     {int|ptr} variable
-#           check if the variable is declared.          e.g. dcl int errno
+#           check if the variable is declared.
+#           e.g.: dcl int errno
 #   member  struct member
-#           check if member is a member of struct. e.g. member statfs f_bsize
+#           check if member is a member of struct.
+#           e.g.: member statfs f_bsize
 #
 #
 hdr     ctype.h
