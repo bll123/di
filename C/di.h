@@ -106,6 +106,7 @@ typedef unsigned long __ulong;
 #define DI_PRNT_OK          1
 #define DI_PRNT_BAD         2
 #define DI_PRNT_OUTOFZONE   3
+#define DI_PRNT_EXCLUDE     4
 
 typedef struct
 {
