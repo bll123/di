@@ -164,6 +164,7 @@ extern int di_lib_debug;
 #define DI_F_TOTAL             0x00000010
 #define DI_F_NO_HEADER         0x00000020
 #define DI_F_DEBUG_HDR         0x00000040
+#define DI_F_INCLUDE_LOOPBACK  0x00000080
 
     /* mount information */
 #define DI_FMT_MOUNT           'm'
@@ -286,6 +287,8 @@ typedef struct {
 
 static int          debug = { 0 };
 static __ulong      flags = { 0 };
+/* Linux users may want as the default: */
+/* static __ulong      flags = { DI_F_INCLUDE_LOOPBACK }; */
 static int          sortType = { DI_SORT_NAME };
 static int          sortOrder = { DI_SORT_ASCENDING };
 static int          posix_compat = { 0 };
@@ -357,6 +360,7 @@ static void checkIncludeList    _((di_DiskInfo *, iList *));
 static void checkZone           _((di_DiskInfo *, zoneInfo_t *, int));
 static void setDispBlockSize    _((char *));
 static int  findDispSize        _((double));
+static char *getPrintFlagText   _((int));
 #if ! _mth_fmod && ! _lib_fmod
  static double fmod _((double, double));
 #endif
@@ -707,15 +711,11 @@ printDiskInfo (diskInfo, diCount)
     {
         if (debug > 5)
         {
-            int pf;
-            pf = diskInfo[i].printFlag;
             printf ("pdi:%s:%s:\n", diskInfo[i].name,
-                pf == DI_PRNT_OK ? "ok" :
-                pf == DI_PRNT_BAD ? "bad" :
-                pf == DI_PRNT_IGNORE ? "ignore" :
-                pf == DI_PRNT_OUTOFZONE ? "outofzone" : "unknown");
+                getPrintFlagText ((int) diskInfo[i].printFlag));
         }
-        if (diskInfo [i].printFlag == DI_PRNT_BAD ||
+        if (diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
+            diskInfo [i].printFlag == DI_PRNT_BAD ||
             diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
         {
             continue;
@@ -1571,7 +1571,8 @@ getDiskStatInfo (diskInfo, diCount)
     for (i = 0; i < diCount; ++i)
     {
             /* don't try to stat devices that are not accessible */
-        if (diskInfo [i].printFlag == DI_PRNT_BAD ||
+        if (diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
+            diskInfo [i].printFlag == DI_PRNT_BAD ||
             diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
         {
             continue;
@@ -1677,12 +1678,15 @@ checkDiskInfo (diskInfo, includeList, diCount)
 
     for (i = 0; i < diCount; ++i)
     {
-        if (diskInfo [i].printFlag == DI_PRNT_BAD ||
+        if (diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
+            diskInfo [i].printFlag == DI_PRNT_BAD ||
             diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
         {
             if (debug > 2)
             {
-                printf ("chk: skipping:%s\n", diskInfo [i].name);
+                printf ("chk: skipping(%s):%s\n",
+                    getPrintFlagText ((int) diskInfo[i].printFlag),
+                    diskInfo [i].name);
             }
             continue;
         }
@@ -1717,9 +1721,7 @@ checkDiskInfo (diskInfo, includeList, diCount)
             diskInfo [i].availInodes = 0;
         }
 
-            /* if all flag is set, display filesystems w/0 blocks */
-        if (diskInfo [i].printFlag == DI_PRNT_OK &&
-            (flags & DI_F_ALL) != DI_F_ALL)
+        if (diskInfo [i].printFlag == DI_PRNT_OK)
         {
             if (debug > 2)
             {
@@ -1746,72 +1748,77 @@ checkDiskInfo (diskInfo, includeList, diCount)
         checkIncludeList (&diskInfo [i], includeList);
     } /* for all disks */
 
-        /* this loop sets duplicate entries to be ignored. */
-    for (i = 0; i < diCount; ++i)
+    if ((flags & DI_F_INCLUDE_LOOPBACK) != DI_F_INCLUDE_LOOPBACK)
     {
-        if (diskInfo [i].printFlag == DI_PRNT_IGNORE ||
-            diskInfo [i].printFlag == DI_PRNT_BAD ||
-            diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+            /* this loop sets duplicate entries to be ignored. */
+        for (i = 0; i < diCount; ++i)
         {
-            if (debug > 2)
+            if (diskInfo [i].printFlag == DI_PRNT_IGNORE ||
+                diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
+                diskInfo [i].printFlag == DI_PRNT_BAD ||
+                diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
             {
-                printf ("chk: skipping(2):%s\n", diskInfo [i].name);
-            }
-            continue;
-        }
-
-            /* don't need to bother checking real partitions */
-            /* don't bother if already ignored               */
-        if (diskInfo [i].sp_rdev != 0 &&
-            diskInfo [i].printFlag == DI_PRNT_OK &&
-            (flags & DI_F_ALL) != DI_F_ALL)
-        {
-            sp_dev = diskInfo [i].sp_dev;
-            sp_rdev = diskInfo [i].sp_rdev;
-            dupCount = 0;
-
-            for (j = 0; j < diCount; ++j)
-            {
-                if (diskInfo [j].sp_dev == sp_rdev)
+                if (debug > 2)
                 {
-                    ++dupCount;
+                    printf ("chk: skipping(%s):%s\n",
+                        getPrintFlagText ((int) diskInfo[i].printFlag),
+                        diskInfo [i].name);
                 }
+                continue;
             }
 
-            if (debug > 2)
+                /* don't need to bother checking real partitions */
+                /* don't bother if already ignored               */
+            if (diskInfo [i].sp_rdev != 0 &&
+                diskInfo [i].printFlag == DI_PRNT_OK)
             {
-                printf ("dup: chk: i: %s dev: %ld rdev: %ld dup: %d\n",
-                    diskInfo [i].name, sp_dev, sp_rdev, dupCount);
-            }
+                sp_dev = diskInfo [i].sp_dev;
+                sp_rdev = diskInfo [i].sp_rdev;
+                dupCount = 0;
 
-            for (j = 0; dupCount > 0 && j < diCount; ++j)
-            {
-                    /* don't reset flags! */
-                if (diskInfo [j].sp_rdev == 0 &&
-                    diskInfo [j].sp_dev == sp_rdev &&
-                    diskInfo [j].printFlag == DI_PRNT_OK)
+                for (j = 0; j < diCount; ++j)
                 {
-                    diskInfo [j].printFlag = DI_PRNT_IGNORE;
-                    if (debug > 2)
+                    if (diskInfo [j].sp_dev == sp_rdev)
                     {
-                        printf ("chk: ignore: duplicate: %s of %s\n",
-                                diskInfo [j].name, diskInfo [i].name);
-                        printf ("dup: ign: j: rdev: %ld dev: %ld\n",
-                                diskInfo [j].sp_dev, diskInfo [j].sp_rdev);
+                        ++dupCount;
                     }
                 }
-            } /* duplicate check for each disk */
-        } /* if this is a printable disk */
-        else
-        {
-            if (debug > 2)
+
+                if (debug > 2)
+                {
+                    printf ("dup: chk: i: %s dev: %ld rdev: %ld dup: %d\n",
+                        diskInfo [i].name, sp_dev, sp_rdev, dupCount);
+                }
+
+                for (j = 0; dupCount > 0 && j < diCount; ++j)
+                {
+                        /* don't reset flags! */
+                    if (diskInfo [j].sp_rdev == 0 &&
+                        diskInfo [j].sp_dev == sp_rdev &&
+                        diskInfo [j].printFlag == DI_PRNT_OK)
+                    {
+                        diskInfo [j].printFlag = DI_PRNT_IGNORE;
+                        if (debug > 2)
+                        {
+                            printf ("chk: ignore: duplicate: %s of %s\n",
+                                    diskInfo [j].name, diskInfo [i].name);
+                            printf ("dup: ign: j: rdev: %ld dev: %ld\n",
+                                    diskInfo [j].sp_dev, diskInfo [j].sp_rdev);
+                        }
+                    }
+                } /* duplicate check for each disk */
+            } /* if this is a printable disk */
+            else
             {
-                printf ("chk: dup: not checked: %s prnt: %d dev: %ld rdev: %ld\n",
-                        diskInfo [i].name, diskInfo [i].printFlag,
-                        diskInfo [i].sp_dev, diskInfo [i].sp_rdev);
+                if (debug > 2)
+                {
+                    printf ("chk: dup: not checked: %s prnt: %d dev: %ld rdev: %ld\n",
+                            diskInfo [i].name, diskInfo [i].printFlag,
+                            diskInfo [i].sp_dev, diskInfo [i].sp_rdev);
+                }
             }
-        }
-    } /* for each disk */
+        } /* for each disk */
+    } /* if the duplicate loopback mounts are to be excluded */
 
     if (posix_compat == 1)
     {
@@ -1826,7 +1833,8 @@ checkDiskInfo (diskInfo, includeList, diCount)
     for (i = 0; i < diCount; ++i)
     {
         if (diskInfo [i].printFlag == DI_PRNT_OK ||
-            (flags & DI_F_ALL) == DI_F_ALL)
+            (diskInfo [i].printFlag == DI_PRNT_IGNORE &&
+             (flags & DI_F_ALL) == DI_F_ALL))
         {
             len = strlen (diskInfo [i].name);
             if (len > maxMountString)
@@ -1940,22 +1948,30 @@ preCheckDiskInfo (diskInfo, ignoreList, includeList, diCount, zoneInfo)
         checkZone (&diskInfo [i], zoneInfo,
             ((flags & DI_F_ALL) == DI_F_ALL));
 
-        if (diskInfo [i].printFlag == DI_PRNT_OK &&
-            (flags & DI_F_ALL) != DI_F_ALL)
+        if (diskInfo [i].printFlag == DI_PRNT_OK)
         {
-            di_testRemoteDisk (&diskInfo [i]);
-
-            if (diskInfo [i].isLocal == FALSE &&
-                    (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
+                /* don't bother w/this check is all flag is set. */
+            if ((flags & DI_F_ALL) != DI_F_ALL)
             {
-                diskInfo [i].printFlag = DI_PRNT_IGNORE;
-                if (debug > 2)
+                di_testRemoteDisk (&diskInfo [i]);
+
+                if (diskInfo [i].isLocal == FALSE &&
+                        (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
                 {
-                    printf ("prechk: ignore: remote disk; local flag set: %s\n",
-                        diskInfo [i].name);
+                    diskInfo [i].printFlag = DI_PRNT_IGNORE;
+                    if (debug > 2)
+                    {
+                        printf ("prechk: ignore: remote disk; local flag set: %s\n",
+                            diskInfo [i].name);
+                    }
                 }
             }
+        }
 
+        if (diskInfo [i].printFlag == DI_PRNT_OK ||
+            diskInfo [i].printFlag == DI_PRNT_IGNORE)
+        {
+            /* do do these checks to override the all flag */
             checkIgnoreList (&diskInfo [i], ignoreList);
             checkIncludeList (&diskInfo [i], includeList);
         }
@@ -2025,7 +2041,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
 
     hasdashk = 0;
     while ((ch = getopt (argc, argv,
-        "Aab:B:d:f:F:ghHi:I:klmnPs:tvw:W:x:X:z:Z")) != -1)
+        "Aab:B:d:D:f:F:ghHi:I:klLmnPs:tvw:W:x:X:z:Z")) != -1)
     {
         switch (ch)
         {
@@ -2063,6 +2079,14 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
             case 'd':
             {
                 strncpy (dbsstr, optarg, sizeof (dbsstr));
+                break;
+            }
+
+                /* for debugging; can be replaced */
+            case 'D':
+            {
+                debug = atoi (optarg);
+                di_lib_debug = debug;
                 break;
             }
 
@@ -2120,6 +2144,12 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
             case 'l':
             {
                 flags |= DI_F_LOCAL_ONLY;
+                break;
+            }
+
+            case 'L':
+            {
+                flags |= DI_F_INCLUDE_LOOPBACK;
                 break;
             }
 
@@ -2323,7 +2353,7 @@ checkIgnoreList (diskInfo, ignoreList)
             }
             if (strcmp (ptr, diskInfo->fsType) == 0)
             {
-                diskInfo->printFlag = DI_PRNT_IGNORE;
+                diskInfo->printFlag = DI_PRNT_EXCLUDE;
                 if (debug > 2)
                 {
                     printf ("chkign: ignore: fstype %s match: %s\n", ptr,
@@ -2371,7 +2401,7 @@ checkIncludeList (diskInfo, includeList)
             }
             else
             {
-                diskInfo->printFlag = DI_PRNT_IGNORE;
+                diskInfo->printFlag = DI_PRNT_EXCLUDE;
                 if (debug > 2)
                 {
                     printf ("chkinc:!include:fstype %s no match: %s\n", ptr,
@@ -2671,10 +2701,33 @@ setDispBlockSize (ptr)
     dispBlockSize = val;
 }
 
+/* for debugging */
+static char *
+#if _proto_stdc
+getPrintFlagText (int pf)
+#else
+getPrintFlagText (pf)
+    int pf;
+#endif
+{
+    return pf == DI_PRNT_OK ? "ok" :
+        pf == DI_PRNT_BAD ? "bad" :
+        pf == DI_PRNT_IGNORE ? "ignore" :
+        pf == DI_PRNT_EXCLUDE ? "exclude" :
+        pf == DI_PRNT_OUTOFZONE ? "outofzone" : "unknown";
+}
+
+
 #if ! _mth_fmod && ! _lib_fmod
 
 static double
+#if _proto_stdc
 fmod (double a, double b)
+#else
+fmod (a, b)
+    double a;
+    double b;
+#endif
 {
     double temp;
     temp = a - (int) (a/b) * b;
