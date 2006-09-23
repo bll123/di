@@ -8,18 +8,16 @@
 .\"
 .\" bll@gentoo.com
 .\"
-.\" for di version 4.4
-.\"
 .TH di 1 "20 Nov 2005"
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-AaghHklmnPtZ] [-b block-size] [-d display-size] [-f format]
+.\" di [-AaghHklLmnPtZ] [-b block-size] [-d display-size] [-f format]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x exclude-fstyp-list] [-X debug-level]
 .\" [-z zone-name] [file [...]]
 .B di
-[\fB\-AaghHklmnPtZ\fP]
+[\fB\-AaghHklLmnPtZ\fP]
 [\fB\-b\fP \fIblock\-size\fP]
 [\fB\-d\fP \fIdisplay\-size\fP]
 [\fB\-f\fP \fIformat\fP]
@@ -130,6 +128,9 @@ Display sizes in Kbytes.
 .TP
 .B \-l
 Display only local file systems.
+.TP
+.B \-L
+Don't do the check for duplicate filesystems.
 .TP
 .B \-m
 (alias for: \-dm)
@@ -311,14 +312,14 @@ The default format string for \fIdi\fP is \fBsmbuvpT\fP.
 The default format string for \fImi\fP is \fBMSTIO\fP.
 .PP
 The format string may also contain any other character not listed
-above.  The character will be printed as is.  e.g. \fBdi \-f 'mbuvp|iUFP'\fP
+above.  The character will be printed as is.  e.g. di \-f 'mbuvp|iUFP'
 will print the character '|' between the disk usage and the file slot
 usage.  The command sequence (Bourne Shell):
 .RS
 .br
-.B di \-f 'mbuvp
+di \-f 'mbuvp
 .br
-.B miUFP'
+miUFP'
 .br
 .RE
 will print two lines of data for each filesystem.
@@ -339,11 +340,11 @@ correctly, try one
 of the following format strings:
 .PP
 .RS
-.B di \-f SMbuf1T
+di \-f SMbuf1T
 .br
-.B di \-f SMbcvpT
+di \-f SMbcvpT
 .br
-.B di \-f SMBuv2T
+di \-f SMBuv2T
 .RE
 .SH Environment Variables
 The DIFMT environment variable may be used to specify the default
@@ -368,9 +369,9 @@ df(1), fstab(5), getmnt(2), getmntinfo(2), mnttab(4), mount(1M)
 statfs(2), statvfs(2)
 .SH Bugs
 Send bug reports to: di-bugs@gentoo.com
+.SH Website
+http://www.gentoo.com/di/
 .SH Author
 This program is Copyright 1994-2006 by Brad Lanam.
 .PP
 Brad Lanam, Walnut Creek, CA (bll@gentoo.com)
-.PP
-http://www.gentoo.com/di/

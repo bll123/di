@@ -1,4 +1,4 @@
-di - disk information utility (version 4.6).
+di - disk information utility (version 4.7).
 
 DESCRIPTION
 
@@ -81,7 +81,7 @@ BUGS
 
 PORTING
 
-    di 4.6 has been tested on the following platforms:
+    di 4.7 has been tested on the following platforms:
         FreeBSD 6.1
         HP-UX B.11.11, B.11.23
         CentOS Linux 2.4.21
@@ -94,8 +94,8 @@ PORTING
     di has been ported to the following systems in the past:
 
         A/UX, AIX, BSDI, Compaq Tru64, Convex, Cray UNICOS 9 & 10,
-        Cray UNICOS/mk, FreeBSD, HP/UX, Linux, MacOS X, NetBSD, Next 3.x,
-        OpenBSD, OSF/1, Pyramid, SCO Unix,
+        Cray UNICOS/mk, FreeBSD, HP/UX, Linux, MacOS X,
+        NetBSD, Next 3.x, OpenBSD, OSF/1, Pyramid, SCO Unix,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Sys V.3,
         Sys V.4, Ultrix, Windows, Xenix
 
@@ -116,6 +116,12 @@ BUGS
     Build in non-interactive mode for any system.
 
 CHANGES
+
+    4.7                                     [23 Sep 2006]
+        Changed the operation of the -a, -x and -I flags
+        so that it is possible to specify -a and still exclude
+        filesystems from the list.
+        Added the -L flag to not check for duplicate filesystems.
 
     4.6                                     [3 Sep 2006]
         Improve mkconfig.pl configuration to be more robust,
