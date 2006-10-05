@@ -75,7 +75,8 @@ all:
 di-all:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
 config.h:	features/di.iffe features/cflags.sh \
-		mkconfig.pl features/mkconfig.dat
+		mkconfig.pl features/mkconfig.dat \
+		features/mkconfig.tail
 	@-$(RM) -f config.h
 	./Build config.h
 
@@ -157,7 +158,8 @@ install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
 	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 	-./hasnls$(EXE_EXT) && \
-		$(MAKE) LOCALEDIR="$(LOCALEDIR)" install-po
+		$(MAKE) LOCALEDIR="$(LOCALEDIR)" \
+		MSGFMT="$(MSGFMT)" install-po
 
 install-man:
 	-$(TEST) -d $(MANPATH) || $(MKDIR) -p $(MANPATH)
@@ -175,7 +177,8 @@ installperms:
 current-files:
 	-$(RM) -f features/* > /dev/null 2>&1
 	$(CP) -f po.base/*.po po
-	$(CP) -f features.base/*.sh features.base/*.iffe features.base/*.dat \
+	$(CP) -f features.base/*.sh features.base/*.iffe \
+		features.base/*.dat features.base/*.tail \
 		features
 
 tar:	Build LICENSE LICENSE.iffe MANIFEST \
