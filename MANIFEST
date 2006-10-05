@@ -17,6 +17,7 @@ features/
 features/cflags.sh	cflags configuration
 features/di.iffe	iffe configuration
 features/mkconfig.dat	mkconfig.pl configuration
+features/mkconfig.tail	mkconfig.pl configuration
 features/obj_ext.sh	obj extension test
 features/turnoffnls.sh	turn off all NLS features in config.h
 LICENSE.iffe		iffe license
