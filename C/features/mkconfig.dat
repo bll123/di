@@ -72,6 +72,7 @@ sys     vfs.h
 sys     vfstab.h
 sys     vmount.h
 command msgfmt
+command gmsgfmt
 typ     statvfs_t
 typ     size_t
 typ     uint_t
