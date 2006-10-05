@@ -75,8 +75,7 @@ all:
 di-all:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
 config.h:	features/di.iffe features/cflags.sh \
-		mkconfig.pl features/mkconfig.dat \
-		features/mkconfig.tail
+		mkconfig.pl features/mkconfig.dat
 	@-$(RM) -f config.h
 	./Build config.h
 
@@ -178,7 +177,7 @@ current-files:
 	-$(RM) -f features/* > /dev/null 2>&1
 	$(CP) -f po.base/*.po po
 	$(CP) -f features.base/*.sh features.base/*.iffe \
-		features.base/*.dat features.base/*.tail \
+		features.base/*.dat \
 		features
 
 tar:	Build LICENSE LICENSE.iffe MANIFEST \
