@@ -33,7 +33,8 @@
 #   member  struct member
 #           check if member is a member of struct.
 #           e.g.: member statfs f_bsize
-#
+#   include     include all of the code between these two tags
+#   endinclude  in the configuration file.
 #
 hdr     ctype.h
 hdr     errno.h
@@ -129,3 +130,54 @@ member  statfs f_type
 member  mnttab mnt_time
 member  vmount vmt_time
 size    long long
+
+include
+
+#if _lib_bindtextdomain && \
+_lib_gettext && \
+_lib_setlocale && \
+_lib_textdomain && \
+_hdr_libintl && \
+_hdr_locale && \
+(_command_msgfmt || _command_gmsgfmt)
+# define _enable_nls 1
+#else
+# define _enable_nls 0
+#endif
+
+#if _typ_statvfs_t
+# define Statvfs_t statvfs_t
+#else
+# define Statvfs_t struct statvfs
+#endif
+
+#if _typ_size_t
+# define Size_t size_t
+#else
+# define Size_t unsigned int
+#endif
+
+#if _typ_uint_t
+# define Uint_t uint_t
+#else
+# define Uint_t unsigned int
+#endif
+
+#if _typ_uid_t
+# define Uid_t uid_t
+#else
+# define Uid_t int
+#endif
+
+#if _lib_snprintf
+# define Snprintf snprintf
+# define SPF(a1,a2,a3)      a1,a2,a3
+#else
+# define Snprintf sprintf
+# define SPF(a1,a2,a3)      a1,a3
+#endif
+
+#define _config_by_iffe_ 0
+#define _config_by_mkconfig_pl_ 1
+
+endinclude
