@@ -1,4 +1,4 @@
-di - disk information utility (version 4.7).
+di - disk information utility (version 4.8).
 
 DESCRIPTION
 
@@ -81,7 +81,7 @@ BUGS
 
 PORTING
 
-    di 4.7 has been tested on the following platforms:
+    di 4.8 has been tested on the following platforms:
         FreeBSD 6.1
         HP-UX B.11.11, B.11.23
         CentOS Linux 2.4.21
@@ -112,10 +112,20 @@ BUGS
     If the Build script doesn't set up the 'config.h'
     file correctly, please let me know.  E-mail me the incorrect
     (and corrected if possible) config.h file, and any other
-    information as appropriate.  The goal is to be able to run
-    Build in non-interactive mode for any system.
+    information as appropriate.
 
 CHANGES
+
+    4.8                                     [5 Oct 2006]
+        Linux's statvfs() is not POSIX compliant and does not
+        use f_frsize.  The correct value is returned in f_bsize.
+        Since there's no way to tell which type of statvfs() is
+        in use, we have to hard-code the logic for linux.
+        This sucks.
+
+        More minor improvements to mkconfig.pl.
+
+        Add logic to find the correct msgfmt program to use.
 
     4.7                                     [23 Sep 2006]
         Changed the operation of the -a, -x and -I flags
