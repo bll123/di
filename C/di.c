@@ -499,6 +499,7 @@ main (argc, argv)
             }
         }
 
+        zoneInfo.globalIdx = 0;
         for (i = 0; i < zoneInfo.zoneCount; ++i)
         {
             int     len;
