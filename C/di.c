@@ -2232,7 +2232,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
             {
                 debug = atoi (optarg);
                 di_lib_debug = debug;
-                flags |= DI_F_ALL | DI_F_DEBUG_HDR | DI_F_TOTAL;
+                flags |= DI_F_DEBUG_HDR | DI_F_TOTAL;
                 flags &= ~ DI_F_NO_HEADER;
                 width = 10;
                 inodeWidth = 10;
