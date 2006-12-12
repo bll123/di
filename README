@@ -117,7 +117,7 @@ CHANGES
 
     4.9                                     [2 Nov 2006]
         Fixed an uninitialized variable used for Solaris zones.
-        Minor fixes to mkconfix.pl.
+        Minor fixes to mkconfig.pl.
 
     4.8                                     [5 Oct 2006]
         Linux's statvfs() is not POSIX compliant and does not
