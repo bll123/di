@@ -695,6 +695,7 @@ printDiskInfo (diskInfo, diCount)
     char                lastpool [DI_SPEC_NAME_LEN + 1];
     Size_t              lastpoollen = { 0 };
     int                 inpool = { 0 };
+    int                 tempSortType;
 
     lastpool[0] = '\0';
     memset ((char *) &totals, '\0', sizeof (di_DiskInfo));
@@ -707,11 +708,73 @@ printDiskInfo (diskInfo, diCount)
         printTitle ();
     }
 
+    if ((flags & DI_F_TOTAL) == DI_F_TOTAL &&
+            (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
+    {
+            /* in order to find the main pool entry,                */
+            /* we must have the array sorted by special device name */
+        tempSortType = sortType;
+        sortType = DI_SORT_SPECIAL;
+        sortArray ((char *) diskInfo, sizeof (di_DiskInfo), diCount, diCompare);
+        sortType = tempSortType;
+
+        for (i = 0; i < diCount; ++i)
+        {
+            int ispooled = { 0 };
+
+            if (diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
+                diskInfo [i].printFlag == DI_PRNT_BAD ||
+                diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+            {
+                continue;
+            }
+
+            if (diskInfo [i].printFlag == DI_PRNT_IGNORE &&
+                (flags & DI_F_ALL) != DI_F_ALL)
+            {
+                continue;
+            }
+
+                /* is it a pooled filesystem type? */
+            if (strcmp (diskInfo [i].fsType, "zfs") == 0 ||
+                strcmp (diskInfo [i].fsType, "advfs") == 0)
+            {
+                ispooled = 1;
+                if (lastpoollen == 0 ||
+                    strncmp (lastpool, diskInfo [i].special, lastpoollen) != 0)
+                {
+                    strncpy (lastpool, diskInfo [i].special, sizeof (lastpool));
+                    lastpoollen = strlen (lastpool);
+                    inpool = 0;
+                }
+            }
+
+                /* only total the disks that make sense!                    */
+                /* don't add memory filesystems to totals.                  */
+                /* only add the main pool to totals for pooled filesystems  */
+            if (strcmp (diskInfo [i].fsType, "tmpfs") != 0 &&
+                strcmp (diskInfo [i].fsType, "mfs") != 0 &&
+                diskInfo [i].isReadOnly == FALSE &&
+                inpool == 0)
+            {
+                addTotals (&diskInfo [i], &totals);
+            }
+
+                /* is it a pooled filesystem type? */
+            if (ispooled)
+            {
+                if (strncmp (lastpool, diskInfo [i].special, lastpoollen) == 0)
+                {
+                    inpool = 1;
+                }
+            }
+        } /* for each entry */
+    } /* if the totals are to be printed */
+
     if (sortType != DI_SORT_NONE)
     {
         sortArray ((char *) diskInfo, sizeof (di_DiskInfo), diCount, diCompare);
     }
-
 
     for (i = 0; i < diCount; ++i)
     {
@@ -734,41 +797,6 @@ printDiskInfo (diskInfo, diCount)
         }
 
         printInfo (&diskInfo [i]);
-
-        if ((flags & DI_F_TOTAL) == DI_F_TOTAL &&
-            (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
-        {
-                /* is it a pooled filesystem type? */
-            if (strcmp (diskInfo [i].fsType, "zfs") == 0 ||
-                strcmp (diskInfo [i].fsType, "advfs") == 0)
-            {
-                if (lastpoollen == 0 ||
-                    strncmp (lastpool, diskInfo [i].special, lastpoollen) != 0)
-                {
-                    strncpy (lastpool, diskInfo [i].special, sizeof (lastpool));
-                    lastpoollen = strlen (lastpool);
-                    inpool = 0;
-                }
-            }
-                /* only total the disks that make sense! */
-                /* don't add memory filesystems to totals. */
-            if (strcmp (diskInfo [i].fsType, "tmpfs") != 0 &&
-                strcmp (diskInfo [i].fsType, "mfs") != 0 &&
-                diskInfo [i].isReadOnly == FALSE &&
-                inpool == 0)
-            {
-                addTotals (&diskInfo [i], &totals);
-            }
-                /* is it a pooled filesystem type? */
-            if (strcmp (diskInfo [i].fsType, "zfs") == 0 ||
-                strcmp (diskInfo [i].fsType, "advfs") == 0)
-            {
-                if (strncmp (lastpool, diskInfo [i].special, lastpoollen) == 0)
-                {
-                    inpool = 1;
-                }
-            }
-        }
     }
 
     if ((flags & DI_F_TOTAL) == DI_F_TOTAL &&
