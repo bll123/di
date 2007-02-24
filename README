@@ -1,4 +1,4 @@
-di - disk information utility (version 4.9).
+di - disk information utility (version 4.10).
 
 DESCRIPTION
 
@@ -81,7 +81,7 @@ BUGS
 
 PORTING
 
-    di 4.9 has been tested on the following platforms:
+    di 4.10 has been tested on the following platforms:
         FreeBSD 6.1
         CentOS Linux 2.4.21
         Debian Linux 2.4.27, 2.6.8
@@ -114,6 +114,11 @@ BUGS
     information as appropriate.
 
 CHANGES
+
+    4.10                                    [24 Feb 2007]
+        Handle pooled filesystems so that the total space
+        doesn't get added more than once.
+        Compaq Tru64 advfs is untested.
 
     4.9                                     [2 Nov 2006]
         Fixed an uninitialized variable used for Solaris zones.
