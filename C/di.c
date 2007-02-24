@@ -227,6 +227,7 @@ extern int di_lib_debug;
    /* related entries.                                                    */
 #if ! defined (DI_DEFAULT_FORMAT)
 # define DI_DEFAULT_FORMAT      "smbuvpT"
+/* # define DI_DEFAULT_FORMAT      "MbuvpT" */ /* an alternative */
 #endif
 #if _lib_mnt_time
 # define DI_DEF_MOUNT_FORMAT    "MST\n\tI\n\tO"
@@ -273,7 +274,7 @@ typedef struct {
     zoneid_t    zoneid;
     char        name[ZONENAME_MAX];
     char        rootpath[MAXPATHLEN];
-    size_t      rootpathlen;
+    Size_t      rootpathlen;
 } zoneSummary_t;
 
 typedef struct {
@@ -691,8 +692,11 @@ printDiskInfo (diskInfo, diCount)
 {
     int                 i;
     di_DiskInfo         totals;
+    char                lastpool [DI_SPEC_NAME_LEN + 1];
+    Size_t              lastpoollen = { 0 };
+    int                 inpool = { 0 };
 
-
+    lastpool[0] = '\0';
     memset ((char *) &totals, '\0', sizeof (di_DiskInfo));
     totals.blockSize = 8192;
     strncpy (totals.name, GT("Total"), DI_NAME_LEN);
@@ -707,6 +711,7 @@ printDiskInfo (diskInfo, diCount)
     {
         sortArray ((char *) diskInfo, sizeof (di_DiskInfo), diCount, diCompare);
     }
+
 
     for (i = 0; i < diCount; ++i)
     {
@@ -733,13 +738,35 @@ printDiskInfo (diskInfo, diCount)
         if ((flags & DI_F_TOTAL) == DI_F_TOTAL &&
             (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
         {
+                /* is it a pooled filesystem type? */
+            if (strcmp (diskInfo [i].fsType, "zfs") == 0 ||
+                strcmp (diskInfo [i].fsType, "advfs") == 0)
+            {
+                if (lastpoollen == 0 ||
+                    strncmp (lastpool, diskInfo [i].special, lastpoollen) != 0)
+                {
+                    strncpy (lastpool, diskInfo [i].special, sizeof (lastpool));
+                    lastpoollen = strlen (lastpool);
+                    inpool = 0;
+                }
+            }
                 /* only total the disks that make sense! */
                 /* don't add memory filesystems to totals. */
             if (strcmp (diskInfo [i].fsType, "tmpfs") != 0 &&
                 strcmp (diskInfo [i].fsType, "mfs") != 0 &&
-                diskInfo [i].isReadOnly == FALSE)
+                diskInfo [i].isReadOnly == FALSE &&
+                inpool == 0)
             {
                 addTotals (&diskInfo [i], &totals);
+            }
+                /* is it a pooled filesystem type? */
+            if (strcmp (diskInfo [i].fsType, "zfs") == 0 ||
+                strcmp (diskInfo [i].fsType, "advfs") == 0)
+            {
+                if (strncmp (lastpool, diskInfo [i].special, lastpoollen) == 0)
+                {
+                    inpool = 1;
+                }
             }
         }
     }
