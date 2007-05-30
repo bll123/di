@@ -23,10 +23,12 @@ Copyright 1994-2006 Brad Lanam, Walnut Creek, CA
  *      h - "human readable" scaled alternative 1
  *      H - "human readable" scaled alternative 2
  *
- *  Sort types (by name is default):
+ *  Sort types:
+ *      N - name (default)
  *      n - none (mount order)
  *      s - special
- *      S - size (available blocks)
+ *      a - avail
+ *      t - type
  *      r - reverse sort
  *
  *  Format string values:
@@ -193,11 +195,13 @@ extern int di_lib_debug;
 #define DI_FMT_MOUNT_TIME      'I'
 #define DI_FMT_MOUNT_OPTIONS   'O'
 
-#define DI_SORT_NONE            0
-#define DI_SORT_NAME            1
-#define DI_SORT_SPECIAL         2
-#define DI_SORT_AVAIL           3
-
+#define DI_SORT_MAX             10
+#define DI_SORT_NONE            'n'
+#define DI_SORT_MOUNT           'm'
+#define DI_SORT_SPECIAL         's'
+#define DI_SORT_AVAIL           'a'
+#define DI_SORT_REVERSE         'r'
+#define DI_SORT_TYPE            't'
 #define DI_SORT_ASCENDING       1
 #define DI_SORT_DESCENDING      -1
 
@@ -302,7 +306,7 @@ typedef struct {
     char         dispBlockLabel [30];
     double       baseDispSize;
     __ulong      flags;
-    int          sortType;
+    char         sortType [DI_SORT_MAX + 1];
     int          sortOrder;
     int          posix_compat;
 } diOptions_t;
@@ -416,7 +420,7 @@ main (argc, argv)
     diopts->flags = 0;
 /* Linux users may want as the default: */
 /*    diopts->flags = { DI_F_INCLUDE_LOOPBACK }; */
-    diopts->sortType = DI_SORT_NAME;
+    strcpy (diopts->sortType, "m"); /* default - sort by mount point */
     diopts->sortOrder = DI_SORT_ASCENDING;
     diopts->posix_compat = 0;
     diopts->baseDispSize = DI_VAL_1024;
@@ -723,7 +727,7 @@ printDiskInfo (diData)
     char                lastpool [DI_SPEC_NAME_LEN + 1];
     Size_t              lastpoollen = { 0 };
     int                 inpool = { 0 };
-    int                 tempSortType;
+    char                tempSortType [DI_SORT_MAX + 1];
 
     lastpool[0] = '\0';
     memset ((char *) &totals, '\0', sizeof (diDiskInfo_t));
@@ -750,14 +754,11 @@ printDiskInfo (diData)
                 diData->count);
         memcpy ((char *) tempDiskInfo, (char *) diData->diskInfo,
                 sizeof (diDiskInfo_t) * diData->count);
-        if (diopts->sortType != DI_SORT_SPECIAL)
-        {
-            tempSortType = diopts->sortType;
-            diopts->sortType = DI_SORT_SPECIAL;
-            sortArray (diopts, (char *) tempDiskInfo, sizeof (diDiskInfo_t),
-                       diData->count, diCompare);
-            diopts->sortType = tempSortType;
-        }
+        strcpy (tempSortType, diopts->sortType);
+        strcpy (diopts->sortType, "s");
+        sortArray (diopts, (char *) tempDiskInfo, sizeof (diDiskInfo_t),
+                   diData->count, diCompare);
+        strcpy (diopts->sortType, tempSortType);
 
         for (i = 0; i < diData->count; ++i)
         {
@@ -814,7 +815,7 @@ printDiskInfo (diData)
         free ((char *) tempDiskInfo);
     } /* if the totals are to be printed */
 
-    if (diopts->sortType != DI_SORT_NONE)
+    if (strcmp (diopts->sortType, "n") != 0)
     {
         sortArray (diopts, (char *) diData->diskInfo, sizeof (diDiskInfo_t),
                     diData->count, diCompare);
@@ -863,11 +864,11 @@ printDiskInfo (diData)
 
 static void
 #if _proto_stdc
-printInfo (diDiskInfo_t *diskInfo, diOptions_t *diOptions)
+printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts)
 #else
-printInfo (diskInfo, diOptions)
+printInfo (diskInfo, diopts)
     diDiskInfo_t         *diskInfo;
-    diOptions_t        *diOptions;
+    diOptions_t        *diopts;
 #endif
 {
     _fs_size_t          used;
@@ -880,11 +881,11 @@ printInfo (diskInfo, diOptions)
 
     idx = 0;
     temp = 0.0;  /* gcc compile warning */
-    if (diOptions->dispBlockSize == DI_DISP_HR_2)
+    if (diopts->dispBlockSize == DI_DISP_HR_2)
     {
         idx = DI_ONE_MEG_SZTAB; /* default */
 
-        ptr = diOptions->formatString;
+        ptr = diopts->formatString;
         while (*ptr)
         {
             valid = FALSE;
@@ -949,7 +950,7 @@ printInfo (diskInfo, diOptions)
         }
     }
 
-    ptr = diOptions->formatString;
+    ptr = diopts->formatString;
     while (*ptr)
     {
         valid = TRUE;
@@ -964,19 +965,19 @@ printInfo (diskInfo, diOptions)
 
             case DI_FMT_MOUNT_FULL:
             {
-                printf (diOptions->mountFormat, diskInfo->name);
+                printf (diopts->mountFormat, diskInfo->name);
                 break;
             }
 
             case DI_FMT_BTOT:
             {
-                printBlocks (diOptions, diskInfo->totalBlocks, diskInfo->blockSize, idx);
+                printBlocks (diopts, diskInfo->totalBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BTOT_AVAIL:
             {
-                printBlocks (diOptions, diskInfo->totalBlocks -
+                printBlocks (diopts, diskInfo->totalBlocks -
                     (diskInfo->freeBlocks - diskInfo->availBlocks),
                     diskInfo->blockSize, idx);
                 break;
@@ -984,27 +985,27 @@ printInfo (diskInfo, diOptions)
 
             case DI_FMT_BUSED:
             {
-                printBlocks (diOptions, diskInfo->totalBlocks - diskInfo->freeBlocks,
+                printBlocks (diopts, diskInfo->totalBlocks - diskInfo->freeBlocks,
                             diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BCUSED:
             {
-                printBlocks (diOptions, diskInfo->totalBlocks - diskInfo->availBlocks,
+                printBlocks (diopts, diskInfo->totalBlocks - diskInfo->availBlocks,
                             diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printBlocks (diOptions, diskInfo->freeBlocks, diskInfo->blockSize, idx);
+                printBlocks (diopts, diskInfo->freeBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
-                printBlocks (diOptions, diskInfo->availBlocks, diskInfo->blockSize, idx);
+                printBlocks (diopts, diskInfo->availBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
@@ -1012,7 +1013,7 @@ printInfo (diskInfo, diOptions)
             {
                 used = diskInfo->totalBlocks - diskInfo->availBlocks;
                 totAvail = diskInfo->totalBlocks;
-                if (diOptions->posix_compat == 1)
+                if (diopts->posix_compat == 1)
                 {
                     printPerc (used, totAvail, DI_POSIX_PERC_FMT);
                 }
@@ -1027,7 +1028,7 @@ printInfo (diskInfo, diOptions)
             {
                 used = diskInfo->totalBlocks - diskInfo->freeBlocks;
                 totAvail = diskInfo->totalBlocks;
-                if (diOptions->posix_compat == 1)
+                if (diopts->posix_compat == 1)
                 {
                     printPerc (used, totAvail, DI_POSIX_PERC_FMT);
                 }
@@ -1043,7 +1044,7 @@ printInfo (diskInfo, diOptions)
                 used = diskInfo->totalBlocks - diskInfo->freeBlocks;
                 totAvail = diskInfo->totalBlocks -
                         (diskInfo->freeBlocks - diskInfo->availBlocks);
-                if (diOptions->posix_compat == 1)
+                if (diopts->posix_compat == 1)
                 {
                     printPerc (used, totAvail, DI_POSIX_PERC_FMT);
                 }
@@ -1074,19 +1075,19 @@ printInfo (diskInfo, diOptions)
 
             case DI_FMT_ITOT:
             {
-                printf (diOptions->inodeFormat, diskInfo->totalInodes);
+                printf (diopts->inodeFormat, diskInfo->totalInodes);
                 break;
             }
 
             case DI_FMT_IUSED:
             {
-                printf (diOptions->inodeFormat, diskInfo->totalInodes - diskInfo->freeInodes);
+                printf (diopts->inodeFormat, diskInfo->totalInodes - diskInfo->freeInodes);
                 break;
             }
 
             case DI_FMT_IFREE:
             {
-                printf (diOptions->inodeFormat, diskInfo->freeInodes);
+                printf (diopts->inodeFormat, diskInfo->freeInodes);
                 break;
             }
 
@@ -1106,7 +1107,7 @@ printInfo (diskInfo, diOptions)
 
             case DI_FMT_SPECIAL_FULL:
             {
-                printf (diOptions->specialFormat, diskInfo->special);
+                printf (diopts->specialFormat, diskInfo->special);
                 break;
             }
 
@@ -1118,20 +1119,20 @@ printInfo (diskInfo, diOptions)
 
             case DI_FMT_TYPE_FULL:
             {
-                printf (diOptions->typeFormat, diskInfo->fsType);
+                printf (diopts->typeFormat, diskInfo->fsType);
                 break;
             }
 
             case DI_FMT_MOUNT_OPTIONS:
             {
-                printf (diOptions->optFormat, diskInfo->options);
+                printf (diopts->optFormat, diskInfo->options);
                 break;
             }
 
             case DI_FMT_MOUNT_TIME:
             {
 #if _lib_mnt_time
-                printf (diOptions->mTimeFormat, diskInfo->mountTime);
+                printf (diopts->mTimeFormat, diskInfo->mountTime);
 #endif
                 break;
             }
@@ -1156,11 +1157,11 @@ printInfo (diskInfo, diOptions)
 
 static void
 #if _proto_stdc
-printBlocks (diOptions_t *diOptions, _fs_size_t blocks,
+printBlocks (diOptions_t *diopts, _fs_size_t blocks,
                         _fs_size_t blockSize, int idx)
 #else
-printBlocks (diOptions, blocks, blockSize, idx)
-    diOptions_t        *diOptions;
+printBlocks (diopts, blocks, blockSize, idx)
+    diOptions_t        *diopts;
     _fs_size_t          blocks;
     _fs_size_t          blockSize;
     int                 idx;
@@ -1174,17 +1175,17 @@ printBlocks (diOptions, blocks, blockSize, idx)
 
 
     suffix = "";
-    format = diOptions->blockFormat;
-    tdbs = diOptions->dispBlockSize;
+    format = diopts->blockFormat;
+    tdbs = diopts->dispBlockSize;
 
-    if (diOptions->dispBlockSize == DI_DISP_HR)
+    if (diopts->dispBlockSize == DI_DISP_HR)
     {
         temp = (double) blocks * (double) blockSize;
         idx = findDispSize (temp);
     }
 
-    if (diOptions->dispBlockSize == DI_DISP_HR ||
-        diOptions->dispBlockSize == DI_DISP_HR_2)
+    if (diopts->dispBlockSize == DI_DISP_HR ||
+        diopts->dispBlockSize == DI_DISP_HR_2)
     {
         if (idx == -1)
         {
@@ -1270,22 +1271,22 @@ addTotals (diskInfo, totals)
 
 static void
 #if _proto_stdc
-printTitle (diOptions_t *diOptions)
+printTitle (diOptions_t *diopts)
 #else
-printTitle (diOptions)
-    diOptions_t        *diOptions;
+printTitle (diopts)
+    diOptions_t        *diopts;
 #endif
 {
     char                *ptr;
     int                 valid;
 
-    if ((diOptions->flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
+    if ((diopts->flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
     {
         printf (GT("di ver %s Default Format: %s\n"),
                 DI_VERSION, DI_DEFAULT_FORMAT);
     }
 
-    ptr = diOptions->formatString;
+    ptr = diopts->formatString;
 
     while (*ptr)
     {
@@ -1301,13 +1302,13 @@ printTitle (diOptions)
 
             case DI_FMT_MOUNT_FULL:
             {
-                if (diOptions->posix_compat == 1)
+                if (diopts->posix_compat == 1)
                 {
-                    printf (diOptions->mountFormat, GT("Mounted On"));
+                    printf (diopts->mountFormat, GT("Mounted On"));
                 }
                 else
                 {
-                    printf (diOptions->mountFormat, GT("Mount"));
+                    printf (diopts->mountFormat, GT("Mount"));
                 }
                 break;
             }
@@ -1315,32 +1316,32 @@ printTitle (diOptions)
             case DI_FMT_BTOT:
             case DI_FMT_BTOT_AVAIL:
             {
-                printf (diOptions->blockLabelFormat, diOptions->dispBlockLabel);
+                printf (diopts->blockLabelFormat, diopts->dispBlockLabel);
                 break;
             }
 
             case DI_FMT_BUSED:
             case DI_FMT_BCUSED:
             {
-                printf (diOptions->blockLabelFormat, GT("Used"));
+                printf (diopts->blockLabelFormat, GT("Used"));
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printf (diOptions->blockLabelFormat, GT("Free"));
+                printf (diopts->blockLabelFormat, GT("Free"));
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
-                if (diOptions->posix_compat == 1)
+                if (diopts->posix_compat == 1)
                 {
-                    printf (diOptions->blockLabelFormat, GT("Available"));
+                    printf (diopts->blockLabelFormat, GT("Available"));
                 }
                 else
                 {
-                    printf (diOptions->blockLabelFormat, GT("Avail"));
+                    printf (diopts->blockLabelFormat, GT("Avail"));
                 }
                 break;
             }
@@ -1349,7 +1350,7 @@ printTitle (diOptions)
             case DI_FMT_BPERC_USED:
             case DI_FMT_BPERC_BSD:
             {
-                if (diOptions->posix_compat == 1)
+                if (diopts->posix_compat == 1)
                 {
                     printf (DI_POSIX_PERC_LBL_FMT, GT("Capacity"));
                 }
@@ -1369,19 +1370,19 @@ printTitle (diOptions)
 
             case DI_FMT_ITOT:
             {
-                printf (diOptions->inodeLabelFormat, GT("Inodes"));
+                printf (diopts->inodeLabelFormat, GT("Inodes"));
                 break;
             }
 
             case DI_FMT_IUSED:
             {
-                printf (diOptions->inodeLabelFormat, GT("Used"));
+                printf (diopts->inodeLabelFormat, GT("Used"));
                 break;
             }
 
             case DI_FMT_IFREE:
             {
-                printf (diOptions->inodeLabelFormat, GT("Free"));
+                printf (diopts->inodeLabelFormat, GT("Free"));
                 break;
             }
 
@@ -1399,7 +1400,7 @@ printTitle (diOptions)
 
             case DI_FMT_SPECIAL_FULL:
             {
-                printf (diOptions->specialFormat, GT("Filesystem"));
+                printf (diopts->specialFormat, GT("Filesystem"));
                 break;
             }
 
@@ -1411,20 +1412,20 @@ printTitle (diOptions)
 
             case DI_FMT_TYPE_FULL:
             {
-                printf (diOptions->typeFormat, GT("fs Type"));
+                printf (diopts->typeFormat, GT("fs Type"));
                 break;
             }
 
             case DI_FMT_MOUNT_OPTIONS:
             {
-                printf (diOptions->optFormat, GT("Options"));
+                printf (diopts->optFormat, GT("Options"));
                 break;
             }
 
             case DI_FMT_MOUNT_TIME:
             {
 #if _lib_mnt_time
-                printf (diOptions->mTimeFormat, GT("Mount Time"));
+                printf (diopts->mTimeFormat, GT("Mount Time"));
 #endif
                 break;
             }
@@ -1545,10 +1546,10 @@ checkFileInfo (diData, optidx, argc, argv)
 
 static void
 #if _proto_stdc
-sortArray (diOptions_t *diOptions, char *data, Size_t dataSize, int count, DI_SORT_FUNC compareFunc)
+sortArray (diOptions_t *diopts, char *data, Size_t dataSize, int count, DI_SORT_FUNC compareFunc)
 #else
-sortArray (diOptions, data, dataSize, count, compareFunc)
-    diOptions_t    *diOptions;
+sortArray (diopts, data, dataSize, count, compareFunc)
+    diOptions_t    *diopts;
     char            *data;
     Size_t          dataSize;
     int             count;
@@ -1557,6 +1558,7 @@ sortArray (diOptions, data, dataSize, count, compareFunc)
 {
     register int    j;
     char            *tempData;
+    char            *tempDataPtr;
     int             i;
     int             gap;
 
@@ -1585,20 +1587,23 @@ sortArray (diOptions, data, dataSize, count, compareFunc)
         {
             j = i - gap;
 
+            memcpy ((char *) tempData, (char *) &(data [i * dataSize]),
+                    dataSize);
             while (j >= 0 &&
-                compareFunc (diOptions,
-                    &(data [j * dataSize]), &(data [i * dataSize])) > 0)
+                compareFunc (diopts,
+                    &(data [j * dataSize]), tempData) > 0)
             {
-                memcpy ((char *) tempData, (char *) &(data [i * dataSize]),
-                        dataSize);
                 memcpy ((char *) &(data [(j + gap) * dataSize]),
                         (char *) &(data [j * dataSize]), dataSize);
-                memcpy ((char *) &(data [j * dataSize]),
-                        (char *) tempData, dataSize);
                 j -= gap;
             }
 
             j += gap;
+            if (j != i)
+            {
+                memcpy ((char *) &(data [j * dataSize]),
+                        (char *) tempData, dataSize);
+            }
         }
     }
 
@@ -1608,51 +1613,79 @@ sortArray (diOptions, data, dataSize, count, compareFunc)
 
 static int
 #if _proto_stdc
-diCompare (diOptions_t *diOptions, void *a, void *b)
+diCompare (diOptions_t *diopts, void *a, void *b)
 #else
-diCompare (diOptions, a, b)
-    diOptions_t    *diOptions;
+diCompare (diopts, a, b)
+    diOptions_t     *diopts;
     void            *a;
     void            *b;
 #endif
 {
-    diDiskInfo_t *di1;
-    diDiskInfo_t *di2;
-    int         rc;
+    diDiskInfo_t    *di1;
+    diDiskInfo_t    *di2;
+    int             rc;
+    int             order;
+    char            *ptr;
 
 
     di1 = (diDiskInfo_t *) a;
     di2 = (diDiskInfo_t *) b;
 
+        /* reset sort order to the default start value */
+    diopts->sortOrder = DI_SORT_ASCENDING;
     rc = 0;
-    switch (diOptions->sortType)
+    ptr = diopts->sortType;
+
+    while (*ptr)
     {
-        case DI_SORT_NONE:
+        switch (*ptr)
         {
-            break;
+            case DI_SORT_NONE:
+            {
+                break;
+            }
+
+            case DI_SORT_MOUNT:
+            {
+                rc = strcmp (di1->name, di2->name);
+                break;
+            }
+
+            case DI_SORT_REVERSE:
+            {
+                diopts->sortOrder *= -1;
+                break;
+            }
+
+            case DI_SORT_SPECIAL:
+            {
+                rc = strcmp (di1->special, di2->special);
+                break;
+            }
+
+            case DI_SORT_TYPE:
+            {
+                rc = strcmp (di1->fsType, di2->fsType);
+                break;
+            }
+
+            case DI_SORT_AVAIL:
+            {
+                rc = (int) ((di1->availBlocks * di1->blockSize) -
+                        (di2->availBlocks * di2->blockSize));
+                break;
+            }
+        } /* switch on sort type */
+
+        rc *= diopts->sortOrder;
+        if (rc != 0)
+        {
+            return rc;
         }
 
-        case DI_SORT_NAME:
-        {
-            rc = strcmp (di1->name, di2->name);
-            break;
-        }
+        ++ptr;
+    }
 
-        case DI_SORT_SPECIAL:
-        {
-            rc = strcmp (di1->special, di2->special);
-            break;
-        }
-
-        case DI_SORT_AVAIL:
-        {
-            rc = (int) ((di1->availBlocks * di1->blockSize) -
-                    (di2->availBlocks * di2->blockSize));
-            break;
-        }
-    } /* switch on sort type */
-
-    rc *= diOptions->sortOrder;
     return rc;
 }
 
@@ -2296,35 +2329,17 @@ processArgs (argc, argv, diData, dbsstr)
 
             case 's':
             {
-                while (*optarg)
+                strncpy (diopts->sortType, optarg, sizeof (diopts->sortType));
+                    /* for backwards compatibility                       */
+                    /* reverse by itself - change to reverse mount point */
+                if (strcmp (diopts->sortType, "r") == 0)
                 {
-                    switch (*optarg)
-                    {
-                        case 's':
-                        {
-                            diopts->sortType = DI_SORT_SPECIAL;
-                            break;
-                        }
-
-                        case 'n':
-                        {
-                            diopts->sortType = DI_SORT_NONE;
-                            break;
-                        }
-
-                        case 'a':
-                        {
-                            diopts->sortType = DI_SORT_AVAIL;
-                            break;
-                        }
-
-                        case 'r':
-                        {
-                            diopts->sortOrder = DI_SORT_DESCENDING;
-                            break;
-                        }
-                    }
-                    ++optarg;
+                    strcpy (diopts->sortType, "rm");
+                }
+                    /* add some sense to the sort order */
+                if (strcmp (diopts->sortType, "t") == 0)
+                {
+                    strcpy (diopts->sortType, "tm");
                 }
                 break;
             }
@@ -2649,11 +2664,11 @@ checkZone (diskInfo, zoneInfo, allFlag)
 
 static void
 #if _proto_stdc
-setDispBlockSize (char *ptr, diOptions_t *diOptions)
+setDispBlockSize (char *ptr, diOptions_t *diopts)
 #else
-setDispBlockSize (ptr)
+setDispBlockSize (ptr, diopts)
     char            *ptr;
-    diOptions_t     *diOptions;
+    diOptions_t     *diopts;
 #endif
 {
     int         len;
@@ -2745,16 +2760,16 @@ setDispBlockSize (ptr)
             case 'h':
             {
                 val = DI_DISP_HR;
-                strncpy (diOptions->dispBlockLabel, GT("Size"),
-                    sizeof (diOptions->dispBlockLabel));
+                strncpy (diopts->dispBlockLabel, GT("Size"),
+                    sizeof (diopts->dispBlockLabel));
                 break;
             }
 
             case 'H':
             {
                 val = DI_DISP_HR_2;
-                strncpy (diOptions->dispBlockLabel, GT("Size"),
-                    sizeof (diOptions->dispBlockLabel));
+                strncpy (diopts->dispBlockLabel, GT("Size"),
+                    sizeof (diopts->dispBlockLabel));
                 break;
             }
 
@@ -2767,7 +2782,7 @@ setDispBlockSize (ptr)
                 else
                 {
                     /* some unknown string value */
-                    val = diOptions->dispBlockSize;
+                    val = diopts->dispBlockSize;
                 }
                 break;
             }
@@ -2777,13 +2792,13 @@ setDispBlockSize (ptr)
         {
             if (val == 1.0)
             {
-                strncpy (diOptions->dispBlockLabel, GT(dispTable [idx].disp),
-                    sizeof (diOptions->dispBlockLabel));
+                strncpy (diopts->dispBlockLabel, GT(dispTable [idx].disp),
+                    sizeof (diopts->dispBlockLabel));
             }
             else
             {
-                Snprintf (SPF (diOptions->dispBlockLabel,
-                    sizeof (diOptions->dispBlockLabel), "%.0f %s"),
+                Snprintf (SPF (diopts->dispBlockLabel,
+                    sizeof (diopts->dispBlockLabel), "%.0f %s"),
                     val, GT(dispTable [idx].disp));
             }
             val *= dispTable [idx].size;
@@ -2799,8 +2814,8 @@ setDispBlockSize (ptr)
         {
             if (val == dispTable [i].size)
             {
-                strncpy (diOptions->dispBlockLabel, GT(dispTable [i].disp),
-                     sizeof (diOptions->dispBlockLabel));
+                strncpy (diopts->dispBlockLabel, GT(dispTable [i].disp),
+                     sizeof (diopts->dispBlockLabel));
                 ok = 1;
                 break;
             }
@@ -2808,23 +2823,23 @@ setDispBlockSize (ptr)
 
         if (ok == 0)
         {
-            Snprintf (SPF (diOptions->dispBlockLabel,
-                sizeof (diOptions->dispBlockLabel), "%.0fb"), val);
+            Snprintf (SPF (diopts->dispBlockLabel,
+                sizeof (diopts->dispBlockLabel), "%.0fb"), val);
         }
     }  /* some oddball block size */
 
-    if (diOptions->posix_compat == 1 && val == 512)
+    if (diopts->posix_compat == 1 && val == 512)
     {
-        strncpy (diOptions->dispBlockLabel, GT ("512-blocks"),
-            sizeof (diOptions->dispBlockLabel));
+        strncpy (diopts->dispBlockLabel, GT ("512-blocks"),
+            sizeof (diopts->dispBlockLabel));
     }
-    if (diOptions->posix_compat == 1 && val == 1024)
+    if (diopts->posix_compat == 1 && val == 1024)
     {
-        strncpy (diOptions->dispBlockLabel, GT ("1024-blocks"),
-            sizeof (diOptions->dispBlockLabel));
+        strncpy (diopts->dispBlockLabel, GT ("1024-blocks"),
+            sizeof (diopts->dispBlockLabel));
     }
 
-    diOptions->dispBlockSize = val;
+    diopts->dispBlockSize = val;
 }
 
 /* for debugging */
