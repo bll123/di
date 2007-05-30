@@ -131,11 +131,11 @@ typedef struct
     char            fsType [DI_TYPE_LEN + 1];       /* type of file system  */
     char            options [DI_OPT_LEN + 1];
     char            mountTime [DI_MNT_TIME_LEN + 1];
-} di_DiskInfo;
+} diDiskInfo_t;
 
-extern int  di_getDiskEntries      _((di_DiskInfo **, int *));
-extern void di_getDiskInfo         _((di_DiskInfo **, int *));
-extern void di_testRemoteDisk      _((di_DiskInfo *));
+extern int  di_getDiskEntries      _((diDiskInfo_t **, int *));
+extern void di_getDiskInfo         _((diDiskInfo_t **, int *));
+extern void di_testRemoteDisk      _((diDiskInfo_t *));
 extern void *Realloc               _((void *, Size_t));
 
 /* workaround for cygwin                                              */
