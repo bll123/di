@@ -4,11 +4,11 @@
 .\"
 .\" di.1
 .\"
-.\" Copyright 1994-2006 Brad Lanam  Walnut Creek CA USA
+.\" Copyright 1994-2007 Brad Lanam  Walnut Creek CA USA
 .\"
 .\" bll@gentoo.com
 .\"
-.TH di 1 "20 Nov 2005"
+.TH di 1 "30 May 2007"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -149,14 +149,14 @@ Output format is POSIX standard.
 .I sort\-type
 .br
 Use \fIsort\-type\fP to sort the output.
-The output of \fIdi\fP is normally sorted by name.  The output may
-be left unsorted (\fB-s\ n\fP command line switch) i.e. as it appears
-in the mount table or may be
-sorted by the special device name
-(\fB-s\ s\fP command line switch).  If the \fB-s \ r\fP command line
-switch is used, the sort order will be reversed.
-If \fIfile\fP is specified on the
-command line, no sorting is done.
+The output of \fIdi\fP is normally sorted by mount point.  The following
+sort flags may be used to change the sort order:
+m \- by mount point (default); n \- leave unsorted (as it appears in
+the mount table); s \- by special device name;
+t \- by filesystem type; r \- reverse the sort order.
+.IP
+These sort options may be combined in any order.  e.g.: di \-stsrm;
+di \-strsrm.
 .TP
 .B \-t
 Print a totals line below the list of file systems.
