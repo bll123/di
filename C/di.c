@@ -60,7 +60,7 @@ Copyright 1994-2006 Brad Lanam, Walnut Creek, CA
  *      I - mount time
  *      O - mount options.
  *
- *  System V.4 `/usr/bin/df -v` Has format: msbuf1 (w/-dp option: 512 byte blocks)
+ *  System V.4 `/usr/bin/df -v` Has format: msbuf1 (w/-P option: 512 byte blocks)
  *  System V.4 `/usr/bin/df -k` Has format: sbcvpm
  *  System V.4 `/usr/ucb/df`    Has format: sbuv2m
  *
@@ -204,7 +204,7 @@ extern int di_lib_debug;
 #define DI_UNKNOWN_DEV          -1L
 #define DI_LIST_SEP             ","
 #define DI_ARGV_SEP             " 	"  /* space, tab */
-#define DI_MAX_ARGV             30
+#define DI_MAX_ARGV             50
 
 #define DI_ALL_FORMAT           "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 #define DI_POSIX_FORMAT         "SbuvpM"
@@ -242,19 +242,17 @@ extern int di_lib_debug;
 #define DI_MOUNT_FMT            "%-15.15s"
 #define DI_SPEC_FMT             "%-18.18s"
 
-typedef int (*DI_SORT_FUNC) _((void *, void *));
-
 typedef struct
 {
-    int		    count;
-    char        **list;
-} iList;
+    int		        count;
+    char            **list;
+} iList_t;
 
 typedef struct
 {
     double          low;
     double          high;
-    double          dbs;
+    double          dbs;        /* display block size */
     char            *format;
     char            *suffix;
 } sizeTable_t;
@@ -272,8 +270,8 @@ typedef struct
 
 typedef struct {
     zoneid_t    zoneid;
-    char        name[ZONENAME_MAX];
-    char        rootpath[MAXPATHLEN];
+    char        name [ZONENAME_MAX];
+    char        rootpath [MAXPATHLEN];
     Size_t      rootpathlen;
 } zoneSummary_t;
 
@@ -286,43 +284,52 @@ typedef struct {
     int             globalIdx;
 } zoneInfo_t;
 
-static int          debug = { 0 };
-static __ulong      flags = { 0 };
-/* Linux users may want as the default: */
-/* static __ulong      flags = { DI_F_INCLUDE_LOOPBACK }; */
-static int          sortType = { DI_SORT_NAME };
-static int          sortOrder = { DI_SORT_ASCENDING };
-static int          posix_compat = { 0 };
+typedef struct {
+    char         *formatString;
+    char         mountFormat [20];
+    char         specialFormat [20];
+    char         typeFormat [20];
+    char         optFormat [20];
+    char         mTimeFormat [20];
+    int          width;
+    int          inodeWidth;
+    char         blockFormat [40];
+    char         blockFormatNR [40];   /* no radix */
+    char         blockLabelFormat [40];
+    char         inodeFormat [40];
+    char         inodeLabelFormat [40];
+    double       dispBlockSize;
+    char         dispBlockLabel [30];
+    double       baseDispSize;
+    __ulong      flags;
+    int          sortType;
+    int          sortOrder;
+    int          posix_compat;
+} diOptions_t;
 
-static char         *formatString = { DI_DEFAULT_FORMAT };
-static char         mountFormat [20];
-static char         specialFormat [20];
-static char         typeFormat [20];
-static char         optFormat [20];
-static char         mTimeFormat [20];
-static int          width = { 8 };
-static int          inodeWidth = { 7 };
-static char         blockFormat [40];
-static char         blockFormatNR [40];   /* no radix */
-static char         blockLabelFormat [40];
-static char         inodeFormat [40];
-static char         inodeLabelFormat [40];
-static double       dispBlockSize = { DI_VAL_1024 * DI_VAL_1024 };
-static char         dispBlockLabel [30];
-static double       baseDispSize;
+typedef struct {
+    diOptions_t     options;
+    diDiskInfo_t    *diskInfo;
+    int             count;
+    iList_t         ignoreList;
+    iList_t         includeList;
+    zoneInfo_t      zoneInfo;
+} diData_t;
+
+static int          debug = { 0 };
 
 static sizeTable_t sizeTable [] =
 {
-    { 0, 0, 1, blockFormatNR, " " },
-    { 0, 0, 0, blockFormat,   "k" },
+    { 0, 0, 1, (char *) NULL, " " },
+    { 0, 0, 0, (char *) NULL, "k" },
 #define DI_ONE_MEG_SZTAB   2
-    { 0, 0, 0, blockFormat,   "M" },
-    { 0, 0, 0, blockFormat,   "G" },
-    { 0, 0, 0, blockFormat,   "T" },
-    { 0, 0, 0, blockFormat,   "P" },
-    { 0, 0, 0, blockFormat,   "E" },
-    { 0, 0, 0, blockFormat,   "Z" },
-    { 0, 0, 0, blockFormat,   "Y" }
+    { 0, 0, 0, (char *) NULL, "M" },
+    { 0, 0, 0, (char *) NULL, "G" },
+    { 0, 0, 0, (char *) NULL, "T" },
+    { 0, 0, 0, (char *) NULL, "P" },
+    { 0, 0, 0, (char *) NULL, "E" },
+    { 0, 0, 0, (char *) NULL, "Z" },
+    { 0, 0, 0, (char *) NULL, "Y" }
 };
 #define DI_SIZETAB_SIZE (sizeof (sizeTable) / sizeof (sizeTable_t))
 
@@ -339,29 +346,31 @@ static dispTable_t dispTable [] =
 };
 #define DI_DISPTAB_SIZE (sizeof (dispTable) / sizeof (dispTable_t))
 
-static void cleanup             _((di_DiskInfo *, iList *, iList *, char *, zoneInfo_t *));
-static void printDiskInfo       _((di_DiskInfo *, int));
-static void printInfo           _((di_DiskInfo *));
-static void printBlocks          _((_fs_size_t, _fs_size_t, int));
-static void addTotals           _((di_DiskInfo *, di_DiskInfo *));
-static void printTitle          _((void));
-static void printPerc           _((_fs_size_t, _fs_size_t, char *));
-static void sortArray           _((char *, Size_t, int, DI_SORT_FUNC));
-static int  diCompare           _((void *, void *));
-static void getDiskStatInfo     _((di_DiskInfo *, int));
-static void getDiskSpecialInfo  _((di_DiskInfo *, int));
-static int  checkFileInfo       _((di_DiskInfo *, int, int, int, char *[]));
-static void preCheckDiskInfo    _((di_DiskInfo *, iList *, iList *, int, zoneInfo_t *));
-static void checkDiskInfo       _((di_DiskInfo *, iList *, int));
-static void usage               _((void));
-static void processArgs         _((int, char *[], iList *, iList *, char *, char *));
-static void parseList           _((iList *, char *));
-static void checkIgnoreList     _((di_DiskInfo *, iList *));
-static void checkIncludeList    _((di_DiskInfo *, iList *));
-static void checkZone           _((di_DiskInfo *, zoneInfo_t *, int));
-static void setDispBlockSize    _((char *));
+typedef int (*DI_SORT_FUNC) _((diOptions_t *, void *, void *));
+
+static void addTotals           _((diDiskInfo_t *, diDiskInfo_t *));
+static void checkDiskInfo       _((diData_t *));
+static int  checkFileInfo       _((diData_t *, int, int, char *[]));
+static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
+static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
+static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, int));
+static void cleanup             _((diData_t *, char *));
+static int  diCompare           _((diOptions_t *, void *, void *));
 static int  findDispSize        _((double));
+static void getDiskSpecialInfo  _((diData_t *));
+static void getDiskStatInfo     _((diData_t *));
 static char *getPrintFlagText   _((int));
+static void parseList           _((iList_t *, char *));
+static void preCheckDiskInfo    _((diData_t *));
+static void printDiskInfo       _((diData_t *));
+static void printInfo           _((diDiskInfo_t *, diOptions_t *));
+static void printBlocks          _((diOptions_t *, _fs_size_t, _fs_size_t, int));
+static void printTitle          _((diOptions_t *));
+static void printPerc           _((_fs_size_t, _fs_size_t, char *));
+static void processArgs         _((int, char *[], diData_t *, char *));
+static void setDispBlockSize    _((char *, diOptions_t *));
+static void sortArray           _((diOptions_t *, char *, Size_t, int, DI_SORT_FUNC));
+static void usage               _((void));
 #if ! _mth_fmod && ! _lib_fmod
  static double fmod _((double, double));
 #endif
@@ -375,21 +384,44 @@ main (argc, argv)
     char                *argv [];
 #endif
 {
-    di_DiskInfo         *diskInfo = { (di_DiskInfo *) NULL };
+    diData_t            diData;
+    diOptions_t         *diopts;
     int                 i;
-    int                 diCount = { 0 };
-    iList               ignoreList;
-    iList               includeList;
     char                *ptr;
     char                *argvptr;
     char                dbsstr [30];
-    zoneInfo_t          zoneInfo;
+
+        /* initialization */
+    diData.count = 0;
+
+    diData.diskInfo = (diDiskInfo_t *) NULL;
+
+    diData.ignoreList.count = 0;
+    diData.ignoreList.list = (char **) NULL;
+
+    diData.includeList.count = 0;
+    diData.includeList.list = (char **) NULL;
+
+    diData.zoneInfo.uid = geteuid ();
+    diData.zoneInfo.zoneDisplay [0] = '\0';
+    diData.zoneInfo.zoneCount = 0;
+    diData.zoneInfo.zones = (zoneSummary_t *) NULL;
+
+        /* options defaults */
+    diopts = &diData.options;
+    diopts->formatString = DI_DEFAULT_FORMAT;
+    diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
+    diopts->width = 8;
+    diopts->inodeWidth = 7;
+    diopts->flags = 0;
+/* Linux users may want as the default: */
+/*    diopts->flags = { DI_F_INCLUDE_LOOPBACK }; */
+    diopts->sortType = DI_SORT_NAME;
+    diopts->sortOrder = DI_SORT_ASCENDING;
+    diopts->posix_compat = 0;
+    diopts->baseDispSize = DI_VAL_1024;
 
     *dbsstr = '\0';
-    ignoreList.count = 0;
-    ignoreList.list = (char **) NULL;
-    includeList.count = 0;
-    includeList.list = (char **) NULL;
 
 #if _lib_setlocale && defined (LC_ALL)
     ptr = setlocale (LC_ALL, "");
@@ -398,18 +430,17 @@ main (argc, argv)
     ptr = bindtextdomain (PROG, DI_LOCALE_DIR);
     ptr = textdomain (PROG);
 #endif
-    baseDispSize = DI_VAL_1024;
 
     ptr = argv [0] + strlen (argv [0]) - 2;
     if (memcmp (ptr, MPROG, 2) == 0)
     {
-        formatString = DI_DEF_MOUNT_FORMAT;
+        diopts->formatString = DI_DEF_MOUNT_FORMAT;
     }
     else    /* don't use DIFMT env var if running mi. */
     {
         if ((ptr = getenv ("DIFMT")) != (char *) NULL)
         {
-            formatString = ptr;
+            diopts->formatString = ptr;
         }
     }
 
@@ -417,8 +448,8 @@ main (argc, argv)
     if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL)
     {
         strncpy (dbsstr, "512", sizeof (dbsstr));
-        formatString = DI_POSIX_FORMAT;
-        posix_compat = 1;
+        diopts->formatString = DI_POSIX_FORMAT;
+        diopts->posix_compat = 1;
     }
 
         /* bsd df */
@@ -432,11 +463,6 @@ main (argc, argv)
     {
         strncpy (dbsstr, ptr, sizeof (dbsstr));
     }
-
-    zoneInfo.uid = geteuid ();
-    zoneInfo.zoneDisplay [0] = '\0';
-    zoneInfo.zoneCount = 0;
-    zoneInfo.zones = (zoneSummary_t *) NULL;
 
     argvptr = (char *) NULL;
     if ((ptr = getenv ("DI_ARGS")) != (char *) NULL)
@@ -464,35 +490,36 @@ main (argc, argv)
                 nargv[nargc++] = tptr;
                 tptr = strtok ((char *) NULL, DI_ARGV_SEP);
             }
-            processArgs (nargc, nargv, &ignoreList, &includeList, dbsstr,
-                         zoneInfo.zoneDisplay);
+            processArgs (nargc, nargv, &diData, dbsstr);
             optind = ooptind;     /* reset so command line can be parsed */
             optarg = ooptarg;
         }
     }
 
-    processArgs (argc, argv, &ignoreList, &includeList, dbsstr,
-            zoneInfo.zoneDisplay);
+    processArgs (argc, argv, &diData, dbsstr);
 
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
     {
         zoneid_t        *zids = (zoneid_t *) NULL;
+        zoneInfo_t      *zi;
 
-        zoneInfo.myzoneid = getzoneid ();
+        zi = &diData.zoneInfo;
+        zi->myzoneid = getzoneid ();
 
-        if (zone_list (zids, &zoneInfo.zoneCount) == 0)
+        if (zone_list (zids, &zi->zoneCount) == 0)
         {
-            if (zoneInfo.zoneCount > 0)
+            if (zi->zoneCount > 0)
             {
-                zids = malloc (sizeof (zoneid_t) * zoneInfo.zoneCount);
+                zids = malloc (sizeof (zoneid_t) * zi->zoneCount);
                 if (zids == (zoneid_t *) NULL)
                 {
                     fprintf (stderr, "malloc failed in main() (1).  errno %d\n", errno);
                     exit (1);
                 }
-                zone_list (zids, &zoneInfo.zoneCount);
-                zoneInfo.zones = malloc (sizeof (zoneSummary_t) * zoneInfo.zoneCount);
-                if (zoneInfo.zones == (zoneSummary_t *) NULL)
+                zone_list (zids, &zi->zoneCount);
+                zi->zones = malloc (sizeof (zoneSummary_t) *
+                        zi->zoneCount);
+                if (zi->zones == (zoneSummary_t *) NULL)
                 {
                     fprintf (stderr, "malloc failed in main() (2).  errno %d\n", errno);
                     exit (1);
@@ -500,37 +527,34 @@ main (argc, argv)
             }
         }
 
-        zoneInfo.globalIdx = 0;
-        for (i = 0; i < zoneInfo.zoneCount; ++i)
+        zi->globalIdx = 0;
+        for (i = 0; i < zi->zoneCount; ++i)
         {
             int     len;
 
-            zoneInfo.zones[i].zoneid = zids[i];
+            zi->zones[i].zoneid = zids[i];
             len = zone_getattr (zids[i], ZONE_ATTR_ROOT,
-                    zoneInfo.zones[i].rootpath, MAXPATHLEN);
+                    zi->zones[i].rootpath, MAXPATHLEN);
             if (len >= 0)
             {
-                zoneInfo.zones[i].rootpathlen = len;
-                strncat (zoneInfo.zones[i].rootpath, "/", MAXPATHLEN - 1);
-                if (zoneInfo.zones[i].zoneid == 0)
+                zi->zones[i].rootpathlen = len;
+                strncat (zi->zones[i].rootpath, "/", MAXPATHLEN - 1);
+                if (zi->zones[i].zoneid == 0)
                 {
-                    zoneInfo.globalIdx = i;
+                    zi->globalIdx = i;
                 }
 
                 len = zone_getattr (zids[i], ZONE_ATTR_NAME,
-                        zoneInfo.zones[i].name, ZONENAME_MAX);
-                if (*zoneInfo.zoneDisplay == '\0' &&
-                    zoneInfo.myzoneid == zoneInfo.zones[i].zoneid)
+                        zi->zones[i].name, ZONENAME_MAX);
+                if (*zi->zoneDisplay == '\0' &&
+                    zi->myzoneid == zi->zones[i].zoneid)
                 {
-                    strncpy (zoneInfo.zoneDisplay, zoneInfo.zones[i].name,
-                             ZONENAME_MAX);
+                    strncpy (zi->zoneDisplay, zi->zones[i].name, ZONENAME_MAX);
                 }
                 if (debug > 4)
                 {
-                    printf ("zone:%d:%s:%s:\n",
-                            (int) zoneInfo.zones[i].zoneid,
-                            zoneInfo.zones[i].name,
-                            zoneInfo.zones[i].rootpath);
+                    printf ("zone:%d:%s:%s:\n", (int) zi->zones[i].zoneid,
+                            zi->zones[i].name, zi->zones[i].rootpath);
                 }
             }
         }
@@ -540,34 +564,40 @@ main (argc, argv)
 
     if (debug > 4)
     {
-        printf ("zone:my:%d:%s:glob:%d:\n", (int) zoneInfo.myzoneid,
-                zoneInfo.zoneDisplay, zoneInfo.globalIdx);
+        printf ("zone:my:%d:%s:glob:%d:\n", (int) diData.zoneInfo.myzoneid,
+                diData.zoneInfo.zoneDisplay, diData.zoneInfo.globalIdx);
     }
 #endif
 
         /* initialize dispTable array */
-    dispTable [0].size = baseDispSize;
+    dispTable [0].size = diopts->baseDispSize;
     for (i = 1; i < DI_DISPTAB_SIZE; ++i)
     {
-        dispTable [i].size = dispTable [i - 1].size * baseDispSize;
+        dispTable [i].size = dispTable [i - 1].size *
+                diopts->baseDispSize;
     }
-    strncpy (dispBlockLabel, GT(dispTable [DI_ONE_MEG].disp),  /* default */
-             sizeof (dispBlockLabel));
+        /* default - one meg */
+    strncpy (diopts->dispBlockLabel, GT(dispTable [DI_ONE_MEG].disp),
+             sizeof (diopts->dispBlockLabel));
 
         /* do this afterwards, because we need to know what the */
         /* user wants for baseDispSize                          */
-    setDispBlockSize (dbsstr);
+    setDispBlockSize (dbsstr, diopts);
 
         /* initialize display size tables */
-    sizeTable [0].high = baseDispSize;
-    sizeTable [1].low = baseDispSize;
-    sizeTable [1].high = baseDispSize * baseDispSize;
-    sizeTable [1].dbs = baseDispSize;
+    sizeTable [0].format = diopts->blockFormatNR;
+    sizeTable [1].format = diopts->blockFormat;
+
+    sizeTable [0].high = diopts->baseDispSize;
+    sizeTable [1].low = diopts->baseDispSize;
+    sizeTable [1].high = diopts->baseDispSize * diopts->baseDispSize;
+    sizeTable [1].dbs = diopts->baseDispSize;
     for (i = 2; i < DI_SIZETAB_SIZE; ++i)
     {
-        sizeTable [i].low = sizeTable [i - 1].low * baseDispSize;
-        sizeTable [i].high = sizeTable [i - 1].high * baseDispSize;
-        sizeTable [i].dbs = sizeTable [i - 1].dbs * baseDispSize;
+        sizeTable [i].format = diopts->blockFormat;
+        sizeTable [i].low = sizeTable [i - 1].low * diopts->baseDispSize;
+        sizeTable [i].high = sizeTable [i - 1].high * diopts->baseDispSize;
+        sizeTable [i].dbs = sizeTable [i - 1].dbs * diopts->baseDispSize;
     }
 
     if (debug > 0)
@@ -585,7 +615,7 @@ main (argc, argv)
             printf ("\n");
         }
 
-        printf ("dispBlockSize: %8.2f\n", dispBlockSize);
+        printf ("dispBlockSize: %8.2f\n", diopts->dispBlockSize);
         for (i = 0; i < DI_SIZETAB_SIZE; ++i)
         {
             printf ("i:%d ", i);
@@ -597,31 +627,33 @@ main (argc, argv)
         }
     }
 
-    if (di_getDiskEntries (&diskInfo, &diCount) < 0)
+        /* main processing */
+
+    if (di_getDiskEntries (&diData.diskInfo, &diData.count) < 0)
     {
-        cleanup (diskInfo, &ignoreList, &includeList, argvptr, &zoneInfo);
+        cleanup (&diData, argvptr);
         exit (1);
     }
 
-    preCheckDiskInfo (diskInfo, &ignoreList, &includeList, diCount, &zoneInfo);
+    preCheckDiskInfo (&diData);
     if (optind < argc)
     {
         int     rc;
 
-        getDiskStatInfo (diskInfo, diCount);
-        rc = checkFileInfo (diskInfo, diCount, optind, argc, argv);
+        getDiskStatInfo (&diData);
+        rc = checkFileInfo (&diData, optind, argc, argv);
         if (rc < 0)
         {
-            cleanup (diskInfo, &ignoreList, &includeList, argvptr, &zoneInfo);
+            cleanup (&diData, argvptr);
             exit (1);
         }
     }
-    di_getDiskInfo (&diskInfo, &diCount);
-    getDiskSpecialInfo (diskInfo, diCount);
-    checkDiskInfo (diskInfo, &includeList, diCount);
-    printDiskInfo (diskInfo, diCount);
+    di_getDiskInfo (&diData.diskInfo, &diData.count);
+    getDiskSpecialInfo (&diData);
+    checkDiskInfo (&diData);
+    printDiskInfo (&diData);
 
-    cleanup (diskInfo, &ignoreList, &includeList, argvptr, &zoneInfo);
+    cleanup (&diData, argvptr);
     exit (0);
 }
 
@@ -634,32 +666,28 @@ main (argc, argv)
 
 static void
 #if _proto_stdc
-cleanup (di_DiskInfo *diskInfo, iList *ignoreList, iList *includeList,
-            char *argvptr, zoneInfo_t *zoneInfo)
+cleanup (diData_t *diData, char *argvptr)
 #else
-cleanup (diskInfo, ignoreList, includeList, argvptr, zoneInfo)
-    di_DiskInfo     *diskInfo;
-    iList           *ignoreList;
-    iList           *includeList;
+cleanup (diData, argvptr)
+    diData_t        *diskInfo;
     char            *argvptr;
-    zoneInfo_t      *zoneInfo;
 #endif
 {
-    if (diskInfo != (di_DiskInfo *) NULL)
+    if (diData->diskInfo != (diDiskInfo_t *) NULL)
     {
-        free ((char *) diskInfo);
+        free ((char *) diData->diskInfo);
     }
 
-    if (ignoreList != (iList *) NULL && ignoreList->count > 0 &&
-        ignoreList->list != (char **) NULL)
+    if (diData->ignoreList.count > 0 &&
+        diData->ignoreList.list != (char **) NULL)
     {
-        free ((char *) ignoreList->list);
+        free ((char *) diData->ignoreList.list);
     }
 
-    if (includeList != (iList *) NULL && includeList->count > 0 &&
-        includeList->list != (char **) NULL)
+    if (diData->includeList.count > 0 &&
+        diData->includeList.list != (char **) NULL)
     {
-        free ((char *) includeList->list);
+        free ((char *) diData->includeList.list);
     }
 
     if (argvptr != (char *) NULL)
@@ -667,9 +695,9 @@ cleanup (diskInfo, ignoreList, includeList, argvptr, zoneInfo)
         free ((char *) argvptr);
     }
 
-    if (zoneInfo->zones != (zoneSummary_t *) NULL)
+    if (diData->zoneInfo.zones != (zoneSummary_t *) NULL)
     {
-        free ((void *) zoneInfo->zones);
+        free ((void *) diData->zoneInfo.zones);
     }
 }
 
@@ -683,67 +711,80 @@ cleanup (diskInfo, ignoreList, includeList, argvptr, zoneInfo)
 
 static void
 #if _proto_stdc
-printDiskInfo (di_DiskInfo *diskInfo, int diCount)
+printDiskInfo (diData_t *diData)
 #else
-printDiskInfo (diskInfo, diCount)
-    di_DiskInfo     *diskInfo;
-    int             diCount;
+printDiskInfo (diData)
+    diData_t        *diData;
 #endif
 {
     int                 i;
-    di_DiskInfo         totals;
+    diOptions_t         *diopts;
+    diDiskInfo_t        totals;
     char                lastpool [DI_SPEC_NAME_LEN + 1];
     Size_t              lastpoollen = { 0 };
     int                 inpool = { 0 };
     int                 tempSortType;
 
     lastpool[0] = '\0';
-    memset ((char *) &totals, '\0', sizeof (di_DiskInfo));
+    memset ((char *) &totals, '\0', sizeof (diDiskInfo_t));
     totals.blockSize = 8192;
     strncpy (totals.name, GT("Total"), DI_NAME_LEN);
     totals.printFlag = DI_PRNT_OK;
 
-    if ((flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
+    diopts = &diData->options;
+    if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
     {
-        printTitle ();
+        printTitle (diopts);
     }
 
-    if ((flags & DI_F_TOTAL) == DI_F_TOTAL &&
-            (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
+    if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL &&
+            (diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
     {
+            /* need to make a copy of the diskinfo array, as we */
+            /* want to preserve the sort order.                 */
+        diDiskInfo_t         *tempDiskInfo;
+
             /* in order to find the main pool entry,                */
             /* we must have the array sorted by special device name */
-        tempSortType = sortType;
-        sortType = DI_SORT_SPECIAL;
-        sortArray ((char *) diskInfo, sizeof (di_DiskInfo), diCount, diCompare);
-        sortType = tempSortType;
+        tempDiskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) *
+                diData->count);
+        memcpy ((char *) tempDiskInfo, (char *) diData->diskInfo,
+                sizeof (diDiskInfo_t) * diData->count);
+        if (diopts->sortType != DI_SORT_SPECIAL)
+        {
+            tempSortType = diopts->sortType;
+            diopts->sortType = DI_SORT_SPECIAL;
+            sortArray (diopts, (char *) tempDiskInfo, sizeof (diDiskInfo_t),
+                       diData->count, diCompare);
+            diopts->sortType = tempSortType;
+        }
 
-        for (i = 0; i < diCount; ++i)
+        for (i = 0; i < diData->count; ++i)
         {
             int ispooled = { 0 };
 
-            if (diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
-                diskInfo [i].printFlag == DI_PRNT_BAD ||
-                diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+            if (tempDiskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
+                tempDiskInfo [i].printFlag == DI_PRNT_BAD ||
+                tempDiskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
             {
                 continue;
             }
 
-            if (diskInfo [i].printFlag == DI_PRNT_IGNORE &&
-                (flags & DI_F_ALL) != DI_F_ALL)
+            if (tempDiskInfo [i].printFlag == DI_PRNT_IGNORE &&
+                (diopts->flags & DI_F_ALL) != DI_F_ALL)
             {
                 continue;
             }
 
                 /* is it a pooled filesystem type? */
-            if (strcmp (diskInfo [i].fsType, "zfs") == 0 ||
-                strcmp (diskInfo [i].fsType, "advfs") == 0)
+            if (strcmp (tempDiskInfo [i].fsType, "zfs") == 0 ||
+                strcmp (tempDiskInfo [i].fsType, "advfs") == 0)
             {
                 ispooled = 1;
                 if (lastpoollen == 0 ||
-                    strncmp (lastpool, diskInfo [i].special, lastpoollen) != 0)
+                    strncmp (lastpool, tempDiskInfo [i].special, lastpoollen) != 0)
                 {
-                    strncpy (lastpool, diskInfo [i].special, sizeof (lastpool));
+                    strncpy (lastpool, tempDiskInfo [i].special, sizeof (lastpool));
                     lastpoollen = strlen (lastpool);
                     inpool = 0;
                 }
@@ -752,57 +793,63 @@ printDiskInfo (diskInfo, diCount)
                 /* only total the disks that make sense!                    */
                 /* don't add memory filesystems to totals.                  */
                 /* only add the main pool to totals for pooled filesystems  */
-            if (strcmp (diskInfo [i].fsType, "tmpfs") != 0 &&
-                strcmp (diskInfo [i].fsType, "mfs") != 0 &&
-                diskInfo [i].isReadOnly == FALSE &&
+            if (strcmp (tempDiskInfo [i].fsType, "tmpfs") != 0 &&
+                strcmp (tempDiskInfo [i].fsType, "mfs") != 0 &&
+                tempDiskInfo [i].isReadOnly == FALSE &&
                 inpool == 0)
             {
-                addTotals (&diskInfo [i], &totals);
+                addTotals (&tempDiskInfo [i], &totals);
             }
 
                 /* is it a pooled filesystem type? */
             if (ispooled)
             {
-                if (strncmp (lastpool, diskInfo [i].special, lastpoollen) == 0)
+                if (strncmp (lastpool, tempDiskInfo [i].special, lastpoollen) == 0)
                 {
                     inpool = 1;
                 }
             }
         } /* for each entry */
+
+        free ((char *) tempDiskInfo);
     } /* if the totals are to be printed */
 
-    if (sortType != DI_SORT_NONE)
+    if (diopts->sortType != DI_SORT_NONE)
     {
-        sortArray ((char *) diskInfo, sizeof (di_DiskInfo), diCount, diCompare);
+        sortArray (diopts, (char *) diData->diskInfo, sizeof (diDiskInfo_t),
+                    diData->count, diCompare);
     }
 
-    for (i = 0; i < diCount; ++i)
+    for (i = 0; i < diData->count; ++i)
     {
+        diDiskInfo_t        *dinfo;
+
+        dinfo = &diData->diskInfo [i];
         if (debug > 5)
         {
-            printf ("pdi:%s:%s:\n", diskInfo[i].name,
-                getPrintFlagText ((int) diskInfo[i].printFlag));
+            printf ("pdi:%s:%s:\n", dinfo->name,
+                getPrintFlagText ((int) dinfo->printFlag));
         }
-        if (diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
-            diskInfo [i].printFlag == DI_PRNT_BAD ||
-            diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+        if (dinfo->printFlag == DI_PRNT_EXCLUDE ||
+            dinfo->printFlag == DI_PRNT_BAD ||
+            dinfo->printFlag == DI_PRNT_OUTOFZONE)
         {
             continue;
         }
 
-        if (diskInfo [i].printFlag == DI_PRNT_IGNORE &&
-            (flags & DI_F_ALL) != DI_F_ALL)
+        if (dinfo->printFlag == DI_PRNT_IGNORE &&
+            (diopts->flags & DI_F_ALL) != DI_F_ALL)
         {
             continue;
         }
 
-        printInfo (&diskInfo [i]);
+        printInfo (dinfo, diopts);
     }
 
-    if ((flags & DI_F_TOTAL) == DI_F_TOTAL &&
-            (flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
+    if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL &&
+            (diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
     {
-        printInfo (&totals);
+        printInfo (&totals, diopts);
     }
 }
 
@@ -816,10 +863,11 @@ printDiskInfo (diskInfo, diCount)
 
 static void
 #if _proto_stdc
-printInfo (di_DiskInfo *diskInfo)
+printInfo (diDiskInfo_t *diskInfo, diOptions_t *diOptions)
 #else
-printInfo (diskInfo)
-    di_DiskInfo         *diskInfo;
+printInfo (diskInfo, diOptions)
+    diDiskInfo_t         *diskInfo;
+    diOptions_t        *diOptions;
 #endif
 {
     _fs_size_t          used;
@@ -832,11 +880,11 @@ printInfo (diskInfo)
 
     idx = 0;
     temp = 0.0;  /* gcc compile warning */
-    if (dispBlockSize == DI_DISP_HR_2)
+    if (diOptions->dispBlockSize == DI_DISP_HR_2)
     {
         idx = DI_ONE_MEG_SZTAB; /* default */
 
-        ptr = formatString;
+        ptr = diOptions->formatString;
         while (*ptr)
         {
             valid = FALSE;
@@ -901,7 +949,7 @@ printInfo (diskInfo)
         }
     }
 
-    ptr = formatString;
+    ptr = diOptions->formatString;
     while (*ptr)
     {
         valid = TRUE;
@@ -916,19 +964,19 @@ printInfo (diskInfo)
 
             case DI_FMT_MOUNT_FULL:
             {
-                printf (mountFormat, diskInfo->name);
+                printf (diOptions->mountFormat, diskInfo->name);
                 break;
             }
 
             case DI_FMT_BTOT:
             {
-                printBlocks (diskInfo->totalBlocks, diskInfo->blockSize, idx);
+                printBlocks (diOptions, diskInfo->totalBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BTOT_AVAIL:
             {
-                printBlocks (diskInfo->totalBlocks -
+                printBlocks (diOptions, diskInfo->totalBlocks -
                     (diskInfo->freeBlocks - diskInfo->availBlocks),
                     diskInfo->blockSize, idx);
                 break;
@@ -936,27 +984,27 @@ printInfo (diskInfo)
 
             case DI_FMT_BUSED:
             {
-                printBlocks (diskInfo->totalBlocks - diskInfo->freeBlocks,
+                printBlocks (diOptions, diskInfo->totalBlocks - diskInfo->freeBlocks,
                             diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BCUSED:
             {
-                printBlocks (diskInfo->totalBlocks - diskInfo->availBlocks,
+                printBlocks (diOptions, diskInfo->totalBlocks - diskInfo->availBlocks,
                             diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printBlocks (diskInfo->freeBlocks, diskInfo->blockSize, idx);
+                printBlocks (diOptions, diskInfo->freeBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
-                printBlocks (diskInfo->availBlocks, diskInfo->blockSize, idx);
+                printBlocks (diOptions, diskInfo->availBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
@@ -964,7 +1012,7 @@ printInfo (diskInfo)
             {
                 used = diskInfo->totalBlocks - diskInfo->availBlocks;
                 totAvail = diskInfo->totalBlocks;
-                if (posix_compat == 1)
+                if (diOptions->posix_compat == 1)
                 {
                     printPerc (used, totAvail, DI_POSIX_PERC_FMT);
                 }
@@ -979,7 +1027,7 @@ printInfo (diskInfo)
             {
                 used = diskInfo->totalBlocks - diskInfo->freeBlocks;
                 totAvail = diskInfo->totalBlocks;
-                if (posix_compat == 1)
+                if (diOptions->posix_compat == 1)
                 {
                     printPerc (used, totAvail, DI_POSIX_PERC_FMT);
                 }
@@ -995,7 +1043,7 @@ printInfo (diskInfo)
                 used = diskInfo->totalBlocks - diskInfo->freeBlocks;
                 totAvail = diskInfo->totalBlocks -
                         (diskInfo->freeBlocks - diskInfo->availBlocks);
-                if (posix_compat == 1)
+                if (diOptions->posix_compat == 1)
                 {
                     printPerc (used, totAvail, DI_POSIX_PERC_FMT);
                 }
@@ -1026,19 +1074,19 @@ printInfo (diskInfo)
 
             case DI_FMT_ITOT:
             {
-                printf (inodeFormat, diskInfo->totalInodes);
+                printf (diOptions->inodeFormat, diskInfo->totalInodes);
                 break;
             }
 
             case DI_FMT_IUSED:
             {
-                printf (inodeFormat, diskInfo->totalInodes - diskInfo->freeInodes);
+                printf (diOptions->inodeFormat, diskInfo->totalInodes - diskInfo->freeInodes);
                 break;
             }
 
             case DI_FMT_IFREE:
             {
-                printf (inodeFormat, diskInfo->freeInodes);
+                printf (diOptions->inodeFormat, diskInfo->freeInodes);
                 break;
             }
 
@@ -1058,7 +1106,7 @@ printInfo (diskInfo)
 
             case DI_FMT_SPECIAL_FULL:
             {
-                printf (specialFormat, diskInfo->special);
+                printf (diOptions->specialFormat, diskInfo->special);
                 break;
             }
 
@@ -1070,20 +1118,20 @@ printInfo (diskInfo)
 
             case DI_FMT_TYPE_FULL:
             {
-                printf (typeFormat, diskInfo->fsType);
+                printf (diOptions->typeFormat, diskInfo->fsType);
                 break;
             }
 
             case DI_FMT_MOUNT_OPTIONS:
             {
-                printf (optFormat, diskInfo->options);
+                printf (diOptions->optFormat, diskInfo->options);
                 break;
             }
 
             case DI_FMT_MOUNT_TIME:
             {
 #if _lib_mnt_time
-                printf (mTimeFormat, diskInfo->mountTime);
+                printf (diOptions->mTimeFormat, diskInfo->mountTime);
 #endif
                 break;
             }
@@ -1108,9 +1156,11 @@ printInfo (diskInfo)
 
 static void
 #if _proto_stdc
-printBlocks (_fs_size_t blocks, _fs_size_t blockSize, int idx)
+printBlocks (diOptions_t *diOptions, _fs_size_t blocks,
+                        _fs_size_t blockSize, int idx)
 #else
-printBlocks (blocks, blockSize, idx)
+printBlocks (diOptions, blocks, blockSize, idx)
+    diOptions_t        *diOptions;
     _fs_size_t          blocks;
     _fs_size_t          blockSize;
     int                 idx;
@@ -1124,17 +1174,17 @@ printBlocks (blocks, blockSize, idx)
 
 
     suffix = "";
-    format = blockFormat;
-    tdbs = dispBlockSize;
+    format = diOptions->blockFormat;
+    tdbs = diOptions->dispBlockSize;
 
-    if (dispBlockSize == DI_DISP_HR)
+    if (diOptions->dispBlockSize == DI_DISP_HR)
     {
         temp = (double) blocks * (double) blockSize;
         idx = findDispSize (temp);
     }
 
-    if (dispBlockSize == DI_DISP_HR ||
-        dispBlockSize == DI_DISP_HR_2)
+    if (diOptions->dispBlockSize == DI_DISP_HR ||
+        diOptions->dispBlockSize == DI_DISP_HR_2)
     {
         if (idx == -1)
         {
@@ -1183,11 +1233,11 @@ findDispSize (siz)
 
 static void
 #if _proto_stdc
-addTotals (di_DiskInfo *diskInfo, di_DiskInfo *totals)
+addTotals (diDiskInfo_t *diskInfo, diDiskInfo_t *totals)
 #else
 addTotals (diskInfo, totals)
-    di_DiskInfo   *diskInfo;
-    di_DiskInfo   *totals;
+    diDiskInfo_t   *diskInfo;
+    diDiskInfo_t   *totals;
 #endif
 {
     double              mult;
@@ -1220,21 +1270,22 @@ addTotals (diskInfo, totals)
 
 static void
 #if _proto_stdc
-printTitle (void)
+printTitle (diOptions_t *diOptions)
 #else
-printTitle ()
+printTitle (diOptions)
+    diOptions_t        *diOptions;
 #endif
 {
     char                *ptr;
     int                 valid;
 
-    if ((flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
+    if ((diOptions->flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
     {
         printf (GT("di ver %s Default Format: %s\n"),
                 DI_VERSION, DI_DEFAULT_FORMAT);
     }
 
-    ptr = formatString;
+    ptr = diOptions->formatString;
 
     while (*ptr)
     {
@@ -1250,13 +1301,13 @@ printTitle ()
 
             case DI_FMT_MOUNT_FULL:
             {
-                if (posix_compat == 1)
+                if (diOptions->posix_compat == 1)
                 {
-                    printf (mountFormat, GT("Mounted On"));
+                    printf (diOptions->mountFormat, GT("Mounted On"));
                 }
                 else
                 {
-                    printf (mountFormat, GT("Mount"));
+                    printf (diOptions->mountFormat, GT("Mount"));
                 }
                 break;
             }
@@ -1264,32 +1315,32 @@ printTitle ()
             case DI_FMT_BTOT:
             case DI_FMT_BTOT_AVAIL:
             {
-                printf (blockLabelFormat, dispBlockLabel);
+                printf (diOptions->blockLabelFormat, diOptions->dispBlockLabel);
                 break;
             }
 
             case DI_FMT_BUSED:
             case DI_FMT_BCUSED:
             {
-                printf (blockLabelFormat, GT("Used"));
+                printf (diOptions->blockLabelFormat, GT("Used"));
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printf (blockLabelFormat, GT("Free"));
+                printf (diOptions->blockLabelFormat, GT("Free"));
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
-                if (posix_compat == 1)
+                if (diOptions->posix_compat == 1)
                 {
-                    printf (blockLabelFormat, GT("Available"));
+                    printf (diOptions->blockLabelFormat, GT("Available"));
                 }
                 else
                 {
-                    printf (blockLabelFormat, GT("Avail"));
+                    printf (diOptions->blockLabelFormat, GT("Avail"));
                 }
                 break;
             }
@@ -1298,7 +1349,7 @@ printTitle ()
             case DI_FMT_BPERC_USED:
             case DI_FMT_BPERC_BSD:
             {
-                if (posix_compat == 1)
+                if (diOptions->posix_compat == 1)
                 {
                     printf (DI_POSIX_PERC_LBL_FMT, GT("Capacity"));
                 }
@@ -1318,19 +1369,19 @@ printTitle ()
 
             case DI_FMT_ITOT:
             {
-                printf (inodeLabelFormat, GT("Inodes"));
+                printf (diOptions->inodeLabelFormat, GT("Inodes"));
                 break;
             }
 
             case DI_FMT_IUSED:
             {
-                printf (inodeLabelFormat, GT("Used"));
+                printf (diOptions->inodeLabelFormat, GT("Used"));
                 break;
             }
 
             case DI_FMT_IFREE:
             {
-                printf (inodeLabelFormat, GT("Free"));
+                printf (diOptions->inodeLabelFormat, GT("Free"));
                 break;
             }
 
@@ -1348,7 +1399,7 @@ printTitle ()
 
             case DI_FMT_SPECIAL_FULL:
             {
-                printf (specialFormat, GT("Filesystem"));
+                printf (diOptions->specialFormat, GT("Filesystem"));
                 break;
             }
 
@@ -1360,20 +1411,20 @@ printTitle ()
 
             case DI_FMT_TYPE_FULL:
             {
-                printf (typeFormat, GT("fs Type"));
+                printf (diOptions->typeFormat, GT("fs Type"));
                 break;
             }
 
             case DI_FMT_MOUNT_OPTIONS:
             {
-                printf (optFormat, GT("Options"));
+                printf (diOptions->optFormat, GT("Options"));
                 break;
             }
 
             case DI_FMT_MOUNT_TIME:
             {
 #if _lib_mnt_time
-                printf (mTimeFormat, GT("Mount Time"));
+                printf (diOptions->mTimeFormat, GT("Mount Time"));
 #endif
                 break;
             }
@@ -1431,12 +1482,10 @@ printPerc (used, totAvail, format)
 
 static int
 #if _proto_stdc
-checkFileInfo (di_DiskInfo *diskInfo, int diCount,
-        int optidx, int argc, char *argv [])
+checkFileInfo (diData_t *diData, int optidx, int argc, char *argv [])
 #else
-checkFileInfo (diskInfo, diCount, optidx, argc, argv)
-    di_DiskInfo         *diskInfo;
-    int                 diCount;
+checkFileInfo (diData, optidx, argc, argv)
+    diData_t            *diData;
     int                 optidx;
     int                 argc;
     char                *argv [];
@@ -1450,11 +1499,11 @@ checkFileInfo (diskInfo, diCount, optidx, argc, argv)
 
     rc = 0;
         /* turn everything off */
-    for (j = 0; j < diCount; ++j)
+    for (j = 0; j < diData->count; ++j)
     {
-        if (diskInfo [j].printFlag == DI_PRNT_OK)
+        if (diData->diskInfo [j].printFlag == DI_PRNT_OK)
         {
-            diskInfo [j].printFlag = DI_PRNT_IGNORE;
+            diData->diskInfo [j].printFlag = DI_PRNT_IGNORE;
         }
     }
 
@@ -1462,13 +1511,16 @@ checkFileInfo (diskInfo, diCount, optidx, argc, argv)
     {
         if (stat (argv [i], &statBuf) == 0)
         {
-            for (j = 0; j < diCount; ++j)
+            for (j = 0; j < diData->count; ++j)
             {
-                if (diskInfo [j].printFlag == DI_PRNT_IGNORE &&
-                    diskInfo [j].st_dev != DI_UNKNOWN_DEV &&
-                    (__ulong) statBuf.st_dev == diskInfo [j].st_dev)
+                diDiskInfo_t        *dinfo;
+
+                dinfo = &diData->diskInfo[j];
+                if (dinfo->printFlag == DI_PRNT_IGNORE &&
+                    dinfo->st_dev != DI_UNKNOWN_DEV &&
+                    (__ulong) statBuf.st_dev == dinfo->st_dev)
                 {
-                    diskInfo [j].printFlag = DI_PRNT_OK;
+                    dinfo->printFlag = DI_PRNT_OK;
                     break; /* out of inner for */
                 }
             }
@@ -1493,9 +1545,10 @@ checkFileInfo (diskInfo, diCount, optidx, argc, argv)
 
 static void
 #if _proto_stdc
-sortArray (char *data, Size_t dataSize, int count, DI_SORT_FUNC compareFunc)
+sortArray (diOptions_t *diOptions, char *data, Size_t dataSize, int count, DI_SORT_FUNC compareFunc)
 #else
-sortArray (data, dataSize, count, compareFunc)
+sortArray (diOptions, data, dataSize, count, compareFunc)
+    diOptions_t    *diOptions;
     char            *data;
     Size_t          dataSize;
     int             count;
@@ -1530,24 +1583,22 @@ sortArray (data, dataSize, count, compareFunc)
     {
         for (i = gap; i < count; ++i)
         {
-            memcpy ((char *) tempData, (char *) &(data [i * dataSize]),
-                    dataSize);
             j = i - gap;
 
             while (j >= 0 &&
-                compareFunc (&(data [j * dataSize]), tempData) > 0)
+                compareFunc (diOptions,
+                    &(data [j * dataSize]), &(data [i * dataSize])) > 0)
             {
+                memcpy ((char *) tempData, (char *) &(data [i * dataSize]),
+                        dataSize);
                 memcpy ((char *) &(data [(j + gap) * dataSize]),
                         (char *) &(data [j * dataSize]), dataSize);
+                memcpy ((char *) &(data [j * dataSize]),
+                        (char *) tempData, dataSize);
                 j -= gap;
             }
 
             j += gap;
-            if (j != i)
-            {
-                memcpy ((char *) &(data [j * dataSize]),
-                        (char *) tempData, dataSize);
-            }
         }
     }
 
@@ -1557,23 +1608,24 @@ sortArray (data, dataSize, count, compareFunc)
 
 static int
 #if _proto_stdc
-diCompare (void *a, void *b)
+diCompare (diOptions_t *diOptions, void *a, void *b)
 #else
-diCompare (a, b)
-    void        *a;
-    void        *b;
+diCompare (diOptions, a, b)
+    diOptions_t    *diOptions;
+    void            *a;
+    void            *b;
 #endif
 {
-    di_DiskInfo *di1;
-    di_DiskInfo *di2;
+    diDiskInfo_t *di1;
+    diDiskInfo_t *di2;
     int         rc;
 
 
-    di1 = (di_DiskInfo *) a;
-    di2 = (di_DiskInfo *) b;
+    di1 = (diDiskInfo_t *) a;
+    di2 = (diDiskInfo_t *) b;
 
     rc = 0;
-    switch (sortType)
+    switch (diOptions->sortType)
     {
         case DI_SORT_NONE:
         {
@@ -1600,7 +1652,7 @@ diCompare (a, b)
         }
     } /* switch on sort type */
 
-    rc *= sortOrder;
+    rc *= diOptions->sortOrder;
     return rc;
 }
 
@@ -1614,40 +1666,41 @@ diCompare (a, b)
 
 static void
 #if _proto_stdc
-getDiskStatInfo (di_DiskInfo *diskInfo, int diCount)
+getDiskStatInfo (diData_t *diData)
 #else
-getDiskStatInfo (diskInfo, diCount)
-    di_DiskInfo             *diskInfo;
-    int                     diCount;
+getDiskStatInfo (diData)
+    diData_t            *diData;
 #endif
 {
     int         i;
     struct stat statBuf;
 
-    for (i = 0; i < diCount; ++i)
+    for (i = 0; i < diData->count; ++i)
     {
+        diDiskInfo_t        *dinfo;
+
+        dinfo = &diData->diskInfo [i];
             /* don't try to stat devices that are not accessible */
-        if (diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
-            diskInfo [i].printFlag == DI_PRNT_BAD ||
-            diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+        if (dinfo->printFlag == DI_PRNT_EXCLUDE ||
+            dinfo->printFlag == DI_PRNT_BAD ||
+            dinfo->printFlag == DI_PRNT_OUTOFZONE)
         {
             continue;
         }
 
-        diskInfo [i].st_dev = (__ulong) DI_UNKNOWN_DEV;
+        dinfo->st_dev = (__ulong) DI_UNKNOWN_DEV;
 
-        if (stat (diskInfo [i].name, &statBuf) == 0)
+        if (stat (dinfo->name, &statBuf) == 0)
         {
-            diskInfo [i].st_dev = (__ulong) statBuf.st_dev;
+            dinfo->st_dev = (__ulong) statBuf.st_dev;
             if (debug > 2)
             {
-                printf ("dev: %s: %ld\n", diskInfo [i].name,
-                    diskInfo [i].st_dev);
+                printf ("dev: %s: %ld\n", dinfo->name, dinfo->st_dev);
             }
         }
         else
         {
-            fprintf (stderr, "stat: %s ", diskInfo [i].name);
+            fprintf (stderr, "stat: %s ", dinfo->name);
             perror ("");
         }
     }
@@ -1662,35 +1715,37 @@ getDiskStatInfo (diskInfo, diCount)
 
 static void
 #if _proto_stdc
-getDiskSpecialInfo (di_DiskInfo *diskInfo, int diCount)
+getDiskSpecialInfo (diData_t *diData)
 #else
-getDiskSpecialInfo (diskInfo, diCount)
-    di_DiskInfo         *diskInfo;
-    int                 diCount;
+getDiskSpecialInfo (diData)
+    diData_t            *diData;
 #endif
 {
     int         i;
     struct stat statBuf;
 
-    for (i = 0; i < diCount; ++i)
+    for (i = 0; i < diData->count; ++i)
     {
+        diDiskInfo_t        *dinfo;
+
+        dinfo = &diData->diskInfo [i];
            /* check for initial slash; otherwise we can pick up normal files */
-        if (*diskInfo [i].special == '/' &&
-            stat (diskInfo [i].special, &statBuf) == 0)
+        if (*(dinfo->special) == '/' &&
+            stat (dinfo->special, &statBuf) == 0)
         {
-            diskInfo [i].sp_dev = (__ulong) statBuf.st_dev;
-            diskInfo [i].sp_rdev = (__ulong) statBuf.st_rdev;
+            dinfo->sp_dev = (__ulong) statBuf.st_dev;
+            dinfo->sp_rdev = (__ulong) statBuf.st_rdev;
             if (debug > 2)
             {
                 printf ("special dev: %s: %ld rdev: %ld\n",
-                        diskInfo [i].special, diskInfo [i].sp_dev,
-                        diskInfo [i].sp_rdev);
+                        dinfo->special, dinfo->sp_dev,
+                        dinfo->sp_rdev);
             }
         }
         else
         {
-            diskInfo [i].sp_dev = 0;
-            diskInfo [i].sp_rdev = 0;
+            dinfo->sp_dev = 0;
+            dinfo->sp_rdev = 0;
         }
     }
 }
@@ -1704,45 +1759,47 @@ getDiskSpecialInfo (diskInfo, diCount)
 
 static void
 #if _proto_stdc
-checkDiskInfo (di_DiskInfo *diskInfo, iList *includeList, int diCount)
+checkDiskInfo (diData_t *diData)
 #else
-checkDiskInfo (diskInfo, includeList, diCount)
-    di_DiskInfo         *diskInfo;
-    iList               *includeList;
-    int                 diCount;
+checkDiskInfo (diData)
+    diData_t            *diData;
 #endif
 {
-    int           i;
-    int           j;
-    int           dupCount;
-    int           len;
-    int           maxMountString;
-    int           maxSpecialString;
-    int           maxTypeString;
-    int           maxOptString;
-    int           maxMntTimeString;
-    _fs_size_t    temp;
-    __ulong       sp_dev;
-    __ulong       sp_rdev;
+    int             i;
+    int             j;
+    int             dupCount;
+    int             len;
+    int             maxMountString;
+    int             maxSpecialString;
+    int             maxTypeString;
+    int             maxOptString;
+    int             maxMntTimeString;
+    _fs_size_t      temp;
+    __ulong         sp_dev;
+    __ulong         sp_rdev;
+    diOptions_t     *diopts;
 
 
-    maxMountString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 5;
-    maxSpecialString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 10;
-    maxTypeString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7;
-    maxOptString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7;
-    maxMntTimeString = (flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 26;
+    diopts = &diData->options;
+    maxMountString = (diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 5;
+    maxSpecialString = (diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 10;
+    maxTypeString = (diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7;
+    maxOptString = (diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7;
+    maxMntTimeString = (diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 26;
 
-    for (i = 0; i < diCount; ++i)
+    for (i = 0; i < diData->count; ++i)
     {
-        if (diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
-            diskInfo [i].printFlag == DI_PRNT_BAD ||
-            diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+        diDiskInfo_t        *dinfo;
+
+        dinfo = &diData->diskInfo[i];
+        if (dinfo->printFlag == DI_PRNT_EXCLUDE ||
+            dinfo->printFlag == DI_PRNT_BAD ||
+            dinfo->printFlag == DI_PRNT_OUTOFZONE)
         {
             if (debug > 2)
             {
                 printf ("chk: skipping(%s):%s\n",
-                    getPrintFlagText ((int) diskInfo[i].printFlag),
-                    diskInfo [i].name);
+                    getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
             }
             continue;
         }
@@ -1753,88 +1810,90 @@ checkDiskInfo (diskInfo, includeList, diCount)
         if (debug > 2)
         {
 #if _siz_long_long >= 8
-            printf ("chk: %s free: %llu\n", diskInfo [i].name,
-                diskInfo [i].freeBlocks);
+            printf ("chk: %s free: %llu\n", dinfo->name,
+                dinfo->freeBlocks);
 #else
-            printf ("chk: %s free: %lu\n", diskInfo [i].name,
-                diskInfo [i].freeBlocks);
+            printf ("chk: %s free: %lu\n", dinfo->name,
+                dinfo->freeBlocks);
 #endif
         }
-        if ((_s_fs_size_t) diskInfo [i].freeBlocks < 0L)
+        if ((_s_fs_size_t) dinfo->freeBlocks < 0L)
         {
-            diskInfo [i].freeBlocks = 0L;
+            dinfo->freeBlocks = 0L;
         }
-        if ((_s_fs_size_t) diskInfo [i].availBlocks < 0L)
+        if ((_s_fs_size_t) dinfo->availBlocks < 0L)
         {
-            diskInfo [i].availBlocks = 0L;
+            dinfo->availBlocks = 0L;
         }
 
         temp = (_fs_size_t) ~ 0;
-        if (diskInfo [i].totalInodes == temp)
+        if (dinfo->totalInodes == temp)
         {
-            diskInfo [i].totalInodes = 0;
-            diskInfo [i].freeInodes = 0;
-            diskInfo [i].availInodes = 0;
+            dinfo->totalInodes = 0;
+            dinfo->freeInodes = 0;
+            dinfo->availInodes = 0;
         }
 
-        if (diskInfo [i].printFlag == DI_PRNT_OK)
+        if (dinfo->printFlag == DI_PRNT_OK)
         {
             if (debug > 2)
             {
 #if _siz_long_long >= 8
-                printf ("chk: %s total: %lld\n", diskInfo [i].name,
-                        diskInfo [i].totalBlocks);
+                printf ("chk: %s total: %lld\n", dinfo->name,
+                        dinfo->totalBlocks);
 #else
-                printf ("chk: %s total: %ld\n", diskInfo [i].name,
-                        diskInfo [i].totalBlocks);
+                printf ("chk: %s total: %ld\n", dinfo->name,
+                        dinfo->totalBlocks);
 #endif
             }
-            if (diskInfo [i].totalBlocks <= 0L)
+            if (dinfo->totalBlocks <= 0L)
             {
-                diskInfo [i].printFlag = DI_PRNT_IGNORE;
+                dinfo->printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
                 {
                     printf ("chk: ignore: totalBlocks <= 0: %s\n",
-                            diskInfo [i].name);
+                            dinfo->name);
                 }
             }
         }
 
         /* make sure anything in the include list didn't get turned off */
-        checkIncludeList (&diskInfo [i], includeList);
+        checkIncludeList (dinfo, &diData->includeList);
     } /* for all disks */
 
-    if ((flags & DI_F_INCLUDE_LOOPBACK) != DI_F_INCLUDE_LOOPBACK)
+    if ((diopts->flags & DI_F_INCLUDE_LOOPBACK) != DI_F_INCLUDE_LOOPBACK)
     {
             /* this loop sets duplicate entries to be ignored. */
-        for (i = 0; i < diCount; ++i)
+        for (i = 0; i < diData->count; ++i)
         {
-            if (diskInfo [i].printFlag == DI_PRNT_IGNORE ||
-                diskInfo [i].printFlag == DI_PRNT_EXCLUDE ||
-                diskInfo [i].printFlag == DI_PRNT_BAD ||
-                diskInfo [i].printFlag == DI_PRNT_OUTOFZONE)
+            diDiskInfo_t        *dinfo;
+
+            dinfo = &diData->diskInfo[i];
+            if (dinfo->printFlag == DI_PRNT_IGNORE ||
+                dinfo->printFlag == DI_PRNT_EXCLUDE ||
+                dinfo->printFlag == DI_PRNT_BAD ||
+                dinfo->printFlag == DI_PRNT_OUTOFZONE)
             {
                 if (debug > 2)
                 {
                     printf ("chk: skipping(%s):%s\n",
-                        getPrintFlagText ((int) diskInfo[i].printFlag),
-                        diskInfo [i].name);
+                        getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
                 }
                 continue;
             }
 
                 /* don't need to bother checking real partitions */
                 /* don't bother if already ignored               */
-            if (diskInfo [i].sp_rdev != 0 &&
-                diskInfo [i].printFlag == DI_PRNT_OK)
+            if (dinfo->sp_rdev != 0 &&
+                dinfo->printFlag == DI_PRNT_OK)
             {
-                sp_dev = diskInfo [i].sp_dev;
-                sp_rdev = diskInfo [i].sp_rdev;
+                sp_dev = dinfo->sp_dev;
+                sp_rdev = dinfo->sp_rdev;
                 dupCount = 0;
 
-                for (j = 0; j < diCount; ++j)
+                for (j = 0; j < diData->count; ++j)
                 {
-                    if (diskInfo [j].sp_dev == sp_rdev)
+                    if (diData->diskInfo [j].sp_dev == sp_rdev)
                     {
                         ++dupCount;
                     }
@@ -1843,23 +1902,26 @@ checkDiskInfo (diskInfo, includeList, diCount)
                 if (debug > 2)
                 {
                     printf ("dup: chk: i: %s dev: %ld rdev: %ld dup: %d\n",
-                        diskInfo [i].name, sp_dev, sp_rdev, dupCount);
+                        dinfo->name, sp_dev, sp_rdev, dupCount);
                 }
 
-                for (j = 0; dupCount > 0 && j < diCount; ++j)
+                for (j = 0; dupCount > 0 && j < diData->count; ++j)
                 {
+                    diDiskInfo_t        *dinfob;
+
+                    dinfob = &diData->diskInfo [j];
                         /* don't reset flags! */
-                    if (diskInfo [j].sp_rdev == 0 &&
-                        diskInfo [j].sp_dev == sp_rdev &&
-                        diskInfo [j].printFlag == DI_PRNT_OK)
+                    if (dinfob->sp_rdev == 0 &&
+                        dinfob->sp_dev == sp_rdev &&
+                        dinfob->printFlag == DI_PRNT_OK)
                     {
-                        diskInfo [j].printFlag = DI_PRNT_IGNORE;
+                        dinfob->printFlag = DI_PRNT_IGNORE;
                         if (debug > 2)
                         {
                             printf ("chk: ignore: duplicate: %s of %s\n",
-                                    diskInfo [j].name, diskInfo [i].name);
+                                    dinfob->name, dinfo->name);
                             printf ("dup: ign: j: rdev: %ld dev: %ld\n",
-                                    diskInfo [j].sp_dev, diskInfo [j].sp_rdev);
+                                    dinfob->sp_dev, dinfob->sp_rdev);
                         }
                     }
                 } /* duplicate check for each disk */
@@ -1869,54 +1931,57 @@ checkDiskInfo (diskInfo, includeList, diCount)
                 if (debug > 2)
                 {
                     printf ("chk: dup: not checked: %s prnt: %d dev: %ld rdev: %ld\n",
-                            diskInfo [i].name, diskInfo [i].printFlag,
-                            diskInfo [i].sp_dev, diskInfo [i].sp_rdev);
+                            dinfo->name, dinfo->printFlag,
+                            dinfo->sp_dev, dinfo->sp_rdev);
                 }
             }
         } /* for each disk */
     } /* if the duplicate loopback mounts are to be excluded */
 
-    if (posix_compat == 1)
+    if (diopts->posix_compat == 1)
     {
         /* Mounted On */
         len = strlen (GT("Mounted On"));
         maxMountString = maxMountString < len ? len : maxMountString;
-        len = strlen (dispBlockLabel);
-        width = width < len ? len : width;
+        len = strlen (diopts->dispBlockLabel);
+        diopts->width = diopts->width < len ? len : diopts->width;
     }
 
         /* this loop gets the max string lengths */
-    for (i = 0; i < diCount; ++i)
+    for (i = 0; i < diData->count; ++i)
     {
-        if (diskInfo [i].printFlag == DI_PRNT_OK ||
-            (diskInfo [i].printFlag == DI_PRNT_IGNORE &&
-             (flags & DI_F_ALL) == DI_F_ALL))
+        diDiskInfo_t        *dinfo;
+
+        dinfo = &diData->diskInfo[i];
+        if (dinfo->printFlag == DI_PRNT_OK ||
+            (dinfo->printFlag == DI_PRNT_IGNORE &&
+             (diopts->flags & DI_F_ALL) == DI_F_ALL))
         {
-            len = strlen (diskInfo [i].name);
+            len = strlen (dinfo->name);
             if (len > maxMountString)
             {
                 maxMountString = len;
             }
 
-            len = strlen (diskInfo [i].special);
+            len = strlen (dinfo->special);
             if (len > maxSpecialString)
             {
                 maxSpecialString = len;
             }
 
-            len = strlen (diskInfo [i].fsType);
+            len = strlen (dinfo->fsType);
             if (len > maxTypeString)
             {
                 maxTypeString = len;
             }
 
-            len = strlen (diskInfo [i].options);
+            len = strlen (dinfo->options);
             if (len > maxOptString)
             {
                 maxOptString = len;
             }
 
-            len = strlen (diskInfo [i].mountTime);
+            len = strlen (dinfo->mountTime);
             if (len > maxMntTimeString)
             {
                 maxMntTimeString = len;
@@ -1924,51 +1989,55 @@ checkDiskInfo (diskInfo, includeList, diCount)
         } /* if we are printing this item */
     } /* for all disks */
 
-    Snprintf (SPF(mountFormat, sizeof (mountFormat), "%%-%d.%ds"),
+    Snprintf (SPF(diopts->mountFormat, sizeof (diopts->mountFormat), "%%-%d.%ds"),
               maxMountString, maxMountString);
-    Snprintf (SPF(specialFormat, sizeof (specialFormat), "%%-%d.%ds"),
+    Snprintf (SPF(diopts->specialFormat, sizeof (diopts->specialFormat), "%%-%d.%ds"),
               maxSpecialString, maxSpecialString);
-    Snprintf (SPF(typeFormat, sizeof (typeFormat), "%%-%d.%ds"),
+    Snprintf (SPF(diopts->typeFormat, sizeof (diopts->typeFormat), "%%-%d.%ds"),
               maxTypeString, maxTypeString);
-    Snprintf (SPF(optFormat, sizeof (optFormat), "%%-%d.%ds"),
+    Snprintf (SPF(diopts->optFormat, sizeof (diopts->optFormat), "%%-%d.%ds"),
               maxOptString, maxOptString);
-    Snprintf (SPF(mTimeFormat, sizeof (mTimeFormat), "%%-%d.%ds"),
+    Snprintf (SPF(diopts->mTimeFormat, sizeof (diopts->mTimeFormat), "%%-%d.%ds"),
               maxMntTimeString, maxMntTimeString);
 
-    if (dispBlockSize == DI_DISP_HR ||
-        dispBlockSize == DI_DISP_HR_2)
+    if (diopts->dispBlockSize == DI_DISP_HR ||
+        diopts->dispBlockSize == DI_DISP_HR_2)
     {
-        --width;
+        --diopts->width;
     }
 
-    if (dispBlockSize != DI_DISP_HR &&
-        dispBlockSize != DI_DISP_HR_2 &&
-        (dispBlockSize > 0 && dispBlockSize <= DI_VAL_1024))
+    if (diopts->dispBlockSize != DI_DISP_HR &&
+        diopts->dispBlockSize != DI_DISP_HR_2 &&
+        (diopts->dispBlockSize > 0 && diopts->dispBlockSize <= DI_VAL_1024))
     {
-        Snprintf (SPF(blockFormat, sizeof (blockFormat), "%%%d.0f%%s"), width);
+        Snprintf (SPF(diopts->blockFormat,
+                  sizeof (diopts->blockFormat), "%%%d.0f%%s"), diopts->width);
     }
     else
     {
-        Snprintf (SPF(blockFormatNR, sizeof (blockFormatNR), "%%%d.0f%%s"),
-                  width);
-        Snprintf (SPF(blockFormat, sizeof (blockFormat), "%%%d.1f%%s"), width);
+        Snprintf (SPF(diopts->blockFormatNR,
+                  sizeof (diopts->blockFormatNR), "%%%d.0f%%s"), diopts->width);
+        Snprintf (SPF(diopts->blockFormat,
+                  sizeof (diopts->blockFormat), "%%%d.1f%%s"), diopts->width);
     }
 
-    if (dispBlockSize == DI_DISP_HR ||
-        dispBlockSize == DI_DISP_HR_2)
+    if (diopts->dispBlockSize == DI_DISP_HR ||
+        diopts->dispBlockSize == DI_DISP_HR_2)
     {
-        ++width;
+        ++diopts->width;
     }
 
-    Snprintf (SPF(blockLabelFormat, sizeof (blockLabelFormat), "%%%ds"),
-              width);
+    Snprintf (SPF(diopts->blockLabelFormat,
+              sizeof (diopts->blockLabelFormat), "%%%ds"), diopts->width);
 #if _siz_long_long >= 8
-    Snprintf (SPF(inodeFormat, sizeof (inodeFormat), "%%%dllu"), inodeWidth);
+    Snprintf (SPF(diopts->inodeFormat,
+              sizeof (diopts->inodeFormat), "%%%dllu"), diopts->inodeWidth);
 #else
-    Snprintf (SPF(inodeFormat, sizeof (inodeFormat), "%%%dlu"), inodeWidth);
+    Snprintf (SPF(diopts->inodeFormat,
+              sizeof (diopts->inodeFormat), "%%%dlu"), diopts->inodeWidth);
 #endif
-    Snprintf (SPF(inodeLabelFormat, sizeof (inodeLabelFormat), "%%%ds"),
-              inodeWidth);
+    Snprintf (SPF(diopts->inodeLabelFormat,
+              sizeof (diopts->inodeLabelFormat), "%%%ds"), diopts->inodeWidth);
 }
 
 /*
@@ -1982,54 +2051,54 @@ checkDiskInfo (diskInfo, includeList, diCount)
 
 static void
 #if _proto_stdc
-preCheckDiskInfo (di_DiskInfo *diskInfo, iList *ignoreList,
-        iList *includeList, int diCount, zoneInfo_t *zoneInfo)
+preCheckDiskInfo (diData_t *diData)
 #else
-preCheckDiskInfo (diskInfo, ignoreList, includeList, diCount, zoneInfo)
-    di_DiskInfo         *diskInfo;
-    iList               *ignoreList;
-    iList               *includeList;
-    int                 diCount;
-    zoneInfo_t          *zoneInfo;
+preCheckDiskInfo (diData)
+    diData_t            *diData;
 #endif
 {
-    int           i;
+    int             i;
+    diOptions_t     *diopts;
 
-    for (i = 0; i < diCount; ++i)
+    diopts = &diData->options;
+    for (i = 0; i < diData->count; ++i)
     {
+        diDiskInfo_t        *dinfo;
+
+        dinfo = &diData->diskInfo[i];
         if (debug > 4)
         {
-            printf ("## prechk:%s:\n", diskInfo[i].name);
+            printf ("## prechk:%s:\n", dinfo->name);
         }
-        checkZone (&diskInfo [i], zoneInfo,
-            ((flags & DI_F_ALL) == DI_F_ALL));
+        checkZone (dinfo, &diData->zoneInfo,
+            ((diopts->flags & DI_F_ALL) == DI_F_ALL));
 
-        if (diskInfo [i].printFlag == DI_PRNT_OK)
+        if (dinfo->printFlag == DI_PRNT_OK)
         {
                 /* don't bother w/this check is all flag is set. */
-            if ((flags & DI_F_ALL) != DI_F_ALL)
+            if ((diopts->flags & DI_F_ALL) != DI_F_ALL)
             {
-                di_testRemoteDisk (&diskInfo [i]);
+                di_testRemoteDisk (dinfo);
 
-                if (diskInfo [i].isLocal == FALSE &&
-                        (flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
+                if (dinfo->isLocal == FALSE &&
+                        (diopts->flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
                 {
-                    diskInfo [i].printFlag = DI_PRNT_IGNORE;
+                    dinfo->printFlag = DI_PRNT_IGNORE;
                     if (debug > 2)
                     {
                         printf ("prechk: ignore: remote disk; local flag set: %s\n",
-                            diskInfo [i].name);
+                            dinfo->name);
                     }
                 }
             }
         }
 
-        if (diskInfo [i].printFlag == DI_PRNT_OK ||
-            diskInfo [i].printFlag == DI_PRNT_IGNORE)
+        if (dinfo->printFlag == DI_PRNT_OK ||
+            dinfo->printFlag == DI_PRNT_IGNORE)
         {
             /* do do these checks to override the all flag */
-            checkIgnoreList (&diskInfo [i], ignoreList);
-            checkIncludeList (&diskInfo [i], includeList);
+            checkIgnoreList (dinfo, &diData->ignoreList);
+            checkIncludeList (dinfo, &diData->includeList);
         }
     } /* for all disks */
 }
@@ -2076,25 +2145,24 @@ usage ()
 
 static void
 #if _proto_stdc
-processArgs (int argc, char *argv [],
-             iList *ignoreList,
-             iList *includeList,
-             char *dbsstr,
-             char *zoneDisplay)
+processArgs (int argc,
+             char *argv [],
+             diData_t *diData,
+             char *dbsstr)
 #else
-processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
-    int         argc;
-    char        *argv [];
-    iList       *ignoreList;
-    iList       *includeList;
-    char        *dbsstr;
-    char        *zoneDisplay;
+processArgs (argc, argv, diData, dbsstr)
+    int             argc;
+    char            *argv [];
+    diData_t        *diData;
+    char            *dbsstr;
 #endif
 {
     int         ch;
     int         hasdashk;
+    diOptions_t *diopts;
 
 
+    diopts = &diData->options;
     hasdashk = 0;
     while ((ch = getopt (argc, argv,
         "Aab:B:d:D:f:F:ghHi:I:klLmnPs:tvw:W:x:X:z:Z")) != -1)
@@ -2103,14 +2171,14 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
         {
             case 'A':   /* for debugging */
             {
-                formatString = DI_ALL_FORMAT;
+                diopts->formatString = DI_ALL_FORMAT;
                 break;
             }
 
             case 'a':
             {
-                flags |= DI_F_ALL;
-                strcpy (zoneDisplay, "all");
+                diopts->flags |= DI_F_ALL;
+                strcpy (diData->zoneInfo.zoneDisplay, "all");
                 break;
             }
 
@@ -2119,15 +2187,15 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
             {
                 if (isdigit ((int) (*optarg)))
                 {
-                    baseDispSize = atof (optarg);
+                    diopts->baseDispSize = atof (optarg);
                 }
                 else if (*optarg == 'k')
                 {
-                    baseDispSize = DI_VAL_1024;
+                    diopts->baseDispSize = DI_VAL_1024;
                 }
                 else if (*optarg == 'd')
                 {
-                    baseDispSize = DI_VAL_1000;
+                    diopts->baseDispSize = DI_VAL_1000;
                 }
                 break;
             }
@@ -2148,7 +2216,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
 
             case 'f':
             {
-                formatString = optarg;
+                diopts->formatString = optarg;
                 break;
             }
 
@@ -2179,14 +2247,14 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
             case 'i':  /* backwards compatibility */
             case 'x':  /* preferred */
             {
-                parseList (ignoreList, optarg);
+                parseList (&diData->ignoreList, optarg);
                 break;
             }
 
             case 'F':  /* compatibility w/other df */
             case 'I':
             {
-                parseList (includeList, optarg);
+                parseList (&diData->includeList, optarg);
                 break;
             }
 
@@ -2199,19 +2267,19 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
 
             case 'l':
             {
-                flags |= DI_F_LOCAL_ONLY;
+                diopts->flags |= DI_F_LOCAL_ONLY;
                 break;
             }
 
             case 'L':
             {
-                flags |= DI_F_INCLUDE_LOOPBACK;
+                diopts->flags |= DI_F_INCLUDE_LOOPBACK;
                 break;
             }
 
             case 'n':
             {
-                flags |= DI_F_NO_HEADER;
+                diopts->flags |= DI_F_NO_HEADER;
                 break;
             }
 
@@ -2221,8 +2289,8 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
                 {
                     strncpy (dbsstr, "512", sizeof (dbsstr));
                 }
-                formatString = DI_POSIX_FORMAT;
-                posix_compat = 1;
+                diopts->formatString = DI_POSIX_FORMAT;
+                diopts->posix_compat = 1;
                 break;
             }
 
@@ -2234,25 +2302,25 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
                     {
                         case 's':
                         {
-                            sortType = DI_SORT_SPECIAL;
+                            diopts->sortType = DI_SORT_SPECIAL;
                             break;
                         }
 
                         case 'n':
                         {
-                            sortType = DI_SORT_NONE;
+                            diopts->sortType = DI_SORT_NONE;
                             break;
                         }
 
                         case 'a':
                         {
-                            sortType = DI_SORT_AVAIL;
+                            diopts->sortType = DI_SORT_AVAIL;
                             break;
                         }
 
                         case 'r':
                         {
-                            sortOrder = DI_SORT_DESCENDING;
+                            diopts->sortOrder = DI_SORT_DESCENDING;
                             break;
                         }
                     }
@@ -2263,7 +2331,7 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
 
             case 't':
             {
-                flags |= DI_F_TOTAL;
+                diopts->flags |= DI_F_TOTAL;
                 break;
             }
 
@@ -2274,13 +2342,13 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
 
             case 'w':
             {
-                width = atoi (optarg);
+                diopts->width = atoi (optarg);
                 break;
             }
 
             case 'W':
             {
-                inodeWidth = atoi (optarg);
+                diopts->inodeWidth = atoi (optarg);
                 break;
             }
 
@@ -2288,22 +2356,22 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
             {
                 debug = atoi (optarg);
                 di_lib_debug = debug;
-                flags |= DI_F_DEBUG_HDR | DI_F_TOTAL;
-                flags &= ~ DI_F_NO_HEADER;
-                width = 10;
-                inodeWidth = 10;
+                diopts->flags |= DI_F_DEBUG_HDR | DI_F_TOTAL;
+                diopts->flags &= ~ DI_F_NO_HEADER;
+                diopts->width = 10;
+                diopts->inodeWidth = 10;
                 break;
             }
 
             case 'z':
             {
-                strcpy (zoneDisplay, optarg);
+                strcpy (diData->zoneInfo.zoneDisplay, optarg);
                 break;
             }
 
             case 'Z':
             {
-                strcpy (zoneDisplay, "all");
+                strcpy (diData->zoneInfo.zoneDisplay, "all");
                 break;
             }
 
@@ -2318,10 +2386,10 @@ processArgs (argc, argv, ignoreList, includeList, dbsstr, zoneDisplay)
 
 static void
 #if _proto_stdc
-parseList (iList *list, char *str)
+parseList (iList_t *list, char *str)
 #else
 parseList (list, str)
-    iList       *list;
+    iList_t       *list;
     char        *str;
 #endif
 {
@@ -2386,11 +2454,11 @@ parseList (list, str)
 
 static void
 #if _proto_stdc
-checkIgnoreList (di_DiskInfo *diskInfo, iList *ignoreList)
+checkIgnoreList (diDiskInfo_t *diskInfo, iList_t *ignoreList)
 #else
 checkIgnoreList (diskInfo, ignoreList)
-    di_DiskInfo     *diskInfo;
-    iList           *ignoreList;
+    diDiskInfo_t     *diskInfo;
+    iList_t           *ignoreList;
 #endif
 {
     char            *ptr;
@@ -2423,11 +2491,11 @@ checkIgnoreList (diskInfo, ignoreList)
 
 static void
 #if _proto_stdc
-checkIncludeList (di_DiskInfo *diskInfo, iList *includeList)
+checkIncludeList (diDiskInfo_t *diskInfo, iList_t *includeList)
 #else
 checkIncludeList (diskInfo, includeList)
-    di_DiskInfo     *diskInfo;
-    iList           *includeList;
+    diDiskInfo_t     *diskInfo;
+    iList_t           *includeList;
 #endif
 {
     char            *ptr;
@@ -2470,10 +2538,10 @@ checkIncludeList (diskInfo, includeList)
 
 static void
 # if _proto_stdc
-checkZone (di_DiskInfo *diskInfo, zoneInfo_t *zoneInfo, int allFlag)
+checkZone (diDiskInfo_t *diskInfo, zoneInfo_t *zoneInfo, int allFlag)
 # else
 checkZone (diskInfo, zoneInfo, allFlag)
-    di_DiskInfo *diskInfo;
+    diDiskInfo_t *diskInfo;
     zoneInfo_t  *zoneInfo;
     int         allFlag;
 # endif
@@ -2581,10 +2649,11 @@ checkZone (diskInfo, zoneInfo, allFlag)
 
 static void
 #if _proto_stdc
-setDispBlockSize (char *ptr)
+setDispBlockSize (char *ptr, diOptions_t *diOptions)
 #else
 setDispBlockSize (ptr)
-    char    *ptr;
+    char            *ptr;
+    diOptions_t     *diOptions;
 #endif
 {
     int         len;
@@ -2676,16 +2745,16 @@ setDispBlockSize (ptr)
             case 'h':
             {
                 val = DI_DISP_HR;
-                strncpy (dispBlockLabel, GT("Size"),
-                    sizeof (dispBlockLabel));
+                strncpy (diOptions->dispBlockLabel, GT("Size"),
+                    sizeof (diOptions->dispBlockLabel));
                 break;
             }
 
             case 'H':
             {
                 val = DI_DISP_HR_2;
-                strncpy (dispBlockLabel, GT("Size"),
-                    sizeof (dispBlockLabel));
+                strncpy (diOptions->dispBlockLabel, GT("Size"),
+                    sizeof (diOptions->dispBlockLabel));
                 break;
             }
 
@@ -2698,7 +2767,7 @@ setDispBlockSize (ptr)
                 else
                 {
                     /* some unknown string value */
-                    val = dispBlockSize;
+                    val = diOptions->dispBlockSize;
                 }
                 break;
             }
@@ -2708,13 +2777,14 @@ setDispBlockSize (ptr)
         {
             if (val == 1.0)
             {
-                strncpy (dispBlockLabel, GT(dispTable [idx].disp),
-                    sizeof (dispBlockLabel));
+                strncpy (diOptions->dispBlockLabel, GT(dispTable [idx].disp),
+                    sizeof (diOptions->dispBlockLabel));
             }
             else
             {
-                Snprintf (SPF (dispBlockLabel, sizeof (dispBlockLabel),
-                    "%.0f %s"), val, GT(dispTable [idx].disp));
+                Snprintf (SPF (diOptions->dispBlockLabel,
+                    sizeof (diOptions->dispBlockLabel), "%.0f %s"),
+                    val, GT(dispTable [idx].disp));
             }
             val *= dispTable [idx].size;
         } /* known size multiplier */
@@ -2729,8 +2799,8 @@ setDispBlockSize (ptr)
         {
             if (val == dispTable [i].size)
             {
-                strncpy (dispBlockLabel, GT(dispTable [i].disp),
-                     sizeof (dispBlockLabel));
+                strncpy (diOptions->dispBlockLabel, GT(dispTable [i].disp),
+                     sizeof (diOptions->dispBlockLabel));
                 ok = 1;
                 break;
             }
@@ -2738,23 +2808,23 @@ setDispBlockSize (ptr)
 
         if (ok == 0)
         {
-            Snprintf (SPF (dispBlockLabel, sizeof (dispBlockLabel),
-                "%.0fb"), val);
+            Snprintf (SPF (diOptions->dispBlockLabel,
+                sizeof (diOptions->dispBlockLabel), "%.0fb"), val);
         }
     }  /* some oddball block size */
 
-    if (posix_compat == 1 && val == 512)
+    if (diOptions->posix_compat == 1 && val == 512)
     {
-        strncpy (dispBlockLabel, GT ("512-blocks"),
-            sizeof (dispBlockLabel));
+        strncpy (diOptions->dispBlockLabel, GT ("512-blocks"),
+            sizeof (diOptions->dispBlockLabel));
     }
-    if (posix_compat == 1 && val == 1024)
+    if (diOptions->posix_compat == 1 && val == 1024)
     {
-        strncpy (dispBlockLabel, GT ("1024-blocks"),
-            sizeof (dispBlockLabel));
+        strncpy (diOptions->dispBlockLabel, GT ("1024-blocks"),
+            sizeof (diOptions->dispBlockLabel));
     }
 
-    dispBlockSize = val;
+    diOptions->dispBlockSize = val;
 }
 
 /* for debugging */
