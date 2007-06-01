@@ -1558,7 +1558,6 @@ sortArray (diopts, data, dataSize, count, compareFunc)
 {
     register int    j;
     char            *tempData;
-    char            *tempDataPtr;
     int             i;
     int             gap;
 
@@ -1624,7 +1623,6 @@ diCompare (diopts, a, b)
     diDiskInfo_t    *di1;
     diDiskInfo_t    *di2;
     int             rc;
-    int             order;
     char            *ptr;
 
 
