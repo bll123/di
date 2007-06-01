@@ -1,4 +1,4 @@
-di - disk information utility (version 4.10).
+di - disk information utility (version 4.11).
 
 DESCRIPTION
 
@@ -81,7 +81,7 @@ BUGS
 
 PORTING
 
-    di 4.10 has been tested on the following platforms:
+    di 4.11 has been tested on the following platforms:
         FreeBSD 6.1
         CentOS Linux 2.4.21
         Debian Linux 2.4.27, 2.6.8
@@ -114,6 +114,11 @@ BUGS
     information as appropriate.
 
 CHANGES
+
+    4.11                                    [29 May 2007]
+        Fixed minor bug for 'di -sn -t' introduced in 4.10.
+        Code cleanup -- move global variables into local structures.
+        Recoded sorting, added sort by filesystem type.
 
     4.10                                    [24 Feb 2007]
         Handle pooled filesystems so that the total space
@@ -458,6 +463,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2006 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2007 Brad Lanam, Walnut Creek, CA, USA
     bll@gentoo.com
     http://www.gentoo.com/di/
