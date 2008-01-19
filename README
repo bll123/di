@@ -1,4 +1,4 @@
-di - disk information utility (version 4.11).
+di - disk information utility (version 4.12).
 
 DESCRIPTION
 
@@ -81,7 +81,7 @@ BUGS
 
 PORTING
 
-    di 4.11 has been tested on the following platforms:
+    di 4.12 has been tested on the following platforms:
         FreeBSD 6.1
         CentOS Linux 2.4.21
         Debian Linux 2.4.27, 2.6.8
@@ -114,6 +114,9 @@ BUGS
     information as appropriate.
 
 CHANGES
+
+    4.12                                    [19 Jan 2008]
+        Change of e-mail addresses
 
     4.11                                    [29 May 2007]
         Fixed minor bug for 'di -sn -t' introduced in 4.10.
