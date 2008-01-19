@@ -76,7 +76,7 @@ INSTALLATION
 
 BUGS
 
-    submit bugs to di-bugs@gentoo.com
+    submit bugs to bll6969di_at_gmail.com
     Bug Database: https://www.itetools.com/cal/1/pli/dttlist?q=di
 
 PORTING
@@ -106,7 +106,7 @@ BUGS
     Send bug reports along with the output from 'di -A -a -X 5' and the
     output from your standard df command (as verbose as possible) to:
 
-        di-bugs@gentoo.com
+        bll6969di_at_gmail.com
 
     If the Build script doesn't set up the 'config.h'
     file correctly, please let me know.  E-mail me the incorrect
@@ -464,5 +464,5 @@ ACKNOWLEDGEMENTS
 COPYRIGHT
 
     Copyright 1994-2007 Brad Lanam, Walnut Creek, CA, USA
-    bll@gentoo.com
+    bll6969di_at_gmail.com
     http://www.gentoo.com/di/
