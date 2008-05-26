@@ -1,13 +1,13 @@
 /*
 $Id$
 $Source$
-Copyright 1994-2007 Brad Lanam, Walnut Creek, CA
+Copyright 1994-2008 Brad Lanam, Walnut Creek, CA
 */
 
 /*
  * di.c
  *
- *   Copyright 1994-2007 Brad Lanam,  Walnut Creek, CA
+ *   Copyright 1994-2008 Brad Lanam,  Walnut Creek, CA
  *
  *  Warning: Do not replace your system's 'df' command with this program.
  *           You will in all likelihood break your installation procedures.
@@ -352,7 +352,7 @@ static dispTable_t dispTable [] =
 
 typedef int (*DI_SORT_FUNC) _((diOptions_t *, void *, void *));
 
-static void addTotals           _((diDiskInfo_t *, diDiskInfo_t *));
+static void addTotals           _((diDiskInfo_t *, diDiskInfo_t *, int));
 static void checkDiskInfo       _((diData_t *));
 static int  checkFileInfo       _((diData_t *, int, int, char *[]));
 static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
@@ -796,10 +796,9 @@ printDiskInfo (diData)
                 /* only add the main pool to totals for pooled filesystems  */
             if (strcmp (tempDiskInfo [i].fsType, "tmpfs") != 0 &&
                 strcmp (tempDiskInfo [i].fsType, "mfs") != 0 &&
-                tempDiskInfo [i].isReadOnly == FALSE &&
-                inpool == 0)
+                tempDiskInfo [i].isReadOnly == FALSE)
             {
-                addTotals (&tempDiskInfo [i], &totals);
+                addTotals (&tempDiskInfo [i], &totals, inpool);
             }
 
                 /* is it a pooled filesystem type? */
@@ -1234,11 +1233,12 @@ findDispSize (siz)
 
 static void
 #if _proto_stdc
-addTotals (diDiskInfo_t *diskInfo, diDiskInfo_t *totals)
+addTotals (diDiskInfo_t *diskInfo, diDiskInfo_t *totals, int inpool)
 #else
-addTotals (diskInfo, totals)
+addTotals (diskInfo, totals, inpool)
     diDiskInfo_t   *diskInfo;
     diDiskInfo_t   *totals;
+    int            inpool;
 #endif
 {
     double              mult;
@@ -1248,18 +1248,31 @@ addTotals (diskInfo, totals)
     if (debug > 2)
     {
 #if _siz_long_long >= 8
-        printf ("totals:bs:%lld:mult:%f\n", diskInfo->blockSize, mult);
+        printf ("totals:%s:inp:%d:bs:%lld:mult:%f\n", diskInfo->name,
+                    inpool, diskInfo->blockSize, mult);
 #else
-        printf ("totals:bs:%ld:mult:%f\n", diskInfo->blockSize, mult);
+        printf ("totals:%s:inp:%d:bs:%ld:mult:%f\n", diskInfo->name,
+                    inpool, diskInfo->blockSize, mult);
 #endif
     }
 
-    totals->totalBlocks += diskInfo->totalBlocks * mult;
-    totals->freeBlocks += diskInfo->freeBlocks * mult;
-    totals->availBlocks += diskInfo->availBlocks * mult;
-    totals->totalInodes += diskInfo->totalInodes;
-    totals->freeInodes += diskInfo->freeInodes;
-    totals->availInodes += diskInfo->availInodes;
+    if (inpool)
+    {
+        /* if in a pool of disks, add the total used to the totals also */
+        totals->totalBlocks += (diskInfo->totalBlocks -
+                diskInfo->freeBlocks) * mult;
+        totals->totalInodes += (diskInfo->totalInodes -
+                diskInfo->freeInodes);
+    }
+    else
+    {
+        totals->totalBlocks += diskInfo->totalBlocks * mult;
+        totals->freeBlocks += diskInfo->freeBlocks * mult;
+        totals->availBlocks += diskInfo->availBlocks * mult;
+        totals->totalInodes += diskInfo->totalInodes;
+        totals->freeInodes += diskInfo->freeInodes;
+        totals->availInodes += diskInfo->availInodes;
+    }
 }
 
 /*
