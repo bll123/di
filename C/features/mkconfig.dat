@@ -1,6 +1,6 @@
 #
 # $Id$
-# Copyright 2006-2007 Brad Lanam, Walnut Creek, California USA
+# Copyright 2006-2008 Brad Lanam, Walnut Creek, California USA
 #
 #   The four headers: stdio.h, stdlib.h, sys/types.h, and sys/param.h
 #   are always checked.  FreeBSD has header inclusion bugs and requires
