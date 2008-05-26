@@ -1,4 +1,4 @@
-di - disk information utility (version 4.12).
+di - disk information utility (version 4.13).
 
 DESCRIPTION
 
@@ -82,13 +82,13 @@ BUGS
 PORTING
 
     di 4.12 has been tested on the following platforms:
-        FreeBSD 6.1
+        FreeBSD 6.1, 7.0
         CentOS Linux 2.4.21
         Debian Linux 2.4.27, 2.6.8
         Mandriva Linux 2.6.12
         Red Hat Linux 2.6.9
         SuSe Linux 2.6.16
-        Solaris 8, 10
+        Solaris 10, 11
 
     di has been ported to the following systems in the past:
 
@@ -114,6 +114,9 @@ BUGS
     information as appropriate.
 
 CHANGES
+
+    4.13                                    [25 May 2008]
+        Fixed totals to correctly account for pooled filesystems.
 
     4.12                                    [19 Jan 2008]
         Change of e-mail addresses
@@ -466,6 +469,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2007 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2008 Brad Lanam, Walnut Creek, CA, USA
     bll6969di_at_gmail.com
     http://www.gentoo.com/di/
