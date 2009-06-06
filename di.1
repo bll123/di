@@ -67,12 +67,14 @@ printed \- e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 (compatibility: \-B)
 .br
 Change the base block size from 1024 (default) to the size specified.
-\fIblock\-size\fP may be one of: k\ \-\ 1024 bytes, d\ \-\ 1000 bytes,
+\fIblock\-size\fP may be one of: k\ \-\ 1024 bytes, si\ \-\ 1000 bytes,
 or a specific size.
 .TP
 .B \-d
 .I display\-size
-Display the blocks in units specified by \fIdisplay\-size\fP.
+Display the blocks in units specified by \fIdisplay\-size\fP.  
+Note that if the base block size is SI units of 1000 bytes, the
+display size is calculated using those units.
 \fIdisplay\-size\fP
 may be one of: 512\ \-\ POSIX, k\ \-\ kilobytes,
 m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, P\ \-\ petabytes,
@@ -160,8 +162,10 @@ di \-strsrm.
 .TP
 .B \-t
 Print a totals line below the list of file systems.
-Memory filesystems (tmpfs, mfs) and read-only
-filesystems are not added to the totals.
+Memory filesystems (tmpfs, mfs), read-only
+filesystems (such as a CD-ROM) and user filesystems (fuse)
+are not added to the totals.  Pooled filesystems (zfs, advfs) 
+have only the main pool added to the total.
 .TP
 .B \-w
 .I block\-width
@@ -352,7 +356,7 @@ display format string.
 .PP
 The DI_ARGS environment variable may be used to specify command
 line arguments.  e.g. If you always want gigabytes displayed, set
-DI_ARGS equal to "-dg".  Any command line arguments specified
+DI_ARGS equal to "\-dg".  Any command line arguments specified
 will override the DI_ARGS environment variable.
 .PP
 The GNU df POSIXLY_CORRECT, and DF_BLOCK_SIZE and the BSD BLOCKSIZE
