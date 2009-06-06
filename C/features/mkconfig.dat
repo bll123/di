@@ -26,8 +26,8 @@
 #           check if function exists.
 #           if libs are specified, tests for function
 #           w/o the libraries, then with.
-#           e.g.: lib gettext -lintl
-#                 lib gettext -lintl -liconv
+#           e.g.: lib gettext -lintl -liconv
+#                 will test gettext, gettext -lintl, gettext -lintl -liconv
 #   dcl     {int|ptr} variable
 #           check if the variable is declared.
 #           e.g.: dcl int errno
@@ -80,7 +80,6 @@ typ     size_t
 typ     uint_t
 typ     uid_t
 lib     bcopy
-lib     bindtextdomain -lintl
 lib     bindtextdomain -lintl -liconv
 lib     bzero
 lib     endmntent
@@ -96,7 +95,6 @@ lib     getmnt
 lib     getmntent
 lib     getmntinfo
 lib     getopt
-lib     gettext -lintl
 lib     gettext -lintl -liconv
 lib     getvfsstat
 lib     getzoneid
@@ -104,18 +102,15 @@ lib     hasmntopt
 lib     memcpy
 lib     memset
 lib     mntctl
-lib     setlocale  -lintl
 lib     setlocale  -lintl -liconv
 lib     setmntent
 lib     snprintf
 lib     statfs
 lib     statvfs
 lib     sysfs
-lib     textdomain  -lintl
 lib     textdomain  -lintl -liconv
 lib     zone_getattr
 lib     zone_list
-lib     fmod -lm
 npt     getenv
 npt     statfs _lib_statfs
 dcl     int  errno
