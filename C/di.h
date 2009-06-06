@@ -110,6 +110,7 @@ typedef unsigned long __ulong;
 
 typedef struct
 {
+    unsigned int    index;
     _fs_size_t      totalBlocks;
     _fs_size_t      freeBlocks;
     _fs_size_t      availBlocks;
@@ -120,8 +121,9 @@ typedef struct
     __ulong         st_dev;                      /* disk device number   */
     __ulong         sp_dev;                      /* special device number*/
     __ulong         sp_rdev;                     /* special rdev #       */
-    char            printFlag;                   /* do we want to print  */
+    char            doPrint;                     /* do we want to print  */
                                                  /* this entry?          */
+    char            printFlag;                   /* print flags          */
     char            isLocal;                     /* is this mount point  */
                                                  /* local?               */
     char            isReadOnly;                  /* is this mount point  */
