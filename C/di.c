@@ -213,9 +213,9 @@ extern int di_lib_debug;
 #define DI_POSIX_FORMAT         "SbuvpM"
 
 #define DI_VAL_1000             1000.0
-#define DI_DISP_1000_IDX        1
+#define DI_DISP_1000_IDX        0
 #define DI_VAL_1024             1024.0
-#define DI_DISP_1024_IDX        0
+#define DI_DISP_1024_IDX        1
     /* these are indexes into the dispTable array... */
 #define DI_ONE_K                0
 #define DI_ONE_MEG              1
@@ -419,8 +419,9 @@ main (argc, argv)
     diopts->width = 8;
     diopts->inodeWidth = 7;
     diopts->flags = 0;
-/* Linux users may want as the default: */
-/*    diopts->flags = { DI_F_INCLUDE_LOOPBACK }; */
+#if linux /* Linux loopback works differently than Solaris */
+    diopts->flags |= DI_F_INCLUDE_LOOPBACK;
+#endif
     strcpy (diopts->sortType, "m"); /* default - sort by mount point */
     diopts->posix_compat = 0;
     diopts->baseDispSize = DI_VAL_1024;
@@ -2244,12 +2245,13 @@ processArgs (argc, argv, diData, dbsstr)
                   diopts->baseDispIdx = DI_DISP_1024_IDX;
                 }
               }
-              else if (*optarg == 'k')
+              else if (strcmp (optarg, "k") == 0)
               {
                 diopts->baseDispSize = DI_VAL_1024;
                 diopts->baseDispIdx = DI_DISP_1024_IDX;
               }
-              else if (*optarg == 'd' || strcmp (optarg, "si") == 0)
+              else if (strcmp (optarg, "d") == 0 ||
+                  strcmp (optarg, "si") == 0)
               {
                 diopts->baseDispSize = DI_VAL_1000;
                 diopts->baseDispIdx = DI_DISP_1000_IDX;
@@ -2713,8 +2715,6 @@ setDispBlockSize (ptr, diopts)
 
     tptr = ptr;
     len = strlen (ptr);
-    tptr += len;
-    --tptr;
     if (! isdigit ((int) *tptr))
     {
         int             idx;
@@ -2804,7 +2804,6 @@ setDispBlockSize (ptr, diopts)
                 {
                     /* some unknown string value */
                   idx = DI_ONE_MEG;
-                  break;
                 }
                 break;
             }
@@ -2812,6 +2811,16 @@ setDispBlockSize (ptr, diopts)
 
         if (idx >= 0)
         {
+            if (len > 1)
+            {
+                ++tptr;
+                if (*tptr == 'B')
+                {
+                   diopts->baseDispSize = DI_VAL_1000;
+                   diopts->baseDispIdx = DI_DISP_1000_IDX;
+                }
+            }
+
             if (val == 1.0)
             {
                 strncpy (diopts->dispBlockLabel,
