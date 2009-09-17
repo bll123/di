@@ -1,4 +1,4 @@
-di - disk information utility (version 4.14).
+di - disk information utility (version 4.15).
 
 DESCRIPTION
 
@@ -81,10 +81,11 @@ BUGS
 
 PORTING
 
-    di 4.14 has been tested on the following platforms:
+    di 4.15 has been tested on the following platforms:
         CentOS 5.2, 5.3
         Debian 4.0, 5.0, kFreeBSD 7.1
         FreeBSD 7.0, 7.1, 7.2
+        Haiku 1
         NetBSD 4.0.1, 5.0.1
         Nexenta 101_b85
         OpenBSD 4.5
@@ -110,6 +111,10 @@ BUGS
     information as appropriate.
 
 CHANGES
+
+    4.15                                    [17 Sep 2009]
+        Fixed filename argument w/non-printing filesystem.
+        Build now works on Haiku.
 
     4.14                                    [10 Sep 2009]
         Code cleanup.
