@@ -1,8 +1,9 @@
 /*
-$Id$
-$Source$
-Copyright 1994-2009 Brad Lanam, Walnut Creek, CA
-*/
+ * $Id$
+ * $Source$
+ *
+ * Copyright 1994-2009 Brad Lanam, Walnut Creek, CA
+ */
 
 /*
  * di.c
@@ -134,6 +135,10 @@ Copyright 1994-2009 Brad Lanam, Walnut Creek, CA
 # include <zone.h>
 #endif
 
+#if defined(__cplusplus)
+  extern "C" {
+#endif
+
 extern int di_lib_debug;
 
 #if _npt_getenv
@@ -148,6 +153,10 @@ extern int di_lib_debug;
 #endif
 #if ! defined (_dcl_optarg)
   extern char *optarg;
+#endif
+
+#if defined(__cplusplus)
+  }
 #endif
 
      /* macro for gettext() */
@@ -352,6 +361,10 @@ static dispTable_t dispTable [] =
 };
 #define DI_DISPTAB_SIZE (sizeof (dispTable) / sizeof (dispTable_t))
 
+#if defined(__cplusplus)
+  extern "C" {
+#endif
+
 static void addTotals           _((diDiskInfo_t *, diDiskInfo_t *, int));
 static void checkDiskInfo       _((diData_t *));
 static int  checkFileInfo       _((diData_t *, int, int, char *[]));
@@ -365,7 +378,7 @@ static int  diCompare           _((diOptions_t *, diDiskInfo_t *, unsigned int, 
 static int  findDispSize        _((double));
 static void getDiskSpecialInfo  _((diData_t *));
 static void getDiskStatInfo     _((diData_t *));
-static char *getPrintFlagText   _((int));
+static const char *getPrintFlagText _((int));
 static void parseList           _((iList_t *, char *));
 static void preCheckDiskInfo    _((diData_t *));
 static void printDiskInfo       _((diData_t *));
@@ -377,6 +390,10 @@ static void processArgs         _((int, char *[], diData_t *, char *));
 static void setDispBlockSize    _((char *, diOptions_t *));
 static void sortArray           _((diOptions_t *, diDiskInfo_t *, int));
 static void usage               _((void));
+
+#if defined(__cplusplus)
+  }
+#endif
 
 int
 #if _proto_stdc
@@ -393,6 +410,12 @@ main (argc, argv)
     char                *ptr;
     char                *argvptr;
     char                dbsstr [30];
+
+    if (debug > 4)
+    {
+        printf ("config: iffe:%d mkc:%d\n", _config_by_iffe_,
+                _config_by_mkconfig_pl_);
+    }
 
         /* initialization */
     diData.count = 0;
@@ -1830,6 +1853,7 @@ checkDiskInfo (diData)
 
         dinfo = &diData->diskInfo[i];
         dinfo->doPrint = TRUE;
+          /* these are never printed... */
         if (dinfo->printFlag == DI_PRNT_EXCLUDE ||
             dinfo->printFlag == DI_PRNT_BAD ||
             dinfo->printFlag == DI_PRNT_OUTOFZONE)
@@ -1841,6 +1865,17 @@ checkDiskInfo (diData)
             }
             dinfo->doPrint = FALSE;
             continue;
+        }
+
+          /* need to check against include list */
+        if (dinfo->printFlag == DI_PRNT_IGNORE)
+        {
+            if (debug > 2)
+            {
+                printf ("chk: skipping(%s):%s\n",
+                    getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
+            }
+            dinfo->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
         }
 
             /* Solaris reports a cdrom as having no free blocks,   */
@@ -2156,7 +2191,6 @@ preCheckDiskInfo (diData)
 
 /*
  * usage
- *
  */
 
 static void
@@ -2876,7 +2910,7 @@ setDispBlockSize (ptr, diopts)
 }
 
 /* for debugging */
-static char *
+static const char *
 #if _proto_stdc
 getPrintFlagText (int pf)
 #else
