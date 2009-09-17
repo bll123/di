@@ -1,8 +1,8 @@
 /*
-$Id$
-$Source$
-Copyright 1994-2009 Brad Lanam, Walnut Creek, CA
-*/
+ * $Id$
+ * $Source$
+ * Copyright 1994-2009 Brad Lanam, Walnut Creek, CA
+ */
 
 #ifndef __INC_DI_H_
 #define __INC_DI_H_
@@ -135,6 +135,10 @@ typedef struct
     char            mountTime [DI_MNT_TIME_LEN + 1];
 } diDiskInfo_t;
 
+# if defined(__cplusplus)
+   extern "C" {
+# endif
+
 extern int  di_getDiskEntries      _((diDiskInfo_t **, int *));
 extern void di_getDiskInfo         _((diDiskInfo_t **, int *));
 extern void di_testRemoteDisk      _((diDiskInfo_t *));
@@ -144,6 +148,10 @@ extern void *Realloc               _((void *, Size_t));
 /* if we have a getopt header, there's probably a getopt lib function */
 # if ! defined (_lib_getopt) && ! defined (_hdr_getopt)
 extern int getopt _((int argc, char *argv [], char *optstring));
+# endif
+
+# if defined(__cplusplus)
+   }
 # endif
 
 #endif /* __INC_DI_H_ */
