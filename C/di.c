@@ -411,12 +411,6 @@ main (argc, argv)
     char                *argvptr;
     char                dbsstr [30];
 
-    if (debug > 4)
-    {
-        printf ("config: iffe:%d mkc:%d\n", _config_by_iffe_,
-                _config_by_mkconfig_pl_);
-    }
-
         /* initialization */
     diData.count = 0;
     diData.haspooledfs = FALSE;
@@ -526,6 +520,12 @@ main (argc, argv)
     }
 
     processArgs (argc, argv, &diData, dbsstr);
+
+    if (debug > 4)
+    {
+        printf ("config: iffe:%d mkc:%d\n", _config_by_iffe_,
+                _config_by_mkconfig_pl_);
+    }
 
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
     {
@@ -1542,9 +1542,12 @@ checkFileInfo (diData, optidx, argc, argv)
         /* turn everything off */
     for (j = 0; j < diData->count; ++j)
     {
-      if (diData->diskInfo [j].printFlag == DI_PRNT_OK)
+      diDiskInfo_t        *dinfo;
+
+      dinfo = &diData->diskInfo[j];
+      if (dinfo->printFlag == DI_PRNT_OK)
       {
-        diData->diskInfo [j].printFlag = DI_PRNT_IGNORE;
+        dinfo->printFlag = DI_PRNT_IGNORE;
       }
     }
 
@@ -1561,7 +1564,7 @@ checkFileInfo (diData, optidx, argc, argv)
                     dinfo->st_dev != DI_UNKNOWN_DEV &&
                     (__ulong) statBuf.st_dev == dinfo->st_dev)
                 {
-                    dinfo->printFlag = DI_PRNT_OK;
+                    dinfo->printFlag = DI_PRNT_FORCE;
                     break; /* out of inner for */
                 }
             }
@@ -2922,5 +2925,6 @@ getPrintFlagText (pf)
         pf == DI_PRNT_BAD ? "bad" :
         pf == DI_PRNT_IGNORE ? "ignore" :
         pf == DI_PRNT_EXCLUDE ? "exclude" :
-        pf == DI_PRNT_OUTOFZONE ? "outofzone" : "unknown";
+        pf == DI_PRNT_OUTOFZONE ? "outofzone" :
+        pf == DI_PRNT_FORCE ? "force" : "unknown";
 }
