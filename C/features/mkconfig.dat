@@ -7,6 +7,9 @@
 #   sys/param.h.
 #
 #   Commands:
+#   key     keyword
+#           check to see if keyword is reserved.
+#           e.g.: key volatile
 #   hdr     name-of-header
 #           check for a header.
 #           e.g.: hdr ctype.h
