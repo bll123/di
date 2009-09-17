@@ -105,6 +105,7 @@ lib     hasmntopt
 lib     memcpy
 lib     memset
 lib     mntctl
+lib     next_dev
 lib     setlocale  -lintl -liconv
 lib     setmntent
 lib     snprintf
