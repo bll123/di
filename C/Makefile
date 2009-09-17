@@ -4,9 +4,6 @@
 #  Copyright 2001-2009 Brad Lanam Walnut Creek CA, USA
 #
 #  $Id$
-#  $Source$
-#  @(#)Makefile	1.25
-#
 #
 
 SHELL = /bin/sh
@@ -105,9 +102,6 @@ windows-gcc:	wconfig.h
 
 ####################
 
-di-exe:	$(PROG)$(EXE_EXT)
-	-$(LN) -f $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT)
-
 objclean:
 	-$(RM) -rf *.o *.obj
 
@@ -152,8 +146,8 @@ install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	-$(TEST) -f $(TARGET) && $(MV) -f $(TARGET) $(TARGET).old
 	-$(TEST) -f $(MTARGET) && $(MV) -f $(MTARGET) $(MTARGET).old
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
-	-$(LN) -f $(TARGET) $(MTARGET)
-	-$(RM) -f $(TARGET).old $(MTARGET).old
+	-$(LN) -s $(TARGET) $(MTARGET)
+	-$(RM) -f $(TARGET).old $(MTARGET).old > /dev/null 2>&1
 	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
 	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 	-./hasnls$(EXE_EXT) && \
