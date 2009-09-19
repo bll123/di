@@ -72,8 +72,8 @@
  *  The environment variable "DIFMT" may be set to the desired format
  *  string.
  *
- *  Note that for filesystems that do not have (S512K fs) or systems (SysV.3)
- *  that do not report available blocks, the number of available blocks is
+ *  Note that for filesystems that do not have, or systems (SysV.3)
+ *  that do not report, available blocks, the number of available blocks is
  *  equal to the number of free blocks.
  *
  */
@@ -157,15 +157,6 @@ extern int di_lib_debug;
 
 #if defined(__cplusplus)
   }
-#endif
-
-     /* macro for gettext() */
-#ifndef GT
-# if _enable_nls
-#  define GT(args) gettext (args)
-# else
-#  define GT(args) (args)
-# endif
 #endif
 
 /* end of system specific includes/configurations */
@@ -754,7 +745,7 @@ printDiskInfo (diData)
     lastpool[0] = '\0';
     memset ((char *) &totals, '\0', sizeof (diDiskInfo_t));
     totals.blockSize = 8192;
-    strncpy (totals.name, GT("Total"), DI_NAME_LEN);
+    strncpy (totals.name, DI_GT("Total"), DI_NAME_LEN);
     totals.printFlag = DI_PRNT_OK;
 
     diopts = &diData->options;
@@ -1322,7 +1313,7 @@ printTitle (diopts)
 
     if ((diopts->flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
     {
-        printf (GT("di ver %s Default Format: %s\n"),
+        printf (DI_GT("di ver %s Default Format: %s\n"),
                 DI_VERSION, DI_DEFAULT_FORMAT);
     }
 
@@ -1336,7 +1327,7 @@ printTitle (diopts)
         {
             case DI_FMT_MOUNT:
             {
-                printf (DI_MOUNT_FMT, GT("Mount"));
+                printf (DI_MOUNT_FMT, DI_GT("Mount"));
                 break;
             }
 
@@ -1344,11 +1335,11 @@ printTitle (diopts)
             {
                 if (diopts->posix_compat == 1)
                 {
-                    printf (diopts->mountFormat, GT("Mounted On"));
+                    printf (diopts->mountFormat, DI_GT("Mounted On"));
                 }
                 else
                 {
-                    printf (diopts->mountFormat, GT("Mount"));
+                    printf (diopts->mountFormat, DI_GT("Mount"));
                 }
                 break;
             }
@@ -1363,13 +1354,13 @@ printTitle (diopts)
             case DI_FMT_BUSED:
             case DI_FMT_BCUSED:
             {
-                printf (diopts->blockLabelFormat, GT("Used"));
+                printf (diopts->blockLabelFormat, DI_GT("Used"));
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printf (diopts->blockLabelFormat, GT("Free"));
+                printf (diopts->blockLabelFormat, DI_GT("Free"));
                 break;
             }
 
@@ -1377,11 +1368,11 @@ printTitle (diopts)
             {
                 if (diopts->posix_compat == 1)
                 {
-                    printf (diopts->blockLabelFormat, GT("Available"));
+                    printf (diopts->blockLabelFormat, DI_GT("Available"));
                 }
                 else
                 {
-                    printf (diopts->blockLabelFormat, GT("Avail"));
+                    printf (diopts->blockLabelFormat, DI_GT("Avail"));
                 }
                 break;
             }
@@ -1392,11 +1383,11 @@ printTitle (diopts)
             {
                 if (diopts->posix_compat == 1)
                 {
-                    printf (DI_POSIX_PERC_LBL_FMT, GT("Capacity"));
+                    printf (DI_POSIX_PERC_LBL_FMT, DI_GT("Capacity"));
                 }
                 else
                 {
-                    printf (DI_PERC_LBL_FMT, GT("%Used"));
+                    printf (DI_PERC_LBL_FMT, DI_GT("%Used"));
                 }
                 break;
             }
@@ -1404,68 +1395,68 @@ printTitle (diopts)
             case DI_FMT_BPERC_AVAIL:
             case DI_FMT_BPERC_FREE:
             {
-                printf (DI_PERC_LBL_FMT, GT("%Free"));
+                printf (DI_PERC_LBL_FMT, DI_GT("%Free"));
                 break;
             }
 
             case DI_FMT_ITOT:
             {
-                printf (diopts->inodeLabelFormat, GT("Inodes"));
+                printf (diopts->inodeLabelFormat, DI_GT("Inodes"));
                 break;
             }
 
             case DI_FMT_IUSED:
             {
-                printf (diopts->inodeLabelFormat, GT("Used"));
+                printf (diopts->inodeLabelFormat, DI_GT("Used"));
                 break;
             }
 
             case DI_FMT_IFREE:
             {
-                printf (diopts->inodeLabelFormat, GT("Free"));
+                printf (diopts->inodeLabelFormat, DI_GT("Free"));
                 break;
             }
 
             case DI_FMT_IPERC:
             {
-                printf (DI_PERC_LBL_FMT, GT("%Used"));
+                printf (DI_PERC_LBL_FMT, DI_GT("%Used"));
                 break;
             }
 
             case DI_FMT_SPECIAL:
             {
-                printf (DI_SPEC_FMT, GT("Filesystem"));
+                printf (DI_SPEC_FMT, DI_GT("Filesystem"));
                 break;
             }
 
             case DI_FMT_SPECIAL_FULL:
             {
-                printf (diopts->specialFormat, GT("Filesystem"));
+                printf (diopts->specialFormat, DI_GT("Filesystem"));
                 break;
             }
 
             case DI_FMT_TYPE:
             {
-                printf (DI_FSTYPE_FMT, GT("fsType"));
+                printf (DI_FSTYPE_FMT, DI_GT("fsType"));
                 break;
             }
 
             case DI_FMT_TYPE_FULL:
             {
-                printf (diopts->typeFormat, GT("fs Type"));
+                printf (diopts->typeFormat, DI_GT("fs Type"));
                 break;
             }
 
             case DI_FMT_MOUNT_OPTIONS:
             {
-                printf (diopts->optFormat, GT("Options"));
+                printf (diopts->optFormat, DI_GT("Options"));
                 break;
             }
 
             case DI_FMT_MOUNT_TIME:
             {
 #if _lib_mnt_time
-                printf (diopts->mTimeFormat, GT("Mount Time"));
+                printf (diopts->mTimeFormat, DI_GT("Mount Time"));
 #endif
                 break;
             }
@@ -2021,7 +2012,7 @@ checkDiskInfo (diData)
     if (diopts->posix_compat == 1)
     {
       /* Mounted On */
-      len = strlen (GT("Mounted On"));
+      len = strlen (DI_GT("Mounted On"));
       maxMountString = maxMountString < len ? len : maxMountString;
       len = strlen (diopts->dispBlockLabel);
       diopts->width = diopts->width < len ? len : diopts->width;
@@ -2069,15 +2060,15 @@ checkDiskInfo (diData)
         } /* if we are printing this item */
     } /* for all disks */
 
-    Snprintf (SPF(diopts->mountFormat, sizeof (diopts->mountFormat), "%%-%d.%ds"),
+    Snprintf (DI_SPF(diopts->mountFormat, sizeof (diopts->mountFormat), "%%-%d.%ds"),
               maxMountString, maxMountString);
-    Snprintf (SPF(diopts->specialFormat, sizeof (diopts->specialFormat), "%%-%d.%ds"),
+    Snprintf (DI_SPF(diopts->specialFormat, sizeof (diopts->specialFormat), "%%-%d.%ds"),
               maxSpecialString, maxSpecialString);
-    Snprintf (SPF(diopts->typeFormat, sizeof (diopts->typeFormat), "%%-%d.%ds"),
+    Snprintf (DI_SPF(diopts->typeFormat, sizeof (diopts->typeFormat), "%%-%d.%ds"),
               maxTypeString, maxTypeString);
-    Snprintf (SPF(diopts->optFormat, sizeof (diopts->optFormat), "%%-%d.%ds"),
+    Snprintf (DI_SPF(diopts->optFormat, sizeof (diopts->optFormat), "%%-%d.%ds"),
               maxOptString, maxOptString);
-    Snprintf (SPF(diopts->mTimeFormat, sizeof (diopts->mTimeFormat), "%%-%d.%ds"),
+    Snprintf (DI_SPF(diopts->mTimeFormat, sizeof (diopts->mTimeFormat), "%%-%d.%ds"),
               maxMntTimeString, maxMntTimeString);
 
     if (diopts->dispBlockSize == DI_DISP_HR ||
@@ -2090,14 +2081,14 @@ checkDiskInfo (diData)
         diopts->dispBlockSize != DI_DISP_HR_2 &&
         (diopts->dispBlockSize > 0 && diopts->dispBlockSize <= DI_VAL_1024))
     {
-        Snprintf (SPF(diopts->blockFormat,
+        Snprintf (DI_SPF(diopts->blockFormat,
                   sizeof (diopts->blockFormat), "%%%d.0f%%s"), diopts->width);
     }
     else
     {
-        Snprintf (SPF(diopts->blockFormatNR,
+        Snprintf (DI_SPF(diopts->blockFormatNR,
                   sizeof (diopts->blockFormatNR), "%%%d.0f%%s"), diopts->width);
-        Snprintf (SPF(diopts->blockFormat,
+        Snprintf (DI_SPF(diopts->blockFormat,
                   sizeof (diopts->blockFormat), "%%%d.1f%%s"), diopts->width);
     }
 
@@ -2107,16 +2098,16 @@ checkDiskInfo (diData)
         ++diopts->width;
     }
 
-    Snprintf (SPF(diopts->blockLabelFormat,
+    Snprintf (DI_SPF(diopts->blockLabelFormat,
               sizeof (diopts->blockLabelFormat), "%%%ds"), diopts->width);
 #if _siz_long_long >= 8
-    Snprintf (SPF(diopts->inodeFormat,
+    Snprintf (DI_SPF(diopts->inodeFormat,
               sizeof (diopts->inodeFormat), "%%%dllu"), diopts->inodeWidth);
 #else
-    Snprintf (SPF(diopts->inodeFormat,
+    Snprintf (DI_SPF(diopts->inodeFormat,
               sizeof (diopts->inodeFormat), "%%%dlu"), diopts->inodeWidth);
 #endif
-    Snprintf (SPF(diopts->inodeLabelFormat,
+    Snprintf (DI_SPF(diopts->inodeLabelFormat,
               sizeof (diopts->inodeLabelFormat), "%%%ds"), diopts->inodeWidth);
 }
 
@@ -2203,31 +2194,31 @@ usage (void)
 usage ()
 #endif
 {
-    printf (GT("di ver %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
+    printf (DI_GT("di ver %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
             /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
-    printf (GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
-    printf (GT("       [-I include-fstyp-list] [file [...]]\n"));
-    printf (GT("   -a   : print all mounted devices\n"));
-    printf (GT("   -d x : size to print blocks in (512 - POSIX, k - kbytes,\n"));
-    printf (GT("          m - megabytes, g - gigabytes, t - terabytes, h - human readable).\n"));
-    printf (GT("   -f x : use format string <x>\n"));
-    printf (GT("   -I x : include only file system types in <x>\n"));
-    printf (GT("   -x x : exclude file system types in <x>\n"));
-    printf (GT("   -l   : display local filesystems only\n"));
-    printf (GT("   -n   : don't print header\n"));
-    printf (GT("   -t   : print totals\n"));
-    printf (GT(" Format string values:\n"));
-    printf (GT("    m - mount point                     M - mount point, full length\n"));
-    printf (GT("    b - total kbytes                    B - kbytes available for use\n"));
-    printf (GT("    u - used kbytes                     c - calculated kbytes in use\n"));
-    printf (GT("    f - kbytes free                     v - kbytes available\n"));
-    printf (GT("    p - percentage not avail. for use   1 - percentage used\n"));
-    printf (GT("    2 - percentage of user-available space in use.\n"));
-    printf (GT("    i - total file slots (i-nodes)      U - used file slots\n"));
-    printf (GT("    F - free file slots                 P - percentage file slots used\n"));
-    printf (GT("    s - filesystem name                 S - filesystem name, full length\n"));
-    printf (GT("    t - disk partition type             T - partition type, full length\n"));
-    printf (GT("See manual page for more options.\n"));
+    printf (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
+    printf (DI_GT("       [-I include-fstyp-list] [file [...]]\n"));
+    printf (DI_GT("   -a   : print all mounted devices\n"));
+    printf (DI_GT("   -d x : size to print blocks in (512 - POSIX, k - kbytes,\n"));
+    printf (DI_GT("          m - megabytes, g - gigabytes, t - terabytes, h - human readable).\n"));
+    printf (DI_GT("   -f x : use format string <x>\n"));
+    printf (DI_GT("   -I x : include only file system types in <x>\n"));
+    printf (DI_GT("   -x x : exclude file system types in <x>\n"));
+    printf (DI_GT("   -l   : display local filesystems only\n"));
+    printf (DI_GT("   -n   : don't print header\n"));
+    printf (DI_GT("   -t   : print totals\n"));
+    printf (DI_GT(" Format string values:\n"));
+    printf (DI_GT("    m - mount point                     M - mount point, full length\n"));
+    printf (DI_GT("    b - total kbytes                    B - kbytes available for use\n"));
+    printf (DI_GT("    u - used kbytes                     c - calculated kbytes in use\n"));
+    printf (DI_GT("    f - kbytes free                     v - kbytes available\n"));
+    printf (DI_GT("    p - percentage not avail. for use   1 - percentage used\n"));
+    printf (DI_GT("    2 - percentage of user-available space in use.\n"));
+    printf (DI_GT("    i - total file slots (i-nodes)      U - used file slots\n"));
+    printf (DI_GT("    F - free file slots                 P - percentage file slots used\n"));
+    printf (DI_GT("    s - filesystem name                 S - filesystem name, full length\n"));
+    printf (DI_GT("    t - disk partition type             T - partition type, full length\n"));
+    printf (DI_GT("See manual page for more options.\n"));
 }
 
 
@@ -2818,7 +2809,7 @@ setDispBlockSize (ptr, diopts)
             case 'h':
             {
                 val = DI_DISP_HR;
-                strncpy (diopts->dispBlockLabel, GT("Size"),
+                strncpy (diopts->dispBlockLabel, DI_GT("Size"),
                     sizeof (diopts->dispBlockLabel));
                 break;
             }
@@ -2826,7 +2817,7 @@ setDispBlockSize (ptr, diopts)
             case 'H':
             {
                 val = DI_DISP_HR_2;
-                strncpy (diopts->dispBlockLabel, GT("Size"),
+                strncpy (diopts->dispBlockLabel, DI_GT("Size"),
                     sizeof (diopts->dispBlockLabel));
                 break;
             }
@@ -2861,14 +2852,14 @@ setDispBlockSize (ptr, diopts)
             if (val == 1.0)
             {
                 strncpy (diopts->dispBlockLabel,
-                    GT(dispTable [idx].disp [diopts->baseDispIdx]),
+                    DI_GT(dispTable [idx].disp [diopts->baseDispIdx]),
                     sizeof (diopts->dispBlockLabel));
             }
             else
             {
-                Snprintf (SPF (diopts->dispBlockLabel,
+                Snprintf (DI_SPF(diopts->dispBlockLabel,
                     sizeof (diopts->dispBlockLabel), "%.0f %s"),
-                    val, GT(dispTable [idx].disp [diopts->baseDispIdx]));
+                    val, DI_GT(dispTable [idx].disp [diopts->baseDispIdx]));
             }
             val *= dispTable [idx].size;
         } /* known size multiplier */
@@ -2884,7 +2875,7 @@ setDispBlockSize (ptr, diopts)
             if (val == dispTable [i].size)
             {
                 strncpy (diopts->dispBlockLabel,
-                     GT(dispTable [i].disp  [diopts->baseDispIdx]),
+                     DI_GT(dispTable [i].disp  [diopts->baseDispIdx]),
                      sizeof (diopts->dispBlockLabel));
                 ok = 1;
                 break;
@@ -2893,19 +2884,19 @@ setDispBlockSize (ptr, diopts)
 
         if (ok == 0)
         {
-            Snprintf (SPF (diopts->dispBlockLabel,
+            Snprintf (DI_SPF(diopts->dispBlockLabel,
                 sizeof (diopts->dispBlockLabel), "%.0fb"), val);
         }
     }  /* some oddball block size */
 
     if (diopts->posix_compat == 1 && val == 512)
     {
-        strncpy (diopts->dispBlockLabel, GT ("512-blocks"),
+        strncpy (diopts->dispBlockLabel, DI_GT("512-blocks"),
             sizeof (diopts->dispBlockLabel));
     }
     if (diopts->posix_compat == 1 && val == 1024)
     {
-        strncpy (diopts->dispBlockLabel, GT ("1024-blocks"),
+        strncpy (diopts->dispBlockLabel, DI_GT("1024-blocks"),
             sizeof (diopts->dispBlockLabel));
     }
 
