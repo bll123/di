@@ -155,4 +155,13 @@ extern int getopt _((int argc, char *argv [], char *optstring));
    }
 # endif
 
+     /* macro for gettext() */
+#ifndef DI_GT
+# if _enable_nls
+#  define DI_GT(args) gettext(args)
+# else
+#  define DI_GT(args) (args)
+# endif
+#endif
+
 #endif /* __INC_DI_H_ */
