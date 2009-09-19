@@ -177,10 +177,10 @@ _hdr_locale && \
 
 #if _lib_snprintf
 # define Snprintf snprintf
-# define DI_SPF(a1,a2,a3)      a1,a2,a3
+# define DI_SPF(a2,a3)         a2,a3
 #else
 # define Snprintf sprintf
-# define DI_SPF(a1,a2,a3)      a1,a3
+# define DI_SPF(a2,a3)         a3
 #endif
 
 #define _config_by_iffe_ 0

@@ -2060,15 +2060,15 @@ checkDiskInfo (diData)
         } /* if we are printing this item */
     } /* for all disks */
 
-    Snprintf (DI_SPF(diopts->mountFormat, sizeof (diopts->mountFormat), "%%-%d.%ds"),
+    Snprintf (diopts->mountFormat, DI_SPF(sizeof (diopts->mountFormat), "%%-%d.%ds"),
               maxMountString, maxMountString);
-    Snprintf (DI_SPF(diopts->specialFormat, sizeof (diopts->specialFormat), "%%-%d.%ds"),
+    Snprintf (diopts->specialFormat, DI_SPF(sizeof (diopts->specialFormat), "%%-%d.%ds"),
               maxSpecialString, maxSpecialString);
-    Snprintf (DI_SPF(diopts->typeFormat, sizeof (diopts->typeFormat), "%%-%d.%ds"),
+    Snprintf (diopts->typeFormat, DI_SPF(sizeof (diopts->typeFormat), "%%-%d.%ds"),
               maxTypeString, maxTypeString);
-    Snprintf (DI_SPF(diopts->optFormat, sizeof (diopts->optFormat), "%%-%d.%ds"),
+    Snprintf (diopts->optFormat, DI_SPF(sizeof (diopts->optFormat), "%%-%d.%ds"),
               maxOptString, maxOptString);
-    Snprintf (DI_SPF(diopts->mTimeFormat, sizeof (diopts->mTimeFormat), "%%-%d.%ds"),
+    Snprintf (diopts->mTimeFormat, DI_SPF(sizeof (diopts->mTimeFormat), "%%-%d.%ds"),
               maxMntTimeString, maxMntTimeString);
 
     if (diopts->dispBlockSize == DI_DISP_HR ||
@@ -2081,15 +2081,15 @@ checkDiskInfo (diData)
         diopts->dispBlockSize != DI_DISP_HR_2 &&
         (diopts->dispBlockSize > 0 && diopts->dispBlockSize <= DI_VAL_1024))
     {
-        Snprintf (DI_SPF(diopts->blockFormat,
-                  sizeof (diopts->blockFormat), "%%%d.0f%%s"), diopts->width);
+        Snprintf (diopts->blockFormat,
+            DI_SPF(sizeof (diopts->blockFormat), "%%%d.0f%%s"), diopts->width);
     }
     else
     {
-        Snprintf (DI_SPF(diopts->blockFormatNR,
-                  sizeof (diopts->blockFormatNR), "%%%d.0f%%s"), diopts->width);
-        Snprintf (DI_SPF(diopts->blockFormat,
-                  sizeof (diopts->blockFormat), "%%%d.1f%%s"), diopts->width);
+        Snprintf (diopts->blockFormatNR,
+            DI_SPF(sizeof (diopts->blockFormatNR), "%%%d.0f%%s"), diopts->width);
+        Snprintf (diopts->blockFormat,
+            DI_SPF(sizeof (diopts->blockFormat), "%%%d.1f%%s"), diopts->width);
     }
 
     if (diopts->dispBlockSize == DI_DISP_HR ||
@@ -2098,17 +2098,17 @@ checkDiskInfo (diData)
         ++diopts->width;
     }
 
-    Snprintf (DI_SPF(diopts->blockLabelFormat,
-              sizeof (diopts->blockLabelFormat), "%%%ds"), diopts->width);
+    Snprintf (diopts->blockLabelFormat,
+            DI_SPF(sizeof (diopts->blockLabelFormat), "%%%ds"), diopts->width);
 #if _siz_long_long >= 8
-    Snprintf (DI_SPF(diopts->inodeFormat,
-              sizeof (diopts->inodeFormat), "%%%dllu"), diopts->inodeWidth);
+    Snprintf (diopts->inodeFormat,
+            DI_SPF(sizeof (diopts->inodeFormat), "%%%dllu"), diopts->inodeWidth);
 #else
-    Snprintf (DI_SPF(diopts->inodeFormat,
-              sizeof (diopts->inodeFormat), "%%%dlu"), diopts->inodeWidth);
+    Snprintf (diopts->inodeFormat,
+            DI_SPF(sizeof (diopts->inodeFormat), "%%%dlu"), diopts->inodeWidth);
 #endif
-    Snprintf (DI_SPF(diopts->inodeLabelFormat,
-              sizeof (diopts->inodeLabelFormat), "%%%ds"), diopts->inodeWidth);
+    Snprintf (diopts->inodeLabelFormat,
+            DI_SPF(sizeof (diopts->inodeLabelFormat), "%%%ds"), diopts->inodeWidth);
 }
 
 /*
@@ -2857,8 +2857,8 @@ setDispBlockSize (ptr, diopts)
             }
             else
             {
-                Snprintf (DI_SPF(diopts->dispBlockLabel,
-                    sizeof (diopts->dispBlockLabel), "%.0f %s"),
+                Snprintf (diopts->dispBlockLabel,
+                    DI_SPF(sizeof (diopts->dispBlockLabel), "%.0f %s"),
                     val, DI_GT(dispTable [idx].disp [diopts->baseDispIdx]));
             }
             val *= dispTable [idx].size;
@@ -2884,8 +2884,8 @@ setDispBlockSize (ptr, diopts)
 
         if (ok == 0)
         {
-            Snprintf (DI_SPF(diopts->dispBlockLabel,
-                sizeof (diopts->dispBlockLabel), "%.0fb"), val);
+            Snprintf (diopts->dispBlockLabel,
+                DI_SPF(sizeof (diopts->dispBlockLabel), "%.0fb"), val);
         }
     }  /* some oddball block size */
 
