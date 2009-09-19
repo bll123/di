@@ -1,10 +1,15 @@
 #
 # $Id$
-# Copyright 2006-2008 Brad Lanam, Walnut Creek, California USA
+# $Source$
+# Copyright 2006-2009 Brad Lanam, Walnut Creek, California USA
 #
 #   The four headers: stdio.h, stdlib.h, sys/types.h, and sys/param.h
 #   are always checked.  FreeBSD has header inclusion bugs and requires
 #   sys/param.h.
+#
+#   The keywords 'void' and 'const' are always tested.
+#
+#   Prototype support is always tested.
 #
 #   Commands:
 #   key     keyword
@@ -37,8 +42,9 @@
 #   member  struct member
 #           check if member is a member of struct.
 #           e.g.: member statfs f_bsize
-#   include     include all of the code between these two tags
-#   endinclude  in the configuration file.
+#   include
+#   endinclude  include all of the code between these two tags
+#               in the configuration file.
 #
 hdr     ctype.h
 hdr     errno.h
@@ -171,10 +177,10 @@ _hdr_locale && \
 
 #if _lib_snprintf
 # define Snprintf snprintf
-# define SPF(a1,a2,a3)      a1,a2,a3
+# define DI_SPF(a1,a2,a3)      a1,a2,a3
 #else
 # define Snprintf sprintf
-# define SPF(a1,a2,a3)      a1,a3
+# define DI_SPF(a1,a2,a3)      a1,a3
 #endif
 
 #define _config_by_iffe_ 0
