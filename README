@@ -1,4 +1,4 @@
-di - disk information utility (version 4.15).
+di - disk information utility (version 4.16).
 
 DESCRIPTION
 
@@ -81,20 +81,21 @@ BUGS
 
 PORTING
 
-    di 4.15 has been tested on the following platforms:
+    di 4.16 has been tested on the following platforms:
         CentOS 5.2, 5.3
         Debian 4.0, 5.0, kFreeBSD 7.1
-        FreeBSD 7.0, 7.1, 7.2
+        FreeBSD 5.1, 7.0, 7.1, 7.2
         Haiku 1
         NetBSD 4.0.1, 5.0.1
         Nexenta 101_b85
         OpenBSD 4.5
+        RedHat 7.3
         Ubuntu 9
 
     di has been ported to the following systems in the past:
 
-        A/UX, AIX, BSDI, Compaq Tru64, Convex, Cray UNICOS,
-        Cray UNICOS/mk, FreeBSD, HP/UX, Linux, MacOS X,
+        A/UX, AIX, BeOS, BSDI, Compaq Tru64, Convex, Cray UNICOS,
+        Cray UNICOS/mk, FreeBSD, Haiku, HP/UX, Linux, MacOS X,
         NetBSD, Next, OpenBSD, OSF/1, Pyramid, SCO Unix,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Sys V.3,
         Sys V.4, Ultrix, Windows, Xenix
@@ -111,6 +112,10 @@ BUGS
     information as appropriate.
 
 CHANGES
+
+    4.16                                    [20 Sep 2009]
+        Fixed a nested macro issue on Mac OS X 10.6.
+        Fixed bugs with filename arguments.
 
     4.15                                    [17 Sep 2009]
         Fixed filename argument w/non-printing filesystem.
