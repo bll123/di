@@ -358,6 +358,7 @@ static dispTable_t dispTable [] =
 
 static void addTotals           _((diDiskInfo_t *, diDiskInfo_t *, int));
 static void checkDiskInfo       _((diData_t *));
+static void getMaxFormatLengths _((diData_t *));
 static int  checkFileInfo       _((diData_t *, int, int, char *[]));
 static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
 static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
@@ -620,7 +621,7 @@ main (argc, argv)
         printf ("di ver %s\n", DI_VERSION);
     }
 
-    if (debug > 4)
+    if (debug > 5)
     {
         for (i = 0; i < DI_DISPTAB_SIZE; ++i)
         {
@@ -667,6 +668,7 @@ main (argc, argv)
     di_getDiskInfo (&diData.diskInfo, &diData.count);
     getDiskSpecialInfo (&diData);
     checkDiskInfo (&diData);
+    getMaxFormatLengths (&diData);
     printDiskInfo (&diData);
 
     cleanup (&diData, argvptr);
@@ -1512,6 +1514,7 @@ printPerc (used, totAvail, format)
 }
 
 
+
 static int
 #if _proto_stdc
 checkFileInfo (diData_t *diData, int optidx, int argc, char *argv [])
@@ -1530,6 +1533,7 @@ checkFileInfo (diData, optidx, argc, argv)
 
 
     rc = 0;
+
         /* turn everything off */
     for (j = 0; j < diData->count; ++j)
     {
@@ -1556,6 +1560,11 @@ checkFileInfo (diData, optidx, argc, argv)
                     (__ulong) statBuf.st_dev == dinfo->st_dev)
                 {
                     dinfo->printFlag = DI_PRNT_FORCE;
+                    if (debug > 2)
+                    {
+                        printf ("file %s specified: found device %ld (%s)\n",
+                                argv[i], dinfo->st_dev, dinfo->name);
+                    }
                     break; /* out of inner for */
                 }
             }
@@ -1817,12 +1826,6 @@ checkDiskInfo (diData)
     int             i;
     int             j;
     int             dupCount;
-    unsigned int    len;
-    unsigned int    maxMountString;
-    unsigned int    maxSpecialString;
-    unsigned int    maxTypeString;
-    unsigned int    maxOptString;
-    unsigned int    maxMntTimeString;
     _fs_size_t      temp;
     __ulong         sp_dev;
     __ulong         sp_rdev;
@@ -1830,16 +1833,6 @@ checkDiskInfo (diData)
 
 
     diopts = &diData->options;
-    maxMountString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 5);
-    maxSpecialString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 10);
-    maxTypeString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7);
-    maxOptString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7);
-    maxMntTimeString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 26);
 
     for (i = 0; i < diData->count; ++i)
     {
@@ -1875,7 +1868,7 @@ checkDiskInfo (diData)
             /* Solaris reports a cdrom as having no free blocks,   */
             /* no available.  Their df doesn't always work right!  */
             /* -1 is returned.                                     */
-        if (debug > 2)
+        if (debug > 5)
         {
 #if _siz_long_long >= 8
             printf ("chk: %s free: %llu\n", dinfo->name,
@@ -1904,7 +1897,7 @@ checkDiskInfo (diData)
 
         if (dinfo->printFlag == DI_PRNT_OK)
         {
-          if (debug > 2)
+          if (debug > 5)
           {
 #if _siz_long_long >= 8
               printf ("chk: %s total: %lld\n", dinfo->name,
@@ -1946,7 +1939,7 @@ checkDiskInfo (diData)
         {
             if (debug > 2)
             {
-                printf ("chk: skipping(%s):%s\n",
+                printf ("dup: chk: skipping(%s):%s\n",
                     getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
             }
             continue;
@@ -1989,7 +1982,7 @@ checkDiskInfo (diData)
               dinfob->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
               if (debug > 2)
               {
-                  printf ("chk: ignore: duplicate: %s of %s\n",
+                  printf ("dup: chk: ignore: duplicate: %s of %s\n",
                           dinfob->name, dinfo->name);
                   printf ("dup: ign: j: rdev: %ld dev: %ld\n",
                           dinfob->sp_dev, dinfob->sp_rdev);
@@ -2008,6 +2001,39 @@ checkDiskInfo (diData)
         }
       } /* for each disk */
     } /* if the duplicate loopback mounts are to be excluded */
+}
+
+
+static void
+#if _proto_stdc
+getMaxFormatLengths (diData_t *diData)
+#else
+getMaxFormatLengths (diData)
+    diData_t            *diData;
+#endif
+{
+    int             i;
+    unsigned int    len;
+    unsigned int    maxMountString;
+    unsigned int    maxSpecialString;
+    unsigned int    maxTypeString;
+    unsigned int    maxOptString;
+    unsigned int    maxMntTimeString;
+    diOptions_t     *diopts;
+
+
+    diopts = &diData->options;
+
+    maxMountString = (unsigned int)
+        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 5);
+    maxSpecialString = (unsigned int)
+        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 10);
+    maxTypeString = (unsigned int)
+        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7);
+    maxOptString = (unsigned int)
+        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7);
+    maxMntTimeString = (unsigned int)
+        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 26);
 
     if (diopts->posix_compat == 1)
     {
@@ -2024,9 +2050,7 @@ checkDiskInfo (diData)
         diDiskInfo_t        *dinfo;
 
         dinfo = &diData->diskInfo[i];
-        if (dinfo->printFlag == DI_PRNT_OK ||
-            (dinfo->printFlag == DI_PRNT_IGNORE &&
-             (diopts->flags & DI_F_ALL) == DI_F_ALL))
+        if (dinfo->doPrint)
         {
             len = strlen (dinfo->name);
             if (len > maxMountString)
