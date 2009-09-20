@@ -182,14 +182,6 @@ tar:	Build LICENSE LICENSE.iffe MANIFEST \
 	$(MAKE) -f Makefile current-files
 	$(SHELL) mktar.sh $?
 
-testtar:	Build LICENSE LICENSE.iffe MANIFEST \
-		Makefile README bin config.win95 \
-		di.1 di.c \
-		di.h dilib.c features getopt.c hasnls.c \
-		mkconfig.pl po version.h
-	$(MAKE) -f Makefile current-files
-	$(SHELL) mktar.sh $?
-
 ###
 
 $(PROG)$(EXE_EXT):	di$(OBJ_EXT) dilib$(OBJ_EXT) \
