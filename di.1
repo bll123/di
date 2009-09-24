@@ -8,7 +8,7 @@
 .\"
 .\" bll6969di_at_gmail.com
 .\"
-.TH di 1 "30 May 2007"
+.TH di 1 "23 Sep 2009"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -50,7 +50,7 @@ that are part of a zone (Solaris).
 .PP
 \fImi\fP Displays the mounted filesystem information.
 .PP
-Several switches may be specified to
+Several options may be specified to
 control the output of
 \fIdi\fP and \fImi\fP:
 .TP
@@ -72,7 +72,7 @@ or a specific size.
 .TP
 .B \-d
 .I display\-size
-Display the blocks in units specified by \fIdisplay\-size\fP.  
+Display the blocks in units specified by \fIdisplay\-size\fP.
 Note that if the base block size is SI units of 1000 bytes, the
 display size is calculated using those units.
 \fIdisplay\-size\fP
@@ -162,10 +162,11 @@ di \-strsrm.
 .TP
 .B \-t
 Print a totals line below the list of file systems.
-Memory filesystems (tmpfs, mfs), read-only
-filesystems (such as a CD-ROM) and user filesystems (fuse)
-are not added to the totals.  Pooled filesystems (zfs, advfs) 
-have only the main pool added to the total.
+Pooled filesystems (zfs, advfs) have only the main pool added to the total.
+It is up to the user
+to exclude (using the \-x option) read\-only (cdfs, iso9660) filesystems,
+swap-based (memfs, mfs, tmpfs) filesystems and user (fuse*)
+filesystems.
 .TP
 .B \-w
 .I block\-width
@@ -203,7 +204,7 @@ The zone must be visible to the user.
 Display the filesystems for all visible zones.
 .SH Format strings
 The output of \fIdi\fP may be specified via a format string.  This
-string may be given either via the \fB-f\fP command line switch or by
+string may be given either via the \fB-f\fP command line option or by
 the \fBDIFMT\fP environment variable.  The format string may specify the
 following columns:
 .RS .5
