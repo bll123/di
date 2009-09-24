@@ -101,7 +101,8 @@ lib     GetLogicalDriveStrings
 lib     GetVolumeInformation
 lib     getfsstat
 lib     getmnt
-lib     getmntent
+# unixware put getmntent into libgen for some reason
+lib     getmntent -lgen
 lib     getmntinfo
 lib     getopt
 lib     gettext -lintl -liconv
