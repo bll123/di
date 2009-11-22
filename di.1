@@ -8,7 +8,7 @@
 .\"
 .\" bll6969di_at_gmail.com
 .\"
-.TH di 1 "23 Sep 2009"
+.TH di 1 "22 Nov 2009"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -120,7 +120,8 @@ Display partition sizes in scaled alternative 2 format.
 .br
 Include \fIonly\fP the file system types listed in \fIinclude\-fstyp\-list\fP.
 The list is a comma separated list of file system types.
-Multiple \-I options may be specified.
+Multiple \-I options may be specified.  If the 'fuse' filesystem type
+is specified, all fuse* filesystems will be included.
 e.g. \-I nfs,rfs or \-I nfs \-I rfs.
 .TP
 .B \-k
@@ -164,9 +165,10 @@ di \-strsrm.
 Print a totals line below the list of file systems.
 Pooled filesystems (zfs, advfs) have only the main pool added to the total.
 It is up to the user
-to exclude (using the \-x option) read\-only (cdfs, iso9660) filesystems,
+to exclude (using the \-x option) read\-only filesystems (cdfs, iso9660),
 swap-based (memfs, mfs, tmpfs) filesystems and user (fuse*)
-filesystems.
+filesystems.  Excluding the 'fuse' filesystem will exclude all
+fuse* filesystems.
 .TP
 .B \-w
 .I block\-width
@@ -184,7 +186,8 @@ Set the print width for inode values.  Default is seven.
 .br
 Exclude the file system types listed in \fIexclude\-fstyp\-list\fP.
 The list is a comma separated list of file system types.
-Multiple \-x options may be specified.
+Multiple \-x options may be specified.  If the 'fuse' filesystem
+type is excluded, all fuse* filesystems will be excluded.
 e.g. \-x nfs,rfs or \-x nfs \-x rfs.
 .TP
 .B \-X
