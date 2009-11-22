@@ -15,10 +15,10 @@
 #   key     keyword
 #           check to see if keyword is reserved.
 #           e.g.: key volatile
-#   hdr     name-of-header
+#   hdr     name-of-header [required-headers]
 #           check for a header.
 #           e.g.: hdr ctype.h
-#   sys     name-of-sys-header
+#   sys     name-of-sys-header [required-headers]
 #           check for a header in sys/.
 #           e.g.: sys types.h
 #   command name-of-command
@@ -36,6 +36,9 @@
 #           w/o the libraries, then with.
 #           e.g.: lib gettext -lintl -liconv
 #                 will test gettext, gettext -lintl, gettext -lintl -liconv
+#   class   class [libs]
+#           check if class exists.
+#           e.g.: class os::Volumes
 #   dcl     {int|ptr} variable
 #           check if the variable is declared.
 #           e.g.: dcl int errno
@@ -62,10 +65,14 @@ hdr     mnttab.h
 hdr     storage/Directory.h
 hdr     storage/Entry.h
 hdr     storage/Path.h
+hdr     gui/window.h
+# syllable: broken design, broken header
+hdr     storage/volumes.h gui/window.h
 hdr     string.h
 hdr     strings.h
 hdr     time.h
 hdr     unistd.h
+hdr     util/string.h
 hdr     windows.h
 hdr     zone.h
 sys     fs_types.h
@@ -97,9 +104,9 @@ lib     fshelp
 lib     GetDiskFreeSpace
 lib     GetDiskFreeSpaceEx
 lib     GetDriveType
+lib     getfsstat
 lib     GetLogicalDriveStrings
 lib     GetVolumeInformation
-lib     getfsstat
 lib     getmnt
 # unixware put getmntent into libgen for some reason
 lib     getmntent -lgen
@@ -122,6 +129,8 @@ lib     sysfs
 lib     textdomain  -lintl -liconv
 lib     zone_getattr
 lib     zone_list
+class   os::String -lsyllable
+class   os::Volumes -lsyllable
 npt     getenv
 npt     statfs _lib_statfs
 dcl     int  errno
@@ -183,8 +192,5 @@ _hdr_locale && \
 # define Snprintf sprintf
 # define DI_SPF(a2,a3)         a3
 #endif
-
-#define _config_by_iffe_ 0
-#define _config_by_mkconfig_pl_ 1
 
 endinclude
