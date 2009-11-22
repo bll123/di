@@ -685,7 +685,7 @@ static void
 cleanup (diData_t *diData, char *argvptr)
 #else
 cleanup (diData, argvptr)
-    diData_t        *diskInfo;
+    diData_t        *diData;
     char            *argvptr;
 #endif
 {
