@@ -5,21 +5,18 @@ MANIFEST		MANIFEST
 di.1			di Manual Page
 di.c			di source
 di.h			di source
+di.spec			rpmspec file
 dilib.c			di source
 getopt.c		getopt source (from Cnews)
 hasnls.c		checks for NLS support.
-config.win95		config.h for win95
+config.win95		sample config.h for win95
 Makefile		Main Makefile
 mkconfig.pl		perl config program
-bin/
-bin/iffe		iffe config program
 features/
 features/cflags.sh	cflags configuration
-features/di.iffe	iffe configuration
 features/mkconfig.dat	mkconfig.pl configuration
 features/obj_ext.sh	obj extension test
 features/turnoffnls.sh	turn off all NLS features in config.h
-LICENSE.iffe		iffe license
 po/                     internationalization files
 po/en_US.po
 po/de_DE.po
