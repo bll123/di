@@ -63,14 +63,18 @@
  *      I - mount time
  *      O - mount options.
  *
- *  System V.4 `/usr/bin/df -v` Has format: msbuf1 (w/-P option: 512 byte blocks)
+ *  System V.4 `/usr/bin/df -v` Has format: msbuf1
  *  System V.4 `/usr/bin/df -k` Has format: sbcvpm
  *  System V.4 `/usr/ucb/df`    Has format: sbuv2m
  *
  *  The default format string for this program is: smbuvpT
  *
- *  The environment variable "DIFMT" may be set to the desired format
- *  string.
+ *  Environment variables:
+ *      DIFMT:              specifies the format string.
+ *      DI_ARGS:            specifies any arguments to di.
+ *      POSIXLY_CORRECT:    forces posix mode.
+ *      BLOCKSIZE:          BSD df block size.
+ *      DF_BLOCK_SIZE:      GNU df block size.
  *
  *  Note that for filesystems that do not have, or systems (SysV.3)
  *  that do not report, available blocks, the number of available blocks is
@@ -512,12 +516,6 @@ main (argc, argv)
     }
 
     processArgs (argc, argv, &diData, dbsstr);
-
-    if (debug > 4)
-    {
-        printf ("config: iffe:%d mkc:%d\n", _config_by_iffe_,
-                _config_by_mkconfig_pl_);
-    }
 
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
     {
@@ -2568,7 +2566,9 @@ checkIgnoreList (diskInfo, ignoreList)
             printf ("chkign: test: fstype %s/%s : %s\n", ptr,
                     diskInfo->fsType, diskInfo->name);
         }
-        if (strcmp (ptr, diskInfo->fsType) == 0)
+        if (strcmp (ptr, diskInfo->fsType) == 0 ||
+            (strcmp (ptr, "fuse") == 0 &&
+             strncmp ("fuse", diskInfo->fsType, 4) == 0))
         {
             diskInfo->printFlag = DI_PRNT_EXCLUDE;
             diskInfo->doPrint = FALSE;
@@ -2607,7 +2607,9 @@ checkIncludeList (diskInfo, includeList)
                     diskInfo->fsType, diskInfo->name);
         }
 
-        if (strcmp (ptr, diskInfo->fsType) == 0)
+        if (strcmp (ptr, diskInfo->fsType) == 0 ||
+            (strcmp (ptr, "fuse") == 0 &&
+             strncmp ("fuse", diskInfo->fsType, 4) == 0))
         {
             diskInfo->printFlag = DI_PRNT_OK;
             diskInfo->doPrint = TRUE;
