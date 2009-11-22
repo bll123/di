@@ -71,15 +71,9 @@ all:
 
 di-all:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
-config.h:	features/di.iffe features/cflags.sh \
-		mkconfig.pl features/mkconfig.dat
+config.h:	features/cflags.sh mkconfig.pl features/mkconfig.dat
 	@-$(RM) -f config.h
 	./Build config.h
-
-#config.h:	features/di.iffe features/cflags.sh \
-#		mkconfig.pl features/mkconfig.dat
-#	@-$(RM) -f config.h
-#	./Build dconfig.h
 
 wconfig.h:	config.win95
 	$(CP) -f config.win95 config.h
@@ -170,17 +164,23 @@ installperms:
 current-files:
 	-$(RM) -f features/* > /dev/null 2>&1
 	$(CP) -f po.base/*.po po
-	$(CP) -f features.base/*.sh features.base/*.iffe \
-		features.base/*.dat \
-		features
+	$(CP) -f features.base/*.sh features.base/*.dat features
 
-tar:	Build LICENSE LICENSE.iffe MANIFEST \
-		Makefile README bin config.win95 \
-		di.1 di.c \
-		di.h dilib.c features getopt.c hasnls.c \
+tar:	Build LICENSE MANIFEST \
+		Makefile README config.win95 \
+		di.1 di.c di.h dilib.c features getopt.c hasnls.c \
 		mkconfig.pl po version.h
 	$(MAKE) -f Makefile current-files
 	$(SHELL) mktar.sh $?
+
+testrpmbuild:
+	test -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
+	mkdir -p $$HOME/rpmbuild/SOURCES
+	cp -f di-4.17.tar.gz $$HOME/rpmbuild/SOURCES
+	rpmbuild -ba di.spec
+	test -f $$HOME/rpmbuild/RPMS/i386/di-4.17-1.i386.rpm || exit 1
+	test -f $$HOME/rpmbuild/SRPMS/di-4.17-1.src.rpm || exit 1
+	test -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
 
 ###
 
