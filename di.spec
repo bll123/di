@@ -1,5 +1,5 @@
 Name:           di
-Version: 	4.17
+Version:        4.17
 Release:        1%{?dist}
 Summary:        'di' is a disk information utility, displaying everything (and more) that your 'df' command does.
 
@@ -7,6 +7,7 @@ Group:          System Environment/Base
 License:        zlib/libpng
 URL:            http://www.gentoo.com/di/
 Source0:        http://www.gentoo.com/di/di-%{version}.tar.gz
+Source1:        http://www.sfr-fresh.com/unix/misc/di-%{version}.tar.gz
 BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 #BuildRequires: perl
