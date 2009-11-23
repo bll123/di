@@ -22,14 +22,8 @@
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
-#if _sys_param
-# include <sys/param.h>
-#endif
 #if _sys_types
 # include <sys/types.h>
-#endif
-#if _hdr_ctype
-# include <ctype.h>
 #endif
 #if _hdr_errno
 # include <errno.h>
@@ -46,6 +40,12 @@
 #if _include_malloc && _hdr_malloc
 # include <malloc.h>
 #endif
+
+
+#if 0
+#if _sys_param
+# include <sys/param.h>
+#endif
 #if _hdr_unistd
 # include <unistd.h>
 #endif
@@ -58,42 +58,72 @@
 #if _sys_stat
 # include <sys/stat.h>
 #endif
+#endif
 
-#if _sys_mnttab
+
+#if _hdr_mntent                 /* Linux, kFreeBSD, HP-UX */
+# include <mntent.h>
+#endif
+#if _sys_mount                  /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+# include <sys/mount.h>
+#endif
+#if _sys_fstypes                /* NetBSD */
+# include <sys/fstypes.h>
+#endif
+#if _sys_fs_types               /* OSF/1 */
+# include <sys/fs_types.h>
+#endif
+#if _sys_mnttab                 /* Solaris */
 # include <sys/mnttab.h>
+#endif
+
+#if _sys_statfs && ! defined (_sys_statvfs)     /* FreeBSD, SysV.3 */
+# include <sys/statfs.h>
+#endif
+#if _sys_statvfs                    /* NetBSD, Solaris */
+# include <sys/statvfs.h>
+#endif
+#if _sys_mntctl                     /* AIX */
+# include <sys/mntctl.h>
+#endif
+#if _sys_vmount                     /* AIX */
+# include <sys/vmount.h>
+#endif
+#if _hdr_windows                    /* windows */
+# include <windows.h>
+#endif
+#if _hdr_kernel_fs_info             /* BeOS */
+# include <kernel/fs_info.h>
+#endif
+#if _hdr_storage_Directory          /* BeOS */
+# include <storage/Directory.h>
+#endif
+#if _hdr_storage_Entry              /* BeOS */
+# include <storage/Entry.h>
+#endif
+#if _hdr_storage_Path               /* BeOS */
+# include <storage/Path.h>
+#endif
+ /* bozo syllable volumes header requires gui/window */
+#if _hdr_gui_window                 /* Syllable */
+# include <gui/window.h>
+#endif
+#if _hdr_storage_volumes            /* Syllable */
+# include <storage/volumes.h>
+#endif
+#if _hdr_util_string                /* Syllable */
+# include <util/string.h>
+#endif
+
+#if 0
+#if _sys_mntent                 /* Solaris */
+# include <sys/mntent.h>
 #endif
 #if _hdr_mnttab
 # include <mnttab.h>
 #endif
-#if _hdr_mntent
-# include <mntent.h>
-#endif
-#if _sys_mntent
-# include <sys/mntent.h>
-#endif
-#if _sys_mount
-# include <sys/mount.h>
-#endif
-#if _sys_fstypes
-# include <sys/fstypes.h>
-#endif
-#if _sys_fs_types
-# include <sys/fs_types.h>
-#endif
-#if _sys_mntctl
-# include <sys/mntctl.h>
-#endif
-#if _sys_vmount
-# include <sys/vmount.h>
-#endif
-#if _sys_statfs && ! defined (_sys_statvfs)
-# include <sys/statfs.h>
-#endif
 #if _hdr_fshelp
 # include <fshelp.h>
-#endif
-#if _sys_statvfs
-# include <sys/statvfs.h>
 #endif
 #if _sys_fstyp
 # include <sys/fstyp.h>
@@ -108,32 +138,8 @@
 #  define DI_TYPE_LEN         FSTYPSZ
 # endif
 #endif
+#endif
 
-#if _hdr_windows
-# include <windows.h>            /* windows */
-#endif
-#if _hdr_kernel_fs_info
-# include <kernel/fs_info.h>
-#endif
-#if _hdr_storage_Directory
-# include <storage/Directory.h>
-#endif
-#if _hdr_storage_Entry
-# include <storage/Entry.h>
-#endif
-#if _hdr_storage_Path
-# include <storage/Path.h>
-#endif
- /* bozo syllable volumes header requires gui/window */
-#if _hdr_gui_window
-# include <gui/window.h>
-#endif
-#if _hdr_storage_volumes
-# include <storage/volumes.h>
-#endif
-#if _hdr_util_string
-# include <util/string.h>
-#endif
 
 /********************************************************/
 
@@ -167,20 +173,6 @@
 #    endif
 #   endif
 #  endif
-# endif
-#endif
-
-#if ! defined (_lib_statvfs) && \
-	_lib_statfs && \
-	_npt_statfs
-# if _lib_statfs && _statfs_2arg
-  extern int statfs _((char *, struct statfs *));
-# endif
-# if _lib_statfs && _statfs_3arg
-  extern int statfs _((char *, struct statfs *, int));
-# endif
-# if _lib_statfs && _statfs_4arg
-  extern int statfs _((char *, struct statfs *, int, int));
 # endif
 #endif
 
@@ -239,10 +231,7 @@ di_getDiskEntries (diskInfo, diCount)
         *diskInfo = (diDiskInfo_t *) Realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * *diCount);
         diptr = *diskInfo + idx;
-        memset ((char *) diptr, '\0', sizeof (diDiskInfo_t));
-        diptr->printFlag = DI_PRNT_OK;
-        diptr->isLocal = TRUE;
-        diptr->isReadOnly = FALSE;
+        di_initDiskInfo (diptr);
 
         strncpy (diptr->special, mntEntry.mnt_special, DI_SPEC_NAME_LEN);
         strncpy (diptr->name, mntEntry.mnt_mountp, DI_NAME_LEN);
@@ -279,7 +268,7 @@ di_getDiskEntries (diskInfo, diCount)
             printf ("mnt:%s - %s\n", diptr->name, diptr->fsType);
         }
 
-        if (debug > 0)
+        if (debug > 1)
         {
             printf ("mnt:%s - %s\n", diptr->name, diptr->special);
         }
@@ -357,10 +346,7 @@ di_getDiskEntries (diskInfo, diCount)
             ++*diCount;
             *diskInfo = (diDiskInfo_t *) Realloc ((char *) *diskInfo,
                     sizeof (diDiskInfo_t) * *diCount);
-            memset ((char *) diptr, '\0', sizeof (diDiskInfo_t));
-            diptr->printFlag = DI_PRNT_OK;
-            diptr->isLocal = TRUE;
-            diptr->isReadOnly = FALSE;
+            di_initDiskInfo (diptr);
 
 # if defined (COHERENT)
                 /* Coherent seems to have these fields reversed. oh well. */
@@ -375,7 +361,7 @@ di_getDiskEntries (diskInfo, diCount)
                     DI_MNT_TIME_LEN);
         }
 
-        if (debug > 0)
+        if (debug > 1)
         {
             printf ("mnt:%s - %s\n", diptr->name,
                     diptr->special);
@@ -447,10 +433,7 @@ di_getDiskEntries (diskInfo, diCount)
         *diskInfo = (diDiskInfo_t *) Realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * (Size_t) *diCount);
         diptr = *diskInfo + idx;
-        memset ((char *) diptr, '\0', sizeof (diDiskInfo_t));
-        diptr->printFlag = DI_PRNT_OK;
-        diptr->isLocal = TRUE;
-        diptr->isReadOnly = FALSE;
+        di_initDiskInfo (diptr);
 
         strncpy (diptr->special, mntEntry->mnt_fsname, DI_SPEC_NAME_LEN);
         strncpy (diptr->name, mntEntry->mnt_dir, DI_NAME_LEN);
@@ -490,7 +473,7 @@ di_getDiskEntries (diskInfo, diCount)
         }
         strncpy (diptr->options, mntEntry->mnt_opts, DI_OPT_LEN);
 
-        if (debug > 0)
+        if (debug > 1)
         {
             printf ("mnt:%s - %s : %s\n", diptr->name,
                     diptr->special, diptr->fsType);
@@ -538,7 +521,6 @@ di_getDiskEntries (diskInfo, diCount)
     diDiskInfo_t     *diptr;
     int             count;
     int             idx;
-    int             len;
     short           fstype;
     struct statfs   *mntbufp;
 
@@ -570,13 +552,11 @@ di_getDiskEntries (diskInfo, diCount)
         _fs_size_t      tblocksz;
 
         diptr = *diskInfo + idx;
-        diptr->printFlag = DI_PRNT_OK;
-        diptr->isLocal = FALSE;
-        diptr->isReadOnly = FALSE;
+        di_initDiskInfo (diptr);
 # if defined (MNT_LOCAL)
-        if ((mntbufp [idx].f_flags & MNT_LOCAL) == MNT_LOCAL)
+        if ((mntbufp [idx].f_flags & MNT_LOCAL) != MNT_LOCAL)
         {
-            diptr->isLocal = TRUE;
+            diptr->isLocal = FALSE;
         }
 # endif
 
@@ -767,19 +747,21 @@ di_getDiskEntries (diskInfo, diCount)
         {
             printf ("%s: %s\n", diptr->name, diptr->fsType);
             printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
-                    mntbufp [idx].f_blocks, mntbufp [idx].f_bfree,
-                    mntbufp [idx].f_bavail);
+                    (long) mntbufp [idx].f_blocks,
+                    (long) mntbufp [idx].f_bfree,
+                    (long) mntbufp [idx].f_bavail);
 # if _mem_f_fsize_statfs
-            printf ("\tfsize:%ld \n", mntbufp [idx].f_fsize);
+            printf ("\tfsize:%ld \n", (long) mntbufp [idx].f_fsize);
 # endif
 # if _mem_f_bsize_statfs
-            printf ("\tbsize:%ld \n", mntbufp [idx].f_bsize);
+            printf ("\tbsize:%ld \n", (long) mntbufp [idx].f_bsize);
 # endif
 # if _mem_f_iosize_statfs
-            printf ("\tiosize:%ld \n", mntbufp [idx].f_iosize);
+            printf ("\tiosize:%ld \n", (long) mntbufp [idx].f_iosize);
 # endif
             printf ("\tinodes: tot:%ld free:%ld\n",
-                    mntbufp [idx].f_files, mntbufp [idx].f_ffree);
+                    (long) mntbufp [idx].f_files,
+                    (long) mntbufp [idx].f_ffree);
         }
     }
 
@@ -843,9 +825,8 @@ di_getDiskEntries (diskInfo, diCount)
         _fs_size_t          tblocksz;
 
         diptr = *diskInfo + idx;
-        diptr->printFlag = DI_PRNT_OK;
-        diptr->isLocal = FALSE;
-        diptr->isReadOnly = FALSE;
+        di_initDiskInfo (diptr);
+
         sp = mntbufp + idx;
 # if defined (MNT_RDONLY)
         if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY)
@@ -854,9 +835,9 @@ di_getDiskEntries (diskInfo, diCount)
         }
 # endif
 # if defined (MNT_LOCAL)
-        if ((sp->f_flags & MNT_LOCAL) == MNT_LOCAL)
+        if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL)
         {
-            diptr->isLocal = TRUE;
+            diptr->isLocal = FALSE;
         }
 # endif
         convertMountOptions ((long) sp->f_flags, diptr);
@@ -975,9 +956,7 @@ di_getDiskEntries (diskInfo, diCount)
         _fs_size_t      tblocksz;
 
         diptr = *diskInfo + idx;
-        diptr->printFlag = DI_PRNT_OK;
-        diptr->isLocal = FALSE;
-        diptr->isReadOnly = FALSE;
+        di_initDiskInfo (diptr);
 
         sp = mntbufp + idx;
 
@@ -988,9 +967,9 @@ di_getDiskEntries (diskInfo, diCount)
         }
 # endif
 # if defined (MNT_LOCAL)
-        if ((sp->f_flag & MNT_LOCAL) == MNT_LOCAL)
+        if ((sp->f_flag & MNT_LOCAL) != MNT_LOCAL)
         {
-            diptr->isLocal = TRUE;
+            diptr->isLocal = FALSE;
         }
 # endif
         convertMountOptions ((long) sp->f_flag, diptr);
@@ -1108,9 +1087,7 @@ di_getDiskEntries (diskInfo, diCount)
     for (idx = 0; idx < count; idx++)
     {
         diptr = *diskInfo + idx;
-        diptr->printFlag = DI_PRNT_OK;
-        diptr->isLocal = TRUE;
-        diptr->isReadOnly = FALSE;
+        di_initDiskInfo (diptr);
 
         if ((fsdbuf [idx].fd_req.flags & MNT_LOCAL) != MNT_LOCAL)
         {
@@ -1288,10 +1265,9 @@ di_getDiskEntries (diskInfo, diCount)
     for (i = 0; i < num; i++)
     {
         diptr = *diskInfo + i;
+        di_initDiskInfo (diptr);
+
         vmtp = (struct vmount *) bufp;
-        diptr->printFlag = DI_PRNT_OK;
-        diptr->isLocal = TRUE;
-        diptr->isReadOnly = FALSE;
         if ((vmtp->vmt_flags & MNT_REMOTE) == MNT_REMOTE)
         {
             diptr->isLocal = FALSE;
@@ -1339,7 +1315,7 @@ di_getDiskEntries (diskInfo, diCount)
                 DI_MNT_TIME_LEN);
         bufp += vmtp->vmt_length;
 
-        if (debug > 0)
+        if (debug > 1)
         {
             printf ("mnt:%s - %s : %s\n", diptr->name,
                     diptr->special, diptr->fsType);
@@ -1480,8 +1456,8 @@ di_getDiskEntries (diskInfo, diCount)
         *diskInfo = (diDiskInfo_t *) Realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * *diCount);
         diptr = *diskInfo + idx;
-        memset ((char *) diptr, '\0', sizeof (diDiskInfo_t));
-        diptr->printFlag = DI_PRNT_OK;
+        di_initDiskInfo (diptr);
+
         *buff = '\0';
         nref.device = dev;
         nref.node = fsinfo.root;
@@ -1491,8 +1467,6 @@ di_getDiskEntries (diskInfo, diCount)
         strncpy (diptr->name, path.Path(), DI_NAME_LEN);
         strncpy (diptr->special, fsinfo.device_name, DI_SPEC_NAME_LEN);
         strncpy (diptr->fsType, fsinfo.fsh_name, DI_TYPE_LEN);
-        diptr->isLocal = TRUE;
-        diptr->isReadOnly = FALSE;
         di_saveBlockSizes (diptr, (_fs_size_t) fsinfo.block_size,
             (_fs_size_t) fsinfo.total_blocks,
             (_fs_size_t) fsinfo.free_blocks,
@@ -1515,7 +1489,7 @@ di_getDiskEntries (diskInfo, diCount)
         convertMountOptions ((long) fsinfo.flags, diptr);
         trimChar (diptr->options, ',');
 
-        if (debug > 0)
+        if (debug > 1)
         {
             printf ("mnt:%s - %s\n", diptr->name, diptr->special);
             printf ("dev:%d fs:%s\n", dev, diptr->fsType);
@@ -1576,14 +1550,11 @@ di_getDiskEntries (diskInfo, diCount)
         *diskInfo = (diDiskInfo_t *) Realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * *diCount);
         diptr = *diskInfo + idx;
-        memset ((char *) diptr, '\0', sizeof (diDiskInfo_t));
-        diptr->printFlag = DI_PRNT_OK;
+        di_initDiskInfo (diptr);
         stat = vols->GetMountPoint (i, &mpString);
         strncpy (diptr->name, mpString.c_str(), DI_NAME_LEN);
         strncpy (diptr->special, fsinfo.fi_device_path, DI_SPEC_NAME_LEN);
         strncpy (diptr->fsType, fsinfo.fi_driver_name, DI_TYPE_LEN);
-        diptr->isLocal = TRUE;
-        diptr->isReadOnly = FALSE;
         di_saveBlockSizes (diptr, (_fs_size_t) fsinfo.block_size,
             (_fs_size_t) fsinfo.total_blocks,
             (_fs_size_t) fsinfo.free_blocks,
@@ -1606,7 +1577,7 @@ di_getDiskEntries (diskInfo, diCount)
         convertMountOptions ((long) fsinfo.fi_flags, diptr);
         trimChar (diptr->options, ',');
 
-        if (debug > 0)
+        if (debug > 1)
         {
             printf ("mnt:%s - %s\n", diptr->name, diptr->special);
             printf ("dev:%d fs:%s\n", fsinfo.fi_dev, diptr->fsType);

@@ -32,17 +32,17 @@
 #if _sys_param
 # include <sys/param.h>
 #endif
-#if _hdr_ctype
-# include <ctype.h>
-#endif
-#if _hdr_errno
-# include <errno.h>
-#endif
 #if _hdr_string
 # include <string.h>
 #endif
 #if _hdr_strings && ((! defined (_hdr_string)) || (_include_string))
 # include <strings.h>
+#endif
+
+
+#if 0
+#if _hdr_errno
+# include <errno.h>
 #endif
 #if _hdr_memory
 # include <memory.h>
@@ -62,21 +62,38 @@
 #if _sys_stat
 # include <sys/stat.h>
 #endif
+#endif
 
-#if _sys_mnttab
+#if _hdr_mntent                 /* Linux, kFreeBSD */
+# include <mntent.h>
+#endif
+#if _sys_mount                  /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+# include <sys/mount.h>
+#endif
+#if _sys_mntent                 /* Solaris */
+# include <sys/mntent.h>
+#endif
+
+#if _sys_statvfs                /* Linux, Solaris, FreeBSD, NetBSD, HP-UX */
+# include <sys/statvfs.h>
+#endif
+#if _sys_vfs                    /* Linux, HP-UX */
+# include <sys/vfs.h>
+#endif
+#if _sys_statfs && ! defined (_sys_statvfs)     /* SysV.3 */
+# include <sys/statfs.h>
+#endif
+#if _sys_fstyp                                  /* SysV.3 */
+# include <sys/fstyp.h>
+# define DI_TYPE_LEN          FSTYPSZ
+#endif
+
+#if 0
+#if _sys_mnttab                         /* Solaris */
 # include <sys/mnttab.h>
 #endif
 #if _hdr_mnttab
 # include <mnttab.h>
-#endif
-#if _hdr_mntent
-# include <mntent.h>
-#endif
-#if _sys_mntent
-# include <sys/mntent.h>
-#endif
-#if _sys_mount
-# include <sys/mount.h>
 #endif
 #if _sys_fstypes
 # include <sys/fstypes.h>
@@ -84,39 +101,25 @@
 #if _sys_fs_types
 # include <sys/fs_types.h>
 #endif
-#if _sys_mntctl
-# include <sys/mntctl.h>
 #endif
-#if _sys_vmount
-# include <sys/vmount.h>
-#endif
-#if _sys_statfs && ! defined (_sys_statvfs)
-# include <sys/statfs.h>
-#endif
-#if _hdr_fshelp
-# include <fshelp.h>
-#endif
-#if _sys_statvfs
-# include <sys/statvfs.h>
-#endif
-#if _sys_fstyp
-# include <sys/fstyp.h>
-# define DI_TYPE_LEN          FSTYPSZ
-#endif
-#if _sys_vfs
-# include <sys/vfs.h>
-#endif
-#if _sys_vfstab
-# include <sys/vfstab.h>
-# if ! defined (DI_TYPE_LEN)
-#  define DI_TYPE_LEN         FSTYPSZ
-# endif
-#endif
-
 #if _hdr_windows
 # include <windows.h>            /* windows */
 #endif
 
+
+#if ! defined (_lib_statvfs) && \
+	_lib_statfs && \
+	_npt_statfs
+# if _lib_statfs && _statfs_2arg
+  extern int statfs _((char *, struct statfs *));
+# endif
+# if _lib_statfs && _statfs_3arg
+  extern int statfs _((char *, struct statfs *, int));
+# endif
+# if _lib_statfs && _statfs_4arg
+  extern int statfs _((char *, struct statfs *, int, int));
+# endif
+#endif
 
 /********************************************************/
 
@@ -341,7 +344,7 @@ di_getDiskInfo (diskInfo, diCount)
                     (_fs_size_t) statBuf.f_files,
                     (_fs_size_t) statBuf.f_ffree,
                     (_fs_size_t) statBuf.f_ffree);
-# if _lib_sysfs
+# if _lib_sysfs && _mem_f_fstyp_statfs
                 sysfs (GETFSTYP, statBuf.f_fstyp, diptr->fsType);
 # endif
 
@@ -400,7 +403,7 @@ di_getDiskInfo (diskInfo, diCount)
     int             i;
     struct statfs   statBuf;
 
-    if (debug > 0) { printf ("# lib:getDiskEntries: bsd-statfs 2/3arg\n"); }
+    if (debug > 0) { printf ("# lib:getDiskInfo: bsd-statfs 2/3arg\n"); }
     for (i = 0; i < *diCount; ++i)
     {
         diptr = *diskInfo + i;
@@ -418,18 +421,19 @@ di_getDiskInfo (diskInfo, diCount)
                     (_fs_size_t) statBuf.f_ffree,
                     (_fs_size_t) statBuf.f_ffree);
 
-# if _lib_sysfs
+# if _lib_sysfs && _mem_f_fstyp_statfs
                 sysfs (GETFSTYP, statBuf.f_fstyp, diptr->fsType);
 # endif
 
                 if (debug > 1)
                 {
                     printf ("%s: %s\n", diptr->name, diptr->fsType);
-                    printf ("\tbsize:%ld\n", statBuf.f_bsize);
+                    printf ("\tbsize:%ld\n", (long) statBuf.f_bsize);
                     printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
-                            statBuf.f_blocks, statBuf.f_bfree, statBuf.f_bavail);
+                            (long) statBuf.f_blocks, (long) statBuf.f_bfree,
+                            (long) statBuf.f_bavail);
                     printf ("\tinodes: tot:%ld free:%ld\n",
-                            statBuf.f_files, statBuf.f_ffree);
+                            (long) statBuf.f_files, (long) statBuf.f_ffree);
                 }
             } /* if we got the info */
             else
