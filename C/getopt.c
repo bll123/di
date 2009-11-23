@@ -18,6 +18,9 @@ $Source$
  */
 
 #include <stdio.h>
+#if _hdr_stdlib
+# include <stdlib.h>
+#endif
 #if _hdr_string
 # include <string.h>
 #endif
