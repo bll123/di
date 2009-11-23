@@ -7,8 +7,6 @@
 #ifndef __INC_DI_H_
 #define __INC_DI_H_
 
-/* $Id$ */
-
 #include "config.h"
 
 /*****************************************************/
@@ -29,10 +27,10 @@
 #  define MAXPATHLEN        _POSIX_PATH_MAX
 # else
 #  if defined (PATH_MAX)
-#   define MAXPATHLEN        PATH_MAX
+#   define MAXPATHLEN       PATH_MAX
 #  endif
 #  if defined (LPNMAX)
-#   define MAXPATHLEN         LPNMAX
+#   define MAXPATHLEN       LPNMAX
 #  endif
 # endif
 #endif
@@ -44,24 +42,24 @@
 #if _sys_fstyp
 # include <sys/fstyp.h>
 # if defined (FSTYPSZ)
-#  define DI_TYPE_LEN          FSTYPSZ
+#  define DI_TYPE_LEN       FSTYPSZ
 # endif
 #endif
 #if _sys_mount
 # include <sys/mount.h>
 # if ! defined (DI_TYPE_LEN) && defined (MFSNAMELEN)
-#  define DI_TYPE_LEN          MFSNAMELEN
+#  define DI_TYPE_LEN       MFSNAMELEN
 # endif
 #endif
 #if _sys_vfstab
 # include <sys/vfstab.h>
 # if ! defined (DI_TYPE_LEN) && defined (FSTYPSZ)
-#  define DI_TYPE_LEN         FSTYPSZ
+#  define DI_TYPE_LEN       FSTYPSZ
 # endif
 #endif
 
 #if ! defined (DI_TYPE_LEN)
-# define DI_TYPE_LEN          16
+# define DI_TYPE_LEN        16
 #endif
 
 #if ! defined (_lib_memcpy) && ! defined (memcpy)
@@ -140,10 +138,29 @@ typedef struct
    extern "C" {
 # endif
 
-extern int  di_getDiskEntries      _((diDiskInfo_t **, int *));
-extern void di_getDiskInfo         _((diDiskInfo_t **, int *));
-extern void di_testRemoteDisk      _((diDiskInfo_t *));
-extern void *Realloc               _((void *, Size_t));
+ /* digetdiskentries.c */
+extern int  di_getDiskEntries       _((diDiskInfo_t **, int *));
+ /* digetdiskinfo.c */
+extern void di_getDiskInfo          _((diDiskInfo_t **, int *));
+ /* trimchar.c */
+extern void trimChar                _((char *, int));
+ /* realloc.c */
+extern void *Realloc                _((void *, Size_t));
+ /* didiskutil.c */
+extern void di_initDiskInfo _((diDiskInfo_t *));
+extern void di_saveBlockSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t, _fs_size_t));
+extern void di_saveInodeSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t));
+#if _lib_getmntent && \
+    ! defined (_lib_getmntinfo) && \
+    ! defined (_lib_getfsstat) && \
+    ! defined (_lib_getvfsstat) && \
+	! defined (_lib_mntctl) && \
+	! defined (_class_os__Volumes)
+extern char *chkMountOptions        _((char *, char *));
+#endif
+extern void convertMountOptions     _((long, diDiskInfo_t *));
+extern void convertNFSMountOptions  _((long, long, long, diDiskInfo_t *));
+extern void di_testRemoteDisk       _((diDiskInfo_t *));
 
 /* workaround for cygwin                                              */
 /* if we have a getopt header, there's probably a getopt lib function */
