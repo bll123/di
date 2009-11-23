@@ -1,4 +1,4 @@
-di - disk information utility (version 4.16).
+di - disk information utility (version 4.17).
 
 DESCRIPTION
 
@@ -12,24 +12,16 @@ INSTALLATION
 
   To build with mkconfig.pl (requires perl):
 
-      Example                 Example w/gcc and different prefix.
       ./Build distclean
-      ./Build -mkc              CC=gcc prefix=/usr/lbin ./Build -mkc
-      ./Build -mkc install      CC=gcc prefix=/usr/lbin ./Build -mkc install
-
-  To build with iffe:
-      Example                 Example w/gcc and different prefix.
-      ./Build distclean
-      ./Build                   CC=gcc prefix=/usr/lbin ./Build
-      ./Build install           CC=gcc prefix=/usr/lbin ./Build install
-                         gcc sometimes requires -lintl for internationalization
-                                LIBS="-lintl" CC=gcc ./Build
-                                LIBS="-lintl" CC=gcc ./Build install
+      ./Build
+      ./Build install
+   Example to change compiler and prefix:
+      CC=gcc prefix=/usr/lbin ./Build
+   For BeOS, Haiku, Syllable:
+      CC=g++ ./Build
 
   To turn off NLS (internationalization):
-
-      ./Build -mkc -nonls            CC=gcc ./Build -mkc -nonls
-      ./Build -mkc -nonls install    CC=gcc ./Build -mkc -nonls install
+      ./Build -nonls
 
   The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.
@@ -45,7 +37,7 @@ INSTALLATION
       ./Build -64
 
   Installation Permissions:
-    Some systems (Sys V variants) only allow root to read the
+    Some old systems (Sys V variants) only allow root to read the
     mount table.  If this is the case, change the INSTPERM macro
     in the Makefile should be set to 4111, and the USER macro to root.
     In SysV.4 and Solaris, the mount command would reset the
@@ -75,30 +67,31 @@ INSTALLATION
         ./Build distclean
         CC=gcc ./Build
 
-BUGS
-
-    submit bugs to bll6969di_at_gmail.com
-
 PORTING
 
-    di 4.16 has been tested on the following platforms:
-        CentOS 5.2, 5.3
-        Debian 4.0, 5.0, kFreeBSD 7.1
-        FreeBSD 5.1, 7.0, 7.1, 7.2
-        Haiku 1
-        NetBSD 4.0.1, 5.0.1
+    di 4.17 has been tested on the following platforms:
+        CentOS 4.8, 5.2, 5.3
+        Debian 4.0, 5.0, kFreeBSD 7.2
+        Fedora 5.2
+        FreeBSD 4.9, 5.1, 7.0, 7.1, 7.2
+        HP-UX 11.11 (bundled cc, gcc)
+        MacOSX 8.11, 9.5
+        NetBSD 2.0.2, 4.0.1, 5.0.1
         Nexenta 101_b85
         OpenBSD 4.5
         RedHat 7.3
+        Solaris 5.8, 5.10
+        Syllable 0.6.6
         Ubuntu 9
+        Unixware 11
 
     di has been ported to the following systems in the past:
 
         A/UX, AIX, BeOS, BSDI, Compaq Tru64, Convex, Cray UNICOS,
         Cray UNICOS/mk, FreeBSD, Haiku, HP/UX, Linux, MacOS X,
         NetBSD, Next, OpenBSD, OSF/1, Pyramid, SCO Unix,
-        Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Sys V.3,
-        Sys V.4, Ultrix, Windows, Xenix
+        Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Syllable,
+        Sys V.3, Sys V.4, Ultrix, Windows, Xenix
 
 BUGS
     Send bug reports along with the output from 'di -A -a -X 5' and the
@@ -112,6 +105,23 @@ BUGS
     information as appropriate.
 
 CHANGES
+
+    4.17                                    [22 Nov 2009]
+        Totals have been changed to add up whatever filesystems
+        are displayed.  This is more intuitive for the user.
+        It is up to the user to exclude read-only filesystems
+        (cdfs, iso9660), memory-based filesystems (memfs, mfs, tmpfs)
+        and user filesystems (fuse*).  Excluding the 'fuse' type will
+        exclude all fuse* filesystems.
+
+        As before, only the main pool of a pooled filesystem is totaled.
+
+        The build now works on unixware (getmntent is in libgen).
+        The build now works on syllable.
+
+        The default configuration method has been changed to
+        use the perl script.  Removed iffe, as it doesn't support
+        class testing.
 
     4.16                                    [20 Sep 2009]
         Fixed a nested macro issue on Mac OS X 10.6.
@@ -130,7 +140,7 @@ CHANGES
         Fixed totals to correctly account for pooled filesystems.
 
     4.12                                    [19 Jan 2008]
-        Change of e-mail addresses
+        Change of e-mail addresses.
 
     4.11                                    [29 May 2007]
         Fixed minor bug for 'di -sn -t' introduced in 4.10.
@@ -432,49 +442,32 @@ CHANGES
 
 ACKNOWLEDGEMENTS
 
-    And for their comments and/or source and/or
-    manual pages and/or bug fixes, thanks!
+    And for their comments/source/manual pages and/or bug fixes, thanks!
 
         jjb@NOSPAM-jagware.bcc.com (J.J.Bailey)
-        vogelke@NOSPAM-c-17igp.wpafb.af.mil (Contr Karl Vogel)
-            [pyramid]
+        vogelke@NOSPAM-c-17igp.wpafb.af.mil (Contr Karl Vogel) [pyramid]
         costales@NOSPAM-ICSI.Berkeley.EDU (Bryan Costales)
         Mark Neale <mark@NOSPAM-edscom.demon.co.uk>
-        Pat Myrto <pat@NOSPAM-rwing.uucp>
-            [sunOS filesystem type stuff]
-        henrikar@NOSPAM-utctu1.ct.utwente.nl (Henri Karrenbeld)
-            [sgi]
+        Pat Myrto <pat@NOSPAM-rwing.uucp> [sunOS filesystem type stuff]
+        henrikar@NOSPAM-utctu1.ct.utwente.nl (Henri Karrenbeld) [sgi]
         Peter Bray <Peter.Bray@NOSPAM-serg.cse.unsw.edu.au>
-        gsipe@NOSPAM-pyramid.com (George M. Sipe)
-            [manual page]
+        gsipe@NOSPAM-pyramid.com (George M. Sipe) [manual page]
         Jeffrey Mogul <mogul@NOSPAM-pa.dec.com>
             [ultrix, osf/1, manual page, new format options]
-        thomas@NOSPAM-idx.kodak.com (Th. Bullinger)
-            [help usage]
-        Seth Theriault <seth@NOSPAM-connact.com>
-            [next, tru64]
-        steve@NOSPAM-nshore.org (Stephen J. Walick)
-            [SCO]
-        Gerald Rinske <gerald@NOSPAM-D012F291.mch.sni.de>
-            [sgi]
-        Mike Grupenhoff <kashmir@NOSPAM-snare.dorm.umd.edu>
-            [linux]
-        R.K.Lloyd@NOSPAM-csc.liv.ac.uk
-            [hpux]
-        "William Gibbs" <bill@NOSPAM-wgc386.MV.COM>
-            [xenix]
-        Randy Thompson <randyt@NOSPAM-sequent.com>
-            [sequent]
-        eriko@NOSPAM-risc.austin.ibm.com (O'Shaughnessy Erik)
-            [aix]
+        thomas@NOSPAM-idx.kodak.com (Th. Bullinger) [help usage]
+        Seth Theriault <seth@NOSPAM-connact.com> [next, tru64]
+        steve@NOSPAM-nshore.org (Stephen J. Walick) [SCO]
+        Gerald Rinske <gerald@NOSPAM-D012F291.mch.sni.de> [sgi]
+        Mike Grupenhoff <kashmir@NOSPAM-snare.dorm.umd.edu> [linux]
+        R.K.Lloyd@NOSPAM-csc.liv.ac.uk [hpux]
+        "William Gibbs" <bill@NOSPAM-wgc386.MV.COM> [xenix]
+        Randy Thompson <randyt@NOSPAM-sequent.com> [sequent]
+        eriko@NOSPAM-risc.austin.ibm.com (O'Shaughnessy Erik) [aix]
         Bill Davidsen <davidsen@NOSPAM-tmr.com>
             [linux, SCO, etc., new format options]
-        fredex@NOSPAM-fcshome.stoneham.ma.us (fred smith)
-            [coherent 4.2.05]
-        bag@NOSPAM-clipper.cs.kiev.ua (Andrey Blochintsev)
-            [bsdi]
-        ginsbach@NOSPAM-spacestar.net (Brian Ginsbach)
-            [netbsd, irix, unicos]
+        fredex@NOSPAM-fcshome.stoneham.ma.us (fred smith) [coherent 4.2.05]
+        bag@NOSPAM-clipper.cs.kiev.ua (Andrey Blochintsev) [bsdi]
+        ginsbach@NOSPAM-spacestar.net (Brian Ginsbach) [netbsd, irix, unicos]
 
         et. al.
 
