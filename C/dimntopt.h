@@ -9,47 +9,46 @@
 
 #include "config.h"
 
-#if _sys_mnttab
-# include <sys/mnttab.h>
-#endif
-#if _hdr_mnttab
-# include <mnttab.h>
-#endif
-#if _hdr_mntent
+#if _hdr_mntent                     /* Linux, kFreeBSD */
 # include <mntent.h>
 #endif
-#if _sys_mntent
-# include <sys/mntent.h>
-#endif
-#if _sys_mount
+#if _sys_mount                      /* FreeBSD, OpenBSD, NetBSD, HP-UX */
 # include <sys/mount.h>
 #endif
-#if _sys_fstypes
+#if _sys_mntent                     /* Solaris */
+# include <sys/mntent.h>
+#endif
+#if _sys_fstypes                    /* NetBSD */
 # include <sys/fstypes.h>
 #endif
-#if _sys_fs_types
+#if _sys_fs_types                   /* OSF/1 */
 # include <sys/fs_types.h>
+#endif
+#if _sys_vmount                     /* AIX */
+# include <sys/vmount.h>
+#endif
+
+#if 0
+#if _hdr_mnttab
+# include <mnttab.h>
 #endif
 #if _sys_mntctl
 # include <sys/mntctl.h>
 #endif
-#if _sys_vmount
-# include <sys/vmount.h>
-#endif
 #if _sys_statfs && ! defined (_sys_statvfs)
 # include <sys/statfs.h>
 #endif
+#if _sys_statvfs                    /* NetBSD */
+# include <sys/statvfs.h>
+#endif
 #if _hdr_fshelp
 # include <fshelp.h>
-#endif
-#if _sys_statvfs
-# include <sys/statvfs.h>
 #endif
 #if _sys_fstyp
 # include <sys/fstyp.h>
 # define DI_TYPE_LEN          FSTYPSZ
 #endif
-#if _sys_vfs
+#if _sys_vfs                        /* Linux */
 # include <sys/vfs.h>
 #endif
 #if _sys_vfstab
@@ -64,6 +63,7 @@
 #endif
 #if _hdr_kernel_fs_info
 # include <kernel/fs_info.h>
+#endif
 #endif
 
 /********************************************************/
@@ -161,6 +161,24 @@
 #endif
 #if defined (FS_HAS_QUERY)
 # define MNT_HAS_QUERY FS_HAS_QUERY
+#endif
+
+#if defined (MNTOPT_IGNORE)
+# define DI_MNTOPT_IGNORE MNTOPT_IGNORE
+#else
+# define DI_MNTOPT_IGNORE "ignore"
+#endif
+
+#if defined (MNTOPT_RO)
+# define DI_MNTOPT_RO MNTOPT_RO
+#else
+# define DI_MNTOPT_RO "ro"
+#endif
+
+#if defined (MNTOPT_DEV)
+# define DI_MNTOPT_DEV MNTOPT_DEV
+#else
+# define DI_MNTOPT_DEV "dev="
 #endif
 
 #endif /* __INC_DIMNTOPT_H_ */
