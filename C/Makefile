@@ -131,8 +131,8 @@ install-po: build-po
 		$(TEST) -d $(LOCALEDIR)/$$j/LC_MESSAGES || \
 			$(MKDIR) $(LOCALEDIR)/$$j/LC_MESSAGES; \
 		$(CP) -f $$j.mo $(LOCALEDIR)/$$j/LC_MESSAGES/di.mo; \
-        $(RM) -f $$j.mo; \
-	done)
+		$(RM) -f $$j.mo; \
+		done)
 
 install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	-$(TEST) -d $(prefix) || $(MKDIR) $(prefix)
@@ -168,7 +168,9 @@ current-files:
 
 tar:	Build LICENSE MANIFEST \
 		Makefile README config.win95 \
-		di.1 di.c di.h dilib.c features getopt.c hasnls.c \
+		di.1 di.c di.h dimntopt.h didiskutil.c digetdiskentries.c \
+		digetdiskinfo.c realloc.c trimchar.c \
+		features getopt.c hasnls.c \
 		mkconfig.pl po version.h
 	$(MAKE) -f Makefile current-files
 	$(SHELL) mktar.sh $?
@@ -184,12 +186,15 @@ testrpmbuild:
 
 ###
 
-$(PROG)$(EXE_EXT):	di$(OBJ_EXT) dilib$(OBJ_EXT) \
-		getopt$(OBJ_EXT)
+$(PROG)$(EXE_EXT):	di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
+		digetdiskentries$(OBJ_EXT) digetdiskinfo$(OBJ_EXT) \
+		realloc$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
 	@test ! -f reqlibs.txt || echo "*** Using libs: `cat reqlibs.txt`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) \
-		di$(OBJ_EXT) dilib$(OBJ_EXT) \
+		di$(OBJ_EXT) didiskutil$(OBJ_EXT) digetdiskinfo$(OBJ_EXT) \
+		digetdiskentries$(OBJ_EXT) \
+		realloc$(OBJ_EXT) trimchar$(OBJ_EXT) \
 		getopt$(OBJ_EXT) $(LIBS) \
 		`test ! -f reqlibs.txt || cat reqlibs.txt`
 
@@ -203,12 +208,25 @@ hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
 di$(OBJ_EXT):		di.c config.h di.h version.h
 	$(CC) -c $(CFLAGS) $(OTHERFLAGS) di.c
 
-dilib$(OBJ_EXT):	dilib.c config.h di.h
-	$(CC) -c $(CFLAGS) dilib.c
+digetdiskinfo$(OBJ_EXT):	digetdiskinfo.c config.h di.h dimntopt.h
+	$(CC) -c $(CFLAGS) digetdiskinfo.c
 
-getopt$(OBJ_EXT):	getopt.c config.h di.h
+didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimntopt.h
+	$(CC) -c $(CFLAGS) didiskutil.c
+
+digetdiskentries$(OBJ_EXT):	digetdiskentries.c config.h di.h dimntopt.h
+	$(CC) -c $(CFLAGS) digetdiskentries.c
+
+getopt$(OBJ_EXT):	getopt.c config.h
 	$(CC) -c $(CFLAGS) getopt.c
 
 hasnls$(OBJ_EXT):	hasnls.c config.h
 	$(CC) -c $(CFLAGS) $(OTHERFLAGS) hasnls.c
+
+realloc$(OBJ_EXT):	realloc.c config.h
+	$(CC) -c $(CFLAGS) realloc.c
+
+trimchar$(OBJ_EXT):	trimchar.c config.h
+	$(CC) -c $(CFLAGS) trimchar.c
+
 
