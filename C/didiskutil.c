@@ -9,17 +9,8 @@
 #include "dimntopt.h"
 
 #include <stdio.h>
-#if _hdr_ctype
-# include <ctype.h>
-#endif
-#if _hdr_errno
-# include <errno.h>
-#endif
 #if _hdr_stdlib
 # include <stdlib.h>
-#endif
-#if _sys_types
-# include <sys/types.h>
 #endif
 #if _hdr_string
 # include <string.h>
@@ -33,27 +24,19 @@
 #if _include_malloc && _hdr_malloc
 # include <malloc.h>
 #endif
-#if _hdr_unistd
-# include <unistd.h>
-#endif
-#if _hdr_time
-# include <time.h>
-#endif
-#if _sys_time
-# include <sys/time.h>
-#endif
-#if _sys_stat
-# include <sys/stat.h>
-#endif
-#if _sys_param
-# include <sys/param.h>
-#endif
+
 
 /********************************************************/
 /*
     This module contains utility routines for conversion
     and checking the data.
 
+    di_initDiskInfo ()
+        initialize disk info structure
+    di_saveBlockSizes ()
+        save the block sizes in the diskinfo structure.
+    di_saveInodeSizes ()
+        save the inode sizes in the diskinfo structure.
     convertMountOptions ()
         converts mount options to text format.
     convertNFSMountOptions ()
@@ -65,6 +48,58 @@
         test a disk to see if it is remote (nfs, nfs3).
 
 */
+
+void
+#if _proto_stdc
+di_initDiskInfo (diDiskInfo_t *diptr)
+#else
+di_initDiskInfo (diptr)
+    diDiskInfo_t        *diptr;
+#endif
+{
+    memset ((char *) diptr, '\0', sizeof (diDiskInfo_t));
+    diptr->printFlag = DI_PRNT_OK;
+    diptr->isLocal = TRUE;
+    diptr->isReadOnly = FALSE;
+}
+
+void
+#if _proto_stdc
+di_saveBlockSizes (diDiskInfo_t *diptr, _fs_size_t block_size,
+        _fs_size_t total_blocks, _fs_size_t free_blocks,
+        _fs_size_t avail_blocks)
+#else
+di_saveBlockSizes (diptr, block_size, total_blocks, free_blocks, avail_blocks)
+    diDiskInfo_t *diptr;
+    _fs_size_t block_size;
+    _fs_size_t total_blocks;
+    _fs_size_t free_blocks;
+    _fs_size_t avail_blocks;
+#endif
+{
+    diptr->blockSize = (_fs_size_t) block_size;
+    diptr->totalBlocks = (_fs_size_t) total_blocks;
+    diptr->freeBlocks = (_fs_size_t) free_blocks;
+    diptr->availBlocks = (_fs_size_t) avail_blocks;
+}
+
+void
+#if _proto_stdc
+di_saveInodeSizes (diDiskInfo_t *diptr,
+        _fs_size_t total_nodes, _fs_size_t free_nodes,
+        _fs_size_t avail_nodes)
+#else
+di_saveInodeSizes (diptr, total_nodes, free_nodes, avail_nodes)
+    diDiskInfo_t *diptr;
+    _fs_size_t total_nodes;
+    _fs_size_t free_nodes;
+    _fs_size_t avail_nodes;
+#endif
+{
+    diptr->totalInodes = total_nodes;
+    diptr->freeInodes = free_nodes;
+    diptr->availInodes = avail_nodes;
+}
 
 void
 #if _proto_stdc
