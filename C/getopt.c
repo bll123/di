@@ -106,6 +106,6 @@ getopt (argc, argv, optstring)
 
 #else
 
-extern int di_lib_debug;
+extern int debug;
 
 #endif
