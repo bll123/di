@@ -138,6 +138,7 @@ dcl     int  optind
 dcl     ptr  optarg
 member  statfs f_bsize
 member  statfs f_fsize
+member  statfs f_fstyp
 member  statfs f_iosize
 member  statfs f_frsize
 member  statfs f_fstypename
