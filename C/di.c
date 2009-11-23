@@ -87,20 +87,20 @@
 #include "version.h"
 
 #include <stdio.h>
+#if _hdr_stdlib
+# include <stdlib.h>
+#endif
+#if _sys_types
+# include <sys/types.h>
+#endif
 #if _hdr_ctype
 # include <ctype.h>
 #endif
 #if _hdr_errno
 # include <errno.h>
 #endif
-#if _hdr_stdlib
-# include <stdlib.h>
-#endif
 #if _hdr_getopt
 # include <getopt.h>
-#endif
-#if _sys_types
-# include <sys/types.h>
 #endif
 #if _hdr_string
 # include <string.h>
@@ -142,8 +142,6 @@
 #if defined(__cplusplus)
   extern "C" {
 #endif
-
-extern int di_lib_debug;
 
 #if _npt_getenv
   extern char *getenv _((char *));
@@ -326,7 +324,7 @@ typedef struct {
     char            haspooledfs;
 } diData_t;
 
-static int          debug = { 0 };
+int          debug = { 0 };
 
 static sizeTable_t sizeTable [] =
 {
@@ -743,12 +741,16 @@ printDiskInfo (diData)
     char                tempSortType [DI_SORT_MAX + 1];
 
     lastpool[0] = '\0';
-    memset ((char *) &totals, '\0', sizeof (diDiskInfo_t));
-    totals.blockSize = 8192;
-    strncpy (totals.name, DI_GT("Total"), DI_NAME_LEN);
-    totals.printFlag = DI_PRNT_OK;
-
     diopts = &diData->options;
+
+    if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
+    {
+        memset ((char *) &totals, '\0', sizeof (diDiskInfo_t));
+        totals.blockSize = 8192;
+        strncpy (totals.name, DI_GT("Total"), DI_NAME_LEN);
+        totals.printFlag = DI_PRNT_OK;
+    }
+
     if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
     {
         printTitle (diopts);
@@ -2319,7 +2321,6 @@ processArgs (argc, argv, diData, dbsstr)
             case 'D':
             {
                 debug = atoi (optarg);
-                di_lib_debug = debug;
                 break;
             }
 
@@ -2446,7 +2447,6 @@ processArgs (argc, argv, diData, dbsstr)
             case 'X':
             {
                 debug = atoi (optarg);
-                di_lib_debug = debug;
                 diopts->flags |= DI_F_DEBUG_HDR | DI_F_TOTAL;
                 diopts->flags &= ~ DI_F_NO_HEADER;
                 diopts->width = 10;
