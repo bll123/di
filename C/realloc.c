@@ -5,6 +5,7 @@
  */
 
 #include "config.h"
+#include "di.h"
 
 #include <stdio.h>
 #if _hdr_stdlib
