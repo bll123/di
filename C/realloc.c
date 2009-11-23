@@ -21,6 +21,7 @@
  * Realloc
  *
  * portable realloc
+ * some variants don't accept a null pointer for initial allocation.
  *
  */
 
