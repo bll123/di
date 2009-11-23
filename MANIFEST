@@ -1,23 +1,28 @@
-Build			Build script
-LICENSE			License
-README			Read This
-MANIFEST		MANIFEST
-di.1			di Manual Page
-di.c			di source
-di.h			di source
-di.spec			rpmspec file
-dilib.c			di source
-getopt.c		getopt source (from Cnews)
-hasnls.c		checks for NLS support.
-config.win95		sample config.h for win95
-Makefile		Main Makefile
-mkconfig.pl		perl config program
+Build						Build script
+config.win95				sample config.h for win95
+di.1						di Manual Page
+di.c						di source
+didiskutil.c				di source
+digetdiskentries.c			di source
+digetdiskinfo.c				di source
+dimntopt.h					di source
+di.h						di source
+di.spec						rpmspec file
 features/
-features/cflags.sh	cflags configuration
-features/mkconfig.dat	mkconfig.pl configuration
-features/obj_ext.sh	obj extension test
-features/turnoffnls.sh	turn off all NLS features in config.h
-po/                     internationalization files
-po/en_US.po
-po/de_DE.po
-version.h		di source
+features/cflags.sh			cflags configuration
+features/mkconfig.dat		mkconfig.pl configuration
+features/obj_ext.sh			obj extension test
+features/turnoffnls.sh		turn off all NLS features in config.h
+getopt.c					getopt source (from Cnews)
+hasnls.c					checks for NLS support.
+LICENSE						License
+Makefile					Main Makefile
+MANIFEST					MANIFEST
+mkconfig.pl					perl config program
+po/de_DE.po					internationalization
+po/en_US.po					internationalization
+po/
+README						Read This
+realloc.c					di source
+trimchar.c					di source
+version.h					di source
