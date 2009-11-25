@@ -129,7 +129,6 @@ lib     sysfs
 lib     textdomain  -lintl -liconv
 lib     zone_getattr
 lib     zone_list
-class   os::String -lsyllable
 class   os::Volumes -lsyllable
 npt     getenv
 npt     statfs _lib_statfs
