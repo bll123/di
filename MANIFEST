@@ -19,6 +19,7 @@ LICENSE						License
 Makefile					Main Makefile
 MANIFEST					MANIFEST
 mkconfig.pl					perl config program
+mkconfig.sh					shell config program
 po/de_DE.po					internationalization
 po/en_US.po					internationalization
 po/
