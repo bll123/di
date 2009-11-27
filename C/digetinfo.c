@@ -32,6 +32,9 @@
 #if _sys_param
 # include <sys/param.h>
 #endif
+#if _hdr_errno
+# include <errno.h>
+#endif
 #if _hdr_string
 # include <string.h>
 #endif
@@ -39,53 +42,23 @@
 # include <strings.h>
 #endif
 
-
-#if 0
-#if _hdr_errno
-# include <errno.h>
-#endif
-#if _hdr_memory
-# include <memory.h>
-#endif
-#if _include_malloc && _hdr_malloc
-# include <malloc.h>
-#endif
-#if _hdr_unistd
-# include <unistd.h>
-#endif
-#if _hdr_time
-# include <time.h>
-#endif
-#if _sys_time
-# include <sys/time.h>
-#endif
-#if _sys_stat
-# include <sys/stat.h>
-#endif
-#endif
-
-#if _hdr_mntent                 /* Linux, kFreeBSD */
-# include <mntent.h>
-#endif
 #if _sys_mount                  /* FreeBSD, OpenBSD, NetBSD, HP-UX */
-# include <sys/mount.h>
+# include <sys/mount.h>         /* statfs(); struct statfs; getfsstat() */
 #endif
-#if _sys_mntent                 /* Solaris */
-# include <sys/mntent.h>
-#endif
-
 #if _sys_statvfs                /* Linux, Solaris, FreeBSD, NetBSD, HP-UX */
-# include <sys/statvfs.h>
+# include <sys/statvfs.h>       /* statvfs(); struct statvfs */
 #endif
 #if _sys_vfs                    /* Linux, HP-UX */
-# include <sys/vfs.h>
+# include <sys/vfs.h>           /* struct statfs */
 #endif
-#if _sys_statfs && ! defined (_sys_statvfs)     /* SysV.3 */
-# include <sys/statfs.h>
+#if _sys_statfs && ! defined (_sys_statvfs)     /* Linux, SysV.3 */
+# include <sys/statfs.h>                        /* statfs(); struct statfs */
 #endif
-#if _sys_fstyp                                  /* SysV.3 */
-# include <sys/fstyp.h>
-# define DI_TYPE_LEN          FSTYPSZ
+#if _sys_fstyp                  /* SysV.3 */
+# include <sys/fstyp.h>         /* sysfs() */
+#endif
+#if _hdr_windows            /* windows */
+# include <windows.h>       /* GetDiskFreeSpace(); GetVolumeInformation() */
 #endif
 
 #if 0
@@ -102,24 +75,7 @@
 # include <sys/fs_types.h>
 #endif
 #endif
-#if _hdr_windows
-# include <windows.h>            /* windows */
-#endif
 
-
-#if ! defined (_lib_statvfs) && \
-	_lib_statfs && \
-	_npt_statfs
-# if _lib_statfs && _statfs_2arg
-  extern int statfs _((char *, struct statfs *));
-# endif
-# if _lib_statfs && _statfs_3arg
-  extern int statfs _((char *, struct statfs *, int));
-# endif
-# if _lib_statfs && _statfs_4arg
-  extern int statfs _((char *, struct statfs *, int, int));
-# endif
-#endif
 
 /********************************************************/
 
@@ -127,35 +83,6 @@
   extern "C" {
 #endif
 
-#if (_lib_getmntent || \
-    _statfs_2arg || \
-    _statfs_3arg || \
-    _statfs_4arg) && \
-    ! defined (_lib_getmntinfo) && \
-    ! defined (_lib_getfsstat) && \
-    ! defined (_lib_getvfsstat) && \
-    ! defined (_lib_mntctl) && \
-    ! defined (_lib_getmnt) && \
-    ! defined (_class_os__Volumes)
-# if defined (_PATH_MOUNTED)
-#  define DI_MOUNT_FILE        _PATH_MOUNTED
-# else
-#  if defined (MOUNTED)
-#   define DI_MOUNT_FILE       MOUNTED
-#  else
-#   if defined (MNTTAB)
-#    define DI_MOUNT_FILE      MNTTAB
-#   else
-#    if (USE_ETC_FILESYSTEMS)
-#     define DI_MOUNT_FILE     "/etc/filesystems" /* AIX 4.x or /etc/mntent? */
-#    else
-#     define DI_MOUNT_FILE     "/etc/mnttab"
-#    endif
-#   endif
-#  endif
-# endif
-#endif
-
 #if ! defined (_lib_statvfs) && \
 	_lib_statfs && \
 	_npt_statfs
@@ -170,15 +97,13 @@
 # endif
 #endif
 
+extern int debug;
+
 #if defined(__cplusplus)
   }
 #endif
 
 /********************************************************/
-
-#define DI_UNKNOWN_FSTYPE       "Unknown fstype %.2d"
-
-extern int debug;
 
 #if _lib_statvfs && \
     ! defined (_lib_fs_stat_dev) && \
@@ -458,6 +383,8 @@ di_getDiskInfo (diskInfo, diCount)
  */
 
 # define DI_GETDISKINFO_DEF 1
+
+# define MSDOS_BUFFER_SIZE          256
 
 void
 # if _proto_stdc

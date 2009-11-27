@@ -9,14 +9,14 @@
 
 #include "config.h"
 
-#if _hdr_mntent                     /* Linux, kFreeBSD */
-# include <mntent.h>
+#if _hdr_mntent                     /* Linux, kFreeBSD, HP-UX */
+# include <mntent.h>                /* MNTOPT_... */
 #endif
 #if _sys_mount                      /* FreeBSD, OpenBSD, NetBSD, HP-UX */
-# include <sys/mount.h>
+# include <sys/mount.h>             /* MNT_...; M_... (hp-ux) */
 #endif
 #if _sys_mntent                     /* Solaris */
-# include <sys/mntent.h>
+# include <sys/mntent.h>            /* MNTOPT_... */
 #endif
 #if _sys_fstypes                    /* NetBSD */
 # include <sys/fstypes.h>
@@ -25,7 +25,7 @@
 # include <sys/fs_types.h>
 #endif
 #if _sys_vmount                     /* AIX */
-# include <sys/vmount.h>
+# include <sys/vmount.h>            /* MNT_... */
 #endif
 
 #if 0
@@ -56,10 +56,6 @@
 # if ! defined (DI_TYPE_LEN)
 #  define DI_TYPE_LEN         FSTYPSZ
 # endif
-#endif
-
-#if _hdr_windows
-# include <windows.h>            /* windows */
 #endif
 #if _hdr_kernel_fs_info
 # include <kernel/fs_info.h>

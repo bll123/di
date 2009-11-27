@@ -25,6 +25,9 @@
 #if _sys_types
 # include <sys/types.h>
 #endif
+#if _sys_param
+# include <sys/param.h>
+#endif
 #if _hdr_errno
 # include <errno.h>
 #endif
@@ -40,32 +43,20 @@
 #if _include_malloc && _hdr_malloc
 # include <malloc.h>
 #endif
-
-
-#if 0
-#if _sys_param
-# include <sys/param.h>
-#endif
-#if _hdr_unistd
-# include <unistd.h>
-#endif
 #if _hdr_time
 # include <time.h>
 #endif
 #if _sys_time
 # include <sys/time.h>
 #endif
-#if _sys_stat
-# include <sys/stat.h>
-#endif
-#endif
 
 
 #if _hdr_mntent                 /* Linux, kFreeBSD, HP-UX */
-# include <mntent.h>
-#endif
+# include <mntent.h>            /* hasmntopt(); _PATH_MNTTAB */
+#endif                          /* HP-UX: set/get/endmntent(); hasmntopt() */
+
 #if _sys_mount                  /* FreeBSD, OpenBSD, NetBSD, HP-UX */
-# include <sys/mount.h>
+# include <sys/mount.h>         /* getmntinfo(); struct statfs */
 #endif
 #if _sys_fstypes                /* NetBSD */
 # include <sys/fstypes.h>
@@ -74,14 +65,15 @@
 # include <sys/fs_types.h>
 #endif
 #if _sys_mnttab                 /* Solaris */
-# include <sys/mnttab.h>
+# include <sys/mnttab.h>        /* getmntent(); MNTTAB */
 #endif
 
-#if _sys_statfs && ! defined (_sys_statvfs)     /* FreeBSD, SysV.3 */
-# include <sys/statfs.h>
+
+#if _sys_statfs && ! defined (_sys_statvfs) /* Linux, FreeBSD, SysV.3 */
+# include <sys/statfs.h>                    /* struct statfs; statfs() */
 #endif
 #if _sys_statvfs                    /* NetBSD, Solaris */
-# include <sys/statvfs.h>
+# include <sys/statvfs.h>           /* struct statvfs; statvfs() */
 #endif
 #if _sys_mntctl                     /* AIX */
 # include <sys/mntctl.h>
@@ -106,19 +98,16 @@
 #endif
  /* bozo syllable volumes header requires gui/window */
 #if _hdr_gui_window                 /* Syllable */
-# include <gui/window.h>
+# include <gui/window.h>            /* gack! */
 #endif
 #if _hdr_storage_volumes            /* Syllable */
-# include <storage/volumes.h>
+# include <storage/volumes.h>       /* class os::Volumes */
 #endif
 #if _hdr_util_string                /* Syllable */
-# include <util/string.h>
+# include <util/string.h>           /* os::String - to get mount name */
 #endif
 
 #if 0
-#if _sys_mntent                 /* Solaris */
-# include <sys/mntent.h>
-#endif
 #if _hdr_mnttab
 # include <mnttab.h>
 #endif
@@ -127,16 +116,12 @@
 #endif
 #if _sys_fstyp
 # include <sys/fstyp.h>
-# define DI_TYPE_LEN          FSTYPSZ
 #endif
 #if _sys_vfs
 # include <sys/vfs.h>
 #endif
 #if _sys_vfstab
 # include <sys/vfstab.h>
-# if ! defined (DI_TYPE_LEN)
-#  define DI_TYPE_LEN         FSTYPSZ
-# endif
 #endif
 #endif
 
@@ -160,21 +145,27 @@
 # if defined (_PATH_MOUNTED)
 #  define DI_MOUNT_FILE        _PATH_MOUNTED
 # else
-#  if defined (MOUNTED)
-#   define DI_MOUNT_FILE       MOUNTED
+#  if defined (_PATH_MNTTAB)
+#   define DI_MOUNT_FILE        _PATH_MNTTAB
 #  else
-#   if defined (MNTTAB)
-#    define DI_MOUNT_FILE      MNTTAB
+#   if defined (MOUNTED)
+#    define DI_MOUNT_FILE       MOUNTED
 #   else
-#    if (USE_ETC_FILESYSTEMS)
-#     define DI_MOUNT_FILE     "/etc/filesystems" /* AIX 4.x or /etc/mntent? */
+#    if defined (MNTTAB)
+#     define DI_MOUNT_FILE      MNTTAB
 #    else
-#     define DI_MOUNT_FILE     "/etc/mnttab"
+#     if (USE_ETC_FILESYSTEMS)
+#      define DI_MOUNT_FILE     "/etc/filesystems" /* AIX 4.x or /etc/mntent? */
+#     else
+#      define DI_MOUNT_FILE     "/etc/mnttab"       /* SysV.3 default */
+#     endif
 #    endif
 #   endif
 #  endif
 # endif
 #endif
+
+extern int debug;
 
 #if defined(__cplusplus)
   }
@@ -182,14 +173,18 @@
 
 /********************************************************/
 
-#define DI_UNKNOWN_FSTYPE       "Unknown fstype %.2d"
-
-extern int debug;
-
 #if _lib_getmntent && \
 	! defined (_lib_setmntent) && \
 	! defined (_lib_mntctl) && \
 	! defined (_class_os__Volumes)
+
+#if defined(__cplusplus)
+  extern "C" {
+#endif
+static char *checkMountOptions      _((struct mnttab *, char *));
+#if defined(__cplusplus)
+  }
+#endif
 
 /*
  * di_getDiskEntries
@@ -197,8 +192,6 @@ extern int debug;
  * For SysV.4, we open the file and call getmntent () repeatedly.
  *
  */
-
-static char *checkMountOptions      _((struct mnttab *, char *));
 
 int
 # if _proto_stdc
@@ -278,7 +271,7 @@ di_getDiskEntries (diskInfo, diCount)
     return 0;
 }
 
-char *
+static char *
 # if _proto_stdc
 checkMountOptions (struct mnttab *mntEntry, char *str)
 # else
@@ -494,6 +487,8 @@ di_getDiskEntries (diskInfo, diCount)
 #if _lib_getmntinfo && \
     ! defined (_lib_getfsstat) && \
     ! defined (_lib_getvfsstat)
+
+#define DI_UNKNOWN_FSTYPE       "Unknown fstype %.2d"
 
 /*
  * di_getDiskEntries
@@ -778,7 +773,7 @@ di_getDiskEntries (diskInfo, diCount)
 /*
  * di_getDiskEntries
  *
- * OSF/1 / Digital Unix / Compaq Tru64 / FreeBSD
+ * OSF/1 / Digital Unix / Compaq Tru64 / FreeBSD / NetBSD 2.x
  *
  */
 

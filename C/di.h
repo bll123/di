@@ -16,10 +16,10 @@
 # include <sys/types.h>
 #endif
 #if _hdr_limits
-# include <limits.h>        /* has PATH_MAX */
+# include <limits.h>        /* PATH_MAX */
 #endif
 #if _sys_param
-# include <sys/param.h>     /* has MAXPATHLEN */
+# include <sys/param.h>     /* MAXPATHLEN */
 #endif
 
 #if ! defined (MAXPATHLEN)
@@ -39,14 +39,14 @@
 # define MAXPATHLEN         255
 #endif
 
-#if _sys_fstyp
-# include <sys/fstyp.h>
+#if _sys_fstyp                          /* HP-UX, Solaris */
+# include <sys/fstyp.h>                 /* FSTYPSZ */
 # if defined (FSTYPSZ)
 #  define DI_TYPE_LEN       FSTYPSZ
 # endif
 #endif
-#if _sys_mount
-# include <sys/mount.h>
+#if _sys_mount                          /* NetBSD */
+# include <sys/mount.h>                 /* MFSNAMELEN */
 # if ! defined (DI_TYPE_LEN) && defined (MFSNAMELEN)
 #  define DI_TYPE_LEN       MFSNAMELEN
 # endif
@@ -59,7 +59,7 @@
 #endif
 
 #if ! defined (DI_TYPE_LEN)
-# define DI_TYPE_LEN        16
+# define DI_TYPE_LEN        65
 #endif
 
 #if ! defined (_lib_memcpy) && ! defined (memcpy)
