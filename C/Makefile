@@ -71,7 +71,7 @@ all:
 
 di-all:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
-config.h:	features/cflags.sh mkconfig.pl features/mkconfig.dat
+config.h:	features/cflags.sh mkconfig.pl mkconfig.sh features/mkconfig.dat
 	@-$(RM) -f config.h
 	./Build config.h
 
@@ -171,7 +171,7 @@ tar:	Build LICENSE MANIFEST \
 		di.1 di.c di.h dimntopt.h didiskutil.c digetdiskentries.c \
 		digetdiskinfo.c realloc.c trimchar.c \
 		features getopt.c hasnls.c \
-		mkconfig.pl po version.h
+		mkconfig.pl mkconfig.sh po version.h
 	$(MAKE) -f Makefile current-files
 	$(SHELL) mktar.sh $?
 
