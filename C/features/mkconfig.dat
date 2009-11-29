@@ -11,6 +11,23 @@
 #
 #   Prototype support is always tested.
 #
+#   The following code is present in the final config.h file:
+#
+#       #if ! _key_void || ! _proto_stdc
+#       # define void int
+#       #endif
+#       #if ! _key_const || ! _proto_stdc
+#       # define const
+#       #endif
+#
+#       #ifndef _
+#       # if _proto_stdc
+#       #  define _(args) args
+#       # else
+#       #  define _(args) ()
+#       # endif
+#       #endif
+#
 #   Commands:
 #   key     keyword
 #           check to see if keyword is reserved.
@@ -24,9 +41,11 @@
 #   command name-of-command
 #           check if command exists.
 #           e.g.: command msgfmt
-#   npt     function
+#   npt     function [requirement]
 #           check if function needs a prototype.
+#           the optional requirement should be _lib_<funcname>
 #           e.g.: npt getopt
+#                 npt statfs _lib_statfs
 #   typ     type-name
 #           check if type-name exists.
 #           e.g.: typ size_t
