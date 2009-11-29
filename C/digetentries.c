@@ -1550,13 +1550,13 @@ di_getDiskEntries (diskInfo, diCount)
         strncpy (diptr->name, mpString.c_str(), DI_NAME_LEN);
         strncpy (diptr->special, fsinfo.fi_device_path, DI_SPEC_NAME_LEN);
         strncpy (diptr->fsType, fsinfo.fi_driver_name, DI_TYPE_LEN);
-        di_saveBlockSizes (diptr, (_fs_size_t) fsinfo.block_size,
-            (_fs_size_t) fsinfo.total_blocks,
-            (_fs_size_t) fsinfo.free_blocks,
-            (_fs_size_t) fsinfo.free_blocks);
-        di_saveInodeSizes (diptr, (_fs_size_t) fsinfo.total_nodes,
-            (_fs_size_t) fsinfo.free_nodes,
-            (_fs_size_t) fsinfo.free_nodes);
+        di_saveBlockSizes (diptr, (_fs_size_t) fsinfo.fi_block_size,
+            (_fs_size_t) fsinfo.fi_total_blocks,
+            (_fs_size_t) fsinfo.fi_free_blocks,
+            (_fs_size_t) fsinfo.fi_free_user_blocks);
+        di_saveInodeSizes (diptr, (_fs_size_t) fsinfo.fi_total_inodes,
+            (_fs_size_t) fsinfo.fi_free_inodes,
+            (_fs_size_t) fsinfo.fi_free_inodes);
 # if defined (MNT_RDONLY)
         if ((fsinfo.fi_flags & MNT_RDONLY) == MNT_RDONLY)
         {
@@ -1581,10 +1581,13 @@ di_getDiskEntries (diskInfo, diCount)
         {
             printf ("mount_args: %s\n", fsinfo.fi_mount_args);
             printf ("%s: %s\n", diptr->name, diptr->fsType);
-            printf ("\tblocks: tot:%ld free:%ld\n",
-                    fsinfo.fi_total_blocks, fsinfo.fi_free_blocks);
+            printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
+                    (long int) fsinfo.fi_total_blocks,
+                    (long int) fsinfo.fi_free_blocks,
+                    (long int) fsinfo.fi_free_user_blocks);
             printf ("\tinodes: tot:%ld free:%ld\n",
-                    fsinfo.fi_total_inodes, fsinfo.fi_free_inodes);
+                    (long int) fsinfo.fi_total_inodes,
+                    (long int) fsinfo.fi_free_inodes);
         }
     }
     return 0;
