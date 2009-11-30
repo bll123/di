@@ -77,7 +77,6 @@ hdr     limits.h
 hdr     libintl.h
 hdr     locale.h
 hdr     malloc.h
-hdr     math.h
 hdr     memory.h
 hdr     mntent.h
 hdr     mnttab.h

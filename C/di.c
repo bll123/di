@@ -114,9 +114,6 @@
 #if _include_malloc && _hdr_malloc
 # include <malloc.h>
 #endif
-#if _hdr_math
-# include <math.h>
-#endif
 #if _hdr_unistd
 # include <unistd.h>
 #endif
