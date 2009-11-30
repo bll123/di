@@ -168,8 +168,8 @@ current-files:
 
 tar:	Build LICENSE MANIFEST \
 		Makefile README config.win95 \
-		di.1 di.c di.h dimntopt.h didiskutil.c digetdiskentries.c \
-		digetdiskinfo.c realloc.c trimchar.c \
+		di.1 di.c di.h dimntopt.h didiskutil.c digetentries.c \
+		digetinfo.c realloc.c trimchar.c \
 		features getopt.c hasnls.c \
 		mkconfig.pl mkconfig.sh po version.h
 	$(MAKE) -f Makefile current-files
@@ -187,13 +187,13 @@ testrpmbuild:
 ###
 
 $(PROG)$(EXE_EXT):	di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
-		digetdiskentries$(OBJ_EXT) digetdiskinfo$(OBJ_EXT) \
+		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		realloc$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
 	@test ! -f reqlibs.txt || echo "*** Using libs: `cat reqlibs.txt`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) \
-		di$(OBJ_EXT) didiskutil$(OBJ_EXT) digetdiskinfo$(OBJ_EXT) \
-		digetdiskentries$(OBJ_EXT) \
+		di$(OBJ_EXT) didiskutil$(OBJ_EXT) digetinfo$(OBJ_EXT) \
+		digetentries$(OBJ_EXT) \
 		realloc$(OBJ_EXT) trimchar$(OBJ_EXT) \
 		getopt$(OBJ_EXT) $(LIBS) \
 		`test ! -f reqlibs.txt || cat reqlibs.txt`
@@ -208,14 +208,14 @@ hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
 di$(OBJ_EXT):		di.c config.h di.h version.h
 	$(CC) -c $(CFLAGS) $(OTHERFLAGS) di.c
 
-digetdiskinfo$(OBJ_EXT):	digetdiskinfo.c config.h di.h dimntopt.h
-	$(CC) -c $(CFLAGS) digetdiskinfo.c
+digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
+	$(CC) -c $(CFLAGS) digetinfo.c
 
 didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimntopt.h
 	$(CC) -c $(CFLAGS) didiskutil.c
 
-digetdiskentries$(OBJ_EXT):	digetdiskentries.c config.h di.h dimntopt.h
-	$(CC) -c $(CFLAGS) digetdiskentries.c
+digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
+	$(CC) -c $(CFLAGS) digetentries.c
 
 getopt$(OBJ_EXT):	getopt.c config.h
 	$(CC) -c $(CFLAGS) getopt.c
