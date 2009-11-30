@@ -51,7 +51,7 @@
 #  define DI_TYPE_LEN       MFSNAMELEN
 # endif
 #endif
-#if _sys_vfstab
+#if _sys_vfstab                         /* ??? */
 # include <sys/vfstab.h>
 # if ! defined (DI_TYPE_LEN) && defined (FSTYPSZ)
 #  define DI_TYPE_LEN       FSTYPSZ

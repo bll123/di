@@ -27,7 +27,7 @@
 #if _sys_vmount                     /* AIX */
 # include <sys/vmount.h>            /* MNT_... */
 #endif
-#if _hdr_mnttab                     /* ??? */
+#if _hdr_mnttab                     /* SysV.3 */
 # include <mnttab.h>
 #endif
 
