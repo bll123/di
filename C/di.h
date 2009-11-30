@@ -138,9 +138,9 @@ typedef struct
    extern "C" {
 # endif
 
- /* digetdiskentries.c */
+ /* digetentries.c */
 extern int  di_getDiskEntries       _((diDiskInfo_t **, int *));
- /* digetdiskinfo.c */
+ /* digetinfo.c */
 extern void di_getDiskInfo          _((diDiskInfo_t **, int *));
  /* trimchar.c */
 extern void trimChar                _((char *, int));
