@@ -1,103 +1,122 @@
 
-#ifndef _config_H
-#define _config_H	1
-#define	_sys_types	1	/* #include <sys/types.h> ok */
-#define _hdr_stdio	1	/* #include <stdio.h> ok */
-#define _hdr_stdlib	1	/* #include <stdlib.h> ok */
-#define _sys_param	1	/* #include <sys/param.h> ok */
-#define _key_void	1	/* void is a reserved keyword */
-#define _proto_stdc	1	/* Standard-C prototypes ok */
-#define _command_msgfmt	1	/* Is msgfmt available? */
-#define _hdr_ctype	1	/* #include <ctype.h> ok */
-#define _hdr_errno	1	/* #include <errno.h> ok */
-#undef	_hdr_fshelp		/* #include <fshelp.h> not ok */
-#define _hdr_getopt	1	/* #include <getopt.h> ok */
-#undef	_hdr_kernel_fs_info		/* #include <kernel/fs_info.h> not ok */
-#define _hdr_limits	1	/* #include <limits.h> ok */
-#define _hdr_libintl	1	/* #include <libintl.h> ok */
-#define _hdr_locale	1	/* #include <locale.h> ok */
-#define _hdr_malloc	1	/* #include <malloc.h> ok */
-#define _hdr_memory	1	/* #include <memory.h> ok */
-#define _hdr_mntent	1	/* #include <mntent.h> ok */
-#undef	_hdr_mnttab		/* #include <mnttab.h> not ok */
-#undef	_hdr_storage_Directory		/* #include <storage/Directory.h> not ok */
-#undef	_hdr_storage_Entry		/* #include <storage/Entry.h> not ok */
-#undef	_hdr_storage_Path		/* #include <storage/Path.h> not ok */
-#define _hdr_string	1	/* #include <string.h> ok */
-#define _hdr_strings	1	/* #include <strings.h> ok */
-#define _hdr_time	1	/* #include <time.h> ok */
-#define _hdr_unistd	1	/* #include <unistd.h> ok */
-#define _hdr_windows	1	/* #include <windows.h> ok */
-#undef	_sys_fs_types		/* #include <sys/fs_types.h> not ok */
-#undef	_sys_fstyp		/* #include <sys/fstyp.h> not ok */
-#undef	_sys_fstypes		/* #include <sys/fstypes.h> not ok */
-#undef	_sys_mntctl		/* #include <sys/mntctl.h> not ok */
-#undef	_sys_mntent		/* #include <sys/mntent.h> not ok */
-#undef	_sys_mnttab		/* #include <sys/mnttab.h> not ok */
-#define _sys_mount	1	/* #include <sys/mount.h> ok */
-#define _sys_stat	1	/* #include <sys/stat.h> ok */
-#define _sys_statfs	1	/* #include <sys/statfs.h> ok */
-#undef	_sys_statvfs		/* #include <sys/statvfs.h> not ok */
-#define _sys_time	1	/* #include <sys/time.h> ok */
-#define _sys_vfs	1	/* #include <sys/vfs.h> ok */
-#undef	_sys_vfstab		/* #include <sys/vfstab.h> not ok */
-#undef	_sys_vmount		/* #include <sys/vmount.h> not ok */
-#define _include_malloc	1	/* Is it safe to include malloc.h? */
-#define _include_string	1	/* Is it safe to include both string.h and strings.h? */
-#undef	_npt_getenv		/* getenv() does not need a prototype */
-#undef	_npt_statfs		/* statfs() does not need a prototype */
-#undef	_typ_statvfs_t		/* statvfs_t is not a type */
-#define _typ_size_t	1	/* size_t is a type */
-#define _lib_bcopy	1	/* bcopy() in default lib(s) */
-#undef	_lib_bindtextdomain		/* bindtextdomain() not in default lib(s) */
-#define _lib_bzero	1	/* bzero() in default lib(s) */
-#define _lib_endmntent	1	/* endmntent() in default lib(s) */
-#undef	_lib_fs_stat_dev		/* fs_stat_dev() not in default lib(s) */
-#undef	_lib_fshelp		/* fshelp() not in default lib(s) */
-#define _lib_GetDiskFreeSpace	1	/* is GetDiskFreeSpace a library function? */
-#define _lib_GetDiskFreeSpaceEx	1	/* is GetDiskFreeSpaceEx a library function? */
-#define _lib_GetDriveType	1	/* GetDriveType() in default lib(s) */
-#define _lib_GetLogicalDriveStrings	1	/* GetLogicalDriveStrings() in default lib(s) */
-#define _lib_GetVolumeInformation	1	/* GetVolumeInformation() in default lib(s) */
-#undef	_lib_getfsstat		/* getfsstat() not in default lib(s) */
-#undef	_lib_getmnt		/* getmnt() not in default lib(s) */
-#define _lib_getmntent	1	/* getmntent() in default lib(s) */
-#undef	_lib_getmntinfo		/* getmntinfo() not in default lib(s) */
-#define _lib_getopt	1	/* getopt() in default lib(s) */
-#undef	_lib_gettext		/* gettext() not in default lib(s) */
-#undef	_lib_hasmntopt		/* hasmntopt() not in default lib(s) */
-#define _lib_memcpy	1	/* memcpy() in default lib(s) */
-#define _lib_memset	1	/* memset() in default lib(s) */
-#undef	_lib_mntctl		/* mntctl() not in default lib(s) */
-#define _lib_setlocale	1	/* setlocale() in default lib(s) */
-#define _lib_setmntent	1	/* setmntent() in default lib(s) */
-#define _lib_snprintf	1	/* snprintf() in default lib(s) */
-#define _lib_statfs	1	/* statfs() in default lib(s) */
-#undef	_lib_statvfs		/* statvfs() not in default lib(s) */
-#undef	_lib_sysfs		/* sysfs() not in default lib(s) */
-#undef	_lib_textdomain		/* textdomain() not in default lib(s) */
-#undef	_setmntent_1arg		/* does setmntent take one arg? failed */
-#define _setmntent_2arg	1	/* does setmntent take two args? */
-#define _statfs_2arg	1	/* does statfs take 2 args? */
-#undef	_statfs_3arg		/* does statfs take 3 args? failed */
-#undef	_statfs_4arg		/* does statfs take 4 args? failed */
-#define _user_prompt	1	/* ask user for args in setmntent/statfs */
-#define _dcl_errno	1	/* is errno declared? */
-#define _dcl_optind	1	/* is optind declared? */
-#define _dcl_optarg	1	/* is optarg declared? */
-#define _mem_f_bsize_statfs	1	/* f_bsize is a member of struct statfs */
-#undef	_mem_f_fsize_statfs		/* f_fsize is not a member of struct statfs */
-#undef	_mem_f_iosize_statfs		/* f_iosize is not a member of struct statfs */
-#undef	_mem_f_frsize_statfs		/* f_frsize is not a member of struct statfs */
-#undef	_mem_f_fstypename_statfs		/* f_fstypename is not a member of struct statfs */
-#undef	_mem_mount_info_statfs		/* mount_info is not a member of struct statfs */
-#define _mem_f_type_statfs	1	/* f_type is a member of struct statfs */
-#undef	_mem_mnt_time_mnttab		/* mnt_time is not a member of struct mnttab */
-#undef	_mem_vmt_time_vmount		/* vmt_time is not a member of struct vmount */
-#define _siz_long_long	8	/* sizeof(long long) */
+#ifndef __INC_CONFIG_H
+#define __INC_CONFIG_H 1
+
+#define _hdr_stdlib 1
+#define _hdr_stdio 1
+#define _sys_types 1
+#define _sys_param 1
+#define _key_void 1
+#define _key_const 1
+#define _proto_stdc 1
+#define _hdr_ctype 1
+#define _hdr_errno 1
+#undef  _hdr_fshelp
+#define _hdr_getopt 1
+#undef  _hdr_kernel_fs_info
+#define _hdr_limits 1
+#define _hdr_libintl 1
+#define _hdr_locale 1
+#define _hdr_malloc 1
+#define _hdr_math 1
+#define _hdr_memory 1
+#define _hdr_mntent 1
+#undef  _hdr_mnttab
+#undef  _hdr_storage_Directory
+#undef  _hdr_storage_Entry
+#undef  _hdr_storage_Path
+#undef  _hdr_gui_window
+#undef  _hdr_storage_volumes
+#define _hdr_string 1
+#define _hdr_strings 1
+#define _hdr_time 1
+#define _hdr_unistd 1
+#undef  _hdr_util_string
+#define _hdr_windows 1
+#undef  _hdr_zone
+#undef  _sys_fs_types
+#undef  _sys_fstyp
+#undef  _sys_fstypes
+#undef  _sys_mntctl
+#undef  _sys_mntent
+#undef  _sys_mnttab
+#define _sys_mount 1
+#define _sys_stat 1
+#define _sys_statfs 1
+#undef  _sys_statvfs
+#define _sys_time 1
+#define _sys_vfs 1
+#undef  _sys_vfstab
+#undef  _sys_vmount
+#define _include_malloc 1
+#define _include_string 1
+#define _command_msgfmt 1
+#undef  _command_gmsgfmt
+#undef  _typ_statvfs_t
+#define _typ_size_t 1
+#undef  _typ_uint_t
+#define _typ_uid_t 1
+#define _lib_bcopy 1
+#undef  _lib_bindtextdomain
+#define _lib_bzero 1
+#define _lib_endmntent 1
+#undef  _lib_fs_stat_dev
+#undef  _lib_fshelp
+#define _lib_GetDiskFreeSpace 1
+#define _lib_GetDiskFreeSpaceEx 1
+#define _lib_GetDriveType 1
+#undef  _lib_getfsstat
+#define _lib_GetLogicalDriveStrings 1
+#define _lib_GetVolumeInformation 1
+#undef  _lib_getmnt
+#define _lib_getmntent 1
+#undef  _lib_getmntinfo
+#define _lib_getopt 1
+#undef  _lib_gettext
+#undef  _lib_getvfsstat
+#undef  _lib_getzoneid
+#undef  _lib_hasmntopt
+#define _lib_memcpy 1
+#define _lib_memset 1
+#undef  _lib_mntctl
+#undef  _lib_next_dev
+#define _lib_setlocale 1
+#define _lib_setmntent 1
+#undef  _setmntent_1arg
+#define _setmntent_2arg 1
+#define _lib_snprintf 1
+#define _lib_statfs 1
+#define _statfs_2arg 1
+#undef  _statfs_3arg
+#undef  _statfs_4arg
+#undef  _lib_statvfs
+#undef  _lib_sysfs
+#undef  _lib_textdomain
+#undef  _lib_zone_getattr
+#undef  _lib_zone_list
+#undef  _class_os__Volumes
+#undef  _npt_getenv
+#undef  _npt_statfs
+#define _dcl_errno 1
+#define _dcl_optind 1
+#define _dcl_optarg 1
+#define _mem_f_bsize_statfs 1
+#undef  _mem_f_fsize_statfs
+#undef  _mem_f_fstyp_statfs
+#undef  _mem_f_iosize_statfs
+#undef  _mem_f_frsize_statfs
+#undef  _mem_f_fstypename_statfs
+#undef  _mem_mount_info_statfs
+#define _mem_f_type_statfs 1
+#undef  _mem_mnt_time_mnttab
+#undef  _mem_vmt_time_vmount
+#define _siz_long_long 8
 
 #if ! _key_void || ! _proto_stdc
 # define void int
+#endif
+#if ! _key_const || ! _proto_stdc
+# define const
 #endif
 
 #ifndef _
@@ -108,13 +127,14 @@
 # endif
 #endif
 
+
 #if _lib_bindtextdomain && \
 _lib_gettext && \
 _lib_setlocale && \
 _lib_textdomain && \
 _hdr_libintl && \
 _hdr_locale && \
-_command_msgfmt
+(_command_msgfmt || _command_gmsgfmt)
 # define _enable_nls 1
 #else
 # define _enable_nls 0
@@ -132,15 +152,28 @@ _command_msgfmt
 # define Size_t unsigned int
 #endif
 
+#if _typ_uint_t
+# define Uint_t uint_t
+#else
+# define Uint_t unsigned int
+#endif
+
+#if _typ_uid_t
+# define Uid_t uid_t
+#else
+# define Uid_t int
+#endif
+
 #if _lib_snprintf
 # define Snprintf snprintf
-# define SPF(a1,a2,a3)      a1,a2,a3
+# define DI_SPF(a2,a3)         a2,a3
 #else
 # define Snprintf sprintf
-# define SPF(a1,a2,a3)      a1,a3
+# define DI_SPF(a2,a3)         a3
 #endif
 
-#define _config_by_iffe_ 1
-#define _config_by_mkconfig_pl_ 0
 
-#endif
+#define _mkconfig_sh 0
+#define _mkconfig_pl 0
+
+#endif /* __INC_CONFIG_H */
