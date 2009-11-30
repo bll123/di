@@ -94,6 +94,13 @@ windows-gcc:	wconfig.h
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-g -O2" $(PROG).exe
 
+os2-gcc:
+	$(MAKE) -f Makefile \
+		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -g -O2 \
+		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
+		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
+
 ####################
 
 objclean:
