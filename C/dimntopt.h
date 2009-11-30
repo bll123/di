@@ -27,39 +27,8 @@
 #if _sys_vmount                     /* AIX */
 # include <sys/vmount.h>            /* MNT_... */
 #endif
-
-#if 0
-#if _hdr_mnttab
+#if _hdr_mnttab                     /* ??? */
 # include <mnttab.h>
-#endif
-#if _sys_mntctl
-# include <sys/mntctl.h>
-#endif
-#if _sys_statfs && ! defined (_sys_statvfs)
-# include <sys/statfs.h>
-#endif
-#if _sys_statvfs                    /* NetBSD */
-# include <sys/statvfs.h>
-#endif
-#if _hdr_fshelp
-# include <fshelp.h>
-#endif
-#if _sys_fstyp
-# include <sys/fstyp.h>
-# define DI_TYPE_LEN          FSTYPSZ
-#endif
-#if _sys_vfs                        /* Linux */
-# include <sys/vfs.h>
-#endif
-#if _sys_vfstab
-# include <sys/vfstab.h>
-# if ! defined (DI_TYPE_LEN)
-#  define DI_TYPE_LEN         FSTYPSZ
-# endif
-#endif
-#if _hdr_kernel_fs_info
-# include <kernel/fs_info.h>
-#endif
 #endif
 
 /********************************************************/

@@ -61,22 +61,6 @@
 # include <windows.h>       /* GetDiskFreeSpace(); GetVolumeInformation() */
 #endif
 
-#if 0
-#if _sys_mnttab                         /* Solaris */
-# include <sys/mnttab.h>
-#endif
-#if _hdr_mnttab
-# include <mnttab.h>
-#endif
-#if _sys_fstypes
-# include <sys/fstypes.h>
-#endif
-#if _sys_fs_types
-# include <sys/fs_types.h>
-#endif
-#endif
-
-
 /********************************************************/
 
 #if defined(__cplusplus)

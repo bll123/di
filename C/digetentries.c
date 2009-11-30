@@ -68,7 +68,6 @@
 # include <sys/mnttab.h>        /* getmntent(); MNTTAB */
 #endif
 
-
 #if _sys_statfs && ! defined (_sys_statvfs) /* Linux, FreeBSD, SysV.3 */
 # include <sys/statfs.h>                    /* struct statfs; statfs() */
 #endif
@@ -80,6 +79,9 @@
 #endif
 #if _sys_vmount                     /* AIX */
 # include <sys/vmount.h>
+#endif
+#if _hdr_fshelp                     /* AIX */
+# include <fshelp.h>
 #endif
 #if _hdr_windows                    /* windows */
 # include <windows.h>
@@ -105,24 +107,6 @@
 #endif
 #if _hdr_util_string                /* Syllable */
 # include <util/string.h>           /* os::String - to get mount name */
-#endif
-
-#if 0
-#if _hdr_mnttab
-# include <mnttab.h>
-#endif
-#if _hdr_fshelp
-# include <fshelp.h>
-#endif
-#if _sys_fstyp
-# include <sys/fstyp.h>
-#endif
-#if _sys_vfs
-# include <sys/vfs.h>
-#endif
-#if _sys_vfstab
-# include <sys/vfstab.h>
-#endif
 #endif
 
 
