@@ -1,4 +1,4 @@
-di - disk information utility (version 4.17).
+di - disk information utility (version 4.18).
 
 DESCRIPTION
 
@@ -10,18 +10,23 @@ DESCRIPTION
 
 INSTALLATION
 
-  To build with mkconfig.pl (requires perl):
+  To build with mkconfig.sh:
 
       ./Build distclean
       ./Build
       ./Build install
    Example to change compiler and prefix:
-      CC=gcc prefix=/usr/lbin ./Build
-   For BeOS, Haiku, Syllable:
+      CC=gcc prefix=/opt/bin ./Build
+   For BeOS, Haiku:
       CC=g++ ./Build
+   For Syllable:
+      CC=g++ ./Build -mkpl
 
   To turn off NLS (internationalization):
       ./Build -nonls
+
+  To build with mkconfig.pl (requires perl):
+      ./Build -mkpl
 
   The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.
@@ -67,23 +72,45 @@ INSTALLATION
         ./Build distclean
         CC=gcc ./Build
 
+REQUIREMENTS
+
+    bourne/ksh/bash shell
+    C compiler
+    make
+    features/cflags.sh:
+        uname sed grep
+    features/obj_ext.sh:
+        cat rm
+    mkconfig.sh:
+        a shell that supports shell functions
+        sort uniq cat rm sed grep
+    mkconfig.pl:
+        perl cat rm
+    NLS:
+        msgfmt sed
+        turnoffnls.sh:
+            ed
+    make install:
+        cp ln rm test
+
 PORTING
 
-    di 4.17 has been tested on the following platforms:
-        CentOS 4.8, 5.2, 5.3
+    di 4.18 has been tested on the following platforms:
+        CentOS 3.9, 4.8, 5.2, 5.3
+        Cygwin
         Debian 4.0, 5.0, kFreeBSD 7.2
         Fedora 5.2
-        FreeBSD 4.9, 5.1, 7.0, 7.1, 7.2
+        FreeBSD 4.9, 7.0, 7.1, 7.2, 8.0
+        Haiku 1
         HP-UX 11.11 (bundled cc, gcc)
         MacOSX 8.11, 9.5
         NetBSD 2.0.2, 4.0.1, 5.0.1
         Nexenta 101_b85
         OpenBSD 4.5
         RedHat 7.3
-        Solaris 5.8, 5.10
+        Solaris 8, 9, 10 (cc, gcc3, gcc4)
         Syllable 0.6.6
         Ubuntu 9
-        Unixware 11
 
     di has been ported to the following systems in the past:
 
@@ -105,6 +132,13 @@ BUGS
     information as appropriate.
 
 CHANGES
+
+    4.18                                    [29 Nov 2009]
+        Code cleanup.
+
+        The default configuration method has been changed to
+        use a shell script.  The perl configuration script is
+        still available (./Build -mkpl).
 
     4.17                                    [22 Nov 2009]
         Totals have been changed to add up whatever filesystems
@@ -326,7 +360,7 @@ CHANGES
         Duplicate filesystems (automounted) are not displayed.
         This probably does not work for Digital's advfs.
 
-    1.24
+    1.24                                    [never released]
         Added Windows w/gcc.
         The Solaris 2.6 statvfs() bug has a patch out for it.
         Patch #105572-05 (?).
@@ -404,7 +438,7 @@ CHANGES
         mount options.
         SunOs filesystem type info.
 
-    1.6
+    1.6                                     [never released]
         ultrix bug fixes.
         add dynix to makefile.
 
