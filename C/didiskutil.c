@@ -15,7 +15,7 @@
 #if _hdr_string
 # include <string.h>
 #endif
-#if _hdr_strings && ((! defined (_hdr_string)) || (_include_string))
+#if _hdr_strings && ((! _hdr_string) || (_include_string))
 # include <strings.h>
 #endif
 #if _hdr_memory
@@ -379,13 +379,13 @@ convertNFSMountOptions (flags, wsize, rsize, diptr)
 
 
 #if _lib_getmntent && \
-    ! defined (_lib_getmntinfo) && \
-    ! defined (_lib_getfsstat) && \
-    ! defined (_lib_getvfsstat) && \
-	! defined (_lib_mntctl) && \
-	! defined (_class_os__Volumes)
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+	! _lib_mntctl && \
+	! _class_os__Volumes
 
-extern char *
+char *
 # if _proto_stdc
 chkMountOptions (char *mntopts, char *str)
 # else
