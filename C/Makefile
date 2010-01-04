@@ -171,6 +171,7 @@ installperms:
 
 current-files:
 	-$(RM) -f features/* > /dev/null 2>&1
+	-$(RM) -f po/* > /dev/null 2>&1
 	$(CP) -f po.base/*.po po
 	$(CP) -f features.base/*.sh features.base/*.dat features
 
