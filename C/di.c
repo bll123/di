@@ -105,7 +105,7 @@
 #if _hdr_string
 # include <string.h>
 #endif
-#if _hdr_strings && ((! defined (_hdr_string)) || (_include_string))
+#if _hdr_strings && ((! _hdr_string) || (_include_string))
 # include <strings.h>
 #endif
 #if _hdr_memory
@@ -144,13 +144,13 @@
   extern char *getenv _((char *));
 #endif
 
-#if ! defined (_dcl_errno)
+#if ! _dcl_errno
   extern int     errno;
 #endif
-#if ! defined (_dcl_optind)
+#if ! _dcl_optind
   extern int optind;
 #endif
-#if ! defined (_dcl_optarg)
+#if ! _dcl_optarg
   extern char *optarg;
 #endif
 

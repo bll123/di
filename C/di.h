@@ -62,16 +62,16 @@
 # define DI_TYPE_LEN        65
 #endif
 
-#if ! defined (_lib_memcpy) && ! defined (memcpy)
-# if ! defined (_lib_bcopy)
+#if ! _lib_memcpy && ! defined (memcpy)
+# if ! _lib_bcopy
    error No memcpy/bcopy available.
 # else
 #  define memcpy(dst, src, cnt)     (bcopy((src), (dst), (cnt)), dst)
 # endif
 #endif
 
-#if ! defined (_lib_memset) && ! defined (memset)
-# if ! defined (_lib_bzero)
+#if ! _lib_memset && ! defined (memset)
+# if ! _lib_bzero
    error No memset/bzero available.
 # else
 #  define memset(s,c,n)    (bzero ((s), (n)), s)
@@ -151,11 +151,11 @@ extern void di_initDiskInfo _((diDiskInfo_t *));
 extern void di_saveBlockSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t, _fs_size_t));
 extern void di_saveInodeSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t));
 #if _lib_getmntent && \
-    ! defined (_lib_getmntinfo) && \
-    ! defined (_lib_getfsstat) && \
-    ! defined (_lib_getvfsstat) && \
-	! defined (_lib_mntctl) && \
-	! defined (_class_os__Volumes)
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+	! _lib_mntctl && \
+	! _class_os__Volumes
 extern char *chkMountOptions        _((char *, char *));
 #endif
 extern void convertMountOptions     _((long, diDiskInfo_t *));
@@ -164,7 +164,7 @@ extern void di_testRemoteDisk       _((diDiskInfo_t *));
 
 /* workaround for cygwin                                              */
 /* if we have a getopt header, there's probably a getopt lib function */
-# if ! defined (_lib_getopt) && ! defined (_hdr_getopt)
+# if ! _lib_getopt && ! _hdr_getopt
 extern int getopt _((int argc, char *argv [], char *optstring));
 # endif
 
