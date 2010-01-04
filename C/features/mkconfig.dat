@@ -153,6 +153,7 @@ npt     statfs _lib_statfs
 dcl     int  errno
 dcl     int  optind
 dcl     ptr  optarg
+dcl     ptr  mnt_names
 member  statfs f_bsize
 member  statfs f_fsize
 member  statfs f_fstyp
