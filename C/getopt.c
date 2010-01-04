@@ -5,7 +5,7 @@ $Source$
 
 #include "config.h"
 
-#if ! defined (_lib_getopt)
+#if ! _lib_getopt
 
 /*
  *
@@ -24,7 +24,7 @@ $Source$
 #if _hdr_string
 # include <string.h>
 #endif
-#if _hdr_strings && ((! defined (_hdr_string)) || (_include_string))
+#if _hdr_strings && ((! _hdr_string) || (_include_string))
 # include <strings.h>
 #endif
 
