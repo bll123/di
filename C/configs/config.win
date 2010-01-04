@@ -11,9 +11,9 @@
 #define _proto_stdc 1
 #define _hdr_ctype 1
 #define _hdr_errno 1
-#undef  _hdr_fshelp
+#define _hdr_fshelp 0
 #define _hdr_getopt 1
-#undef  _hdr_kernel_fs_info
+#define _hdr_kernel_fs_info 0
 #define _hdr_limits 1
 #define _hdr_libintl 1
 #define _hdr_locale 1
@@ -21,95 +21,95 @@
 #define _hdr_math 1
 #define _hdr_memory 1
 #define _hdr_mntent 1
-#undef  _hdr_mnttab
-#undef  _hdr_storage_Directory
-#undef  _hdr_storage_Entry
-#undef  _hdr_storage_Path
-#undef  _hdr_gui_window
-#undef  _hdr_storage_volumes
+#define _hdr_mnttab 0
+#define _hdr_storage_Directory 0
+#define _hdr_storage_Entry 0
+#define _hdr_storage_Path 0
+#define _hdr_gui_window 0
+#define _hdr_storage_volumes 0
 #define _hdr_string 1
 #define _hdr_strings 1
 #define _hdr_time 1
 #define _hdr_unistd 1
-#undef  _hdr_util_string
+#define _hdr_util_string 0
 #define _hdr_windows 1
-#undef  _hdr_zone
-#undef  _sys_fs_types
-#undef  _sys_fstyp
-#undef  _sys_fstypes
-#undef  _sys_mntctl
-#undef  _sys_mntent
-#undef  _sys_mnttab
+#define _hdr_zone 0
+#define _sys_fs_types 0
+#define _sys_fstyp 0
+#define _sys_fstypes 0
+#define _sys_mntctl 0
+#define _sys_mntent 0
+#define _sys_mnttab 0
 #define _sys_mount 1
 #define _sys_stat 1
 #define _sys_statfs 1
-#undef  _sys_statvfs
+#define _sys_statvfs 0
 #define _sys_time 1
 #define _sys_vfs 1
-#undef  _sys_vfstab
-#undef  _sys_vmount
+#define _sys_vfstab 0
+#define _sys_vmount 0
 #define _include_malloc 1
 #define _include_string 1
 #define _command_msgfmt 1
-#undef  _command_gmsgfmt
-#undef  _typ_statvfs_t
+#define _command_gmsgfmt 0
+#define _typ_statvfs_t 0
 #define _typ_size_t 1
-#undef  _typ_uint_t
+#define _typ_uint_t 0
 #define _typ_uid_t 1
 #define _lib_bcopy 1
-#undef  _lib_bindtextdomain
+#define _lib_bindtextdomain 0
 #define _lib_bzero 1
 #define _lib_endmntent 1
-#undef  _lib_fs_stat_dev
-#undef  _lib_fshelp
+#define _lib_fs_stat_dev 0
+#define _lib_fshelp 0
 #define _lib_GetDiskFreeSpace 1
 #define _lib_GetDiskFreeSpaceEx 1
 #define _lib_GetDriveType 1
-#undef  _lib_getfsstat
+#define _lib_getfsstat 0
 #define _lib_GetLogicalDriveStrings 1
 #define _lib_GetVolumeInformation 1
-#undef  _lib_getmnt
+#define _lib_getmnt 0
 #define _lib_getmntent 1
-#undef  _lib_getmntinfo
+#define _lib_getmntinfo 0
 #define _lib_getopt 1
-#undef  _lib_gettext
-#undef  _lib_getvfsstat
-#undef  _lib_getzoneid
-#undef  _lib_hasmntopt
+#define _lib_gettext 0
+#define _lib_getvfsstat 0
+#define _lib_getzoneid 0
+#define _lib_hasmntopt 0
 #define _lib_memcpy 1
 #define _lib_memset 1
-#undef  _lib_mntctl
-#undef  _lib_next_dev
+#define _lib_mntctl 0
+#define _lib_next_dev 0
 #define _lib_setlocale 1
 #define _lib_setmntent 1
-#undef  _setmntent_1arg
+#define _setmntent_1arg 0
 #define _setmntent_2arg 1
 #define _lib_snprintf 1
 #define _lib_statfs 1
 #define _statfs_2arg 1
-#undef  _statfs_3arg
-#undef  _statfs_4arg
-#undef  _lib_statvfs
-#undef  _lib_sysfs
-#undef  _lib_textdomain
-#undef  _lib_zone_getattr
-#undef  _lib_zone_list
-#undef  _class_os__Volumes
-#undef  _npt_getenv
-#undef  _npt_statfs
+#define _statfs_3arg 0
+#define _statfs_4arg 0
+#define _lib_statvfs 0
+#define _lib_sysfs 0
+#define _lib_textdomain 0
+#define _lib_zone_getattr 0
+#define _lib_zone_list 0
+#define _class_os__Volumes 0
+#define _npt_getenv 0
+#define _npt_statfs 0
 #define _dcl_errno 1
 #define _dcl_optind 1
 #define _dcl_optarg 1
 #define _mem_f_bsize_statfs 1
-#undef  _mem_f_fsize_statfs
-#undef  _mem_f_fstyp_statfs
-#undef  _mem_f_iosize_statfs
-#undef  _mem_f_frsize_statfs
-#undef  _mem_f_fstypename_statfs
-#undef  _mem_mount_info_statfs
+#define _mem_f_fsize_statfs 0
+#define _mem_f_fstyp_statfs 0
+#define _mem_f_iosize_statfs 0
+#define _mem_f_frsize_statfs 0
+#define _mem_f_fstypename_statfs 0
+#define _mem_mount_info_statfs 0
 #define _mem_f_type_statfs 1
-#undef  _mem_mnt_time_mnttab
-#undef  _mem_vmt_time_vmount
+#define _mem_mnt_time_mnttab 0
+#define _mem_vmt_time_vmount 0
 #define _siz_long_long 8
 
 #if ! _key_void || ! _proto_stdc
