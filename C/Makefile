@@ -50,18 +50,19 @@ MANPERM = 644
 #
 # common programs
 #
-LN = ln
-RM = rm
-CP = cp
-MV = mv
-TEST = test
-CHOWN = chown
+CAT = cat
 CHGRP = chgrp
 CHMOD = chmod
-TOUCH = touch
-MSGFMT = msgfmt
+CHOWN = chown
+CP = cp
+LN = ln
 MKDIR = mkdir
+MSGFMT = msgfmt
+MV = mv
+RM = rm
+RPMBUILD = rpmbuild
 SED = sed
+TEST = test
 
 ###
 
@@ -183,27 +184,27 @@ tar:	Build LICENSE MANIFEST \
 	$(SHELL) mktar.sh $?
 
 testrpmbuild:
-	test -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
-	mkdir -p $$HOME/rpmbuild/SOURCES
-	cp -f di-4.17.tar.gz $$HOME/rpmbuild/SOURCES
-	rpmbuild -ba di.spec
-	test -f $$HOME/rpmbuild/RPMS/i386/di-4.17-1.i386.rpm || exit 1
-	test -f $$HOME/rpmbuild/SRPMS/di-4.17-1.src.rpm || exit 1
-	test -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
+	$(TEST) -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
+	$(MKDIR) -p $$HOME/rpmbuild/SOURCES
+	$(CP) -f di-4.17.tar.gz $$HOME/rpmbuild/SOURCES
+	$(RPMBUILD) -ba di.spec
+	$(TEST) -f $$HOME/rpmbuild/RPMS/i386/di-4.17-1.i386.rpm || exit 1
+	$(TEST) -f $$HOME/rpmbuild/SRPMS/di-4.17-1.src.rpm || exit 1
+	$(TEST) -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
 
 ###
 
 $(PROG)$(EXE_EXT):	di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		realloc$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
-	@test ! -f reqlibs.txt || echo "*** Using libs: `cat reqlibs.txt`"
+	@$(TEST) ! -f reqlibs.txt || echo "*** Using libs: `$(CAT) reqlibs.txt`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) \
 		di$(OBJ_EXT) didiskutil$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) \
 		realloc$(OBJ_EXT) trimchar$(OBJ_EXT) \
 		getopt$(OBJ_EXT) $(LIBS) \
-		`test ! -f reqlibs.txt || cat reqlibs.txt`
+		`$(TEST) ! -f reqlibs.txt || $(CAT) reqlibs.txt`
 
 hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
 	$(CC) -o hasnls$(EXE_EXT) \
