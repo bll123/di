@@ -5,8 +5,8 @@ DESCRIPTION
   'di' is a disk information utility, displaying everything
   (and more) that your 'df' command does. It features the
   ability to display your disk usage in whatever format you
-  desire/prefer/are used to. It is designed to be portable
-  across many platforms.
+  desire. It is designed to be highly portable. Great for
+  heterogenous networks.
 
 INSTALLATION
 
@@ -21,6 +21,8 @@ INSTALLATION
       CC=g++ ./Build
    For Syllable:
       CC=g++ ./Build -mkpl
+   For OS/2:
+      ./Build -mkpl os2-gcc
 
   To turn off NLS (internationalization):
       ./Build -nonls
@@ -41,6 +43,26 @@ INSTALLATION
   To force a 64 bit binary build:
       ./Build -64
 
+  Windows installation:
+
+    Alternative 1)
+        Cygwin gcc: make windows-gcc
+        MS VC++:    nmake windows
+    Alternative 2)
+        ./Build distclean
+        CC=gcc ./Build
+
+    (1) and (2) will build using the windows API.
+
+    You may need to undefine _lib_GetDiskFreeSpaceEX
+    in the config.h file for older windows systems.
+
+    If you prefer to use the cygwin API rather than the
+    windows API, edit config.h, and undefine _hdr_windows,
+    _lib_GetDiskFreeSpace, _lib_GetDiskFreeSpaceEx,
+    _lib_GetDriveType, _lib_GetLogicalDriveStrings and
+    _lib_GetVolumeInformation, then re-run the build.
+
   Installation Permissions:
     Some old systems (Sys V variants) only allow root to read the
     mount table.  If this is the case, change the INSTPERM macro
@@ -52,38 +74,30 @@ INSTALLATION
 
     make installperms
 
-  Windows installation:
+BUGS
+    Send bug reports along with the output from 'di -A -a -X 5' and the
+    output from your standard df command (as verbose as possible) to:
 
-    You may need to undefine _lib_GetDiskFreeSpaceEX
-    in the config.h file for older windows systems.
+        bll6969di_at_gmail.com
 
-    (1) and (2) will build using the windows API.
-
-    If you prefer to use the cygwin API rather than the
-    windows API, edit config.h, and undefine _hdr_windows,
-    _lib_GetDiskFreeSpace, _lib_GetDiskFreeSpaceEx,
-    _lib_GetDriveType, _lib_GetLogicalDriveStrings and
-    _lib_GetVolumeInformation, then re-run the build.
-
-    Alternative 1)
-        Cygnus gcc: make windows-gcc
-        MS VC++:    nmake windows
-    Alternative 2)
-        ./Build distclean
-        CC=gcc ./Build
+    If the Build script doesn't set up the 'config.h'
+    file correctly, please let me know.  E-mail me the incorrect
+    (and corrected if possible) config.h file, and any other
+    information as appropriate.
 
 REQUIREMENTS
 
-    bourne/ksh/bash shell
+    bourne/ksh/bash/zsh shell
     C compiler
     make
+        cat test
     features/cflags.sh:
         uname sed grep
     features/obj_ext.sh:
         cat rm
     mkconfig.sh:
         a shell that supports shell functions
-        sort uniq cat rm sed grep
+        cat grep rm sed sort uniq
     mkconfig.pl:
         perl cat rm
     NLS:
@@ -91,7 +105,7 @@ REQUIREMENTS
         turnoffnls.sh:
             ed
     make install:
-        cp ln rm test
+        cp ln mkdir mv rm sed test
 
 PORTING
 
@@ -120,18 +134,13 @@ PORTING
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Syllable,
         Sys V.3, Sys V.4, Ultrix, Windows, Xenix
 
-BUGS
-    Send bug reports along with the output from 'di -A -a -X 5' and the
-    output from your standard df command (as verbose as possible) to:
-
-        bll6969di_at_gmail.com
-
-    If the Build script doesn't set up the 'config.h'
-    file correctly, please let me know.  E-mail me the incorrect
-    (and corrected if possible) config.h file, and any other
-    information as appropriate.
-
 CHANGES
+
+    4.19
+        Fixed a quoting bug in mkconfig.sh
+        Added some support for AROS.
+        Changed format of config.h file.
+        Minor cleanup.
 
     4.18                                    [29 Nov 2009]
         Code cleanup.
