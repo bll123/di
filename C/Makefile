@@ -184,12 +184,12 @@ tar:	Build LICENSE MANIFEST \
 	$(SHELL) mktar.sh $?
 
 testrpmbuild:
-	$(TEST) -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
+	-$(TEST) -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
 	$(MKDIR) -p $$HOME/rpmbuild/SOURCES
-	$(CP) -f di-4.17.tar.gz $$HOME/rpmbuild/SOURCES
+	$(CP) -f di-4.18.tar.gz $$HOME/rpmbuild/SOURCES
 	$(RPMBUILD) -ba di.spec
-	$(TEST) -f $$HOME/rpmbuild/RPMS/i386/di-4.17-1.i386.rpm || exit 1
-	$(TEST) -f $$HOME/rpmbuild/SRPMS/di-4.17-1.src.rpm || exit 1
+	$(TEST) -f $$HOME/rpmbuild/RPMS/i386/di-4.18-1.i386.rpm || exit 1
+	$(TEST) -f $$HOME/rpmbuild/SRPMS/di-4.18-1.src.rpm || exit 1
 	$(TEST) -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
 
 ###
