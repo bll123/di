@@ -10,21 +10,22 @@ Source0:        http://www.gentoo.com/di/di-%{version}.tar.gz
 Source1:        http://www.sfr-fresh.com/unix/misc/di-%{version}.tar.gz
 BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
-#BuildRequires: perl
+# Build requires: cat cp grep ln msgfmt mv rm sed sort test uname uniq
+#BuildRequires:
 #Requires:
 
 %description
 'di' is a disk information utility, displaying everything
 (and more) that your 'df' command does. It features the
 ability to display your disk usage in whatever format you
-desire/prefer/are used to. It is designed to be portable
-across many platforms.
+desire. It is designed to be highly portable across many
+platforms.  Great for heterogenous networks.
 
 %prep
 %setup -q
 
 %build
-env LOCALEDIR=/usr/share/locale ./Build -mkc config.h
+env LOCALEDIR=/usr/share/locale ./Build config.h
 make LOCALEDIR=/usr/share/locale %{?_smp_mflags}
 
 %install
