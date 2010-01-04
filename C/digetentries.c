@@ -34,7 +34,7 @@
 #if _hdr_string
 # include <string.h>
 #endif
-#if _hdr_strings && ((! defined (_hdr_string)) || (_include_string))
+#if _hdr_strings && ((! _hdr_string) || (_include_string))
 # include <strings.h>
 #endif
 #if _hdr_memory
@@ -61,14 +61,14 @@
 #if _sys_fstypes                /* NetBSD */
 # include <sys/fstypes.h>
 #endif
-#if _sys_fs_types               /* OSF/1 */
+#if _sys_fs_types               /* OSF/1, AROS */
 # include <sys/fs_types.h>
 #endif
 #if _sys_mnttab                 /* Solaris */
 # include <sys/mnttab.h>        /* getmntent(); MNTTAB */
 #endif
 
-#if _sys_statfs && ! defined (_sys_statvfs) /* Linux, FreeBSD, SysV.3 */
+#if _sys_statfs && ! _sys_statvfs /* Linux, FreeBSD, SysV.3 */
 # include <sys/statfs.h>                    /* struct statfs; statfs() */
 #endif
 #if _sys_statvfs                    /* NetBSD, Solaris */
@@ -120,12 +120,12 @@
     _statfs_2arg || \
     _statfs_3arg || \
     _statfs_4arg) && \
-    ! defined (_lib_getmntinfo) && \
-    ! defined (_lib_getfsstat) && \
-    ! defined (_lib_getvfsstat) && \
-    ! defined (_lib_mntctl) && \
-    ! defined (_lib_getmnt) && \
-    ! defined (_class_os__Volumes)
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_mntctl && \
+    ! _lib_getmnt && \
+    ! _class_os__Volumes
 # if defined (_PATH_MOUNTED)
 #  define DI_MOUNT_FILE        _PATH_MOUNTED
 # else
@@ -158,9 +158,9 @@ extern int debug;
 /********************************************************/
 
 #if _lib_getmntent && \
-	! defined (_lib_setmntent) && \
-	! defined (_lib_mntctl) && \
-	! defined (_class_os__Volumes)
+	! _lib_setmntent && \
+	! _lib_mntctl && \
+	! _class_os__Volumes
 
 #if defined(__cplusplus)
   extern "C" {
@@ -273,16 +273,16 @@ checkMountOptions (mntEntry, str)
 
 #endif
 
-#if ! defined (_lib_getmntent) && \
-    ! defined (_lib_mntctl) && \
-    ! defined (_lib_getmntinfo) && \
-    ! defined (_lib_getfsstat) && \
-    ! defined (_lib_getvfsstat) && \
-    ! defined (_lib_getmnt) && \
-    ! defined (_lib_GetDiskFreeSpace) && \
-    ! defined (_lib_GetDiskFreeSpaceEx) && \
-    ! defined (_lib_fs_stat_dev) && \
-    ! defined (_class_os__Volumes)
+#if ! _lib_getmntent && \
+    ! _lib_mntctl && \
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_getmnt && \
+    ! _lib_GetDiskFreeSpace && \
+    ! _lib_GetDiskFreeSpaceEx && \
+    ! _lib_fs_stat_dev && \
+    ! _class_os__Volumes
 
 /*
  * di_getDiskEntries
@@ -356,13 +356,13 @@ di_getDiskEntries (diskInfo, diCount)
 #if _lib_getmntent && \
     _lib_setmntent && \
     _lib_endmntent && \
-    ! defined (_lib_getmntinfo) && \
-    ! defined (_lib_getfsstat) && \
-    ! defined (_lib_getvfsstat) && \
-    ! defined (_lib_mntctl) && \
-    ! defined (_lib_GetDiskFreeSpace) && \
-    ! defined (_lib_GetDiskFreeSpaceEx) && \
-    ! defined (_class_os__Volumes)
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_mntctl && \
+    ! _lib_GetDiskFreeSpace && \
+    ! _lib_GetDiskFreeSpaceEx && \
+    ! _class_os__Volumes
 
 /*
  * di_getDiskEntries
@@ -469,10 +469,10 @@ di_getDiskEntries (diskInfo, diCount)
 
 
 #if _lib_getmntinfo && \
-    ! defined (_lib_getfsstat) && \
-    ! defined (_lib_getvfsstat)
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat
 
-#define DI_UNKNOWN_FSTYPE       "Unknown fstype %.2d"
+# define DI_UNKNOWN_FSTYPE       "(%.2d)?"
 
 /*
  * di_getDiskEntries
@@ -483,7 +483,7 @@ di_getDiskEntries (diskInfo, diCount)
  *
  */
 
-# if defined (INITMOUNTNAMES)
+# if defined (INITMOUNTNAMES) && ! _dcl_mnt_names
  static char *mnt_names [] = INITMOUNTNAMES;
 #  define MNT_NUMTYPES (MOUNT_MAXTYPE + 1)
 # endif
@@ -561,8 +561,8 @@ di_getDiskEntries (diskInfo, diCount)
             (_fs_size_t) mntbufp [idx].f_ffree);
 
         fstype = mntbufp [idx].f_type;
-# if ! defined (_sys_fstyp) && ! defined (INITMOUNTNAMES) && \
-    ! defined (_mem_f_fstypename_statfs)
+# if ! _sys_fs_types && ! defined (INITMOUNTNAMES) && \
+    ! _mem_f_fstypename_statfs
         if ((fstype >= 0) && (fstype <= MOUNT_MAXTYPE))
         {
             switch (fstype)
@@ -710,7 +710,7 @@ di_getDiskEntries (diskInfo, diCount)
                       DI_UNKNOWN_FSTYPE), fstype);
         }
 #  endif
-# endif /* has fs_types.h */
+# endif /* else has sys/fs_types.h */
 
         diptr->isReadOnly = FALSE;
 # if defined (MNT_RDONLY)
@@ -752,7 +752,7 @@ di_getDiskEntries (diskInfo, diCount)
 #endif /* _lib_getmntinfo */
 
 #if _lib_getfsstat && \
-    ! defined (_lib_getvfsstat)
+    ! _lib_getvfsstat
 
 /*
  * di_getDiskEntries
@@ -760,6 +760,11 @@ di_getDiskEntries (diskInfo, diCount)
  * OSF/1 / Digital Unix / Compaq Tru64 / FreeBSD / NetBSD 2.x
  *
  */
+
+# if _dcl_mnt_names
+#  define MNT_NUMTYPES (sizeof(mnt_names)/sizeof(char *))
+# endif
+# define DI_UNKNOWN_FSTYPE       "(%.2d)?"
 
 int
 # if _proto_stdc
@@ -773,6 +778,7 @@ di_getDiskEntries (diskInfo, diCount)
     diDiskInfo_t     *diptr;
     int             count;
     int             idx;
+    short           fstype;
     Size_t          bufsize;
     struct statfs   *mntbufp;
     struct statfs   *sp;
@@ -858,7 +864,7 @@ di_getDiskEntries (diskInfo, diCount)
 # if _mem_f_fsize_statfs
         tblocksz = (_fs_size_t) sp->f_fsize;
 # endif
-# if _mem_f_bsize_statfs && ! defined (_mem_f_fsize_statfs)
+# if _mem_f_bsize_statfs && ! _mem_f_fsize_statfs
         tblocksz = (_fs_size_t) sp->f_bsize;
 # endif
         di_saveBlockSizes (diptr, tblocksz,
@@ -874,6 +880,19 @@ di_getDiskEntries (diskInfo, diCount)
 # else
 #  if _lib_sysfs && _mem_f_type_statfs
         sysfs (GETFSTYP, sp->f_type, diptr->fsType);
+#  else
+#   if _dcl_mnt_names && _mem_f_type_statfs
+        fstype = sp->f_type;
+        if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
+        {
+            strncpy (diptr->fsType, mnt_names [fstype], DI_TYPE_LEN);
+        }
+        else
+        {
+            Snprintf (diptr->fsType, DI_SPF(sizeof (diptr->fsType),
+                      DI_UNKNOWN_FSTYPE), fstype);
+        }
+#   endif
 #  endif
 # endif
     }
