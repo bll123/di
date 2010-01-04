@@ -38,7 +38,7 @@
 #if _hdr_string
 # include <string.h>
 #endif
-#if _hdr_strings && ((! defined (_hdr_string)) || (_include_string))
+#if _hdr_strings && ((! _hdr_string) || (_include_string))
 # include <strings.h>
 #endif
 
@@ -51,7 +51,7 @@
 #if _sys_vfs                    /* Linux, HP-UX */
 # include <sys/vfs.h>           /* struct statfs */
 #endif
-#if _sys_statfs && ! defined (_sys_statvfs)     /* Linux, SysV.3 */
+#if _sys_statfs && ! _sys_statvfs     /* Linux, SysV.3 */
 # include <sys/statfs.h>                        /* statfs(); struct statfs */
 #endif
 #if _sys_fstyp                  /* SysV.3 */
@@ -67,7 +67,7 @@
   extern "C" {
 #endif
 
-#if ! defined (_lib_statvfs) && \
+#if ! _lib_statvfs && \
 	_lib_statfs && \
 	_npt_statfs
 # if _lib_statfs && _statfs_2arg
@@ -90,12 +90,12 @@ extern int debug;
 /********************************************************/
 
 #if _lib_statvfs && \
-    ! defined (_lib_fs_stat_dev) && \
-    ! defined (_lib_getmntinfo) && \
-    ! defined (_lib_getfsstat) && \
-    ! defined (_lib_getvfsstat) && \
-    ! defined (_lib_GetVolumeInformation) && \
-	! defined (_class_os__Volumes)
+    ! _lib_fs_stat_dev && \
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_GetVolumeInformation && \
+	! _class_os__Volumes
 
 /*
  * di_getDiskInfo
@@ -185,11 +185,11 @@ di_getDiskInfo (diskInfo, diCount)
 #endif /* _lib_statvfs */
 
 #if _lib_statfs && _statfs_4arg && \
-    ! defined (_lib_statvfs) && \
-    ! defined (_lib_getmntinfo) && \
-    ! defined (_lib_getfsstat) && \
-    ! defined (_lib_getvfsstat) && \
-    ! defined (_lib_getmnt)
+    ! _lib_statvfs && \
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_getmnt
 
 # if ! defined (UBSIZE)
 #  if defined (BSIZE)
@@ -284,11 +284,12 @@ di_getDiskInfo (diskInfo, diCount)
 #endif /* _statfs_4arg */
 
 #if _lib_statfs && (_statfs_2arg ||_statfs_3arg) && \
-        ! defined (_lib_statvfs) && \
-        ! defined (_lib_getmntinfo) && \
-        ! defined (_lib_getmnt) && \
-        ! defined (_lib_GetDiskFreeSpace) && \
-        ! defined (_lib_GetDiskFreeSpaceEx)
+        ! _lib_statvfs && \
+        ! _lib_getmntinfo && \
+        ! _lib_getfsstat && \
+        ! _lib_getmnt && \
+        ! _lib_GetDiskFreeSpace && \
+        ! _lib_GetDiskFreeSpaceEx
 
 /*
  * di_getDiskInfo
