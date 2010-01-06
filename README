@@ -54,14 +54,14 @@ INSTALLATION
 
     (1) and (2) will build using the windows API.
 
-    You may need to undefine _lib_GetDiskFreeSpaceEX
+    You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.
 
     If you prefer to use the cygwin API rather than the
-    windows API, edit config.h, and undefine _hdr_windows,
+    windows API, edit config.h, and change _hdr_windows,
     _lib_GetDiskFreeSpace, _lib_GetDiskFreeSpaceEx,
     _lib_GetDriveType, _lib_GetLogicalDriveStrings and
-    _lib_GetVolumeInformation, then re-run the build.
+    _lib_GetVolumeInformation to 0, then re-run the build.
 
   Installation Permissions:
     Some old systems (Sys V variants) only allow root to read the
