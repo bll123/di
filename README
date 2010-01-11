@@ -33,26 +33,21 @@ INSTALLATION
   The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.
 
-  The LOCALEDIR environment variable may be set to the installation
-  directory for the locale files.  Default is ${prefix}/share/locale.
+  The LOCALEDIR environment variable defaults to ${prefix}/share/locale.
+  The installation uses the INSTALL_DIR environment variable
+  (default ${prefix}) as the root for the installation.
 
   The internationalization files are automatically installed if
   your system supports internationalization.
-  [en_US: 27-Aug-2002, de_DE: 26-Feb-2004].
-
-  To force a 64 bit binary build:
-      ./Build -64
 
   Windows installation:
 
-    Alternative 1)
+    Alternative 1 - These use config.win95 as the config.h file.
         Cygwin gcc: make windows-gcc
         MS VC++:    nmake windows
-    Alternative 2)
+    Alternative 2 - builds a new config.h file.
         ./Build distclean
         CC=gcc ./Build
-
-    (1) and (2) will build using the windows API.
 
     You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.
