@@ -17,12 +17,15 @@ LDFLAGS =
 # installation options
 #
 prefix = /usr/local
-INSTDIR = $(prefix)/bin
 LOCALEDIR = $(prefix)/share/locale
+#
+INSTALL_DIR = $(prefix)
+INSTALL_BIN_DIR = $(INSTALL_DIR)/bin
+INST_LOCALEDIR = $(INSTALL_DIR)/share/locale
 PROG = di
 MPROG = mi
-TARGET = $(INSTDIR)/$(PROG)
-MTARGET = $(INSTDIR)/$(MPROG)
+TARGET = $(INSTALL_BIN_DIR)/$(PROG)
+MTARGET = $(INSTALL_BIN_DIR)/$(MPROG)
 
 #
 # additional flags/libraries
@@ -34,7 +37,6 @@ OTHERFLAGS = -DPROG=\"$(PROG)\" -DMPROG=\"$(MPROG)\" \
 # edit these, and do a "make installperm".
 USER = root
 GROUP = bin
-#INSTPERM = 111   # change USER to bin also...
 INSTPERM = 4111   # install suid if your system has a mount table only root
 #                   can read.  For SysV.4 and Solaris, the mount command may
 #                   reset the permissions of /etc/mnttab.
@@ -42,7 +44,7 @@ INSTPERM = 4111   # install suid if your system has a mount table only root
 #
 # simple man page installation
 #
-MANPATH = $(prefix)/share/man
+MANPATH = $(INSTALL_DIR)/share/man
 MANDIR = $(MANPATH)/man1
 MANTARGET = $(PROG).1
 MANPERM = 644
@@ -104,9 +106,6 @@ os2-gcc:
 
 ####################
 
-objclean:
-	-$(RM) -rf *.o *.obj
-
 clean:
 	-$(RM) -rf $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
 		hasnls$(EXE_EXT) *.o *.obj a.out mkconfig.log \
@@ -131,20 +130,24 @@ build-po:
 	done)
 
 install-po: build-po
-	-$(TEST) -d $(LOCALEDIR) || $(MKDIR) -p $(LOCALEDIR)
+	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
 	-(cd po;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
-		$(TEST) -d $(LOCALEDIR)/$$j || \
-			$(MKDIR) $(LOCALEDIR)/$$j; \
-		$(TEST) -d $(LOCALEDIR)/$$j/LC_MESSAGES || \
-			$(MKDIR) $(LOCALEDIR)/$$j/LC_MESSAGES; \
-		$(CP) -f $$j.mo $(LOCALEDIR)/$$j/LC_MESSAGES/di.mo; \
+		$(TEST) -d $(INST_LOCALEDIR)/$$j || \
+			$(MKDIR) $(INST_LOCALEDIR)/$$j; \
+		$(TEST) -d $(INST_LOCALEDIR)/$$j/LC_MESSAGES || \
+			$(MKDIR) $(INST_LOCALEDIR)/$$j/LC_MESSAGES; \
+		$(CP) -f $$j.mo $(INST_LOCALEDIR)/$$j/LC_MESSAGES/di.mo; \
 		$(RM) -f $$j.mo; \
 		done)
 
+check-nls:	hasnls$(EXE_EXT)
+	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
+	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
+
 install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
-	-$(TEST) -d $(prefix) || $(MKDIR) $(prefix)
-	-$(TEST) -d $(INSTDIR) || $(MKDIR) $(INSTDIR)
+	-$(TEST) -d $(INSTALL_DIR) || $(MKDIR) $(INSTALL_DIR)
+	-$(TEST) -d $(INSTALL_BIN_DIR) || $(MKDIR) $(INSTALL_BIN_DIR)
 	-$(TEST) -f $(TARGET) && $(MV) -f $(TARGET) $(TARGET).old
 	-$(TEST) -f $(MTARGET) && $(MV) -f $(MTARGET) $(MTARGET).old
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
@@ -153,7 +156,7 @@ install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
 	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 	-./hasnls$(EXE_EXT) && \
-		$(MAKE) LOCALEDIR="$(LOCALEDIR)" \
+		$(MAKE) INST_LOCALEDIR="$(INST_LOCALEDIR)"\
 		MSGFMT="$(MSGFMT)" install-po
 
 install-man:
