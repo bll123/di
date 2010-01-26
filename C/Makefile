@@ -108,14 +108,12 @@ os2-gcc:
 
 clean:
 	-$(RM) -rf $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
-		hasnls$(EXE_EXT) *.o *.obj a.out mkconfig.log \
-		_tmp \
+		*.o *.obj hasnls$(EXE_EXT) mkconfig.log _tmp \
 		>/dev/null 2>&1
 
 distclean:
 	$(MAKE) -f Makefile clean
-	-$(RM) -f config.h reqlibs.txt object_ext \
-		diskinfo$(EXE_EXT) \
+	-$(RM) -f config.h mkconfig.cache object_ext reqlibs.txt \
 		>/dev/null 2>&1
 
 realclean:
