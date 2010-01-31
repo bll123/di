@@ -8,7 +8,7 @@ digetinfo.c		di source
 dimntopt.h		di source
 di.h			di source
 di.spec			rpmspec file
-features
+features/
 features/cflags.sh	cflags configuration
 features/mkconfig.dat	mkconfig.pl configuration
 features/obj_ext.sh	obj extension test
@@ -20,10 +20,28 @@ Makefile		Main Makefile
 MANIFEST		MANIFEST
 mkconfig.pl		perl config program
 mkconfig.sh		shell config program
+pretests/		pre test directory
+pretests/test_01.config	test 1
+pretests/test_01.dat	test 1
+pretests/test_01.mkconfig	test 1
+pretests/test_01.sh	test 1
+pretests/test_02.config	test 2
+pretests/test_02.dat	test 2
+pretests/test_02.mkconfig	test 2
+pretests/test_02.reqlibs	test 2
+pretests/test_02.sh	test 2
+pretests/test_03.config	test 3
+pretests/test_03.dat	test 3
+pretests/test_03.mkconfig	test 3
+pretests/test_03.reqlibs	test 3
+pretests/test_03.sh	test 3
 po/de_DE.po		internationalization
 po/en_US.po		internationalization
 po/
 README			Read This
 realloc.c		di source
+runtests.sh		runs tests
+tests/			post test directory
+tests/test_01.sh	test 1
 trimchar.c		di source
 version.h		di source
