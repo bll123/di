@@ -743,7 +743,7 @@ printDiskInfo (diData)
     if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
     {
         memset ((char *) &totals, '\0', sizeof (diDiskInfo_t));
-        totals.blockSize = 8192;
+        totals.blockSize = 512;
         strncpy (totals.name, DI_GT("Total"), DI_NAME_LEN);
         totals.printFlag = DI_PRNT_OK;
     }
