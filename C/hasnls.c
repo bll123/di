@@ -1,7 +1,7 @@
 /*
 $Id$
 $Source$
-Copyright 2006-2009 Brad Lanam, Walnut Creek, CA
+Copyright 2006-2010 Brad Lanam, Walnut Creek, CA
 */
 
 #include "config.h"

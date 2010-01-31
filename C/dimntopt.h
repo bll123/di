@@ -1,7 +1,7 @@
 /*
  * $Id$
  * $Source$
- * Copyright 2009 Brad Lanam, Walnut Creek, CA
+ * Copyright 2010 Brad Lanam, Walnut Creek, CA
  */
 
 #ifndef __INC_DIMNTOPT_H_
