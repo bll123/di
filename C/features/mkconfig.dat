@@ -29,21 +29,23 @@
 #       #endif
 #
 #   Commands:
-#   key     keyword
-#           check to see if keyword is reserved.
-#           e.g.: key volatile
 #   hdr     name-of-header [required-headers]
 #           check for a header.
 #           e.g.: hdr ctype.h
 #   sys     name-of-sys-header [required-headers]
 #           check for a header in sys/.
 #           e.g.: sys types.h
+#   key     keyword
+#           check to see if keyword is reserved.
+#           e.g.: key volatile
 #   command name-of-command
 #           check if command exists.
 #           e.g.: command msgfmt
 #   npt     function [requirement]
 #           check if function needs a prototype.
 #           the optional requirement should be _lib_<funcname>
+#           if the requirement does not exist, _npt_<function>
+#           will set set to false in config.h
 #           e.g.: npt getopt
 #                 npt statfs _lib_statfs
 #   typ     type-name
@@ -64,9 +66,9 @@
 #   member  struct member
 #           check if member is a member of struct.
 #           e.g.: member statfs f_bsize
-#   include
-#   endinclude  include all of the code between these two tags
-#               in the configuration file.
+#   include     include all of the code between these two tags
+#   endinclude  in the configuration file.  Backslashes must
+#               be escaped with a backslash.
 #
 hdr     ctype.h
 hdr     errno.h
@@ -169,12 +171,12 @@ size    long long
 include
 
 #if _lib_bindtextdomain && \\
-_lib_gettext && \\
-_lib_setlocale && \\
-_lib_textdomain && \\
-_hdr_libintl && \\
-_hdr_locale && \\
-(_command_msgfmt || _command_gmsgfmt)
+    _lib_gettext && \\
+    _lib_setlocale && \\
+    _lib_textdomain && \\
+    _hdr_libintl && \\
+    _hdr_locale && \\
+    (_command_msgfmt || _command_gmsgfmt)
 # define _enable_nls 1
 #else
 # define _enable_nls 0
