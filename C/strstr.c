@@ -8,6 +8,8 @@
 
 #if ! _lib_strstr
 
+# include "di.h"
+
 # include <stdio.h>
 # if _hdr_stdlib
 #  include <stdlib.h>

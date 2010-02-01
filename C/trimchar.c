@@ -27,7 +27,7 @@ trimChar (str, ch)
     int          ch;
 #endif
 {
-    unsigned int  len;
+    Size_t       len;
 
     len = strlen (str);
     if (len > 0)
