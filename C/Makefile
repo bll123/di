@@ -198,7 +198,7 @@ current-files:
 	@-$(CP) -f tests.base/* tests > /dev/null 2>&1
 
 tar:	Build LICENSE MANIFEST \
-		Makefile README config.win \
+		Makefile README config.bsd43.cc config.bsd43.gcc config.win \
 		di.1 di.c di.h dimntopt.h didiskutil.c digetentries.c \
 		digetinfo.c realloc.c strdup.c strstr.c trimchar.c \
 		features getopt.c hasnls.c \
