@@ -145,7 +145,7 @@
 #endif
 
 #if _npt_getenv
-  extern char *getenv _((char *));
+  extern char *getenv _((const char *));
 #endif
 
 #if defined(__cplusplus)
@@ -349,7 +349,7 @@ static dispTable_t dispTable [] =
   extern "C" {
 #endif
 
-static void addTotals           _((diDiskInfo_t *, diDiskInfo_t *, int));
+static void addTotals           _((const diDiskInfo_t *, diDiskInfo_t *, int));
 static void checkDiskInfo       _((diData_t *));
 static void getMaxFormatLengths _((diData_t *));
 static int  checkFileInfo       _((diData_t *, int, int, char *[]));
@@ -359,7 +359,7 @@ static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
 static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, int));
 #endif
 static void cleanup             _((diData_t *, char *));
-static int  diCompare           _((diOptions_t *, diDiskInfo_t *, unsigned int, unsigned int));
+static int  diCompare           _((const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int));
 static int  findDispSize        _((double));
 static void getDiskSpecialInfo  _((diData_t *));
 static void getDiskStatInfo     _((diData_t *));
@@ -368,10 +368,10 @@ static void parseList           _((iList_t *, char *));
 static void preCheckDiskInfo    _((diData_t *));
 static void printDiskInfo       _((diData_t *));
 static void printInfo           _((diDiskInfo_t *, diOptions_t *));
-static void printBlocks         _((diOptions_t *, _fs_size_t, _fs_size_t, int));
+static void printBlocks         _((const diOptions_t *, _fs_size_t, _fs_size_t, int));
 static void printTitle          _((diOptions_t *));
-static void printPerc           _((_fs_size_t, _fs_size_t, char *));
-static void processArgs         _((int, char *[], diData_t *, char *));
+static void printPerc           _((_fs_size_t, _fs_size_t, const char *));
+static void processArgs         _((int, char * const [], diData_t *, char *));
 static void setDispBlockSize    _((char *, diOptions_t *));
 static void sortArray           _((diOptions_t *, diDiskInfo_t *, int));
 static void usage               _((void));
@@ -386,7 +386,7 @@ main (int argc, char *argv [])
 #else
 main (argc, argv)
     int                 argc;
-    char                *argv [];
+    char                * argv [];
 #endif
 {
     diData_t            diData;
@@ -476,13 +476,17 @@ main (argc, argv)
     if ((ptr = getenv ("DI_ARGS")) != (char *) NULL)
     {
         char        *tptr;
-        size_t      len;
         int         nargc;
         int         ooptind;
         char        *ooptarg;
         char        *nargv [DI_MAX_ARGV];
 
         argvptr = strdup (ptr);
+        if (argvptr == (char *) NULL)
+        {
+            fprintf (stderr, "strdup failed in main() (1).  errno %d\n", errno);
+            exit (1);
+        }
         ooptind = optind;
         ooptarg = optarg;
         if (argvptr != (char *) NULL)
@@ -1168,11 +1172,11 @@ printInfo (diskInfo, diopts)
 
 static void
 #if _proto_stdc
-printBlocks (diOptions_t *diopts, _fs_size_t blocks,
+printBlocks (const diOptions_t *diopts, _fs_size_t blocks,
                         _fs_size_t blockSize, int idx)
 #else
 printBlocks (diopts, blocks, blockSize, idx)
-    diOptions_t        *diopts;
+    const diOptions_t        *diopts;
     _fs_size_t          blocks;
     _fs_size_t          blockSize;
     int                 idx;
@@ -1182,7 +1186,7 @@ printBlocks (diopts, blocks, blockSize, idx)
     double          mult;
     double          temp;
     char            *suffix;
-    char            *format;
+    const char      *format;
 
 
     suffix = "";
@@ -1245,10 +1249,10 @@ findDispSize (siz)
 
 static void
 #if _proto_stdc
-addTotals (diDiskInfo_t *diskInfo, diDiskInfo_t *totals, int inpool)
+addTotals (const diDiskInfo_t *diskInfo, diDiskInfo_t *totals, int inpool)
 #else
 addTotals (diskInfo, totals, inpool)
-    diDiskInfo_t   *diskInfo;
+    const diDiskInfo_t   *diskInfo;
     diDiskInfo_t   *totals;
     int            inpool;
 #endif
@@ -1482,12 +1486,12 @@ printTitle (diopts)
 
 static void
 #if _proto_stdc
-printPerc (_fs_size_t used, _fs_size_t totAvail, char *format)
+printPerc (_fs_size_t used, _fs_size_t totAvail, const char *format)
 #else
 printPerc (used, totAvail, format)
     _fs_size_t      used;
     _fs_size_t      totAvail;
-    char            *format;
+    const char      *format;
 #endif
 {
     double      perc;
@@ -1638,21 +1642,21 @@ sortArray (diopts, data, count)
 
 static int
 #if _proto_stdc
-diCompare (diOptions_t *diopts, diDiskInfo_t *data,
+diCompare (const diOptions_t *diopts, const diDiskInfo_t *data,
            unsigned int idx1, unsigned int idx2)
 #else
 diCompare (diopts, data, idx1, idx2)
-    diOptions_t     *diopts;
-    diDiskInfo_t    *data;
+    const diOptions_t     *diopts;
+    const diDiskInfo_t    *data;
     unsigned int    idx1;
     unsigned int    idx2;
 #endif
 {
     int             rc;
     int             sortOrder;
-    char            *ptr;
-    diDiskInfo_t    *d1;
-    diDiskInfo_t    *d2;
+    const char            *ptr;
+    const diDiskInfo_t    *d1;
+    const diDiskInfo_t    *d2;
 
         /* reset sort order to the default start value */
     sortOrder = DI_SORT_ASCENDING;
@@ -2253,13 +2257,13 @@ usage ()
 static void
 #if _proto_stdc
 processArgs (int argc,
-             char *argv [],
+             char * const argv [],
              diData_t *diData,
              char *dbsstr)
 #else
 processArgs (argc, argv, diData, dbsstr)
     int             argc;
-    char            *argv [];
+    char            * const argv [];
     diData_t        *diData;
     char            *dbsstr;
 #endif
@@ -2452,7 +2456,7 @@ processArgs (argc, argv, diData, dbsstr)
             {
                 debug = atoi (optarg);
                 diopts->flags |= DI_F_DEBUG_HDR | DI_F_TOTAL;
-                diopts->flags &= ~ DI_F_NO_HEADER;
+                diopts->flags &= (__ulong) (~ DI_F_NO_HEADER);
                 diopts->width = 10;
                 diopts->inodeWidth = 10;
                 break;
@@ -2497,15 +2501,12 @@ parseList (list, str)
     unsigned int i;
     unsigned int len;
 
-    i = strlen (str);
-    dstr = (char *) malloc ((Size_t) i + 1);
+    dstr = strdup (str);
     if (dstr == (char *) NULL)
     {
-        fprintf (stderr, "malloc failed in parseList() (1).  errno %d\n", errno);
+        fprintf (stderr, "strdup failed in parseList() (1).  errno %d\n", errno);
         exit (1);
     }
-    memcpy (dstr, str, (Size_t) i);
-    dstr [i] = '\0';
 
     ptr = strtok (dstr, DI_LIST_SEP);
     count = 0;
