@@ -7,13 +7,9 @@ FORMATS="b B u c f v i U F"
 grc=0
 for format in $FORMATS; do
   echo "Checking format: $format"
-  ditot=`../di -n -d1 -f $format -t | tail -1`
-  didata=`../di -n -d1 -f $format`
-  diline=`echo $didata`  # convert to single line
-  sumtot=`(echo "0 ";echo $diline | sed 's/  */ + /g'; echo " + p") | dc`
-  echo "Total from di: $ditot"
-  echo "Total summed: $sumtot"
-  if [ $ditot -ne $sumtot ]; then
+  didata=`../di -n -d1 -f $format -t`
+  summtot=`(echo "0 ";echo $didata | sed 's/  */ + /g'; echo " - p") | dc`
+  if [ $summtot -ne 0 ]; then
     echo "format: $format failed"
     grc=1
   fi
