@@ -1,5 +1,7 @@
 Build			Build script
-config.win95		sample config.h for win95
+config.win		sample config.h for windows
+config.bsd43.cc		config.h for bsd43
+config.bsd43.gcc	config.h for bsd43
 di.1			di Manual Page
 di.c			di source
 didiskutil.c		di source
@@ -43,5 +45,7 @@ realloc.c		di source
 runtests.sh		runs tests
 tests/			post test directory
 tests/test_01.sh	test 1
+strdup.c		di source
+strstr.c		di source
 trimchar.c		di source
 version.h		di source
