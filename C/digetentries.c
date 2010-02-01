@@ -46,16 +46,20 @@
 #if _hdr_time
 # include <time.h>
 #endif
-#if _sys_time
+#if _sys_time && ((! _hdr_time) || (_include_time))
 # include <sys/time.h>
 #endif
 
 
-#if _hdr_mntent                 /* Linux, kFreeBSD, HP-UX */
+#if _hdr_mntent && \
+  ! defined (_DI_INC_MNTENT)        /* Linux, kFreeBSD, HP-UX */
+# define _DI_INC_MNTENT 1
 # include <mntent.h>            /* hasmntopt(); _PATH_MNTTAB */
 #endif                          /* HP-UX: set/get/endmntent(); hasmntopt() */
 
-#if _sys_mount                  /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+#if _sys_mount && \
+  ! defined (_DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+# define _DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>         /* getmntinfo(); struct statfs */
 #endif
 #if _sys_fstypes                /* NetBSD */
@@ -73,6 +77,9 @@
 #endif
 #if _sys_statvfs                    /* NetBSD, Solaris */
 # include <sys/statvfs.h>           /* struct statvfs; statvfs() */
+#endif
+#if _sys_vfs                    /* BSD 4.3 */
+# include <sys/vfs.h>           /* struct statfs */
 #endif
 #if _sys_mntctl                     /* AIX */
 # include <sys/mntctl.h>
