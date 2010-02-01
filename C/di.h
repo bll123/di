@@ -109,13 +109,13 @@
     typedef unsigned long _fs_size_t;
     typedef long _s_fs_size_t;
 #else
- #if _siz_long_long >= 8
+# if _siz_long_long >= 8
     typedef unsigned long long _fs_size_t;
     typedef long long _s_fs_size_t;
- #else
+# else
     typedef unsigned long _fs_size_t;
     typedef long _s_fs_size_t;
- #endif
+# endif
 #endif
 
 typedef unsigned long __ulong;
