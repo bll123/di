@@ -1,4 +1,4 @@
-di - disk information utility (version 4.18).
+di - disk information utility (version 4.19).
 
 DESCRIPTION
 
@@ -84,31 +84,35 @@ REQUIREMENTS
 
     bourne/ksh/bash/zsh shell
     C compiler
+    Build
+        test
     make
         cat test
     features/cflags.sh:
-        uname sed grep
+        grep sed uname
     features/obj_ext.sh:
         cat rm
     mkconfig.sh:
         a shell that supports shell functions
         cat grep rm sed sort uniq
     mkconfig.pl:
-        perl cat rm
+        cat perl rm
     NLS:
         msgfmt sed
         turnoffnls.sh:
             ed
     make install:
         cp ln mkdir mv rm sed test
+    runtests.sh:
+        ar cat cp dc diff env rm sed sort
 
 PORTING
 
-    di 4.18 has been tested on the following platforms:
+    di 4.19 has been tested on the following platforms:
+        BSD 4.3
         CentOS 3.9, 4.8, 5.2, 5.3
         Cygwin
         Debian 4.0, 5.0, kFreeBSD 7.2
-        Fedora 5.2
         FreeBSD 4.9, 7.0, 7.1, 7.2, 8.0
         Haiku 1
         HP-UX 11.11 (bundled cc, gcc)
@@ -123,7 +127,7 @@ PORTING
 
     di has been ported to the following systems in the past:
 
-        A/UX, AIX, BeOS, BSDI, Compaq Tru64, Convex, Cray UNICOS,
+        A/UX, AIX, BeOS, BSD 4.3, BSDI, Compaq Tru64, Convex, Cray UNICOS,
         Cray UNICOS/mk, FreeBSD, Haiku, HP/UX, Linux, MacOS X,
         NetBSD, Next, OpenBSD, OSF/1, Pyramid, SCO Unix,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Syllable,
@@ -131,11 +135,16 @@ PORTING
 
 CHANGES
 
-    4.19
-        Fixed a quoting bug in mkconfig.sh
-        Added some support for AROS.
+    4.19                                    [1 Feb 2010]
+        Fix totals to add up when using small block sizes.
+        Fix totals for mixed pooled and non-pooled filesystems.
+        Add fix for automounted directories:
+          https://bugzilla.redhat.com/show_bug.cgi?id=497830 (df)
+        Fixed a quoting bug in mkconfig.sh.
+        mkconfig enhancements and cleanup.
+        Builds on BSD 4.3.
         Changed format of config.h file.
-        Minor cleanup.
+        Code cleanup.
 
     4.18                                    [29 Nov 2009]
         Code cleanup.
@@ -511,6 +520,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2009 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2010 Brad Lanam, Walnut Creek, CA, USA
     bll6969di_at_gmail.com
     http://www.gentoo.com/di/
