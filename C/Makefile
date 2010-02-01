@@ -74,9 +74,10 @@ all:
 
 di-all:	di-prog
 
-di-all-test:	pretests.done di-prog tests.done
-
 di-prog:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
+
+# for regression testing
+di-all-test:	pretests.done di-prog tests.done
 
 pretests.done:
 	echo "## running pretests"
