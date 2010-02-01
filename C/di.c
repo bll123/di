@@ -2,13 +2,11 @@
  * $Id$
  * $Source$
  *
- * Copyright 1994-2009 Brad Lanam, Walnut Creek, CA
+ * Copyright 1994-2010 Brad Lanam, Walnut Creek, CA
  */
 
 /*
  * di.c
- *
- *   Copyright 1994-2009 Brad Lanam,  Walnut Creek, CA
  *
  *  Warning: Do not replace your system's 'df' command with this program.
  *           You will in all likelihood break your installation procedures.
@@ -99,6 +97,12 @@
 #if _hdr_errno
 # include <errno.h>
 #endif
+#if _hdr_fcntl
+# include <fcntl.h>
+#endif
+#if _sys_file
+# include <sys/file.h>
+#endif
 #if _hdr_getopt
 # include <getopt.h>
 #endif
@@ -120,7 +124,7 @@
 #if _hdr_time
 # include <time.h>
 #endif
-#if _sys_time
+#if _sys_time && ((! _hdr_time) || (_include_time))
 # include <sys/time.h>
 #endif
 #if _sys_stat
@@ -142,16 +146,6 @@
 
 #if _npt_getenv
   extern char *getenv _((char *));
-#endif
-
-#if ! _dcl_errno
-  extern int     errno;
-#endif
-#if ! _dcl_optind
-  extern int optind;
-#endif
-#if ! _dcl_optarg
-  extern char *optarg;
 #endif
 
 #if defined(__cplusplus)
@@ -482,6 +476,7 @@ main (argc, argv)
     if ((ptr = getenv ("DI_ARGS")) != (char *) NULL)
     {
         char        *tptr;
+        size_t      len;
         int         nargc;
         int         ooptind;
         char        *ooptarg;
@@ -1545,7 +1540,19 @@ checkFileInfo (diData, optidx, argc, argv)
 
     for (i = optidx; i < argc; ++i)
     {
-        if (stat (argv [i], &statBuf) == 0)
+        int fd;
+        int src;
+
+        /* do this to automount devices.                    */
+        /* stat() will not necessarily cause an automount.  */
+        fd = open (argv[i], O_RDONLY | O_NOCTTY);
+        if (fd < 0)
+        {
+          src = stat (argv [i], &statBuf);
+        } else {
+          src = fstat (fd, &statBuf);
+        }
+        if (src == 0)
         {
             for (j = 0; j < diData->count; ++j)
             {
