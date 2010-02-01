@@ -171,15 +171,15 @@ extern int  di_getDiskEntries       _((diDiskInfo_t **, int *));
 extern void di_getDiskInfo          _((diDiskInfo_t **, int *));
  /* getopt.c */
 # if ! _lib_getopt || _npt_getopt
-extern int getopt                   _((char *, char *[], char *));
+extern int getopt                   _((char *, char * const [], const char *));
 # endif
  /* strdup.c */
 # if ! _lib_strdup
-extern char *strdup                 _((char *, Size_t));
+extern char *strdup                 _((const char *));
 # endif
  /* strstr.c */
 # if ! _lib_strstr
-extern char *strstr                 _((char *, char *));
+extern char *strstr                 _((const char *, const char *));
 # endif
  /* trimchar.c */
 extern void trimChar                _((char *, int));
@@ -195,7 +195,7 @@ extern void di_saveInodeSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_siz
     ! _lib_getvfsstat && \
 	! _lib_mntctl && \
 	! _class_os__Volumes
-extern char *chkMountOptions        _((char *, char *));
+extern char *chkMountOptions        _((const char *, const char *));
 #endif
 extern void convertMountOptions     _((long, diDiskInfo_t *));
 extern void convertNFSMountOptions  _((long, long, long, diDiskInfo_t *));
@@ -204,7 +204,7 @@ extern void di_testRemoteDisk       _((diDiskInfo_t *));
 /* workaround for cygwin                                              */
 /* if we have a getopt header, there's probably a getopt lib function */
 # if ! _lib_getopt && ! _hdr_getopt
-extern int getopt _((int argc, char *argv [], char *optstring));
+extern int getopt _((int, char * const [], const char *));
 # endif
 
 # if defined(__cplusplus)
