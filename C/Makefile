@@ -1,7 +1,7 @@
 #
 #  di makefile
 #
-#  Copyright 2001-2009 Brad Lanam Walnut Creek CA, USA
+#  Copyright 2001-2010 Brad Lanam Walnut Creek CA, USA
 #
 #  $Id$
 #
@@ -70,16 +70,31 @@ TEST = test
 
 # have to get various environment variables set up.
 all:
-	./Build
+	$(SHELL) ./Build
 
-di-all:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
+di-all:	di-prog
+
+di-all-test:	pretests.done di-prog tests.done
+
+di-prog:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
+
+pretests.done:
+	echo "## running pretests"
+	cd pretests && $(SHELL) ../runtests.sh
+	touch pretests.done
+
+tests.done:
+	echo "## running tests"
+	cd tests && $(SHELL) ../runtests.sh
+	touch tests.done
 
 config.h:	features/cflags.sh mkconfig.pl mkconfig.sh features/mkconfig.dat
-	@-$(RM) -f config.h
-	./Build config.h
+	@-$(RM) -f config.h mkconfig.cache tests.done
+	$(SHELL) ./Build config.h
 
-wconfig.h:	config.win95
-	$(CP) -f config.win95 config.h
+wconfig.h:	config.win
+	@-$(RM) -f config.h mkconfig.cache tests.done
+	$(CP) -f config.win config.h
 
 # This was tested using vc++ 5.0.
 windows:	wconfig.h
@@ -108,12 +123,14 @@ os2-gcc:
 
 clean:
 	-$(RM) -rf $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
-		*.o *.obj hasnls$(EXE_EXT) mkconfig.log _tmp \
+		*.o *.obj hasnls$(EXE_EXT) mkconfig.log \
+		tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
 
 distclean:
 	$(MAKE) -f Makefile clean
-	-$(RM) -f config.h mkconfig.cache object_ext reqlibs.txt \
+	-$(RM) -f config.h mkconfig.cache object_ext \
+		pretests.done reqlibs.txt \
 		>/dev/null 2>&1
 
 realclean:
@@ -171,17 +188,22 @@ installperms:
 ###
 
 current-files:
-	-$(RM) -f features/* > /dev/null 2>&1
-	-$(RM) -f po/* > /dev/null 2>&1
-	$(CP) -f po.base/*.po po
-	$(CP) -f features.base/*.sh features.base/*.dat features
+	@-$(RM) -f features/* > /dev/null 2>&1
+	@-$(RM) -f po/* > /dev/null 2>&1
+	@-$(RM) -f tests/* > /dev/null 2>&1
+	@-$(RM) -f pretests/* > /dev/null 2>&1
+	@$(CP) -f po.base/*.po po
+	@$(CP) -f features.base/*.sh features.base/*.dat features
+	@-$(CP) -f pretests.base/* pretests > /dev/null 2>&1
+	@-$(CP) -f tests.base/* tests > /dev/null 2>&1
 
 tar:	Build LICENSE MANIFEST \
-		Makefile README config.win95 \
+		Makefile README config.win \
 		di.1 di.c di.h dimntopt.h didiskutil.c digetentries.c \
-		digetinfo.c realloc.c trimchar.c \
+		digetinfo.c realloc.c strdup.c strstr.c trimchar.c \
 		features getopt.c hasnls.c \
-		mkconfig.pl mkconfig.sh po version.h
+		mkconfig.pl mkconfig.sh pretests po \
+		runtests.sh strdup.c strstr.c tests version.h
 	$(MAKE) -f Makefile current-files
 	$(SHELL) mktar.sh $?
 
@@ -198,14 +220,16 @@ testrpmbuild:
 
 $(PROG)$(EXE_EXT):	di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		realloc$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
+		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
+		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
 	@$(TEST) ! -f reqlibs.txt || echo "*** Using libs: `$(CAT) reqlibs.txt`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) \
 		di$(OBJ_EXT) didiskutil$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		digetentries$(OBJ_EXT) \
-		realloc$(OBJ_EXT) trimchar$(OBJ_EXT) \
-		getopt$(OBJ_EXT) $(LIBS) \
+		digetentries$(OBJ_EXT) realloc$(OBJ_EXT) \
+		strdup$(OBJ_EXT) strstr$(OBJ_EXT) \
+		trimchar$(OBJ_EXT) getopt$(OBJ_EXT) \
+		$(LIBS) \
 		`$(TEST) ! -f reqlibs.txt || $(CAT) reqlibs.txt`
 
 hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
@@ -233,10 +257,16 @@ getopt$(OBJ_EXT):	getopt.c config.h
 hasnls$(OBJ_EXT):	hasnls.c config.h
 	$(CC) -c $(CFLAGS) $(OTHERFLAGS) hasnls.c
 
-realloc$(OBJ_EXT):	realloc.c config.h
+realloc$(OBJ_EXT):	realloc.c config.h di.h
 	$(CC) -c $(CFLAGS) realloc.c
 
-trimchar$(OBJ_EXT):	trimchar.c config.h
+strdup$(OBJ_EXT):	strdup.c config.h di.h
+	$(CC) -c $(CFLAGS) strdup.c
+
+strstr$(OBJ_EXT):	strstr.c config.h di.h
+	$(CC) -c $(CFLAGS) strstr.c
+
+trimchar$(OBJ_EXT):	trimchar.c config.h di.h
 	$(CC) -c $(CFLAGS) trimchar.c
 
 
