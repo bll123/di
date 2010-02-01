@@ -23,19 +23,19 @@
 
 char *
 # if _proto_stdc
-strstr (char *buff, char *srch)
+strstr (const char *buff, const char *srch)
 # else
 strstr (buff, srch)
-  char *buff;
-  char *srch;
+  const char *buff;
+  const char *srch;
 # endif
 {
   Size_t    len;
   char *    p;
 
-  if (srch == (char *) NULL) { return buff; }
+  p = (char *) buff;
+  if (srch == (char *) NULL) { return p; }
 
-  p = buff;
   len = strlen (srch);
   for (; (p = strchr (p, *srch)) != (char *) NULL; p++)
   {

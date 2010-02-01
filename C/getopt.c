@@ -35,12 +35,12 @@ static char *scan = NULL;   /* Private scan pointer. */
 
 int
 #if _proto_stdc
-getopt (int argc, char *argv [], char *optstring)
+getopt (int argc, char * const argv [], const char *optstring)
 #else
 getopt (argc, argv, optstring)
     int argc;
-    char *argv[];
-    char *optstring;
+    char * const argv[];
+    const char *optstring;
 #endif
 {
     char c;

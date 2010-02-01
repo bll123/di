@@ -29,10 +29,10 @@
 
 char *
 # if _proto_stdc
-strdup (char *ptr)
+strdup (const char *ptr)
 # else
 strdup (ptr)
-    char        *ptr;
+    const char        *ptr;
 # endif
 {
   Size_t        len;
