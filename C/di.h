@@ -12,6 +12,12 @@
 /*****************************************************/
 
 #include <stdio.h>
+#if _hdr_fcntl
+# include <fcntl.h>
+#endif
+#if _sys_file
+# include <sys/file.h>
+#endif
 #if _sys_types
 # include <sys/types.h>
 #endif
@@ -20,6 +26,10 @@
 #endif
 #if _sys_param
 # include <sys/param.h>     /* MAXPATHLEN */
+#endif
+
+#if ! defined (O_NOCTTY)
+# define O_NOCTTY 0
 #endif
 
 #if ! defined (MAXPATHLEN)
@@ -45,7 +55,9 @@
 #  define DI_TYPE_LEN       FSTYPSZ
 # endif
 #endif
-#if _sys_mount                          /* NetBSD */
+#if _sys_mount && \
+    ! defined (_DI_INC_SYS_MOUNT)       /* NetBSD */
+# define _DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>                 /* MFSNAMELEN */
 # if ! defined (DI_TYPE_LEN) && defined (MFSNAMELEN)
 #  define DI_TYPE_LEN       MFSNAMELEN
@@ -64,7 +76,7 @@
 
 #if ! _lib_memcpy && ! defined (memcpy)
 # if ! _lib_bcopy
-   error No memcpy/bcopy available.
+   error No_memcpy/bcopy_available.
 # else
 #  define memcpy(dst, src, cnt)     (bcopy((src), (dst), (cnt)), dst)
 # endif
@@ -72,10 +84,20 @@
 
 #if ! _lib_memset && ! defined (memset)
 # if ! _lib_bzero
-   error No memset/bzero available.
+   error No_memset/bzero_available.
 # else
 #  define memset(s,c,n)    (bzero ((s), (n)), s)
 # endif
+#endif
+
+#if ! _dcl_errno
+  extern int     errno;
+#endif
+#if ! _dcl_optind
+  extern int optind;
+#endif
+#if ! _dcl_optarg
+  extern char *optarg;
 #endif
 
 #define DI_NAME_LEN            MAXPATHLEN
@@ -83,12 +105,17 @@
 #define DI_OPT_LEN             MAXPATHLEN
 #define DI_MNT_TIME_LEN        24
 
-#if _siz_long_long >= 8
-    typedef unsigned long long _fs_size_t;
-    typedef long long _s_fs_size_t;
-#else
+#if _siz_long_long == 0
     typedef unsigned long _fs_size_t;
     typedef long _s_fs_size_t;
+#else
+ #if _siz_long_long >= 8
+    typedef unsigned long long _fs_size_t;
+    typedef long long _s_fs_size_t;
+ #else
+    typedef unsigned long _fs_size_t;
+    typedef long _s_fs_size_t;
+ #endif
 #endif
 
 typedef unsigned long __ulong;
@@ -142,6 +169,18 @@ typedef struct
 extern int  di_getDiskEntries       _((diDiskInfo_t **, int *));
  /* digetinfo.c */
 extern void di_getDiskInfo          _((diDiskInfo_t **, int *));
+ /* getopt.c */
+# if ! _lib_getopt || _npt_getopt
+extern int getopt                   _((char *, char *[], char *));
+# endif
+ /* strdup.c */
+# if ! _lib_strdup
+extern char *strdup                 _((char *, Size_t));
+# endif
+ /* strstr.c */
+# if ! _lib_strstr
+extern char *strstr                 _((char *, char *));
+# endif
  /* trimchar.c */
 extern void trimChar                _((char *, int));
  /* realloc.c */
