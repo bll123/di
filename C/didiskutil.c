@@ -24,6 +24,9 @@
 #if _include_malloc && _hdr_malloc
 # include <malloc.h>
 #endif
+#if _hdr_errno
+# include <errno.h>
+#endif
 
 
 /********************************************************/
@@ -387,17 +390,22 @@ convertNFSMountOptions (flags, wsize, rsize, diptr)
 
 char *
 # if _proto_stdc
-chkMountOptions (char *mntopts, char *str)
+chkMountOptions (const char *mntopts, const char *str)
 # else
 chkMountOptions (mntopts, str)
-    char          *mntopts;
-    char          *str;
+    const char          *mntopts;
+    const char          *str;
 # endif
 {
     char    *ptr;
     char    *tstr;
 
     tstr = strdup (mntopts);
+    if (tstr == (char *) NULL)
+    {
+        fprintf (stderr, "strdup failed in chkMountOptions (1).  errno %d\n", errno);
+        exit (1);
+    }
     ptr = strtok (tstr, ",");
     while (ptr != (char *) NULL)
     {
