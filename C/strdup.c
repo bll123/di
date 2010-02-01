@@ -8,6 +8,8 @@
 
 #if ! _lib_strdup
 
+# include "di.h"
+
 # include <stdio.h>
 # if _hdr_stdlib
 #  include <stdlib.h>
@@ -42,7 +44,7 @@ strdup (ptr)
   }
 
   len = strlen (ptr);
-  nptr = malloc (len + 1);
+  nptr = (char *) malloc (len + 1);
   strncpy (nptr, ptr, len);
   return nptr;
 }
