@@ -42,13 +42,15 @@
 # include <strings.h>
 #endif
 
-#if _sys_mount                  /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+#if _sys_mount && \
+  ! defined (_DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+# define _DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>         /* statfs(); struct statfs; getfsstat() */
 #endif
 #if _sys_statvfs                /* Linux, Solaris, FreeBSD, NetBSD, HP-UX */
 # include <sys/statvfs.h>       /* statvfs(); struct statvfs */
 #endif
-#if _sys_vfs                    /* Linux, HP-UX */
+#if _sys_vfs                    /* Linux, HP-UX, BSD 4.3 */
 # include <sys/vfs.h>           /* struct statfs */
 #endif
 #if _sys_statfs && ! _sys_statvfs     /* Linux, SysV.3 */
