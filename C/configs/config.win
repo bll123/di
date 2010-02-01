@@ -10,6 +10,7 @@
 #define _proto_stdc 1
 #define _hdr_ctype 1
 #define _hdr_errno 1
+#define _hdr_fcntl 1
 #define _hdr_fshelp 0
 #define _hdr_getopt 1
 #define _hdr_kernel_fs_info 0
@@ -17,7 +18,6 @@
 #define _hdr_libintl 1
 #define _hdr_locale 1
 #define _hdr_malloc 1
-#define _hdr_math 1
 #define _hdr_memory 1
 #define _hdr_mntent 1
 #define _hdr_mnttab 0
@@ -33,6 +33,7 @@
 #define _hdr_util_string 0
 #define _hdr_windows 1
 #define _hdr_zone 0
+#define _sys_file 0
 #define _sys_fs_types 0
 #define _sys_fstyp 0
 #define _sys_fstypes 0
@@ -49,8 +50,11 @@
 #define _sys_vmount 0
 #define _include_malloc 1
 #define _include_string 1
+#define _include_time 1
 #define _command_msgfmt 1
 #define _command_gmsgfmt 0
+#define _const_o_rdonly 1
+#define _const_o_noctty 1
 #define _typ_statvfs_t 0
 #define _typ_size_t 1
 #define _typ_uint_t 0
@@ -89,12 +93,15 @@
 #define _statfs_3arg 0
 #define _statfs_4arg 0
 #define _lib_statvfs 0
+#define _lib_strdup 1
+#define _lib_strstr 1
 #define _lib_sysfs 0
 #define _lib_textdomain 0
 #define _lib_zone_getattr 0
 #define _lib_zone_list 0
 #define _class_os__Volumes 0
 #define _npt_getenv 0
+#define _npt_getopt 0
 #define _npt_statfs 0
 #define _dcl_errno 1
 #define _dcl_optind 1
@@ -127,12 +134,12 @@
 #endif
 
 #if _lib_bindtextdomain && \
-_lib_gettext && \
-_lib_setlocale && \
-_lib_textdomain && \
-_hdr_libintl && \
-_hdr_locale && \
-(_command_msgfmt || _command_gmsgfmt)
+    _lib_gettext && \
+    _lib_setlocale && \
+    _lib_textdomain && \
+    _hdr_libintl && \
+    _hdr_locale && \
+    (_command_msgfmt || _command_gmsgfmt)
 # define _enable_nls 1
 #else
 # define _enable_nls 0
