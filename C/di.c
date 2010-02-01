@@ -814,6 +814,8 @@ printDiskInfo (diData)
                 lastpoollen = strlen (lastpool);
                 inpool = FALSE;
               }
+            } else {
+              inpool = FALSE;
             }
 
             if (debug > 2)
