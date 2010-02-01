@@ -1,7 +1,7 @@
 #
 # $Id$
 # $Source$
-# Copyright 2006-2009 Brad Lanam, Walnut Creek, California USA
+# Copyright 2006-2010 Brad Lanam, Walnut Creek, California USA
 #
 #   The four headers: stdio.h, stdlib.h, sys/types.h, and sys/param.h
 #   are always checked.  FreeBSD has header inclusion bugs and requires
@@ -35,6 +35,9 @@
 #   sys     name-of-sys-header [required-headers]
 #           check for a header in sys/.
 #           e.g.: sys types.h
+#   const   constant-name [required-headers]
+#           check that a constant exists
+#           e.g.: O_RDONLY
 #   key     keyword
 #           check to see if keyword is reserved.
 #           e.g.: key volatile
@@ -72,6 +75,7 @@
 #
 hdr     ctype.h
 hdr     errno.h
+hdr     fcntl.h
 hdr     fshelp.h
 hdr     getopt.h
 hdr     kernel/fs_info.h
@@ -95,6 +99,7 @@ hdr     unistd.h
 hdr     util/string.h
 hdr     windows.h
 hdr     zone.h
+sys     file.h
 sys     fs_types.h
 sys     fstyp.h
 sys     fstypes.h
@@ -111,6 +116,7 @@ sys     vfstab.h
 sys     vmount.h
 command msgfmt
 command gmsgfmt
+const   O_NOCTTY
 typ     statvfs_t
 typ     size_t
 typ     uint_t
@@ -145,12 +151,15 @@ lib     setmntent
 lib     snprintf
 lib     statfs
 lib     statvfs
+lib     strdup
+lib     strstr
 lib     sysfs
 lib     textdomain  -lintl -liconv
 lib     zone_getattr
 lib     zone_list
 class   os::Volumes -lsyllable
 npt     getenv
+npt     getopt
 npt     statfs _lib_statfs
 dcl     int  errno
 dcl     int  optind
