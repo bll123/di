@@ -22,7 +22,7 @@ Makefile		Main Makefile
 MANIFEST		MANIFEST
 mkconfig.pl		perl config program
 mkconfig.sh		shell config program
-pretests/		pre test directory
+pretests/		regression tests - pre test directory
 pretests/test_01.config	test 1
 pretests/test_01.dat	test 1
 pretests/test_01.mkconfig	test 1
@@ -42,8 +42,8 @@ po/en_US.po		internationalization
 po/
 README			Read This
 realloc.c		di source
-runtests.sh		runs tests
-tests/			post test directory
+runtests.sh		runs regression tests
+tests/			regression tests - post test directory
 tests/test_01.sh	test 1
 strdup.c		di source
 strstr.c		di source
