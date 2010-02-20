@@ -202,7 +202,8 @@ current-files:
 
 tar:	Build LICENSE MANIFEST \
 		Makefile README config.bsd43.cc config.bsd43.gcc config.win \
-		di.1 di.c di.h dimntopt.h didiskutil.c digetentries.c \
+		di.1 di.c di.h di.spec \
+		dimntopt.h didiskutil.c digetentries.c \
 		digetinfo.c realloc.c strdup.c strstr.c trimchar.c \
 		features getopt.c hasnls.c \
 		mkconfig.pl mkconfig.sh mkconfig.units pretests po \
@@ -213,6 +214,7 @@ tar:	Build LICENSE MANIFEST \
 testrpmbuild:
 	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
 	$(MKDIR) -p ./rpmbuild/SOURCES
+	$(MKDIR) -p ./rpmbuild/BUILD
 	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
 	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
 	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
