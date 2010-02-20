@@ -15,7 +15,7 @@ fi
 
 grc=1
 for l in "de_DE" "de_DE.utf-8" "de_DE.UTF-8"; do
-  LC_ALL="${l}" ./di -A | egrep Benutzt >/dev/null 2>&1
+  LC_ALL="${l}" ./test_di/bin/di -A | egrep Benutzt >/dev/null 2>&1
   rc=$?
   if [ $rc -eq 0 ]; then
     grc=0
