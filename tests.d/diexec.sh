@@ -2,7 +2,6 @@
 
 echo ${EN} "di executes${EC}" >&3
 
-cd ..
-./di 
+../di 
 rc=$?
 exit $rc

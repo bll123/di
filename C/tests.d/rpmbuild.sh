@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo ${EN} "di rpmbuild${EC}" >&3
+echo ${EN} "rpmbuild${EC}" >&3
 
 cd ..
 . ./mkconfig.cache
