@@ -9,7 +9,7 @@ cd ..
 hasnls=$?
 
 if [ ${hasnls} -ne 0 ];then
-  echo "no nls support; skipped"
+  echo ${EN} " skipped${EC}" >&3
   exit 0
 fi
 
@@ -22,6 +22,9 @@ for l in "de_DE" "de_DE.utf-8" "de_DE.UTF-8"; do
   fi
 done
 
-#exit $grc
 # cannot depend on german being installed...
+if [ $grc -ne 0 ]; then
+  echo ${EN} " de_DE not installed?${EC}" >&3
+fi
+#exit $grc
 exit 0
