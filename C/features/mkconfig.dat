@@ -4,9 +4,9 @@
 # Copyright 2006-2010 Brad Lanam, Walnut Creek, California USA
 #
 # Commands:
-#   config   file-name
+#   output   file-name
 #            specify the name of the output file.
-#   source   unit-name
+#   loadunit unit-name
 #            include a unit for testing
 #            units may include specific check routines.
 #   standard  perform any standard checks for the language unit
@@ -57,13 +57,15 @@
 #            check if member is a member of struct.
 #            e.g.: member statfs f_bsize
 #
-config  config.h
-source  lang-c
-source  include-malloc
-source  include-string
-source  include-time
-source  setmntent-args
-source  statfs-args
+output   config.h
+
+loadunit lang-c
+loadunit include-malloc
+loadunit include-string
+loadunit include-time
+loadunit setmntent-args
+loadunit statfs-args
+
 standard
 
 hdr     ctype.h
@@ -112,6 +114,7 @@ include_string
 include_time
 command msgfmt
 command gmsgfmt
+# rpmbuild used for regression tests
 command rpmbuild
 const   O_NOCTTY
 typ     statvfs_t
