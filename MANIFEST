@@ -23,12 +23,12 @@ MANIFEST		MANIFEST
 mkconfig.pl		perl config program
 mkconfig.sh		shell config program
 mkconfig.units/		test units for mkconfig.sh
-mkconfig.units/include-malloc.sh	include string.h malloc.h test
-mkconfig.units/include-string.sh	include string.h strings.h test
-mkconfig.units/include-time.sh	include time.h sys/time.h test
-mkconfig.units/lang-c.sh	C language testing
-mkconfig.units/setmntent-args.sh	test for number of setmntent args
-mkconfig.units/statfs-args.sh	test for number of statfs args
+mkconfig.units/include-malloc.sh
+mkconfig.units/include-string.sh
+mkconfig.units/include-time.sh
+mkconfig.units/lang-c.sh
+mkconfig.units/setmntent-args.sh
+mkconfig.units/statfs-args.sh
 pretests/		regression tests - pre test directory
 pretests/test_01.sh	test 1
 pretests/test_02.sh	test 2
@@ -63,6 +63,7 @@ tests/test_06.sh	test 6
 tests/test_07.sh	test 7
 tests/test_08.sh	test 8
 tests/test_09.sh	test 9
+tests/test_10.sh	test 10
 strdup.c		di source
 strstr.c		di source
 trimchar.c		di source
