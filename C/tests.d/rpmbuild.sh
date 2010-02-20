@@ -10,6 +10,12 @@ if [ ${di_cfg__command_rpmbuild} = "0" ];then
   exit 0
 fi
 
+rvers=`rpmbuild --version | tr -cd '0-9'`
+if [ $rvers -lt 470 ]; then
+  echo ${EN} " old version skipped${EC}" >&3
+  exit 0
+fi
+
 DI_VERSION=`grep DI_VERSION version.h | sed  -e 's/"$//' -e 's/.*"//'`
 
 grc=0
