@@ -77,7 +77,7 @@ di-all:	di-prog
 di-prog:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
 # for regression testing
-di-all-test:	pretests.done di-prog tests.done
+di-all-test:	pretests.done tests.done
 
 pretests.done:
 	echo "## running pretests"
@@ -211,13 +211,13 @@ tar:	Build LICENSE MANIFEST \
 	$(SHELL) mktar.sh $?
 
 testrpmbuild:
-	-$(TEST) -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
-	$(MKDIR) -p $$HOME/rpmbuild/SOURCES
-	$(CP) -f di-4.18.tar.gz $$HOME/rpmbuild/SOURCES
-	$(RPMBUILD) -ba di.spec
-	$(TEST) -f $$HOME/rpmbuild/RPMS/i386/di-4.18-1.i386.rpm || exit 1
-	$(TEST) -f $$HOME/rpmbuild/SRPMS/di-4.18-1.src.rpm || exit 1
-	$(TEST) -d $$HOME/rpmbuild && rm -rf $$HOME/rpmbuild
+	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
+	$(MKDIR) -p ./rpmbuild/SOURCES
+	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
+	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
+	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
+	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
+	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
 
 ###
 
