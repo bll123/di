@@ -112,6 +112,7 @@ include_string
 include_time
 command msgfmt
 command gmsgfmt
+command rpmbuild
 const   O_NOCTTY
 typ     statvfs_t
 typ     size_t
