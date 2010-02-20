@@ -12,6 +12,5 @@ if [ $rc -ne 0 ]; then grc=$rc; fi
 ${instdir}/bin/di
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
-rm -rf test_di 
 
 exit $grc
