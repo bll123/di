@@ -81,12 +81,12 @@ di-all-test:	pretests.done di-prog tests.done
 
 pretests.done:
 	echo "## running pretests"
-	cd pretests && $(SHELL) ../runtests.sh
+	$(SHELL) ./runtests.sh pretests
 	touch pretests.done
 
 tests.done:
 	echo "## running tests"
-	cd tests && $(SHELL) ../runtests.sh
+	$(SHELL) ./runtests.sh tests
 	touch tests.done
 
 config.h:	features/cflags.sh mkconfig.pl mkconfig.sh features/mkconfig.dat
