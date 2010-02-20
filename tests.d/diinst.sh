@@ -1,12 +1,12 @@
 #!/bin/sh
 
-echo ${EN} "di install${EC}" >&3
+echo ${EN} "install${EC}" >&3
 
-instdir="test_di"
 
 cd ..
 grc=0
-prefix=${instdir} ./Build -mksh install
+instdir="`pwd`/test_di"
+prefix=${instdir} LOCALEDIR=${prefix}/share/locale ./Build -mksh install
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 ${instdir}/bin/di
