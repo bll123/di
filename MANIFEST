@@ -22,21 +22,31 @@ Makefile		Main Makefile
 MANIFEST		MANIFEST
 mkconfig.pl		perl config program
 mkconfig.sh		shell config program
+mkconfig.units/		test units for mkconfig.sh
+mkconfig.units/include-malloc.sh	include string.h malloc.h test
+mkconfig.units/include-string.sh	include string.h strings.h test
+mkconfig.units/include-time.sh	include time.h sys/time.h test
+mkconfig.units/lang-c.sh	C language testing
+mkconfig.units/setmntent-args.sh	test for number of setmntent args
+mkconfig.units/statfs-args.sh	test for number of statfs args
 pretests/		regression tests - pre test directory
-pretests/test_01.config	test 1
-pretests/test_01.dat	test 1
-pretests/test_01.mkconfig	test 1
 pretests/test_01.sh	test 1
-pretests/test_02.config	test 2
-pretests/test_02.dat	test 2
-pretests/test_02.mkconfig	test 2
-pretests/test_02.reqlibs	test 2
 pretests/test_02.sh	test 2
-pretests/test_03.config	test 3
-pretests/test_03.dat	test 3
-pretests/test_03.mkconfig	test 3
-pretests/test_03.reqlibs	test 3
 pretests/test_03.sh	test 3
+pretests/test_04.config	test 4
+pretests/test_04.dat	test 4
+pretests/test_04.mkconfig	test 4
+pretests/test_04.sh	test 4
+pretests/test_05.config	test 5
+pretests/test_05.dat	test 5
+pretests/test_05.mkconfig	test 5
+pretests/test_05.reqlibs	test 5
+pretests/test_05.sh	test 5
+pretests/test_06.config	test 6
+pretests/test_06.dat	test 6
+pretests/test_06.mkconfig	test 6
+pretests/test_06.reqlibs	test 6
+pretests/test_06.sh	test 6
 po/de_DE.po		internationalization
 po/en_US.po		internationalization
 po/
