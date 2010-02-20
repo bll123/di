@@ -13,6 +13,6 @@ if [ $rc -ne 0 ]; then
     # other machines w/odd setup
     ../di -n -f M /boot 2>/dev/null | egrep '^/boot[ ]*$' > /dev/null 2>&1
     rc=$?
-  FI
+  fi
 fi
 exit $rc
