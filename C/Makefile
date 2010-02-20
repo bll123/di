@@ -193,17 +193,19 @@ current-files:
 	@-$(RM) -f po/* > /dev/null 2>&1
 	@-$(RM) -f tests/* > /dev/null 2>&1
 	@-$(RM) -f pretests/* > /dev/null 2>&1
-	@$(CP) -f po.base/*.po po
-	@$(CP) -f features.base/*.sh features.base/*.dat features
+	@-$(CP) -f po.base/*.po po > /dev/null 2>&1
+	@-$(CP) -f features.base/*.sh features.base/*.dat features \
+		> /dev/null 2>&1
 	@-$(CP) -f pretests.base/* pretests > /dev/null 2>&1
 	@-$(CP) -f tests.base/* tests > /dev/null 2>&1
+	@-$(CP) -f mkconfig.units.base/* mkconfig.units > /dev/null 2>&1
 
 tar:	Build LICENSE MANIFEST \
 		Makefile README config.bsd43.cc config.bsd43.gcc config.win \
 		di.1 di.c di.h dimntopt.h didiskutil.c digetentries.c \
 		digetinfo.c realloc.c strdup.c strstr.c trimchar.c \
 		features getopt.c hasnls.c \
-		mkconfig.pl mkconfig.sh pretests po \
+		mkconfig.pl mkconfig.sh mkconfig.units pretests po \
 		runtests.sh strdup.c strstr.c tests version.h
 	$(MAKE) -f Makefile current-files
 	$(SHELL) mktar.sh $?
