@@ -8,7 +8,7 @@
 .\"
 .\" bll6969di_at_gmail.com
 .\"
-.TH di 1 "22 Nov 2009"
+.TH di 1 "20 Feb 2010"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -96,8 +96,8 @@ to the same unit size (the largest needed).
 .TP
 .B \-f
 .I format
-Use the specified format string \fIformat\fP.  Format strings are
-described below.
+Use the specified format string \fIformat\fP.  See the
+\fBFormat Strings\fP section.
 .TP
 .B \-g
 (alias for: \-dg)
@@ -158,8 +158,9 @@ m \- by mount point (default); n \- leave unsorted (as it appears in
 the mount table); s \- by special device name;
 t \- by filesystem type; r \- reverse the sort order.
 .IP
-These sort options may be combined in any order.  e.g.: di \-stsrm;
-di \-strsrm.
+These sort options may be combined in any order.  e.g.: di \-stsrm \- by
+type, special, reversed mount;
+di \-strsrm \- by type, reversed special, mount.
 .TP
 .B \-t
 Print a totals line below the list of file systems.
@@ -205,7 +206,7 @@ The zone must be visible to the user.
 (alias for: \-z all)
 .br
 Display the filesystems for all visible zones.
-.SH Format strings
+.SH Format Strings
 The output of \fIdi\fP may be specified via a format string.  This
 string may be given either via the \fB-f\fP command line option or by
 the \fBDIFMT\fP environment variable.  The format string may specify the
@@ -219,75 +220,6 @@ Print the name of the mount point.
 Print the name of the mount point, at full length.  The mount point
 is formatted to the maximum width necessary for the longest mount
 point name.
-.TP
-.B b
-Print the total number of megabytes on the file system.
-See also the \-d option.
-.TP
-.B B
-Print the total number of megabytes on the file system
-available for use by normal
-users.
-See also the \-d option.
-.TP
-.B u
-Print the number of megabytes in use on the file system
-(actual number of megabytes used = total \- free).
-See also the \-d option.
-.TP
-.B c
-Print the number of megabytes not available for use by normal users
-(total \- available).
-See also the \-d option.
-.TP
-.B f
-Print the number of free (unused) megabytes on the file system.
-See also the \-d option.
-.TP
-.B v
-Print the number of megabytes available for use by normal users.
-See also the \-d option.
-.TP
-.B p
-Print the percentage of megabytes not available for use by normal users
-(number of megabytes not available for use / total disk space).
-See also the \-d option.
-.TP
-.B 1
-Print the percentage of total megabytes in use
-(actual number of megabytes used / total disk space).
-See also the \-d option.
-.TP
-.B 2
-Print the percentage of megabytes in use, BSD-style.  Represents the
-percentage of user-available space in use.  Note that values over 100%
-are possible
-(actual number of megabytes used / disk
-space available to non-root users).
-See also the \-d option.
-.TP
-.B a
-Print the percentage of megabytes available for use by normal users
-(number of megabytes available for use / total disk space).
-See also the \-d option.
-.TP
-.B 3
-Print the percentage of total megabytes free
-(actual number of megabytes free / total disk space).
-See also the \-d option.
-.TP
-.B i
-Print the total number of file slots (inodes) that can be created on the file
-system.
-.TP
-.B U
-Print the number of file slots in use.
-.TP
-.B F
-Print the number of file slots available.
-.TP
-.B P
-Print the percentage of file slots in use.
 .TP
 .B s
 Print the file system name (special device or remote mount point).
@@ -307,6 +239,78 @@ Print the file system type at full length.  The file system type
 is formatted to the maximum width necessary for the longest file system
 type.
 .TP
+.B Total Available
+.TP
+.B b
+Print the total number of megabytes on the file system.
+.TP
+.B B
+Print the total number of megabytes on the file system
+available for use by normal
+users.
+.TP
+.B In Use
+.TP
+.B u
+Print the number of megabytes in use on the file system
+(actual number of megabytes used = total \- free).
+.TP
+.B c
+Print the number of megabytes not available for use by normal users
+(total \- available).
+.TP
+.B Free
+.TP
+.B f
+Print the number of free (unused) megabytes on the file system.
+.TP
+.B v
+Print the number of megabytes available for use by normal users.
+.TP
+.B Percentage Used
+.TP
+.B p
+Print the percentage of megabytes not available for use by normal users
+(number of megabytes not available for use / total disk space).
+.TP
+.B 1
+Print the percentage of total megabytes in use
+(actual number of megabytes used / total disk space).
+.TP
+.B 2
+Print the percentage of megabytes in use, BSD-style.  Represents the
+percentage of user-available space in use.  Note that values over 100%
+are possible
+(actual number of megabytes used / disk
+space available to non-root users).
+.TP
+.B Percentage Free
+.TP
+.B a
+Print the percentage of megabytes available for use by normal users
+(number of megabytes available for use / total disk space).
+.TP
+.B 3
+Print the percentage of total megabytes free
+(actual number of megabytes free / total disk space).
+.TP
+.B Inodes
+.TP
+.B i
+Print the total number of file slots (inodes) that can be created on the file
+system.
+.TP
+.B U
+Print the number of file slots in use.
+.TP
+.B F
+Print the number of file slots available.
+.TP
+.B P
+Print the percentage of file slots in use.
+.TP
+.B Mount Information
+.TP
 .B I
 Print the time the filesystem was mounted.  This column is
 not supported on all systems.
@@ -322,7 +326,7 @@ The default format string for \fImi\fP is \fBMSTIO\fP.
 The format string may also contain any other character not listed
 above.  The character will be printed as is.  e.g. di \-f 'mbuvp|iUFP'
 will print the character '|' between the disk usage and the file slot
-usage.  The command sequence (Bourne Shell):
+usage.  The command sequence:
 .RS
 .br
 di \-f 'mbuvp
