@@ -6,7 +6,7 @@ cd ..
 . ./mkconfig.cache
 
 if [ ${di_cfg__command_rpmbuild} = "0" ];then
-  echo "no rpmbuild; skipped"
+  echo ${EN} " skipped${EC}" >&3
   exit 0
 fi
 
