@@ -79,12 +79,12 @@ di-prog:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 # for regression testing
 di-all-test:	pretests.done tests.done
 
-pretests.done:
+pretests.done: runtests.sh
 	echo "## running pretests"
 	$(SHELL) ./runtests.sh pretests
 	touch pretests.done
 
-tests.done:
+tests.done: runtests.sh
 	echo "## running tests"
 	$(SHELL) ./runtests.sh tests
 	touch tests.done
@@ -130,8 +130,8 @@ clean:
 
 distclean:
 	$(MAKE) -f Makefile clean
-	-$(RM) -f config.h mkconfig.cache object_ext \
-		pretests.done reqlibs.txt \
+	-$(RM) -rf config.h mkconfig.cache object_ext \
+		pretests.done reqlibs.txt test_di \
 		>/dev/null 2>&1
 
 realclean:
