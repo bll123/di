@@ -3,76 +3,69 @@
 # $Source$
 # Copyright 2006-2010 Brad Lanam, Walnut Creek, California USA
 #
-#   The four headers: stdio.h, stdlib.h, sys/types.h, and sys/param.h
-#   are always checked.  FreeBSD has header inclusion bugs and requires
-#   sys/param.h.
-#
-#   The keywords 'void' and 'const' are always tested.
-#
-#   Prototype support is always tested.
-#
-#   The following code is present in the final config.h file:
-#
-#       #if ! _key_void || ! _proto_stdc
-#       # define void int
-#       #endif
-#       #if ! _key_const || ! _proto_stdc
-#       # define const
-#       #endif
-#
-#       #ifndef _
-#       # if _proto_stdc
-#       #  define _(args) args
-#       # else
-#       #  define _(args) ()
-#       # endif
-#       #endif
-#
-#   Commands:
-#   hdr     name-of-header [required-headers]
-#           check for a header.
-#           e.g.: hdr ctype.h
-#   sys     name-of-sys-header [required-headers]
-#           check for a header in sys/.
-#           e.g.: sys types.h
-#   const   constant-name [required-headers]
-#           check that a constant exists
-#           e.g.: O_RDONLY
-#   key     keyword
-#           check to see if keyword is reserved.
-#           e.g.: key volatile
-#   command name-of-command
-#           check if command exists.
-#           e.g.: command msgfmt
-#   npt     function [requirement]
-#           check if function needs a prototype.
-#           the optional requirement should be _lib_<funcname>
-#           if the requirement does not exist, _npt_<function>
-#           will set set to false in config.h
-#           e.g.: npt getopt
-#                 npt statfs _lib_statfs
-#   typ     type-name
-#           check if type-name exists.
-#           e.g.: typ size_t
-#   lib     function [libs]
-#           check if function exists.
-#           if libs are specified, tests for function
-#           w/o the libraries, then with.
-#           e.g.: lib gettext -lintl -liconv
-#                 will test gettext, gettext -lintl, gettext -lintl -liconv
-#   class   class [libs]
-#           check if class exists.
-#           e.g.: class os::Volumes
-#   dcl     {int|ptr} variable
-#           check if the variable is declared.
-#           e.g.: dcl int errno
-#   member  struct member
-#           check if member is a member of struct.
-#           e.g.: member statfs f_bsize
+# Commands:
+#   config   file-name
+#            specify the name of the output file.
+#   source   unit-name
+#            include a unit for testing
+#            units may include specific check routines.
+#   standard  perform any standard checks for the language unit
+#            that was sourced
+#   command  name-of-command
+#            check if command exists.
+#            e.g.: command msgfmt
 #   include     include all of the code between these two tags
 #   endinclude  in the configuration file.  Backslashes must
 #               be escaped with a backslash.
 #
+# lang-c:
+#   hdr      name-of-header [required-headers]
+#            check for a header.
+#            e.g.: hdr ctype.h
+#   sys      name-of-sys-header [required-headers]
+#            check for a header in sys/.
+#            e.g.: sys types.h
+#   const    constant-name [required-headers]
+#            check that a constant exists
+#            e.g.: O_RDONLY
+#   key      keyword
+#            check to see if keyword is reserved.
+#            e.g.: key volatile
+#   npt      function [requirement]
+#            check if function needs a prototype.
+#            the optional requirement should be _lib_<funcname>
+#            if the requirement does not exist, _npt_<function>
+#            will set set to false in config.h
+#            e.g.: npt getopt
+#                  npt statfs _lib_statfs
+#   typ      type-name
+#            check if type-name exists.
+#            e.g.: typ size_t
+#   lib      function [libs]
+#            check if function exists.
+#            if libs are specified, tests for function
+#            w/o the libraries, then with.
+#            e.g.: lib gettext -lintl -liconv
+#                  will test gettext, gettext -lintl, gettext -lintl -liconv
+#   class    class [libs]
+#            check if class exists.
+#            e.g.: class os::Volumes
+#   dcl      {int|ptr} variable
+#            check if the variable is declared.
+#            e.g.: dcl int errno
+#   member   struct member
+#            check if member is a member of struct.
+#            e.g.: member statfs f_bsize
+#
+config  config.h
+source  lang-c
+source  include-malloc
+source  include-string
+source  include-time
+source  setmntent-args
+source  statfs-args
+standard
+
 hdr     ctype.h
 hdr     errno.h
 hdr     fcntl.h
@@ -114,6 +107,9 @@ sys     time.h
 sys     vfs.h
 sys     vfstab.h
 sys     vmount.h
+include_malloc
+include_string
+include_time
 command msgfmt
 command gmsgfmt
 const   O_NOCTTY
@@ -157,6 +153,8 @@ lib     sysfs
 lib     textdomain  -lintl -liconv
 lib     zone_getattr
 lib     zone_list
+setmntent_args
+statfs_args
 class   os::Volumes -lsyllable
 npt     getenv
 npt     getopt
