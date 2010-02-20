@@ -85,13 +85,8 @@
 #define _lib_next_dev 0
 #define _lib_setlocale 0
 #define _lib_setmntent 1
-#define _setmntent_1arg 0
-#define _setmntent_2arg 1
 #define _lib_snprintf 0
 #define _lib_statfs 1
-#define _statfs_2arg 1
-#define _statfs_3arg 0
-#define _statfs_4arg 0
 #define _lib_statvfs 0
 #define _lib_strdup 0
 #define _lib_strstr 0
@@ -99,6 +94,8 @@
 #define _lib_textdomain 0
 #define _lib_zone_getattr 0
 #define _lib_zone_list 0
+#define _setmntent_args 2
+#define _statfs_args 2
 #define _class_os__Volumes 0
 #define _npt_getopt 0
 #define _npt_getenv 0
