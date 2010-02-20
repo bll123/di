@@ -124,9 +124,7 @@
 #endif
 
 #if (_lib_getmntent || \
-    _statfs_2arg || \
-    _statfs_3arg || \
-    _statfs_4arg) && \
+    _statfs_args > 0) && \
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
@@ -400,7 +398,7 @@ di_getDiskEntries (diskInfo, diCount)
 
     if (debug > 0) { printf ("# lib:getDiskEntries: set/get/endmntent\n"); }
 /* if both are set not an ansi compiler... */
-#if _setmntent_1arg && ! _setmntent_2arg
+#if _setmntent_args == 1
     if ((f = setmntent (DI_MOUNT_FILE)) == (FILE *) NULL)
 #else
     if ((f = setmntent (DI_MOUNT_FILE, "r")) == (FILE *) NULL)

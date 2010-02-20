@@ -72,13 +72,13 @@
 #if ! _lib_statvfs && \
 	_lib_statfs && \
 	_npt_statfs
-# if _lib_statfs && _statfs_2arg
+# if _lib_statfs && _statfs_args == 2
   extern int statfs _((char *, struct statfs *));
 # endif
-# if _lib_statfs && _statfs_3arg
+# if _lib_statfs && _statfs_args == 3
   extern int statfs _((char *, struct statfs *, int));
 # endif
-# if _lib_statfs && _statfs_4arg
+# if _lib_statfs && _statfs_args == 4
   extern int statfs _((char *, struct statfs *, int, int));
 # endif
 #endif
@@ -186,7 +186,7 @@ di_getDiskInfo (diskInfo, diCount)
 
 #endif /* _lib_statvfs */
 
-#if _lib_statfs && _statfs_4arg && \
+#if _lib_statfs && _statfs_args == 4 && \
     ! _lib_statvfs && \
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
@@ -283,9 +283,9 @@ di_getDiskInfo (diskInfo, diCount)
     } /* for each entry */
 }
 
-#endif /* _statfs_4arg */
+#endif /* _statfs_args == 4 */
 
-#if _lib_statfs && (_statfs_2arg ||_statfs_3arg) && \
+#if _lib_statfs && (_statfs_args == 2 || _statfs_args == 3) && \
         ! _lib_statvfs && \
         ! _lib_getmntinfo && \
         ! _lib_getfsstat && \
@@ -357,7 +357,7 @@ di_getDiskInfo (diskInfo, diCount)
     } /* for each entry */
 }
 
-#endif /* _statfs_2arg */
+#endif /* _statfs_args == 2 or 3 */
 
 
 #if _lib_GetVolumeInformation
