@@ -1,11 +1,11 @@
 #!/bin/sh
 
-echo ${EN} "di build w/mkconfig.sh${EC}" >&3
+echo ${EN} "build w/mkconfig.sh${EC}" >&3
 
 cd ..
 make distclean
-instdir="test_di"
-prefix=${instdir} ./Build -mksh 
+instdir="`pwd`/test_di"
+prefix=${instdir} LOCALEDIR=${prefix}/share/locale ./Build -mksh 
 rc=$?
 
 exit $rc
