@@ -48,8 +48,8 @@ pretests/test_06.mkconfig	test 6
 pretests/test_06.reqlibs	test 6
 pretests/test_06.sh	test 6
 po/
-po/de_DE.po		internationalization
-po/en_US.po		internationalization
+po/de.po		internationalization
+po/en.po		internationalization
 README			Read This
 realloc.c		di source
 runtests.sh		runs regression tests
