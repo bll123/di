@@ -11,7 +11,7 @@ if [ ${hasnls} -ne 0 ];then
 fi
 
 grc=1
-for l in "de_DE" "de_DE.utf-8" "de_DE.UTF-8" \
+for l in "de" "de_DE" "de_DE.utf-8" "de_DE.UTF-8" \
     "de_DE.ISO8859-1" "de_DE.ISO8859-15"; do
   LC_ALL="${l}" ../test_di/bin/di -A | egrep Benutzt >/dev/null 2>&1
   rc=$?
@@ -22,7 +22,7 @@ done
 
 # cannot depend on german being installed...
 if [ $grc -ne 0 ]; then
-  echo ${EN} " de_DE not installed?${EC}" >&3
+  echo ${EN} " de not installed?${EC}" >&3
 fi
 #exit $grc
 exit 0
