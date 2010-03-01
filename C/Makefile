@@ -90,11 +90,11 @@ tests.done: runtests.sh
 	touch tests.done
 
 config.h:	features/cflags.sh mkconfig.pl mkconfig.sh features/mkconfig.dat
-	@-$(RM) -f config.h mkconfig.cache tests.done
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	$(SHELL) ./Build config.h
 
 wconfig.h:	config.win
-	@-$(RM) -f config.h mkconfig.cache tests.done
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	$(CP) -f config.win config.h
 
 # This was tested using vc++ 5.0.
@@ -130,7 +130,7 @@ clean:
 
 distclean:
 	$(MAKE) -f Makefile clean
-	-$(RM) -rf config.h mkconfig.cache object_ext \
+	-$(RM) -rf config.h mkconfig.cache mkconfig.vars object_ext \
 		pretests.done reqlibs.txt test_di \
 		>/dev/null 2>&1
 
