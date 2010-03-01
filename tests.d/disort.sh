@@ -28,8 +28,8 @@ rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 
 echo "by special and mount w/total"
-../test_di/bin/di -n -a -f SM | sort > s1
-../test_di/bin/di -n -a -f SM -ssm -t | sed '$d' > s2
+../test_di/bin/di -n -a -f 'S~M' | sort -t'~' > s1
+../test_di/bin/di -n -a -f 'S~M' -ssm -t | sed '$d' > s2
 diff -w s1 s2
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
@@ -56,8 +56,8 @@ rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 
 echo "by mount and special w/total"
-../test_di/bin/di -n -a -f MS | sort > s1
-../test_di/bin/di -n -a -f MS -sms -t | sed '$d' > s2
+../test_di/bin/di -n -a -f 'M~S' | sort -t'~' > s1
+../test_di/bin/di -n -a -f 'M~S' -sms -t | sed '$d' > s2
 diff -w s1 s2
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
@@ -84,8 +84,8 @@ rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 
 echo "by type and special and mount w/total"
-../test_di/bin/di -n -a -f TSM | sort > s1
-../test_di/bin/di -n -a -f TSM -stsm -t | sed '$d' > s2
+../test_di/bin/di -n -a -f 'T~S~M' | sort -t'~' > s1
+../test_di/bin/di -n -a -f 'T~S~M' -stsm -t | sed '$d' > s2
 diff -w s1 s2
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
@@ -93,15 +93,15 @@ if [ $rc -ne 0 ]; then grc=$rc; fi
 sort -k1 > /dev/null < /dev/null
 if [ $? = 0 ]; then
   echo "by type and special and mount reversed 2 and 3"
-  ../test_di/bin/di -n -a -f TSM | sort -k1,1 -k2,2r -k3,3r > s1
-  ../test_di/bin/di -n -a -f TSM -strsm > s2
+  ../test_di/bin/di -n -a -f 'T~S~M' | sort -t'~' -k1,1 -k2,2r -k3,3r > s1
+  ../test_di/bin/di -n -a -f 'T~S~M' -strsm > s2
   diff -w s1 s2
   rc=$?
   if [ $rc -ne 0 ]; then grc=$rc; fi
 
   echo "by type and special and mount reversed 2 "
-  ../test_di/bin/di -n -a -f TSM | sort -k1,1 -k2,2r -k3,3 > s1
-  ../test_di/bin/di -n -a -f TSM -strsrm > s2
+  ../test_di/bin/di -n -a -f 'T~S~M' | sort -t'~' -k1,1 -k2,2r -k3,3 > s1
+  ../test_di/bin/di -n -a -f 'T~S~M' -strsrm > s2
   diff -w s1 s2
   rc=$?
   if [ $rc -ne 0 ]; then grc=$rc; fi
