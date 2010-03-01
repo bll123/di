@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
+#
 
 echo ${EN} "install${EC}" >&3
 

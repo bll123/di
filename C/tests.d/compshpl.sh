@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
+#
 
 echo ${EN} "compare mkconfig.sh mkconfig.pl${EC}" >&3
 
