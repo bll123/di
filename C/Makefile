@@ -12,6 +12,7 @@ EXE_EXT =
 CC = cc
 CFLAGS = -O
 LDFLAGS =
+MAKE = make
 
 #
 # installation options
