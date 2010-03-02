@@ -15,6 +15,23 @@ LDFLAGS =
 MAKE = make
 
 #
+# common programs
+#
+CAT = cat
+CHGRP = chgrp
+CHMOD = chmod
+CHOWN = chown
+CP = cp
+LN = ln
+MKDIR = mkdir
+MSGFMT = msgfmt
+MV = mv
+RM = rm
+RPMBUILD = rpmbuild
+SED = sed
+TEST = test
+
+#
 # installation options
 #
 prefix = /usr/local
@@ -49,23 +66,6 @@ MANPATH = $(INSTALL_DIR)/share/man
 MANDIR = $(MANPATH)/man1
 MANTARGET = $(PROG).1
 MANPERM = 644
-
-#
-# common programs
-#
-CAT = cat
-CHGRP = chgrp
-CHMOD = chmod
-CHOWN = chown
-CP = cp
-LN = ln
-MKDIR = mkdir
-MSGFMT = msgfmt
-MV = mv
-RM = rm
-RPMBUILD = rpmbuild
-SED = sed
-TEST = test
 
 ###
 # mkconfig
@@ -138,7 +138,9 @@ tar:	LICENSE MANIFEST Makefile README \
 		$(MKCONFIGPATH)/environment.sh $(MKCONFIGPATH)/env.units \
 		$(MKCONFIGPATH)/mkconfig.pl $(MKCONFIGPATH)/mkconfig.sh \
 		$(MKCONFIGPATH)/mkconfig.units $(MKCONFIGPATH)/runtests.sh \
-		$(MKCONFIGPATH)/shellfuncs.sh $(MKCONFIGPATH)/tests
+		$(MKCONFIGPATH)/shellfuncs.sh $(MKCONFIGPATH)/tests \
+		$(MKCONFIGPATH)/README $(MKCONFIGPATH)/MANIFEST \
+		$(MKCONFIGPATH)/LICENSE
 	$(MAKE) -f Makefile current-files
 	cd mkconfig;$(MAKE) -f Makefile current-files
 	$(SHELL) mktar.sh $?
