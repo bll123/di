@@ -8,7 +8,7 @@ echo ${EN} "build w/mkconfig.sh${EC}" >&3
 cd ..
 make distclean
 instdir="`pwd`/test_di"
-prefix=${instdir} LOCALEDIR=${prefix}/share/locale ./Build -mksh
+make prefix=${instdir} LOCALEDIR=${prefix}/share/locale all-sh
 rc=$?
 
 exit $rc

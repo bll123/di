@@ -9,7 +9,7 @@ echo ${EN} "install${EC}" >&3
 cd ..
 grc=0
 instdir="`pwd`/test_di"
-prefix=${instdir} LOCALEDIR=${prefix}/share/locale ./Build -mksh install
+make prefix=${instdir} LOCALEDIR=${prefix}/share/locale install
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 ${instdir}/bin/di
