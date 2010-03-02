@@ -7,7 +7,8 @@ echo ${EN} "di sort${EC}" >&3
 
 grc=0
 
-export LC_ALL="C"
+LC_ALL="C"
+export LC_ALL
 
 echo "by special"
 ../test_di/bin/di -n -a -f S | sort > s1
