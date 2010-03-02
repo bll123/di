@@ -790,7 +790,7 @@ printDiskInfo (diData)
             int             ispooled;
 
             ispooled = FALSE;
-            dinfo = &tempDiskInfo [i];
+            dinfo = &(tempDiskInfo [tempDiskInfo [i].index]);
 
             if (! dinfo->doPrint)
             {
