@@ -17,45 +17,8 @@ getopt.c		getopt source (from Cnews)
 hasnls.c		checks for NLS support.
 LICENSE			License
 Makefile		Main Makefile
-MANIFEST		MANIFEST
-mkconfig/environment.sh		environment setup program
-mkconfig/env.units/		units for environment.sh
-mkconfig/env.units/cflags.sh
-mkconfig/env.units/object_extension.sh
-mkconfig/mkconfig.pl		perl config program
-mkconfig/mkconfig.sh		shell config program
-mkconfig/mkconfig.units/	units for mkconfig.sh
-mkconfig/mkconfig.units/include-malloc.sh
-mkconfig/mkconfig.units/include-string.sh
-mkconfig/mkconfig.units/include-time.sh
-mkconfig/mkconfig.units/lang-c.sh
-mkconfig/mkconfig.units/setmntent-args.sh
-mkconfig/mkconfig.units/statfs-args.sh
-mkconfig/shellfuncs.sh		mkconfig functions
-mkconfig/tests/			regression tests for mkconfig
-mkconfig/tests/test_01.sh
-mkconfig/tests/test_02.sh
-mkconfig/tests/test_03.sh
-mkconfig/tests/test_04.config
-mkconfig/tests/test_04.dat
-mkconfig/tests/test_04.mkconfig
-mkconfig/tests/test_04.sh
-mkconfig/tests/test_05.config
-mkconfig/tests/test_05.dat
-mkconfig/tests/test_05.mkconfig
-mkconfig/tests/test_05.reqlibs
-mkconfig/tests/test_05.sh
-mkconfig/tests/test_06.config
-mkconfig/tests/test_06.dat
-mkconfig/tests/test_06.mkconfig
-mkconfig/tests/test_06.reqlibs
-mkconfig/tests/test_06.sh
-mkconfig/tests/test_07.dat
-mkconfig/tests/test_07.mkconfig
-mkconfig/tests/test_07.sh
-mkconfig/runtests.sh			runs regression tests
 po/			internationalization
-po/de.po		
+po/de.po
 po/en.po
 README			Read This
 realloc.c		di source
