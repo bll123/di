@@ -68,38 +68,95 @@ SED = sed
 TEST = test
 
 ###
+# mkconfig
+
+MKCONFIGPATH = ./mkconfig
+
+###
 
 # have to get various environment variables set up.
-all:
-	$(SHELL) ./Build
 
-di-all:	di-prog
-
-di-prog:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
+all:	all-sh
+	
+all-sh:	mkconfig.env
+	. ./mkconfig.env;$(MAKE) config-sh di-prog
+	
+all-perl:	mkconfig.env
+	. ./mkconfig.env;$(MAKE) config-perl di-prog
+	
 
 # for regression testing
 di-all-test:	pretests.done tests.done
 
-pretests.done: runtests.sh
+pretests.done: $(MKCONFIGPATH)/runtests.sh
 	echo "## running pretests"
-	$(SHELL) ./runtests.sh pretests
+	$(SHELL) $(MKCONFIGPATH)/runtests.sh $(MKCONFIGPATH)/tests
 	touch pretests.done
 
-tests.done: runtests.sh
+tests.done: $(MKCONFIGPATH)/runtests.sh
 	echo "## running tests"
-	$(SHELL) ./runtests.sh tests
+	$(SHELL) $(MKCONFIGPATH)/runtests.sh tests
 	touch tests.done
 
-config.h:	features/cflags.sh mkconfig.pl mkconfig.sh features/mkconfig.dat
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	$(SHELL) ./Build config.h
+####
 
-wconfig.h:	config.win
+mkconfig.env:	$(MKCONFIGPATH)/environment.sh \
+		features/env.dat
+	@-$(RM) -f mkconfig.env tests.done
+	$(MKCONFIGPATH)/environment.sh features/env.dat
+
+config-perl:	mkconfig.env \
+		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	. ./mkconfig.env;$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
+
+config-sh:	mkconfig.env \
+		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	. ./mkconfig.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
+
+config-win:	config.win
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	$(CP) -f config.win config.h
 
+####
+
+current-files:
+	@-$(RM) -f features/* > /dev/null 2>&1
+	@$(CP) -f features.base/*.sh features.base/*.dat features
+	@-$(RM) -f po/* > /dev/null 2>&1
+	@$(CP) -f po.base/*.po po
+	@-$(RM) -f tests/* > /dev/null 2>&1
+	@$(CP) -f tests.base/*.sh tests 
+
+tar:	LICENSE MANIFEST Makefile README \
+		config.bsd43.cc config.bsd43.gcc config.win \
+		di.1 di.c di.h di.spec dimntopt.h \
+		didiskutil.c digetentries.c digetinfo.c realloc.c \
+		strdup.c strstr.c trimchar.c features getopt.c hasnls.c \
+		po strstr.c strdup.c tests version.h \
+		$(MKCONFIGPATH)/environment.sh $(MKCONFIGPATH)/env.units \
+		$(MKCONFIGPATH)/mkconfig.pl $(MKCONFIGPATH)/mkconfig.sh \
+		$(MKCONFIGPATH)/mkconfig.units $(MKCONFIGPATH)/runtests.sh \
+		$(MKCONFIGPATH)/shellfuncs.sh $(MKCONFIGPATH)/tests
+	$(MAKE) -f Makefile current-files
+	cd mkconfig;$(MAKE) -f Makefile current-files
+	$(SHELL) mktar.sh $?
+
+testrpmbuild:
+	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
+	$(MKDIR) -p ./rpmbuild/SOURCES
+	$(MKDIR) -p ./rpmbuild/BUILD
+	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
+	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
+	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
+	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
+	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
+
+####
+
 # This was tested using vc++ 5.0.
-windows:	wconfig.h
+windows:	config-win
 	$(MAKE) -f Makefile \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
@@ -107,26 +164,26 @@ windows:	wconfig.h
 		LDFLAGS="-nologo -O2" $(PROG).exe
 
 # This was tested using cygwin
-windows-gcc:	wconfig.h
+windows-gcc:	config-win
 	$(MAKE) -f Makefile \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-g -O2" $(PROG).exe
 
-os2-gcc:
+os2-gcc:	config-perl
 	$(MAKE) -f Makefile \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
 
-####################
+####
 
 clean:
 	-$(RM) -rf $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
-		*.o *.obj hasnls$(EXE_EXT) mkconfig.log \
-		tests.done _tmp_mkconfig \
+		*.o *.obj hasnls$(EXE_EXT) mkconfig.env mkconfig.log \
+		mkconfig_env.log tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
 
 distclean:
@@ -137,6 +194,8 @@ distclean:
 
 realclean:
 	$(MAKE) -f Makefile distclean
+
+####
 
 install:	install-prog install-man
 
@@ -187,42 +246,16 @@ installperms:
 	$(CHGRP) $(GROUP) $(TARGET)
 	$(CHMOD) $(INSTPERM) $(TARGET)
 
-###
+####
 
-current-files:
-	@-$(RM) -f features/* > /dev/null 2>&1
-	@-$(RM) -f po/* > /dev/null 2>&1
-	@-$(RM) -f tests/* > /dev/null 2>&1
-	@-$(RM) -f pretests/* > /dev/null 2>&1
-	@-$(CP) -f po.base/*.po po > /dev/null 2>&1
-	@-$(CP) -f features.base/*.sh features.base/*.dat features \
-		> /dev/null 2>&1
-	@-$(CP) -f pretests.base/* pretests > /dev/null 2>&1
-	@-$(CP) -f tests.base/* tests > /dev/null 2>&1
-	@-$(CP) -f mkconfig.units.base/* mkconfig.units > /dev/null 2>&1
+di-prog:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
-tar:	Build LICENSE MANIFEST \
-		Makefile README config.bsd43.cc config.bsd43.gcc config.win \
-		di.1 di.c di.h di.spec \
-		dimntopt.h didiskutil.c digetentries.c \
-		digetinfo.c realloc.c strdup.c strstr.c trimchar.c \
-		features getopt.c hasnls.c \
-		mkconfig.pl mkconfig.sh mkconfig.units pretests po \
-		runtests.sh strdup.c strstr.c tests version.h
-	$(MAKE) -f Makefile current-files
-	$(SHELL) mktar.sh $?
+config.h:	mkconfig.env $(MKCONFIGPATH)/mkconfig.pl \
+		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	. ./mkconfig.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 
-testrpmbuild:
-	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
-	$(MKDIR) -p ./rpmbuild/SOURCES
-	$(MKDIR) -p ./rpmbuild/BUILD
-	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
-	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
-	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
-	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
-	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
-
-###
+####
 
 $(PROG)$(EXE_EXT):	di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
@@ -274,5 +307,3 @@ strstr$(OBJ_EXT):	strstr.c config.h di.h
 
 trimchar$(OBJ_EXT):	trimchar.c config.h di.h
 	$(CC) -c $(CFLAGS) trimchar.c
-
-
