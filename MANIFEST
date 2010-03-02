@@ -1,7 +1,6 @@
-Build			Build script
 config.bsd43.cc		config.h for bsd43
 config.bsd43.gcc	config.h for bsd43
-config.win		sample config.h for windows
+config.win		config.h for windows
 di.1			di Manual Page
 di.c			di source
 didiskutil.c		di source
@@ -11,59 +10,66 @@ dimntopt.h		di source
 di.h			di source
 di.spec			rpmspec file
 features/
-features/cflags.sh	cflags configuration
+features/env.dat	environment configuration
 features/mkconfig.dat	mkconfig configuration
-features/obj_ext.sh	obj extension test
 features/turnoffnls.sh	turn off all NLS features in config.h
 getopt.c		getopt source (from Cnews)
 hasnls.c		checks for NLS support.
 LICENSE			License
 Makefile		Main Makefile
 MANIFEST		MANIFEST
-mkconfig.pl		perl config program
-mkconfig.sh		shell config program
-mkconfig.units/		test units for mkconfig.sh
-mkconfig.units/include-malloc.sh
-mkconfig.units/include-string.sh
-mkconfig.units/include-time.sh
-mkconfig.units/lang-c.sh
-mkconfig.units/setmntent-args.sh
-mkconfig.units/statfs-args.sh
-pretests/		regression tests - pre test directory
-pretests/test_01.sh	test 1
-pretests/test_02.sh	test 2
-pretests/test_03.sh	test 3
-pretests/test_04.config	test 4
-pretests/test_04.dat	test 4
-pretests/test_04.mkconfig	test 4
-pretests/test_04.sh	test 4
-pretests/test_05.config	test 5
-pretests/test_05.dat	test 5
-pretests/test_05.mkconfig	test 5
-pretests/test_05.reqlibs	test 5
-pretests/test_05.sh	test 5
-pretests/test_06.config	test 6
-pretests/test_06.dat	test 6
-pretests/test_06.mkconfig	test 6
-pretests/test_06.reqlibs	test 6
-pretests/test_06.sh	test 6
-po/
-po/de.po		internationalization
-po/en.po		internationalization
+mkconfig/environment.sh		environment setup program
+mkconfig/env.units/		units for environment.sh
+mkconfig/env.units/cflags.sh
+mkconfig/env.units/object_extension.sh
+mkconfig/mkconfig.pl		perl config program
+mkconfig/mkconfig.sh		shell config program
+mkconfig/mkconfig.units/	units for mkconfig.sh
+mkconfig/mkconfig.units/include-malloc.sh
+mkconfig/mkconfig.units/include-string.sh
+mkconfig/mkconfig.units/include-time.sh
+mkconfig/mkconfig.units/lang-c.sh
+mkconfig/mkconfig.units/setmntent-args.sh
+mkconfig/mkconfig.units/statfs-args.sh
+mkconfig/shellfuncs.sh		mkconfig functions
+mkconfig/tests/			regression tests for mkconfig
+mkconfig/tests/test_01.sh
+mkconfig/tests/test_02.sh
+mkconfig/tests/test_03.sh
+mkconfig/tests/test_04.config
+mkconfig/tests/test_04.dat
+mkconfig/tests/test_04.mkconfig
+mkconfig/tests/test_04.sh
+mkconfig/tests/test_05.config
+mkconfig/tests/test_05.dat
+mkconfig/tests/test_05.mkconfig
+mkconfig/tests/test_05.reqlibs
+mkconfig/tests/test_05.sh
+mkconfig/tests/test_06.config
+mkconfig/tests/test_06.dat
+mkconfig/tests/test_06.mkconfig
+mkconfig/tests/test_06.reqlibs
+mkconfig/tests/test_06.sh
+mkconfig/tests/test_07.dat
+mkconfig/tests/test_07.mkconfig
+mkconfig/tests/test_07.sh
+mkconfig/runtests.sh			runs regression tests
+po/			internationalization
+po/de.po		
+po/en.po
 README			Read This
 realloc.c		di source
-runtests.sh		runs regression tests
-tests/			regression tests - post test directory
-tests/test_01.sh	test 1
-tests/test_02.sh	test 2
-tests/test_03.sh	test 3
-tests/test_04.sh	test 4
-tests/test_05.sh	test 5
-tests/test_06.sh	test 6
-tests/test_07.sh	test 7
-tests/test_08.sh	test 8
-tests/test_09.sh	test 9
-tests/test_10.sh	test 10
+tests/			regression tests for di
+tests/test_01.sh
+tests/test_02.sh
+tests/test_03.sh
+tests/test_04.sh
+tests/test_05.sh
+tests/test_06.sh
+tests/test_07.sh
+tests/test_08.sh
+tests/test_09.sh
+tests/test_10.sh
 strdup.c		di source
 strstr.c		di source
 trimchar.c		di source
