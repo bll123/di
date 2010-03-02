@@ -78,11 +78,11 @@ MKCONFIGPATH = ./mkconfig
 
 all:	all-sh
 	
-all-sh:	mkconfig.env
-	. ./mkconfig.env;$(MAKE) config-sh di-prog
+all-sh:	di.env
+	. ./di.env;$(MAKE) config-sh di-prog
 	
-all-perl:	mkconfig.env
-	. ./mkconfig.env;$(MAKE) config-perl di-prog
+all-perl:	di.env
+	. ./di.env;$(MAKE) config-perl di-prog
 	
 
 # for regression testing
@@ -100,20 +100,20 @@ tests.done: $(MKCONFIGPATH)/runtests.sh
 
 ####
 
-mkconfig.env:	$(MKCONFIGPATH)/environment.sh \
+di.env:	$(MKCONFIGPATH)/environment.sh \
 		features/env.dat
-	@-$(RM) -f mkconfig.env tests.done
+	@-$(RM) -f di.env tests.done
 	$(MKCONFIGPATH)/environment.sh features/env.dat
 
-config-perl:	mkconfig.env \
+config-perl:	di.env \
 		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	. ./mkconfig.env;$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
+	. ./di.env;$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
 
-config-sh:	mkconfig.env \
+config-sh:	di.env \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	. ./mkconfig.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
+	. ./di.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 
 config-win:	config.win
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
@@ -184,7 +184,7 @@ os2-gcc:	config-perl
 
 clean:
 	-$(RM) -rf $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
-		*.o *.obj hasnls$(EXE_EXT) mkconfig.env mkconfig.log \
+		*.o *.obj hasnls$(EXE_EXT) di.env mkconfig.log \
 		mkconfig_env.log tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
 
@@ -252,10 +252,10 @@ installperms:
 
 di-prog:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
-config.h:	mkconfig.env $(MKCONFIGPATH)/mkconfig.pl \
+config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	. ./mkconfig.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
+	. ./di.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 
 ####
 
