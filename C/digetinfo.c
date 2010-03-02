@@ -164,14 +164,20 @@ di_getDiskInfo (diskInfo, diCount)
                             (long) statBuf.f_frsize);
 # if _siz_long_long >= 8
                     printf ("\tblocks: tot:%llu free:%lld avail:%llu\n",
-                           statBuf.f_blocks, statBuf.f_bfree, statBuf.f_bavail);
+                        (long long) statBuf.f_blocks, 
+                        (long long) statBuf.f_bfree, 
+                        (long long) statBuf.f_bavail);
                     printf ("\tinodes: tot:%llu free:%llu avail:%llu\n",
-                            statBuf.f_files, statBuf.f_ffree, statBuf.f_favail);
+                        (long long) statBuf.f_files, 
+                        (long long) statBuf.f_ffree, 
+                        (long long) statBuf.f_favail);
 # else
                     printf ("\tblocks: tot:%lu free:%lu avail:%lu\n",
-                           statBuf.f_blocks, statBuf.f_bfree, statBuf.f_bavail);
+                        (long) statBuf.f_blocks, (long) statBuf.f_bfree, 
+                        (long) statBuf.f_bavail);
                     printf ("\tinodes: tot:%lu free:%lu avail:%lu\n",
-                            statBuf.f_files, statBuf.f_ffree, statBuf.f_favail);
+                        (long) statBuf.f_files, (long) statBuf.f_ffree, 
+                        (long) statBuf.f_favail);
 # endif
                 }
             }
