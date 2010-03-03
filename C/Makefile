@@ -8,10 +8,8 @@
 
 SHELL = /bin/sh
 OBJ_EXT = .o
-EXE_EXT =
+EXE_EXT = 
 CC = cc
-CFLAGS = -O
-LDFLAGS =
 MAKE = make
 
 #
@@ -24,7 +22,6 @@ CHOWN = chown
 CP = cp
 LN = ln
 MKDIR = mkdir
-MSGFMT = msgfmt
 MV = mv
 RM = rm
 RPMBUILD = rpmbuild
@@ -76,17 +73,19 @@ MKCONFIGPATH = ./mkconfig
 
 # have to get various environment variables set up.
 
-all:	all-sh
+all:	
+	$(MAKE) -e all-sh
 	
 all-sh:	di.env
-	. ./di.env;$(MAKE) config-sh di-prog
+	. ./di.env;$(MAKE) -e config-sh di-prog
 	
 all-perl:	di.env
-	. ./di.env;$(MAKE) config-perl di-prog
+	. ./di.env;$(MAKE) -e config-perl di-prog
 	
 
 # for regression testing
-di-all-test:	pretests.done tests.done
+di-all-test:	
+	$(MAKE) -e pretests.done tests.done
 
 pretests.done: $(MKCONFIGPATH)/runtests.sh
 	echo "## running pretests"
@@ -100,18 +99,15 @@ tests.done: $(MKCONFIGPATH)/runtests.sh
 
 ####
 
-di.env:	$(MKCONFIGPATH)/environment.sh \
-		features/env.dat
+di.env:	$(MKCONFIGPATH)/environment.sh features/env.dat
 	@-$(RM) -f di.env tests.done
 	CC=$(CC) $(MKCONFIGPATH)/environment.sh features/env.dat
 
-config-perl:	di.env \
-		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
+config-perl:	di.env $(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	. ./di.env;$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
 
-config-sh:	di.env \
-		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
+config-sh:	di.env $(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	. ./di.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 
@@ -141,8 +137,8 @@ tar:	LICENSE MANIFEST Makefile README \
 		$(MKCONFIGPATH)/shellfuncs.sh $(MKCONFIGPATH)/tests \
 		$(MKCONFIGPATH)/README $(MKCONFIGPATH)/MANIFEST \
 		$(MKCONFIGPATH)/LICENSE
-	$(MAKE) -f Makefile current-files
-	cd mkconfig;$(MAKE) -f Makefile current-files
+	$(MAKE) -e current-files
+	cd mkconfig;$(MAKE) -e current-files
 	$(SHELL) mktar.sh $?
 
 testrpmbuild:
@@ -159,7 +155,7 @@ testrpmbuild:
 
 # This was tested using vc++ 5.0.
 windows:	config-win
-	$(MAKE) -f Makefile \
+	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
@@ -167,14 +163,15 @@ windows:	config-win
 
 # This was tested using cygwin
 windows-gcc:	config-win
-	$(MAKE) -f Makefile \
+	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-g -O2" $(PROG).exe
 
-os2-gcc:	config-perl
-	$(MAKE) -f Makefile \
+os2-gcc:	
+	$(MAKE) -e config-perl
+	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
@@ -189,25 +186,29 @@ clean:
 		>/dev/null 2>&1
 
 distclean:
-	$(MAKE) -f Makefile clean
+	$(MAKE) clean
 	-$(RM) -rf config.h mkconfig.cache mkconfig.vars object_ext \
 		pretests.done reqlibs.txt test_di \
 		>/dev/null 2>&1
 
 realclean:
-	$(MAKE) -f Makefile distclean
+	$(MAKE) distclean
 
 ####
 
-install:	install-prog install-man
+install:
+	. ./di.env;$(MAKE) -e install-prog install-man
 
-build-po:
-	-(cd po;for i in *.po; do \
+build-po:	di.env
+	-. ./di.env; \
+		echo $(XMSGFMT); env | sort ; \
+		(cd po;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
-		$(MSGFMT) -o $$j.mo $$i; \
+		$(XMSGFMT) -o $$j.mo $$i; \
 	done)
 
-install-po: build-po
+install-po: 
+	. ./di.env; $(MAKE) -e build-po
 	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
 	-(cd po;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
@@ -223,7 +224,7 @@ check-nls:	hasnls$(EXE_EXT)
 	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
 	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 
-install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
+install-prog:	di.env $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	-$(TEST) -d $(INSTALL_DIR) || $(MKDIR) $(INSTALL_DIR)
 	-$(TEST) -d $(INSTALL_BIN_DIR) || $(MKDIR) $(INSTALL_BIN_DIR)
 	-$(TEST) -f $(TARGET) && $(MV) -f $(TARGET) $(TARGET).old
@@ -234,8 +235,8 @@ install-prog:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
 	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 	-./hasnls$(EXE_EXT) && \
-		$(MAKE) INST_LOCALEDIR="$(INST_LOCALEDIR)"\
-		MSGFMT="$(MSGFMT)" install-po
+		. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)"\
+		XMSGFMT="$(XMSGFMT)" install-po
 
 install-man:
 	-$(TEST) -d $(MANPATH) || $(MKDIR) -p $(MANPATH)
