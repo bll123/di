@@ -65,27 +65,30 @@ MAN_TARGET = $(PROG).1
 MANPERM = 644
 
 ###
-# mkconfig
+# mkconfig variables
 
 MKCONFIGPATH = ./mkconfig
+MKCONFIG_TYPE = sh
 
 ###
+# main
 
 # have to get various environment variables set up.
 
-all:	
-	$(MAKE) -e all-sh
+all:	all-sh
 	
 all-sh:	di.env
-	. ./di.env;$(MAKE) -e config-sh di-prog
+	. ./di.env;$(MAKE) -e di-programs
 	
 all-perl:	di.env
-	. ./di.env;$(MAKE) -e config-perl di-prog
+	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
 	
 
+###
+# testing
+
 # for regression testing
-di-all-test:	
-	$(MAKE) -e pretests.done tests.done
+di-all-test:	pretests.done tests.done
 
 pretests.done: $(MKCONFIGPATH)/runtests.sh
 	echo "## running pretests"
@@ -97,25 +100,25 @@ tests.done: $(MKCONFIGPATH)/runtests.sh
 	CC=$(CC) $(SHELL) $(MKCONFIGPATH)/runtests.sh tests
 	touch tests.done
 
-####
+testrpmbuild:
+	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
+	$(MKDIR) -p ./rpmbuild/SOURCES
+	$(MKDIR) -p ./rpmbuild/BUILD
+	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
+	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
+	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
+	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
+	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
+
+###
+# environment
 
 di.env:	$(MKCONFIGPATH)/environment.sh features/env.dat
 	@-$(RM) -f di.env tests.done
 	CC=$(CC) $(MKCONFIGPATH)/environment.sh features/env.dat
 
-config-perl:	di.env $(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	. ./di.env;$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
-
-config-sh:	di.env $(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	. ./di.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
-
-config-win:	config.win
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	$(CP) -f config.win config.h
-
-####
+###
+# packaging
 
 current-files:
 	@-$(RM) -f features/* > /dev/null 2>&1
@@ -141,17 +144,8 @@ tar:	LICENSE MANIFEST Makefile README \
 	cd mkconfig;$(MAKE) -e current-files
 	$(SHELL) mktar.sh $?
 
-testrpmbuild:
-	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
-	$(MKDIR) -p ./rpmbuild/SOURCES
-	$(MKDIR) -p ./rpmbuild/BUILD
-	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
-	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
-	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
-	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
-	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
-
-####
+###
+# specific builds
 
 # This was tested using vc++ 5.0.
 windows:	config-win
@@ -170,18 +164,18 @@ windows-gcc:	config-win
 		LDFLAGS="-g -O2" $(PROG).exe
 
 os2-gcc:	
-	$(MAKE) -e config-perl
-	$(MAKE) \
+	$(MAKE) MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
 
-####
+###
+# cleaning
 
 clean:
-	-$(RM) -rf $(PROG)$(EXE_EXT) $(MPROG)$(EXE_EXT) \
-		*.o *.obj hasnls$(EXE_EXT) di.env mkconfig.log \
+	-$(RM) -rf $(PROG) $(MPROG) $(PROG).exe $(MPROG).exe \
+		*.o *.obj hasnls hasnls.exe di.env mkconfig.log \
 		mkconfig_env.log tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
 
@@ -194,9 +188,10 @@ distclean:
 realclean:
 	$(MAKE) distclean
 
-####
+###
+# installation
 
-install:
+install:	di-programs
 	. ./di.env; \
 		$(MAKE) -e install-prog install-man
 
@@ -207,8 +202,7 @@ build-po:	di.env
 		$(XMSGFMT) -o $$j.mo $$i; \
 	done)
 
-install-po: 
-	. ./di.env; $(MAKE) -e build-po
+install-po: 	build.po
 	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
 	-(cd po;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
@@ -219,10 +213,6 @@ install-po:
 		$(CP) -f $$j.mo $(INST_LOCALEDIR)/$$j/LC_MESSAGES/di.mo; \
 		$(RM) -f $$j.mo; \
 		done)
-
-check-nls:	hasnls$(EXE_EXT)
-	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
-	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 
 install-prog:	di.env $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 	-$(TEST) -d $(INSTALL_DIR) || $(MKDIR) $(INSTALL_DIR)
@@ -249,16 +239,28 @@ installperms:
 	$(CHGRP) $(GROUP) $(TARGET)
 	$(CHMOD) $(INSTPERM) $(TARGET)
 
-####
+###
+# programs
 
-di-prog:	config.h $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
+di-programs:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
+
+###
+# configuration file
+
+config-win:	config.win
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	$(CP) -f config.win config.h
 
 config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	. ./di.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
+	$(TEST) $(MKCONFIG_TYPE) = perl || \
+		(. ./di.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat)
+	$(TEST) $(MKCONFIG_TYPE) = sh || \
+		(. ./di.env;$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat)
 
-####
+###
+# executables
 
 $(PROG)$(EXE_EXT):	di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
@@ -280,6 +282,7 @@ hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
 		hasnls$(OBJ_EXT)
 
 ###
+# objects
 
 di$(OBJ_EXT):		di.c config.h di.h version.h
 	$(CC) -c $(CFLAGS) $(OTHERFLAGS) di.c
