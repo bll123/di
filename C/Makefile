@@ -191,7 +191,7 @@ realclean:
 ###
 # installation
 
-install:	di-programs
+install:
 	. ./di.env; \
 		$(MAKE) -e install-prog install-man
 
@@ -202,7 +202,7 @@ build-po:	di.env
 		$(XMSGFMT) -o $$j.mo $$i; \
 	done)
 
-install-po: 	build.po
+install-po: 	build-po
 	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
 	-(cd po;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
@@ -214,7 +214,7 @@ install-po: 	build.po
 		$(RM) -f $$j.mo; \
 		done)
 
-install-prog:	di.env $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
+install-prog:	di.env di-programs
 	-$(TEST) -d $(INSTALL_DIR) || $(MKDIR) $(INSTALL_DIR)
 	-$(TEST) -d $(INSTALL_BIN_DIR) || $(MKDIR) $(INSTALL_BIN_DIR)
 	-$(TEST) -f $(TARGET) && $(MV) -f $(TARGET) $(TARGET).old
