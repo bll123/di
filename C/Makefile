@@ -59,9 +59,9 @@ INSTPERM = 4111   # install suid if your system has a mount table only root
 #
 # simple man page installation
 #
-MANPATH = $(INSTALL_DIR)/share/man
-MANDIR = $(MANPATH)/man1
-MANTARGET = $(PROG).1
+DI_MANINSTDIR = $(INSTALL_DIR)/share/man
+DI_MANDIR = $(DI_MANINSTDIR)/man1
+MAN_TARGET = $(PROG).1
 MANPERM = 644
 
 ###
@@ -197,11 +197,11 @@ realclean:
 ####
 
 install:
-	. ./di.env;$(MAKE) -e install-prog install-man
+	. ./di.env; \
+		$(MAKE) -e install-prog install-man
 
 build-po:	di.env
 	-. ./di.env; \
-		echo $(XMSGFMT); env | sort ; \
 		(cd po;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
 		$(XMSGFMT) -o $$j.mo $$i; \
@@ -239,10 +239,10 @@ install-prog:	di.env $(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 		XMSGFMT="$(XMSGFMT)" install-po
 
 install-man:
-	-$(TEST) -d $(MANPATH) || $(MKDIR) -p $(MANPATH)
-	-$(TEST) -d $(MANDIR) || $(MKDIR) -p $(MANDIR)
-	$(CP) -f di.1 $(MANDIR)/$(MANTARGET)
-	$(CHMOD) $(MANPERM) $(MANDIR)/$(MANTARGET)
+	-$(TEST) -d $(DI_MANINSTDIR) || $(MKDIR) -p $(DI_MANINSTDIR)
+	-$(TEST) -d $(DI_MANDIR) || $(MKDIR) -p $(DI_MANDIR)
+	$(CP) -f di.1 $(DI_MANDIR)/$(MAN_TARGET)
+	$(CHMOD) $(MANPERM) $(DI_MANDIR)/$(MAN_TARGET)
 
 installperms:
 	$(CHOWN) $(USER) $(TARGET)
