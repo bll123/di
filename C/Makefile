@@ -90,12 +90,12 @@ di-all-test:	pretests.done tests.done
 
 pretests.done: $(MKCONFIGPATH)/runtests.sh
 	echo "## running pretests"
-	$(SHELL) $(MKCONFIGPATH)/runtests.sh $(MKCONFIGPATH)/tests
+	CC=$(CC) $(SHELL) $(MKCONFIGPATH)/runtests.sh $(MKCONFIGPATH)/tests
 	touch pretests.done
 
 tests.done: $(MKCONFIGPATH)/runtests.sh
 	echo "## running tests"
-	$(SHELL) $(MKCONFIGPATH)/runtests.sh tests
+	CC=$(CC) $(SHELL) $(MKCONFIGPATH)/runtests.sh tests
 	touch tests.done
 
 ####
@@ -103,7 +103,7 @@ tests.done: $(MKCONFIGPATH)/runtests.sh
 di.env:	$(MKCONFIGPATH)/environment.sh \
 		features/env.dat
 	@-$(RM) -f di.env tests.done
-	$(MKCONFIGPATH)/environment.sh features/env.dat
+	CC=$(CC) $(MKCONFIGPATH)/environment.sh features/env.dat
 
 config-perl:	di.env \
 		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat
