@@ -23,11 +23,11 @@ DI_VERSION=`grep DI_VERSION version.h | sed  -e 's/"$//' -e 's/.*"//'`
 
 grc=0
 if [ -f di-${DI_VERSION}.tar.gz ]; then
-  make DI_DIR="." DI_VERSION=${DI_VERSION} testrpmbuild
+  make -e DI_DIR="." DI_VERSION=${DI_VERSION} testrpmbuild
   rc=$?
   if [ $rc -ne 0 ]; then grc=$rc; fi
 elif [ -f ../di-${DI_VERSION}.tar.gz ]; then
-  make DI_DIR=".." DI_VERSION=${DI_VERSION} testrpmbuild
+  make -e DI_DIR=".." DI_VERSION=${DI_VERSION} testrpmbuild
   rc=$?
   if [ $rc -ne 0 ]; then grc=$rc; fi
 else
