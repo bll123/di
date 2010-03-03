@@ -9,12 +9,12 @@ cd ..
 grc=0
 make distclean
 rm -f config.h.sh config.h.pl cache.pl cache.sh vars.pl vars.sh
-make -e config-sh
+make -e config.h
 mv config.h config.h.sh
 cat mkconfig.cache | sort > cache.sh
 cat mkconfig.vars > vars.sh
 rm -f mkconfig.cache
-make -e config-perl
+make -e MKCONFIG_TYPE=perl config.h
 mv config.h config.h.pl
 cat mkconfig.cache | sort > cache.pl
 cat mkconfig.vars > vars.pl
