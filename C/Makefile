@@ -153,7 +153,7 @@ windows:	config-win
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
-		LDFLAGS="-nologo -O2" $(PROG).exe
+		LDFLAGS="-nologo -O2" di-programs
 
 # This was tested using cygwin
 windows-gcc:	config-win
@@ -161,7 +161,7 @@ windows-gcc:	config-win
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
-		LDFLAGS="-g -O2" $(PROG).exe
+		LDFLAGS="-g -O2" di-programs
 
 os2-gcc:	
 	$(MAKE) MKCONFIG_TYPE=perl \
@@ -169,6 +169,18 @@ os2-gcc:
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
+
+bsd43-cc:
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	$(CP) -f config.bsd43.cc config.h
+	$(MAKE) SHELL=/usr/local/bin/bash2 \
+		CC=cc LD=cc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
+
+bsd43-gcc:
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	$(CP) -f config.bsd43.gcc config.h
+	$(MAKE) SHELL=/usr/local/bin/bash2 \
+		CC=gcc LD=gcc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
 
 ###
 # cleaning
