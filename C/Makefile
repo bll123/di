@@ -203,7 +203,7 @@ realclean:
 ###
 # installation
 
-install:
+install:	di.env
 	. ./di.env; \
 		$(MAKE) -e install-prog install-man
 
