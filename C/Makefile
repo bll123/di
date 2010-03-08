@@ -128,21 +128,11 @@ current-files:
 	@-$(RM) -f tests/* > /dev/null 2>&1
 	@$(CP) -f tests.base/*.sh tests 
 
-tar:	LICENSE MANIFEST Makefile README \
-		config.bsd43.cc config.bsd43.gcc config.win \
-		di.1 di.c di.h di.spec dimntopt.h \
-		didiskutil.c digetentries.c digetinfo.c realloc.c \
-		strdup.c strstr.c trimchar.c features getopt.c hasnls.c \
-		po strstr.c strdup.c tests version.h \
-		$(MKCONFIGPATH)/environment.sh $(MKCONFIGPATH)/env.units \
-		$(MKCONFIGPATH)/mkconfig.pl $(MKCONFIGPATH)/mkconfig.sh \
-		$(MKCONFIGPATH)/mkconfig.units $(MKCONFIGPATH)/runtests.sh \
-		$(MKCONFIGPATH)/shellfuncs.sh $(MKCONFIGPATH)/tests \
-		$(MKCONFIGPATH)/README $(MKCONFIGPATH)/MANIFEST \
-		$(MKCONFIGPATH)/LICENSE
-	$(MAKE) -e current-files
-	cd mkconfig;$(MAKE) -e current-files
-	$(SHELL) mktar.sh $?
+tar:	
+	$(MAKE) current-files
+	cd mkconfig;$(MAKE) current-files
+	cd mkconfig;make tar
+	$(SHELL) mktar.sh
 
 ###
 # specific builds
