@@ -18,15 +18,15 @@ make -e MKCONFIG_TYPE=perl config.h
 mv config.h config.h.pl
 cat mkconfig.cache | sort > cache.pl
 cat mkconfig.vars > vars.pl
-echo "##== diff config.h"
+echo "##== diff config.h.sh config.h.pl"
 diff -w config.h.sh config.h.pl
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
-echo "##== diff cache"
+echo "##== diff cache.sh cache.pl"
 diff -w cache.sh cache.pl
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
-echo "##== diff vars"
+echo "##== diff vars.sh vars.pl"
 diff -w vars.sh vars.pl
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
