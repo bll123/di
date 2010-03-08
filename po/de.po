@@ -126,11 +126,11 @@ msgstr "Zettas"
 msgid  "Zebis"
 msgstr "Zebis"
 #, c-format
-msgid  "di ver %s    Default Format: %s\n"
-msgstr "di ver %s    Standardformat: %s\n"
+msgid  "di version %s    Default Format: %s\n"
+msgstr "di version %s    Standardformat: %s\n"
 #, c-format
-msgid  "di ver %s Default Format: %s\n"
-msgstr "di ver %s Standardformat: %s\n"
+msgid  "di version %s Default Format: %s\n"
+msgstr "di version %s Standardformat: %s\n"
 #, no-c-format
 msgid  "fs Type"
 msgstr "D.typ"

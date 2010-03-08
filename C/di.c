@@ -625,7 +625,7 @@ main (argc, argv)
 
     if (debug > 0)
     {
-        printf ("di ver %s\n", DI_VERSION);
+        printf ("di version %s\n", DI_VERSION);
     }
 
     if (debug > 5)
@@ -1328,7 +1328,7 @@ printTitle (diopts)
 
     if ((diopts->flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
     {
-        printf (DI_GT("di ver %s Default Format: %s\n"),
+        printf (DI_GT("di version %s Default Format: %s\n"),
                 DI_VERSION, DI_DEFAULT_FORMAT);
     }
 
@@ -2243,7 +2243,7 @@ usage (void)
 usage ()
 #endif
 {
-    printf (DI_GT("di ver %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
+    printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
             /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
     printf (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
     printf (DI_GT("       [-I include-fstyp-list] [file [...]]\n"));
