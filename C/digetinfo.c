@@ -121,7 +121,7 @@ di_getDiskInfo (diskInfo, diCount)
     int             i;
     Statvfs_t       statBuf;
 
-    if (debug > 0) { printf ("# lib:getDiskInfo: statvfs\n"); }
+    if (debug > 0) { printf ("# getDiskInfo: statvfs\n"); }
     for (i = 0; i < *diCount; ++i)
     {
         diptr = *diskInfo + i;
@@ -164,19 +164,19 @@ di_getDiskInfo (diskInfo, diCount)
                             (long) statBuf.f_frsize);
 # if _siz_long_long >= 8
                     printf ("\tblocks: tot:%llu free:%lld avail:%llu\n",
-                        (long long) statBuf.f_blocks, 
-                        (long long) statBuf.f_bfree, 
+                        (long long) statBuf.f_blocks,
+                        (long long) statBuf.f_bfree,
                         (long long) statBuf.f_bavail);
                     printf ("\tinodes: tot:%llu free:%llu avail:%llu\n",
-                        (long long) statBuf.f_files, 
-                        (long long) statBuf.f_ffree, 
+                        (long long) statBuf.f_files,
+                        (long long) statBuf.f_ffree,
                         (long long) statBuf.f_favail);
 # else
                     printf ("\tblocks: tot:%lu free:%lu avail:%lu\n",
-                        (long) statBuf.f_blocks, (long) statBuf.f_bfree, 
+                        (long) statBuf.f_blocks, (long) statBuf.f_bfree,
                         (long) statBuf.f_bavail);
                     printf ("\tinodes: tot:%lu free:%lu avail:%lu\n",
-                        (long) statBuf.f_files, (long) statBuf.f_ffree, 
+                        (long) statBuf.f_files, (long) statBuf.f_ffree,
                         (long) statBuf.f_favail);
 # endif
                 }
@@ -230,7 +230,7 @@ di_getDiskInfo (diskInfo, diCount)
     int             i;
     struct statfs   statBuf;
 
-    if (debug > 0) { printf ("# lib:getDiskInfo: sysv-statfs 4arg\n"); }
+    if (debug > 0) { printf ("# getDiskInfo: sysv-statfs 4arg\n"); }
     for (i = 0; i < *diCount; ++i)
     {
         diptr = *diskInfo + i;
@@ -321,7 +321,7 @@ di_getDiskInfo (diskInfo, diCount)
     int             i;
     struct statfs   statBuf;
 
-    if (debug > 0) { printf ("# lib:getDiskInfo: bsd-statfs 2/3arg\n"); }
+    if (debug > 0) { printf ("# getDiskInfo: bsd-statfs 2/3arg\n"); }
     for (i = 0; i < *diCount; ++i)
     {
         diptr = *diskInfo + i;
@@ -398,7 +398,7 @@ di_getDiskInfo (diskInfo, diCount)
     DWORD               fsFlags;
 
 
-    if (debug > 0) { printf ("# lib:getDiskInfo: GetVolumeInformation\n"); }
+    if (debug > 0) { printf ("# getDiskInfo: GetVolumeInformation\n"); }
     for (i = 0; i < *diCount; ++i)
     {
         diptr = *diskInfo + i;
@@ -512,7 +512,7 @@ di_getDiskInfo (diskInfo, diCount)
     int *diCount;
 #  endif
 {
-    if (debug > 0) { printf ("# lib:getDiskInfo: empty\n"); }
+    if (debug > 0) { printf ("# getDiskInfo: empty\n"); }
     return;
 }
 #endif
