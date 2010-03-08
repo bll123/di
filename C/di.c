@@ -510,6 +510,21 @@ main (argc, argv)
     }
 
     processArgs (argc, argv, &diData, dbsstr);
+    if (debug > 0 && (ptr = getenv ("DI_ARGS")) != (char *) NULL)
+    {
+        printf ("# DI_ARGS:%s\n", ptr);
+    }
+    if (debug > 0)
+    {
+        int i;
+        printf ("# ARGS:");
+        for (i = 0; i < argc; ++i)
+        {
+          printf (" %s", argv[i]);
+        }
+        printf ("\n");
+        printf ("# blocksize: %s\n", dbsstr);
+    }
 
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
     {
@@ -2521,7 +2536,7 @@ parseList (list, str)
     ocount = list->count;
     list->count += count;
     ncount = list->count;
-    list->list = (char **) Realloc ((char *) list->list,
+    list->list = (char **) _realloc ((char *) list->list,
             list->count * sizeof (char *));
     if (list->list == (char **) NULL)
     {
