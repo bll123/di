@@ -18,6 +18,7 @@ getopt.c		getopt source (from Cnews)
 hasnls.c		checks for NLS support.
 LICENSE			License
 Makefile		Main Makefile
+MANIFEST		This file
 po/			internationalization
 po/de.po
 po/en.po
