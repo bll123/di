@@ -184,7 +184,7 @@ extern char *strstr                 _((const char *, const char *));
  /* trimchar.c */
 extern void trimChar                _((char *, int));
  /* realloc.c */
-extern void *Realloc                _((void *, Size_t));
+extern void *_realloc               _((void *, Size_t));
  /* didiskutil.c */
 extern void di_initDiskInfo _((diDiskInfo_t *));
 extern void di_saveBlockSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t, _fs_size_t));
@@ -219,5 +219,50 @@ extern int getopt _((int, char * const [], const char *));
 #  define DI_GT(args) (args)
 # endif
 #endif
+
+# if _lib_sys_dollar_device_scan && _lib_sys_dollar_getdviw
+
+typedef struct {
+  short   buflen;          /* Length of output buffer */
+  short   itmcode;         /* Item code */
+  void    *buffer;         /* Buffer address */
+  void    *retlen;         /* Return length address */
+} VMS_ITMLST;
+
+#define DVI_IS_STRING 1
+#define DVI_IS_LONGWORD 2
+#define DVI_IS_QUADWORD 3
+#define DVI_IS_WORD 4
+#define DVI_IS_BYTE 5
+#define DVI_IS_VMSDATE 6
+#define DVI_IS_BITMAP 7   /* Each bit in the return value indicates something */
+#define DVI_IS_ENUM 8     /* Each returned value has a name, and we ought to */
+                          /* return the name instead of the value */
+#define DVI_IS_ODD 9      /* A catchall */
+
+
+#define DVI_IS_INPUT (1<<0)
+#define DVI_IS_OUTPUT (1<<1)
+#define DVI_ENT(a, b, c) {#a, DVI$_##a, b, c, DVI_IS_OUTPUT}
+
+typedef struct {
+  char *name;         /* Pointer to the item name */
+  int  syscallValue;  /* Value to use in the getDVI item list */
+  int  bufferLen;     /* Length the return va buf needs to be. (no nul */
+                      /* terminators, so must be careful with the return */
+                      /* values. */
+  int  returnType;    /* Type of data the item returns */
+  int  inOut;         /* Is this an input or an output item? */
+} genericID_t ;
+
+/* Macro to fill in a 'traditional' item-list entry */
+#define init_itemlist(ile, length, code, bufaddr, retlen_addr) \
+{ \
+    (ile)->buflen = (length); \
+    (ile)->itmcode = (code); \
+    (ile)->buffer = (bufaddr); \
+    (ile)->retlen = (retlen_addr) ;}
+
+# endif
 
 #endif /* __INC_DI_H_ */
