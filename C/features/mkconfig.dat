@@ -69,10 +69,15 @@ loadunit statfs-args
 standard
 
 hdr     ctype.h
+hdr     dcdef.h
+hdr     descrip.h
+hdr     dvidef.h
+hdr     dvsdef.h
 hdr     errno.h
 hdr     fcntl.h
 hdr     fshelp.h
 hdr     getopt.h
+hdr     gui/window.h
 hdr     kernel/fs_info.h
 hdr     limits.h
 hdr     libintl.h
@@ -81,10 +86,11 @@ hdr     malloc.h
 hdr     memory.h
 hdr     mntent.h
 hdr     mnttab.h
+hdr     ssdef.h
+hdr     starlet.h
 hdr     storage/Directory.h
 hdr     storage/Entry.h
 hdr     storage/Path.h
-hdr     gui/window.h
 # syllable: broken design, broken header
 hdr     storage/volumes.h gui/window.h
 hdr     string.h
@@ -153,6 +159,10 @@ lib     statfs
 lib     statvfs
 lib     strdup
 lib     strstr
+# VMS
+lib     sys_dollar_device_scan
+# VMS
+lib     sys_dollar_getdviw
 lib     sysfs
 lib     textdomain  -lintl -liconv
 lib     zone_getattr
