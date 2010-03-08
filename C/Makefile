@@ -138,8 +138,10 @@ tar:
 # specific builds
 
 # This was tested using vc++ 5.0.
-windows:	config-win
+windows:
 	@echo ':' > di.env;chmod a+rx di.env
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	$(CP) -f config.win config.h
 	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
@@ -147,8 +149,10 @@ windows:	config-win
 		LDFLAGS="-nologo -O2" di-programs
 
 # This was tested using cygwin
-windows-gcc:	config-win
+windows-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
+	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	$(CP) -f config.win config.h
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
@@ -253,10 +257,6 @@ di-programs:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
 ###
 # configuration file
-
-config-win:	config.win
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	$(CP) -f config.win config.h
 
 config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
