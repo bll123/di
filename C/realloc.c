@@ -19,7 +19,6 @@
 #endif
 
 /*
- * Realloc
  *
  * portable realloc
  * some variants don't accept a null pointer for initial allocation.
@@ -28,9 +27,9 @@
 
 void *
 #if _proto_stdc
-Realloc (void *ptr, Size_t size)
+_realloc (void *ptr, Size_t size)
 #else
-Realloc (ptr, size)
+_realloc (ptr, size)
     void        *ptr;
     Size_t      size;
 #endif
