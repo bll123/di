@@ -516,11 +516,11 @@ main (argc, argv)
     }
     if (debug > 0)
     {
-        int i;
+        int j;
         printf ("# ARGS:");
-        for (i = 0; i < argc; ++i)
+        for (j = 0; j < argc; ++j)
         {
-          printf (" %s", argv[i]);
+          printf (" %s", argv[j]);
         }
         printf ("\n");
         printf ("# blocksize: %s\n", dbsstr);
