@@ -1,13 +1,14 @@
 config.bsd43.cc		config.h for bsd43
 config.bsd43.gcc	config.h for bsd43
+config.vms		config.h for VMS
 config.win		config.h for windows
 di.1			di Manual Page
 di.c			di source
 didiskutil.c		di source
 digetentries.c		di source
 digetinfo.c		di source
-dimntopt.h		di source
 di.h			di source
+dimntopt.h		di source
 di.spec			rpmspec file
 features/
 features/env.dat	environment configuration
@@ -22,6 +23,8 @@ po/de.po
 po/en.po
 README			Read This
 realloc.c		di source
+strdup.c		di source
+strstr.c		di source
 tests/			regression tests for di
 tests/test_01.sh
 tests/test_02.sh
@@ -33,7 +36,5 @@ tests/test_07.sh
 tests/test_08.sh
 tests/test_09.sh
 tests/test_10.sh
-strdup.c		di source
-strstr.c		di source
 trimchar.c		di source
 version.h		di source
