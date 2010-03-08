@@ -8,7 +8,7 @@
 
 SHELL = /bin/sh
 OBJ_EXT = .o
-EXE_EXT = 
+EXE_EXT =
 CC = cc
 MAKE = make
 
@@ -76,13 +76,13 @@ MKCONFIG_TYPE = sh
 # have to get various environment variables set up.
 
 all:	all-sh
-	
+
 all-sh:	di.env
 	. ./di.env;$(MAKE) -e di-programs
-	
+
 all-perl:	di.env
 	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
-	
+
 
 ###
 # testing
@@ -125,10 +125,10 @@ current-files:
 	@$(CP) -f features.base/*.sh features.base/*.dat features
 	@-$(RM) -f po/* > /dev/null 2>&1
 	@$(CP) -f po.base/*.po po
-	@-$(RM) -f tests/* > /dev/null 2>&1
-	@$(CP) -f tests.base/*.sh tests 
+	@-$(RM) -rf tests/* > /dev/null 2>&1
+	@$(CP) -f tests.base/*.sh tests
 
-tar:	
+tar:
 	$(MAKE) current-files
 	cd mkconfig;$(MAKE) current-files
 	cd mkconfig;make tar
@@ -139,6 +139,7 @@ tar:
 
 # This was tested using vc++ 5.0.
 windows:	config-win
+	@echo ':' > di.env;chmod a+rx di.env
 	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
@@ -147,13 +148,15 @@ windows:	config-win
 
 # This was tested using cygwin
 windows-gcc:	config-win
+	@echo ':' > di.env;chmod a+rx di.env
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-g -O2" di-programs
 
-os2-gcc:	
+os2-gcc:
+	@echo ':' > di.env;chmod a+rx di.env
 	$(MAKE) MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
@@ -161,12 +164,14 @@ os2-gcc:
 		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
 
 bsd43-cc:
+	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	$(CP) -f config.bsd43.cc config.h
 	$(MAKE) SHELL=/usr/local/bin/bash2 \
 		CC=cc LD=cc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
 
 bsd43-gcc:
+	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	$(CP) -f config.bsd43.gcc config.h
 	$(MAKE) SHELL=/usr/local/bin/bash2 \
@@ -177,13 +182,13 @@ bsd43-gcc:
 
 clean:
 	-$(RM) -rf $(PROG) $(MPROG) $(PROG).exe $(MPROG).exe \
-		*.o *.obj hasnls hasnls.exe di.env mkconfig.log \
+		*.o *.obj hasnls hasnls.exe mkconfig.log \
 		mkconfig_env.log tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
 
 distclean:
 	$(MAKE) clean
-	-$(RM) -rf config.h mkconfig.cache mkconfig.vars object_ext \
+	-$(RM) -rf config.h di.env mkconfig.cache mkconfig.vars \
 		pretests.done reqlibs.txt test_di \
 		>/dev/null 2>&1
 
@@ -227,8 +232,8 @@ install-prog:	di.env di-programs
 	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
 	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 	-./hasnls$(EXE_EXT) && \
-		. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)"\
-		XMSGFMT="$(XMSGFMT)" install-po
+		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
+		XMSGFMT="$(XMSGFMT)" install-po)
 
 install-man:
 	-$(TEST) -d $(DI_MANINSTDIR) || $(MKDIR) -p $(DI_MANINSTDIR)
@@ -259,7 +264,7 @@ config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 	$(TEST) $(MKCONFIG_TYPE) = perl || \
 		(. ./di.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat)
 	$(TEST) $(MKCONFIG_TYPE) = sh || \
-		(. ./di.env;$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat)
+		(. ./di.env;perl $(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat)
 
 ###
 # executables
