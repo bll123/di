@@ -1,29 +1,30 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "Enter version: \c"
-read ver
+ver=$(grep DI_VERSION version.h | sed  -e 's/"$//' -e 's/.*"//')
 
-rm -rf di-${ver} > /dev/null 2>&1
-mkdir di-${ver}
-mkdir di-${ver}/mkconfig
-chmod 755 di-${ver}
-chmod 755 di-${ver}/mkconfig
+PKG=di
+dir="${PKG}-${ver}"
+rm -rf ${dir} > /dev/null 2>&1
+mkdir ${dir}
+chmod 755 ${dir}
 
-for f in $@; do
-  case $f in 
-    mkconfig*)
-      cp -r $f di-${ver}/mkconfig
-      ;;
-    *)
-      cp -r $f di-${ver}
-      ;;
-  esac
+cat MANIFEST | sed 's,[/]*[	 ].*$,,' |
+while read f; do
+  if [ -d $f ]; then
+    mkdir ${dir}/${f}
+    chmod 755 ${dir}/${f}
+  else
+    d=$(dirname $f)
+    cp $f ${dir}/${d}
+  fi
 done
-chmod -R a+r di-${ver}/*
+chmod -R a+r ${dir}
 
-tar cf - ./di-${ver} |
-gzip -9 > di-${ver}.tar.gz
+cwd=$(pwd)
+(cd $dir;tar xfz $cwd/mkconfig/mkconfig-*.tar.gz;mv mkconfig* mkconfig)
+tar cf - ./${dir} |
+gzip -9 > ${dir}.tar.gz
 
-rm -rf di-${ver} > /dev/null 2>&1
+rm -rf ${dir} > /dev/null 2>&1
 
 exit 0
