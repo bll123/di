@@ -1,18 +1,23 @@
 #ifndef __INC_CONFIG_H
 #define __INC_CONFIG_H 1
 
-#define _hdr_stdlib 1
 #define _hdr_stdio 1
+#define _hdr_stdlib 1
 #define _sys_types 1
 #define _sys_param 1
 #define _key_void 1
 #define _key_const 1
 #define _proto_stdc 1
 #define _hdr_ctype 1
+#define _hdr_dcdef 0
+#define _hdr_descrip 0
+#define _hdr_dvidef 0
+#define _hdr_dvsdef 0
 #define _hdr_errno 1
 #define _hdr_fcntl 1
 #define _hdr_fshelp 0
 #define _hdr_getopt 0
+#define _hdr_gui_window 0
 #define _hdr_kernel_fs_info 0
 #define _hdr_limits 1
 #define _hdr_libintl 0
@@ -21,10 +26,11 @@
 #define _hdr_memory 1
 #define _hdr_mntent 1
 #define _hdr_mnttab 0
+#define _hdr_ssdef 0
+#define _hdr_starlet 0
 #define _hdr_storage_Directory 0
 #define _hdr_storage_Entry 0
 #define _hdr_storage_Path 0
-#define _hdr_gui_window 0
 #define _hdr_storage_volumes 0
 #define _hdr_string 1
 #define _hdr_strings 1
@@ -89,6 +95,8 @@
 #define _lib_statvfs 0
 #define _lib_strdup 0
 #define _lib_strstr 0
+#define _lib_sys_dollar_device_scan 0
+#define _lib_sys_dollar_getdviw 0
 #define _lib_sysfs 0
 #define _lib_textdomain 0
 #define _lib_zone_getattr 0
