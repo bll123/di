@@ -142,7 +142,7 @@ windows:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	$(CP) -f config.win config.h
-	$(MAKE) \
+	$(MAKE) -e \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
@@ -153,7 +153,7 @@ windows-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	$(CP) -f config.win config.h
-	$(MAKE) \
+	$(MAKE) -e \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
@@ -161,7 +161,7 @@ windows-gcc:
 
 os2-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
-	$(MAKE) MKCONFIG_TYPE=perl \
+	$(MAKE) -e MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
@@ -171,14 +171,16 @@ bsd43-cc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	$(CP) -f config.bsd43.cc config.h
-	$(MAKE) SHELL=/usr/local/bin/bash2 \
+	$(MAKE) -e SHELL=/usr/local/bin/bash2 \
+		_MKCONFIG_SHELL=/usr/local/bin/bash2 \
 		CC=cc LD=cc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
 
 bsd43-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
 	$(CP) -f config.bsd43.gcc config.h
-	$(MAKE) SHELL=/usr/local/bin/bash2 \
+	$(MAKE) -e SHELL=/usr/local/bin/bash2 \
+		_MKCONFIG_SHELL=/usr/local/bin/bash2 \
 		CC=gcc LD=gcc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
 
 ###
