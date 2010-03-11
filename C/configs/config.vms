@@ -57,8 +57,6 @@
 #define _sys_vfs 0
 #define _sys_vfstab 0
 #define _sys_vmount 0
-#define _include_malloc 1
-#define _include_string 1
 #define _include_time 1
 #define _command_msgfmt 0
 #define _command_gmsgfmt 0
