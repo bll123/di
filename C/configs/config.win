@@ -54,11 +54,10 @@
 #define _sys_vfs 1
 #define _sys_vfstab 0
 #define _sys_vmount 0
-#define _include_malloc 1
-#define _include_string 1
 #define _include_time 1
 #define _command_msgfmt 1
 #define _command_gmsgfmt 0
+#define _command_rpmbuild 0
 #define _const_O_NOCTTY 1
 #define _typ_statvfs_t 0
 #define _typ_size_t 1
