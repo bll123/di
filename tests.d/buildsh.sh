@@ -5,7 +5,7 @@
 
 echo ${EN} "build w/mkconfig.sh${EC}" >&3
 
-cd ..
+cd $RUNTOPDIR
 make distclean
 instdir="`pwd`/test_di"
 make -e prefix=${instdir} all-sh

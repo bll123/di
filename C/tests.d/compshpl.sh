@@ -5,7 +5,7 @@
 
 echo ${EN} "compare mkconfig.sh mkconfig.pl${EC}" >&3
 
-cd ..
+cd $RUNTOPDIR
 grc=0
 make distclean
 rm -f config.h.sh config.h.pl cache.pl cache.sh vars.pl vars.sh
