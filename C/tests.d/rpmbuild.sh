@@ -8,7 +8,7 @@ echo ${EN} "rpmbuild${EC}" >&3
 cd ..
 . ./mkconfig.cache
 
-if [ ${di_cfg__command_rpmbuild} = "0" ];then
+if [ "${di_c__command_rpmbuild}" = "0" ];then
   echo ${EN} " skipped${EC}" >&3
   exit 0
 fi
