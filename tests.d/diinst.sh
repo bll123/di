@@ -6,7 +6,7 @@
 echo ${EN} "install${EC}" >&3
 
 
-cd ..
+cd $RUNTOPDIR
 grc=0
 instdir="`pwd`/test_di"
 make -e prefix=${instdir} install
