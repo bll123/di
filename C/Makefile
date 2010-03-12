@@ -159,12 +159,13 @@ os2-gcc:
 
 bsd43-cc:
 	$(MAKE) MAKEFLAGS="" SHELL=/usr/local/bin/bash2 \
-		_MKCONFIG_TEST_EXTERN=1 \
+		_MKCONFIG_TEST_EXTERN=Y \
 		_MKCONFIG_SHELL=/usr/local/bin/bash2 \
 		CC=cc LD=cc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
 
 bsd43-gcc:
 	$(MAKE) MAKEFLAGS="" SHELL=/usr/local/bin/bash2 \
+		_MKCONFIG_TEST_EXTERN=Y \
 		_MKCONFIG_SHELL=/usr/local/bin/bash2 \
 		CC=gcc LD=gcc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
 
