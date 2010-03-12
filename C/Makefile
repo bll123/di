@@ -11,6 +11,7 @@ OBJ_EXT = .o
 EXE_EXT =
 CC = cc
 MAKE = make
+MAKEFLAGS = "-e"
 
 #
 # common programs
@@ -78,10 +79,10 @@ MKCONFIG_TYPE = sh
 all:	all-sh
 
 all-sh:	di.env
-	. ./di.env;$(MAKE) -e di-programs
+	. ./di.env;$(MAKE) di-programs
 
 all-perl:	di.env
-	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
+	. ./di.env;$(MAKE) MKCONFIG_TYPE=perl di-programs
 
 
 ###
@@ -90,14 +91,12 @@ all-perl:	di.env
 # for regression testing
 di-all-test:	pretests.done tests.done
 
-pretests.done: $(MKCONFIGPATH)/runtests.sh
-	echo "## running pretests"
-	CC=$(CC) $(SHELL) $(MKCONFIGPATH)/runtests.sh $(MKCONFIGPATH)/tests
-	touch pretests.done
+pretests.done:
+	cd $(MKCONFIGPATH); $(MAKE) tests.done
 
 tests.done: $(MKCONFIGPATH)/runtests.sh
 	echo "## running tests"
-	CC=$(CC) $(SHELL) $(MKCONFIGPATH)/runtests.sh tests
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/runtests.sh tests
 	touch tests.done
 
 testrpmbuild:
@@ -113,9 +112,10 @@ testrpmbuild:
 ###
 # environment
 
-di.env:	$(MKCONFIGPATH)/environment.sh features/env.dat
+di.env:	$(MKCONFIGPATH)/mkconfig.sh features/env.dat
 	@-$(RM) -f di.env tests.done
-	CC=$(CC) $(MKCONFIGPATH)/environment.sh features/env.dat
+	CC=$(CC) $(_MKCONFIG_SHELL) \
+		$(MKCONFIGPATH)/mkconfig.sh features/env.dat
 
 ###
 # packaging
@@ -132,7 +132,7 @@ tar:
 	$(MAKE) current-files
 	cd mkconfig;$(MAKE) current-files
 	cd mkconfig;make tar
-	$(SHELL) mktar.sh
+	./mktar.sh
 
 ###
 # specific builds
@@ -168,18 +168,13 @@ os2-gcc:
 		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
 
 bsd43-cc:
-	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	$(CP) -f config.bsd43.cc config.h
-	$(MAKE) -e SHELL=/usr/local/bin/bash2 \
+	$(MAKE) MAKEFLAGS="" SHELL=/usr/local/bin/bash2 \
+		_MKCONFIG_TEST_EXTERN=1 \
 		_MKCONFIG_SHELL=/usr/local/bin/bash2 \
 		CC=cc LD=cc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
 
 bsd43-gcc:
-	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	$(CP) -f config.bsd43.gcc config.h
-	$(MAKE) -e SHELL=/usr/local/bin/bash2 \
+	$(MAKE) MAKEFLAGS="" SHELL=/usr/local/bin/bash2 \
 		_MKCONFIG_SHELL=/usr/local/bin/bash2 \
 		CC=gcc LD=gcc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
 
@@ -194,9 +189,10 @@ clean:
 
 distclean:
 	$(MAKE) clean
-	-$(RM) -rf config.h di.env mkconfig.cache mkconfig.vars \
+	-$(RM) -rf config.h di.env mkconfig.cache mkconfig_*.vars \
 		pretests.done reqlibs.txt test_di \
 		>/dev/null 2>&1
+	cd $(MKCONFIGPATH);$(MAKE) clean
 
 realclean:
 	$(MAKE) distclean
@@ -206,7 +202,7 @@ realclean:
 
 install:	di.env
 	. ./di.env; \
-		$(MAKE) -e install-prog install-man
+		$(MAKE) install-prog install-man
 
 build-po:	di.env
 	-. ./di.env; \
@@ -238,7 +234,7 @@ install-prog:	di.env di-programs
 	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
 	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 	-./hasnls$(EXE_EXT) && \
-		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
+		(. ./di.env; $(MAKE) INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		XMSGFMT="$(XMSGFMT)" install-po)
 
 install-man:
@@ -263,10 +259,12 @@ di-programs:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
-	$(TEST) $(MKCONFIG_TYPE) = perl || \
-		(. ./di.env;$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat)
-	$(TEST) $(MKCONFIG_TYPE) = sh || \
-		(. ./di.env;perl $(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat)
+	if [ $(MKCONFIG_TYPE) = sh ]; then \
+		. ./di.env;$(_MKCONFIG_SHELL) \
+		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat; fi
+	if [ $(MKCONFIG_TYPE) = perl ]; then \
+		. ./di.env;perl \
+		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat; fi
 
 ###
 # executables
@@ -275,7 +273,8 @@ $(PROG)$(EXE_EXT):	di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
-	@$(TEST) ! -f reqlibs.txt || echo "*** Using libs: `$(CAT) reqlibs.txt`"
+	@if [ -f reqlibs.txt ];then \
+		echo "*** Using libs: `$(CAT) reqlibs.txt`"; fi
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) \
 		di$(OBJ_EXT) didiskutil$(OBJ_EXT) digetinfo$(OBJ_EXT) \
@@ -283,7 +282,7 @@ $(PROG)$(EXE_EXT):	di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		strdup$(OBJ_EXT) strstr$(OBJ_EXT) \
 		trimchar$(OBJ_EXT) getopt$(OBJ_EXT) \
 		$(LIBS) \
-		`$(TEST) ! -f reqlibs.txt || $(CAT) reqlibs.txt`
+		`if [ -f reqlibs.txt ];then $(CAT) reqlibs.txt; fi`
 
 hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
 	$(CC) -o hasnls$(EXE_EXT) \
