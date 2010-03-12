@@ -171,7 +171,7 @@ extern int  di_getDiskEntries       _((diDiskInfo_t **, int *));
 extern void di_getDiskInfo          _((diDiskInfo_t **, int *));
  /* getopt.c */
 # if ! _lib_getopt || _npt_getopt
-extern int getopt                   _((char *, char * const [], const char *));
+extern int getopt                   _((int, char * const [], const char *));
 # endif
  /* strdup.c */
 # if ! _lib_strdup
