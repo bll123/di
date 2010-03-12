@@ -11,7 +11,7 @@ make distclean
 rm -f config.h.sh config.h.pl cache.pl cache.sh vars.pl vars.sh
 make -e config.h
 mv config.h config.h.sh
-cat mkconfig.cache | sort > cache.sh
+cat mkconfig.cache | grep -v '^di_env' | sort > cache.sh
 cat mkconfig_c.vars > vars.sh
 rm -f mkconfig.cache
 make -e MKCONFIG_TYPE=perl config.h
