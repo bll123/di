@@ -107,6 +107,7 @@
 #define _npt_getopt 0
 #define _npt_statfs 0
 #define _dcl_errno 1
+#define _dcl_mnt_names 0
 #define _dcl_optind 1
 #define _dcl_optarg 1
 #define _mem_f_bsize_statfs 1
@@ -135,6 +136,7 @@
 #  define _(args) ()
 # endif
 #endif
+
 
 #if _lib_bindtextdomain && \
     _lib_gettext && \
@@ -179,5 +181,6 @@
 # define Snprintf sprintf
 # define DI_SPF(a2,a3)         a3
 #endif
+
 
 #endif /* __INC_CONFIG_H */
