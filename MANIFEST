@@ -26,16 +26,17 @@ README			Read This
 realloc.c		di source
 strdup.c		di source
 strstr.c		di source
-tests/			regression tests for di
-tests/test_01.sh
-tests/test_02.sh
-tests/test_03.sh
-tests/test_04.sh
-tests/test_05.sh
-tests/test_06.sh
-tests/test_07.sh
-tests/test_08.sh
-tests/test_09.sh
-tests/test_10.sh
+tests.d/			regression tests for di
+tests.d/buildpl.sh
+tests.d/buildsh.sh
+tests.d/compshpl.sh
+tests.d/diarg.sh
+tests.d/diexec.sh
+tests.d/diinst.sh
+tests.d/dinls.sh
+tests.d/disort.sh
+tests.d/ditot.sh
+tests.d/rpmbuild.sh
+tests.d/test_order
 trimchar.c		di source
 version.h		di source
