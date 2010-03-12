@@ -96,7 +96,7 @@ pretests.done:
 
 tests.done: $(MKCONFIGPATH)/runtests.sh
 	@echo "## running tests"
-	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/runtests.sh tests
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/runtests.sh tests.d
 	touch tests.done
 
 testrpmbuild:
@@ -120,17 +120,7 @@ di.env:	$(MKCONFIGPATH)/mkconfig.sh features/env.dat
 ###
 # packaging
 
-current-files:
-	@-$(RM) -f features/* > /dev/null 2>&1
-	@$(CP) -f features.base/*.sh features.base/*.dat features
-	@-$(RM) -f po/* > /dev/null 2>&1
-	@$(CP) -f po.base/*.po po
-	@-$(RM) -rf tests/* > /dev/null 2>&1
-	@$(CP) -f tests.base/*.sh tests
-
 tar:
-	$(MAKE) current-files
-	cd $(MKCONFIGPATH);$(MAKE) current-files
 	cd $(MKCONFIGPATH);make tar
 	./mktar.sh
 
