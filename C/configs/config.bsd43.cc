@@ -5,7 +5,7 @@
 #define _hdr_stdlib 0
 #define _sys_types 1
 #define _sys_param 1
-#define _key_void 1
+#define _key_void 0
 #define _key_const 0
 #define _proto_stdc 0
 #define _hdr_ctype 1
@@ -107,9 +107,9 @@
 #define _npt_getopt 1
 #define _npt_statfs 1
 #define _dcl_errno 0
+#define _dcl_mnt_names 0
 #define _dcl_optind 0
 #define _dcl_optarg 0
-#define _dcl_mnt_names 0
 #define _mem_f_bsize_statfs 1
 #define _mem_f_fsize_statfs 0
 #define _mem_f_fstyp_statfs 0
