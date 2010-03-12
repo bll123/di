@@ -54,11 +54,10 @@
 #define _sys_vfs 1
 #define _sys_vfstab 0
 #define _sys_vmount 0
-#define _include_malloc 1
-#define _include_string 1
 #define _include_time 0
 #define _command_msgfmt 0
 #define _command_gmsgfmt 0
+#define _command_rpmbuild 0
 #define _const_O_NOCTTY 0
 #define _typ_statvfs_t 0
 #define _typ_size_t 1
@@ -83,7 +82,7 @@
 #define _lib_gettext 0
 #define _lib_getvfsstat 0
 #define _lib_getzoneid 0
-#define _lib_hasmntopt 0
+#define _lib_hasmntopt 1
 #define _lib_memcpy 1
 #define _lib_memset 1
 #define _lib_mntctl 0
@@ -104,12 +103,13 @@
 #define _setmntent_args 2
 #define _statfs_args 2
 #define _class_os__Volumes 0
-#define _npt_getopt 1
 #define _npt_getenv 1
-#define _npt_statfs 0
+#define _npt_getopt 1
+#define _npt_statfs 1
 #define _dcl_errno 0
 #define _dcl_optind 0
 #define _dcl_optarg 0
+#define _dcl_mnt_names 0
 #define _mem_f_bsize_statfs 1
 #define _mem_f_fsize_statfs 0
 #define _mem_f_fstyp_statfs 0
@@ -117,15 +117,15 @@
 #define _mem_f_frsize_statfs 0
 #define _mem_f_fstypename_statfs 0
 #define _mem_mount_info_statfs 0
-#define _mem_f_type_statfs 0
+#define _mem_f_type_statfs 1
 #define _mem_mnt_time_mnttab 0
 #define _mem_vmt_time_vmount 0
 #define _siz_long_long 0
 
-#if ! _key_void || ! _proto_stdc
+#if ! _key_void
 # define void int
 #endif
-#if ! _key_const || ! _proto_stdc
+#if ! _key_const
 # define const
 #endif
 
