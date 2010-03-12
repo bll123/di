@@ -95,7 +95,7 @@ pretests.done:
 	cd $(MKCONFIGPATH); $(MAKE) tests.done
 
 tests.done: $(MKCONFIGPATH)/runtests.sh
-	echo "## running tests"
+	@echo "## running tests"
 	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/runtests.sh tests
 	touch tests.done
 
