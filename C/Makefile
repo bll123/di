@@ -248,7 +248,7 @@ di-programs:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
 config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
-	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	@-$(RM) -f config.h tests.done
 	if [ $(MKCONFIG_TYPE) = sh ]; then \
 		. ./di.env;$(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat; fi
