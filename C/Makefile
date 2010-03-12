@@ -130,8 +130,8 @@ current-files:
 
 tar:
 	$(MAKE) current-files
-	cd mkconfig;$(MAKE) current-files
-	cd mkconfig;make tar
+	cd $(MKCONFIGPATH);$(MAKE) current-files
+	cd $(MKCONFIGPATH);make tar
 	./mktar.sh
 
 ###
@@ -140,7 +140,7 @@ tar:
 # This was tested using vc++ 5.0.
 windows:
 	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
 	$(MAKE) -e \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
@@ -151,7 +151,7 @@ windows:
 # This was tested using cygwin
 windows-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
 	$(MAKE) -e \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
@@ -184,7 +184,7 @@ bsd43-gcc:
 clean:
 	-$(RM) -rf $(PROG) $(MPROG) $(PROG).exe $(MPROG).exe \
 		*.o *.obj hasnls hasnls.exe mkconfig.log \
-		mkconfig_env.log tests.done _tmp_mkconfig \
+		tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
 
 distclean:
@@ -258,7 +258,7 @@ di-programs:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 
 config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
-	@-$(RM) -f config.h mkconfig.cache mkconfig.vars tests.done
+	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	if [ $(MKCONFIG_TYPE) = sh ]; then \
 		. ./di.env;$(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat; fi
