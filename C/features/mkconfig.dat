@@ -3,68 +3,13 @@
 # $Source$
 # Copyright 2006-2010 Brad Lanam, Walnut Creek, California USA
 #
-# Commands:
-#   output   file-name
-#            specify the name of the output file.
-#   loadunit unit-name
-#            include a unit for testing
-#            units may include specific check routines.
-#   standard  perform any standard checks for the language unit
-#            that was sourced
-#   command  name-of-command
-#            check if command exists.
-#            e.g.: command msgfmt
-#   include     include all of the code between these two tags
-#   endinclude  in the configuration file.  Backslashes must
-#               be escaped with a backslash.
-#
-# lang-c:
-#   hdr      name-of-header [required-headers]
-#            check for a header.
-#            e.g.: hdr ctype.h
-#   sys      name-of-sys-header [required-headers]
-#            check for a header in sys/.
-#            e.g.: sys types.h
-#   const    constant-name [required-headers]
-#            check that a constant exists
-#            e.g.: O_RDONLY
-#   key      keyword
-#            check to see if keyword is reserved.
-#            e.g.: key volatile
-#   npt      function [requirement]
-#            check if function needs a prototype.
-#            the optional requirement should be _lib_<funcname>
-#            if the requirement does not exist, _npt_<function>
-#            will set set to false in config.h
-#            e.g.: npt getopt
-#                  npt statfs _lib_statfs
-#   typ      type-name
-#            check if type-name exists.
-#            e.g.: typ size_t
-#   lib      function [libs]
-#            check if function exists.
-#            if libs are specified, tests for function
-#            w/o the libraries, then with.
-#            e.g.: lib gettext -lintl -liconv
-#                  will test gettext, gettext -lintl, gettext -lintl -liconv
-#   class    class [libs]
-#            check if class exists.
-#            e.g.: class os::Volumes
-#   dcl      {int|ptr} variable
-#            check if the variable is declared.
-#            e.g.: dcl int errno
-#   member   struct member
-#            check if member is a member of struct.
-#            e.g.: member statfs f_bsize
 #
 output   config.h
 
-loadunit lang-c
-loadunit include-malloc
-loadunit include-string
-loadunit include-time
-loadunit setmntent-args
-loadunit statfs-args
+loadunit c-main
+loadunit c-include-time
+loadunit c-setmntent-args
+loadunit c-statfs-args
 
 standard
 
@@ -115,8 +60,6 @@ sys     time.h
 sys     vfs.h
 sys     vfstab.h
 sys     vmount.h
-include_malloc
-include_string
 include_time
 command msgfmt
 command gmsgfmt
