@@ -82,7 +82,7 @@
 #define _lib_gettext 0
 #define _lib_getvfsstat 0
 #define _lib_getzoneid 0
-#define _lib_hasmntopt 0
+#define _lib_hasmntopt 1
 #define _lib_memcpy 1
 #define _lib_memset 1
 #define _lib_mntctl 0
@@ -103,10 +103,11 @@
 #define _setmntent_args 2
 #define _statfs_args 2
 #define _class_os__Volumes 0
-#define _npt_getopt 0
-#define _npt_getenv 0
-#define _npt_statfs 0
-#define _dcl_errno 0
+#define _npt_getopt 1
+#define _npt_getenv 1
+#define _npt_statfs 1
+#define _dcl_errno 1
+#define _dcl_mnt_names 0
 #define _dcl_optind 0
 #define _dcl_optarg 0
 #define _mem_f_bsize_statfs 1
@@ -116,7 +117,7 @@
 #define _mem_f_frsize_statfs 0
 #define _mem_f_fstypename_statfs 0
 #define _mem_mount_info_statfs 0
-#define _mem_f_type_statfs 0
+#define _mem_f_type_statfs 1
 #define _mem_mnt_time_mnttab 0
 #define _mem_vmt_time_vmount 0
 #define _siz_long_long 0
