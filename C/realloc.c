@@ -14,7 +14,7 @@
 #if _hdr_memory
 # include <memory.h>
 #endif
-#if _include_malloc && _hdr_malloc
+#if _hdr_malloc
 # include <malloc.h>
 #endif
 

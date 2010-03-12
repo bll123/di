@@ -109,13 +109,13 @@
 #if _hdr_string
 # include <string.h>
 #endif
-#if _hdr_strings && ((! _hdr_string) || (_include_string))
+#if _hdr_strings
 # include <strings.h>
 #endif
 #if _hdr_memory
 # include <memory.h>
 #endif
-#if _include_malloc && _hdr_malloc
+#if _hdr_malloc
 # include <malloc.h>
 #endif
 #if _hdr_unistd
