@@ -11,7 +11,6 @@ OBJ_EXT = .o
 EXE_EXT =
 CC = cc
 MAKE = make
-MAKEFLAGS = "-e"
 
 #
 # common programs
@@ -79,10 +78,10 @@ MKCONFIG_TYPE = sh
 all:	all-sh
 
 all-sh:	di.env
-	. ./di.env;$(MAKE) di-programs
+	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=sh di-programs
 
 all-perl:	di.env
-	. ./di.env;$(MAKE) MKCONFIG_TYPE=perl di-programs
+	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
 
 
 ###
@@ -92,7 +91,7 @@ all-perl:	di.env
 di-all-test:	pretests.done tests.done
 
 pretests.done:
-	cd $(MKCONFIGPATH); $(MAKE) tests.done
+	cd $(MKCONFIGPATH); $(MAKE) -e tests.done
 
 tests.done: $(MKCONFIGPATH)/runtests.sh
 	@echo "## running tests"
@@ -193,7 +192,7 @@ realclean:
 
 install:	di.env
 	. ./di.env; \
-		$(MAKE) install-prog install-man
+		$(MAKE) -e install-prog install-man
 
 build-po:	di.env
 	-. ./di.env; \
@@ -225,7 +224,7 @@ install-prog:	di.env di-programs
 	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
 	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
 	-./hasnls$(EXE_EXT) && \
-		(. ./di.env; $(MAKE) INST_LOCALEDIR="$(INST_LOCALEDIR)" \
+		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		XMSGFMT="$(XMSGFMT)" install-po)
 
 install-man:
@@ -260,19 +259,16 @@ config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 ###
 # executables
 
-$(PROG)$(EXE_EXT):	di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
+OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
+
+$(PROG)$(EXE_EXT):	$(OBJECTS)
 	@if [ -f reqlibs.txt ];then \
 		echo "*** Using libs: `$(CAT) reqlibs.txt`"; fi
 	$(CC) -o $(PROG)$(EXE_EXT) \
-		$(CFLAGS) $(LDFLAGS) \
-		di$(OBJ_EXT) didiskutil$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		digetentries$(OBJ_EXT) realloc$(OBJ_EXT) \
-		strdup$(OBJ_EXT) strstr$(OBJ_EXT) \
-		trimchar$(OBJ_EXT) getopt$(OBJ_EXT) \
-		$(LIBS) \
+		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS) \
 		`if [ -f reqlibs.txt ];then $(CAT) reqlibs.txt; fi`
 
 hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
