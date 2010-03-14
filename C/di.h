@@ -133,10 +133,14 @@ typedef unsigned long __ulong;
 #define DI_PRNT_OUTOFZONE   3
 #define DI_PRNT_EXCLUDE     4
 #define DI_PRNT_FORCE       5
+#define DI_PRNT_SKIP        6
+
+#define DI_MAIN_SORT_IDX    0
+#define DI_TOT_SORT_IDX     1
 
 typedef struct
 {
-    unsigned int    index;
+    unsigned int    sortIndex [2];
     _fs_size_t      totalBlocks;
     _fs_size_t      freeBlocks;
     _fs_size_t      availBlocks;
