@@ -127,6 +127,7 @@ di_getDiskInfo (diskInfo, diCount)
         diptr = *diskInfo + i;
 
         if (diptr->printFlag == DI_PRNT_OK ||
+            diptr->printFlag == DI_PRNT_SKIP ||
             diptr->printFlag == DI_PRNT_FORCE)
         {
             _fs_size_t      tblocksz;
@@ -235,6 +236,7 @@ di_getDiskInfo (diskInfo, diCount)
     {
         diptr = *diskInfo + i;
         if (diptr->printFlag == DI_PRNT_OK ||
+            diptr->printFlag == DI_PRNT_SKIP ||
             diptr->printFlag == DI_PRNT_FORCE)
         {
             _fs_size_t      tblocksz;
@@ -326,6 +328,7 @@ di_getDiskInfo (diskInfo, diCount)
     {
         diptr = *diskInfo + i;
         if (diptr->printFlag == DI_PRNT_OK ||
+            diptr->printFlag == DI_PRNT_SKIP ||
             diptr->printFlag == DI_PRNT_FORCE)
         {
             if (statfs (diptr->name, &statBuf) == 0)
@@ -403,6 +406,7 @@ di_getDiskInfo (diskInfo, diCount)
     {
         diptr = *diskInfo + i;
         if (diptr->printFlag == DI_PRNT_OK ||
+            diptr->printFlag == DI_PRNT_SKIP ||
             diptr->printFlag == DI_PRNT_FORCE)
         {
             rc = GetVolumeInformation (diptr->name,
