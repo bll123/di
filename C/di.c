@@ -307,12 +307,13 @@ typedef struct {
 
 typedef struct {
     int             count;
+    int             haspooledfs;
+    int             totsorted;
     diOptions_t     options;
     diDiskInfo_t    *diskInfo;
     iList_t         ignoreList;
     iList_t         includeList;
     zoneInfo_t      zoneInfo;
-    char            haspooledfs;
 } diData_t;
 
 int          debug = { 0 };
@@ -373,7 +374,7 @@ static void printTitle          _((diOptions_t *));
 static void printPerc           _((_fs_size_t, _fs_size_t, const char *));
 static void processArgs         _((int, char * const [], diData_t *, char *));
 static void setDispBlockSize    _((char *, diOptions_t *));
-static void sortArray           _((diOptions_t *, diDiskInfo_t *, int));
+static void sortArray           _((diOptions_t *, diDiskInfo_t *, int, int));
 static void usage               _((void));
 
 #if defined(__cplusplus)
@@ -399,6 +400,7 @@ main (argc, argv)
         /* initialization */
     diData.count = 0;
     diData.haspooledfs = FALSE;
+    diData.totsorted = FALSE;
 
     diData.diskInfo = (diDiskInfo_t *) NULL;
 
@@ -749,7 +751,6 @@ printDiskInfo (diData)
     char                lastpool [DI_SPEC_NAME_LEN + 1];
     Size_t              lastpoollen = { 0 };
     int                 inpool = { FALSE };
-    char                tempSortType [DI_SORT_MAX + 1];
 
     lastpool[0] = '\0';
     diopts = &diData->options;
@@ -767,54 +768,35 @@ printDiskInfo (diData)
         printTitle (diopts);
     }
 
+    diskInfo = diData->diskInfo;
     if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
     {
-            /* need to make a copy of the diskinfo array, as we */
-            /* want to preserve the sort order.                 */
-        diDiskInfo_t         *tempDiskInfo;
         int                  allocated;
 
         allocated = FALSE;
-        if (diData->haspooledfs)
+        if (diData->haspooledfs && ! diData->totsorted)
         {
-              /* in order to find the main pool entry,                */
+          char tempSortType [DI_SORT_MAX + 1];
+              /* in order to find the main pool entries,              */
               /* we must have the array sorted by special device name */
-          tempDiskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) *
-                  (Size_t) diData->count);
-          if (tempDiskInfo == (diDiskInfo_t *) NULL)
-          {
-            fprintf (stderr, "malloc failed in printDiskInfo().  errno %d\n", errno);
-            exit (1);
-          }
-          memcpy ((char *) tempDiskInfo, (char *) diData->diskInfo,
-                  sizeof (diDiskInfo_t) * (Size_t) diData->count);
           strcpy (tempSortType, diopts->sortType);
           strcpy (diopts->sortType, "s");
-          sortArray (diopts, tempDiskInfo, diData->count);
+          sortArray (diopts, diskInfo, diData->count, DI_TOT_SORT_IDX);
           strcpy (diopts->sortType, tempSortType);
-          allocated = TRUE;
-        }
-        else
-        {
-          tempDiskInfo = diData->diskInfo;
+          diData->totsorted = TRUE;
         }
 
         for (i = 0; i < diData->count; ++i)
         {
             diDiskInfo_t    *dinfo;
             int             ispooled;
+            int             startpool;
+            int             poolmain;
 
             ispooled = FALSE;
-            dinfo = &(tempDiskInfo [tempDiskInfo [i].index]);
-
-            if (! dinfo->doPrint)
-            {
-              if (debug > 2)
-              {
-                  printf ("tot: %s: not printed; don't add\n", tempDiskInfo[i].name);
-              }
-              continue;
-            }
+            startpool = FALSE;
+            poolmain = FALSE;
+            dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
 
                 /* is it a pooled filesystem type? */
             if (diData->haspooledfs &&
@@ -829,43 +811,49 @@ printDiskInfo (diData)
                 lastpoollen = strlen (lastpool);
                 inpool = FALSE;
               }
+
+              if (strncmp (lastpool, dinfo->special, lastpoollen) == 0)
+              {
+                startpool = TRUE;
+                if (inpool == FALSE) 
+                {
+                  poolmain = TRUE;
+                }
+              }
             } else {
               inpool = FALSE;
             }
 
-            if (debug > 2)
+            if (dinfo->doPrint || inpool || poolmain)
             {
-                printf ("tot: %s: add; inpool: %d\n", tempDiskInfo[i].name, inpool);
+              addTotals (dinfo, &totals, inpool);
             }
-            addTotals (dinfo, &totals, inpool);
-
-                /* is it a pooled filesystem type? */
-            if (ispooled)
+            else 
             {
-              if (strncmp (lastpool, dinfo->special, lastpoollen) == 0)
+              if (debug > 2) 
               {
-                inpool = TRUE;
+                printf ("tot:%s:%s:skip\n", dinfo->special, dinfo->name);
               }
             }
-        } /* for each entry */
 
-        if (allocated)
-        {
-          free ((char *) tempDiskInfo);
-        }
+            if (startpool)
+            {
+              inpool = TRUE;
+            }
+        } /* for each entry */
     } /* if the totals are to be printed */
 
+    diskInfo = diData->diskInfo;
     if (strcmp (diopts->sortType, "n") != 0)
     {
-      sortArray (diopts, diData->diskInfo, diData->count);
+      sortArray (diopts, diskInfo, diData->count, DI_MAIN_SORT_IDX);
     }
 
-    diskInfo = diData->diskInfo;
     for (i = 0; i < diData->count; ++i)
     {
       diDiskInfo_t        *dinfo;
 
-      dinfo = &(diskInfo [diskInfo [i].index]);
+      dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_MAIN_SORT_IDX]]);
       if (debug > 5)
       {
         printf ("pdi:%s:%s:%d:\n", dinfo->name,
@@ -1281,16 +1269,19 @@ addTotals (diskInfo, totals, inpool)
     if (debug > 2)
     {
 #if _siz_long_long >= 8
-        printf ("totals:%s:inp:%d:bs:%lld:mult:%f\n", diskInfo->name,
+        printf ("tot:%s:%s:inp:%d:bs:%lld:mult:%f\n", 
+                    diskInfo->special, diskInfo->name,
                     inpool, diskInfo->blockSize, mult);
 #else
-        printf ("totals:%s:inp:%d:bs:%ld:mult:%f\n", diskInfo->name,
+        printf ("tot:%s:%s:inp:%d:bs:%ld:mult:%f\n", 
+                    diskInfo->special, diskInfo->name,
                     inpool, diskInfo->blockSize, mult);
 #endif
     }
 
     if (inpool)
     {
+        if (debug > 2) {printf ("  tot:inpool:add total used\n"); }
         /* if in a pool of disks, add the total used to the totals also */
         totals->totalBlocks += (_fs_size_t) ((double) (diskInfo->totalBlocks -
                 diskInfo->freeBlocks) * mult);
@@ -1299,6 +1290,7 @@ addTotals (diskInfo, totals, inpool)
     }
     else
     {
+        if (debug > 2) {printf ("  tot:not inpool:add all totals\n"); }
         totals->totalBlocks += (_fs_size_t) ((double) diskInfo->totalBlocks * mult);
         totals->freeBlocks += (_fs_size_t) ((double) diskInfo->freeBlocks * mult);
         totals->availBlocks += (_fs_size_t) ((double) diskInfo->availBlocks * mult);
@@ -1543,6 +1535,8 @@ checkFileInfo (diData, optidx, argc, argv)
     int                 i;
     int                 j;
     struct stat         statBuf;
+    diOptions_t         *diopts;
+    diDiskInfo_t        *diskInfo;
 
 
     rc = 0;
@@ -1557,6 +1551,20 @@ checkFileInfo (diData, optidx, argc, argv)
       {
         dinfo->printFlag = DI_PRNT_IGNORE;
       }
+    }
+
+    diopts = &diData->options;
+
+    diskInfo = diData->diskInfo;
+    if (diData->haspooledfs && ! diData->totsorted)
+    {
+      char tempSortType [DI_SORT_MAX + 1];
+
+      strcpy (tempSortType, diopts->sortType);
+      strcpy (diopts->sortType, "s");
+      sortArray (diopts, diskInfo, diData->count, DI_TOT_SORT_IDX);
+      strcpy (diopts->sortType, tempSortType);
+      diData->totsorted = TRUE;
     }
 
     for (i = optidx; i < argc; ++i)
@@ -1575,22 +1583,97 @@ checkFileInfo (diData, optidx, argc, argv)
         }
         if (src == 0)
         {
+            int             saveIdx;
+            int             found = { FALSE };
+            int             inpool = { FALSE };
+            Size_t          lastpoollen = { 0 };
+            char            lastpool [DI_SPEC_NAME_LEN + 1];
+
             for (j = 0; j < diData->count; ++j)
             {
-                diDiskInfo_t        *dinfo;
+                diDiskInfo_t    *dinfo;
+                int             ispooled;
+                int             startpool;
+                int             poolmain;
 
-                dinfo = &diData->diskInfo[j];
+                ispooled = FALSE;
+                startpool = FALSE;
+                poolmain = FALSE;
+
+                dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
+
+                    /* is it a pooled filesystem type? */
+                if (diData->haspooledfs &&
+                    (strcmp (dinfo->fsType, "zfs") == 0 ||
+                     strcmp (dinfo->fsType, "advfs") == 0))
+                {
+                  ispooled = TRUE;
+                  if (lastpoollen == 0 ||
+                      strncmp (lastpool, dinfo->special, lastpoollen) != 0)
+                  {
+                    strncpy (lastpool, dinfo->special, sizeof (lastpool));
+                    lastpoollen = strlen (lastpool);
+                    inpool = FALSE;
+                  }
+
+                  if (strncmp (lastpool, dinfo->special, lastpoollen) == 0)
+                  {
+                    startpool = TRUE;
+                    if (inpool == FALSE) 
+                    {
+                      poolmain = TRUE;
+                    }
+                  }
+                } else {
+                  inpool = FALSE;
+                }
+
+                if (poolmain)
+                {
+                  saveIdx = j;
+                }
+
+                if (found)
+                {
+                  dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
+                  dinfo->printFlag = DI_PRNT_SKIP;
+                  if (debug > 2)
+                  {
+                    printf ("  inpool B: also process %s %s\n",
+                            dinfo->special, dinfo->name);
+                  }
+                }
+
                 if (dinfo->printFlag == DI_PRNT_IGNORE &&
                     dinfo->st_dev != DI_UNKNOWN_DEV &&
                     (__ulong) statBuf.st_dev == dinfo->st_dev)
                 {
-                    dinfo->printFlag = DI_PRNT_FORCE;
-                    if (debug > 2)
+                  dinfo->printFlag = DI_PRNT_FORCE;
+                  found = TRUE;
+                  if (debug > 2)
+                  {
+                      printf ("file %s specified: found device %ld (%s %s)\n",
+                              argv[i], dinfo->st_dev, dinfo->special, dinfo->name);
+                  }
+                  if (inpool)
+                  {
+                    int   k;
+                    for (k = saveIdx; k < j; ++k)
                     {
-                        printf ("file %s specified: found device %ld (%s)\n",
-                                argv[i], dinfo->st_dev, dinfo->name);
+                      dinfo = &(diskInfo [diskInfo [k].sortIndex[DI_TOT_SORT_IDX]]);
+                      dinfo->printFlag = DI_PRNT_SKIP;
+                      if (debug > 2)
+                      {
+                        printf ("  inpool A: also process %s %s\n",
+                                dinfo->special, dinfo->name);
+                      }
                     }
-                    break; /* out of inner for */
+                  }
+                }
+
+                if (startpool)
+                {
+                  inpool = TRUE;
                 }
             }
         } /* if stat ok */
@@ -1611,12 +1694,13 @@ checkFileInfo (diData, optidx, argc, argv)
  */
 static void
 #if _proto_stdc
-sortArray (diOptions_t *diopts, diDiskInfo_t *data, int count)
+sortArray (diOptions_t *diopts, diDiskInfo_t *data, int count, int sidx)
 #else
 sortArray (diopts, data, count)
     diOptions_t     *diopts;
     diDiskInfo_t    *data;
     int             count;
+    int             sidx;
 #endif
 {
   unsigned int  tempIndex;
@@ -1639,19 +1723,19 @@ sortArray (diopts, data, count)
   {
     for (i = gap; i < count; ++i)
     {
-      tempIndex = data[i].index;
+      tempIndex = data[i].sortIndex[sidx];
       j = i - gap;
 
-      while (j >= 0 && diCompare (diopts, data, data[j].index, tempIndex) > 0)
+      while (j >= 0 && diCompare (diopts, data, data[j].sortIndex[sidx], tempIndex) > 0)
       {
-        data[j + gap].index = data[j].index;
+        data[j + gap].sortIndex[sidx] = data[j].sortIndex[sidx];
         j -= gap;
       }
 
       j += gap;
       if (j != i)
       {
-        data[j].index = tempIndex;
+        data[j].sortIndex[sidx] = tempIndex;
       }
     }
   }
@@ -1880,14 +1964,15 @@ checkDiskInfo (diData)
         }
 
           /* need to check against include list */
-        if (dinfo->printFlag == DI_PRNT_IGNORE)
+        if (dinfo->printFlag == DI_PRNT_IGNORE || 
+            dinfo->printFlag == DI_PRNT_SKIP)
         {
-            if (debug > 2)
-            {
-                printf ("chk: skipping(%s):%s\n",
-                    getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
-            }
-            dinfo->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
+          if (debug > 2)
+          {
+              printf ("chk: skipping(%s):%s\n",
+                  getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
+          }
+          dinfo->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
         }
 
             /* Solaris reports a cdrom as having no free blocks,   */
@@ -2186,7 +2271,8 @@ preCheckDiskInfo (diData)
         diDiskInfo_t        *dinfo;
 
         dinfo = &diData->diskInfo[i];
-        dinfo->index = (unsigned int) i;
+        dinfo->sortIndex[0] = (unsigned int) i;
+        dinfo->sortIndex[1] = (unsigned int) i;
         if (debug > 4)
         {
             printf ("## prechk:%s:\n", dinfo->name);
@@ -2965,5 +3051,6 @@ getPrintFlagText (pf)
         pf == DI_PRNT_IGNORE ? "ignore" :
         pf == DI_PRNT_EXCLUDE ? "exclude" :
         pf == DI_PRNT_OUTOFZONE ? "outofzone" :
-        pf == DI_PRNT_FORCE ? "force" : "unknown";
+        pf == DI_PRNT_FORCE ? "force" : 
+        pf == DI_PRNT_SKIP ? "skip" : "unknown";
 }
