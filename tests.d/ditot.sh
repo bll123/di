@@ -10,7 +10,10 @@ FORMATS="b B u c f v i U F"
 grc=0
 for format in $FORMATS; do
   echo "Checking format: $format"
-  didata=`$RUNTOPDIR/di -n -d1 -f $format -t`
+  # have to exclude zfs, otherwise this test won't work.
+  # include the normally excluded to get some data.
+  # ctfs,objfs,sharefs have weird used inode counts (U)
+  didata=`$RUNTOPDIR/di -n -d1 -f $format -t -a -x zfs,ctfs,objfs,sharefs 2>/dev/null `
   summtot=`(echo "0 ";echo $didata | sed 's/  */ + /g'; echo " - p") | dc`
   if [ $summtot -ne 0 ]; then
     echo "format: $format failed"
