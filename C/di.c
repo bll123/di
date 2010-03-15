@@ -662,11 +662,16 @@ main (argc, argv)
     }
 
     preCheckDiskInfo (&diData);
+    if (optind < argc ||
+        (diopts->flags & DI_F_INCLUDE_LOOPBACK) != DI_F_INCLUDE_LOOPBACK)
+    {
+      getDiskStatInfo (&diData);
+      getDiskSpecialInfo (&diData);
+    }
     if (optind < argc)
     {
         int     rc;
 
-        getDiskStatInfo (&diData);
         rc = checkFileInfo (&diData, optind, argc, argv);
         if (rc < 0)
         {
@@ -675,7 +680,6 @@ main (argc, argv)
         }
     }
     di_getDiskInfo (&diData.diskInfo, &diData.count);
-    getDiskSpecialInfo (&diData);
     checkDiskInfo (&diData);
     getMaxFormatLengths (&diData);
     printDiskInfo (&diData);
@@ -815,7 +819,7 @@ printDiskInfo (diData)
               if (strncmp (lastpool, dinfo->special, lastpoollen) == 0)
               {
                 startpool = TRUE;
-                if (inpool == FALSE) 
+                if (inpool == FALSE)
                 {
                   poolmain = TRUE;
                 }
@@ -828,9 +832,9 @@ printDiskInfo (diData)
             {
               addTotals (dinfo, &totals, inpool);
             }
-            else 
+            else
             {
-              if (debug > 2) 
+              if (debug > 2)
               {
                 printf ("tot:%s:%s:skip\n", dinfo->special, dinfo->name);
               }
@@ -1269,11 +1273,11 @@ addTotals (diskInfo, totals, inpool)
     if (debug > 2)
     {
 #if _siz_long_long >= 8
-        printf ("tot:%s:%s:inp:%d:bs:%lld:mult:%f\n", 
+        printf ("tot:%s:%s:inp:%d:bs:%lld:mult:%f\n",
                     diskInfo->special, diskInfo->name,
                     inpool, diskInfo->blockSize, mult);
 #else
-        printf ("tot:%s:%s:inp:%d:bs:%ld:mult:%f\n", 
+        printf ("tot:%s:%s:inp:%d:bs:%ld:mult:%f\n",
                     diskInfo->special, diskInfo->name,
                     inpool, diskInfo->blockSize, mult);
 #endif
@@ -1602,6 +1606,11 @@ checkFileInfo (diData, optidx, argc, argv)
 
                 dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
 
+                if (found && ! inpool)
+                {
+                  break;
+                }
+
                     /* is it a pooled filesystem type? */
                 if (diData->haspooledfs &&
                     (strcmp (dinfo->fsType, "zfs") == 0 ||
@@ -1619,7 +1628,7 @@ checkFileInfo (diData, optidx, argc, argv)
                   if (strncmp (lastpool, dinfo->special, lastpoollen) == 0)
                   {
                     startpool = TRUE;
-                    if (inpool == FALSE) 
+                    if (inpool == FALSE)
                     {
                       poolmain = TRUE;
                     }
@@ -1633,7 +1642,7 @@ checkFileInfo (diData, optidx, argc, argv)
                   saveIdx = j;
                 }
 
-                if (found)
+                if (found && inpool)
                 {
                   dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
                   dinfo->printFlag = DI_PRNT_SKIP;
@@ -1644,9 +1653,9 @@ checkFileInfo (diData, optidx, argc, argv)
                   }
                 }
 
-                if (dinfo->printFlag == DI_PRNT_IGNORE &&
-                    dinfo->st_dev != DI_UNKNOWN_DEV &&
-                    (__ulong) statBuf.st_dev == dinfo->st_dev)
+                if (dinfo->st_dev != DI_UNKNOWN_DEV &&
+                    (__ulong) statBuf.st_dev == dinfo->st_dev &&
+                    strcmp (dinfo->fsType, "lofs") != 0)
                 {
                   dinfo->printFlag = DI_PRNT_FORCE;
                   found = TRUE;
@@ -1904,8 +1913,8 @@ getDiskSpecialInfo (diData)
             dinfo->sp_rdev = (__ulong) statBuf.st_rdev;
             if (debug > 2)
             {
-                printf ("special dev: %s: %ld rdev: %ld\n",
-                        dinfo->special, dinfo->sp_dev,
+                printf ("special dev: %s %s: %ld rdev: %ld\n",
+                        dinfo->special, dinfo->name, dinfo->sp_dev,
                         dinfo->sp_rdev);
             }
         }
@@ -1936,8 +1945,6 @@ checkDiskInfo (diData)
     int             j;
     int             dupCount;
     _fs_size_t      temp;
-    __ulong         sp_dev;
-    __ulong         sp_rdev;
     diOptions_t     *diopts;
 
 
@@ -1964,7 +1971,7 @@ checkDiskInfo (diData)
         }
 
           /* need to check against include list */
-        if (dinfo->printFlag == DI_PRNT_IGNORE || 
+        if (dinfo->printFlag == DI_PRNT_IGNORE ||
             dinfo->printFlag == DI_PRNT_SKIP)
         {
           if (debug > 2)
@@ -2042,33 +2049,40 @@ checkDiskInfo (diData)
         diDiskInfo_t        *dinfo;
 
         dinfo = &diData->diskInfo[i];
-        if (dinfo->printFlag == DI_PRNT_IGNORE ||
-            dinfo->printFlag == DI_PRNT_EXCLUDE ||
-            dinfo->printFlag == DI_PRNT_BAD ||
-            dinfo->printFlag == DI_PRNT_OUTOFZONE)
+        if (dinfo->printFlag != DI_PRNT_OK)
         {
-            if (debug > 2)
-            {
-                printf ("dup: chk: skipping(%s):%s\n",
-                    getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
-            }
-            continue;
+          if (debug > 2)
+          {
+              printf ("dup: chk: skipping(%s):%s\n",
+                  getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
+          }
+          continue;
         }
 
             /* don't need to bother checking real partitions */
             /* don't bother if already ignored               */
         if (dinfo->sp_rdev != 0 &&
-            dinfo->printFlag == DI_PRNT_OK)
+            dinfo->printFlag == DI_PRNT_OK &&
+            strcmp (dinfo->fsType, "lofs") == 0)
         {
+          __ulong         sp_dev;
+          __ulong         sp_rdev;
+
           sp_dev = dinfo->sp_dev;
           sp_rdev = dinfo->sp_rdev;
           dupCount = 0;
 
           for (j = 0; j < diData->count; ++j)
           {
-              if (diData->diskInfo [j].sp_dev == sp_rdev)
+              if (diData->diskInfo [j].st_dev == sp_dev)
               {
-                  ++dupCount;
+                if (debug > 2) 
+                {
+                  printf ("dup: for %s %ld: found: %s %ld\n",
+                      dinfo->name, sp_dev, diData->diskInfo[j].name,
+                      diData->diskInfo [j].st_dev);
+                }
+                ++dupCount;
               }
           }
 
@@ -2083,10 +2097,10 @@ checkDiskInfo (diData)
             diDiskInfo_t        *dinfob;
 
             dinfob = &diData->diskInfo [j];
-                /* don't reset flags! */
-            if (dinfob->sp_rdev == 0 &&
-                dinfob->sp_dev == sp_rdev &&
-                dinfob->printFlag == DI_PRNT_OK)
+            if (dinfob->printFlag == DI_PRNT_OK &&
+                dinfob->sp_rdev != 0 &&
+                dinfob->st_dev == sp_dev &&
+                strcmp (dinfob->fsType, "lofs") == 0)
             {
               dinfob->printFlag = DI_PRNT_IGNORE;
               dinfob->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
@@ -3051,6 +3065,6 @@ getPrintFlagText (pf)
         pf == DI_PRNT_IGNORE ? "ignore" :
         pf == DI_PRNT_EXCLUDE ? "exclude" :
         pf == DI_PRNT_OUTOFZONE ? "outofzone" :
-        pf == DI_PRNT_FORCE ? "force" : 
+        pf == DI_PRNT_FORCE ? "force" :
         pf == DI_PRNT_SKIP ? "skip" : "unknown";
 }
