@@ -38,4 +38,5 @@ diff -w vars.sh vars.pl
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 
+rm -f config.h.sh config.h.pl cache.pl cache.sh vars.pl vars.sh
 exit $grc
