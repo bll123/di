@@ -1705,7 +1705,7 @@ static void
 #if _proto_stdc
 sortArray (diOptions_t *diopts, diDiskInfo_t *data, int count, int sidx)
 #else
-sortArray (diopts, data, count)
+sortArray (diopts, data, count, sidx)
     diOptions_t     *diopts;
     diDiskInfo_t    *data;
     int             count;
