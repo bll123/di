@@ -91,7 +91,7 @@ all-perl:	di.env
 di-all-test:	pretests.done tests.done
 
 pretests.done:
-	cd $(MKCONFIGPATH); $(MAKE) -e tests.done
+	cd $(MKCONFIGPATH); $(MAKE) CC=$(CC) tests.done
 
 tests.done: $(MKCONFIGPATH)/runtests.sh
 	@echo "## running tests"
@@ -131,7 +131,7 @@ windows:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
-	$(MAKE) -e \
+	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
@@ -142,7 +142,7 @@ windows-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
-	$(MAKE) -e \
+	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
@@ -150,7 +150,7 @@ windows-gcc:
 
 os2-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
-	$(MAKE) -e MKCONFIG_TYPE=perl \
+	$(MAKE) MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
