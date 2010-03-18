@@ -423,7 +423,7 @@ main (argc, argv)
     diopts->width = 8;
     diopts->inodeWidth = 7;
     diopts->flags = 0;
-#if linux /* Linux loopback works differently than Solaris */
+#if ! SunOS /* Solaris loopback devices should be excluded */
     diopts->flags |= DI_F_INCLUDE_LOOPBACK;
 #endif
     strcpy (diopts->sortType, "m"); /* default - sort by mount point */
@@ -2076,7 +2076,7 @@ checkDiskInfo (diData)
           {
               if (diData->diskInfo [j].st_dev == sp_dev)
               {
-                if (debug > 2) 
+                if (debug > 2)
                 {
                   printf ("dup: for %s %ld: found: %s %ld\n",
                       dinfo->name, sp_dev, diData->diskInfo[j].name,
