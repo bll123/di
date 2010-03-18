@@ -1628,6 +1628,8 @@ di_getDiskEntries (diskInfo, diCount)
 
 #if _lib_sys_dollar_device_scan && _lib_sys_dollar_getdviw
 
+/* Thanks to Craig Berry's VMS::Device for the VMS code. */
+
 char *monthNames[12] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
   "Oct", "Nov", "Dec" };

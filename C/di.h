@@ -226,6 +226,8 @@ extern int getopt _((int, char * const [], const char *));
 
 # if _lib_sys_dollar_device_scan && _lib_sys_dollar_getdviw
 
+/* Thanks to Craig Berry's VMS::Device for the VMS code. */
+
 typedef struct {
   short   buflen;          /* Length of output buffer */
   short   itmcode;         /* Item code */
