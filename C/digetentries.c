@@ -1920,9 +1920,8 @@ di_getDiskEntries (diskInfo, diCount)
 
     /* reset this so there's room for the next device name */
     devNameDesc.dsc$w_length = 64;
+    trimChar (diptr->options, ',');
   } /* while there are entries */
-
-  trimChar (diptr->options, ',');
 
   for (i = 0; i < devInfoListCount; i++) {
     free (returnBuffers[i]);
