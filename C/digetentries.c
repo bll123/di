@@ -1657,183 +1657,21 @@ genericID_t devInfoList[] =
 #ifdef DVI$_VOLNAM
   DVI_ENT(VOLNAM, 12, DVI_IS_STRING),
 #endif
-/* these might be useful at some point */
-/*
-#ifdef DVI$_HOST_NAME
-  DVI_ENT(HOST_NAME, 64, DVI_IS_STRING),
+#ifdef DVI$_AVL
+  DVI_ENT(AVL, 4, DVI_IS_LONGWORD),
 #endif
-#ifdef DVI$_HOST_TYPE
-  DVI_ENT(HOST_TYPE, 64, DVI_IS_STRING),
+#ifdef DVI$_MNT
+  DVI_ENT(MNT, 4, DVI_IS_LONGWORD),
 #endif
-#ifdef DVI$_LOGVOLNAM
-  DVI_ENT(LOGVOLNAM, 64, DVI_IS_STRING),
+#ifdef DVI$_ODS2_SUBSET0
+  DVI_ENT(ODS2_SUBSET0, 4, DVI_IS_LONGWORD),
 #endif
-#ifdef DVI$_DEVICE_TYPE_NAME
-  DVI_ENT(DEVICE_TYPE_NAME, 64, DVI_IS_STRING),
+#ifdef DVI$_ODS5
+  DVI_ENT(ODS5, 4, DVI_IS_LONGWORD),
 #endif
-#ifdef DVI$_ALLDEVNAM
-  DVI_ENT(ALLDEVNAM, 64, DVI_IS_STRING),
+#ifdef DVI$_NET
+  DVI_ENT(NET, 4, DVI_IS_LONGWORD),
 #endif
-#ifdef DVI$_FULLDEVNAM
-  DVI_ENT(FULLDEVNAM, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_DEVNAM
-  DVI_ENT(DEVNAM, 64, DVI_IS_STRING),
-#endif
-*/
-/* might need some of these for mount options */
-/*
-#ifdef DVI$_ALT_HOST_AVAIL
-  DVI_ENT(ALT_HOST_AVAIL, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_ALT_HOST_NAME
-  DVI_ENT(ALT_HOST_NAME, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_ALT_HOST_TYPE
-  DVI_ENT(ALT_HOST_TYPE, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_CLUSTER
-  DVI_ENT(CLUSTER, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_HOST_AVAIL
-  DVI_ENT(HOST_AVAIL, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_HOST_COUNT
-  DVI_ENT(HOST_COUNT, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_ACPPID
-  DVI_ENT(ACPPID, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_ACPTYPE
-  DVI_ENT(ACPTYPE, 4, DVI_IS_ENUM),
-#endif
-#ifdef DVI$_ALLOCLASS
-  DVI_ENT(ALLOCLASS, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_CYLINDERS
-  DVI_ENT(CYLINDERS, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_DEVCHAR
-  DVI_ENT(DEVCHAR, 4, DVI_IS_BITMAP),
-#endif
-#ifdef DVI$_DEVCLASS
-  DVI_ENT(DEVCLASS, 4, DVI_IS_ENUM),
-#endif
-#ifdef DVI$_DEVDEPEND
-  DVI_ENT(DEVDEPEND, 4, DVI_IS_BITMAP),
-#endif
-#ifdef DVI$_DEVDEPEND2
-  DVI_ENT(DEVDEPEND2, 4, DVI_IS_BITMAP),
-#endif
-#ifdef DVI$_DEVLOCKNAM
-  DVI_ENT(DEVLOCKNAM, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_DEVSTS
-  DVI_ENT(DEVSTS, 4, DVI_IS_BITMAP),
-#endif
-#ifdef DVI$_DEVTYPE
-  DVI_ENT(DEVTYPE, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_DFS_ACCESS
-  DVI_ENT(DFS_ACCESS, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_ERRCNT
-  DVI_ENT(ERRCNT, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_LOCKID
-  DVI_ENT(LOCKID, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_MEDIA_ID
-  DVI_ENT(MEDIA_ID, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_MEDIA_NAME
-  DVI_ENT(MEDIA_NAME, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_MEDIA_TYPE
-  DVI_ENT(MEDIA_TYPE, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_MOUNTCNT
-  DVI_ENT(MOUNTCNT, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_MSCP_UNIT_NUMBER
-  DVI_ENT(MSCP_UNIT_NUMBER, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_NEXTDEVNAM
-  DVI_ENT(NEXTDEVNAM, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_OPCNT
-  DVI_ENT(OPCNT, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_OWNUIC
-  DVI_ENT(OWNUIC, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_PID
-  DVI_ENT(PID, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_RECSIZ
-  DVI_ENT(RECSIZ, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_REFCNT
-  DVI_ENT(REFCNT, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_ROOTDEVNAM
-  DVI_ENT(ROOTDEVNAM, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_SECTORS
-  DVI_ENT(SECTORS, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SERIALNUM
-  DVI_ENT(SERIALNUM, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SERVED_DEVICE
-  DVI_ENT(SERVED_DEVICE, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SHDW_CATCHUP_COPYING
-  DVI_ENT(SHDW_CATCHUP_COPYING, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SHDW_FAILED_MEMBER
-  DVI_ENT(SHDW_FAILED_MEMBER, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SHDW_MASTER
-  DVI_ENT(SHDW_MASTER, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SHDW_MASTER_NAME
-  DVI_ENT(SHDW_MASTER_NAME, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_SHDW_MEMBER
-  DVI_ENT(SHDW_MEMBER, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SHDW_MERGE_COPYING
-  DVI_ENT(SHDW_MERGE_COPYING, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SHDW_NEXT_MBR_NAME
-  DVI_ENT(SHDW_NEXT_MBR_NAME, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_STS
-  DVI_ENT(STS, 4, DVI_IS_BITMAP),
-#endif
-#ifdef DVI$_TRACKS
-  DVI_ENT(TRACKS, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_TRANSCNT
-  DVI_ENT(TRANSCNT, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_UNIT
-  DVI_ENT(UNIT, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_VOLCOUNT
-  DVI_ENT(VOLCOUNT, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_VOLNUMBER
-  DVI_ENT(VOLNUMBER, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_VOLSETMEM
-  DVI_ENT(VOLSETMEM, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_VPROT
-  DVI_ENT(VPROT, 4, DVI_IS_LONGWORD),
-#endif
-*/
   {NULL, 0, 0, 0}
 };
 #define devInfoListCount ((sizeof(devInfoList)/sizeof (genericID_t)) - 1)
@@ -1848,186 +1686,243 @@ di_getDiskEntries (diskInfo, diCount)
     int *diCount;
 # endif
 {
-    diDiskInfo_t    *diptr;
-    int             idx;
-    unsigned short  devNameLen;
-    unsigned short  devReturnLen;
-    unsigned int    deviceClass;
-    char            context[8] = {0,0,0,0,0,0,0,0};
-    struct dsc$descriptor_s devNameDesc;
-    struct dsc$descriptor_s devSearchNameDesc;
-    VMS_ITMLST      scanItemList;
-    VMS_ITMLST      *itemList;
-    unsigned short  *returnLengths;
-    char            **returnBuffers;
-    long            *tempLong;
-    char            returnedDevName [65];
-    unsigned short  returnedTime[7];
-    char            displayTime[100];
-    int             i;
-    int             status;
+  diDiskInfo_t    *diptr;
+  int             idx;
+  unsigned short  devNameLen;
+  unsigned short  devReturnLen;
+  unsigned int    deviceClass;
+  char            context[8] = {0,0,0,0,0,0,0,0};
+  struct dsc$descriptor_s devNameDesc;
+  struct dsc$descriptor_s devSearchNameDesc;
+  VMS_ITMLST      scanItemList;
+  VMS_ITMLST      *itemList;
+  unsigned short  *returnLengths;
+  char            **returnBuffers;
+  long            *tempLong;
+  char            returnedDevName [65];
+  unsigned short  returnedTime[7];
+  char            displayTime[100];
+  int             i;
+  int             status;
 # ifdef __ALPHA
-    __int64         *tempLongLong;
+  __int64         *tempLongLong;
 # endif
-    _fs_size_t      freeBlocks;
-    _fs_size_t      totBlocks;
-    _fs_size_t      maxFiles;
-    _fs_size_t      tblocksz;
+  _fs_size_t      freeBlocks;
+  _fs_size_t      totBlocks;
+  _fs_size_t      maxFiles;
+  _fs_size_t      tblocksz;
 
 
-    if (debug > 0) { printf ("# getDiskEntries: sys$device_scan/sys$getdviw\n"); }
+  if (debug > 0) { printf ("# getDiskEntries: sys$device_scan/sys$getdviw\n"); }
+
+  devNameDesc.dsc$a_pointer = returnedDevName;
+  devNameDesc.dsc$w_length = 64;
+  devNameDesc.dsc$b_dtype = DSC$K_DTYPE_T;
+  devNameDesc.dsc$b_class = DSC$K_CLASS_S;
+
+  devSearchNameDesc.dsc$a_pointer = "*";
+  devSearchNameDesc.dsc$w_length = 1;
+  devSearchNameDesc.dsc$b_dtype = DSC$K_DTYPE_T;
+  devSearchNameDesc.dsc$b_class = DSC$K_CLASS_S;
+
+  memset (&scanItemList, 0, sizeof(VMS_ITMLST));
+  itemList = malloc (sizeof(VMS_ITMLST) * (devInfoListCount));
+  memset (itemList, 0, sizeof(VMS_ITMLST) * (devInfoListCount));
+  returnBuffers = (char **) malloc (sizeof (char *) * devInfoListCount);
+  returnLengths = malloc (sizeof(short) * devInfoListCount);
+
+  for (i = 0; i < devInfoListCount; i++) {
+    returnBuffers[i] = malloc (devInfoList[i].bufferLen + 1);
+    memset (returnBuffers[i], 0, devInfoList[i].bufferLen + 1);
+    init_itemlist (&itemList[i], devInfoList[i].bufferLen,
+          devInfoList[i].syscallValue, returnBuffers[i],
+          &returnLengths[i]);
+  }
+
+  deviceClass = DC$_DISK;
+  init_itemlist (&scanItemList, sizeof(deviceClass),
+     DVS$_DEVCLASS, &deviceClass, NULL);
+
+  while (sys$device_scan (&devNameDesc, &devReturnLen,
+          &devSearchNameDesc, &scanItemList, context) == SS$_NORMAL) {
+    idx = *diCount;
+    ++*diCount;
+    *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+        sizeof (diDiskInfo_t) * (Size_t) *diCount);
+    diptr = *diskInfo + idx;
+    di_initDiskInfo (diptr);
+
+    returnedDevName [devReturnLen] = '\0';
+
+    if (debug > 4)
+    {
+      printf ("%s\n", returnedDevName);
+    }
 
     devNameDesc.dsc$a_pointer = returnedDevName;
-    devNameDesc.dsc$w_length = 64;
+    devNameDesc.dsc$w_length = devReturnLen;
     devNameDesc.dsc$b_dtype = DSC$K_DTYPE_T;
     devNameDesc.dsc$b_class = DSC$K_CLASS_S;
 
-    devSearchNameDesc.dsc$a_pointer = "*";
-    devSearchNameDesc.dsc$w_length = 1;
-    devSearchNameDesc.dsc$b_dtype = DSC$K_DTYPE_T;
-    devSearchNameDesc.dsc$b_class = DSC$K_CLASS_S;
-
-    memset (&scanItemList, 0, sizeof(VMS_ITMLST));
-    itemList = malloc (sizeof(VMS_ITMLST) * (devInfoListCount));
-    memset (itemList, 0, sizeof(VMS_ITMLST) * (devInfoListCount));
-    returnBuffers = (char **) malloc (sizeof (char *) * devInfoListCount);
-    returnLengths = malloc (sizeof(short) * devInfoListCount);
-
-    for (i = 0; i < devInfoListCount; i++) {
-      returnBuffers[i] = malloc (devInfoList[i].bufferLen + 1);
-      memset (returnBuffers[i], 0, devInfoList[i].bufferLen + 1);
-      init_itemlist (&itemList[i], devInfoList[i].bufferLen,
-            devInfoList[i].syscallValue, returnBuffers[i],
-            &returnLengths[i]);
+    strncpy (diptr->fsType, "ODS-2", DI_TYPE_LEN);
+    /* _$9$LDA2: */
+    if (strlen (returnedDevName) > 4 && returnedDevName[4] == 'L')
+    {
+      strncpy (diptr->fsType, "LD", DI_TYPE_LEN);
+    }
+    status = sys$getdviw(0, 0, &devNameDesc, itemList,
+            NULL, NULL, NULL, NULL);
+    if (status == SS$_NORMAL) {
+      for (i = 0; i < devInfoListCount; i++) {
+        switch (devInfoList[i].returnType) {
+          case DVI_IS_STRING:
+            if (debug > 4)
+            {
+              printf ("  string:");
+              printf ("%s:", devInfoList[i].name);
+              printf ("%*s:\n", (int) returnLengths[i],
+                      (char *) returnBuffers[i]);
+            }
+            if (strcmp (devInfoList[i].name, "DISPLAY_DEVNAM") == 0)
+            {
+                strncpy (diptr->special, returnBuffers[i], returnLengths[i]);
+                diptr->special[returnLengths[i]] = '\0';
+            }
+            if (strcmp (devInfoList[i].name, "VOLNAM") == 0)
+            {
+                strncpy (diptr->name, returnBuffers[i], returnLengths[i]);
+                diptr->name[returnLengths[i]] = '\0';
+            }
+            break;
+          case DVI_IS_VMSDATE:
+            sys$numtim (returnedTime, returnBuffers[i]);
+            sprintf (displayTime, "%02hi-%s-%hi %02hi:%02hi:%02hi.%02hi",
+                    returnedTime[2], monthNames[returnedTime[1] - 1],
+                    returnedTime[0], returnedTime[3], returnedTime[4],
+                    returnedTime[5], returnedTime[6]);
+            if (debug > 4)
+            {
+              printf ("  date:");
+              printf ("%s:", devInfoList[i].name);
+              printf ("%s:\n", displayTime);
+            }
+            break;
+          case DVI_IS_ENUM:
+            tempLong = (long *) returnBuffers[i];
+            if (debug > 4)
+            {
+              printf ("  enum:");
+              printf ("%s:", devInfoList[i].name);
+              printf ("%ld:\n", *tempLong);
+            }
+            break;
+          case DVI_IS_BITMAP:
+          case DVI_IS_LONGWORD:
+            tempLong = (long *) returnBuffers[i];
+            if (debug > 4)
+            {
+              printf ("  long:");
+              printf ("%s:", devInfoList[i].name);
+              printf ("%ld:\n", *tempLong);
+            }
+            if (strcmp (devInfoList[i].name, "MAXBLOCK") == 0)
+            {
+                totBlocks = *tempLong;
+            }
+            if (strcmp (devInfoList[i].name, "FREEBLOCKS") == 0)
+            {
+                freeBlocks = *tempLong;
+            }
+            if (strcmp (devInfoList[i].name, "MAXFILES") == 0)
+            {
+                maxFiles = *tempLong;
+            }
+            if (strcmp (devInfoList[i].name, "REMOTE_DEVICE") == 0)
+            {
+                if (*tempLong == 1L)
+                {
+                    diptr->isLocal = FALSE;
+                }
+            }
+            if (strcmp (devInfoList[i].name, "NET") == 0)
+            {
+                if (*tempLong == 1L)
+                {
+                    diptr->isLocal = FALSE;
+                }
+            }
+            if (strcmp (devInfoList[i].name, "DEVBUFSIZ") == 0)
+            {
+                tblocksz = *tempLong;
+            }
+            if (strcmp (devInfoList[i].name, "AVL") == 0)
+            {
+              if (*tempLong == 0L)
+              {
+                diptr->printFlag = DI_PRNT_IGNORE;
+                strncat (diptr->options, "Offline,",
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+              }
+              if (*tempLong == 1L)
+              {
+                strncat (diptr->options, "Online,",
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+              }
+            }
+            if (strcmp (devInfoList[i].name, "MNT") == 0)
+            {
+              if (*tempLong == 1L)
+              {
+                strncat (diptr->options, "Mounted,",
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+              }
+              else
+              {
+                diptr->printFlag = DI_PRNT_IGNORE;
+              }
+            }
+            if (strcmp (devInfoList[i].name, "ODS2_SUBSET0") == 0)
+            {
+              if (*tempLong == 1L)
+              {
+                strncpy (diptr->fsType, "ODS-2/0", DI_TYPE_LEN);
+              }
+            }
+            if (strcmp (devInfoList[i].name, "ODS5") == 0)
+            {
+              if (*tempLong == 1L)
+              {
+                strncpy (diptr->fsType, "ODS-5", DI_TYPE_LEN);
+              }
+            }
+            break;
+# ifdef __ALPHA
+          case DVI_IS_QUADWORD:
+            tempLongLong = (__int64 *) returnBuffers[i];
+            if (debug > 4)
+            {
+              printf ("  quad:");
+              printf ("%s:", devInfoList[i].name);
+              printf ("%llu:\n", (long long) *tempLongLong);
+            }
+            break;
+# endif
+          }
+      }
+    } else {
+      /* fail */
+      ;
     }
 
-    deviceClass = DC$_DISK;
-    init_itemlist (&scanItemList, sizeof(deviceClass),
-       DVS$_DEVCLASS, &deviceClass, NULL);
+    di_saveBlockSizes (diptr, tblocksz,
+          totBlocks, freeBlocks, freeBlocks);
+    di_saveInodeSizes (diptr, maxFiles, 0, 0);
 
-    while (sys$device_scan (&devNameDesc, &devReturnLen,
-            &devSearchNameDesc, &scanItemList, context) == SS$_NORMAL) {
-      idx = *diCount;
-      ++*diCount;
-      *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
-          sizeof (diDiskInfo_t) * (Size_t) *diCount);
-      diptr = *diskInfo + idx;
-      di_initDiskInfo (diptr);
+    /* reset this so there's room for the next device name */
+    devNameDesc.dsc$w_length = 64;
+  } /* while there are entries */
 
-      returnedDevName [devReturnLen] = '\0';
-
-      if (debug > 4)
-      {
-        printf ("%s\n", returnedDevName);
-      }
-
-      devNameDesc.dsc$a_pointer = returnedDevName;
-      devNameDesc.dsc$w_length = devReturnLen;
-      devNameDesc.dsc$b_dtype = DSC$K_DTYPE_T;
-      devNameDesc.dsc$b_class = DSC$K_CLASS_S;
-
-      status = sys$getdviw(0, 0, &devNameDesc, itemList,
-              NULL, NULL, NULL, NULL);
-      if (status == SS$_NORMAL) {
-        for (i = 0; i < devInfoListCount; i++) {
-          switch (devInfoList[i].returnType) {
-            case DVI_IS_STRING:
-              if (debug > 4)
-              {
-                printf ("  string:");
-                printf ("%s:", devInfoList[i].name);
-                printf ("%*s:\n", (int) returnLengths[i],
-                        (char *) returnBuffers[i]);
-              }
-              if (strcmp (devInfoList[i].name, "DISPLAY_DEVNAM") == 0)
-              {
-                  strncpy (diptr->special, returnBuffers[i], returnLengths[i]);
-                  diptr->special[returnLengths[i]] = '\0';
-              }
-              if (strcmp (devInfoList[i].name, "VOLNAM") == 0)
-              {
-                  strncpy (diptr->name, returnBuffers[i], returnLengths[i]);
-                  diptr->name[returnLengths[i]] = '\0';
-              }
-              break;
-            case DVI_IS_VMSDATE:
-              sys$numtim (returnedTime, returnBuffers[i]);
-              sprintf (displayTime, "%02hi-%s-%hi %02hi:%02hi:%02hi.%02hi",
-                      returnedTime[2], monthNames[returnedTime[1] - 1],
-                      returnedTime[0], returnedTime[3], returnedTime[4],
-                      returnedTime[5], returnedTime[6]);
-              if (debug > 4)
-              {
-                printf ("  date:");
-                printf ("%s:", devInfoList[i].name);
-                printf ("%s:\n", displayTime);
-              }
-              break;
-            case DVI_IS_ENUM:
-              tempLong = (long *) returnBuffers[i];
-              if (debug > 4)
-              {
-                printf ("  enum:");
-                printf ("%s:", devInfoList[i].name);
-                printf ("%ld:\n", *tempLong);
-              }
-              break;
-            case DVI_IS_BITMAP:
-            case DVI_IS_LONGWORD:
-              tempLong = (long *) returnBuffers[i];
-              if (debug > 4)
-              {
-                printf ("  long:");
-                printf ("%s:", devInfoList[i].name);
-                printf ("%ld:\n", *tempLong);
-              }
-              if (strcmp (devInfoList[i].name, "MAXBLOCK") == 0)
-              {
-                  totBlocks = *tempLong;
-              }
-              if (strcmp (devInfoList[i].name, "FREEBLOCKS") == 0)
-              {
-                  freeBlocks = *tempLong;
-              }
-              if (strcmp (devInfoList[i].name, "MAXFILES") == 0)
-              {
-                  maxFiles = *tempLong;
-              }
-              if (strcmp (devInfoList[i].name, "REMOTE_DEVICE") == 0)
-              {
-                  if (*tempLong == 1L)
-                  {
-                      diptr->isLocal = FALSE;
-                  }
-              }
-              if (strcmp (devInfoList[i].name, "DEVBUFSIZ") == 0)
-              {
-                  tblocksz = *tempLong;
-              }
-              break;
-# ifdef __ALPHA
-            case DVI_IS_QUADWORD:
-              tempLongLong = (__int64 *) returnBuffers[i];
-              if (debug > 4)
-              {
-                printf ("  quad:");
-                printf ("%s:", devInfoList[i].name);
-                printf ("%llu:\n", (long long) *tempLongLong);
-              }
-              break;
-# endif
-            }
-        }
-      } else {
-        /* fail */
-        ;
-      }
-
-      di_saveBlockSizes (diptr, tblocksz,
-            totBlocks, freeBlocks, freeBlocks);
-      di_saveInodeSizes (diptr, maxFiles, 0, 0);
-
-  } /* for each entry */
+  trimChar (diptr->options, ',');
 
   for (i = 0; i < devInfoListCount; i++) {
     free (returnBuffers[i]);
