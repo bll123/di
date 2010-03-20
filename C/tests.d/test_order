@@ -1,10 +1,10 @@
 1 compshpl
 1 buildpl
 2 buildsh
-3 diarg
+4 diarg
 3 diexec
-3 diinst
-4 dinls
-3 disort
-3 ditot
+4 diinst
+5 dinls
+4 disort
+4 ditot
 3 rpmbuild
