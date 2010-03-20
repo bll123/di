@@ -1663,6 +1663,9 @@ genericID_t devInfoList[] =
 #ifdef DVI$_MNT
   DVI_ENT(MNT, 4, DVI_IS_LONGWORD),
 #endif
+#ifdef DVI$_SHR
+  DVI_ENT(SHR, 4, DVI_IS_LONGWORD),
+#endif
 #ifdef DVI$_ODS2_SUBSET0
   DVI_ENT(ODS2_SUBSET0, 4, DVI_IS_LONGWORD),
 #endif
@@ -1671,6 +1674,18 @@ genericID_t devInfoList[] =
 #endif
 #ifdef DVI$_NET
   DVI_ENT(NET, 4, DVI_IS_LONGWORD),
+#endif
+#ifdef DVI$_DEVICE_TYPE_NAME
+  DVI_ENT(DEVICE_TYPE_NAME, 64, DVI_IS_STRING),
+#endif
+#ifdef DVI$_SHDW_MASTER
+  DVI_ENT(SHDW_MASTER, 4, DVI_IS_LONGWORD),
+#endif
+#ifdef DVI$_SHDW_MEMBER
+  DVI_ENT(SHDW_MEMBER, 4, DVI_IS_LONGWORD),
+#endif
+#ifdef DVI$_SHDW_MASTER_NAME
+  DVI_ENT(SHDW_MASTER_NAME, 64, DVI_IS_STRING),
 #endif
   {NULL, 0, 0, 0}
 };
@@ -1770,6 +1785,7 @@ di_getDiskEntries (diskInfo, diCount)
     {
       strncpy (diptr->fsType, "LD", DI_TYPE_LEN);
     }
+
     status = sys$getdviw(0, 0, &devNameDesc, itemList,
             NULL, NULL, NULL, NULL);
     if (status == SS$_NORMAL) {
@@ -1792,6 +1808,26 @@ di_getDiskEntries (diskInfo, diCount)
             {
                 strncpy (diptr->name, returnBuffers[i], returnLengths[i]);
                 diptr->name[returnLengths[i]] = '\0';
+            }
+            if (strcmp (devInfoList[i].name, "DEVICE_TYPE_NAME") == 0)
+            {
+              returnBuffers[i][returnLengths[i]] = '\0';
+              strncat (diptr->options, "dev=",
+                  DI_OPT_LEN - strlen (diptr->options) - 1);
+              strncat (diptr->options, returnBuffers[i],
+                  DI_OPT_LEN - strlen (diptr->options) - 1);
+              strncat (diptr->options, ",",
+                  DI_OPT_LEN - strlen (diptr->options) - 1);
+            }
+            if (strcmp (devInfoList[i].name, "SHDW_MASTER_NAME") == 0)
+            {
+              if (returnLengths[i] > 0) {
+                returnBuffers[i][returnLengths[i]] = '\0';
+                strncat (diptr->options, returnBuffers[i],
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+                strncat (diptr->options, "),",
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+              }
             }
             break;
           case DVI_IS_VMSDATE:
@@ -1881,6 +1917,30 @@ di_getDiskEntries (diskInfo, diCount)
                 diptr->printFlag = DI_PRNT_IGNORE;
               }
             }
+            if (strcmp (devInfoList[i].name, "SHR") == 0)
+            {
+              if (*tempLong == 1L)
+              {
+                strncat (diptr->options, "Shareable,",
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+              }
+            }
+            if (strcmp (devInfoList[i].name, "SHDW_MASTER") == 0)
+            {
+              if (*tempLong == 1L)
+              {
+                strncat (diptr->options, "Shadow Master,",
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+              }
+            }
+            if (strcmp (devInfoList[i].name, "SHDW_MEMBER") == 0)
+            {
+              if (*tempLong == 1L)
+              {
+                strncat (diptr->options, "Shadow Member(",
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+              }
+            }
             if (strcmp (devInfoList[i].name, "ODS2_SUBSET0") == 0)
             {
               if (*tempLong == 1L)
@@ -1918,7 +1978,7 @@ di_getDiskEntries (diskInfo, diCount)
           totBlocks, freeBlocks, freeBlocks);
     di_saveInodeSizes (diptr, maxFiles, 0, 0);
 
-    /* reset this so there's room for the next device name */
+    /* reset this so there's room during the next syscall */
     devNameDesc.dsc$w_length = 64;
     trimChar (diptr->options, ',');
   } /* while there are entries */
