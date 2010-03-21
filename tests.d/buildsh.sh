@@ -22,8 +22,9 @@ if [ -x /bin/bash ]; then
   export _MKCONFIG_SHELL=bash
   dotest
 fi
-if [ -x /bin/ksh ]; then
-  tshell=`/usr/bin/ksh -c ". $mypath/shellfuncs.sh;getshelltype"`
+if [ -x /usr/bin/ksh ]; then
+  cmd="/usr/bin/ksh -c \". $mypath/shellfuncs.sh;getshelltype;echo \\\$shell\""
+  tshell=`eval $cmd`
   case $tshell in
     pdksh)
       ;;
