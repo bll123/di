@@ -19,7 +19,8 @@ dotest () {
 
 echo ${EN} " ${EC}" >&3
 if [ -x /bin/bash ]; then
-  export _MKCONFIG_SHELL=bash
+  _MKCONFIG_SHELL=bash
+  export _MKCONFIG_SHELL
   dotest
 fi
 if [ -x /usr/bin/ksh ]; then
@@ -30,16 +31,19 @@ if [ -x /usr/bin/ksh ]; then
       ;;
     *)
       _MKCONFIG_SHELL=ksh
+      export _MKCONFIG_SHELL
       dotest
       ;;
   esac
 fi
 if [ -x /bin/ash ]; then
   _MKCONFIG_SHELL=ash
+  export _MKCONFIG_SHELL
   dotest
 fi
 if [ -x /bin/dash ]; then
   _MKCONFIG_SHELL=dash
+  export _MKCONFIG_SHELL
   dotest
 fi
 
