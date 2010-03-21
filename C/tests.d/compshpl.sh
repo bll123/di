@@ -15,6 +15,8 @@ make -e config.h
 mv config.h config.h.sh
 cat mkconfig.cache | grep -v '^di_env' | sort > cache.sh
 mv mkconfig_c.vars vars.sh
+echo "##== mkconfig.log (sh)"
+cat mkconfig.log
 
 rm -f mkconfig.cache
 
@@ -22,6 +24,8 @@ make -e MKCONFIG_TYPE=perl config.h
 mv config.h config.h.pl
 cat mkconfig.cache | sort > cache.pl
 mv mkconfig_c.vars vars.pl
+echo "##== mkconfig.log (pl)"
+cat mkconfig.log
 
 echo "##== diff config.h.sh config.h.pl"
 diff -w config.h.sh config.h.pl
