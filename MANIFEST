@@ -1,6 +1,7 @@
 config.bsd43.cc		config.h for bsd43
 config.bsd43.gcc	config.h for bsd43
 config.vms		config.h for VMS
+config.vms.b		alternate config.h for VMS
 config.win		config.h for windows
 di.1			di Manual Page
 di.c			di source
