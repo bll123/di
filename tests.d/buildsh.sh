@@ -5,8 +5,6 @@
 
 echo ${EN} "build w/mkconfig.sh${EC}" >&3
 
-cd $RUNTOPDIR
-grc=0
 dotest () {
   echo ${EN} "${_MKCONFIG_SHELL} ${EC}" >&3
   echo "   testing with ${_MKCONFIG_SHELL} "
@@ -17,47 +15,52 @@ dotest () {
   if [ $rc != 0 ]; then grc=$rc; fi
 }
 
+cd $RUNTOPDIR
+grc=0
 echo ${EN} " ${EC}" >&3
-for s in /bin/sh /bin/bash /bin/posh /bin/ash /bin/dash; do
-  if [ -x $s ]; then
-    ls -l $s | grep -- '->' > /dev/null 2>&1
-    rc1=$?
-    ls -l $s | grep '/etc/alternatives' > /dev/null 2>&1
-    rc2=$?
-    if [ $rc1 -ne 0 -o $rc2 -eq 0 ]; then
-      _MKCONFIG_SHELL=`echo $s | sed 's,.*/,,'`
-      export _MKCONFIG_SHELL
-      dotest
-    fi
-  fi
-done
-for s in /usr/bin/ksh /bin/ksh; do 
-  if [ $s = "/bin/ksh" ]; then
-    ls -l /bin | grep -- '->' > /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-      continue
-    fi
-  fi
 
-  if [ -x $s ]; then
-    ls -l $s | grep -- '->' > /dev/null 2>&1
-    rc1=$?
-    ls -l $s | grep '/etc/alternatives' > /dev/null 2>&1
-    rc2=$?
-    if [ $rc1 -ne 0 -o $rc2 -eq 0 ]; then
-      cmd="$s -c \". $mypath/shellfuncs.sh;getshelltype;echo \\\$shell\""
-      tshell=`eval $cmd`
-      case $tshell in
-        pdksh)
-          ;;
-        *)
-          _MKCONFIG_SHELL=ksh
-          export _MKCONFIG_SHELL
-          dotest
-          ;;
-      esac
+plist=""
+ls -ld /bin | grep -- '->' > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  plist=/bin
+fi
+plist="${plist} /usr/bin /usr/local/bin"
+
+for p in $plist; do
+  for s in sh bash posh ash dash; do
+    if [ -x $p/$s ]; then
+      ls -l $p/$s | grep -- '->' > /dev/null 2>&1
+      rc1=$?
+      ls -l $p/$s | grep '/etc/alternatives' > /dev/null 2>&1
+      rc2=$?
+      if [ $rc1 -ne 0 -o $rc2 -eq 0 ]; then
+        _MKCONFIG_SHELL=${p}/${s}
+        export _MKCONFIG_SHELL
+        dotest
+      fi
     fi
-  fi
+  done
+  for s in ksh; do
+    if [ -x $p/$s ]; then
+      ls -l $p/$s | grep -- '->' > /dev/null 2>&1
+      rc1=$?
+      ls -l $p/$s | grep '/etc/alternatives' > /dev/null 2>&1
+      rc2=$?
+      if [ $rc1 -ne 0 -o $rc2 -eq 0 ]; then
+        cmd="$p/$s -c \". $mypath/shellfuncs.sh;getshelltype;echo \\\$shell\""
+        tshell=`eval $cmd`
+        case $tshell in
+          pdksh)
+            ;;
+          *)
+            _MKCONFIG_SHELL=${p}/${s}
+            export _MKCONFIG_SHELL
+            dotest
+            ;;
+        esac
+      fi
+    fi
+  done
 done
 
 exit $grc
