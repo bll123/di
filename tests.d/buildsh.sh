@@ -56,6 +56,7 @@ for p in $plist; do
           *)
             _MKCONFIG_SHELL=${p}/${s}
             export _MKCONFIG_SHELL
+            shell=$s
             dotest
             ;;
         esac
