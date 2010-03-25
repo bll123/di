@@ -12,6 +12,9 @@ dotest () {
   export _MKCONFIG_SHELL
   cmd="$sh -c \". $MKCONFIG_DIR/shellfuncs.sh;getshelltype;echo \\\$shell\""
   shell=`eval $cmd`
+  if [ "$shell" = "sh" ]; then
+    shell=`echo ${_MKCONFIG_SHELL} | sed 's,.*/,,'`
+  fi
   echo ${EN} "${shell} ${EC}" >&3
   echo "   testing with ${_MKCONFIG_SHELL} "
   make distclean
