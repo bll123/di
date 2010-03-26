@@ -21,7 +21,7 @@ dotest () {
   echo "   testing with ${_MKCONFIG_SHELL} "
   make distclean
   instdir="`pwd`/test_di"
-  time make -e prefix=${instdir} all-sh
+  make -e prefix=${instdir} all-sh
   rc=$?
   if [ $rc != 0 ]; then grc=$rc; fi
 }
