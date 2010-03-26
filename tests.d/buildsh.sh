@@ -10,6 +10,8 @@ dotest () {
 
   _MKCONFIG_SHELL=${sh}
   export _MKCONFIG_SHELL
+  unset _shell
+  unset shell
   cmd="$sh -c \". $MKCONFIG_DIR/shellfuncs.sh;getshelltype;echo \\\$shell\""
   shell=`eval $cmd`
   if [ "$shell" = "sh" ]; then
