@@ -160,16 +160,24 @@ os2-gcc:
 		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
 
 bsd43-cc:
-	$(MAKE) MAKEFLAGS="" SHELL=/usr/local/bin/bash2 \
-		_MKCONFIG_TEST_EXTERN=Y \
-		_MKCONFIG_SHELL=/usr/local/bin/bash2 \
-		CC=cc LD=cc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
+	@echo ':' > di.env;chmod a+rx di.env
+	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	$(CP) -f config.bsd43.cc config.h
+	$(MAKE) \
+		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -O \
+		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
+		LDFLAGS="-O" di-programs
 
 bsd43-gcc:
-	$(MAKE) MAKEFLAGS="" SHELL=/usr/local/bin/bash2 \
-		_MKCONFIG_TEST_EXTERN=Y \
-		_MKCONFIG_SHELL=/usr/local/bin/bash2 \
-		CC=gcc LD=gcc CFLAGS="$(CFLAGS) -O " LDFLAGS="-O " di-programs
+	@echo ':' > di.env;chmod a+rx di.env
+	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	$(CP) -f config.bsd43.gcc config.h
+	$(MAKE) \
+		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -O2 \
+		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
+		LDFLAGS="-O2" di-programs
 
 ###
 # cleaning
