@@ -1,5 +1,5 @@
 Name:           di
-Version:        4.19
+Version:        4.20
 Release:        1%{?dist}
 Summary:        'di' is a disk information utility, displaying everything (and more) that your 'df' command does.
 
@@ -25,13 +25,12 @@ platforms.  Great for heterogenous networks.
 %setup -q
 
 %build
-env LOCALEDIR=/usr/share/locale ./Build config.h
-make LOCALEDIR=/usr/share/locale %{?_smp_mflags}
+make LOCALEDIR=/usr/share/locale
 
 %install
 test -d $RPM_BUILD_ROOT || mkdir $RPM_BUILD_ROOT
 test -d $RPM_BUILD_ROOT/usr || mkdir $RPM_BUILD_ROOT/usr
-make install prefix=$RPM_BUILD_ROOT/usr
+make prefix=$RPM_BUILD_ROOT/usr install
 rm -f $RPM_BUILD_ROOT/usr/bin/mi
 cd $RPM_BUILD_ROOT/usr/bin/
 ln -sf di mi
@@ -44,8 +43,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc README LICENSE MANIFEST
 /usr/bin/di
 /usr/bin/mi
-/usr/share/locale/de_DE/LC_MESSAGES/di.mo
-/usr/share/locale/en_US/LC_MESSAGES/di.mo
+/usr/share/locale/de/LC_MESSAGES/di.mo
+/usr/share/locale/en/LC_MESSAGES/di.mo
 /usr/share/man/man1/di.1.gz
 
 %changelog
