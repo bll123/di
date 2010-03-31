@@ -1,4 +1,14 @@
-di - disk information utility (version 4.19).
+di - disk information utility (version 4.20).
+
+CONTENTS
+  Description
+  Installation
+  Bugs
+  Requirements
+  Porting Information
+  Changes
+  Acknowledgements
+  Copyright
 
 DESCRIPTION
 
@@ -10,25 +20,14 @@ DESCRIPTION
 
 INSTALLATION
 
-  To build with mkconfig.sh:
-
-      ./Build distclean
-      ./Build
-      ./Build install
+   To build with mkconfig.sh:
+      make
+      make install
    Example to change compiler and prefix:
-      CC=gcc prefix=/opt/bin ./Build
-   For BeOS, Haiku:
-      CC=g++ ./Build
-   For Syllable:
-      CC=g++ ./Build -mkpl
-   For OS/2:
-      ./Build -mkpl os2-gcc
-
-  To turn off NLS (internationalization):
-      ./Build -nonls
+      make CC=gcc prefix=/opt/bin
 
   To build with mkconfig.pl (requires perl):
-      ./Build -mkpl
+      make all-perl
 
   The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.
@@ -46,8 +45,8 @@ INSTALLATION
         Cygwin gcc: make windows-gcc
         MS VC++:    nmake windows
     Alternative 2 - builds a new config.h file.
-        ./Build distclean
-        CC=gcc ./Build
+        make distclean
+        make CC=gcc
 
     You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.
@@ -70,78 +69,82 @@ INSTALLATION
     make installperms
 
 BUGS
-    Send bug reports along with the output from 'di -A -a -X 5' and the
-    output from your standard df command (as verbose as possible) to:
+    Send bug reports along with the output from 'di -A -a -X 5',
+    output from your standard df command (as verbose as possible),
+    mkconfig.log, mkconfig_env.log, di.env, and config.h to:
 
         bll6969di_at_gmail.com
 
-    If the Build script doesn't set up the 'config.h'
-    file correctly, please let me know.  E-mail me the incorrect
-    (and corrected if possible) config.h file, and any other
-    information as appropriate.
+    If the 'config.h' doesn't get set up correctly, please let me know.
+    E-mail me the incorrect (and corrected if possible) config.h file,
+    and any other information as appropriate.
 
 REQUIREMENTS
 
-    bourne/ksh/bash/zsh shell
+    bourne/ksh/bash shell
     C compiler
-    Build
-        test
     make
-        cat test
-    features/cflags.sh:
-        grep sed uname
-    features/obj_ext.sh:
-        cat rm
+        cat chmod ln mkdir mv rm sed test
     mkconfig.sh:
         a shell that supports shell functions
-        cat grep rm sed sort uniq
+        cat expr grep sed rm
     mkconfig.pl:
         cat perl rm
     NLS:
         msgfmt sed
         turnoffnls.sh:
             ed
-    make install:
-        cp ln mkdir mv rm sed test
     runtests.sh:
-        ar cat cp dc diff env rm sed sort
+        ar cat cp dc diff env expr grep mv rm sed sort tr
 
 PORTING
 
-    di 4.19 has been tested on the following platforms:
+    di 4.20 has been tested on the following platforms:
         BSD 4.3
-        CentOS 3.9, 4.8, 5.2, 5.3
+        CentOS 3.9, 4.8, 5.2, 5.3, 5.4
         Cygwin
         Debian 4.0, 5.0, kFreeBSD 7.2
-        FreeBSD 4.9, 7.0, 7.1, 7.2, 8.0
+        Fedora 7, 12
+        FreeBSD 4.9, 5.1, 7.0, 7.1, 7.2, 8.0
         Haiku 1
         HP-UX 11.11 (bundled cc, gcc)
         MacOSX 8.11, 9.5
-        NetBSD 2.0.2, 4.0.1, 5.0.1
-        Nexenta 101_b85
-        OpenBSD 4.5
-        RedHat 7.3
+        NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1
+        Nexenta 1.0.1_b85 2.0_b104
+        OpenBSD 4.4 4.5 4.6
+        OpenSolaris 200805
+        RedHat 7.1 7.3
+        RHEL 5.2
         Solaris 8, 9, 10 (cc, gcc3, gcc4)
         Syllable 0.6.6
-        Ubuntu 9
+        Ubuntu 10
+        VMS
 
     di has been ported to the following systems in the past:
 
-        A/UX, AIX, BeOS, BSD 4.3, BSDI, Compaq Tru64, Convex, Cray UNICOS,
-        Cray UNICOS/mk, FreeBSD, Haiku, HP/UX, Linux, MacOS X,
-        NetBSD, Next, OpenBSD, OSF/1, Pyramid, SCO Unix,
+        A/UX, AIX, BeOS, BSD, BSDI, Compaq Tru64, Convex, Cray UNICOS,
+        Cray UNICOS/mk, FreeBSD, Haiku, HP/UX, Linux, MacOSX,
+        NetBSD, Next, OpenBSD, OS/2, OSF/1, Pyramid, SCO Unix,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Syllable,
-        Sys V.3, Sys V.4, Ultrix, Windows, Xenix
+        Sys V.3, Sys V.4, Ultrix, VMS, Windows, Xenix
 
 CHANGES
+
+    4.20                                    [7 mar 2010]
+        Added VMS.
+        Fixed totals for pooled filesystems, again
+          (incorrect sort, skipped fs, pooled fs on command line).
+        Remove initial build script and use new mkconfig.
+        Rewrite makefile.
+        Moved mkconfig to its own package.
+        Move regression tests into tests.d directory.
+        Minor updates to manual page.
 
     4.19                                    [1 Feb 2010]
         Fix totals to add up when using small block sizes.
         Fix totals for mixed pooled and non-pooled filesystems.
         Add fix for automounted directories:
           https://bugzilla.redhat.com/show_bug.cgi?id=497830 (df)
-        Fixed a quoting bug in mkconfig.sh.
-        mkconfig enhancements and cleanup.
         Builds on BSD 4.3.
         Changed format of config.h file.
         Code cleanup.
