@@ -39,13 +39,13 @@ INSTALL_BIN_DIR = $(INSTALL_DIR)/bin
 INST_LOCALEDIR = $(INSTALL_DIR)/share/locale
 PROG = di
 MPROG = mi
-TARGET = $(INSTALL_BIN_DIR)/$(PROG)
-MTARGET = $(INSTALL_BIN_DIR)/$(MPROG)
+TARGET = $(INSTALL_BIN_DIR)/$(PROG)$(EXE_EXT)
+MTARGET = $(INSTALL_BIN_DIR)/$(MPROG)$(EXE_EXT)
 
 #
 # additional flags/libraries
 #
-OTHERFLAGS = -DPROG=\"$(PROG)\" -DMPROG=\"$(MPROG)\" \
+DI_CPPFLAGS = -DPROG=\"$(PROG)\" -DMPROG=\"$(MPROG)\" \
 	-DDI_LOCALE_DIR=\"$(LOCALEDIR)\"
 
 # if you need permissions other than the default,
@@ -230,7 +230,7 @@ install-prog:	di.env di-programs
 	-$(TEST) -f $(TARGET) && $(MV) -f $(TARGET) $(TARGET).old
 	-$(TEST) -f $(MTARGET) && $(MV) -f $(MTARGET) $(MTARGET).old
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
-	-$(LN) -s $(TARGET) $(MTARGET)
+	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old > /dev/null 2>&1
 	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
 	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
@@ -260,12 +260,14 @@ di-programs:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 	@-$(RM) -f config.h tests.done
-	if [ $(MKCONFIG_TYPE) = sh ]; then \
+	if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./di.env;$(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat; fi
-	if [ $(MKCONFIG_TYPE) = perl ]; then \
+	if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
 		. ./di.env;perl \
 		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat; fi
+	if [ "$(DI_NO_NLS)" != "" ]; then \
+		. ./features/turnoffnls.sh; fi
 
 ###
 # executables
@@ -291,31 +293,31 @@ hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
 # objects
 
 di$(OBJ_EXT):		di.c config.h di.h version.h
-	$(CC) -c $(CFLAGS) $(OTHERFLAGS) di.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(DI_CPPFLAGS) di.c
 
 digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
-	$(CC) -c $(CFLAGS) digetinfo.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) digetinfo.c
 
 didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimntopt.h
-	$(CC) -c $(CFLAGS) didiskutil.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) didiskutil.c
 
 digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
-	$(CC) -c $(CFLAGS) digetentries.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) digetentries.c
 
 getopt$(OBJ_EXT):	getopt.c config.h
-	$(CC) -c $(CFLAGS) getopt.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) getopt.c
 
 hasnls$(OBJ_EXT):	hasnls.c config.h
-	$(CC) -c $(CFLAGS) $(OTHERFLAGS) hasnls.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) hasnls.c
 
 realloc$(OBJ_EXT):	realloc.c config.h di.h
-	$(CC) -c $(CFLAGS) realloc.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) realloc.c
 
 strdup$(OBJ_EXT):	strdup.c config.h di.h
-	$(CC) -c $(CFLAGS) strdup.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) strdup.c
 
 strstr$(OBJ_EXT):	strstr.c config.h di.h
-	$(CC) -c $(CFLAGS) strstr.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) strstr.c
 
 trimchar$(OBJ_EXT):	trimchar.c config.h di.h
-	$(CC) -c $(CFLAGS) trimchar.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) trimchar.c
