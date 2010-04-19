@@ -1,4 +1,4 @@
-di - disk information utility (version 4.20).
+di - disk information utility (version 4.21).
 
 CONTENTS
   Description
@@ -29,7 +29,7 @@ INSTALLATION
   To build with mkconfig.pl (requires perl):
       make all-perl
 
-  The CC, CFLAGS, prefix, LDFLAGS, and LIBS environment
+  The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.
 
   The LOCALEDIR environment variable defaults to ${prefix}/share/locale.
@@ -99,8 +99,7 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.20 has been tested on the following platforms:
-        BSD 4.3
+    di 4.21 has been tested on the following platforms:
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4
         Cygwin
         Debian 4.0, 5.0, kFreeBSD 7.2
@@ -112,13 +111,12 @@ PORTING
         NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1
         Nexenta 1.0.1_b85 2.0_b104
         OpenBSD 4.4 4.5 4.6
-        OpenSolaris 200805
+        OpenSolaris 200805 200906
         RedHat 7.1 7.3
         RHEL 5.2
         Solaris 8, 9, 10 (cc, gcc3, gcc4)
         Syllable 0.6.6
         Ubuntu 10
-        VMS
 
     di has been ported to the following systems in the past:
 
@@ -129,6 +127,10 @@ PORTING
         Sys V.3, Sys V.4, Ultrix, VMS, Windows, Xenix
 
 CHANGES
+
+    4.21                                    [11 Apr 2010]
+        Fixed features/turnoffnls.sh.
+        Makefile cleanup (Mike Frysinger).
 
     4.20                                    [7 mar 2010]
         Added VMS.
