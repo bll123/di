@@ -71,7 +71,7 @@ typ     size_t
 typ     uint_t
 typ     uid_t
 lib     bcopy
-lib     bindtextdomain -lintl -liconv
+lib     bindtextdomain -lintl, -lintl -liconv
 lib     bzero
 lib     endmntent
 lib     fs_stat_dev
@@ -87,7 +87,7 @@ lib     getmnt
 lib     getmntent -lgen
 lib     getmntinfo
 lib     getopt
-lib     gettext -lintl -liconv
+lib     gettext -lintl, -lintl -liconv
 lib     getvfsstat
 lib     getzoneid
 lib     hasmntopt
@@ -95,7 +95,7 @@ lib     memcpy
 lib     memset
 lib     mntctl
 lib     next_dev
-lib     setlocale  -lintl -liconv
+lib     setlocale  -lintl, -lintl -liconv
 lib     setmntent
 lib     snprintf
 lib     statfs
@@ -107,7 +107,7 @@ lib     sys_dollar_device_scan
 # VMS
 lib     sys_dollar_getdviw
 lib     sysfs
-lib     textdomain  -lintl -liconv
+lib     textdomain  -lintl, -lintl -liconv
 lib     zone_getattr
 lib     zone_list
 setmntent_args
