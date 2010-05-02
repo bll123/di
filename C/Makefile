@@ -260,14 +260,20 @@ di-programs:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
 config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 	@-$(RM) -f config.h tests.done
-	if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
+	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./di.env;$(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat; fi
-	if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
+	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
 		. ./di.env;perl \
 		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat; fi
-	if [ "$(DI_NO_NLS)" != "" ]; then \
+	@if [ "$(DI_NO_NLS)" != "" ]; then \
+		echo "*** User requested no NLS"; \
 		. ./features/turnoffnls.sh; fi
+
+reqlibs.txt:	di.env config.h
+	$(_MKCONFIG_SHELL) \
+		$(MKCONFIGPATH)/mkreqlib.sh config.h
+	
 
 ###
 # executables
@@ -277,12 +283,10 @@ OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
 
-$(PROG)$(EXE_EXT):	$(OBJECTS)
-	@if [ -f reqlibs.txt ];then \
-		echo "*** Using libs: `$(CAT) reqlibs.txt`"; fi
+$(PROG)$(EXE_EXT):	reqlibs.txt $(OBJECTS)
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS) \
-		`if [ -f reqlibs.txt ];then $(CAT) reqlibs.txt; fi`
+		`$(CAT) reqlibs.txt`
 
 hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
 	$(CC) -o hasnls$(EXE_EXT) \
