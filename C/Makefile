@@ -184,7 +184,7 @@ bsd43-gcc:
 
 clean:
 	-$(RM) -rf $(PROG) $(MPROG) $(PROG).exe $(MPROG).exe \
-		*.o *.obj hasnls hasnls.exe mkconfig.log \
+		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
 
@@ -232,9 +232,9 @@ install-prog:	di.env di-programs
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
 	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old > /dev/null 2>&1
-	@-./hasnls$(EXE_EXT) && echo "# NLS enabled"
-	@-./hasnls$(EXE_EXT) || echo "# NLS not enabled"
-	-./hasnls$(EXE_EXT) && \
+	@-./features/hasnls.sh && echo "# NLS enabled"
+	@-./features/hasnls.sh || echo "# NLS not enabled"
+	-./features/hasnls.sh && \
 		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		XMSGFMT="$(XMSGFMT)" install-po)
 
@@ -252,7 +252,7 @@ installperms:
 ###
 # programs
 
-di-programs:	$(PROG)$(EXE_EXT) hasnls$(EXE_EXT)
+di-programs:	$(PROG)$(EXE_EXT)
 
 ###
 # configuration file
@@ -284,14 +284,10 @@ OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
 
 $(PROG)$(EXE_EXT):	reqlibs.txt $(OBJECTS)
+	@echo "*** Libraries: `$(CAT) reqlibs.txt`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS) \
 		`$(CAT) reqlibs.txt`
-
-hasnls$(EXE_EXT):	hasnls$(OBJ_EXT)
-	$(CC) -o hasnls$(EXE_EXT) \
-		$(CFLAGS) $(LDFLAGS) \
-		hasnls$(OBJ_EXT)
 
 ###
 # objects
@@ -310,9 +306,6 @@ digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
 
 getopt$(OBJ_EXT):	getopt.c config.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) getopt.c
-
-hasnls$(OBJ_EXT):	hasnls.c config.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) hasnls.c
 
 realloc$(OBJ_EXT):	realloc.c config.h di.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) realloc.c
