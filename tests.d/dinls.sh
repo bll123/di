@@ -5,7 +5,7 @@
 
 echo ${EN} "di nls${EC}" >&3
 
-$RUNTOPDIR/features/hasnls.sh
+$RUNTOPDIR/features/hasnls
 hasnls=$?
 
 if [ ${hasnls} -ne 0 ];then
@@ -27,5 +27,5 @@ done
 if [ $grc -ne 0 ]; then
   echo ${EN} " de not installed?${EC}" >&3
 fi
-#exit $grc
+
 exit 0
