@@ -232,8 +232,8 @@ install-prog:	di.env di-programs
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
 	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old > /dev/null 2>&1
-	@-./features/hasnls.sh -v
-	-./features/hasnls.sh && \
+	@-./features/hasnls.sh -v config.h
+	-./features/hasnls.sh config.h && \
 		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		XMSGFMT="$(XMSGFMT)" install-po)
 
