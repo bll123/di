@@ -232,8 +232,7 @@ install-prog:	di.env di-programs
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
 	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old > /dev/null 2>&1
-	@-./features/hasnls.sh && echo "# NLS enabled"
-	@-./features/hasnls.sh || echo "# NLS not enabled"
+	@-./features/hasnls.sh -v
 	-./features/hasnls.sh && \
 		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		XMSGFMT="$(XMSGFMT)" install-po)
@@ -252,7 +251,7 @@ installperms:
 ###
 # programs
 
-di-programs:	$(PROG)$(EXE_EXT)
+di-programs:	$(PROG)$(EXE_EXT) 
 
 ###
 # configuration file
@@ -284,7 +283,7 @@ OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
 
 $(PROG)$(EXE_EXT):	reqlibs.txt $(OBJECTS)
-	@echo "*** Libraries: `$(CAT) reqlibs.txt`"
+	@echo "*** Using libs: `$(CAT) reqlibs.txt`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS) \
 		`$(CAT) reqlibs.txt`
