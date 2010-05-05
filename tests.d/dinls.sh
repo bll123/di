@@ -5,7 +5,7 @@
 
 echo ${EN} "di nls${EC}" >&3
 
-$RUNTOPDIR/features/hasnls
+$RUNTOPDIR/features/hasnls.sh $RUNTOPDIR/config.h
 hasnls=$?
 
 if [ ${hasnls} -ne 0 ];then
