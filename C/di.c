@@ -410,7 +410,9 @@ main (argc, argv)
     diData.includeList.count = 0;
     diData.includeList.list = (char **) NULL;
 
+#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
     diData.zoneInfo.uid = geteuid ();
+#endif
     diData.zoneInfo.zoneDisplay [0] = '\0';
     diData.zoneInfo.zoneCount = 0;
     diData.zoneInfo.zones = (zoneSummary_t *) NULL;
