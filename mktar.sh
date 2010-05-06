@@ -22,8 +22,8 @@ chmod -R a+r ${dir}
 
 cwd=$(pwd)
 (cd $dir;tar xfz $cwd/mkconfig/mkconfig-*.tar.gz;mv mkconfig-* mkconfig)
-tar cf - ./${dir} |
-gzip -9 > ${dir}.tar.gz
+tar cf - ${dir} |
+  gzip -9 > ${dir}.tar.gz
 
 rm -rf ${dir} > /dev/null 2>&1
 
