@@ -151,6 +151,17 @@ windows-gcc:
 		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-g -O2" di-programs
 
+windows-mingw:
+	copy NUL: di.env
+	del config.h
+	copy /y /b NUL:+config.mingw config.h
+	$(MAKE) \
+		CC=mingw32-gcc LD=mingw32-gcc \
+		EXE_EXT=".exe" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -g -O2 \
+		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
+		LDFLAGS="-g -O2" mingw-$(PROG).exe
+
 os2-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	$(MAKE) MKCONFIG_TYPE=perl \
@@ -183,7 +194,8 @@ bsd43-gcc:
 # cleaning
 
 clean:
-	-$(RM) -rf $(PROG) $(MPROG) $(PROG).exe $(MPROG).exe \
+	-$(RM) -rf $(PROG) $(MPROG) \
+		mingw-$(PROG).exe $(PROG).exe $(MPROG).exe \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
@@ -287,6 +299,10 @@ $(PROG)$(EXE_EXT):	reqlibs.txt $(OBJECTS)
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS) \
 		`$(CAT) reqlibs.txt`
+
+mingw-$(PROG)$(EXE_EXT):	$(OBJECTS)
+	$(CC) -o mingw-$(PROG)$(EXE_EXT) \
+		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS)
 
 ###
 # objects
