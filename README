@@ -111,7 +111,7 @@ PORTING
         NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1
         Nexenta 1.0.1_b85 2.0_b104
         OpenBSD 4.4 4.5 4.6
-        OpenSolaris 200805
+        OpenSolaris 200805 200906
         RedHat 7.1 7.3
         RHEL 5.2
         Solaris 8, 9, 10 (cc, gcc3, gcc4)
