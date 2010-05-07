@@ -22,11 +22,23 @@
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
+#if _hdr_dirent
+# include <dirent.h>
+#endif
 #if _sys_types
 # include <sys/types.h>
 #endif
 #if _sys_param
 # include <sys/param.h>
+#endif
+#if _sys_ftype                      /* QNX */
+# include <sys/ftype.h>
+#endif
+#if _sys_dcmd_blk                   /* QNX */
+# include <sys/dcmd_blk.h>
+#endif
+#if _sys_io                         /* QNX */
+# include <sys/io.h>
 #endif
 #if _hdr_errno
 # include <errno.h>
@@ -164,7 +176,7 @@
 #     if (USE_ETC_FILESYSTEMS)
 #      define DI_MOUNT_FILE     "/etc/filesystems" /* AIX 4.x or /etc/mntent? */
 #     else
-#      define DI_MOUNT_FILE     "/etc/mnttab"       /* SysV.3 default */
+#      define DI_MOUNT_FILE     "/etc/mnttab"      /* SysV.3 default */
 #     endif
 #    endif
 #   endif
@@ -172,6 +184,7 @@
 # endif
 #endif
 
+static int di_getQNXDiskEntries _((char *ipath, diDiskInfo_t **diskInfo, int *diCount));
 extern int debug;
 
 #if defined(__cplusplus)
@@ -181,9 +194,9 @@ extern int debug;
 /********************************************************/
 
 #if _lib_getmntent && \
-	! _lib_setmntent && \
-	! HAVE_MNTCTL && \
-	! _class_os__Volumes
+    ! _lib_setmntent && \
+    ! HAVE_MNTCTL && \
+    ! _class_os__Volumes
 
 #if defined(__cplusplus)
   extern "C" {
@@ -296,87 +309,6 @@ checkMountOptions (mntEntry, str)
 
 #endif
 
-#if ! _lib_getmntent && \
-    ! HAVE_MNTCTL && \
-    ! _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat && \
-    ! _lib_getmnt && \
-    ! _lib_GetDiskFreeSpace && \
-    ! _lib_GetDiskFreeSpaceEx && \
-    ! _lib_fs_stat_dev && \
-    ! _class_os__Volumes && \
-    ! _lib_sys_dollar_device_scan
-
-/*
- * di_getDiskEntries
- *
- * For SysV.3 we open the file and read it ourselves.
- *
- */
-
-int
-# if _proto_stdc
-di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
-{
-    FILE             *f;
-    int              idx;
-    struct mnttab    mntEntry;
-
-
-    if (debug > 0) { printf ("# getDiskEntries: not anything; sys v.3\n"); }
-    if ((f = fopen (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
-    {
-        fprintf (stderr, "Unable to open: %s errno %d\n", DI_MOUNT_FILE, errno);
-        return -1;
-    }
-
-    while (fread ((char *) &mntEntry, sizeof (struct mnttab), 1, f) == 1)
-    {
-            /* xenix allows null mount table entries */
-            /* sco nfs background mounts are marked as "nothing" */
-        if (mntEntry.mt_filsys [0] &&
-                strcmp (mntEntry.mt_filsys, "nothing") != 0)
-        {
-            idx = *diCount;
-            ++*diCount;
-            *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
-                    sizeof (diDiskInfo_t) * *diCount);
-            di_initDiskInfo (diptr);
-
-# if defined (COHERENT)
-                /* Coherent seems to have these fields reversed. oh well. */
-            strncpy (diptr->name, mntEntry.mt_dev, DI_NAME_LEN);
-            strncpy (diptr->special, mntEntry.mt_filsys, DI_SPEC_NAME_LEN);
-# else
-            strncpy (diptr->special, mntEntry.mt_dev, DI_SPEC_NAME_LEN);
-            strncpy (diptr->name, mntEntry.mt_filsys, DI_NAME_LEN);
-# endif
-            strncpy (diptr->options, mntEntry.mnt_mntopts, DI_OPT_LEN);
-            strncpy (diptr->mountTime, mntEntry.mnt_time,
-                    DI_MNT_TIME_LEN);
-        }
-
-        if (debug > 1)
-        {
-            printf ("mnt:%s - %s\n", diptr->name,
-                    diptr->special);
-        }
-    }
-
-    fclose (f);
-    return 0;
-}
-
-
-#endif /* Sys V.3 */
-
-
 #if _lib_getmntent && \
     _lib_setmntent && \
     _lib_endmntent && \
@@ -408,7 +340,7 @@ di_getDiskEntries (diskInfo, diCount)
     int *diCount;
 # endif
 {
-    diDiskInfo_t     *diptr;
+    diDiskInfo_t    *diptr;
     FILE            *f;
     int             idx;
     struct mntent   *mntEntry;
@@ -486,6 +418,230 @@ di_getDiskEntries (diskInfo, diCount)
 }
 
 #endif /* _lib_getmntent && _lib_setmntent && _lib_endmntent */
+
+/* QNX */
+#if ! _lib_getmntent && \
+    ! HAVE_MNTCTL && \
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_getmnt && \
+    ! _lib_GetDiskFreeSpace && \
+    ! _lib_GetDiskFreeSpaceEx && \
+    ! _lib_fs_stat_dev && \
+    ! _class_os__Volumes && \
+    ! _lib_sys_dollar_device_scan && \
+    defined (__QNX__)
+
+/*
+ * di_getDiskEntries
+ *
+ * QNX
+ *
+ * This is bloody slow.
+ * It would be nice to have a way to short-circuit some of
+ * the directory subtrees.
+ * Can /proc/mount/dev be chopped?
+ *
+ */
+
+int
+# if _proto_stdc
+di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
+# else
+di_getDiskEntries (diskInfo, diCount)
+    diDiskInfo_t **diskInfo;
+    int *diCount;
+# endif
+{
+    if (debug > 0) { printf ("# getDiskEntries: QNX\n"); }
+    return di_getQNXDiskEntries ("/proc/mount", diskInfo, diCount);
+}
+
+static int
+# if _proto_stdc
+di_getQNXDiskEntries (char *ipath, diDiskInfo_t **diskInfo, int *diCount)
+# else
+di_getQNXDiskEntries (ipath, diskInfo, diCount)
+    char *ipath;
+    diDiskInfo_t **diskInfo;
+    int *diCount;
+# endif
+{
+    diDiskInfo_t    *diptr;
+    int             idx;
+    char            path [MAXPATHLEN];
+    int             len;   /* current length of path */
+    DIR             *dp;
+    struct dirent   *dent;
+    int             ret;
+    int             nd;
+    int             pid;
+    int             chid;
+    int             handle;
+    int             ftype;
+    struct stat     statinfo;
+    int             fd;
+    char            tspecial [DI_SPEC_NAME_LEN];
+
+    strcpy (path, ipath);
+    len = strlen (path);
+
+    if (!(dp = opendir(path))) {
+      return 0;
+    }
+    while ((dent = readdir(dp))) {
+      if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
+        continue;
+      }
+
+      path[len] = '\0';
+      ret = sscanf(dent->d_name, "%d,%d,%d,%d,%d",
+          &nd, &pid, &chid, &handle, &ftype);
+
+      if (len + strlen(dent->d_name) + 1 > MAXPATHLEN) {
+        continue;
+      }
+
+      path[len] = '/';
+      strcpy (&path[len+1], dent->d_name);
+      if (debug > 4) { printf ("check: %s\n", path); }
+
+      memset(&statinfo, 0, sizeof(statinfo));
+
+      if (stat(path, &statinfo) == -1) {
+        continue;
+      }
+
+      if (ret != 5) {
+        if (S_ISDIR (statinfo.st_mode)) {
+          if (debug > 4) { printf ("into: %s\n", path); }
+          di_getQNXDiskEntries (path, diskInfo, diCount);
+        }
+        continue;
+      }
+
+      if (ftype != _FTYPE_ANY) {
+        continue;
+      }
+
+      *tspecial = '\0';
+      if (S_ISDIR(statinfo.st_mode) && ftype == _FTYPE_ANY) {
+        if ((fd = open (path, /* O_ACCMODE */ O_RDONLY | O_NOCTTY)) != -1) {
+          devctl (fd, DCMD_FSYS_MOUNTED_ON, tspecial, DI_SPEC_NAME_LEN, 0);
+          close (fd);
+          if (*tspecial == '\0') {
+            continue;
+          }
+        } else {
+          continue;
+        }
+      } else {
+        continue;
+      }
+
+      idx = *diCount;
+      ++*diCount;
+      *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+              sizeof (diDiskInfo_t) * (Size_t) *diCount);
+      diptr = *diskInfo + idx;
+      di_initDiskInfo (diptr);
+
+      path[len] = '\0';
+      strncpy (diptr->special, tspecial, DI_SPEC_NAME_LEN);
+      strncpy (diptr->name, path + 11, DI_NAME_LEN);
+      if (*diptr->name == '\0') {
+        strcpy (diptr->name, "/");
+      }
+      if (debug > 4) { printf ("found: %s %s\n", diptr->special, diptr->name); }
+    }
+
+    closedir (dp);
+    return 0;
+}
+
+#endif /* QNX */
+
+/* if nothing matches, assume a SysV.3 /etc/mnttab or similar */
+#if ! _lib_getmntent && \
+    ! HAVE_MNTCTL && \
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_getmnt && \
+    ! _lib_GetDiskFreeSpace && \
+    ! _lib_GetDiskFreeSpaceEx && \
+    ! _lib_fs_stat_dev && \
+    ! _class_os__Volumes && \
+    ! _lib_sys_dollar_device_scan && \
+    ! defined (__QNX__)
+
+/*
+ * di_getDiskEntries
+ *
+ * For SysV.3 we open the file and read it ourselves.
+ *
+ */
+
+int
+# if _proto_stdc
+di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
+# else
+di_getDiskEntries (diskInfo, diCount)
+    diDiskInfo_t **diskInfo;
+    int *diCount;
+# endif
+{
+    FILE             *f;
+    int              idx;
+    struct mnttab    mntEntry;
+
+
+    if (debug > 0) { printf ("# getDiskEntries: not anything; sys v.3\n"); }
+    if ((f = fopen (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
+    {
+        fprintf (stderr, "Unable to open: %s errno %d\n", DI_MOUNT_FILE, errno);
+        return -1;
+    }
+
+    while (fread ((char *) &mntEntry, sizeof (struct mnttab), 1, f) == 1)
+    {
+            /* xenix allows null mount table entries */
+            /* sco nfs background mounts are marked as "nothing" */
+        if (mntEntry.mt_filsys [0] &&
+                strcmp (mntEntry.mt_filsys, "nothing") != 0)
+        {
+            idx = *diCount;
+            ++*diCount;
+            *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+                    sizeof (diDiskInfo_t) * *diCount);
+            di_initDiskInfo (diptr);
+
+# if defined (COHERENT)
+                /* Coherent seems to have these fields reversed. oh well. */
+            strncpy (diptr->name, mntEntry.mt_dev, DI_NAME_LEN);
+            strncpy (diptr->special, mntEntry.mt_filsys, DI_SPEC_NAME_LEN);
+# else
+            strncpy (diptr->special, mntEntry.mt_dev, DI_SPEC_NAME_LEN);
+            strncpy (diptr->name, mntEntry.mt_filsys, DI_NAME_LEN);
+# endif
+            strncpy (diptr->options, mntEntry.mnt_mntopts, DI_OPT_LEN);
+            strncpy (diptr->mountTime, mntEntry.mnt_time,
+                    DI_MNT_TIME_LEN);
+        }
+
+        if (debug > 1)
+        {
+            printf ("mnt:%s - %s\n", diptr->name,
+                    diptr->special);
+        }
+    }
+
+    fclose (f);
+    return 0;
+}
+
+#endif /* Sys V.3 */
 
 /*
  * All of the following routines also replace di_getDiskInfo()
@@ -1274,7 +1430,7 @@ di_getDiskEntries (diskInfo, diCount)
 
         /* <num> vmount structs returned in vmbuf */
     *diCount = num;
-    *diskInfo = (diDiskInfo_t *) calloc (sizeof (diDiskInfo_t), 
+    *diskInfo = (diDiskInfo_t *) calloc (sizeof (diDiskInfo_t),
         (Size_t) *diCount);
     if (*diskInfo == (diDiskInfo_t *) NULL)
     {
