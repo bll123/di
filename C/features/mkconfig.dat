@@ -16,6 +16,7 @@ standard
 hdr     ctype.h
 hdr     dcdef.h
 hdr     descrip.h
+hdr     dirent.h
 hdr     dvidef.h
 hdr     dvsdef.h
 hdr     errno.h
@@ -45,10 +46,13 @@ hdr     unistd.h
 hdr     util/string.h
 hdr     windows.h
 hdr     zone.h
+sys     dcmd_blk.h
 sys     file.h
 sys     fs_types.h
 sys     fstyp.h
 sys     fstypes.h
+sys     ftype.h
+sys     io.h
 sys     mntctl.h
 sys     mntent.h
 sys     mnttab.h
@@ -73,7 +77,7 @@ typ     uid_t
 lib     bcopy
 lib     bindtextdomain -lintl, -lintl -liconv
 lib     bzero
-lib     endmntent
+lib     endmntent -lsun, -lseq
 lib     fs_stat_dev
 lib     fshelp
 lib     GetDiskFreeSpace
@@ -84,7 +88,7 @@ lib     GetLogicalDriveStrings
 lib     GetVolumeInformation
 lib     getmnt
 # unixware put getmntent into libgen for some reason
-lib     getmntent -lgen
+lib     getmntent -lgen, -lsun, -lseq
 lib     getmntinfo
 lib     getopt
 lib     gettext -lintl, -lintl -liconv
@@ -93,10 +97,12 @@ lib     getzoneid
 lib     hasmntopt
 lib     memcpy
 lib     memset
+# AIX doesn't declare this :(
+# Look for MCTL_QUERY (see di.h)
 lib     mntctl
 lib     next_dev
 lib     setlocale  -lintl, -lintl -liconv
-lib     setmntent
+lib     setmntent -lsun, -lseq
 lib     snprintf
 lib     statfs
 lib     statvfs
@@ -128,6 +134,7 @@ member  statfs f_frsize
 member  statfs f_fstypename
 member  statfs mount_info
 member  statfs f_type
+member  statvfs f_basetype
 member  mnttab mnt_time
 member  vmount vmt_time
 size    long long
