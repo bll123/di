@@ -265,6 +265,9 @@ di-programs:	$(PROG)$(EXE_EXT)
 ###
 # configuration file
 
+# If NLS is off, turn all NLS settings off so we don't link
+# in extra libraries.
+# If the user has requested no NLS, turn it off.
 config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
 	@-$(RM) -f config.h tests.done
@@ -274,9 +277,10 @@ config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
 		. ./di.env;perl \
 		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat; fi
+	@./features/hasnls.sh config.h || ./features/turnoffnls.sh; fi
 	@if [ "$(DI_NO_NLS)" != "" ]; then \
 		echo "*** User requested no NLS"; \
-		. ./features/turnoffnls.sh; fi
+		./features/turnoffnls.sh; fi
 
 reqlibs.txt:	di.env config.h
 	$(_MKCONFIG_SHELL) \
