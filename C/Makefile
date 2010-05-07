@@ -131,13 +131,13 @@ tar:
 
 # This was tested using vc++ 5.0.
 windows:
-	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
-	$(CP) -f config.win config.h
+	copy NUL: di.env
+	del config.h
+	copy /y /b NUL:+config.win config.h
 	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
-		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
+		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-nologo -O2" di-programs
 
 # This was tested using cygwin
@@ -148,7 +148,7 @@ windows-gcc:
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
-		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
+		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-g -O2" di-programs
 
 windows-mingw:
@@ -159,7 +159,7 @@ windows-mingw:
 		CC=mingw32-gcc LD=mingw32-gcc \
 		EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
-		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
+		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-g -O2" mingw-$(PROG).exe
 
 os2-gcc:
@@ -167,7 +167,6 @@ os2-gcc:
 	$(MAKE) MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
-		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
 
 bsd43-cc:
@@ -177,7 +176,6 @@ bsd43-cc:
 	$(MAKE) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -O \
-		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-O" di-programs
 
 bsd43-gcc:
@@ -187,7 +185,6 @@ bsd43-gcc:
 	$(MAKE) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -O2 \
-		-DDEFAULT_FORMAT=\\\"sMbuvpT\\\"" \
 		LDFLAGS="-O2" di-programs
 
 ###
