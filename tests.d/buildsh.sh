@@ -29,9 +29,7 @@ dotest () {
 grc=0
 echo ${EN} " ${EC}" >&3
 
-. $_MKCONFIG_DIR/shellfuncs.sh
 cd $RUNTOPDIR
-getlistofshells
 for s in $shelllist; do
   dotest $s
 done
