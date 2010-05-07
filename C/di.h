@@ -27,6 +27,9 @@
 #if _sys_param
 # include <sys/param.h>     /* MAXPATHLEN */
 #endif
+#if _sys_vmount
+# include <sys/vmount.h>     /* for AIX workaround */
+#endif
 
 #if ! defined (O_NOCTTY)
 # define O_NOCTTY 0
@@ -213,6 +216,13 @@ extern int getopt _((int, char * const [], const char *));
 
 # if defined(__cplusplus)
    }
+# endif
+
+/* workaround for AIX - mntctl not declared */
+# if defined (MCTL_QUERY) || _lib_mntctl
+#  define HAVE_MNTCTL 1
+# else
+#  define HAVE_MNTCTL 0
 # endif
 
      /* macro for gettext() */
