@@ -221,12 +221,15 @@
 #define DI_DISP_HR              -20
 #define DI_DISP_HR_2            -21
 
-   /* you may want to change some of these values.  Be sure to change all */
-   /* related entries.                                                    */
+   /* you may want to change some of these values. */
 #if ! defined (DI_DEFAULT_FORMAT)
 # define DI_DEFAULT_FORMAT      "smbuvpT"
 /* # define DI_DEFAULT_FORMAT      "MbuvpT" */ /* an alternative */
 #endif
+#if ! defined (DI_DEFAULT_DISP_SIZE)
+# define DI_DEFAULT_DISP_SIZE   "H"
+#endif
+
 #if _lib_mnt_time
 # define DI_DEF_MOUNT_FORMAT    "MST\n\tI\n\tO"
 #else
@@ -433,7 +436,7 @@ main (argc, argv)
     diopts->baseDispSize = DI_VAL_1024;
     diopts->baseDispIdx = DI_DISP_1024_IDX;
 
-    strncpy (dbsstr, "m", sizeof (dbsstr)); /* default */
+    strncpy (dbsstr, DI_DEFAULT_DISP_SIZE, sizeof (dbsstr)); /* default */
 
 #if _lib_setlocale && defined (LC_ALL)
     ptr = setlocale (LC_ALL, "");
