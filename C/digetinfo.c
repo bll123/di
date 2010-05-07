@@ -157,6 +157,9 @@ di_getDiskInfo (diskInfo, diCount)
                     (_fs_size_t) statBuf.f_files,
                     (_fs_size_t) statBuf.f_ffree,
                     (_fs_size_t) statBuf.f_favail);
+# if _mem_f_basetype_statvfs
+                strncpy (diptr->fsType, statBuf.f_basetype, DI_TYPE_LEN);
+# endif
 
                 if (debug > 1)
                 {
