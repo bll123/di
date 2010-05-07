@@ -146,7 +146,7 @@
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
-    ! _lib_mntctl && \
+    ! HAVE_MNTCTL && \
     ! _lib_getmnt && \
     ! _class_os__Volumes
 # if defined (_PATH_MOUNTED)
@@ -182,7 +182,7 @@ extern int debug;
 
 #if _lib_getmntent && \
 	! _lib_setmntent && \
-	! _lib_mntctl && \
+	! HAVE_MNTCTL && \
 	! _class_os__Volumes
 
 #if defined(__cplusplus)
@@ -297,7 +297,7 @@ checkMountOptions (mntEntry, str)
 #endif
 
 #if ! _lib_getmntent && \
-    ! _lib_mntctl && \
+    ! HAVE_MNTCTL && \
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
@@ -383,7 +383,7 @@ di_getDiskEntries (diskInfo, diCount)
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
-    ! _lib_mntctl && \
+    ! HAVE_MNTCTL && \
     ! _lib_GetDiskFreeSpace && \
     ! _lib_GetDiskFreeSpaceEx && \
     ! _class_os__Volumes
@@ -1178,7 +1178,7 @@ di_getDiskEntries (diskInfo, diCount)
 #endif /* _lib_getmnt */
 
 
-#if _lib_mntctl
+#if HAVE_MNTCTL
 
 /*
  * di_getDiskEntries
@@ -1224,7 +1224,6 @@ di_getDiskEntries (diskInfo, diCount)
     char            *bufp;      /* pointer into vmbuf                   */
     struct vmount   *vmtp;      /* pointer into vmbuf                   */
     struct vfs_ent  *ve;        /* pointer for file system type entry   */
-    int             len;
 
 
     if (debug > 0) { printf ("# getDiskEntries: mntctl\n"); }
@@ -1236,7 +1235,7 @@ di_getDiskEntries (diskInfo, diCount)
         if ((vmbuf = (char *) malloc (vmbufsz)) == (char *) NULL)
         {
             fprintf (stderr, "malloc (%d) for mntctl() failed errno %d\n",
-                    vmbufsz, errno);
+                    (int) vmbufsz, errno);
             return -1;
         }
 
@@ -1252,7 +1251,7 @@ di_getDiskEntries (diskInfo, diCount)
             memcpy (&vmbufsz, vmbuf, sizeof (vmbufsz)); /* see mntctl(2) */
             if (debug > 0)
             {
-                printf ("vmbufsz too small, new size: %d\n", vmbufsz);
+                printf ("vmbufsz too small, new size: %d\n", (int) vmbufsz);
             }
             free ((char *) vmbuf); /* free this last, it's still being used! */
             ++i;
@@ -1275,7 +1274,8 @@ di_getDiskEntries (diskInfo, diCount)
 
         /* <num> vmount structs returned in vmbuf */
     *diCount = num;
-    *diskInfo = (diDiskInfo_t *) calloc (sizeof (diDiskInfo_t), *diCount);
+    *diskInfo = (diDiskInfo_t *) calloc (sizeof (diDiskInfo_t), 
+        (Size_t) *diCount);
     if (*diskInfo == (diDiskInfo_t *) NULL)
     {
         fprintf (stderr, "malloc failed for diskInfo. %s errno %d\n",
@@ -1344,9 +1344,10 @@ di_getDiskEntries (diskInfo, diCount)
             printf ("\t%s\n", (char *) vmt2dataptr (vmtp, VMT_ARGS));
         }
     }
+    return 0;
 }
 
-#endif  /* _lib_mntctl */
+#endif  /* HAVE_MNTCTL */
 
 
 #if _lib_GetDiskFreeSpace && \
