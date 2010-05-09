@@ -277,7 +277,7 @@ config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
 		. ./di.env;perl \
 		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat; fi
-	@./features/hasnls.sh config.h || ./features/turnoffnls.sh; fi
+	@./features/hasnls.sh config.h || ./features/turnoffnls.sh
 	@if [ "$(DI_NO_NLS)" != "" ]; then \
 		echo "*** User requested no NLS"; \
 		./features/turnoffnls.sh; fi
