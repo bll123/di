@@ -441,7 +441,7 @@ di_getDiskEntries (diskInfo, diCount)
  * This is bloody slow.
  * It would be nice to have a way to short-circuit some of
  * the directory subtrees.
- * Can /proc/mount/dev be chopped?
+ * /proc/mount/dev is not processed...hopefully that won't affect much.
  *
  */
 
@@ -472,10 +472,10 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
     int             idx;
     char            path [MAXPATHLEN];
     int             len;   /* current length of path */
-    DIR             *dp;
+    DIR             *dirp;
     struct dirent   *dent;
     int             ret;
-    int             nd;
+    int             nodeid;
     int             pid;
     int             chid;
     int             handle;
@@ -484,20 +484,24 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
     int             fd;
     char            tspecial [DI_SPEC_NAME_LEN];
 
+    if (strcmp (ipath, "/proc/mount/dev") == 0) {
+      return 0;
+    }
+
     strcpy (path, ipath);
     len = strlen (path);
 
-    if (!(dp = opendir(path))) {
+    if (!(dirp = opendir(path))) {
       return 0;
     }
-    while ((dent = readdir(dp))) {
-      if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
+    while ((dent = readdir(dirp))) {
+      if (strcmp (dent->d_name, ".") == 0 || strcmp (dent->d_name, "..") == 0) {
         continue;
       }
 
       path[len] = '\0';
       ret = sscanf(dent->d_name, "%d,%d,%d,%d,%d",
-          &nd, &pid, &chid, &handle, &ftype);
+          &nodeid, &pid, &chid, &handle, &ftype);
 
       if (len + strlen(dent->d_name) + 1 > MAXPATHLEN) {
         continue;
@@ -556,7 +560,7 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
       if (debug > 4) { printf ("found: %s %s\n", diptr->special, diptr->name); }
     }
 
-    closedir (dp);
+    closedir (dirp);
     return 0;
 }
 
