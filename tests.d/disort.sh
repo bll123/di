@@ -63,8 +63,8 @@ if [ $rc -ne 0 ]; then
 fi
 
 echo "by mount"
-$RUNTOPDIR/di -n -a -f M~b | sort -t'~' > s1
-$RUNTOPDIR/di -n -a -f M~b -sm > s2
+$RUNTOPDIR/di -n -a -f M | sort -t'~' > s1
+$RUNTOPDIR/di -n -a -f M -sm > s2
 diff -w s1 s2
 rc=$?
 if [ $rc -ne 0 ]; then
