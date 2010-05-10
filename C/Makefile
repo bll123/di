@@ -132,7 +132,7 @@ tar:
 # This was tested using vc++ 5.0.
 windows:
 	copy /y NUL: di.env
-	del config.h
+	-del config.h
 	copy /y /b NUL:+config.win config.h
 	copy /y NUL: reqlibs.txt
 	$(MAKE) \
@@ -155,7 +155,7 @@ windows-gcc:
 
 windows-mingw:
 	copy /y NUL: di.env
-	del config.h
+	-del config.h
 	copy /y /b NUL:+config.mingw config.h
 	copy /y NUL: reqlibs.txt
 	$(MAKE) \
