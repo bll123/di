@@ -1,5 +1,6 @@
 config.bsd43.cc		config.h for bsd43
 config.bsd43.gcc	config.h for bsd43
+config.mingw		config.h for windows (MinGW)
 config.vms		config.h for VMS
 config.vms.b		alternate config.h for VMS
 config.win		config.h for windows
