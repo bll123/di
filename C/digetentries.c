@@ -184,7 +184,9 @@
 # endif
 #endif
 
+#if defined (__QNX__)
 static int di_getQNXDiskEntries _((char *ipath, diDiskInfo_t **diskInfo, int *diCount));
+#endif
 extern int debug;
 
 #if defined(__cplusplus)
