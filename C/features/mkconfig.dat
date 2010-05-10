@@ -44,6 +44,7 @@ hdr     strings.h
 hdr     time.h
 hdr     unistd.h
 hdr     util/string.h
+hdr     wchar.h
 hdr     windows.h
 hdr     zone.h
 sys     dcmd_blk.h
@@ -95,6 +96,7 @@ lib     gettext -lintl, -lintl -liconv
 lib     getvfsstat
 lib     getzoneid
 lib     hasmntopt
+lib     mbrlen
 lib     memcpy
 lib     memset
 # AIX doesn't declare this :(
@@ -135,8 +137,6 @@ member  statfs f_fstypename
 member  statfs mount_info
 member  statfs f_type
 member  statvfs f_basetype
-member  mnttab mnt_time
-member  vmount vmt_time
 size    long long
 
 include
