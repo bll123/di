@@ -537,6 +537,8 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
           devctl (fd, DCMD_FSYS_MOUNTED_ON, tspecial, DI_SPEC_NAME_LEN, 0);
           close (fd);
           if (*tspecial == '\0') {
+            /* unfortunately, this cuts out /proc, /dev/sem, etc. */
+            /* but it also removes strange duplicate stuff        */
             continue;
           }
         } else {
