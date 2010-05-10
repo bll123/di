@@ -8,7 +8,7 @@
 .\"
 .\" bll6969di_at_gmail.com
 .\"
-.TH di 1 "20 Feb 2010"
+.TH di 1 "9 May 2010"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -208,8 +208,9 @@ The zone must be visible to the user.
 Display the filesystems for all visible zones.
 .SH Format Strings
 The output of \fIdi\fP may be specified via a format string.  This
-string may be given either via the \fB-f\fP command line option or by
-the \fBDIFMT\fP environment variable.  The format string may specify the
+string may be given either via the \fB-f\fP command line option or as
+part of the \fBDI_ARGS\fP environment variable.  
+The format string may specify the
 following columns:
 .RS .5
 .TP
@@ -359,9 +360,6 @@ di \-f SMbcvpT
 di \-f SMBuv2T
 .RE
 .SH Environment Variables
-The DIFMT environment variable may be used to specify the default
-display format string.
-.PP
 The DI_ARGS environment variable may be used to specify command
 line arguments.  e.g. If you always want gigabytes displayed, set
 DI_ARGS equal to "\-dg".  Any command line arguments specified
