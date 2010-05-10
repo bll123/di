@@ -121,8 +121,6 @@
 #define _mem_f_fstypename_statfs 0
 #define _mem_mount_info_statfs 0
 #define _mem_f_type_statfs 0
-#define _mem_mnt_time_mnttab 0
-#define _mem_vmt_time_vmount 0
 #define _siz_long_long 0
 
 #if ! _key_void
