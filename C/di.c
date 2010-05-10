@@ -798,12 +798,12 @@ printDiskInfo (diData)
         diopts->dispBlockSize != DI_DISP_HR_2 &&
         (diopts->dispBlockSize > 0 && diopts->dispBlockSize <= DI_VAL_1024)) {
       Snprintf (diout->blockFormat,
-          DI_SPF(sizeof (diout->blockFormat), "%%%d.0f%%s"), diout->width);
+          DI_SPF(sizeof (diout->blockFormat), "%%%d.0f%%s"), (int) diout->width);
     } else {
       Snprintf (diout->blockFormatNR,
-          DI_SPF(sizeof (diout->blockFormatNR), "%%%d.0f%%s"), diout->width);
+          DI_SPF(sizeof (diout->blockFormatNR), "%%%d.0f%%s"), (int) diout->width);
       Snprintf (diout->blockFormat,
-          DI_SPF(sizeof (diout->blockFormat), "%%%d.1f%%s"), diout->width);
+          DI_SPF(sizeof (diout->blockFormat), "%%%d.1f%%s"), (int) diout->width);
     }
 
     if (diopts->dispBlockSize == DI_DISP_HR ||
@@ -813,13 +813,13 @@ printDiskInfo (diData)
     }
 
     Snprintf (diout->blockLabelFormat,
-        DI_SPF(sizeof (diout->blockLabelFormat), "%%%ds"), diout->width);
+        DI_SPF(sizeof (diout->blockLabelFormat), "%%%ds"), (int) diout->width);
 #if _siz_long_long >= 8
     Snprintf (diout->inodeFormat,
-        DI_SPF(sizeof (diout->inodeFormat), "%%%dllu"), diout->inodeWidth);
+        DI_SPF(sizeof (diout->inodeFormat), "%%%dllu"), (int) diout->inodeWidth);
 #else
     Snprintf (diout->inodeFormat,
-        DI_SPF(sizeof (diout->inodeFormat), "%%%dlu"), diout->inodeWidth);
+        DI_SPF(sizeof (diout->inodeFormat), "%%%dlu"), (int) diout->inodeWidth);
 #endif
 
     diskInfo = diData->diskInfo;
@@ -1606,11 +1606,11 @@ processTitles (diopts, diout)
         }
 
         if (wlen > 0) {
-          Size_t    ilen;
-          Size_t    olen;
-          Size_t    len;
-          Size_t    tlen;
-          char      *jstr;
+          Size_t     ilen;
+          Size_t     olen;
+          Size_t     len;
+          Size_t     tlen;
+          const char *jstr;
 
           pstr = DI_GT (pstr);
           olen = (Size_t) strlen (pstr);
@@ -1621,7 +1621,7 @@ processTitles (diopts, diout)
 
           jstr = justification == DI_JUST_LEFT ? "-" : "";
           Snprintf (tformat, DI_SPF(sizeof (tformat), "%%%s%d.%ds"),
-              jstr, tlen, tlen);
+              jstr, (int) tlen, (int) tlen);
 
           if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
             printf (tformat, pstr);
@@ -1629,7 +1629,7 @@ processTitles (diopts, diout)
           if (fstr != (char *) NULL) {
             if (tlen != len) {
               Snprintf (tformat, DI_SPF(sizeof (tformat), "%%%s%d.%ds"),
-                  jstr, len, len);
+                  jstr, (int) len, (int) len);
             }
             strncpy (fstr, tformat, maxsize);
           }
