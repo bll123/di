@@ -124,16 +124,17 @@ tar:
 	cd $(MKCONFIGPATH);make tar
 	./mktar.sh
 	genisoimage -J -R -o $$HOME/ISOs/di.iso testdi.sh build*.sh *.gz
-	cp *.gz $$HOME/vbox*
+	cp *.gz buildcompare.sh testdi.sh $$HOME/vbox_shared
 
 ###
 # specific builds
 
 # This was tested using vc++ 5.0.
 windows:
-	copy NUL: di.env
+	copy /y NUL: di.env
 	del config.h
 	copy /y /b NUL:+config.win config.h
+	copy /y NUL: reqlibs.txt
 	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
@@ -145,6 +146,7 @@ windows-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
+	@echo '' > reqlibs.txt
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
@@ -152,9 +154,10 @@ windows-gcc:
 		LDFLAGS="-g -O2" di-programs
 
 windows-mingw:
-	copy NUL: di.env
+	copy /y NUL: di.env
 	del config.h
 	copy /y /b NUL:+config.mingw config.h
+	copy /y NUL: reqlibs.txt
 	$(MAKE) \
 		CC=mingw32-gcc LD=mingw32-gcc \
 		EXE_EXT=".exe" OBJ_EXT=".o" \
