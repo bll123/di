@@ -78,6 +78,7 @@ typ     uid_t
 lib     bcopy
 lib     bindtextdomain -lintl, -lintl -liconv
 lib     bzero
+# unknown if -lsun, -lseq are needed (old irix, sequent)
 lib     endmntent -lsun, -lseq
 lib     fs_stat_dev
 lib     fshelp
@@ -89,6 +90,7 @@ lib     GetLogicalDriveStrings
 lib     GetVolumeInformation
 lib     getmnt
 # unixware put getmntent into libgen for some reason
+# -lsun, -lseq are untested (old irix, sequent)
 lib     getmntent -lgen, -lsun, -lseq
 lib     getmntinfo
 lib     getopt
@@ -104,6 +106,7 @@ lib     memset
 lib     mntctl
 lib     next_dev
 lib     setlocale  -lintl, -lintl -liconv
+# unknown if -lsun, -lseq are needed (old irix, sequent)
 lib     setmntent -lsun, -lseq
 lib     snprintf
 lib     statfs
