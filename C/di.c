@@ -68,7 +68,6 @@
  *  The default format string for this program is: smbuvpT
  *
  *  Environment variables:
- *      DIFMT:              specifies the format string.
  *      DI_ARGS:            specifies any arguments to di.
  *      POSIXLY_CORRECT:    forces posix mode.
  *      BLOCKSIZE:          BSD df block size.
@@ -139,6 +138,9 @@
 #if _hdr_zone
 # include <zone.h>
 #endif
+#if _hdr_wchar
+# include <wchar.h>
+#endif
 
 #if defined(__cplusplus)
   extern "C" {
@@ -204,6 +206,7 @@
 
 #define DI_ALL_FORMAT           "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 #define DI_POSIX_FORMAT         "SbuvpM"
+#define DI_DEF_MOUNT_FORMAT     "MST\n\tO"
 
 #define DI_VAL_1000             1000.0
 #define DI_DISP_1000_IDX        0
@@ -229,19 +232,10 @@
 #if ! defined (DI_DEFAULT_DISP_SIZE)
 # define DI_DEFAULT_DISP_SIZE   "H"
 #endif
-
-#if _lib_mnt_time
-# define DI_DEF_MOUNT_FORMAT    "MST\n\tI\n\tO"
-#else
-# define DI_DEF_MOUNT_FORMAT    "MST\n\tO"
-#endif
 #define DI_PERC_FMT             "%3.0f%% "
 #define DI_POSIX_PERC_FMT       "   %3.0f%% "
-#define DI_POSIX_PERC_LBL_FMT   "%8s"
-#define DI_PERC_LBL_FMT         "%5s"
-#define DI_FSTYPE_FMT           "%-7.7s"
-#define DI_MOUNT_FMT            "%-15.15s"
-#define DI_SPEC_FMT             "%-18.18s"
+#define DI_JUST_LEFT            0
+#define DI_JUST_RIGHT           1
 
 typedef struct
 {
@@ -287,20 +281,7 @@ typedef struct {
 
 typedef struct {
     char         *formatString;
-    char         mountFormat [20];
-    char         specialFormat [20];
-    char         typeFormat [20];
-    char         optFormat [20];
-    char         mTimeFormat [20];
-    unsigned int width;
-    unsigned int inodeWidth;
-    char         blockFormat [40];
-    char         blockFormatNR [40];   /* no radix */
-    char         blockLabelFormat [40];
-    char         inodeFormat [40];
-    char         inodeLabelFormat [40];
     double       dispBlockSize;
-    char         dispBlockLabel [30];
     double       baseDispSize;
     unsigned int baseDispIdx;
     __ulong      flags;
@@ -309,10 +290,32 @@ typedef struct {
 } diOptions_t;
 
 typedef struct {
+    Size_t       inodeWidth;
+    Size_t       maxMntTimeString;
+    Size_t       maxMountString;
+    Size_t       maxOptString;
+    Size_t       maxSpecialString;
+    Size_t       maxTypeString;
+    Size_t       width;
+    char         *dispBlockLabel;
+    char         blockFormat [15];
+    char         blockFormatNR [15];   /* no radix */
+    char         blockLabelFormat [15];
+    char         inodeFormat [15];
+    char         inodeLabelFormat [15];
+    char         mountFormat [10];
+    char         mTimeFormat [15];
+    char         optFormat [15];
+    char         specialFormat [15];
+    char         typeFormat [10];
+} diOutput_t;
+
+typedef struct {
     int             count;
     int             haspooledfs;
     int             totsorted;
     diOptions_t     options;
+    diOutput_t      output;
     diDiskInfo_t    *diskInfo;
     iList_t         ignoreList;
     iList_t         includeList;
@@ -368,15 +371,16 @@ static int  findDispSize        _((double));
 static void getDiskSpecialInfo  _((diData_t *));
 static void getDiskStatInfo     _((diData_t *));
 static const char *getPrintFlagText _((int));
+static Size_t istrlen           _((const char *));
 static void parseList           _((iList_t *, char *));
 static void preCheckDiskInfo    _((diData_t *));
 static void printDiskInfo       _((diData_t *));
-static void printInfo           _((diDiskInfo_t *, diOptions_t *));
-static void printBlocks         _((const diOptions_t *, _fs_size_t, _fs_size_t, int));
-static void printTitle          _((diOptions_t *));
+static void printInfo           _((diDiskInfo_t *, diOptions_t *, diOutput_t *));
+static void printBlocks         _((const diOptions_t *, const diOutput_t *, _fs_size_t, _fs_size_t, int));
+static void processTitles       _((diOptions_t *, diOutput_t *));
 static void printPerc           _((_fs_size_t, _fs_size_t, const char *));
 static void processArgs         _((int, char * const [], diData_t *, char *));
-static void setDispBlockSize    _((char *, diOptions_t *));
+static void setDispBlockSize    _((char *, diOptions_t *, diOutput_t *));
 static void sortArray           _((diOptions_t *, diDiskInfo_t *, int, int));
 static void usage               _((void));
 
@@ -395,6 +399,7 @@ main (argc, argv)
 {
     diData_t            diData;
     diOptions_t         *diopts;
+    diOutput_t          *diout;
     int                 i;
     char                *ptr;
     char                *argvptr;
@@ -425,8 +430,6 @@ main (argc, argv)
     diopts->formatString = DI_DEFAULT_FORMAT;
         /* change default display format here */
     diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
-    diopts->width = 8;
-    diopts->inodeWidth = 7;
     diopts->flags = 0;
 #if ! SunOS /* Solaris loopback devices should be excluded */
     diopts->flags |= DI_F_INCLUDE_LOOPBACK;
@@ -435,6 +438,15 @@ main (argc, argv)
     diopts->posix_compat = 0;
     diopts->baseDispSize = DI_VAL_1024;
     diopts->baseDispIdx = DI_DISP_1024_IDX;
+
+    diout = &diData.output;
+    diout->width = 8;
+    diout->inodeWidth = 7;
+    diout->maxMountString = 0;  /* 15 */
+    diout->maxSpecialString = 0; /* 18 */
+    diout->maxTypeString = 0; /* 7 */
+    diout->maxOptString = 0;
+    diout->maxMntTimeString = 0;
 
     strncpy (dbsstr, DI_DEFAULT_DISP_SIZE, sizeof (dbsstr)); /* default */
 
@@ -612,11 +624,11 @@ main (argc, argv)
                 diopts->baseDispSize;
     }
 
-    setDispBlockSize (dbsstr, diopts);
+    setDispBlockSize (dbsstr, diopts, diout);
 
         /* initialize display size tables */
-    sizeTable [0].format = diopts->blockFormatNR;
-    sizeTable [1].format = diopts->blockFormat;
+    sizeTable [0].format = diout->blockFormatNR;
+    sizeTable [1].format = diout->blockFormat;
 
     sizeTable [0].high = diopts->baseDispSize;
     sizeTable [1].low = diopts->baseDispSize;
@@ -624,7 +636,7 @@ main (argc, argv)
     sizeTable [1].dbs = diopts->baseDispSize;
     for (i = 2; i < DI_SIZETAB_SIZE; ++i)
     {
-        sizeTable [i].format = diopts->blockFormat;
+        sizeTable [i].format = diout->blockFormat;
         sizeTable [i].low = sizeTable [i - 1].low * diopts->baseDispSize;
         sizeTable [i].high = sizeTable [i - 1].high * diopts->baseDispSize;
         sizeTable [i].dbs = sizeTable [i - 1].dbs * diopts->baseDispSize;
@@ -686,7 +698,6 @@ main (argc, argv)
     }
     di_getDiskInfo (&diData.diskInfo, &diData.count);
     checkDiskInfo (&diData);
-    getMaxFormatLengths (&diData);
     printDiskInfo (&diData);
 
     cleanup (&diData, argvptr);
@@ -760,9 +771,11 @@ printDiskInfo (diData)
     char                lastpool [DI_SPEC_NAME_LEN + 1];
     Size_t              lastpoollen = { 0 };
     int                 inpool = { FALSE };
+    diOutput_t          *diout;
 
     lastpool[0] = '\0';
     diopts = &diData->options;
+    diout = &diData->output;
 
     if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
     {
@@ -772,10 +785,42 @@ printDiskInfo (diData)
         totals.printFlag = DI_PRNT_OK;
     }
 
-    if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER)
+    getMaxFormatLengths (diData);
+    processTitles (diopts, diout);
+
+    if (diopts->dispBlockSize == DI_DISP_HR ||
+        diopts->dispBlockSize == DI_DISP_HR_2)
     {
-        printTitle (diopts);
+        --diout->width;
     }
+
+    if (diopts->dispBlockSize != DI_DISP_HR &&
+        diopts->dispBlockSize != DI_DISP_HR_2 &&
+        (diopts->dispBlockSize > 0 && diopts->dispBlockSize <= DI_VAL_1024)) {
+      Snprintf (diout->blockFormat,
+          DI_SPF(sizeof (diout->blockFormat), "%%%d.0f%%s"), diout->width);
+    } else {
+      Snprintf (diout->blockFormatNR,
+          DI_SPF(sizeof (diout->blockFormatNR), "%%%d.0f%%s"), diout->width);
+      Snprintf (diout->blockFormat,
+          DI_SPF(sizeof (diout->blockFormat), "%%%d.1f%%s"), diout->width);
+    }
+
+    if (diopts->dispBlockSize == DI_DISP_HR ||
+        diopts->dispBlockSize == DI_DISP_HR_2)
+    {
+        ++diout->width;
+    }
+
+    Snprintf (diout->blockLabelFormat,
+        DI_SPF(sizeof (diout->blockLabelFormat), "%%%ds"), diout->width);
+#if _siz_long_long >= 8
+    Snprintf (diout->inodeFormat,
+        DI_SPF(sizeof (diout->inodeFormat), "%%%dllu"), diout->inodeWidth);
+#else
+    Snprintf (diout->inodeFormat,
+        DI_SPF(sizeof (diout->inodeFormat), "%%%dlu"), diout->inodeWidth);
+#endif
 
     diskInfo = diData->diskInfo;
     if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
@@ -874,12 +919,12 @@ printDiskInfo (diData)
         continue;
       }
 
-      printInfo (dinfo, diopts);
+      printInfo (dinfo, diopts, diout);
     }
 
     if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
     {
-      printInfo (&totals, diopts);
+      printInfo (&totals, diopts, diout);
     }
 }
 
@@ -893,11 +938,12 @@ printDiskInfo (diData)
 
 static void
 #if _proto_stdc
-printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts)
+printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
 #else
-printInfo (diskInfo, diopts)
-    diDiskInfo_t         *diskInfo;
-    diOptions_t        *diopts;
+printInfo (diskInfo, diopts, diout)
+    diDiskInfo_t        *diskInfo;
+    diOptions_t         *diopts;
+    diOutput_t          *diout;
 #endif
 {
     _fs_size_t          used;
@@ -987,26 +1033,22 @@ printInfo (diskInfo, diopts)
         switch (*ptr)
         {
             case DI_FMT_MOUNT:
-            {
-                printf (DI_MOUNT_FMT, diskInfo->name);
-                break;
-            }
-
             case DI_FMT_MOUNT_FULL:
             {
-                printf (diopts->mountFormat, diskInfo->name);
+                printf (diout->mountFormat, diskInfo->name);
                 break;
             }
 
             case DI_FMT_BTOT:
             {
-                printBlocks (diopts, diskInfo->totalBlocks, diskInfo->blockSize, idx);
+                printBlocks (diopts, diout,
+                    diskInfo->totalBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BTOT_AVAIL:
             {
-                printBlocks (diopts, diskInfo->totalBlocks -
+                printBlocks (diopts, diout, diskInfo->totalBlocks -
                     (diskInfo->freeBlocks - diskInfo->availBlocks),
                     diskInfo->blockSize, idx);
                 break;
@@ -1014,27 +1056,31 @@ printInfo (diskInfo, diopts)
 
             case DI_FMT_BUSED:
             {
-                printBlocks (diopts, diskInfo->totalBlocks - diskInfo->freeBlocks,
-                            diskInfo->blockSize, idx);
+                printBlocks (diopts, diout,
+                    diskInfo->totalBlocks - diskInfo->freeBlocks,
+                    diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BCUSED:
             {
-                printBlocks (diopts, diskInfo->totalBlocks - diskInfo->availBlocks,
-                            diskInfo->blockSize, idx);
+                printBlocks (diopts, diout,
+                    diskInfo->totalBlocks - diskInfo->availBlocks,
+                    diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printBlocks (diopts, diskInfo->freeBlocks, diskInfo->blockSize, idx);
+                printBlocks (diopts, diout,
+                     diskInfo->freeBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
-                printBlocks (diopts, diskInfo->availBlocks, diskInfo->blockSize, idx);
+                printBlocks (diopts, diout,
+                     diskInfo->availBlocks, diskInfo->blockSize, idx);
                 break;
             }
 
@@ -1104,19 +1150,19 @@ printInfo (diskInfo, diopts)
 
             case DI_FMT_ITOT:
             {
-                printf (diopts->inodeFormat, diskInfo->totalInodes);
+                printf (diout->inodeFormat, diskInfo->totalInodes);
                 break;
             }
 
             case DI_FMT_IUSED:
             {
-                printf (diopts->inodeFormat, diskInfo->totalInodes - diskInfo->freeInodes);
+                printf (diout->inodeFormat, diskInfo->totalInodes - diskInfo->freeInodes);
                 break;
             }
 
             case DI_FMT_IFREE:
             {
-                printf (diopts->inodeFormat, diskInfo->freeInodes);
+                printf (diout->inodeFormat, diskInfo->freeInodes);
                 break;
             }
 
@@ -1129,40 +1175,30 @@ printInfo (diskInfo, diopts)
             }
 
             case DI_FMT_SPECIAL:
-            {
-                printf (DI_SPEC_FMT, diskInfo->special);
-                break;
-            }
-
             case DI_FMT_SPECIAL_FULL:
             {
-                printf (diopts->specialFormat, diskInfo->special);
+                printf (diout->specialFormat, diskInfo->special);
                 break;
             }
 
             case DI_FMT_TYPE:
-            {
-                printf (DI_FSTYPE_FMT, diskInfo->fsType);
-                break;
-            }
-
             case DI_FMT_TYPE_FULL:
             {
-                printf (diopts->typeFormat, diskInfo->fsType);
+                printf (diout->typeFormat, diskInfo->fsType);
                 break;
             }
 
             case DI_FMT_MOUNT_OPTIONS:
             {
-                printf (diopts->optFormat, diskInfo->options);
+                printf (diout->optFormat, diskInfo->options);
                 break;
             }
 
             case DI_FMT_MOUNT_TIME:
             {
-#if _lib_mnt_time
-                printf (diopts->mTimeFormat, diskInfo->mountTime);
-#endif
+                if (diout->maxMntTimeString > 0) {
+                  printf (diout->mTimeFormat, diskInfo->mountTime);
+                }
                 break;
             }
 
@@ -1186,11 +1222,12 @@ printInfo (diskInfo, diopts)
 
 static void
 #if _proto_stdc
-printBlocks (const diOptions_t *diopts, _fs_size_t blocks,
-                        _fs_size_t blockSize, int idx)
+printBlocks (const diOptions_t *diopts, const diOutput_t *diout,
+             _fs_size_t blocks, _fs_size_t blockSize, int idx)
 #else
-printBlocks (diopts, blocks, blockSize, idx)
-    const diOptions_t        *diopts;
+printBlocks (diopts, diout, blocks, blockSize, idx)
+    const diOptions_t   *diopts;
+    const diOutput_t    *diout;
     _fs_size_t          blocks;
     _fs_size_t          blockSize;
     int                 idx;
@@ -1204,7 +1241,7 @@ printBlocks (diopts, blocks, blockSize, idx)
 
 
     suffix = "";
-    format = diopts->blockFormat;
+    format = diout->blockFormat;
     tdbs = diopts->dispBlockSize;
 
     if (diopts->dispBlockSize == DI_DISP_HR)
@@ -1310,22 +1347,34 @@ addTotals (diskInfo, totals, inpool)
 }
 
 /*
- * printTitle
+ * processTitles
  *
- * Loop through the format string and print the appropriate headings.
+ * Sets up the column format strings w/the appropriate defaults.
+ * Loop through the format string and adjust the various column sizes.
+ *
+ * At the same time print the titles.
  *
  */
 
 static void
 #if _proto_stdc
-printTitle (diOptions_t *diopts)
+processTitles (diOptions_t *diopts, diOutput_t *diout)
 #else
-printTitle (diopts)
-    diOptions_t        *diopts;
+processTitles (diopts, diout)
+    diOptions_t   *diopts;
+    diOutput_t    *diout;
 #endif
 {
-    char                *ptr;
-    int                 valid;
+    char            *ptr;
+    int             valid;
+    Size_t          wlen;
+    Size_t          *wlenptr;
+    int             justification;
+    char            *pstr;
+    char            *fstr;
+    Size_t          maxsize;
+    char            tformat [30];
+
 
     if ((diopts->flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
     {
@@ -1338,24 +1387,37 @@ printTitle (diopts)
     while (*ptr)
     {
         valid = TRUE;
+        wlen = 0;
+        wlenptr = (Size_t *) NULL;
+        fstr = (char *) NULL;
+        maxsize = 0;
+        justification = DI_JUST_LEFT;
 
         switch (*ptr)
         {
             case DI_FMT_MOUNT:
             {
-                printf (DI_MOUNT_FMT, DI_GT("Mount"));
+                wlen = 15;
+                wlenptr = &diout->maxMountString;
+                pstr = "Mount";
+                fstr = diout->mountFormat;
+                maxsize = sizeof (diout->mountFormat);
                 break;
             }
 
             case DI_FMT_MOUNT_FULL:
             {
+                wlen = diout->maxMountString;
+                wlenptr = &diout->maxMountString;
+                fstr = diout->mountFormat;
+                maxsize = sizeof (diout->mountFormat);
                 if (diopts->posix_compat == 1)
                 {
-                    printf (diopts->mountFormat, DI_GT("Mounted On"));
+                    pstr = "Mounted On";
                 }
                 else
                 {
-                    printf (diopts->mountFormat, DI_GT("Mount"));
+                    pstr = "Mount";
                 }
                 break;
             }
@@ -1363,32 +1425,44 @@ printTitle (diopts)
             case DI_FMT_BTOT:
             case DI_FMT_BTOT_AVAIL:
             {
-                printf (diopts->blockLabelFormat, diopts->dispBlockLabel);
+                wlen = diout->width;
+                wlenptr = &diout->width;
+                justification = DI_JUST_RIGHT;
+                pstr = diout->dispBlockLabel;
                 break;
             }
 
             case DI_FMT_BUSED:
             case DI_FMT_BCUSED:
             {
-                printf (diopts->blockLabelFormat, DI_GT("Used"));
+                wlen = diout->width;
+                wlenptr = &diout->width;
+                justification = DI_JUST_RIGHT;
+                pstr = "Used";
                 break;
             }
 
             case DI_FMT_BFREE:
             {
-                printf (diopts->blockLabelFormat, DI_GT("Free"));
+                wlen = diout->width;
+                wlenptr = &diout->width;
+                justification = DI_JUST_RIGHT;
+                pstr = "Free";
                 break;
             }
 
             case DI_FMT_BAVAIL:
             {
+                wlen = diout->width;
+                wlenptr = &diout->width;
+                justification = DI_JUST_RIGHT;
                 if (diopts->posix_compat == 1)
                 {
-                    printf (diopts->blockLabelFormat, DI_GT("Available"));
+                    pstr = "Available";
                 }
                 else
                 {
-                    printf (diopts->blockLabelFormat, DI_GT("Avail"));
+                    pstr = "Avail";
                 }
                 break;
             }
@@ -1399,11 +1473,13 @@ printTitle (diopts)
             {
                 if (diopts->posix_compat == 1)
                 {
-                    printf (DI_POSIX_PERC_LBL_FMT, DI_GT("Capacity"));
+                    wlen = 8;
+                    pstr = "Capacity";
                 }
                 else
                 {
-                    printf (DI_PERC_LBL_FMT, DI_GT("%Used"));
+                    wlen = 5;
+                    pstr = "%Used";
                 }
                 break;
             }
@@ -1411,88 +1487,170 @@ printTitle (diopts)
             case DI_FMT_BPERC_AVAIL:
             case DI_FMT_BPERC_FREE:
             {
-                printf (DI_PERC_LBL_FMT, DI_GT("%Free"));
+                wlen = 5;
+                pstr = "%Free";
                 break;
             }
 
             case DI_FMT_ITOT:
             {
-                printf (diopts->inodeLabelFormat, DI_GT("Inodes"));
+                justification = DI_JUST_RIGHT;
+                wlen = diout->inodeWidth;
+                wlenptr = &diout->inodeWidth;
+                fstr = diout->inodeLabelFormat;
+                maxsize = sizeof (diout->inodeLabelFormat);
+                pstr = "Inodes";
                 break;
             }
 
             case DI_FMT_IUSED:
             {
-                printf (diopts->inodeLabelFormat, DI_GT("Used"));
+                justification = DI_JUST_RIGHT;
+                wlen = diout->inodeWidth;
+                wlenptr = &diout->inodeWidth;
+                fstr = diout->inodeLabelFormat;
+                maxsize = sizeof (diout->inodeLabelFormat);
+                pstr = "Used";
                 break;
             }
 
             case DI_FMT_IFREE:
             {
-                printf (diopts->inodeLabelFormat, DI_GT("Free"));
+                justification = DI_JUST_RIGHT;
+                wlen = diout->inodeWidth;
+                wlenptr = &diout->inodeWidth;
+                fstr = diout->inodeLabelFormat;
+                maxsize = sizeof (diout->inodeLabelFormat);
+                pstr = "Free";
                 break;
             }
 
             case DI_FMT_IPERC:
             {
-                printf (DI_PERC_LBL_FMT, DI_GT("%Used"));
+                wlen = 5;
+                pstr = "%Used";
                 break;
             }
 
             case DI_FMT_SPECIAL:
             {
-                printf (DI_SPEC_FMT, DI_GT("Filesystem"));
+                wlen = 18;
+                wlenptr = &diout->maxSpecialString;
+                fstr = diout->specialFormat;
+                maxsize = sizeof (diout->specialFormat);
+                pstr = "Filesystem";
                 break;
             }
 
             case DI_FMT_SPECIAL_FULL:
             {
-                printf (diopts->specialFormat, DI_GT("Filesystem"));
+                wlen = diout->maxSpecialString;
+                wlenptr = &diout->maxSpecialString;
+                fstr = diout->specialFormat;
+                maxsize = sizeof (diout->specialFormat);
+                pstr = "Filesystem";
                 break;
             }
 
             case DI_FMT_TYPE:
             {
-                printf (DI_FSTYPE_FMT, DI_GT("fsType"));
+                wlen = 7;
+                wlenptr = &diout->maxTypeString;
+                fstr = diout->typeFormat;
+                maxsize = sizeof (diout->typeFormat);
+                pstr = "fsType";
                 break;
             }
 
             case DI_FMT_TYPE_FULL:
             {
-                printf (diopts->typeFormat, DI_GT("fs Type"));
+                wlen = diout->maxTypeString;
+                wlenptr = &diout->maxTypeString;
+                fstr = diout->typeFormat;
+                maxsize = sizeof (diout->typeFormat);
+                pstr = "fs Type";
                 break;
             }
 
             case DI_FMT_MOUNT_OPTIONS:
             {
-                printf (diopts->optFormat, DI_GT("Options"));
+                wlen = diout->maxOptString;
+                wlenptr = &diout->maxOptString;
+                fstr = diout->optFormat;
+                maxsize = sizeof (diout->optFormat);
+                pstr = "Options";
                 break;
             }
 
             case DI_FMT_MOUNT_TIME:
             {
-#if _lib_mnt_time
-                printf (diopts->mTimeFormat, DI_GT("Mount Time"));
-#endif
+                pstr = "";
+                if (diout->maxMntTimeString > 0) {
+                  wlen = diout->maxMntTimeString;
+                  wlenptr = &diout->maxMntTimeString;
+                  fstr = diout->mTimeFormat;
+                  maxsize = sizeof (diout->mTimeFormat);
+                  pstr = "Mount Time";
+                }
                 break;
             }
 
             default:
             {
+              if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
                 printf ("%c", *ptr);
-                valid = FALSE;
-                break;
+              }
+              valid = FALSE;
+              break;
             }
         }
 
+        if (wlen > 0) {
+          Size_t    ilen;
+          Size_t    olen;
+          Size_t    len;
+          Size_t    tlen;
+          char      *jstr;
+
+          pstr = DI_GT (pstr);
+          olen = (Size_t) strlen (pstr);
+          ilen = (Size_t) istrlen (pstr);
+          wlen = ilen > wlen ? ilen : wlen;
+          len = wlen;
+          tlen = len + olen - ilen;  /* for the title only */
+
+          jstr = justification == DI_JUST_LEFT ? "-" : "";
+          Snprintf (tformat, DI_SPF(sizeof (tformat), "%%%s%d.%ds"),
+              jstr, tlen, tlen);
+
+          if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
+            printf (tformat, pstr);
+          }
+          if (fstr != (char *) NULL) {
+            if (tlen != len) {
+              Snprintf (tformat, DI_SPF(sizeof (tformat), "%%%s%d.%ds"),
+                  jstr, len, len);
+            }
+            strncpy (fstr, tformat, maxsize);
+          }
+          if (wlenptr != (Size_t *) NULL) {
+            *wlenptr = wlen;
+          }
+/*printf ("%s: olen:%d wlen:%d ilen:%d len:%d %s\n", pstr, olen, wlen, ilen, len, tformat); */
+        }
+
         ++ptr;
-        if (*ptr && valid)
-        {
-            printf (" ");
+        if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
+          if (*ptr && valid)
+          {
+              printf (" ");
+          }
         }
     }
 
-    printf ("\n");
+    if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
+      printf ("\n");
+    }
 }
 
 /*
@@ -2143,35 +2301,9 @@ getMaxFormatLengths (diData)
 {
     int             i;
     unsigned int    len;
-    unsigned int    maxMountString;
-    unsigned int    maxSpecialString;
-    unsigned int    maxTypeString;
-    unsigned int    maxOptString;
-    unsigned int    maxMntTimeString;
-    diOptions_t     *diopts;
+    diOutput_t      *diout;
 
-
-    diopts = &diData->options;
-
-    maxMountString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 5);
-    maxSpecialString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 10);
-    maxTypeString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7);
-    maxOptString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 7);
-    maxMntTimeString = (unsigned int)
-        ((diopts->flags & DI_F_NO_HEADER) == DI_F_NO_HEADER ? 0 : 26);
-
-    if (diopts->posix_compat == 1)
-    {
-      /* Mounted On */
-      len = strlen (DI_GT("Mounted On"));
-      maxMountString = maxMountString < len ? len : maxMountString;
-      len = strlen (diopts->dispBlockLabel);
-      diopts->width = diopts->width < len ? len : diopts->width;
-    }
+    diout = &diData->output;
 
         /* this loop gets the max string lengths */
     for (i = 0; i < diData->count; ++i)
@@ -2182,86 +2314,36 @@ getMaxFormatLengths (diData)
         if (dinfo->doPrint)
         {
             len = strlen (dinfo->name);
-            if (len > maxMountString)
+            if (len > diout->maxMountString)
             {
-                maxMountString = len;
+                diout->maxMountString = len;
             }
 
             len = strlen (dinfo->special);
-            if (len > maxSpecialString)
+            if (len > diout->maxSpecialString)
             {
-                maxSpecialString = len;
+                diout->maxSpecialString = len;
             }
 
             len = strlen (dinfo->fsType);
-            if (len > maxTypeString)
+            if (len > diout->maxTypeString)
             {
-                maxTypeString = len;
+                diout->maxTypeString = len;
             }
 
             len = strlen (dinfo->options);
-            if (len > maxOptString)
+            if (len > diout->maxOptString)
             {
-                maxOptString = len;
+                diout->maxOptString = len;
             }
 
             len = strlen (dinfo->mountTime);
-            if (len > maxMntTimeString)
+            if (len > diout->maxMntTimeString)
             {
-                maxMntTimeString = len;
+                diout->maxMntTimeString = len;
             }
         } /* if we are printing this item */
     } /* for all disks */
-
-    Snprintf (diopts->mountFormat, DI_SPF(sizeof (diopts->mountFormat), "%%-%d.%ds"),
-              maxMountString, maxMountString);
-    Snprintf (diopts->specialFormat, DI_SPF(sizeof (diopts->specialFormat), "%%-%d.%ds"),
-              maxSpecialString, maxSpecialString);
-    Snprintf (diopts->typeFormat, DI_SPF(sizeof (diopts->typeFormat), "%%-%d.%ds"),
-              maxTypeString, maxTypeString);
-    Snprintf (diopts->optFormat, DI_SPF(sizeof (diopts->optFormat), "%%-%d.%ds"),
-              maxOptString, maxOptString);
-    Snprintf (diopts->mTimeFormat, DI_SPF(sizeof (diopts->mTimeFormat), "%%-%d.%ds"),
-              maxMntTimeString, maxMntTimeString);
-
-    if (diopts->dispBlockSize == DI_DISP_HR ||
-        diopts->dispBlockSize == DI_DISP_HR_2)
-    {
-        --diopts->width;
-    }
-
-    if (diopts->dispBlockSize != DI_DISP_HR &&
-        diopts->dispBlockSize != DI_DISP_HR_2 &&
-        (diopts->dispBlockSize > 0 && diopts->dispBlockSize <= DI_VAL_1024))
-    {
-        Snprintf (diopts->blockFormat,
-            DI_SPF(sizeof (diopts->blockFormat), "%%%d.0f%%s"), diopts->width);
-    }
-    else
-    {
-        Snprintf (diopts->blockFormatNR,
-            DI_SPF(sizeof (diopts->blockFormatNR), "%%%d.0f%%s"), diopts->width);
-        Snprintf (diopts->blockFormat,
-            DI_SPF(sizeof (diopts->blockFormat), "%%%d.1f%%s"), diopts->width);
-    }
-
-    if (diopts->dispBlockSize == DI_DISP_HR ||
-        diopts->dispBlockSize == DI_DISP_HR_2)
-    {
-        ++diopts->width;
-    }
-
-    Snprintf (diopts->blockLabelFormat,
-            DI_SPF(sizeof (diopts->blockLabelFormat), "%%%ds"), diopts->width);
-#if _siz_long_long >= 8
-    Snprintf (diopts->inodeFormat,
-            DI_SPF(sizeof (diopts->inodeFormat), "%%%dllu"), diopts->inodeWidth);
-#else
-    Snprintf (diopts->inodeFormat,
-            DI_SPF(sizeof (diopts->inodeFormat), "%%%dlu"), diopts->inodeWidth);
-#endif
-    Snprintf (diopts->inodeLabelFormat,
-            DI_SPF(sizeof (diopts->inodeLabelFormat), "%%%ds"), diopts->inodeWidth);
 }
 
 /*
@@ -2393,9 +2475,11 @@ processArgs (argc, argv, diData, dbsstr)
     int         ch;
     int         hasdashk;
     diOptions_t *diopts;
+    diOutput_t  *diout;
 
 
     diopts = &diData->options;
+    diout = &diData->output;
     hasdashk = 0;
     while ((ch = getopt (argc, argv,
         "Aab:B:d:D:f:F:ghHi:I:klLmnPs:tvw:W:x:X:z:Z")) != -1)
@@ -2564,13 +2648,13 @@ processArgs (argc, argv, diData, dbsstr)
 
             case 'w':
             {
-                diopts->width = (unsigned int) atoi (optarg);
+                diout->width = (unsigned int) atoi (optarg);
                 break;
             }
 
             case 'W':
             {
-                diopts->inodeWidth = (unsigned int) atoi (optarg);
+                diout->inodeWidth = (unsigned int) atoi (optarg);
                 break;
             }
 
@@ -2579,8 +2663,8 @@ processArgs (argc, argv, diData, dbsstr)
                 debug = atoi (optarg);
                 diopts->flags |= DI_F_DEBUG_HDR | DI_F_TOTAL;
                 diopts->flags &= (__ulong) (~ DI_F_NO_HEADER);
-                diopts->width = 10;
-                diopts->inodeWidth = 10;
+                diout->width = 10;
+                diout->inodeWidth = 10;
                 break;
             }
 
@@ -2874,16 +2958,18 @@ checkZone (diskInfo, zoneInfo, allFlag)
 
 static void
 #if _proto_stdc
-setDispBlockSize (char *ptr, diOptions_t *diopts)
+setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
 #else
-setDispBlockSize (ptr, diopts)
+setDispBlockSize (ptr, diopts, diout)
     char            *ptr;
     diOptions_t     *diopts;
+    diOutput_t      *diout;
 #endif
 {
     unsigned int len;
     double       val;
     char         *tptr;
+    static char  tempbl [15];
 
     if (isdigit ((int) (*ptr)))
     {
@@ -2962,16 +3048,14 @@ setDispBlockSize (ptr, diopts)
             case 'h':
             {
                 val = DI_DISP_HR;
-                strncpy (diopts->dispBlockLabel, DI_GT("Size"),
-                    sizeof (diopts->dispBlockLabel));
+                diout->dispBlockLabel = "Size";
                 break;
             }
 
             case 'H':
             {
                 val = DI_DISP_HR_2;
-                strncpy (diopts->dispBlockLabel, DI_GT("Size"),
-                    sizeof (diopts->dispBlockLabel));
+                diout->dispBlockLabel = "Size";
                 break;
             }
 
@@ -3004,15 +3088,13 @@ setDispBlockSize (ptr, diopts)
 
             if (val == 1.0)
             {
-                strncpy (diopts->dispBlockLabel,
-                    DI_GT(dispTable [idx].disp [diopts->baseDispIdx]),
-                    sizeof (diopts->dispBlockLabel));
+                diout->dispBlockLabel = dispTable [idx].disp [diopts->baseDispIdx];
             }
             else
             {
-                Snprintf (diopts->dispBlockLabel,
-                    DI_SPF(sizeof (diopts->dispBlockLabel), "%.0f %s"),
-                    val, DI_GT(dispTable [idx].disp [diopts->baseDispIdx]));
+                Snprintf (tempbl, DI_SPF (sizeof (tempbl), "%.0f %s"),
+                    val, DI_GT (dispTable [idx].disp [diopts->baseDispIdx]));
+                diout->dispBlockLabel = tempbl;
             }
             val *= dispTable [idx].size;
         } /* known size multiplier */
@@ -3027,9 +3109,7 @@ setDispBlockSize (ptr, diopts)
         {
             if (val == dispTable [i].size)
             {
-                strncpy (diopts->dispBlockLabel,
-                     DI_GT(dispTable [i].disp  [diopts->baseDispIdx]),
-                     sizeof (diopts->dispBlockLabel));
+                diout->dispBlockLabel = dispTable [i].disp [diopts->baseDispIdx];
                 ok = 1;
                 break;
             }
@@ -3037,20 +3117,18 @@ setDispBlockSize (ptr, diopts)
 
         if (ok == 0)
         {
-            Snprintf (diopts->dispBlockLabel,
-                DI_SPF(sizeof (diopts->dispBlockLabel), "%.0fb"), val);
+            Snprintf (tempbl, DI_SPF(sizeof (tempbl), "%.0fb"), val);
+            diout->dispBlockLabel = tempbl;
         }
     }  /* some oddball block size */
 
     if (diopts->posix_compat == 1 && val == 512)
     {
-        strncpy (diopts->dispBlockLabel, DI_GT("512-blocks"),
-            sizeof (diopts->dispBlockLabel));
+        diout->dispBlockLabel = "512-blocks";
     }
     if (diopts->posix_compat == 1 && val == 1024)
     {
-        strncpy (diopts->dispBlockLabel, DI_GT("1024-blocks"),
-            sizeof (diopts->dispBlockLabel));
+        diout->dispBlockLabel = "1024-blocks";
     }
 
     diopts->dispBlockSize = val;
@@ -3072,4 +3150,33 @@ getPrintFlagText (pf)
         pf == DI_PRNT_OUTOFZONE ? "outofzone" :
         pf == DI_PRNT_FORCE ? "force" :
         pf == DI_PRNT_SKIP ? "skip" : "unknown";
+}
+
+static Size_t
+#if _proto_stdc
+istrlen (const char *str)
+#else
+istrlen (str)
+    const char *str;
+#endif
+{
+  Size_t            len;
+#if _lib_mbrlen && _enable_nls
+  Size_t            mlen;
+  Size_t            slen;
+  mbstate_t         ps;
+
+  len = 0;
+  memset (&ps, 0, sizeof (mbstate_t));
+  slen = strlen (str);
+  while (slen > 0) {
+    mlen = mbrlen (str, slen, &ps);
+    ++len;
+    str += mlen;
+    slen -= mlen;
+  }
+#else
+  len = strlen (str);
+#endif
+  return len;
 }
