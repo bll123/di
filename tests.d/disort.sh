@@ -141,8 +141,8 @@ if [ $rc -ne 0 ]; then
 fi
 
 echo "by type w/total"
-$RUNTOPDIR/di -n -a -f T~b | sort -t'~' > s1
-$RUNTOPDIR/di -n -a -f T~b -st -t | sed '$d' > s2
+$RUNTOPDIR/di -n -a -f T | sort -t'~' > s1
+$RUNTOPDIR/di -n -a -f T -st -t | sed '$d' > s2
 diff -w s1 s2
 rc=$?
 if [ $rc -ne 0 ]; then
