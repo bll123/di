@@ -22,7 +22,7 @@ cat > config.tmp <<_HERE_
 #define _command_msgfmt 0
 _HERE_
 
-$RUNTOPDIR/features/turnoffnls.sh
+$_MKCONFIG_RUNTOPDIR/features/turnoffnls.sh
 rc=$?
 
 if [ $rc -eq 0 ]; then

@@ -5,6 +5,6 @@
 
 echo ${EN} "di executes${EC}" >&3
 
-$RUNTOPDIR/di
+$_MKCONFIG_RUNTOPDIR/di
 rc=$?
 exit $rc

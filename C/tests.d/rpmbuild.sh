@@ -5,7 +5,7 @@
 
 echo ${EN} "rpmbuild${EC}" >&3
 
-cd $RUNTOPDIR
+cd $_MKCONFIG_RUNTOPDIR
 . ./mkconfig.cache
 
 if [ "${di_c__command_rpmbuild}" = "0" ];then
@@ -25,5 +25,8 @@ grc=0
 make -e DI_DIR="." DI_VERSION=${DI_VERSION} testrpmbuild
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
+# leave a copy there...distclean will get them...
+cp mkconfig.log mkconfig.cache mkconfig*.vars di.env reqlibs.txt \
+    $_MKCONFIG_TSTRUNTMPDIR
 
 exit $grc

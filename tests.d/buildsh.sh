@@ -4,6 +4,10 @@
 #
 
 echo ${EN} "build w/mkconfig.sh${EC}" >&3
+. $_MKCONFIG_DIR/shellfuncs.sh
+testshcapability
+
+count=1
 
 dotest () {
   sh=$1
@@ -24,12 +28,17 @@ dotest () {
   make -e prefix=${instdir} all-sh
   rc=$?
   if [ $rc != 0 ]; then grc=$rc; fi
+  mkdir -p $_MKCONFIG_TSTRUNTMPDIR/${count}_${shell}
+  # leave these laying around for use by install.sh and rpmbuild.sh test
+  cp mkconfig.log mkconfig.cache mkconfig*.vars di.env reqlibs.txt \
+      $_MKCONFIG_TSTRUNTMPDIR/${count}_${shell}
+  domath count "$count + 1"
 }
 
 grc=0
 echo ${EN} " ${EC}" >&3
 
-cd $RUNTOPDIR
+cd $_MKCONFIG_RUNTOPDIR
 for s in $shelllist; do
   dotest $s
 done
