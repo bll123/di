@@ -38,6 +38,7 @@ tests.d/diinst.sh
 tests.d/dinls.sh
 tests.d/disort.sh
 tests.d/ditot.sh
+tests.d/nlsoff.sh
 tests.d/rpmbuild.sh
 tests.d/test_order
 trimchar.c		di source
