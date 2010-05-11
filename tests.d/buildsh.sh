@@ -22,7 +22,7 @@ dotest () {
     shell=`echo ${_MKCONFIG_SHELL} | sed 's,.*/,,'`
   fi
   echo ${EN} "${shell} ${EC}" >&3
-  echo "   testing with ${_MKCONFIG_SHELL} "
+  echo "##   testing with ${_MKCONFIG_SHELL} "
   make distclean
   instdir="`pwd`/test_di"
   make -e prefix=${instdir} all-sh
