@@ -3165,14 +3165,19 @@ istrlen (str)
   Size_t            mlen;
   Size_t            slen;
   mbstate_t         ps;
+  const char        *tstr;
 
   len = 0;
   memset (&ps, 0, sizeof (mbstate_t));
   slen = strlen (str);
+  tstr = str;
   while (slen > 0) {
-    mlen = mbrlen (str, slen, &ps);
+    mlen = mbrlen (tstr, slen, &ps);
+    if (mlen <= 0) {
+      return strlen (str);
+    }
     ++len;
-    str += mlen;
+    tstr += mlen;
     slen -= mlen;
   }
 #else
