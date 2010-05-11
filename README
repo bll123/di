@@ -1,4 +1,4 @@
-di - disk information utility (version 4.22).
+di - disk information utility (version 4.23).
 
 CONTENTS
   Description
@@ -29,6 +29,8 @@ INSTALLATION
   To build with mkconfig.pl (requires perl):
       make all-perl
 
+  For Tru64: export BIN_SH=svr4 beforehand.
+
   The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.
 
@@ -41,12 +43,13 @@ INSTALLATION
 
   Windows installation:
 
-    Alternative 1 - These use config.win95 as the config.h file.
-        Cygwin gcc: make windows-gcc
-        MS VC++:    nmake windows
-    Alternative 2 - builds a new config.h file.
-        make distclean
-        make CC=gcc
+    Alternative 1 - uses config.win or config.mingw
+      Cygwin gcc: make windows-gcc
+      MS VC++:    nmake windows
+      MinGW:      mingw32-make MAKE=mingw32-make CC=mingw32-gcc windows-mingw
+    Alternative 2 - builds a new config.h file (Cygwin).
+      make distclean
+      make CC=gcc
 
     You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.
@@ -55,14 +58,12 @@ INSTALLATION
     windows API, edit config.h, and change _hdr_windows,
     _lib_GetDiskFreeSpace, _lib_GetDiskFreeSpaceEx,
     _lib_GetDriveType, _lib_GetLogicalDriveStrings and
-    _lib_GetVolumeInformation to 0, then re-run the build.
+    _lib_GetVolumeInformation to 0, then run 'make' again.
 
   Installation Permissions:
     Some old systems (Sys V variants) only allow root to read the
-    mount table.  If this is the case, change the INSTPERM macro
-    in the Makefile should be set to 4111, and the USER macro to root.
-    In SysV.4 and Solaris, the mount command would reset the
-    permissions to be root readable only (fixed in Solaris 7).
+    mount table.  In SysV.4 and Solaris, the mount command would 
+    reset the permissions to be root readable only (fixed in Solaris 7).
 
     If this is needed on your system, do:
 
@@ -92,30 +93,36 @@ REQUIREMENTS
         cat perl rm
     NLS:
         msgfmt sed
-        turnoffnls.sh:
-            ed
+    turnoffnls.sh:
+        cat rm sed 
     runtests.sh:
         ar cat cp dc diff env expr grep mv rm sed sort tr
 
 PORTING
 
-    di 4.22 has been tested on the following platforms:
+    di 4.23 has been tested on the following platforms:
+        AIX 5.1
+        BSD
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4
         Cygwin
         Debian 4.0, 5.0, kFreeBSD 7.2
         Fedora 7, 12
         FreeBSD 4.9, 5.1, 7.0, 7.1, 7.2, 8.0
-        Haiku 1
+        Haiku r1a1
         HP-UX 11.11 (bundled cc, gcc)
         MacOSX 8.11, 9.5
+        MinGW
         NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1
         Nexenta 1.0.1_b85 2.0_b104
         OpenBSD 4.4 4.5 4.6
         OpenSolaris 200805 200906
+        QNX 6.3
         RedHat 7.1 7.3
         RHEL 5.2
-        Solaris 8, 9, 10 (cc, gcc3, gcc4)
+        Solaris 8, 9, 10 (cc, gcc3, gcc4); Solaris 8 x86 w/gcc3 fails.
+        Tru64 5.1B
         Ubuntu 10
+        VMS
 
     di has been ported to the following systems in the past:
 
@@ -127,9 +134,17 @@ PORTING
 
 CHANGES
 
+    4.23                                    [10 May 2010]
+        Fix internationalized strings to line up properly.
+        Changed default block size output to -dH (scaled format 2).
+        Brought up to date for AIX, Tru64.
+        Added support for MinGW on Windows.
+        Added support for QNX.
+        Solaris 8 x86 w/gcc3 currently fails.
+
     4.22                                    [2 May 2010]
         Updated to use mkconfig 1.3.  Fixes problem
-        with linking in unneeded libraries.
+          with linking in unneeded libraries.
         Replaced hasnls program with a shell script.
 
     4.21                                    [11 Apr 2010]
