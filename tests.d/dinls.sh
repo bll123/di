@@ -20,6 +20,7 @@ for l in "de" "de_DE" "de_DE.utf-8" "de_DE.UTF-8" \
   rc=$?
   if [ $rc -eq 0 ]; then
     grc=0
+    break   # only need to know one that works...
   fi
 done
 
