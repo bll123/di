@@ -175,19 +175,21 @@ os2-gcc:
 bsd43-cc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
-	$(CP) -f config.bsd43.cc config.h
+	$(CP) config.bsd43.cc config.h
+	@touch reqlibs.txt
 	$(MAKE) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -O \
+		CFLAGS="$(CFLAGS) -O" \
 		LDFLAGS="-O" di-programs
 
 bsd43-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
-	$(CP) -f config.bsd43.gcc config.h
+	$(CP) config.bsd43.gcc config.h
+	@touch reqlibs.txt
 	$(MAKE) \
-		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -O2 \
+		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -O2" \
 		LDFLAGS="-O2" di-programs
 
 ###
