@@ -24,6 +24,7 @@ MANIFEST		This file
 po/			internationalization
 po/de.po
 po/en.po
+po/es.po
 README			Read This
 realloc.c		di source
 strdup.c		di source
