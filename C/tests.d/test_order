@@ -2,6 +2,7 @@
 1 compshpl
 1 buildpl
 2 buildsh
+3 env
 3 diexec
 3 rpmbuild
 4 diarg
