@@ -233,7 +233,7 @@
 # define DI_DEFAULT_DISP_SIZE   "H"
 #endif
 #define DI_PERC_FMT             "%3.0f%% "
-#define DI_POSIX_PERC_FMT       "   %3.0f%% "
+#define DI_POSIX_PERC_FMT       "    %3.0f%% "
 #define DI_JUST_LEFT            0
 #define DI_JUST_RIGHT           1
 
@@ -753,6 +753,9 @@ cleanup (diData, argvptr)
  *
  * Print out the disk information table.
  * Loops through all mounted disks, prints and calculates totals.
+ *
+ * The method to get widths and handle titles and etc. is rather a
+ * mess.  There may be a better way to handle it.
  *
  */
 
@@ -1473,7 +1476,7 @@ processTitles (diopts, diout)
             {
                 if (diopts->posix_compat == 1)
                 {
-                    wlen = 8;
+                    wlen = 9;
                     pstr = "Capacity";
                 }
                 else
@@ -1615,6 +1618,7 @@ processTitles (diopts, diout)
           pstr = DI_GT (pstr);
           olen = (Size_t) strlen (pstr);
           ilen = (Size_t) istrlen (pstr);
+/* fprintf (stderr, "%s: olen:%d wlen:%d ilen:%d\n", pstr, olen, wlen, ilen); */
           wlen = ilen > wlen ? ilen : wlen;
           len = wlen;
           tlen = len + olen - ilen;  /* for the title only */
@@ -1626,6 +1630,7 @@ processTitles (diopts, diout)
           if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
             printf (tformat, pstr);
           }
+/*fprintf (stderr, "%s: olen:%d wlen:%d ilen:%d len:%d tlen:%d %s\n", pstr, olen, wlen, ilen, len, tlen, tformat); */
           if (fstr != (char *) NULL) {
             if (tlen != len) {
               Snprintf (tformat, DI_SPF(sizeof (tformat), "%%%s%d.%ds"),
@@ -1633,10 +1638,10 @@ processTitles (diopts, diout)
             }
             strncpy (fstr, tformat, maxsize);
           }
+/* fprintf (stderr, "%s: %s\n", pstr, tformat); */
           if (wlenptr != (Size_t *) NULL) {
             *wlenptr = wlen;
           }
-/*printf ("%s: olen:%d wlen:%d ilen:%d len:%d %s\n", pstr, olen, wlen, ilen, len, tformat); */
         }
 
         ++ptr;
@@ -2673,7 +2678,6 @@ processArgs (argc, argv, diData, dbsstr)
                 strcpy (diData->zoneInfo.zoneDisplay, optarg);
                 break;
             }
-
             case 'Z':
             {
                 strcpy (diData->zoneInfo.zoneDisplay, "all");
