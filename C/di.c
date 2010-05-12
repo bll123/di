@@ -3173,7 +3173,7 @@ istrlen (str)
   tstr = str;
   while (slen > 0) {
     mlen = mbrlen (tstr, slen, &ps);
-    if (mlen <= 0) {
+    if ((int) mlen <= 0) {
       return strlen (str);
     }
     ++len;
