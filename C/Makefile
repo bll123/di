@@ -235,6 +235,13 @@ install:	di.env
 	. ./di.env; \
 		$(MAKE) -e install-prog install-man
 
+# note that XMSGFMT is set by the install-programs target before
+# executing install-po.  If you need to run this target 
+# or install-po as a separate command, do:
+#    . ./di.env; make -e build-po
+# or:
+#    make -e XMSGFMT=msgfmt build-po
+
 build-po:	di.env
 	-. ./di.env; \
 		(cd po;for i in *.po; do \
