@@ -85,30 +85,6 @@ all-perl:	di.env
 
 
 ###
-# testing
-
-# for regression testing
-di-all-test:	pretests.done tests.done
-
-pretests.done:
-	cd $(MKCONFIGPATH); $(MAKE) CC=$(CC) tests.done
-
-tests.done: $(MKCONFIGPATH)/runtests.sh
-	@echo "## running tests"
-	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/runtests.sh tests.d
-	touch tests.done
-
-testrpmbuild:
-	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
-	$(MKDIR) -p ./rpmbuild/SOURCES
-	$(MKDIR) -p ./rpmbuild/BUILD
-	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
-	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
-	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
-	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
-	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
-
-###
 # environment
 
 di.env:	$(MKCONFIGPATH)/mkconfig.sh features/env.dat
@@ -129,7 +105,7 @@ tar:
 ###
 # specific builds
 
-# This was tested using vc++ 5.0.
+# This was tested using vc++ 5.0. (many years ago)
 windows:
 	copy /y NUL: di.env
 	-del config.h
@@ -213,40 +189,17 @@ realclean:
 	$(MAKE) distclean
 
 ###
-# regression tests
-
-rtest-env:
-	@echo "$(_MKCONFIG_SYSTYPE)"; \
-		echo "$(_MKCONFIG_SYSREV)"; \
-		echo "$(_MKCONFIG_SYSARCH)"; \
-		echo "$(CC)"; \
-		echo "$(_MKCONFIG_USING_GCC)"; \
-		echo "$(CFLAGS)"; \
-		echo "$(LDFLAGS)"; \
-		echo "$(LIBS)"; \
-		echo "$(OBJ_EXT)"; \
-		echo "$(EXE_EXT)"; \
-		echo "$(XMSGFMT)"
-
-###
 # installation
 
 install:	di.env
 	. ./di.env; \
 		$(MAKE) -e install-prog install-man
 
-# note that XMSGFMT is set by the install-programs target before
-# executing install-po.  If you need to run this target 
-# or install-po as a separate command, do:
-#    . ./di.env; make -e build-po
-# or:
-#    make -e XMSGFMT=msgfmt build-po
-
 build-po:	di.env
 	-. ./di.env; \
 		(cd po;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
-		$(XMSGFMT) -o $$j.mo $$i; \
+		$${XMSGFMT} -o $$j.mo $$i; \
 	done)
 
 install-po: 	build-po
@@ -272,7 +225,7 @@ install-prog:	di.env di-programs
 	@-./features/hasnls.sh -v config.h
 	-./features/hasnls.sh config.h && \
 		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
-		XMSGFMT="$(XMSGFMT)" install-po)
+		install-po)
 
 install-man:
 	-$(TEST) -d $(DI_MANINSTDIR) || $(MKDIR) -p $(DI_MANINSTDIR)
@@ -362,3 +315,40 @@ strstr$(OBJ_EXT):	strstr.c config.h di.h
 
 trimchar$(OBJ_EXT):	trimchar.c config.h di.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) trimchar.c
+
+###
+# regression testing
+
+di-all-test:	pretests.done tests.done
+
+pretests.done:
+	cd $(MKCONFIGPATH); $(MAKE) CC=$(CC) tests.done
+
+tests.done: $(MKCONFIGPATH)/runtests.sh
+	@echo "## running tests"
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/runtests.sh tests.d
+	touch tests.done
+
+testrpmbuild:
+	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
+	$(MKDIR) -p ./rpmbuild/SOURCES
+	$(MKDIR) -p ./rpmbuild/BUILD
+	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
+	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
+	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
+	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
+	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
+
+rtest-env:
+	@echo "$(_MKCONFIG_SYSTYPE)"; \
+		echo "$(_MKCONFIG_SYSREV)"; \
+		echo "$(_MKCONFIG_SYSARCH)"; \
+		echo "$(CC)"; \
+		echo "$(_MKCONFIG_USING_GCC)"; \
+		echo "$(CFLAGS)"; \
+		echo "$(LDFLAGS)"; \
+		echo "$(LIBS)"; \
+		echo "$(OBJ_EXT)"; \
+		echo "$(EXE_EXT)"; \
+		echo "$(XMSGFMT)"
+
