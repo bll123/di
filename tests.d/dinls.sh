@@ -3,6 +3,7 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
+set -x
 echo ${EN} "di nls${EC}" >&3
 
 ${_MKCONFIG_RUNTOPDIR}/features/hasnls.sh ${_MKCONFIG_RUNTOPDIR}/config.h
@@ -15,18 +16,30 @@ fi
 
 grc=1
 for l in "de" "de_DE" "de_DE.utf-8" "de_DE.UTF-8" \
-    "de_DE.ISO8859-1" "de_DE.ISO8859-15"; do
+    "de_DE.ISO8859-1" "de_DE.ISO8859-15" ; do
   LC_ALL="${l}" ${_MKCONFIG_RUNTOPDIR}/test_di/bin/di -A | grep Benutzt >/dev/null 2>&1
   rc=$?
   if [ $rc -eq 0 ]; then
     grc=0
-    break   # only need to know one that works...
+    break   # only need to know that one works...
   fi
 done
 
-# cannot depend on german being installed...
 if [ $grc -ne 0 ]; then
-  echo ${EN} " de not installed?${EC}" >&3
+  for l in "es" "es_ES" "es_ES.utf-8" "es_ES.UTF-8" \
+    "es_ES.ISO8859-1" "es_ES.ISO8859-15" ; do
+    LC_ALL="${l}" ${_MKCONFIG_RUNTOPDIR}/test_di/bin/di -A | grep Disponible >/dev/null 2>&1
+    rc=$?
+    if [ $rc -eq 0 ]; then
+      grc=0
+      break   # only need to know that one works...
+    fi
+  done
+fi
+
+# cannot depend on german or spanish being installed...
+if [ $grc -ne 0 ]; then
+  echo ${EN} " de/es not installed?${EC}" >&3
 fi
 
 exit 0
