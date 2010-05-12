@@ -216,17 +216,17 @@ realclean:
 # regression tests
 
 rtest-env:
-	@echo $(_MKCONFIG_SYSTYPE); \
-		echo $(_MKCONFIG_SYSREV); \
-		echo $(_MKCONFIG_SYSARCH); \
-		echo $(CC); \
-		echo $(_MKCONFIG_USING_GCC); \
-		echo $(CFLAGS); \
-		echo $(LDFLAGS); \
-		echo $(LIBS); \
-		echo $(OBJ_EXT); \
-		echo $(EXE_EXT); \
-		echo $(XMSGFMT)
+	@echo "$(_MKCONFIG_SYSTYPE)"; \
+		echo "$(_MKCONFIG_SYSREV)"; \
+		echo "$(_MKCONFIG_SYSARCH)"; \
+		echo "$(CC)"; \
+		echo "$(_MKCONFIG_USING_GCC)"; \
+		echo "$(CFLAGS)"; \
+		echo "$(LDFLAGS)"; \
+		echo "$(LIBS)"; \
+		echo "$(OBJ_EXT)"; \
+		echo "$(EXE_EXT)"; \
+		echo "$(XMSGFMT)"
 
 ###
 # installation
