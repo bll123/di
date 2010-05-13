@@ -13,10 +13,12 @@ make di.env
 
 . ./di.env
 
-make -e --no-print-directory rtest-env > \
-        ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
+make --version | egrep "GNU Make" > /dev/null 2>&1
 rc=$?
-if [ $rc -ne 0 ]; then
+if [ $rc -eq 0 ]; then
+  make -e --no-print-directory rtest-env > \
+        ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
+else
   make -e rtest-env > ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
 fi
 
