@@ -183,11 +183,12 @@ distclean:
 	-$(RM) -rf config.h di.env mkconfig.cache mkconfig_*.vars \
 		pretests.done reqlibs.txt test_di \
 		>/dev/null 2>&1
-	cd $(MKCONFIGPATH);$(MAKE) clean
+	cd $(MKCONFIGPATH);$(MAKE) distclean
 
 realclean:
 	$(MAKE) distclean
 	-$(RM) -rf _mkconfig_runtests _tmp_mkconfig
+	cd $(MKCONFIGPATH);$(MAKE) realclean
 
 ###
 # installation
