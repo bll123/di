@@ -187,6 +187,7 @@ distclean:
 
 realclean:
 	$(MAKE) distclean
+	-$(RM) -rf _mkconfig_runtests _tmp_mkconfig
 
 ###
 # installation
