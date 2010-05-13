@@ -44,7 +44,7 @@ ${XMSGFMT}
 _HERE_
 
 echo "## diff e1 (env) e2 (make)"
-diff -b e1 e2
+diff -w e1 e2
 rc=$?
 
 exit $rc
