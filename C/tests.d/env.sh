@@ -29,8 +29,7 @@ if [ $rc -ne 0 ]; then
   exit $rc
 fi
 
-cat > e1 <<_HERE_
-${_MKCONFIG_SYSTYPE}
+> e1 echo "${_MKCONFIG_SYSTYPE}
 ${_MKCONFIG_SYSREV}
 ${_MKCONFIG_SYSARCH}
 ${CC}
@@ -40,8 +39,7 @@ ${LDFLAGS}
 ${LIBS}
 ${OBJ_EXT}
 ${EXE_EXT}
-${XMSGFMT}
-_HERE_
+${XMSGFMT}"
 
 echo "## diff e1 (env) e2 (make)"
 diff -w e1 e2
