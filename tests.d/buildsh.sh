@@ -3,7 +3,7 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "build w/mkconfig.sh${EC}" >&3
+echo ${EN} "build w/mkconfig.sh${EC}" >&5
 . $_MKCONFIG_DIR/shellfuncs.sh
 testshcapability
 
@@ -21,7 +21,7 @@ dotest () {
   if [ "$shell" = "sh" ]; then
     shell=`echo ${_MKCONFIG_SHELL} | sed 's,.*/,,'`
   fi
-  echo ${EN} "${shell} ${EC}" >&3
+  echo ${EN} "${shell} ${EC}" >&5
   echo "##   testing with ${_MKCONFIG_SHELL} "
   make distclean
   instdir="`pwd`/test_di"
@@ -36,7 +36,7 @@ dotest () {
 }
 
 grc=0
-echo ${EN} " ${EC}" >&3
+echo ${EN} " ${EC}" >&5
 
 cd $_MKCONFIG_RUNTOPDIR
 for s in $shelllist; do

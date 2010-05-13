@@ -4,13 +4,13 @@
 #
 
 set -x
-echo ${EN} "di nls${EC}" >&3
+echo ${EN} "di nls${EC}" >&5
 
 ${_MKCONFIG_RUNTOPDIR}/features/hasnls.sh ${_MKCONFIG_RUNTOPDIR}/config.h
 hasnls=$?
 
 if [ ${hasnls} -ne 0 ];then
-  echo ${EN} " skipped${EC}" >&3
+  echo ${EN} " skipped${EC}" >&5
   exit 0
 fi
 
@@ -39,7 +39,7 @@ fi
 
 # cannot depend on german or spanish being installed...
 if [ $grc -ne 0 ]; then
-  echo ${EN} " de/es not installed?${EC}" >&3
+  echo ${EN} " de/es not installed?${EC}" >&5
 fi
 
 exit 0

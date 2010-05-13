@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo ${EN} "check environment in make${EC}" >&3
+echo ${EN} "check environment in make${EC}" >&5
 
 cd ${_MKCONFIG_RUNTOPDIR}
 rc=$?

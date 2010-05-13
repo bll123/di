@@ -3,7 +3,7 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "install${EC}" >&3
+echo ${EN} "install${EC}" >&5
 
 
 cd $_MKCONFIG_RUNTOPDIR

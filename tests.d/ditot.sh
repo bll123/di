@@ -3,7 +3,7 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "di totals${EC}" >&3
+echo ${EN} "di totals${EC}" >&5
 
 FORMATS="b B u c f v i U F"
 

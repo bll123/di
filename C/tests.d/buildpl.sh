@@ -3,7 +3,7 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "build w/mkconfig.pl${EC}" >&3
+echo ${EN} "build w/mkconfig.pl${EC}" >&5
 
 cd $_MKCONFIG_RUNTOPDIR
 make distclean

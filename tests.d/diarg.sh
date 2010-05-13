@@ -3,7 +3,7 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "di w/argument${EC}" >&3
+echo ${EN} "di w/argument${EC}" >&5
 
 # most all unix
 $_MKCONFIG_RUNTOPDIR/di -n -f M / 2>/dev/null | grep '^/[ ]*$' > /dev/null 2>&1

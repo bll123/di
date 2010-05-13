@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo ${EN} "check turnoffnls.sh${EC}" >&3
+echo ${EN} "check turnoffnls.sh${EC}" >&5
 
 cat > config.h <<_HERE_
 #define _lib_bindtextdomain 1

@@ -3,19 +3,19 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "rpmbuild${EC}" >&3
+echo ${EN} "rpmbuild${EC}" >&5
 
 cd $_MKCONFIG_RUNTOPDIR
 . ./mkconfig.cache
 
 if [ "${di_c__command_rpmbuild}" = "0" ];then
-  echo ${EN} " skipped${EC}" >&3
+  echo ${EN} " skipped${EC}" >&5
   exit 0
 fi
 
 rvers=`rpmbuild --version | tr -cd '0-9'`
 if [ $rvers -lt 470 ]; then
-  echo ${EN} " old version skipped${EC}" >&3
+  echo ${EN} " old version skipped${EC}" >&5
   exit 0
 fi
 

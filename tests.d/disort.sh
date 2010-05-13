@@ -3,7 +3,7 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "di sort${EC}" >&3
+echo ${EN} "di sort${EC}" >&5
 
 grc=0
 
