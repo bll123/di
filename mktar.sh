@@ -8,7 +8,7 @@ rm -rf ${dir} > /dev/null 2>&1
 mkdir ${dir}
 chmod 755 ${dir}
 
-cat MANIFEST | sed 's,[/]*[	 ].*$,,' |
+sed 's,[/]*[	 ].*$,,' MANIFEST |
 while read f; do
   if [ -d $f ]; then
     mkdir ${dir}/${f}
@@ -26,5 +26,8 @@ tar cf - ${dir} |
   gzip -9 > ${dir}.tar.gz
 
 rm -rf ${dir} > /dev/null 2>&1
+
+genisoimage -J -R -o $HOME/ISOs/di.iso testdi.sh build*.sh ${dir}.tar.gz
+cp ${dir}.tar.gz buildcompare.sh testdi.sh $HOME/vbox_shared
 
 exit 0
