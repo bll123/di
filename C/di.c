@@ -232,7 +232,7 @@
 #if ! defined (DI_DEFAULT_DISP_SIZE)
 # define DI_DEFAULT_DISP_SIZE   "H"
 #endif
-#define DI_PERC_FMT             "%3.0f%% "
+#define DI_PERC_FMT             " %3.0f%% "
 #define DI_POSIX_PERC_FMT       "    %3.0f%% "
 #define DI_JUST_LEFT            0
 #define DI_JUST_RIGHT           1
@@ -1481,7 +1481,7 @@ processTitles (diopts, diout)
                 }
                 else
                 {
-                    wlen = 5;
+                    wlen = 6;
                     pstr = "%Used";
                 }
                 break;
@@ -1530,7 +1530,7 @@ processTitles (diopts, diout)
 
             case DI_FMT_IPERC:
             {
-                wlen = 5;
+                wlen = 6;
                 pstr = "%Used";
                 break;
             }
