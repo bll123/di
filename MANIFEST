@@ -17,6 +17,7 @@ features/env.dat	environment configuration
 features/hasnls.sh	checks for NLS support
 features/mkconfig.dat	mkconfig configuration
 features/turnoffnls.sh	turn off all NLS features in config.h
+features/turnoffwinapi.sh	turn off windows API in config.h
 getopt.c		getopt source (from Cnews)
 LICENSE			License
 Makefile		Main Makefile
@@ -29,7 +30,7 @@ README			Read This
 realloc.c		di source
 strdup.c		di source
 strstr.c		di source
-tests.d/			regression tests for di
+tests.d/		regression tests for di
 tests.d/buildpl.sh
 tests.d/buildsh.sh
 tests.d/compshpl.sh
