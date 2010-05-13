@@ -40,6 +40,7 @@
 #define _hdr_time 1
 #define _hdr_unistd 1
 #define _hdr_util_string 0
+#define _hdr_wchar 1
 #define _hdr_windows 0
 #define _hdr_zone 0
 #define _sys_file 1
@@ -86,6 +87,7 @@
 #define _lib_getvfsstat 0
 #define _lib_getzoneid 0
 #define _lib_hasmntopt 1
+#define _lib_mbrlen 1
 #define _lib_memcpy 1
 #define _lib_memset 1
 #define _lib_mntctl 0
