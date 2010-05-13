@@ -99,8 +99,6 @@ tar:
 	@-rm -f $(MKCONFIGPATH)/*.tar.gz *.tar.gz > /dev/null 2>&1
 	cd $(MKCONFIGPATH);make tar
 	./mktar.sh
-	genisoimage -J -R -o $$HOME/ISOs/di.iso testdi.sh build*.sh *.gz
-	cp *.gz buildcompare.sh testdi.sh $$HOME/vbox_shared
 
 ###
 # specific builds
