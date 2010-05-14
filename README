@@ -1,4 +1,4 @@
-di - disk information utility (version 4.23).
+di - disk information utility (version 4.24).
 
 CONTENTS
   Description
@@ -48,21 +48,19 @@ INSTALLATION
       MS VC++:    nmake windows
       MinGW:      mingw32-make MAKE=mingw32-make CC=mingw32-gcc windows-mingw
     Alternative 2 - builds a new config.h file (Cygwin).
-      make distclean
-      make CC=gcc
+      make config.h
+      ./features/turnoffwinapi.sh
+      make
 
     You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.
 
     If you prefer to use the cygwin API rather than the
-    windows API, edit config.h, and change _hdr_windows,
-    _lib_GetDiskFreeSpace, _lib_GetDiskFreeSpaceEx,
-    _lib_GetDriveType, _lib_GetLogicalDriveStrings and
-    _lib_GetVolumeInformation to 0, then run 'make' again.
+    windows API, run features/turnoffwinapi.sh, then run 'make' again.
 
   Installation Permissions:
     Some old systems (Sys V variants) only allow root to read the
-    mount table.  In SysV.4 and Solaris, the mount command would 
+    mount table.  In SysV.4 and Solaris, the mount command would
     reset the permissions to be root readable only (fixed in Solaris 7).
 
     If this is needed on your system, do:
@@ -94,15 +92,14 @@ REQUIREMENTS
     NLS:
         msgfmt sed
     turnoffnls.sh:
-        cat rm sed 
+        cat rm sed
     runtests.sh:
         ar cat cp dc diff env expr grep mv rm sed sort tr
 
 PORTING
 
-    di 4.23 has been tested on the following platforms:
+    di 4.24 has been tested on the following platforms:
         AIX 5.1
-        BSD
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4
         Cygwin
         Debian 4.0, 5.0, kFreeBSD 7.2
@@ -119,10 +116,9 @@ PORTING
         QNX 6.3
         RedHat 7.1 7.3
         RHEL 5.2
-        Solaris 8, 9, 10 (cc, gcc3, gcc4); Solaris 8 x86 w/gcc3 fails.
+        Solaris 8, 9, 10 (cc, gcc3, gcc4)
         Tru64 5.1B
         Ubuntu 10
-        VMS
 
     di has been ported to the following systems in the past:
 
@@ -133,6 +129,14 @@ PORTING
         Sys V.3, Sys V.4, Ultrix, VMS, Windows, Xenix
 
 CHANGES
+
+    4.24                                    [14 May 2010]
+        Added spanish translation (David Sastre).
+        Update some column widths to help support spanish.
+        Check mbrlen() return code.
+        Fix turnoffnls.sh (broken during rewrite).
+        Add missing defines in static configurations.
+        Added turnoffwinapi.sh for cygwin.
 
     4.23                                    [10 May 2010]
         Fix internationalized strings to line up properly.
