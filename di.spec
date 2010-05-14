@@ -1,5 +1,5 @@
 Name:           di
-Version:        4.23
+Version:        4.24
 Release:        1%{?dist}
 Summary:        'di' is a disk information utility, displaying everything (and more) that your 'df' command does.
 
@@ -45,6 +45,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/mi
 /usr/share/locale/de/LC_MESSAGES/di.mo
 /usr/share/locale/en/LC_MESSAGES/di.mo
+/usr/share/locale/es/LC_MESSAGES/di.mo
 /usr/share/man/man1/di.1.gz
 
 %changelog
