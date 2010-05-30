@@ -27,7 +27,4 @@ tar cf - ${dir} |
 
 rm -rf ${dir} > /dev/null 2>&1
 
-genisoimage -J -R -o $HOME/ISOs/di.iso testdi.sh build*.sh ${dir}.tar.gz
-cp ${dir}.tar.gz buildcompare.sh testdi.sh $HOME/vbox_shared
-
 exit 0
