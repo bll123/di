@@ -673,7 +673,9 @@ di_getDiskEntries (diskInfo, diCount)
 
 # if defined (INITMOUNTNAMES) && ! _dcl_mnt_names
  static char *mnt_names [] = INITMOUNTNAMES;
-#  define MNT_NUMTYPES (MOUNT_MAXTYPE + 1)
+#  if ! defined (MNT_NUMTYPES)
+#   define MNT_NUMTYPES (MOUNT_MAXTYPE + 1)
+#  endif
 # endif
 
 int
