@@ -173,14 +173,15 @@ bsd43-gcc:
 clean:
 	-$(RM) -rf $(PROG) $(MPROG) \
 		mingw-$(PROG).exe $(PROG).exe $(MPROG).exe \
+		mkconfig.cache mkconfig_*.vars \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
 
 distclean:
 	$(MAKE) clean
-	-$(RM) -rf config.h di.env mkconfig.cache mkconfig_*.vars \
-		pretests.done reqlibs.txt test_di \
+	-$(RM) -rf config.h di.env reqlibs.txt \
+    	pretests.done test_di \
 		>/dev/null 2>&1
 	cd $(MKCONFIGPATH);$(MAKE) distclean
 
@@ -242,7 +243,7 @@ installperms:
 ###
 # programs
 
-di-programs:	$(PROG)$(EXE_EXT) 
+di-programs:	$(PROG)$(EXE_EXT)
 
 ###
 # configuration file
@@ -267,13 +268,14 @@ config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 reqlibs.txt:	di.env config.h
 	$(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkreqlib.sh config.h
-	
+
 
 ###
 # executables
 
 OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
+		diquotactl$(OBJ_EXT) \
 		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
 
@@ -301,6 +303,9 @@ didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimntopt.h
 
 digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) digetentries.c
+
+diquotactl$(OBJ_EXT):	diquotactl.c config.h di.h
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) diquotactl.c
 
 getopt$(OBJ_EXT):	getopt.c config.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) getopt.c
