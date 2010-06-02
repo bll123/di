@@ -9,7 +9,7 @@ di.c			di source
 didiskutil.c		di source
 digetentries.c		di source
 digetinfo.c		di source
-diquotactl.c		di source
+diquota.c		di source
 di.h			di source
 dimntopt.h		di source
 di.spec			rpmspec file
