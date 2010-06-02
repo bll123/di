@@ -7,7 +7,8 @@
 output   config.h
 
 loadunit c-main
-loadunit c-include-time
+loadunit c-include-conflict
+loadunit c-quotactl
 loadunit c-setmntent-args
 loadunit c-statfs-args
 
@@ -26,6 +27,9 @@ hdr     getopt.h
 hdr     gui/window.h
 hdr     kernel/fs_info.h
 hdr     limits.h
+# aix doesn't declare their own, use the compatibility version
+hdr     linux/dqblk_xfs.h
+hdr     linux/quota.h
 hdr     libintl.h
 hdr     locale.h
 hdr     malloc.h
@@ -42,6 +46,8 @@ hdr     storage/volumes.h gui/window.h
 hdr     string.h
 hdr     strings.h
 hdr     time.h
+hdr     ufs/quota.h
+hdr     ufs/ufs/quota.h
 hdr     unistd.h
 hdr     util/string.h
 hdr     wchar.h
@@ -49,6 +55,7 @@ hdr     windows.h
 hdr     zone.h
 sys     dcmd_blk.h
 sys     file.h
+sys     fs/ufs_quota.h
 sys     fs_types.h
 sys     fstyp.h
 sys     fstypes.h
@@ -58,6 +65,7 @@ sys     mntctl.h
 sys     mntent.h
 sys     mnttab.h
 sys     mount.h
+sys     quota.h
 sys     stat.h
 sys     statfs.h
 sys     statvfs.h
@@ -66,11 +74,15 @@ sys     vfs.h
 sys     vfstab.h
 sys     vmount.h
 include_time
+include_quota
 command msgfmt
 command gmsgfmt
 # rpmbuild used for regression tests
 command rpmbuild
 const   O_NOCTTY
+typ     struct dqblk
+typ     fs_disk_quota_t
+typ     gid_t
 typ     statvfs_t
 typ     size_t
 typ     uint_t
@@ -105,6 +117,7 @@ lib     memset
 # Look for MCTL_QUERY (see di.h)
 lib     mntctl
 lib     next_dev
+lib     quotactl
 lib     setlocale  -lintl, -lintl -liconv
 # unknown if -lsun, -lseq are needed (old irix, sequent)
 lib     setmntent -lsun, -lseq
@@ -121,6 +134,7 @@ lib     sysfs
 lib     textdomain  -lintl, -lintl -liconv
 lib     zone_getattr
 lib     zone_list
+quotactl_pos
 setmntent_args
 statfs_args
 class   os::Volumes -lsyllable
@@ -131,6 +145,11 @@ dcl     int  errno
 dcl     ptr  mnt_names
 dcl     int  optind
 dcl     ptr  optarg
+member  dqblk  dqb_curspace
+member  dqblk  dqb_curblocks
+member  dqblk  dqb_fhardlimit
+member  dqblk  dqb_fsoftlimit
+member  dqblk  dqb_curfiles
 member  statfs f_bsize
 member  statfs f_fsize
 member  statfs f_fstyp
@@ -178,6 +197,12 @@ include
 # define Uid_t uid_t
 #else
 # define Uid_t int
+#endif
+
+#if _typ_gid_t
+# define Gid_t gid_t
+#else
+# define Gid_t int
 #endif
 
 #if _lib_snprintf
