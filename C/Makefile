@@ -275,7 +275,7 @@ reqlibs.txt:	di.env config.h
 
 OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		diquotactl$(OBJ_EXT) \
+		diquota$(OBJ_EXT) \
 		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
 
@@ -304,8 +304,8 @@ didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimntopt.h
 digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) digetentries.c
 
-diquotactl$(OBJ_EXT):	diquotactl.c config.h di.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) diquotactl.c
+diquota$(OBJ_EXT):	diquota.c config.h di.h
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) diquota.c
 
 getopt$(OBJ_EXT):	getopt.c config.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) getopt.c
