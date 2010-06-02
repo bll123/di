@@ -287,6 +287,7 @@ typedef struct {
     __ulong      flags;
     char         sortType [DI_SORT_MAX + 1];
     unsigned int posix_compat;
+    unsigned int quota_check;
 } diOptions_t;
 
 typedef struct {
@@ -358,6 +359,7 @@ static dispTable_t dispTable [] =
 
 static void addTotals           _((const diDiskInfo_t *, diDiskInfo_t *, int));
 static void checkDiskInfo       _((diData_t *));
+static void checkDiskQuotas     _((diData_t *));
 static void getMaxFormatLengths _((diData_t *));
 static int  checkFileInfo       _((diData_t *, int, int, char *[]));
 static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
@@ -438,6 +440,7 @@ main (argc, argv)
     diopts->posix_compat = 0;
     diopts->baseDispSize = DI_VAL_1024;
     diopts->baseDispIdx = DI_DISP_1024_IDX;
+    diopts->quota_check = TRUE;
 
     diout = &diData.output;
     diout->width = 8;
@@ -698,6 +701,9 @@ main (argc, argv)
     }
     di_getDiskInfo (&diData.diskInfo, &diData.count);
     checkDiskInfo (&diData);
+    if (diopts->quota_check == TRUE) {
+      checkDiskQuotas (&diData);
+    }
     printDiskInfo (&diData);
 
     cleanup (&diData, argvptr);
@@ -864,7 +870,15 @@ printDiskInfo (diData)
               if (lastpoollen == 0 ||
                   strncmp (lastpool, dinfo->special, lastpoollen) != 0)
               {
+                char        *ptr;
+
                 strncpy (lastpool, dinfo->special, sizeof (lastpool));
+                if (strcmp (dinfo->fsType, "advfs") == 0) {
+                  ptr = index (lastpool, '#');
+                  if (ptr != (char *) NULL) {
+                    *ptr = '\0';
+                  }
+                }
                 lastpoollen = strlen (lastpool);
                 inpool = FALSE;
               }
@@ -2295,6 +2309,73 @@ checkDiskInfo (diData)
     } /* if the duplicate loopback mounts are to be excluded */
 }
 
+static void
+#if _proto_stdc
+checkDiskQuotas (diData_t *diData)
+#else
+checkDiskQuotas (diData)
+    diData_t            *diData;
+#endif
+{
+  int           i;
+  Uid_t         uid;
+  Gid_t         gid;
+  diQuota_t     diqinfo;
+
+  uid = geteuid ();
+  gid = getegid ();
+
+  for (i = 0; i < diData->count; ++i)
+  {
+    diDiskInfo_t        *dinfo;
+
+    dinfo = &diData->diskInfo[i];
+    if (! dinfo->doPrint) {
+      continue;
+    }
+
+    diqinfo.special = dinfo->special;
+    diqinfo.name = dinfo->name;
+    diqinfo.type = dinfo->fsType;
+    diqinfo.uid = uid;
+    diqinfo.gid = gid;
+    diqinfo.blockSize = dinfo->blockSize;
+    diquota (&diqinfo);
+
+    if (debug > 2) {
+      printf ("quota: %s limit: %lld\n", dinfo->name, diqinfo.limit);
+      printf ("quota:   tot: %lld\n", dinfo->totalBlocks);
+      printf ("quota: %s used: %lld\n", dinfo->name, diqinfo.used);
+      printf ("quota:   avail: %lld\n", dinfo->availBlocks);
+    }
+    if (diqinfo.limit != 0 &&
+            diqinfo.limit < dinfo->totalBlocks) {
+      dinfo->totalBlocks = diqinfo.limit;
+      dinfo->availBlocks = diqinfo.limit - diqinfo.used;
+      dinfo->freeBlocks = diqinfo.limit - diqinfo.used;
+      if ((_s_fs_size_t) dinfo->availBlocks < 0) {
+        dinfo->availBlocks = 0;
+        dinfo->freeBlocks = 0;
+      }
+      if (debug > 2) {
+        printf ("quota: using quota for disk space\n");
+      }
+    }
+    if (diqinfo.ilimit != 0 &&
+            diqinfo.ilimit < dinfo->totalInodes) {
+      dinfo->totalInodes = diqinfo.ilimit;
+      dinfo->availInodes = diqinfo.ilimit - diqinfo.iused;
+      dinfo->freeInodes = diqinfo.ilimit - diqinfo.iused;
+      if (dinfo->availInodes < 0) {
+        dinfo->availInodes = 0;
+        dinfo->freeInodes = 0;
+      }
+      if (debug > 2) {
+        printf ("quota: using quota for inodes\n");
+      }
+    }
+  }
+}
 
 static void
 #if _proto_stdc
@@ -2487,7 +2568,7 @@ processArgs (argc, argv, diData, dbsstr)
     diout = &diData->output;
     hasdashk = 0;
     while ((ch = getopt (argc, argv,
-        "Aab:B:d:D:f:F:ghHi:I:klLmnPs:tvw:W:x:X:z:Z")) != -1)
+        "Aab:B:d:D:f:F:ghHi:I:klLmnPqs:tvw:W:x:X:z:Z")) != -1)
     {
         switch (ch)
         {
@@ -2620,6 +2701,12 @@ processArgs (argc, argv, diData, dbsstr)
                 }
                 diopts->formatString = DI_POSIX_FORMAT;
                 diopts->posix_compat = 1;
+                break;
+            }
+
+            case 'q':
+            {
+                diopts->quota_check = FALSE;
                 break;
             }
 
