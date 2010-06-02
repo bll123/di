@@ -947,7 +947,7 @@ di_getDiskEntries (diskInfo, diCount)
 /*
  * di_getDiskEntries
  *
- * OSF/1 / Digital Unix / Compaq Tru64 / FreeBSD / NetBSD 2.x
+ * OSF/1 / Digital Unix / Compaq Tru64 / FreeBSD / NetBSD 2.x / OpenBSD
  *
  */
 
@@ -983,7 +983,7 @@ di_getDiskEntries (diskInfo, diCount)
     bufsize = sizeof (struct statfs) * (Size_t) count;
     mntbufp = malloc (bufsize);
     memset ((char *) mntbufp, '\0', sizeof (struct statfs) * (Size_t) count);
-    count = getfsstat (mntbufp, (long) bufsize, MNT_NOWAIT);
+    count = getfsstat (mntbufp, (Size_t) bufsize, MNT_NOWAIT);
 
     *diCount = count;
     *diskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) * (Size_t) count);
@@ -1114,7 +1114,7 @@ di_getDiskEntries (diskInfo, diCount)
     diDiskInfo_t     *diptr;
     int             count;
     int             idx;
-    long            bufsize;
+    Size_t          bufsize;
     struct statvfs  *mntbufp;
     struct statvfs  *sp;
 
@@ -1126,9 +1126,9 @@ di_getDiskEntries (diskInfo, diCount)
         return -1;
     }
     bufsize = sizeof (struct statvfs) * count;
-    mntbufp = malloc (bufsize);
+    mntbufp = malloc ((Size_t) bufsize);
     memset ((char *) mntbufp, '\0', sizeof (struct statvfs) * (Size_t) count);
-    count = getvfsstat (mntbufp, bufsize, ST_NOWAIT);
+    count = getvfsstat (mntbufp, (Size_t) bufsize, ST_NOWAIT);
 
     *diCount = count;
     *diskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) * (Size_t) count);
