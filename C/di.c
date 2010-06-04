@@ -123,7 +123,7 @@
 #if _hdr_time
 # include <time.h>
 #endif
-#if _sys_time && ((! _hdr_time) || (_include_time))
+#if _sys_time && _inc_conflict__hdr_time__sys_time
 # include <sys/time.h>
 #endif
 #if _sys_stat
@@ -2347,6 +2347,16 @@ checkDiskQuotas (diData)
       printf ("quota:   tot: %lld\n", dinfo->totalBlocks);
       printf ("quota: %s used: %lld\n", dinfo->name, diqinfo.used);
       printf ("quota:   avail: %lld\n", dinfo->availBlocks);
+    }
+    /* remap block size if it changed (e.g. nfs) */
+    if (diqinfo.blockSize != dinfo->blockSize) {
+      dinfo->totalBlocks *= dinfo->blockSize;
+      dinfo->freeBlocks *= dinfo->blockSize;
+      dinfo->availBlocks *= dinfo->blockSize;
+      dinfo->blockSize = diqinfo.blockSize;
+      dinfo->totalBlocks /= dinfo->blockSize;
+      dinfo->freeBlocks /= dinfo->blockSize;
+      dinfo->availBlocks /= dinfo->blockSize;
     }
     if (diqinfo.limit != 0 &&
             diqinfo.limit < dinfo->totalBlocks) {
