@@ -58,7 +58,7 @@
 #if _hdr_time
 # include <time.h>
 #endif
-#if _sys_time && ((! _hdr_time) || (_include_time))
+#if _sys_time && _inc_conflict__hdr_time__sys_time
 # include <sys/time.h>
 #endif
 
