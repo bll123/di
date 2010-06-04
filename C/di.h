@@ -168,6 +168,30 @@ typedef struct
     char            mountTime [DI_MNT_TIME_LEN + 1];
 } diDiskInfo_t;
 
+typedef struct
+{
+    char            *special;
+    char            *name;
+    char            *type;
+    Uid_t           uid;
+    Gid_t           gid;
+    _fs_size_t      blockSize;
+    _fs_size_t      limit;
+    _fs_size_t      used;
+    _fs_size_t      ilimit;
+    _fs_size_t      iused;
+} diQuota_t;
+
+/* workaround for AIX - mntctl not declared */
+# if defined (MCTL_QUERY) || _lib_mntctl
+#  if ! _lib_mntctl
+    extern int mntctl _((int, int, char *));
+#  endif
+#  define HAVE_MNTCTL 1
+# else
+#  define HAVE_MNTCTL 0
+# endif
+
 # if defined(__cplusplus)
    extern "C" {
 # endif
@@ -176,6 +200,8 @@ typedef struct
 extern int  di_getDiskEntries       _((diDiskInfo_t **, int *));
  /* digetinfo.c */
 extern void di_getDiskInfo          _((diDiskInfo_t **, int *));
+ /* diquota.c */
+extern void diquota                 _((diQuota_t *));
  /* getopt.c */
 # if ! _lib_getopt || _npt_getopt
 extern int getopt                   _((int, char * const [], const char *));
@@ -200,7 +226,7 @@ extern void di_saveInodeSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_siz
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
-	! _lib_mntctl && \
+	! HAVE_MNTCTL && \
 	! _class_os__Volumes
 extern char *chkMountOptions        _((const char *, const char *));
 #endif
@@ -210,19 +236,12 @@ extern void di_testRemoteDisk       _((diDiskInfo_t *));
 
 /* workaround for cygwin                                              */
 /* if we have a getopt header, there's probably a getopt lib function */
-# if ! _lib_getopt && ! _hdr_getopt
+# if ! _lib_getopt && _hdr_getopt
 extern int getopt _((int, char * const [], const char *));
 # endif
 
 # if defined(__cplusplus)
    }
-# endif
-
-/* workaround for AIX - mntctl not declared */
-# if defined (MCTL_QUERY) || _lib_mntctl
-#  define HAVE_MNTCTL 1
-# else
-#  define HAVE_MNTCTL 0
 # endif
 
      /* macro for gettext() */
