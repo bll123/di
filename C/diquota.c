@@ -63,7 +63,9 @@ static bool_t xdr_quota_get _((XDR *, getquota_args *));
 static bool_t xdr_quota_rslt _((XDR *, getquota_rslt *));
 static void diquota_nfs _((diQuota_t *));
 #endif
+#if _enable_quotas
 static void di_process_quotas _((diQuota_t *, int, int, char *));
+#endif
 
 extern int debug;
 
@@ -108,8 +110,6 @@ diquota (diqinfo)
 #endif
 {
   int               rc;
-  int               ucmd;
-  int               gcmd;
   int               xfsflag;
 #if _typ_struct_dqblk
   struct dqblk      qinfo;
@@ -117,8 +117,15 @@ diquota (diqinfo)
 #if _typ_fs_disk_quota_t
   fs_disk_quota_t   xfsqinfo;
 #endif
+#if _enable_quotas
+  int               ucmd;
+  int               gcmd;
   char              *qiptr;
+#endif
 
+  if (debug > 5) {
+    printf ("quota: diquota\n");
+  }
   rc = -1;
   xfsflag = FALSE;
 
@@ -127,9 +134,10 @@ diquota (diqinfo)
   diqinfo->ilimit = 0;
   diqinfo->iused = 0;
 
-#if _lib_quotactl
-  if (strncmp (diqinfo->type, "nfs", 3) == 0) {
-#if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
+#if _enable_quotas
+  if (strncmp (diqinfo->type, "nfs", 3) == 0 &&
+      strcmp (diqinfo->type, "nfsd") != 0) {
+# if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
     diquota_nfs (diqinfo);
 # endif
     return;
@@ -171,9 +179,8 @@ diquota (diqinfo)
       rc = fd;
     }
   }
-# endif
+# endif  /* _sys_fs_ufs_quota */
 
-# if _lib_quotactl
   di_process_quotas (diqinfo, rc, xfsflag, qiptr);
 
   if (rc == 0 || errno != ESRCH) {
@@ -188,8 +195,7 @@ diquota (diqinfo)
 
     di_process_quotas (diqinfo, rc, xfsflag, qiptr);
   }
-# endif
-#endif
+#endif /* _enable_quotas */
 }
 
 #if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
@@ -198,11 +204,15 @@ static bool_t
 # if _proto_stdc
 xdr_quota_get (XDR *xp, getquota_args *args)
 # else
-xdr_quota_rslt (xp, args)
+xdr_quota_get (xp, args)
   XDR           *xp;
   getquota_args *args;
 # endif
 {
+  if (debug > 5) {
+    printf ("quota: xdr_quota_get\n");
+  }
+
   if (! xdr_string (xp, &args->gqa_pathp, RQ_PATHLEN)) {
     return 0;
   }
@@ -224,10 +234,14 @@ xdr_quota_rslt (xp, rslt)
   int       quotastat;
   rquota    *rptr;
 
+  if (debug > 5) {
+    printf ("quota: xdr_quota_rslt\n");
+  }
+
   if (! xdr_int (xp, &quotastat)) {
     return 0;
   }
-  rslt->status = (gqr_status) quotastat;
+  rslt->status = quotastat;
   rptr = &rslt->getquota_rslt_u.gqr_rquota;
 
   if (! xdr_bool (xp, &rptr->rq_active)) {
@@ -278,10 +292,17 @@ diquota_nfs (diqinfo)
     _fs_size_t      quotBlockSize = { DI_QUOT_BLOCK_SIZE };
 
 
+    if (debug > 5) {
+      printf ("quota: diquota_nfs\n");
+    }
+
     strcpy (host, diqinfo->special);
+    path = host;
     ptr = index (host, ':');
-    *ptr = '\0';
-    path = ptr + 1;
+    if (ptr != (char *) NULL) {
+      *ptr = '\0';
+      path = ptr + 1;
+    }
     if (debug > 2) {
       printf ("quota: nfs: host: %s path: %s\n", host, path);
     }
@@ -343,20 +364,20 @@ diquota_nfs (diqinfo)
       clnt_destroy (rqclnt);
 	}
 }
-#endif
+#endif  /* have rpc headers */
 
+#if _enable_quotas
 static void
-#if _proto_stdc
+# if _proto_stdc
 di_process_quotas (diQuota_t *diqinfo, int rc, int xfsflag, char *cqinfo)
-#else
+# else
 di_process_quotas (diqinfo, rc, xfsflag, cqinfo)
   diQuota_t     *diqinfo;
   int           rc;
   int           xfsflag;
   char          *cqinfo;
-#endif
+# endif
 {
-#if _lib_quotactl
   _fs_size_t        quotBlockSize = { DI_QUOT_BLOCK_SIZE };
   _fs_size_t        tsize;
   struct dqblk      *qinfo;
@@ -474,7 +495,5 @@ di_process_quotas (diqinfo, rc, xfsflag, cqinfo)
       printf ("quota: %s errno %d\n", diqinfo->name, errno);
     }
   }
-#else
-  return;
-#endif
 }
+#endif /* _enable_quotas */
