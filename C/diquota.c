@@ -150,8 +150,10 @@ diquota (diqinfo)
     xfsflag = TRUE;
   } else {
 # endif
+# ifdef QCMD
     ucmd = QCMD (Q_GETQUOTA, USRQUOTA);
     gcmd = QCMD (Q_GETQUOTA, GRPQUOTA);
+#endif
     qiptr = (char *) &qinfo;
   }
 
