@@ -36,6 +36,8 @@ hdr     malloc.h
 hdr     memory.h
 hdr     mntent.h
 hdr     mnttab.h
+hdr     rpc/rpc.h
+hdr     rpcsvc/rquota.h
 hdr     ssdef.h
 hdr     starlet.h
 hdr     storage/Directory.h
@@ -73,8 +75,8 @@ sys     time.h
 sys     vfs.h
 sys     vfstab.h
 sys     vmount.h
-include_time
-include_quota
+include_conflict time.h sys/time.h
+include_conflict sys/quota.h linux/quota.h
 command msgfmt
 command gmsgfmt
 # rpmbuild used for regression tests
