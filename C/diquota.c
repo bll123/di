@@ -44,14 +44,25 @@
 #endif
   /* AIX doesn't seem to have quotactl declared.... */
   /* use their compatibility routine.               */
-#if _hdr_linux_quota && ((! _sys_quota) || (_include_quota))
+#if _hdr_linux_quota && _inc_conflict__sys_quota__hdr_linux_quota
 # include <linux/quota.h>
+#endif
+#if _hdr_rpc_rpc
+# include <rpc/rpc.h>
+#endif
+#if _hdr_rpcsvc_rquota
+# include <rpcsvc/rquota.h>
 #endif
 
 #if defined(__cplusplus)
   extern "C" {
 #endif
 
+#if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
+static bool_t xdr_quota_get _((XDR *, getquota_args *));
+static bool_t xdr_quota_rslt _((XDR *, getquota_rslt *));
+static void diquota_nfs _((diQuota_t *));
+#endif
 static void di_process_quotas _((diQuota_t *, int, int, char *));
 
 extern int debug;
@@ -117,6 +128,12 @@ diquota (diqinfo)
   diqinfo->iused = 0;
 
 #if _lib_quotactl
+  if (strncmp (diqinfo->type, "nfs", 3) == 0) {
+#if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
+    diquota_nfs (diqinfo);
+# endif
+    return;
+  }
   if (strcmp (diqinfo->type, "xfs") == 0) {
 # if _hdr_linux_dqblk_xfs
     ucmd = QCMD (Q_XGETQUOTA, USRQUOTA);
@@ -175,6 +192,158 @@ diquota (diqinfo)
 #endif
 }
 
+#if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
+
+static bool_t
+# if _proto_stdc
+xdr_quota_get (XDR *xp, getquota_args *args)
+# else
+xdr_quota_rslt (xp, args)
+  XDR           *xp;
+  getquota_args *args;
+# endif
+{
+  if (! xdr_string (xp, &args->gqa_pathp, RQ_PATHLEN)) {
+    return 0;
+  }
+  if (! xdr_int (xp, &args->gqa_uid)) {
+    return 0;
+  }
+  return 1;
+}
+
+static bool_t
+# if _proto_stdc
+xdr_quota_rslt (XDR *xp, getquota_rslt *rslt)
+# else
+xdr_quota_rslt (xp, rslt)
+  XDR           *xp;
+  getquota_rslt *rslt;
+# endif
+{
+  int       quotastat;
+  rquota    *rptr;
+
+  if (! xdr_int (xp, &quotastat)) {
+    return 0;
+  }
+  rslt->status = (gqr_status) quotastat;
+  rptr = &rslt->getquota_rslt_u.gqr_rquota;
+
+  if (! xdr_bool (xp, &rptr->rq_active)) {
+    return 0;
+  }
+  if (! xdr_int (xp, &rptr->rq_bsize)) {
+    return 0;
+  }
+  if (! xdr_u_int (xp, &rptr->rq_bhardlimit)) {
+    return 0;
+  }
+  if (! xdr_u_int (xp, &rptr->rq_bsoftlimit)) {
+    return 0;
+  }
+  if (! xdr_u_int (xp, &rptr->rq_curblocks)) {
+    return 0;
+  }
+  if (! xdr_u_int (xp, &rptr->rq_fhardlimit)) {
+    return 0;
+  }
+  if (! xdr_u_int (xp, &rptr->rq_fsoftlimit)) {
+    return 0;
+  }
+  if (! xdr_u_int (xp, &rptr->rq_curfiles)) {
+    return 0;
+  }
+  return (1);
+}
+
+static void
+# if _proto_stdc
+diquota_nfs (diQuota_t *diqinfo)
+# else
+diquota_nfs (diqinfo)
+  diQuota_t     *diqinfo;
+# endif
+{
+    CLIENT          *rqclnt;
+    enum clnt_stat  clnt_stat;
+    struct timeval  timeout = {2, 0};
+    char            host [DI_SPEC_NAME_LEN];
+    char            *ptr;
+    char            *path;
+    getquota_args   args;
+    getquota_rslt   result;
+    rquota          *rptr;
+    _fs_size_t      tsize;
+    _fs_size_t      quotBlockSize = { DI_QUOT_BLOCK_SIZE };
+
+
+    strcpy (host, diqinfo->special);
+    ptr = index (host, ':');
+    *ptr = '\0';
+    path = ptr + 1;
+    if (debug > 2) {
+      printf ("quota: nfs: host: %s path: %s\n", host, path);
+    }
+	args.gqa_pathp = path;
+	args.gqa_uid = (int) diqinfo->uid;
+
+    rqclnt = clnt_create (host, RQUOTAPROG, RQUOTAVERS, "udp");
+    if (rqclnt == (CLIENT *) NULL) {
+      if (debug > 2) {
+        printf ("quota: nfs: create failed %d\n", errno);
+      }
+      return;
+    }
+    rqclnt->cl_auth = authunix_create_default();
+    clnt_stat = clnt_call (rqclnt, RQUOTAPROC_GETQUOTA,
+        (xdrproc_t) xdr_quota_get, (caddr_t) &args,
+        (xdrproc_t) xdr_quota_rslt, (caddr_t) &result, timeout);
+    if (clnt_stat != RPC_SUCCESS) {
+      if (debug > 2) {
+        printf ("quota: nfs: not success\n");
+      }
+      if (rqclnt->cl_auth) {
+        auth_destroy (rqclnt->cl_auth);
+      }
+      clnt_destroy (rqclnt);
+      return;
+    }
+
+    if (result.status == 1) {
+      if (debug > 2) {
+        printf ("quota: nfs: status 1\n");
+      }
+      rptr = &result.getquota_rslt_u.gqr_rquota;
+
+      /* diqinfo->blockSize is something too large to use */
+      /* reset it.                                        */
+      diqinfo->blockSize = 1024;
+
+      diqinfo->used = rptr->rq_curblocks *
+            quotBlockSize / diqinfo->blockSize;
+      diqinfo->limit = rptr->rq_bhardlimit *
+            quotBlockSize / diqinfo->blockSize;
+      tsize = rptr->rq_bsoftlimit *
+              quotBlockSize / diqinfo->blockSize;
+      if (tsize != 0 && tsize < diqinfo->limit) {
+        diqinfo->limit = tsize;
+      }
+      diqinfo->iused = rptr->rq_curfiles;
+      diqinfo->ilimit = rptr->rq_fhardlimit;
+      if (rptr->rq_fsoftlimit < diqinfo->ilimit) {
+        diqinfo->ilimit = rptr->rq_fsoftlimit;
+      }
+    }
+
+	if (rqclnt) {
+      if (rqclnt->cl_auth) {
+        auth_destroy (rqclnt->cl_auth);
+      }
+      clnt_destroy (rqclnt);
+	}
+}
+#endif
 
 static void
 #if _proto_stdc
