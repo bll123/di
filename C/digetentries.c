@@ -1408,7 +1408,7 @@ di_getDiskEntries (diskInfo, diCount)
             return -1;
         }
 
-        num = mntctl (MCTL_QUERY, vmbufsz, vmbuf);
+        num = mntctl (MCTL_QUERY, (int) vmbufsz, vmbuf);
             /*
              * vmbuf is too small, could happen for
              * following reasons:
@@ -1544,7 +1544,7 @@ di_getDiskEntries (diskInfo, diCount)
 {
     diDiskInfo_t     *diptr;
     int             i;
-    int             diskflag;
+    char            diskflag;
     int             rc;
     char            *p;
     char            buff [MSDOS_BUFFER_SIZE];
@@ -1558,10 +1558,11 @@ di_getDiskEntries (diskInfo, diCount)
 #  endif
 # endif
     diskflag = DI_PRNT_IGNORE;
-    rc = GetLogicalDriveStrings (MSDOS_BUFFER_SIZE, buff);
+    rc = (int) GetLogicalDriveStrings (MSDOS_BUFFER_SIZE, buff);
     *diCount = rc / BYTES_PER_LOGICAL_DRIVE;
 
-    *diskInfo = (diDiskInfo_t *) calloc (sizeof (diDiskInfo_t), *diCount);
+    *diskInfo = (diDiskInfo_t *)
+        calloc (sizeof (diDiskInfo_t), (Size_t) *diCount);
     if (*diskInfo == (diDiskInfo_t *) NULL)
     {
         fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
@@ -1573,7 +1574,7 @@ di_getDiskEntries (diskInfo, diCount)
         diptr = *diskInfo + i;
         p = buff + (BYTES_PER_LOGICAL_DRIVE * i);
         strncpy (diptr->name, p, DI_NAME_LEN);
-        rc = GetDriveType (p);
+        rc = (int) GetDriveType (p);
         diptr->printFlag = DI_PRNT_OK;
 
         if (rc == DRIVE_NO_ROOT_DIR)
