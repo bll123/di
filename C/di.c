@@ -161,7 +161,7 @@
 #define DI_F_TOTAL             0x00000010
 #define DI_F_NO_HEADER         0x00000020
 #define DI_F_DEBUG_HDR         0x00000040
-#define DI_F_INCLUDE_LOOPBACK  0x00000080
+#define DI_F_EXCLUDE_LOOPBACK  0x00000080
 
     /* mount information */
 #define DI_FMT_MOUNT           'm'
@@ -433,8 +433,9 @@ main (argc, argv)
         /* change default display format here */
     diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
     diopts->flags = 0;
-#if ! SunOS /* Solaris loopback devices should be excluded */
-    diopts->flags |= DI_F_INCLUDE_LOOPBACK;
+    /* Solaris loopback devices (lofs) should be excluded  */
+#if defined(sun) && (defined(__SVR4) || defined(__svr4__))
+    diopts->flags |= DI_F_EXCLUDE_LOOPBACK;
 #endif
     strcpy (diopts->sortType, "m"); /* default - sort by mount point */
     diopts->posix_compat = 0;
@@ -683,7 +684,7 @@ main (argc, argv)
 
     preCheckDiskInfo (&diData);
     if (optind < argc ||
-        (diopts->flags & DI_F_INCLUDE_LOOPBACK) != DI_F_INCLUDE_LOOPBACK)
+        (diopts->flags & DI_F_EXCLUDE_LOOPBACK) == DI_F_EXCLUDE_LOOPBACK)
     {
       getDiskStatInfo (&diData);
       getDiskSpecialInfo (&diData);
@@ -874,7 +875,7 @@ printDiskInfo (diData)
 
                 strncpy (lastpool, dinfo->special, sizeof (lastpool));
                 if (strcmp (dinfo->fsType, "advfs") == 0) {
-                  ptr = index (lastpool, '#');
+                  ptr = strchr (lastpool, '#');
                   if (ptr != (char *) NULL) {
                     *ptr = '\0';
                   }
@@ -2223,7 +2224,7 @@ checkDiskInfo (diData)
       checkIncludeList (dinfo, &diData->includeList);
     } /* for all disks */
 
-    if ((diopts->flags & DI_F_INCLUDE_LOOPBACK) != DI_F_INCLUDE_LOOPBACK)
+    if ((diopts->flags & DI_F_EXCLUDE_LOOPBACK) == DI_F_EXCLUDE_LOOPBACK)
     {
           /* this loop sets duplicate entries to be ignored. */
       for (i = 0; i < diData->count; ++i)
@@ -2322,6 +2323,7 @@ checkDiskQuotas (diData)
   Gid_t         gid;
   diQuota_t     diqinfo;
 
+#if _enable_quotas
   uid = geteuid ();
   gid = getegid ();
 
@@ -2348,6 +2350,7 @@ checkDiskQuotas (diData)
       printf ("quota: %s used: %lld\n", dinfo->name, diqinfo.used);
       printf ("quota:   avail: %lld\n", dinfo->availBlocks);
     }
+
     /* remap block size if it changed (e.g. nfs) */
     if (diqinfo.blockSize != dinfo->blockSize) {
       dinfo->totalBlocks *= dinfo->blockSize;
@@ -2358,6 +2361,7 @@ checkDiskQuotas (diData)
       dinfo->freeBlocks /= dinfo->blockSize;
       dinfo->availBlocks /= dinfo->blockSize;
     }
+
     if (diqinfo.limit != 0 &&
             diqinfo.limit < dinfo->totalBlocks) {
       dinfo->totalBlocks = diqinfo.limit;
@@ -2371,6 +2375,7 @@ checkDiskQuotas (diData)
         printf ("quota: using quota for disk space\n");
       }
     }
+
     if (diqinfo.ilimit != 0 &&
             diqinfo.ilimit < dinfo->totalInodes) {
       dinfo->totalInodes = diqinfo.ilimit;
@@ -2385,6 +2390,8 @@ checkDiskQuotas (diData)
       }
     }
   }
+#endif
+  return;
 }
 
 static void
@@ -2693,7 +2700,7 @@ processArgs (argc, argv, diData, dbsstr)
 
             case 'L':
             {
-                diopts->flags |= DI_F_INCLUDE_LOOPBACK;
+                diopts->flags |= DI_F_EXCLUDE_LOOPBACK;
                 break;
             }
 
