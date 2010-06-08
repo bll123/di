@@ -9,8 +9,8 @@ output   config.h
 loadunit c-main
 loadunit c-include-conflict
 loadunit c-quotactl
-loadunit c-setmntent-args
-loadunit c-statfs-args
+loadunit c-setmntent
+loadunit c-statfs
 
 standard
 
@@ -57,8 +57,8 @@ hdr     windows.h
 hdr     zone.h
 sys     dcmd_blk.h
 sys     file.h
-sys     fs/ufs_quota.h
 sys     fs_types.h
+sys     fs/ufs_quota.h
 sys     fstyp.h
 sys     fstypes.h
 sys     ftype.h
@@ -134,6 +134,8 @@ lib     sys_dollar_device_scan
 lib     sys_dollar_getdviw
 lib     sysfs
 lib     textdomain  -lintl, -lintl -liconv
+# need this to get the optional library
+lib     xdr_int -lnsl
 lib     zone_getattr
 lib     zone_list
 quotactl_pos
@@ -152,6 +154,8 @@ member  dqblk  dqb_curblocks
 member  dqblk  dqb_fhardlimit
 member  dqblk  dqb_fsoftlimit
 member  dqblk  dqb_curfiles
+member  getquota_rslt gqr_status
+member  getquota_rslt gqr_rquota
 member  statfs f_bsize
 member  statfs f_fsize
 member  statfs f_fstyp
