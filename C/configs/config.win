@@ -7,6 +7,7 @@
 #define _sys_param 1
 #define _key_void 1
 #define _key_const 1
+#define _param_void_star 1
 #define _proto_stdc 1
 #define _hdr_ctype 1
 #define _hdr_dcdef 0
@@ -136,6 +137,8 @@
 #define _mem_dqb_fhardlimit_dqblk 0
 #define _mem_dqb_fsoftlimit_dqblk 0
 #define _mem_dqb_curfiles_dqblk 0
+#define _mem_gqr_status_getquota_rslt 0
+#define _mem_gqr_rquota_getquota_rslt 0
 #define _mem_f_bsize_statfs 1
 #define _mem_f_fsize_statfs 0
 #define _mem_f_fstyp_statfs 0
@@ -149,6 +152,11 @@
 
 #if ! _key_void
 # define void int
+#endif
+#if ! _key_void || ! _param_void_star
+  typedef char *_pvoid;
+#else
+  typedef void *_pvoid;
 #endif
 #if ! _key_const
 # define const
