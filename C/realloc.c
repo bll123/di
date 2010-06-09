@@ -25,22 +25,22 @@
  *
  */
 
-void *
+_pvoid
 #if _proto_stdc
-_realloc (void *ptr, Size_t size)
+_realloc (_pvoid ptr, Size_t size)
 #else
 _realloc (ptr, size)
-    void        *ptr;
+    _pvoid      ptr;
     Size_t      size;
 #endif
 {
-    if (ptr == (void *) NULL)
+    if (ptr == (_pvoid) NULL)
     {
-        ptr = (void *) malloc (size);
+        ptr = (_pvoid) malloc (size);
     }
     else
     {
-        ptr = (void *) realloc (ptr, size);
+        ptr = (_pvoid) realloc (ptr, size);
     }
 
     return ptr;
