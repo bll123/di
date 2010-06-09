@@ -98,7 +98,7 @@ di.env:	$(MKCONFIGPATH)/mkconfig.sh features/env.dat
 tar:
 	@-rm -f $(MKCONFIGPATH)/*.tar.gz \
 		di-[0-9].[0-9][0-9][a-z].tar.gz > /dev/null 2>&1
-	cd $(MKCONFIGPATH);make tar
+	cd $(MKCONFIGPATH);$(MAKE) tar
 	./mktar.sh
 
 ###
