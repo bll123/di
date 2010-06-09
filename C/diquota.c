@@ -15,6 +15,9 @@
 #if _hdr_unistd
 # include <unistd.h>
 #endif
+#if _sys_param
+# include <sys/param.h>
+#endif
 #if _hdr_string
 # include <string.h>
 #endif
@@ -79,7 +82,7 @@ extern int debug;
 # ifdef DQBSIZE             /* AIX */
 #  define DI_QUOT_BLOCK_SIZE DQBSIZE
 # else
-#  ifdef DEV_BSIZE           /* tru64 */
+#  ifdef DEV_BSIZE           /* tru64, et. al. */
 #   define DI_QUOT_BLOCK_SIZE DEV_BSIZE
 #  else
 #   define DI_QUOT_BLOCK_SIZE 512
@@ -172,11 +175,14 @@ diquota (diqinfo)
   {
     int             fd;
     struct quotctl  qop;
+    char            tname [DI_NAME_LEN];
 
     qop.op = Q_GETQUOTA;
     qop.uid = diqinfo->uid;
     qop.addr = (caddr_t) qiptr;
-    fd = open (strcat (diqinfo->name, "/quotas"), O_RDONLY | O_NOCTTY);
+    strcpy (tname, diqinfo->name);
+    strcat (tname, "/quotas");
+    fd = open (tname, O_RDONLY | O_NOCTTY);
     if (fd >= 0) {
       rc = ioctl (fd, Q_QUOTACTL, &qop);
       close (fd);
@@ -265,10 +271,10 @@ xdr_quota_rslt (xp, rslt)
   rptr = &rslt->getquota_rslt_u.gqr_rquota;
 # endif
 
-  if (! xdr_bool (xp, &rptr->rq_active)) {
+  if (! xdr_int (xp, &rptr->rq_bsize)) {
     return 0;
   }
-  if (! xdr_int (xp, &rptr->rq_bsize)) {
+  if (! xdr_bool (xp, &rptr->rq_active)) {
     return 0;
   }
   if (! xdr_u_int (xp, &rptr->rq_bhardlimit)) {
@@ -311,12 +317,7 @@ diquota_nfs (diqinfo)
     struct rquota           *rptr;
     int                     quotastat;
     _fs_size_t              tsize;
-    _fs_size_t              quotBlockSize = { 1024 };
 
-
-    if (debug > 5) {
-      printf ("quota: diquota_nfs block size: %d\n", quotBlockSize);
-    }
 
     strcpy (host, diqinfo->special);
     path = host;
@@ -339,7 +340,7 @@ diquota_nfs (diqinfo)
       return;
     }
     rqclnt->cl_auth = authunix_create_default();
-    clnt_stat = clnt_call (rqclnt, RQUOTAPROC_GETQUOTA,
+    clnt_stat = clnt_call (rqclnt, RQUOTAPROC_GETACTIVEQUOTA,
         (xdrproc_t) xdr_quota_get, (caddr_t) &args,
         (xdrproc_t) xdr_quota_rslt, (caddr_t) &result, timeout);
     if (clnt_stat != RPC_SUCCESS) {
@@ -359,42 +360,47 @@ diquota_nfs (diqinfo)
     quotastat = result.status;
 # endif
     if (quotastat == 1) {
-      if (debug > 2) {
-        printf ("quota: nfs: status 1\n");
-      }
 # if _mem_gqr_rquota_getquota_rslt
       rptr = &result.gqr_rquota;
 # else
       rptr = &result.getquota_rslt_u.gqr_rquota;
 # endif
 
-      /* diqinfo->blockSize is sometimes too large to use */
-      /* reset it.                                        */
-      if (diqinfo->blockSize > 1024) {
-        diqinfo->blockSize = 1024;
+      if (debug > 2) {
+        printf ("quota: nfs: status 1\n");
+        printf ("quota: nfs: rq_bsize: %d\n", rptr->rq_bsize);
+        printf ("quota: nfs: rq_active: %d\n", rptr->rq_active);
       }
 
-      diqinfo->limit = rptr->rq_bhardlimit *
-            quotBlockSize / diqinfo->blockSize;
-      tsize = rptr->rq_bsoftlimit *
-              quotBlockSize / diqinfo->blockSize;
-      if (tsize != 0 && tsize < diqinfo->limit) {
-        diqinfo->limit = tsize;
-      }
-      if (diqinfo->limit != 0) {
-        diqinfo->used = rptr->rq_curblocks *
-              quotBlockSize / diqinfo->blockSize;
-      }
+      if (rptr->rq_active == 1) {
+        /* diqinfo->blockSize is sometimes too large to use */
+        /* reset it to a low common denominator             */
+        if (diqinfo->blockSize > 512) {
+          diqinfo->blockSize = 512;
+        }
 
-      diqinfo->ilimit = rptr->rq_fhardlimit;
-      tsize = rptr->rq_fsoftlimit;
-      if (tsize != 0 && tsize < diqinfo->ilimit) {
-        diqinfo->ilimit = tsize;
+        diqinfo->limit = rptr->rq_bhardlimit *
+              rptr->rq_bsize / diqinfo->blockSize;
+        tsize = rptr->rq_bsoftlimit *
+                rptr->rq_bsize / diqinfo->blockSize;
+        if (tsize != 0 && tsize < diqinfo->limit) {
+          diqinfo->limit = tsize;
+        }
+        if (diqinfo->limit != 0) {
+          diqinfo->used = rptr->rq_curblocks *
+                rptr->rq_bsize / diqinfo->blockSize;
+        }
+
+        diqinfo->ilimit = rptr->rq_fhardlimit;
+        tsize = rptr->rq_fsoftlimit;
+        if (tsize != 0 && tsize < diqinfo->ilimit) {
+          diqinfo->ilimit = tsize;
+        }
+        if (diqinfo->ilimit != 0) {
+          diqinfo->iused = rptr->rq_curfiles;
+        }
       }
-      if (diqinfo->ilimit != 0) {
-        diqinfo->iused = rptr->rq_curfiles;
-      }
-    }
+    }  /* is active */
 
     if (rqclnt) {
       if (rqclnt->cl_auth) {
