@@ -198,9 +198,9 @@
     _sys_fs_ufs_quota || \
     _sys_quota || \
     _lib_quotactl
-# define _enable_quotas 1
+# define _has_std_quotas 1
 #else
-# define _enable_quotas 0
+# define _has_std_quotas 0
 #endif
 
 #if _lib_bindtextdomain && \
