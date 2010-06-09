@@ -121,7 +121,7 @@ windows-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
-	@echo '' > reqlibs.txt
+	@echo '-lintl' > reqlibs.txt
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
