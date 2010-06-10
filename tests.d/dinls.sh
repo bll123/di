@@ -14,7 +14,7 @@ if [ ${hasnls} -ne 0 ];then
   exit 0
 fi
 
-DI_LOCALE=${_MKCONFIG_RUNTOPDIR}/test_di
+DI_LOCALE=${_MKCONFIG_RUNTOPDIR}/test_di/share/locale
 export DI_LOCALE
 
 grc=1
