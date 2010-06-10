@@ -126,6 +126,7 @@ lib     setmntent -lsun, -lseq
 lib     snprintf
 lib     statfs
 lib     statvfs
+lib     strcoll
 lib     strdup
 lib     strstr
 # VMS
@@ -228,6 +229,10 @@ include
 #else
 # define Snprintf sprintf
 # define DI_SPF(a2,a3)         a3
+#endif
+
+#if ! _lib_strcoll
+# define strcoll strcmp
 #endif
 
 endinclude
