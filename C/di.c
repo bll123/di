@@ -404,6 +404,7 @@ main (argc, argv)
     diOutput_t          *diout;
     int                 i;
     char                *ptr;
+    char                *localeptr;
     char                *argvptr;
     char                dbsstr [30];
 
@@ -458,7 +459,10 @@ main (argc, argv)
     ptr = setlocale (LC_ALL, "");
 #endif
 #if _enable_nls
-    ptr = bindtextdomain (PROG, DI_LOCALE_DIR);
+    if ((localeptr = getenv ("DI_LOCALE")) == (char *) NULL) {
+      localeptr = DI_LOCALE_DIR;
+    }
+    ptr = bindtextdomain (PROG, localeptr);
     ptr = textdomain (PROG);
 #endif
 
@@ -1970,7 +1974,7 @@ diCompare (diopts, data, idx1, idx2)
 
         case DI_SORT_MOUNT:
         {
-            rc = strcmp (d1->name, d2->name);
+            rc = strcoll (d1->name, d2->name);
             rc *= sortOrder;
             break;
         }
@@ -1983,14 +1987,14 @@ diCompare (diopts, data, idx1, idx2)
 
         case DI_SORT_SPECIAL:
         {
-            rc = strcmp (d1->special, d2->special);
+            rc = strcoll (d1->special, d2->special);
             rc *= sortOrder;
             break;
         }
 
         case DI_SORT_TYPE:
         {
-            rc = strcmp (d1->fsType, d2->fsType);
+            rc = strcoll (d1->fsType, d2->fsType);
             rc *= sortOrder;
             break;
         }
@@ -2323,7 +2327,6 @@ checkDiskQuotas (diData)
   Gid_t         gid;
   diQuota_t     diqinfo;
 
-#if _enable_quotas
   uid = geteuid ();
   gid = getegid ();
 
@@ -2390,7 +2393,6 @@ checkDiskQuotas (diData)
       }
     }
   }
-#endif
   return;
 }
 
