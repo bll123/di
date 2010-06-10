@@ -66,7 +66,7 @@ static bool_t xdr_quota_get _((XDR *, struct getquota_args *));
 static bool_t xdr_quota_rslt _((XDR *, struct getquota_rslt *));
 static void diquota_nfs _((diQuota_t *));
 #endif
-#if _enable_quotas
+#if _has_std_quotas
 static void di_process_quotas _((char *, diQuota_t *, int, int, char *));
 #endif
 
@@ -113,14 +113,14 @@ diquota (diqinfo)
   int               xfsflag;
 #if _typ_struct_dqblk
   struct dqblk      qinfo;
+  char              *qiptr;
 #endif
 #if _typ_fs_disk_quota_t
   fs_disk_quota_t   xfsqinfo;
 #endif
-#if _enable_quotas
+#if _has_std_quotas
   int               ucmd;
   int               gcmd;
-  char              *qiptr;
 #endif
 
   if (debug > 5) {
@@ -134,44 +134,45 @@ diquota (diqinfo)
   diqinfo->ilimit = 0;
   diqinfo->iused = 0;
 
-#if _enable_quotas
   if (strncmp (diqinfo->type, "nfs", 3) == 0 &&
       strcmp (diqinfo->type, "nfsd") != 0) {
-# if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
+#if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
     diquota_nfs (diqinfo);
-# endif
+#endif
     return;
   }
   if (strcmp (diqinfo->type, "xfs") == 0) {
-# if _hdr_linux_dqblk_xfs
+#if _hdr_linux_dqblk_xfs
     ucmd = QCMD (Q_XGETQUOTA, USRQUOTA);
     gcmd = QCMD (Q_XGETQUOTA, GRPQUOTA);
     qiptr = (char *) &xfsqinfo;
     xfsflag = TRUE;
-# endif
+#endif
     ;
   } else {
-# ifdef QCMD
+#ifdef QCMD
     ucmd = QCMD (Q_GETQUOTA, USRQUOTA);
     gcmd = QCMD (Q_GETQUOTA, GRPQUOTA);
-# endif
+#endif
+#if _typ_struct_dqblk
     qiptr = (char *) &qinfo;
+#endif
   }
 
-# if _lib_quotactl && _quotactl_pos == 1
+#if _lib_quotactl && _quotactl_pos == 1
   rc = quotactl (diqinfo->name, ucmd,
         (int) diqinfo->uid, (caddr_t) qiptr);
-# endif
-# if _lib_quotactl && _quotactl_pos == 2
-#  if _AIX  /* AIX has linux compatibility routine, but still need name */
+#endif
+#if _lib_quotactl && _quotactl_pos == 2
+# if _AIX  /* AIX has linux compatibility routine, but still need name */
   rc = quotactl (ucmd, diqinfo->name,
         (int) diqinfo->uid, (caddr_t) qiptr);
-#  else
+# else
   rc = quotactl (ucmd, diqinfo->special,
         (int) diqinfo->uid, (caddr_t) qiptr);
-#  endif
 # endif
-# if _sys_fs_ufs_quota        /* Solaris */
+#endif
+#if _sys_fs_ufs_quota        /* Solaris */
   {
     int             fd;
     struct quotctl  qop;
@@ -190,8 +191,9 @@ diquota (diqinfo)
       rc = fd;
     }
   }
-# endif  /* _sys_fs_ufs_quota */
+#endif  /* _sys_fs_ufs_quota */
 
+#if _has_std_quotas
   di_process_quotas ("usr", diqinfo, rc, xfsflag, qiptr);
 
 # ifdef GRPQUOTA
@@ -208,7 +210,7 @@ diquota (diqinfo)
     di_process_quotas ("grp", diqinfo, rc, xfsflag, qiptr);
   }
 # endif /* ifdef GRPQUOTA */
-#endif /* _enable_quotas */
+#endif /* _has_std_quotas */
 }
 
 #if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
@@ -317,6 +319,7 @@ diquota_nfs (diqinfo)
     struct rquota           *rptr;
     int                     quotastat;
     _fs_size_t              tsize;
+    _fs_size_t              tblksize;
 
 
     strcpy (host, diqinfo->special);
@@ -340,7 +343,7 @@ diquota_nfs (diqinfo)
       return;
     }
     rqclnt->cl_auth = authunix_create_default();
-    clnt_stat = clnt_call (rqclnt, RQUOTAPROC_GETACTIVEQUOTA,
+    clnt_stat = clnt_call (rqclnt, RQUOTAPROC_GETQUOTA,
         (xdrproc_t) xdr_quota_get, (caddr_t) &args,
         (xdrproc_t) xdr_quota_rslt, (caddr_t) &result, timeout);
     if (clnt_stat != RPC_SUCCESS) {
@@ -372,46 +375,42 @@ diquota_nfs (diqinfo)
         printf ("quota: nfs: rq_active: %d\n", rptr->rq_active);
       }
 
-      if (rptr->rq_active == 1) {
+      tblksize = 512;
+
+      diqinfo->limit = (_fs_size_t) rptr->rq_bhardlimit *
+            (_fs_size_t) rptr->rq_bsize / tblksize;
+      tsize = (_fs_size_t) rptr->rq_bsoftlimit *
+              (_fs_size_t) rptr->rq_bsize / tblksize;
+      if (tsize != 0 && tsize < diqinfo->limit) {
+        diqinfo->limit = tsize;
+      }
+      if (diqinfo->limit != 0) {
+        diqinfo->used = (_fs_size_t) rptr->rq_curblocks *
+              (_fs_size_t) rptr->rq_bsize / tblksize;
+
         /* diqinfo->blockSize is sometimes too large to use */
         /* reset it to a low common denominator             */
-        if (diqinfo->blockSize > 512) {
-          diqinfo->blockSize = 512;
-        }
-
-        diqinfo->limit = rptr->rq_bhardlimit *
-              rptr->rq_bsize / diqinfo->blockSize;
-        tsize = rptr->rq_bsoftlimit *
-                rptr->rq_bsize / diqinfo->blockSize;
-        if (tsize != 0 && tsize < diqinfo->limit) {
-          diqinfo->limit = tsize;
-        }
-        if (diqinfo->limit != 0) {
-          diqinfo->used = rptr->rq_curblocks *
-                rptr->rq_bsize / diqinfo->blockSize;
-        }
-
-        diqinfo->ilimit = rptr->rq_fhardlimit;
-        tsize = rptr->rq_fsoftlimit;
-        if (tsize != 0 && tsize < diqinfo->ilimit) {
-          diqinfo->ilimit = tsize;
-        }
-        if (diqinfo->ilimit != 0) {
-          diqinfo->iused = rptr->rq_curfiles;
-        }
+        diqinfo->blockSize = tblksize;
       }
-    }  /* is active */
 
-    if (rqclnt) {
-      if (rqclnt->cl_auth) {
-        auth_destroy (rqclnt->cl_auth);
+      diqinfo->ilimit = rptr->rq_fhardlimit;
+      tsize = rptr->rq_fsoftlimit;
+      if (tsize != 0 && tsize < diqinfo->ilimit) {
+        diqinfo->ilimit = tsize;
       }
-      clnt_destroy (rqclnt);
+      if (diqinfo->ilimit != 0) {
+        diqinfo->iused = rptr->rq_curfiles;
+      }
     }
+
+    if (rqclnt->cl_auth) {
+      auth_destroy (rqclnt->cl_auth);
+    }
+    clnt_destroy (rqclnt);
 }
 #endif  /* have rpc headers */
 
-#if _enable_quotas
+#if _has_std_quotas
 static void
 # if _proto_stdc
 di_process_quotas (char *tag, diQuota_t *diqinfo,
@@ -574,4 +573,4 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, cqinfo)
     }
   }
 }
-#endif /* _enable_quotas */
+#endif /* _has_std_quotas */
