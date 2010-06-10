@@ -14,6 +14,9 @@ if [ ${hasnls} -ne 0 ];then
   exit 0
 fi
 
+DI_LOCALE=${_MKCONFIG_RUNTOPDIR}/test_di
+export DI_LOCALE
+
 grc=1
 for l in "de" "de_DE" "de_DE.utf-8" "de_DE.UTF-8" \
     "de_DE.ISO8859-1" "de_DE.ISO8859-15" ; do
