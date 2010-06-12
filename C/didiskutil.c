@@ -64,6 +64,7 @@ di_initDiskInfo (diptr)
     diptr->printFlag = DI_PRNT_OK;
     diptr->isLocal = TRUE;
     diptr->isReadOnly = FALSE;
+    diptr->isLoopback = FALSE;
 }
 
 void
