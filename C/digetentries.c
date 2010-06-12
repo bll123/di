@@ -374,12 +374,6 @@ di_getDiskEntries (diskInfo, diCount)
         strncpy (diptr->name, mntEntry->mnt_dir, DI_NAME_LEN);
         strncpy (diptr->fsType, mntEntry->mnt_type, DI_TYPE_LEN);
 
-        if (strcmp (mntEntry->mnt_type, "none") == 0) {
-          diptr->printFlag = DI_PRNT_IGNORE;
-          if (debug > 2) {
-            printf ("mnt: ignore: fsType 'none': %s\n", diptr->name);
-          }
-        }
         if (strcmp (mntEntry->mnt_fsname, "none") == 0) {
           diptr->printFlag = DI_PRNT_IGNORE;
           if (debug > 2) {
