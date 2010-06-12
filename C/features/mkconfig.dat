@@ -89,7 +89,6 @@ typ     statvfs_t
 typ     size_t
 typ     uint_t
 typ     uid_t
-def     MNTTYPE_LOFS
 lib     bcopy
 lib     bindtextdomain -lintl, -lintl -liconv
 lib     bzero
