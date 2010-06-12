@@ -435,7 +435,7 @@ main (argc, argv)
     diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
     diopts->flags = 0;
     /* Solaris loopback devices (lofs) should be excluded  */
-#if defined(sun) && (defined(__SVR4) || defined(__svr4__))
+#if _def_mnttype_lofs
     diopts->flags |= DI_F_EXCLUDE_LOOPBACK;
 #endif
     strcpy (diopts->sortType, "m"); /* default - sort by mount point */
@@ -459,7 +459,7 @@ main (argc, argv)
     ptr = setlocale (LC_ALL, "");
 #endif
 #if _enable_nls
-    if ((localeptr = getenv ("DI_LOCALE")) == (char *) NULL) {
+    if ((localeptr = getenv ("DI_LOCALE_DIR")) == (char *) NULL) {
       localeptr = DI_LOCALE_DIR;
     }
     ptr = bindtextdomain (PROG, localeptr);
