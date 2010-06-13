@@ -121,6 +121,8 @@ windows-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
+	@chmod u+w config.h
+	./features/turnoffwinapi.sh
 	@echo '-lintl' > reqlibs.txt
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
@@ -173,7 +175,6 @@ bsd43-gcc:
 clean:
 	-$(RM) -rf $(PROG) $(MPROG) \
 		mingw-$(PROG).exe $(PROG).exe $(MPROG).exe \
-		mkconfig.cache mkconfig_*.vars \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
@@ -181,14 +182,15 @@ clean:
 distclean:
 	$(MAKE) clean
 	-$(RM) -rf config.h di.env reqlibs.txt \
+	mkconfig.cache mkconfig_*.vars \
     	pretests.done test_di \
 		>/dev/null 2>&1
-	cd $(MKCONFIGPATH);$(MAKE) distclean
+	@cd $(MKCONFIGPATH);$(MAKE) distclean
 
 realclean:
 	$(MAKE) distclean
 	-$(RM) -rf _mkconfig_runtests _tmp_mkconfig
-	cd $(MKCONFIGPATH);$(MAKE) realclean
+	@cd $(MKCONFIGPATH);$(MAKE) realclean
 
 ###
 # installation
