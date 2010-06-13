@@ -154,7 +154,7 @@ bsd43-cc:
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) config.bsd43.cc config.h
 	@touch reqlibs.txt
-	$(MAKE) \
+	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -O" \
 		LDFLAGS="-O" di-programs
@@ -164,7 +164,7 @@ bsd43-gcc:
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) config.bsd43.gcc config.h
 	@touch reqlibs.txt
-	$(MAKE) \
+	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -O2" \
 		LDFLAGS="-O2" di-programs
