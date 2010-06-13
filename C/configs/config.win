@@ -112,6 +112,7 @@
 #define _lib_snprintf 1
 #define _lib_statfs 1
 #define _lib_statvfs 1
+#define _lib_strcoll 1
 #define _lib_strdup 1
 #define _lib_strstr 1
 #define _lib_sys_dollar_device_scan 0
@@ -230,6 +231,10 @@
 #else
 # define Snprintf sprintf
 # define DI_SPF(a2,a3)         a3
+#endif
+
+#if ! _lib_strcoll
+# define strcoll strcmp
 #endif
 
 
