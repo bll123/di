@@ -12,7 +12,7 @@
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-AaghHklLmnPtZ] [-b block-size] [-d display-size] [-f format]
+.\" di [-AaghHklLmnPqtZ] [-b block-size] [-d display-size] [-f format]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x exclude-fstyp-list] [-X debug-level]
 .\" [-z zone-name] [file [...]]
@@ -36,7 +36,10 @@ di \- disk information
 .NXA "di command" "df command"
 .NXR "disk" "displaying free space"
 \fIdi\fP Displays usage information on mounted filesystems.  Block values are
-reported in megabytes (1024k bytes) by default, but may be changed.
+reported in a human readable format.  If the user or group has a
+disk quota, the values reported are adjusted according the quotas that
+apply to the user.
+.PP
 If \fIfile\fP is specified, the usage information for the partition on which
 \fIfile\fP is located is printed.
 .PP
@@ -44,9 +47,11 @@ Unless the \-a flag is specified, the following mounted
 filesystems will not
 normally be displayed: filesystems
 with total blocks <= 0; filesystems marked by the operating
-system as "ignore"; automounted filesystems that are duplicates
-of other normally mounted filesystems; loopback filesystems
-that are part of a zone (Solaris).
+system as "ignore" or "none";
+loopback filesystems that are duplicates
+of other normally mounted filesystems (filesystem type of 'lofs'
+or linux 'none');
+loopback filesystems that are part of a zone (Solaris).
 .PP
 \fImi\fP Displays the mounted filesystem information.
 .PP
@@ -133,7 +138,7 @@ Display sizes in Kbytes.
 Display only local file systems.
 .TP
 .B \-L
-Don't do the check for duplicate filesystems.
+Turn off check for duplicate filesystems (loopback (lofs/none) mounts).
 .TP
 .B \-m
 (alias for: \-dm)
@@ -147,6 +152,9 @@ parsing the output of \fIdi\fP.
 .B \-P
 Output format is POSIX standard.
 512 byte block size is the default.  The \-k option may be used.
+.TP
+.B \-q
+Disable quota checks.
 .TP
 .B \-s
 .I sort\-type
@@ -209,7 +217,7 @@ Display the filesystems for all visible zones.
 .SH Format Strings
 The output of \fIdi\fP may be specified via a format string.  This
 string may be given either via the \fB-f\fP command line option or as
-part of the \fBDI_ARGS\fP environment variable.  
+part of the \fBDI_ARGS\fP environment variable.
 The format string may specify the
 following columns:
 .RS .5
@@ -364,6 +372,9 @@ The DI_ARGS environment variable may be used to specify command
 line arguments.  e.g. If you always want gigabytes displayed, set
 DI_ARGS equal to "\-dg".  Any command line arguments specified
 will override the DI_ARGS environment variable.
+.PP
+The DI_LOCALE_DIR environment variable may be used to specify the
+location of the di program's locale message files.
 .PP
 The GNU df POSIXLY_CORRECT, and DF_BLOCK_SIZE and the BSD BLOCKSIZE
 environment variables are honored.
