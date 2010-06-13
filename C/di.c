@@ -436,7 +436,9 @@ main (argc, argv)
     diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
     diopts->flags = 0;
     /* loopback devices (lofs) should be excluded by default */
+#if ! _lib_sys_dollar_device_scan  /* not VMS */
     diopts->flags |= DI_F_EXCLUDE_LOOPBACK;
+#endif
     strcpy (diopts->sortType, "m"); /* default - sort by mount point */
     diopts->posix_compat = 0;
     diopts->baseDispSize = DI_VAL_1024;
@@ -2227,7 +2229,7 @@ checkDiskInfo (diData, hasLoop)
 #endif
           }
 
-          if (dinfo->totalBlocks <= 0L)
+          if ((_s_fs_size_t) dinfo->totalBlocks <= 0L)
           {
             dinfo->printFlag = DI_PRNT_IGNORE;
             dinfo->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
@@ -2419,7 +2421,7 @@ checkDiskQuotas (diData)
             diqinfo.ilimit < dinfo->totalInodes) {
       dinfo->totalInodes = diqinfo.ilimit;
       tsize = diqinfo.ilimit - diqinfo.iused;
-      if (tsize < 0) {
+      if ((_s_fs_size_t) tsize < 0) {
         tsize = 0;
       }
       if (tsize < dinfo->availInodes) {
