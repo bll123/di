@@ -161,6 +161,7 @@ typedef struct
                                                  /* local?               */
     char            isReadOnly;                  /* is this mount point  */
                                                  /* read-only?           */
+    char            isLoopback;                  /* lofs or none fs type? */
     char            name [DI_NAME_LEN + 1];         /* mount point          */
     char            special [DI_SPEC_NAME_LEN + 1]; /* special device name  */
     char            fsType [DI_TYPE_LEN + 1];       /* type of file system  */
