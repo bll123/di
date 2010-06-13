@@ -358,7 +358,7 @@ static dispTable_t dispTable [] =
 #endif
 
 static void addTotals           _((const diDiskInfo_t *, diDiskInfo_t *, int));
-static void checkDiskInfo       _((diData_t *));
+static void checkDiskInfo       _((diData_t *, int));
 static void checkDiskQuotas     _((diData_t *));
 static void getMaxFormatLengths _((diData_t *));
 static int  checkFileInfo       _((diData_t *, int, int, char *[]));
@@ -370,12 +370,12 @@ static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, int));
 static void cleanup             _((diData_t *, char *));
 static int  diCompare           _((const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int));
 static int  findDispSize        _((double));
-static void getDiskSpecialInfo  _((diData_t *));
+static int  getDiskSpecialInfo  _((diData_t *));
 static void getDiskStatInfo     _((diData_t *));
 static const char *getPrintFlagText _((int));
 static Size_t istrlen           _((const char *));
 static void parseList           _((iList_t *, char *));
-static void preCheckDiskInfo    _((diData_t *));
+static void preCheckDiskInfo     _((diData_t *));
 static void printDiskInfo       _((diData_t *));
 static void printInfo           _((diDiskInfo_t *, diOptions_t *, diOutput_t *));
 static void printBlocks         _((const diOptions_t *, const diOutput_t *, _fs_size_t, _fs_size_t, int));
@@ -403,6 +403,7 @@ main (argc, argv)
     diOptions_t         *diopts;
     diOutput_t          *diout;
     int                 i;
+    int                 hasLoop;
     char                *ptr;
     char                *localeptr;
     char                *argvptr;
@@ -434,10 +435,8 @@ main (argc, argv)
         /* change default display format here */
     diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
     diopts->flags = 0;
-    /* Solaris loopback devices (lofs) should be excluded  */
-#if _def_mnttype_lofs
+    /* loopback devices (lofs) should be excluded by default */
     diopts->flags |= DI_F_EXCLUDE_LOOPBACK;
-#endif
     strcpy (diopts->sortType, "m"); /* default - sort by mount point */
     diopts->posix_compat = 0;
     diopts->baseDispSize = DI_VAL_1024;
@@ -686,12 +685,13 @@ main (argc, argv)
         exit (1);
     }
 
+    hasLoop = FALSE;
     preCheckDiskInfo (&diData);
     if (optind < argc ||
         (diopts->flags & DI_F_EXCLUDE_LOOPBACK) == DI_F_EXCLUDE_LOOPBACK)
     {
       getDiskStatInfo (&diData);
-      getDiskSpecialInfo (&diData);
+      hasLoop = getDiskSpecialInfo (&diData);
     }
     if (optind < argc)
     {
@@ -705,7 +705,7 @@ main (argc, argv)
         }
     }
     di_getDiskInfo (&diData.diskInfo, &diData.count);
-    checkDiskInfo (&diData);
+    checkDiskInfo (&diData, hasLoop);
     if (diopts->quota_check == TRUE) {
       checkDiskQuotas (&diData);
     }
@@ -1772,6 +1772,7 @@ checkFileInfo (diData, optidx, argc, argv)
         } else {
           src = fstat (fd, &statBuf);
         }
+
         if (src == 0)
         {
             int             saveIdx;
@@ -1842,7 +1843,7 @@ checkFileInfo (diData, optidx, argc, argv)
 
                 if (dinfo->st_dev != DI_UNKNOWN_DEV &&
                     (__ulong) statBuf.st_dev == dinfo->st_dev &&
-                    strcmp (dinfo->fsType, "lofs") != 0)
+                    ! dinfo->isLoopback)
                 {
                   dinfo->printFlag = DI_PRNT_FORCE;
                   found = TRUE;
@@ -2076,7 +2077,7 @@ getDiskStatInfo (diData)
  *
  */
 
-static void
+static int
 #if _proto_stdc
 getDiskSpecialInfo (diData_t *diData)
 #else
@@ -2086,7 +2087,9 @@ getDiskSpecialInfo (diData)
 {
     int         i;
     struct stat statBuf;
+    int         hasLoop;
 
+    hasLoop = FALSE;
     for (i = 0; i < diData->count; ++i)
     {
         diDiskInfo_t        *dinfo;
@@ -2098,11 +2101,20 @@ getDiskSpecialInfo (diData)
         {
             dinfo->sp_dev = (__ulong) statBuf.st_dev;
             dinfo->sp_rdev = (__ulong) statBuf.st_rdev;
+              /* linux labels it's "bind" loopback device    */
+              /* as a filesystem type of "none".  Brilliant. */
+              /* linux has rdev = 0                             */
+              /* solaris is more consistent; rdev != 0 for lofs */
+            if ((strcmp (dinfo->fsType, "lofs") == 0 && dinfo->sp_rdev != 0) ||
+                 strcmp (dinfo->fsType, "none") == 0) {
+              dinfo->isLoopback = TRUE;
+              hasLoop = TRUE;
+            }
             if (debug > 2)
             {
-                printf ("special dev: %s %s: %ld rdev: %ld\n",
+                printf ("special dev: %s %s: %ld rdev: %ld loopback: %d\n",
                         dinfo->special, dinfo->name, dinfo->sp_dev,
-                        dinfo->sp_rdev);
+                        dinfo->sp_rdev, dinfo->isLoopback);
             }
         }
         else
@@ -2111,6 +2123,8 @@ getDiskSpecialInfo (diData)
             dinfo->sp_rdev = 0;
         }
     }
+
+    return hasLoop;
 }
 
 /*
@@ -2122,10 +2136,11 @@ getDiskSpecialInfo (diData)
 
 static void
 #if _proto_stdc
-checkDiskInfo (diData_t *diData)
+checkDiskInfo (diData_t *diData, int hasLoop)
 #else
-checkDiskInfo (diData)
-    diData_t            *diData;
+checkDiskInfo (diData, hasLoop)
+    diData_t    *diData;
+    int         hasLoop;
 #endif
 {
     int             i;
@@ -2228,7 +2243,8 @@ checkDiskInfo (diData)
       checkIncludeList (dinfo, &diData->includeList);
     } /* for all disks */
 
-    if ((diopts->flags & DI_F_EXCLUDE_LOOPBACK) == DI_F_EXCLUDE_LOOPBACK)
+    if (hasLoop &&
+        (diopts->flags & DI_F_EXCLUDE_LOOPBACK) == DI_F_EXCLUDE_LOOPBACK)
     {
           /* this loop sets duplicate entries to be ignored. */
       for (i = 0; i < diData->count; ++i)
@@ -2246,11 +2262,8 @@ checkDiskInfo (diData)
           continue;
         }
 
-            /* don't need to bother checking real partitions */
-            /* don't bother if already ignored               */
-        if (dinfo->sp_rdev != 0 &&
-            dinfo->printFlag == DI_PRNT_OK &&
-            strcmp (dinfo->fsType, "lofs") == 0)
+          /* don't need to bother checking real partitions  */
+        if (dinfo->sp_dev != 0 && dinfo->isLoopback)
         {
           __ulong         sp_dev;
           __ulong         sp_rdev;
@@ -2261,16 +2274,22 @@ checkDiskInfo (diData)
 
           for (j = 0; j < diData->count; ++j)
           {
-              if (diData->diskInfo [j].st_dev == sp_dev)
+            diDiskInfo_t        *dinfob;
+
+            if (i == j) {
+              continue;
+            }
+
+            dinfob = &diData->diskInfo [j];
+            if (dinfob->st_dev == sp_dev)
+            {
+              if (debug > 2)
               {
-                if (debug > 2)
-                {
-                  printf ("dup: for %s %ld: found: %s %ld\n",
-                      dinfo->name, sp_dev, diData->diskInfo[j].name,
-                      diData->diskInfo [j].st_dev);
-                }
-                ++dupCount;
+                printf ("dup: for %s %ld: found: %s %ld\n",
+                    dinfo->name, sp_dev, dinfob->name, dinfob->st_dev);
               }
+              ++dupCount;
+            }
           }
 
           if (debug > 2)
@@ -2283,31 +2302,32 @@ checkDiskInfo (diData)
           {
             diDiskInfo_t        *dinfob;
 
+            if (i == j) {
+              continue;
+            }
+
             dinfob = &diData->diskInfo [j];
-            if (dinfob->printFlag == DI_PRNT_OK &&
-                dinfob->sp_rdev != 0 &&
-                dinfob->st_dev == sp_dev &&
-                strcmp (dinfob->fsType, "lofs") == 0)
-            {
-              dinfob->printFlag = DI_PRNT_IGNORE;
-              dinfob->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
+            if (dinfob->sp_dev != 0 &&
+                dinfob->st_dev == sp_dev) {
+              dinfo->printFlag = DI_PRNT_IGNORE;
+              dinfo->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
               if (debug > 2)
               {
-                  printf ("dup: chk: ignore: duplicate: %s of %s\n",
-                          dinfob->name, dinfo->name);
+                  printf ("dup: chk: ignore: %s duplicate of %s\n",
+                          dinfo->name, dinfob->name);
                   printf ("dup: ign: j: rdev: %ld dev: %ld\n",
-                          dinfob->sp_dev, dinfob->sp_rdev);
+                          dinfo->sp_dev, dinfo->sp_rdev);
               }
             }
-          } /* duplicate check for each disk */
+          }
         } /* if this is a printable disk */
         else
         {
           if (debug > 2)
           {
-            printf ("chk: dup: not checked: %s prnt: %d dev: %ld rdev: %ld\n",
+            printf ("chk: dup: not checked: %s prnt: %d dev: %ld rdev: %ld %s\n",
                     dinfo->name, dinfo->printFlag,
-                    dinfo->sp_dev, dinfo->sp_rdev);
+                    dinfo->sp_dev, dinfo->sp_rdev, dinfo->fsType);
           }
         }
       } /* for each disk */
@@ -2326,6 +2346,7 @@ checkDiskQuotas (diData)
   Uid_t         uid;
   Gid_t         gid;
   diQuota_t     diqinfo;
+  _fs_size_t    tsize;
 
   uid = geteuid ();
   gid = getegid ();
@@ -2368,28 +2389,50 @@ checkDiskQuotas (diData)
     if (diqinfo.limit != 0 &&
             diqinfo.limit < dinfo->totalBlocks) {
       dinfo->totalBlocks = diqinfo.limit;
-      dinfo->availBlocks = diqinfo.limit - diqinfo.used;
-      dinfo->freeBlocks = diqinfo.limit - diqinfo.used;
-      if ((_s_fs_size_t) dinfo->availBlocks < 0) {
-        dinfo->availBlocks = 0;
-        dinfo->freeBlocks = 0;
+      tsize = diqinfo.limit - diqinfo.used;
+      if ((_s_fs_size_t) tsize < 0) {
+        tsize = 0;
       }
-      if (debug > 2) {
-        printf ("quota: using quota for disk space\n");
+      if (tsize < dinfo->availBlocks) {
+        dinfo->availBlocks = tsize;
+        dinfo->freeBlocks = tsize;
+        if (debug > 2) {
+          printf ("quota: using quota for: total free avail\n");
+        }
+      } else if (tsize > dinfo->availBlocks && tsize < dinfo->freeBlocks) {
+        dinfo->freeBlocks = tsize;
+        if (debug > 2) {
+          printf ("quota: using quota for: total free\n");
+        }
+      } else {
+        if (debug > 2) {
+          printf ("quota: using quota for: total\n");
+        }
       }
     }
 
     if (diqinfo.ilimit != 0 &&
             diqinfo.ilimit < dinfo->totalInodes) {
       dinfo->totalInodes = diqinfo.ilimit;
-      dinfo->availInodes = diqinfo.ilimit - diqinfo.iused;
-      dinfo->freeInodes = diqinfo.ilimit - diqinfo.iused;
-      if (dinfo->availInodes < 0) {
-        dinfo->availInodes = 0;
-        dinfo->freeInodes = 0;
+      tsize = diqinfo.ilimit - diqinfo.iused;
+      if (tsize < 0) {
+        tsize = 0;
       }
-      if (debug > 2) {
-        printf ("quota: using quota for inodes\n");
+      if (tsize < dinfo->availInodes) {
+        dinfo->availInodes = tsize;
+        dinfo->freeInodes = tsize;
+        if (debug > 2) {
+          printf ("quota: using quota for inodes: total free avail\n");
+        }
+      } else if (tsize > dinfo->availInodes && tsize < dinfo->freeInodes) {
+        dinfo->freeInodes = tsize;
+        if (debug > 2) {
+          printf ("quota: using quota for inodes: total free\n");
+        }
+      } else {
+        if (debug > 2) {
+          printf ("quota: using quota for inodes: total\n");
+        }
       }
     }
   }
@@ -2470,13 +2513,16 @@ preCheckDiskInfo (diData)
 {
     int             i;
     diOptions_t     *diopts;
+    int             hasLoop;
 
+    hasLoop = FALSE;
     diopts = &diData->options;
     for (i = 0; i < diData->count; ++i)
     {
         diDiskInfo_t        *dinfo;
 
         dinfo = &diData->diskInfo[i];
+
         dinfo->sortIndex[0] = (unsigned int) i;
         dinfo->sortIndex[1] = (unsigned int) i;
         if (debug > 4)
@@ -2702,7 +2748,7 @@ processArgs (argc, argv, diData, dbsstr)
 
             case 'L':
             {
-                diopts->flags |= DI_F_EXCLUDE_LOOPBACK;
+                diopts->flags &= (__ulong) ~ DI_F_EXCLUDE_LOOPBACK;
                 break;
             }
 
@@ -3051,7 +3097,7 @@ checkZone (diskInfo, zoneInfo, allFlag)
     if (! allFlag &&
         diskInfo->printFlag == DI_PRNT_OK &&
         strcmp (zoneInfo->zoneDisplay, "global") != 0 &&
-        strcmp (diskInfo->fsType, "lofs") == 0)
+        diskInfo->isLoopback)
     {
         if (debug > 4)
         {
