@@ -112,6 +112,7 @@
 #define _lib_snprintf 0
 #define _lib_statfs 1
 #define _lib_statvfs 0
+#define _lib_strcoll 0
 #define _lib_strdup 0
 #define _lib_strstr 0
 #define _lib_sys_dollar_device_scan 0
@@ -192,6 +193,12 @@
 # define Uid_t int
 #endif
 
+#if _typ_gid_t
+# define Gid_t gid_t
+#else
+# define Gid_t int
+#endif
+
 #if _hdr_linux_quota || \
     _hdr_ufs_quota || \
     _hdr_ufs_ufs_quota || \
@@ -221,6 +228,10 @@
 #else
 # define Snprintf sprintf
 # define DI_SPF(a2,a3)         a3
+#endif
+
+#if ! _lib_strcoll
+# define strcoll strcmp
 #endif
 
 
