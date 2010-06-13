@@ -2348,8 +2348,12 @@ checkDiskQuotas (diData)
   diQuota_t     diqinfo;
   _fs_size_t    tsize;
 
+  uid = 0;
+  gid = 0;
+#if _has_std_quotas
   uid = geteuid ();
   gid = getegid ();
+#endif
 
   for (i = 0; i < diData->count; ++i)
   {
