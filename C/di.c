@@ -2147,7 +2147,6 @@ checkDiskInfo (diData, hasLoop)
 {
     int             i;
     int             j;
-    int             dupCount;
     _fs_size_t      temp;
     diOptions_t     *diopts;
 
@@ -2272,7 +2271,12 @@ checkDiskInfo (diData, hasLoop)
 
           sp_dev = dinfo->sp_dev;
           sp_rdev = dinfo->sp_rdev;
-          dupCount = 0;
+
+          if (debug > 2)
+          {
+              printf ("dup: chk: i: %s dev: %ld rdev: %ld\n",
+                  dinfo->name, sp_dev, sp_rdev);
+          }
 
           for (j = 0; j < diData->count; ++j)
           {
@@ -2283,46 +2287,26 @@ checkDiskInfo (diData, hasLoop)
             }
 
             dinfob = &diData->diskInfo [j];
-            if (dinfob->st_dev == sp_dev)
-            {
+            if (dinfob->sp_dev != 0 &&
+                dinfob->st_dev == sp_dev) {
               if (debug > 2)
               {
                 printf ("dup: for %s %ld: found: %s %ld\n",
                     dinfo->name, sp_dev, dinfob->name, dinfob->st_dev);
               }
-              ++dupCount;
-            }
-          }
 
-          if (debug > 2)
-          {
-              printf ("dup: chk: i: %s dev: %ld rdev: %ld dup: %d\n",
-                  dinfo->name, sp_dev, sp_rdev, dupCount);
-          }
-
-          for (j = 0; dupCount > 0 && j < diData->count; ++j)
-          {
-            diDiskInfo_t        *dinfob;
-
-            if (i == j) {
-              continue;
-            }
-
-            dinfob = &diData->diskInfo [j];
-            if (dinfob->sp_dev != 0 &&
-                dinfob->st_dev == sp_dev) {
               dinfo->printFlag = DI_PRNT_IGNORE;
               dinfo->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
               if (debug > 2)
               {
                   printf ("dup: chk: ignore: %s duplicate of %s\n",
                           dinfo->name, dinfob->name);
-                  printf ("dup: ign: j: rdev: %ld dev: %ld\n",
-                          dinfo->sp_dev, dinfo->sp_rdev);
+                  printf ("dup: j: dev: %ld rdev: %ld \n",
+                          dinfob->sp_dev, dinfob->sp_rdev);
               }
-            }
+            } /* if dup */
           }
-        } /* if this is a printable disk */
+        } /* if this is a loopback, non-real */
         else
         {
           if (debug > 2)
