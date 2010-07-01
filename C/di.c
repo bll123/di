@@ -795,7 +795,7 @@ printDiskInfo (diData)
 
     if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
     {
-        memset ((char *) &totals, '\0', sizeof (diDiskInfo_t));
+        di_initDiskInfo (&totals);
         totals.blockSize = 512;
         strncpy (totals.name, DI_GT("Total"), DI_NAME_LEN);
         totals.printFlag = DI_PRNT_OK;
@@ -1432,6 +1432,9 @@ processTitles (diopts, diout)
             case DI_FMT_MOUNT_FULL:
             {
                 wlen = diout->maxMountString;
+                if (wlen <= 0) {
+                  wlen = 7;
+                }
                 wlenptr = &diout->maxMountString;
                 fstr = diout->mountFormat;
                 maxsize = sizeof (diout->mountFormat);
