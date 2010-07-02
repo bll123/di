@@ -310,7 +310,7 @@ diquota_nfs (diqinfo)
 {
     CLIENT                  *rqclnt;
     enum clnt_stat          clnt_stat;
-    struct timeval          timeout = {2, 0};
+    struct timeval          timeout;
     char                    host [DI_SPEC_NAME_LEN];
     char                    *ptr;
     char                    *path;
@@ -321,6 +321,8 @@ diquota_nfs (diqinfo)
     _fs_size_t              tsize;
     _fs_size_t              tblksize;
 
+    timeout.tv_sec = 2;
+    timeout.tv_usec = 0;
 
     strcpy (host, diqinfo->special);
     path = host;
