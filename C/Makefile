@@ -122,7 +122,8 @@ windows-gcc:
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
 	@chmod u+w config.h
-	./features/turnoffwinapi.sh
+	$(MKCONFIGPATH)/mkpostconf.sh -o features/options.dat \
+		config.h disable WINAPI
 	@echo '-lintl' > reqlibs.txt
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
@@ -226,8 +227,10 @@ install-prog:	di.env di-programs
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
 	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old > /dev/null 2>&1
-	@-./features/hasnls.sh -v config.h
-	-./features/hasnls.sh config.h && \
+	@-$(MKCONFIGPATH)/mkpostconf.sh -o features/options.dat \
+		config.h status NLS
+	-$(MKCONFIGPATH)/mkpostconf.sh -o features/options.dat \
+		config.h check NLS && \
 		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		install-po)
 
@@ -262,14 +265,21 @@ config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
 		. ./di.env;perl \
 		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat; fi
-	@./features/hasnls.sh config.h || ./features/turnoffnls.sh
+	@$(MKCONFIGPATH)/mkpostconf.sh -o features/options.dat \
+		config.h check NLS || \
+		$(MKCONFIGPATH)/mkpostconf.sh -o features/options.dat \
+		config.h disable NLS
 	@if [ "$(DI_NO_NLS)" != "" ]; then \
 		echo "*** User requested no NLS"; \
-		./features/turnoffnls.sh; fi
+		$(MKCONFIGPATH)/mkpostconf.sh -o features/options.dat \
+		config.h disable NLS; fi
+	@if [ "$(DI_NO_WINAPI)" != "" ]; then \
+		echo "*** User requested no WINAPI"; \
+		$(MKCONFIGPATH)/mkpostconf.sh -o features/options.dat \
+		config.h disable WINAPI; fi
 
 reqlibs.txt:	di.env config.h
-	$(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkreqlib.sh config.h
+	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh config.h
 
 
 ###
