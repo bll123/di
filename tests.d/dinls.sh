@@ -6,7 +6,8 @@
 set -x
 echo ${EN} "di nls${EC}" >&5
 
-${_MKCONFIG_RUNTOPDIR}/features/hasnls.sh ${_MKCONFIG_RUNTOPDIR}/config.h
+${_MKCONFIG_DIR}/mkpostconf.sh -o ${_MKCONFIG_RUNTOPDIR}/features/options.dat \
+    ${_MKCONFIG_RUNTOPDIR}/config.h check NLS
 hasnls=$?
 
 if [ ${hasnls} -ne 0 ];then
