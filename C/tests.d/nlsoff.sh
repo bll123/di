@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo ${EN} "check turnoffnls.sh${EC}" >&5
+echo ${EN} "check NLS option${EC}" >&5
 
 > config.h echo '
 #define _lib_bindtextdomain 1
@@ -22,7 +22,8 @@ echo ${EN} "check turnoffnls.sh${EC}" >&5
 #define _command_msgfmt 0
 '
 
-$_MKCONFIG_RUNTOPDIR/features/turnoffnls.sh
+${_MKCONFIG_DIR}/mkpostconf.sh -o ${_MKCONFIG_RUNTOPDIR}/features/options.dat \
+    config.h disable NLS
 rc=$?
 
 if [ $rc -eq 0 ]; then
