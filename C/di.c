@@ -405,7 +405,9 @@ main (argc, argv)
     int                 i;
     int                 hasLoop;
     char                *ptr;
+#if _enable_nls
     char                *localeptr;
+#endif
     char                *argvptr;
     char                dbsstr [30];
 
