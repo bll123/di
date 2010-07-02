@@ -30,6 +30,12 @@
 #if _hdr_errno
 # include <errno.h>
 #endif
+#if _hdr_time
+# include <time.h>
+#endif
+#if _sys_time && _inc_conflict__hdr_time__sys_time
+# include <sys/time.h>
+#endif
 #if _sys_quota
 # include <sys/quota.h>
 #endif
