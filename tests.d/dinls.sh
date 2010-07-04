@@ -6,7 +6,7 @@
 set -x
 echo ${EN} "di nls${EC}" >&5
 
-${_MKCONFIG_DIR}/mkpostconf.sh -i ${_MKCONFIG_RUNTOPDIR}/features/options.dat \
+${_MKCONFIG_DIR}/mkpostconf.sh -i ${_MKCONFIG_RUNTOPDIR}/features/postconf.dat \
     ${_MKCONFIG_RUNTOPDIR}/config.h check NLS
 hasnls=$?
 

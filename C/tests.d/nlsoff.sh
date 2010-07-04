@@ -22,7 +22,7 @@ echo ${EN} "check NLS option${EC}" >&5
 #define _command_msgfmt 0
 '
 
-${_MKCONFIG_DIR}/mkpostconf.sh -i ${_MKCONFIG_RUNTOPDIR}/features/options.dat \
+${_MKCONFIG_DIR}/mkpostconf.sh -i ${_MKCONFIG_RUNTOPDIR}/features/postconf.dat \
     config.h disable NLS
 rc=$?
 
