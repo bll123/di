@@ -150,6 +150,8 @@
 #define _mem_f_type_statfs 1
 #define _mem_f_basetype_statvfs 0
 #define _siz_long_long 8
+#define _has_std_quotas 0
+#define _enable_nls 1
 
 #if ! _key_void
 # define void int
@@ -200,29 +202,6 @@
 # define Gid_t gid_t
 #else
 # define Gid_t int
-#endif
-
-#if _hdr_linux_quota || \
-    _hdr_ufs_quota || \
-    _hdr_ufs_ufs_quota || \
-    _sys_fs_ufs_quota || \
-    _sys_quota || \
-    _lib_quotactl
-# define _has_std_quotas 1
-#else
-# define _has_std_quotas 0
-#endif
-
-#if _lib_bindtextdomain && \
-    _lib_gettext && \
-    _lib_setlocale && \
-    _lib_textdomain && \
-    _hdr_libintl && \
-    _hdr_locale && \
-    (_command_msgfmt || _command_gmsgfmt)
-# define _enable_nls 1
-#else
-# define _enable_nls 0
 #endif
 
 #if _lib_snprintf
