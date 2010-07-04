@@ -168,6 +168,49 @@ member  statfs f_type
 member  statvfs f_basetype
 size    long long
 
+if _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
+    _sys_fs_ufs_quota || _sys_quota || _lib_quotactl
+  setint _has_std_quotas 1
+else
+  setint _has_std_quotas 0
+endif
+
+ifnotoption NLS
+  set _lib_bindtextdomain 0
+  set _lib_gettext 0
+  set _lib_setlocale 0
+  set _lib_textdomain 0
+  set _hdr_libintl 0
+  set _hdr_locale 0
+  set _command_msgfmt 0
+  set _command_gmsgfmt 0
+endif
+
+if ! ( _lib_bindtextdomain && _lib_gettext && _lib_setlocale && \
+    _lib_textdomain && _hdr_libintl && _hdr_locale && \
+    ( _command_msgfmt || _command_gmsgfmt ) )
+  set _lib_bindtextdomain 0
+  set _lib_gettext 0
+  set _lib_setlocale 0
+  set _lib_textdomain 0
+  set _hdr_libintl 0
+  set _hdr_locale 0
+  set _command_msgfmt 0
+  set _command_gmsgfmt 0
+  setint _enable_nls 0
+else
+  setint _enable_nls 1
+endif
+
+ifnotoption WINAPI
+  set _hdr_windows 0
+  set _lib_GetDiskFreeSpace 0
+  set _lib_GetDiskFreeSpaceEx 0
+  set _lib_GetDriveType 0
+  set _lib_GetLogicalDriveStrings 0
+  set _lib_GetVolumeInformation 0
+endif
+
 include
 
 #if _typ_statvfs_t
@@ -198,29 +241,6 @@ include
 # define Gid_t gid_t
 #else
 # define Gid_t int
-#endif
-
-#if _hdr_linux_quota || \\
-    _hdr_ufs_quota || \\
-    _hdr_ufs_ufs_quota || \\
-    _sys_fs_ufs_quota || \\
-    _sys_quota || \\
-    _lib_quotactl
-# define _has_std_quotas 1
-#else
-# define _has_std_quotas 0
-#endif
-
-#if _lib_bindtextdomain && \\
-    _lib_gettext && \\
-    _lib_setlocale && \\
-    _lib_textdomain && \\
-    _hdr_libintl && \\
-    _hdr_locale && \\
-    (_command_msgfmt || _command_gmsgfmt)
-# define _enable_nls 1
-#else
-# define _enable_nls 0
 #endif
 
 #if _lib_snprintf
