@@ -1,6 +1,6 @@
 1 buildpl
-1 buildsh
-2 compshpl
+1 compshpl
+2 buildsh
 3 env
 3 diexec
 3 rpmbuild
