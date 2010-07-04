@@ -1,0 +1,4 @@
+# enable NLS?
+NLS=T
+# use windows API?
+WINAPI=F
