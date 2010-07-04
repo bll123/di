@@ -14,9 +14,9 @@ di.h			di source
 dimntopt.h		di source
 di.spec			rpmspec file
 features/
+features/dioptions.dat	di options
 features/env.dat	environment configuration
 features/mkconfig.dat	mkconfig configuration
-features/options.dat	di options (NLS, WINAPI)
 getopt.c		getopt source (from Cnews)
 LICENSE			License
 Makefile		Main Makefile
@@ -41,7 +41,6 @@ tests.d/dinls.sh
 tests.d/disort.sh
 tests.d/ditot.sh
 tests.d/env.sh
-tests.d/nlsoff.sh
 tests.d/rpmbuild.sh
 tests.d/test_order
 trimchar.c		di source
