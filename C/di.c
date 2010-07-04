@@ -314,6 +314,7 @@ typedef struct {
 typedef struct {
     int             count;
     int             haspooledfs;
+    int             disppooledfs;
     int             totsorted;
     diOptions_t     options;
     diOutput_t      output;
@@ -414,6 +415,7 @@ main (argc, argv)
         /* initialization */
     diData.count = 0;
     diData.haspooledfs = FALSE;
+    diData.disppooledfs = FALSE;
     diData.totsorted = FALSE;
 
     diData.diskInfo = (diDiskInfo_t *) NULL;
@@ -876,6 +878,9 @@ printDiskInfo (diData)
                  strcmp (dinfo->fsType, "advfs") == 0))
             {
               ispooled = TRUE;
+              if (dinfo->doPrint) {
+                diData->disppooledfs = TRUE;
+              }
               if (lastpoollen == 0 ||
                   strncmp (lastpool, dinfo->special, lastpoollen) != 0)
               {
@@ -904,7 +909,10 @@ printDiskInfo (diData)
               inpool = FALSE;
             }
 
-            if (dinfo->doPrint || inpool || poolmain)
+            /* need to run addTotals for pooled filesystems */
+            /* if a pooled filesystem is being displayed    */
+            if (dinfo->doPrint ||
+                (diData->disppooledfs && (inpool || poolmain)))
             {
               addTotals (dinfo, &totals, inpool);
             }
