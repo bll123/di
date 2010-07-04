@@ -105,7 +105,9 @@ tar:
 # specific builds
 
 # This was tested using vc++ 5.0. (many years ago)
+# seriously out of date; config.win is incorrect for this build.
 windows:
+	@$(MAKE) dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
 	copy /y /b NUL:+config.win config.h
@@ -118,12 +120,10 @@ windows:
 
 # This was tested using cygwin
 windows-gcc:
+	@$(MAKE) dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
-	@chmod u+w config.h
-	$(MKCONFIGPATH)/mkpostconf.sh -i features/postconf.dat \
-		config.h disable WINAPI
 	@echo '-lintl' > reqlibs.txt
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
@@ -132,6 +132,7 @@ windows-gcc:
 		LDFLAGS="-g -O2" di-programs
 
 windows-mingw:
+	@$(MAKE) dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
 	copy /y /b NUL:+config.mingw config.h
@@ -151,6 +152,7 @@ os2-gcc:
 		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
 
 bsd43-cc:
+	@$(MAKE) dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) config.bsd43.cc config.h
@@ -161,6 +163,7 @@ bsd43-cc:
 		LDFLAGS="-O" di-programs
 
 bsd43-gcc:
+	@$(MAKE) dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) config.bsd43.gcc config.h
@@ -227,10 +230,7 @@ install-prog:	di.env di-programs
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
 	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old > /dev/null 2>&1
-	@-$(MKCONFIGPATH)/mkpostconf.sh -i features/postconf.dat \
-		config.h status NLS
-	-$(MKCONFIGPATH)/mkpostconf.sh -i features/postconf.dat \
-		config.h check NLS && \
+	-grep '^#define _enable_nls 1' config.h && \
 		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		install-po)
 
@@ -253,30 +253,23 @@ di-programs:	$(PROG)$(EXE_EXT)
 ###
 # configuration file
 
-# If NLS is off, turn all NLS settings off so we don't link
-# in extra libraries.
-# If the user has requested no NLS, turn it off.
-config.h:	di.env $(MKCONFIGPATH)/mkconfig.pl \
-		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat
+dioptions.dat:	features/dioptions.dat
+	@cp features/dioptions.dat dioptions.dat
+	@chmod u+w dioptions.dat
+	
+config.h:	di.env dioptions.dat features/mkconfig.dat
 	@-$(RM) -f config.h tests.done
-	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
-		. ./di.env;$(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkconfig.sh features/mkconfig.dat; fi
-	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
-		. ./di.env;perl \
-		$(MKCONFIGPATH)/mkconfig.pl features/mkconfig.dat; fi
-	@$(MKCONFIGPATH)/mkpostconf.sh -i features/postconf.dat \
-		config.h check NLS || \
-		$(MKCONFIGPATH)/mkpostconf.sh -i features/postconf.dat \
-		config.h disable NLS
 	@if [ "$(DI_NO_NLS)" != "" ]; then \
 		echo "*** User requested no NLS"; \
-		$(MKCONFIGPATH)/mkpostconf.sh -i features/postconf.dat \
-		config.h disable NLS; fi
-	@if [ "$(DI_NO_WINAPI)" != "" ]; then \
-		echo "*** User requested no WINAPI"; \
-		$(MKCONFIGPATH)/mkpostconf.sh -i features/postconf.dat \
-		config.h disable WINAPI; fi
+		$(MKCONFIGPATH)/mkcsetopt.sh -o dioptions.dat NLS F; fi
+	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
+		. ./di.env;$(_MKCONFIG_SHELL) \
+		$(MKCONFIGPATH)/mkconfig.sh \
+		features/mkconfig.dat; fi
+	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
+		. ./di.env;perl \
+		$(MKCONFIGPATH)/mkconfig.pl \
+		features/mkconfig.dat; fi
 
 reqlibs.txt:	di.env config.h
 	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh config.h
