@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-ver=$(grep DI_VERSION version.h | sed  -e 's/"$//' -e 's/.*"//')
+ver=`grep DI_VERSION version.h | sed  -e 's/"$//' -e 's/.*"//'`
 
 PKG=di
 dir="${PKG}-${ver}"
@@ -14,7 +14,7 @@ while read f; do
     mkdir ${dir}/${f}
     chmod 755 ${dir}/${f}
   else
-    d=$(dirname $f)
+    d=`dirname $f`
     cp $f ${dir}/${d}
   fi
 done
