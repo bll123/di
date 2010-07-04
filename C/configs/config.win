@@ -46,7 +46,7 @@
 #define _hdr_unistd 1
 #define _hdr_util_string 0
 #define _hdr_wchar 1
-#define _hdr_windows 1
+#define _hdr_windows 0
 #define _hdr_zone 0
 #define _sys_dcmd_blk 0
 #define _sys_file 1
@@ -87,12 +87,12 @@
 #define _lib_endmntent 1
 #define _lib_fs_stat_dev 0
 #define _lib_fshelp 0
-#define _lib_GetDiskFreeSpace 1
-#define _lib_GetDiskFreeSpaceEx 1
-#define _lib_GetDriveType 1
+#define _lib_GetDiskFreeSpace 0
+#define _lib_GetDiskFreeSpaceEx 0
+#define _lib_GetDriveType 0
 #define _lib_getfsstat 0
-#define _lib_GetLogicalDriveStrings 1
-#define _lib_GetVolumeInformation 1
+#define _lib_GetLogicalDriveStrings 0
+#define _lib_GetVolumeInformation 0
 #define _lib_getmnt 0
 #define _lib_getmntent 1
 #define _lib_getmntinfo 0
