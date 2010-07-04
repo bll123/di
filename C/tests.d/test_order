@@ -1,7 +1,6 @@
-1 nlsoff
-1 compshpl
 1 buildpl
-2 buildsh
+1 buildsh
+2 compshpl
 3 env
 3 diexec
 3 rpmbuild
