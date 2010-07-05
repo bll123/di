@@ -169,7 +169,7 @@ member  statfs f_type
 member  statvfs f_basetype
 size    long long
 
-if _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
+if stdquotas _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
     _sys_fs_ufs_quota || _sys_quota || _lib_quotactl
   setint _has_std_quotas 1
 else
@@ -187,9 +187,11 @@ ifnotoption NLS
   set _command_gmsgfmt 0
 endif
 
-if ! ( _lib_bindtextdomain && _lib_gettext && _lib_setlocale && \
+if hasnls _lib_bindtextdomain && _lib_gettext && _lib_setlocale && \
     _lib_textdomain && _hdr_libintl && _hdr_locale && \
-    ( _command_msgfmt || _command_gmsgfmt ) )
+    ( _command_msgfmt || _command_gmsgfmt )
+  setint _enable_nls 1
+else
   set _lib_bindtextdomain 0
   set _lib_gettext 0
   set _lib_setlocale 0
@@ -199,8 +201,6 @@ if ! ( _lib_bindtextdomain && _lib_gettext && _lib_setlocale && \
   set _command_msgfmt 0
   set _command_gmsgfmt 0
   setint _enable_nls 0
-else
-  setint _enable_nls 1
 endif
 
 ifnotoption WINAPI
