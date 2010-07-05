@@ -878,9 +878,6 @@ printDiskInfo (diData)
                  strcmp (dinfo->fsType, "advfs") == 0))
             {
               ispooled = TRUE;
-              if (dinfo->doPrint) {
-                diData->disppooledfs = TRUE;
-              }
               if (lastpoollen == 0 ||
                   strncmp (lastpool, dinfo->special, lastpoollen) != 0)
               {
@@ -2250,7 +2247,7 @@ checkDiskInfo (diData, hasLoop)
                 printf ("chk: ignore: totalBlocks <= 0: %s\n",
                         dinfo->name);
             }
-        }
+          }
       }
 
       /* make sure anything in the include list didn't get turned off */
@@ -2464,6 +2461,13 @@ getMaxFormatLengths (diData)
         dinfo = &diData->diskInfo[i];
         if (dinfo->doPrint)
         {
+            if (diData->haspooledfs &&
+                (strcmp (dinfo->fsType, "zfs") == 0 ||
+                 strcmp (dinfo->fsType, "advfs") == 0))
+            {
+              diData->disppooledfs = TRUE;
+            }
+
             len = strlen (dinfo->name);
             if (len > diout->maxMountString)
             {
