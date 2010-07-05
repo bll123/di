@@ -1,9 +1,9 @@
-di - disk information utility (version 4.24).
+di - disk information utility (version 4.25).
 
 CONTENTS
   Description
   Installation
-  Bugs
+  Bugs and Known Issues
   Requirements
   Porting Information
   Changes
@@ -15,31 +15,37 @@ DESCRIPTION
   'di' is a disk information utility, displaying everything
   (and more) that your 'df' command does. It features the
   ability to display your disk usage in whatever format you
-  desire. It is designed to be highly portable. Great for
+  prefer. It is designed to be highly portable. Great for
   heterogenous networks.
 
 INSTALLATION
 
-   To build with mkconfig.sh:
-      make
-      make install
-   Example to change compiler and prefix:
-      make CC=gcc prefix=/opt/bin
+  To build with mkconfig.sh:
+    make
+    make install
+  Example to change compiler and prefix:
+    make CC=gcc prefix=/opt/bin
 
   To build with mkconfig.pl (requires perl):
       make all-perl
 
-  For Tru64: export BIN_SH=svr4 beforehand.
+  To change the options (NLS, WINAPI):
+    make dioptions.dat
+    # edit dioptions.dat
 
   The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.
 
   The LOCALEDIR environment variable defaults to ${prefix}/share/locale.
-  The installation uses the INSTALL_DIR environment variable
-  (default ${prefix}) as the root for the installation.
+  The installation uses the INSTALL_DIR (default ${prefix}),
+  INSTALL_BIN_DIR ($INSTALL_DIR/bin), and INST_LOCALEDIR
+  ($INSTALL_DIR/share/locale) environment variables for installation.
 
-  The internationalization files are automatically installed if
+  The internationalization files are automatically built and installed if
   your system supports internationalization.
+
+  Tru64
+    export BIN_SH=svr4 beforehand.
 
   Windows installation:
 
@@ -49,14 +55,10 @@ INSTALLATION
       MinGW:      mingw32-make MAKE=mingw32-make CC=mingw32-gcc windows-mingw
     Alternative 2 - builds a new config.h file (Cygwin).
       make config.h
-      ./features/turnoffwinapi.sh
       make
 
     You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.
-
-    If you prefer to use the cygwin API rather than the
-    windows API, run features/turnoffwinapi.sh, then run 'make' again.
 
   Installation Permissions:
     Some old systems (Sys V variants) only allow root to read the
@@ -64,15 +66,30 @@ INSTALLATION
     reset the permissions to be root readable only (fixed in Solaris 7).
 
     If this is needed on your system, do:
+        make installperms
 
-    make installperms
+BUGS AND KNOWN ISSUES
+    What's Not Tested:
+      - pooled filesystems on Tru64.
+        - fixes in di-4.25 to handle pool domains properly.
+          I have access to a Tru64 system w/quotas, but there's
+          only one filesystem per pool.
+      - quotas:
+        - MacOSX, HP-UX
+          - No access to users with quotas.
+      - MS VC++ has not been tested in a *very* long while.
+      - A/UX, Ultrix, Irix, UNICOS, Next, Pyramid, SCO Unix, Sequent
+        have not been tested in a *very* long while.
+    Known Issues
+      - quotas:
+        - Solaris ufs requires the quotas file to be readable.
+        - Linux 2.4 - not working
 
-BUGS
     Send bug reports along with the output from 'di -A -a -X 5',
     output from your standard df command (as verbose as possible),
     mkconfig.log, mkconfig_env.log, di.env, and config.h to:
 
-        bll6969di_at_gmail.com
+        brad.lanam.di_at_gmail.com
 
     If the 'config.h' doesn't get set up correctly, please let me know.
     E-mail me the incorrect (and corrected if possible) config.h file,
@@ -86,28 +103,30 @@ REQUIREMENTS
         cat chmod ln mkdir mv rm sed test
     mkconfig.sh:
         a shell that supports shell functions
-        cat expr grep sed rm
+        cat egrep expr grep rm sed test
     mkconfig.pl:
         cat perl rm
+    mksetopt.sh:
+        mv rm sed test
     NLS:
         msgfmt sed
-    turnoffnls.sh:
-        cat rm sed
     runtests.sh:
-        ar cat cp dc diff env expr grep mv rm sed sort tr
+        ar cat cp dc diff env expr grep mv rm sed sort test tr
 
 PORTING
 
-    di 4.24 has been tested on the following platforms:
+    di 4.25 has been tested on the following platforms:
         AIX 5.1
+        BSD 4.3
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4
         Cygwin
         Debian 4.0, 5.0, kFreeBSD 7.2
-        Fedora 7, 12
+        Fedora 7, 12, 13
         FreeBSD 4.9, 5.1, 7.0, 7.1, 7.2, 8.0
         Haiku r1a1
         HP-UX 11.11 (bundled cc, gcc)
         MacOSX 8.11, 9.5
+        Mandrake 9.2
         MinGW
         NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1
         Nexenta 1.0.1_b85 2.0_b104
@@ -119,6 +138,7 @@ PORTING
         Solaris 8, 9, 10 (cc, gcc3, gcc4)
         Tru64 5.1B
         Ubuntu 10
+        VMS
 
     di has been ported to the following systems in the past:
 
@@ -129,6 +149,22 @@ PORTING
         Sys V.3, Sys V.4, Ultrix, VMS, Windows, Xenix
 
 CHANGES
+
+    4.25                                    [4 Jul 2010]
+        Added support for quotas.
+        Fix for Tru64 advfs pools.
+        Fixed loopback filesystem (lofs/none) exclusion; enabled for
+            all systems.
+        Added an optional DI_LOCALE_DIR environment variable to
+            point to the locale directory where di's messages
+            are installed.
+        Changed the sort to use strcoll() rather than strcmp().
+        Updated build system to mkconfig-1.6.
+        Removed turnoffwinapi.sh, hasnls.sh & turnoffnls.sh and updated
+            to use new build system tools.
+        Added dioptions.dat to control options.
+        More fixes for totals in a pooled/non-pooled mix when pooled
+            filesystems are not displayed.
 
     4.24                                    [14 May 2010]
         Added spanish translation (David Sastre).
@@ -549,5 +585,5 @@ ACKNOWLEDGEMENTS
 COPYRIGHT
 
     Copyright 1994-2010 Brad Lanam, Walnut Creek, CA, USA
-    bll6969di_at_gmail.com
+    brad.lanam.di_at_gmail.com
     http://www.gentoo.com/di/
