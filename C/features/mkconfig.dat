@@ -169,6 +169,10 @@ member  statfs f_type
 member  statvfs f_basetype
 size    long long
 
+# see dioptions.dat to change these
+option  DI_DEFAULT_FORMAT smbuvpT
+option  DI_DEFAULT_DISP_SIZE H
+
 if stdquotas _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
     _sys_fs_ufs_quota || _sys_quota || _lib_quotactl
   setint _has_std_quotas 1
