@@ -3,7 +3,10 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "di sort${EC}" >&5
+if [ "$1" = "-d" ]; then
+  echo ${EN} "di sort${EC}"
+  exit 0
+fi
 
 grc=0
 

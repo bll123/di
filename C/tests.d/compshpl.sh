@@ -3,7 +3,10 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "compare mkconfig.sh mkconfig.pl${EC}" >&5
+if [ "$1" = "-d" ]; then
+  echo ${EN} "compare mkconfig.sh mkconfig.pl${EC}"
+  exit 0
+fi
 
 cd $_MKCONFIG_RUNTOPDIR
 grc=0

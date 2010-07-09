@@ -3,7 +3,11 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "build w/mkconfig.sh${EC}" >&5
+if [ "$1" = "-d" ]; then
+  echo ${EN} "build w/mkconfig.sh${EC}"
+  exit 0
+fi
+
 . $_MKCONFIG_DIR/shellfuncs.sh
 testshcapability
 

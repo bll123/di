@@ -3,7 +3,10 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "di totals${EC}" >&5
+if [ "$1" = "-d" ]; then
+  echo ${EN} "di totals${EC}"
+  exit 0
+fi
 
 FORMATS="b B u c f v i U F"
 

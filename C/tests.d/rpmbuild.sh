@@ -3,7 +3,10 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "rpmbuild${EC}" >&5
+if [ "$1" = "-d" ]; then
+  echo ${EN} "rpmbuild${EC}"
+  exit 0
+fi
 
 cd $_MKCONFIG_RUNTOPDIR
 . ./mkconfig.cache

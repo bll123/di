@@ -3,8 +3,10 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-set -x
-echo ${EN} "di nls${EC}" >&5
+if [ "$1" = "-d" ]; then
+  echo ${EN} "di nls${EC}"
+  exit 0
+fi
 
 grep '^#define _enable_nls 1' ${_MKCONFIG_RUNTOPDIR}/config.h
 hasnls=$?

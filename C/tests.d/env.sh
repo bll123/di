@@ -1,6 +1,9 @@
 #!/bin/sh
 
-echo ${EN} "check environment in make${EC}" >&5
+if [ "$1" = "-d" ]; then
+  echo ${EN} "check environment in make${EC}"
+  exit 0
+fi
 
 cd ${_MKCONFIG_RUNTOPDIR}
 rc=$?

@@ -3,7 +3,10 @@
 #  Copyright 2010 Brad Lanam Walnut Creek, CA USA
 #
 
-echo ${EN} "di executes${EC}" >&5
+if [ "$1" = "-d" ]; then
+  echo ${EN} "di executes${EC}"
+  exit 0
+fi
 
 $_MKCONFIG_RUNTOPDIR/di
 rc=$?
