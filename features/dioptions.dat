@@ -2,3 +2,20 @@
 NLS=T
 # use windows API?
 WINAPI=F
+#
+# The default output format
+#
+# default:
+# DI_DEFAULT_FORMAT=smbuvpT 
+# alternatives:
+# DI_DEFAULT_FORMAT=MbuvpT
+#
+# The default display size
+#   k - kbytes
+#   m - mbytes
+#   g - gbytes
+#   h - scaled alternative 1 (human readable)
+#   H - scaled alternative 2 (human readable)
+#
+# default:
+# DI_DEFAULT_DISP_SIZE=H
