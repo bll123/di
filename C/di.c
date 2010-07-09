@@ -224,14 +224,6 @@
 #define DI_DISP_HR              -20
 #define DI_DISP_HR_2            -21
 
-   /* you may want to change some of these values. */
-#if ! defined (DI_DEFAULT_FORMAT)
-# define DI_DEFAULT_FORMAT      "smbuvpT"
-/* # define DI_DEFAULT_FORMAT      "MbuvpT" */ /* an alternative */
-#endif
-#if ! defined (DI_DEFAULT_DISP_SIZE)
-# define DI_DEFAULT_DISP_SIZE   "H"
-#endif
 #define DI_PERC_FMT             " %3.0f%% "
 #define DI_POSIX_PERC_FMT       "    %3.0f%% "
 #define DI_JUST_LEFT            0
