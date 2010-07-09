@@ -32,6 +32,7 @@ strdup.c		di source
 strstr.c		di source
 tests.d/		regression tests for di
 tests.d/buildpl.sh
+tests.d/buildsh.mksh
 tests.d/buildsh.sh
 tests.d/compshpl.sh
 tests.d/diarg.sh
