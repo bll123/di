@@ -4,7 +4,7 @@
 #
 
 if [ "$1" = "-d" ]; then
-  echo ${EN} "di sort${EC}"
+  echo ${EN} " di sort${EC}"
   exit 0
 fi
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ "$1" = "-d" ]; then
-  echo ${EN} "check environment in make${EC}"
+  echo ${EN} " check environment in make${EC}"
   exit 0
 fi
 
@@ -16,7 +16,7 @@ make di.env
 
 . ./di.env
 
-make --version | egrep "GNU Make" > /dev/null 2>&1
+make --version | egrep "GNU Make" 
 rc=$?
 if [ $rc -eq 0 ]; then
   make -e --no-print-directory rtest-env > \

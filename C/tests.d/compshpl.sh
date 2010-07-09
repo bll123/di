@@ -4,7 +4,7 @@
 #
 
 if [ "$1" = "-d" ]; then
-  echo ${EN} "compare mkconfig.sh mkconfig.pl${EC}"
+  echo ${EN} " compare mkconfig.sh mkconfig.pl${EC}"
   exit 0
 fi
 

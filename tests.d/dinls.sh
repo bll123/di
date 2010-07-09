@@ -4,7 +4,7 @@
 #
 
 if [ "$1" = "-d" ]; then
-  echo ${EN} "di nls${EC}"
+  echo ${EN} " di nls${EC}"
   exit 0
 fi
 

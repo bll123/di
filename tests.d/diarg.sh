@@ -4,7 +4,7 @@
 #
 
 if [ "$1" = "-d" ]; then
-  echo ${EN} "di w/argument${EC}"
+  echo ${EN} " di w/argument${EC}"
   exit 0
 fi
 

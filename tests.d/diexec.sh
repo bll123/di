@@ -4,7 +4,7 @@
 #
 
 if [ "$1" = "-d" ]; then
-  echo ${EN} "di executes${EC}"
+  echo ${EN} " di executes${EC}"
   exit 0
 fi
 

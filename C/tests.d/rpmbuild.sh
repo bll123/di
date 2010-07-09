@@ -4,7 +4,7 @@
 #
 
 if [ "$1" = "-d" ]; then
-  echo ${EN} "rpmbuild${EC}"
+  echo ${EN} " rpmbuild${EC}"
   exit 0
 fi
 

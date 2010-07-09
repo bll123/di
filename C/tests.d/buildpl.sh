@@ -4,7 +4,7 @@
 #
 
 if [ "$1" = "-d" ]; then
-  echo ${EN} "build w/mkconfig.pl${EC}"
+  echo ${EN} " build w/mkconfig.pl${EC}"
   exit 0
 fi
 

@@ -4,7 +4,7 @@
 #
 
 if [ "$1" = "-d" ]; then
-  echo ${EN} "di totals${EC}"
+  echo ${EN} " di totals${EC}"
   exit 0
 fi
 
