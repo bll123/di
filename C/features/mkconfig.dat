@@ -151,22 +151,22 @@ dcl     int  errno
 dcl     ptr  mnt_names
 dcl     int  optind
 dcl     ptr  optarg
-member  dqblk  dqb_curspace
-member  dqblk  dqb_curblocks
-member  dqblk  dqb_fhardlimit
-member  dqblk  dqb_fsoftlimit
-member  dqblk  dqb_curfiles
-member  getquota_rslt gqr_status
-member  getquota_rslt gqr_rquota
-member  statfs f_bsize
-member  statfs f_fsize
-member  statfs f_fstyp
-member  statfs f_iosize
-member  statfs f_frsize
-member  statfs f_fstypename
-member  statfs mount_info
-member  statfs f_type
-member  statvfs f_basetype
+member  struct dqblk dqb_curspace
+member  struct dqblk dqb_curblocks
+member  struct dqblk dqb_fhardlimit
+member  struct dqblk dqb_fsoftlimit
+member  struct dqblk dqb_curfiles
+member  struct getquota_rslt gqr_status
+member  struct getquota_rslt gqr_rquota
+member  struct statfs f_bsize
+member  struct statfs f_fsize
+member  struct statfs f_fstyp
+member  struct statfs f_iosize
+member  struct statfs f_frsize
+member  struct statfs f_fstypename
+member  struct statfs mount_info
+member  struct statfs f_type
+member  struct statvfs f_basetype
 size    long long
 
 # see dioptions.dat to change these
