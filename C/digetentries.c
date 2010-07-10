@@ -732,10 +732,10 @@ di_getDiskEntries (diskInfo, diCount)
 
         tblocksz = (_fs_size_t) 1024;
 
-# if _mem_f_fsize_statfs /* OSF 1.x */
+# if _mem_struct_statfs_f_fsize /* OSF 1.x */
         tblocksz = (_fs_size_t) mntbufp [idx].f_fsize;
 # endif
-# if _mem_f_bsize_statfs /* OSF 2.x */
+# if _mem_struct_statfs_f_bsize /* OSF 2.x */
         tblocksz = (_fs_size_t) mntbufp [idx].f_bsize;
 # endif
         di_saveBlockSizes (diptr, tblocksz,
@@ -749,7 +749,7 @@ di_getDiskEntries (diskInfo, diCount)
 
         fstype = mntbufp [idx].f_type;
 # if ! _sys_fs_types && ! defined (INITMOUNTNAMES) && \
-    ! _mem_f_fstypename_statfs
+    ! _mem_struct_statfs_f_fstypename
         if ((fstype >= 0) && (fstype <= MOUNT_MAXTYPE))
         {
             switch (fstype)
@@ -883,7 +883,7 @@ di_getDiskEntries (diskInfo, diCount)
             } /* switch on mount type */
         }
 # else
-#  if _mem_f_fstypename_statfs
+#  if _mem_struct_statfs_f_fstypename
         strncpy (diptr->fsType, mntbufp [idx].f_fstypename, DI_TYPE_LEN);
 #  else
             /* could use getvfsbytype here... */
@@ -916,13 +916,13 @@ di_getDiskEntries (diskInfo, diCount)
                     (long) mntbufp [idx].f_blocks,
                     (long) mntbufp [idx].f_bfree,
                     (long) mntbufp [idx].f_bavail);
-# if _mem_f_fsize_statfs
+# if _mem_struct_statfs_f_fsize
             printf ("\tfsize:%ld \n", (long) mntbufp [idx].f_fsize);
 # endif
-# if _mem_f_bsize_statfs
+# if _mem_struct_statfs_f_bsize
             printf ("\tbsize:%ld \n", (long) mntbufp [idx].f_bsize);
 # endif
-# if _mem_f_iosize_statfs
+# if _mem_struct_statfs_f_iosize
             printf ("\tiosize:%ld \n", (long) mntbufp [idx].f_iosize);
 # endif
             printf ("\tinodes: tot:%ld free:%ld\n",
@@ -1013,7 +1013,7 @@ di_getDiskEntries (diskInfo, diCount)
         }
 # endif
         convertMountOptions ((long) sp->f_flags, diptr);
-# if _mem_f_type_statfs
+# if _mem_struct_statfs_f_type
 #  if defined (MOUNT_NFS3)
         if (sp->f_type == MOUNT_NFS3)
         {
@@ -1022,19 +1022,19 @@ di_getDiskEntries (diskInfo, diCount)
         }
 #  endif
 # endif
-# if _mem_mount_info_statfs && \
+# if _mem_struct_statfs_mount_info && \
         defined (MOUNT_NFS) && \
-        (_mem_f_type_statfs || _mem_f_fstypename_statfs)
-#  if _mem_f_type_statfs
+        (_mem_struct_statfs_f_type || _mem_struct_statfs_f_fstypename)
+#  if _mem_struct_statfs_f_type
         if (sp->f_type == MOUNT_NFS
 #  endif
-#  if _mem_f_fstypename_statfs
+#  if _mem_struct_statfs_f_fstypename
         if (strcmp (sp->f_fstypename, MOUNT_NFS) == 0
 #  endif
-#  if _mem_f_fstypename_statfs && defined (MOUNT_NFS3)
+#  if _mem_struct_statfs_f_fstypename && defined (MOUNT_NFS3)
                 || strcmp (sp->f_fstypename, MOUNT_NFS3) == 0
 #  endif
-#  if _mem_f_type_statfs && defined (MOUNT_NFS3)
+#  if _mem_struct_statfs_f_type && defined (MOUNT_NFS3)
                 || sp->f_type == MOUNT_NFS3
 #  endif
            )
@@ -1048,10 +1048,10 @@ di_getDiskEntries (diskInfo, diCount)
 
         strncpy (diptr->special, sp->f_mntfromname, DI_SPEC_NAME_LEN);
         strncpy (diptr->name, sp->f_mntonname, DI_NAME_LEN);
-# if _mem_f_fsize_statfs
+# if _mem_struct_statfs_f_fsize
         tblocksz = (_fs_size_t) sp->f_fsize;
 # endif
-# if _mem_f_bsize_statfs && ! _mem_f_fsize_statfs
+# if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
         tblocksz = (_fs_size_t) sp->f_bsize;
 # endif
         di_saveBlockSizes (diptr, tblocksz,
@@ -1062,13 +1062,13 @@ di_getDiskEntries (diskInfo, diCount)
             (_fs_size_t) sp->f_files,
             (_fs_size_t) sp->f_ffree,
             (_fs_size_t) sp->f_ffree);
-# if _mem_f_fstypename_statfs
+# if _mem_struct_statfs_f_fstypename
         strncpy (diptr->fsType, sp->f_fstypename, DI_TYPE_LEN);
 # else
-#  if _lib_sysfs && _mem_f_type_statfs
+#  if _lib_sysfs && _mem_struct_statfs_f_type
         sysfs (GETFSTYP, sp->f_type, diptr->fsType);
 #  else
-#   if _dcl_mnt_names && _mem_f_type_statfs
+#   if _dcl_mnt_names && _mem_struct_statfs_f_type
         fstype = sp->f_type;
         if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
         {

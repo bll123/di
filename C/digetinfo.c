@@ -157,7 +157,7 @@ di_getDiskInfo (diskInfo, diCount)
                     (_fs_size_t) statBuf.f_files,
                     (_fs_size_t) statBuf.f_ffree,
                     (_fs_size_t) statBuf.f_favail);
-# if _mem_f_basetype_statvfs
+# if _mem_statvfs_struct_f_basetype
                 if (! *diptr->fsType) {
                   strncpy (diptr->fsType, statBuf.f_basetype, DI_TYPE_LEN);
                 }
@@ -248,7 +248,7 @@ di_getDiskInfo (diskInfo, diCount)
 
             if (statfs (diptr->name, &statBuf, sizeof (statBuf), 0) == 0)
             {
-# if _mem_f_frsize_statfs
+# if _mem_statfs_struct_f_frsize
                 if (statBuf.f_frsize == 0 && statBuf.f_bsize != 0)
                 {
                     tblocksz = (_fs_size_t) statBuf.f_bsize;
@@ -268,14 +268,14 @@ di_getDiskInfo (diskInfo, diCount)
                     (_fs_size_t) statBuf.f_files,
                     (_fs_size_t) statBuf.f_ffree,
                     (_fs_size_t) statBuf.f_ffree);
-# if _lib_sysfs && _mem_f_fstyp_statfs
+# if _lib_sysfs && _mem_statfs_struct_f_fstyp
                 sysfs (GETFSTYP, statBuf.f_fstyp, diptr->fsType);
 # endif
 
                 if (debug > 1)
                 {
                     printf ("%s: %s\n", diptr->name, diptr->fsType);
-# if _mem_f_frsize_statfs
+# if _mem_statfs_struct_f_frsize
                     printf ("\tbsize:%ld\n", statBuf.f_bsize);
                     printf ("\tfrsize:%ld\n", statBuf.f_frsize);
 # else
@@ -347,7 +347,7 @@ di_getDiskInfo (diskInfo, diCount)
                     (_fs_size_t) statBuf.f_ffree,
                     (_fs_size_t) statBuf.f_ffree);
 
-# if _lib_sysfs && _mem_f_fstyp_statfs
+# if _lib_sysfs && _mem_statfs_struct_f_fstyp
                 sysfs (GETFSTYP, statBuf.f_fstyp, diptr->fsType);
 # endif
 

@@ -97,13 +97,13 @@ extern int debug;
 #endif
 
   /* rename certain structure members for portability */
-#if _mem_dqb_fsoftlimit_dqblk
+#if _mem_dqblk_struct_dqb_fsoftlimit
 # define dqb_isoftlimit dqb_fsoftlimit
 #endif
-#if _mem_dqb_fhardlimit_dqblk
+#if _mem_dqblk_struct_dqb_fhardlimit
 # define dqb_ihardlimit dqb_fhardlimit
 #endif
-#if _mem_dqb_curfiles_dqblk
+#if _mem_dqblk_struct_dqb_curfiles
 # define dqb_curinodes dqb_curfiles
 #endif
 
@@ -268,12 +268,12 @@ xdr_quota_rslt (xp, rslt)
   if (! xdr_int (xp, &quotastat)) {
     return 0;
   }
-# if _mem_gqr_status_getquota_rslt
+# if _mem_rslt_struct_gqr_status_getquota
   rslt->gqr_status = quotastat;
 # else
   rslt->status = quotastat;
 # endif
-# if _mem_gqr_rquota_getquota_rslt
+# if _mem_rslt_struct_gqr_rquota_getquota
   rptr = &rslt->gqr_rquota;
 # else
   rptr = &rslt->getquota_rslt_u.gqr_rquota;
@@ -365,13 +365,13 @@ diquota_nfs (diqinfo)
       return;
     }
 
-# if _mem_gqr_status_getquota_rslt
+# if _mem_rslt_struct_gqr_status_getquota
     quotastat = result.gqr_status;
 # else
     quotastat = result.status;
 # endif
     if (quotastat == 1) {
-# if _mem_gqr_rquota_getquota_rslt
+# if _mem_rslt_struct_gqr_rquota_getquota
       rptr = &result.gqr_rquota;
 # else
       rptr = &result.getquota_rslt_u.gqr_rquota;
@@ -495,13 +495,13 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, cqinfo)
       return;
     }
 
-# if _mem_dqb_curspace_dqblk
+# if _mem_dqblk_struct_dqb_curspace
     tsize = qinfo->dqb_curspace / diqinfo->blockSize;
     if (tsize > diqinfo->used || diqinfo->used == 0) {
       diqinfo->used = tsize;
     }
 # endif
-# if _mem_dqb_curblocks_dqblk
+# if _mem_dqblk_struct_dqb_curblocks
     if (xfsflag) {
 #  if _typ_fs_disk_quota_t
       tsize = xfsqinfo->d_bcount;
