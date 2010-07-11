@@ -386,7 +386,7 @@ convertNFSMountOptions (flags, wsize, rsize, diptr)
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
-	! HAVE_MNTCTL && \
+	! _lib_mntctl && \
 	! _class_os__Volumes
 
 char *

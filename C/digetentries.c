@@ -158,7 +158,7 @@
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
-    ! HAVE_MNTCTL && \
+    ! _lib_mntctl && \
     ! _lib_getmnt && \
     ! _class_os__Volumes
 # if defined (_PATH_MOUNTED)
@@ -197,7 +197,7 @@ extern int debug;
 
 #if _lib_getmntent && \
     ! _lib_setmntent && \
-    ! HAVE_MNTCTL && \
+    ! _lib_mntctl && \
     ! _class_os__Volumes
 
 #if defined(__cplusplus)
@@ -317,7 +317,7 @@ checkMountOptions (mntEntry, str)
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
-    ! HAVE_MNTCTL && \
+    ! _lib_mntctl && \
     ! _lib_GetDiskFreeSpace && \
     ! _lib_GetDiskFreeSpaceEx && \
     ! _class_os__Volumes
@@ -420,7 +420,7 @@ di_getDiskEntries (diskInfo, diCount)
 
 /* QNX */
 #if ! _lib_getmntent && \
-    ! HAVE_MNTCTL && \
+    ! _lib_mntctl && \
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
@@ -569,7 +569,7 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
 
 /* if nothing matches, assume a SysV.3 /etc/mnttab or similar */
 #if ! _lib_getmntent && \
-    ! HAVE_MNTCTL && \
+    ! _lib_mntctl && \
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
@@ -1341,7 +1341,7 @@ di_getDiskEntries (diskInfo, diCount)
 #endif /* _lib_getmnt */
 
 
-#if HAVE_MNTCTL
+#if _lib_mntctl
 
 /*
  * di_getDiskEntries
@@ -1510,7 +1510,7 @@ di_getDiskEntries (diskInfo, diCount)
     return 0;
 }
 
-#endif  /* HAVE_MNTCTL */
+#endif  /* _lib_mntctl */
 
 
 #if _lib_GetDiskFreeSpace && \
