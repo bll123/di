@@ -184,13 +184,8 @@ typedef struct
 } diQuota_t;
 
 /* workaround for AIX - mntctl not declared */
-# if defined (MCTL_QUERY) || _lib_mntctl
-#  if ! _lib_mntctl
-    extern int mntctl _((int, int, char *));
-#  endif
-#  define HAVE_MNTCTL 1
-# else
-#  define HAVE_MNTCTL 0
+# if _lib_mntctl && _npt_mntctl
+  extern int mntctl _((int, int, char *));
 # endif
 
 # if defined(__cplusplus)
@@ -227,19 +222,13 @@ extern void di_saveInodeSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_siz
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
-	! HAVE_MNTCTL && \
+	! _lib_mntctl && \
 	! _class_os__Volumes
 extern char *chkMountOptions        _((const char *, const char *));
 #endif
 extern void convertMountOptions     _((long, diDiskInfo_t *));
 extern void convertNFSMountOptions  _((long, long, long, diDiskInfo_t *));
 extern void di_testRemoteDisk       _((diDiskInfo_t *));
-
-/* workaround for cygwin                                              */
-/* if we have a getopt header, there's probably a getopt lib function */
-# if ! _lib_getopt && _hdr_getopt
-extern int getopt _((int, char * const [], const char *));
-# endif
 
 # if defined(__cplusplus)
    }
