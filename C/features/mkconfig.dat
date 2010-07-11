@@ -83,6 +83,7 @@ command gmsgfmt
 # rpmbuild used for regression tests
 command rpmbuild
 const   O_NOCTTY
+define  MCTL_QUERY
 typ     struct dqblk
 typ     fs_disk_quota_t
 typ     gid_t
@@ -146,6 +147,7 @@ statfs_args
 class   os::Volumes -lsyllable
 npt     getenv
 npt     getopt
+npt     mntctl
 npt     statfs _lib_statfs
 dcl     int  errno
 dcl     ptr  mnt_names
@@ -172,6 +174,18 @@ size    long long
 # see dioptions.dat to change these
 option  DI_DEFAULT_FORMAT smbuvpT
 option  DI_DEFAULT_DISP_SIZE H
+
+# workaround for AIX
+# mntctl() is not declared
+if AIX_mntctl _sys_vmount && _define_MCTL_QUERY
+  set _lib_mntctl 1
+endif
+
+# workaround for old cygwin
+# if we have a getopt header, there's probably a getopt lib function
+if chkgetopt _hdr_getopt && ! _lib_getopt
+  set _lib_getopt 1
+endif
 
 if stdquotas _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
     _sys_fs_ufs_quota || _sys_quota || _lib_quotactl
