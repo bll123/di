@@ -183,6 +183,8 @@ clean:
 		tests.done _tmp_mkconfig \
 		>/dev/null 2>&1
 
+# a misnomer...doesn't remove di.env, mkconfig.cache, *.vars, dioptions.dat
+# this should be rearranged
 distclean:
 	$(MAKE) clean
 	-$(RM) -rf config.h di.env reqlibs.txt \
@@ -193,7 +195,7 @@ distclean:
 
 realclean:
 	$(MAKE) distclean
-	-$(RM) -rf _mkconfig_runtests _tmp_mkconfig
+	-$(RM) -rf _mkconfig_runtests _tmp_mkconfig dioptions.dat
 	@cd $(MKCONFIGPATH);$(MAKE) realclean
 
 ###
