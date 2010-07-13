@@ -74,6 +74,7 @@
 #define _command_gmsgfmt 0
 #define _command_rpmbuild 0
 #define _const_O_NOCTTY 1
+#define _define_MCTL_QUERY 0
 #define _typ_struct_dqblk 0
 #define _typ_fs_disk_quota_t 0
 #define _typ_gid_t 0
@@ -138,8 +139,8 @@
 #define _mem_struct_dqblk_dqb_fhardlimit 0
 #define _mem_struct_dqblk_dqb_fsoftlimit 0
 #define _mem_struct_dqblk_dqb_curfiles 0
-#define _mem_struct_rslt_gqr_status_getquota 0
-#define _mem_struct_rslt_gqr_rquota_getquota 0
+#define _mem_struct_getquota_rslt_gqr_status 0
+#define _mem_struct_getquota_rslt_gqr_rquota 0
 #define _mem_struct_statfs_f_bsize 1
 #define _mem_struct_statfs_f_fsize 0
 #define _mem_struct_statfs_f_fstyp 0
@@ -150,6 +151,8 @@
 #define _mem_struct_statfs_f_type 1
 #define _mem_struct_statvfs_f_basetype 0
 #define _siz_long_long 8
+#define DI_DEFAULT_FORMAT "smbuvpT"
+#define DI_DEFAULT_DISP_SIZE "H"
 #define _has_std_quotas 0
 #define _enable_nls 0
 
