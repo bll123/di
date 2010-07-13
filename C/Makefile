@@ -277,7 +277,7 @@ config.h:	di.env dioptions.dat features/mkconfig.dat
 		$(MKCONFIGPATH)/mkconfig.pl \
 		features/mkconfig.dat; fi
 
-$(MKC_REQLIB)	di.env config.h
+$(MKC_REQLIB):	di.env config.h
 	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh config.h
 
 
