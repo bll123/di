@@ -181,7 +181,7 @@ bsd43-gcc:
 #   mkconfig.cache, mkconfig_*.vars, 
 #   dioptions.dat, pretests.done, test_di
 clean:
-	-$(RM) -rf $(PROG) $(MPROG) \
+	@-$(RM) -rf $(PROG) $(MPROG) \
 		mingw-$(PROG).exe $(PROG).exe $(MPROG).exe \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig \
@@ -191,18 +191,15 @@ clean:
 #   _mkconfig_runtests, _tmp_mkconfig, dioptions.dat
 #   pretests.done, test_di
 realclean:
-	$(MAKE) clean
+	@$(MAKE) clean
 	@-$(RM) -rf config.h di.env reqlibs.txt \
 		mkconfig.cache mkconfig_*.vars \
-	@cd $(MKCONFIGPATH);$(MAKE) realclean
 
 distclean:
 	@$(MAKE) realclean
 	@-$(RM) -rf pretests.done test_di \
 		_mkconfig_runtests _tmp_mkconfig dioptions.dat
 		>/dev/null 2>&1
-	@cd $(MKCONFIGPATH);$(MAKE) distclean
-
 
 ###
 # installation
