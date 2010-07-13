@@ -14,7 +14,7 @@ instdir="`pwd`/test_di"
 make -e prefix=${instdir} all-perl
 rc=$?
 # leave a copy there...realclean will get them...
-cp mkconfig.log mkconfig.cache mkconfig*.vars di.env reqlibs.txt \
+cp mkconfig.log mkconfig.cache mkconfig*.vars di.env mkconfig.reqlibs \
     $_MKCONFIG_TSTRUNTMPDIR
 
 exit $rc

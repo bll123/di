@@ -29,7 +29,7 @@ make -e DI_DIR="." DI_VERSION=${DI_VERSION} testrpmbuild
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 # leave a copy there...realclean will get them...
-cp mkconfig.log mkconfig.cache mkconfig*.vars di.env reqlibs.txt \
+cp mkconfig.log mkconfig.cache mkconfig*.vars di.env mkconfig.reqlibs \
     $_MKCONFIG_TSTRUNTMPDIR
 
 exit $grc

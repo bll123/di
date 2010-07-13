@@ -22,7 +22,7 @@ rc=$?
 if [ $rc != 0 ]; then grc=$rc; fi
 mkdir -p $_MKCONFIG_TSTRUNTMPDIR/buildsh${stag}
 # leave these laying around for use by install.sh and rpmbuild.sh test
-cp mkconfig.log mkconfig.cache mkconfig*.vars di.env reqlibs.txt \
+cp mkconfig.log mkconfig.cache mkconfig*.vars di.env mkconfig.reqlibs \
     $_MKCONFIG_TSTRUNTMPDIR/buildsh${stag}
 
 exit $grc

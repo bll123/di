@@ -16,7 +16,7 @@ make -e prefix=${instdir} install
 rc=$?
 
 # leave a copy laying around...make realclean will clean it up
-cp mkconfig.log mkconfig.cache mkconfig*.vars di.env reqlibs.txt \
+cp mkconfig.log mkconfig.cache mkconfig*.vars di.env mkconfig.reqlibs \
     $_MKCONFIG_TSTRUNTMPDIR
 
 if [ $rc -ne 0 ]; then grc=$rc; fi
