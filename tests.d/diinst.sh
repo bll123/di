@@ -15,7 +15,7 @@ instdir="`pwd`/test_di"
 make -e prefix=${instdir} install
 rc=$?
 
-# leave a copy laying around...make distclean will clean it up
+# leave a copy laying around...make realclean will clean it up
 cp mkconfig.log mkconfig.cache mkconfig*.vars di.env reqlibs.txt \
     $_MKCONFIG_TSTRUNTMPDIR
 

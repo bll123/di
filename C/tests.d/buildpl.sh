@@ -9,11 +9,11 @@ if [ "$1" = "-d" ]; then
 fi
 
 cd $_MKCONFIG_RUNTOPDIR
-make distclean
+make realclean
 instdir="`pwd`/test_di"
 make -e prefix=${instdir} all-perl
 rc=$?
-# leave a copy there...distclean will get them...
+# leave a copy there...realclean will get them...
 cp mkconfig.log mkconfig.cache mkconfig*.vars di.env reqlibs.txt \
     $_MKCONFIG_TSTRUNTMPDIR
 

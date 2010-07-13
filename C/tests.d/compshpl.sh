@@ -11,7 +11,7 @@ fi
 cd $_MKCONFIG_RUNTOPDIR
 grc=0
 
-make distclean
+make realclean
 rm -f config.h.sh config.h.pl cache.pl cache.sh vars.pl vars.sh
 
 make -e config.h

@@ -16,7 +16,7 @@ grc=0
 cd $_MKCONFIG_RUNTOPDIR
 
 instdir="`pwd`/test_di"
-make distclean
+make realclean
 make -e prefix=${instdir} all-sh
 rc=$?
 if [ $rc != 0 ]; then grc=$rc; fi
