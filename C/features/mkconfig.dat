@@ -171,10 +171,6 @@ member  struct statfs f_type
 member  struct statvfs f_basetype
 size    long long
 
-# see dioptions.dat to change these
-option  DI_DEFAULT_FORMAT smbuvpT
-option  DI_DEFAULT_DISP_SIZE H
-
 # workaround for AIX
 # mntctl() is not declared
 if AIX_mntctl _sys_vmount && _define_MCTL_QUERY
@@ -229,6 +225,10 @@ ifnotoption WINAPI
   set _lib_GetLogicalDriveStrings 0
   set _lib_GetVolumeInformation 0
 endif
+
+# see dioptions.dat to change these
+option  DI_DEFAULT_FORMAT smbuvpT
+option  DI_DEFAULT_DISP_SIZE H
 
 include
 
