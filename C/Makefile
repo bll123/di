@@ -69,6 +69,7 @@ MANPERM = 644
 
 MKCONFIGPATH = ./mkconfig
 MKCONFIG_TYPE = sh
+MKC_REQLIB = mkconfig.reqlibs
 
 ###
 # main
@@ -111,7 +112,7 @@ windows:
 	copy /y NUL: di.env
 	-del config.h
 	copy /y /b NUL:+config.win config.h
-	copy /y NUL: reqlibs.txt
+	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
@@ -124,7 +125,7 @@ windows-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) -f config.win config.h
-	@echo '-lintl' > reqlibs.txt
+	@echo '-lintl' > $(MKC_REQLIB)
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
@@ -136,7 +137,7 @@ windows-mingw:
 	copy /y NUL: di.env
 	-del config.h
 	copy /y /b NUL:+config.mingw config.h
-	copy /y NUL: reqlibs.txt
+	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
 		CC=mingw32-gcc LD=mingw32-gcc \
 		EXE_EXT=".exe" OBJ_EXT=".o" \
@@ -156,7 +157,7 @@ bsd43-cc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) config.bsd43.cc config.h
-	@touch reqlibs.txt
+	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -O" \
@@ -167,7 +168,7 @@ bsd43-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
 	$(CP) config.bsd43.gcc config.h
-	@touch reqlibs.txt
+	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -O2" \
@@ -177,7 +178,7 @@ bsd43-gcc:
 # cleaning
 
 # leaves:
-#   config.h, di.env, reqlibs.txt
+#   config.h, di.env, mkconfig.reqlibs
 #   mkconfig.cache, mkconfig_*.vars, 
 #   dioptions.dat, pretests.done, test_di
 clean:
@@ -192,7 +193,7 @@ clean:
 #   pretests.done, test_di
 realclean:
 	@$(MAKE) clean
-	@-$(RM) -rf config.h di.env reqlibs.txt \
+	@-$(RM) -rf config.h di.env mkconfig.reqlibs \
 		mkconfig.cache mkconfig_*.vars \
 
 distclean:
@@ -276,7 +277,7 @@ config.h:	di.env dioptions.dat features/mkconfig.dat
 		$(MKCONFIGPATH)/mkconfig.pl \
 		features/mkconfig.dat; fi
 
-reqlibs.txt:	di.env config.h
+$(MKC_REQLIB)	di.env config.h
 	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh config.h
 
 
@@ -289,11 +290,11 @@ OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
 
-$(PROG)$(EXE_EXT):	reqlibs.txt $(OBJECTS)
-	@echo "*** Using libs: `$(CAT) reqlibs.txt`"
+$(PROG)$(EXE_EXT):	$(MKC_REQLIB) $(OBJECTS)
+	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS) \
-		`$(CAT) reqlibs.txt`
+		`$(CAT) $(MKC_REQLIB)`
 
 mingw-$(PROG)$(EXE_EXT):	$(OBJECTS)
 	$(CC) -o mingw-$(PROG)$(EXE_EXT) \
