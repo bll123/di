@@ -1,4 +1,4 @@
-di - disk information utility (version 4.25).
+di - disk information utility (version 4.25.1).
 
 CONTENTS
   Description
@@ -149,6 +149,9 @@ PORTING
         Sys V.3, Sys V.4, Ultrix, VMS, Windows, Xenix
 
 CHANGES
+
+    4.25.1                                  [12 Jul 2010]
+        Updated build system to mkconfig-1.9.
 
     4.25                                    [4 Jul 2010]
         Added support for quotas.
