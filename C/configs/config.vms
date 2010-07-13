@@ -154,10 +154,10 @@
 #define _mem_struct_statfs_f_type 0
 #define _mem_struct_statvfs_f_basetype 0
 #define _siz_long_long 8
-#define DI_DEFAULT_FORMAT "smbuvpT"
-#define DI_DEFAULT_DISP_SIZE "H"
 #define _has_std_quotas 0
 #define _enable_nls 0
+#define DI_DEFAULT_FORMAT "smbuvpT"
+#define DI_DEFAULT_DISP_SIZE "H"
 
 #if ! _key_void
 # define void int
