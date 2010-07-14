@@ -8,7 +8,9 @@
 #include "config.h"
 #include "di.h"
 
-#include <stdio.h>
+#if _hdr_stdio
+# include <stdio.h>
+#endif
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
@@ -63,7 +65,7 @@
 # include <rpcsvc/rquota.h>
 #endif
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
 #endif
 
@@ -78,7 +80,7 @@ static void di_process_quotas _((char *, diQuota_t *, int, int, char *));
 
 extern int debug;
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   }
 #endif
 

@@ -18,7 +18,9 @@
 #include "di.h"
 #include "dimntopt.h"
 
-#include <stdio.h>
+#if _hdr_stdio
+# include <stdio.h>
+#endif
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
@@ -149,7 +151,7 @@
 
 /********************************************************/
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
 #endif
 
@@ -189,7 +191,7 @@ static int di_getQNXDiskEntries _((char *ipath, diDiskInfo_t **diskInfo, int *di
 #endif
 extern int debug;
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   }
 #endif
 
@@ -200,11 +202,11 @@ extern int debug;
     ! _lib_mntctl && \
     ! _class_os__Volumes
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
 #endif
 static char *checkMountOptions      _((struct mnttab *, char *));
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   }
 #endif
 

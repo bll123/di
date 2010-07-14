@@ -83,7 +83,9 @@
 #include "di.h"
 #include "version.h"
 
-#include <stdio.h>
+#if _hdr_stdio
+# include <stdio.h>
+#endif
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
@@ -142,7 +144,7 @@
 # include <wchar.h>
 #endif
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
 #endif
 
@@ -150,7 +152,7 @@
   extern char *getenv _((const char *));
 #endif
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   }
 #endif
 
@@ -346,7 +348,7 @@ static dispTable_t dispTable [] =
 };
 #define DI_DISPTAB_SIZE (sizeof (dispTable) / sizeof (dispTable_t))
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
 #endif
 
@@ -379,7 +381,7 @@ static void setDispBlockSize    _((char *, diOptions_t *, diOutput_t *));
 static void sortArray           _((diOptions_t *, diDiskInfo_t *, int, int));
 static void usage               _((void));
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   }
 #endif
 

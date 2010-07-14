@@ -10,7 +10,9 @@
 
 # include "di.h"
 
-# include <stdio.h>
+#if _hdr_stdio
+#  include <stdio.h>
+#endif
 # if _hdr_stdlib
 #  include <stdlib.h>
 # endif

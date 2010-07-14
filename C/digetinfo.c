@@ -22,7 +22,9 @@
 #include "di.h"
 #include "dimntopt.h"
 
-#include <stdio.h>
+#if _hdr_stdio
+# include <stdio.h>
+#endif
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
@@ -65,7 +67,7 @@
 
 /********************************************************/
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
 #endif
 
@@ -85,7 +87,7 @@
 
 extern int debug;
 
-#if defined(__cplusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
   }
 #endif
 

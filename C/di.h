@@ -188,7 +188,7 @@ typedef struct
   extern int mntctl _((int, int, char *));
 # endif
 
-# if defined(__cplusplus)
+# if defined (__cplusplus) || defined (c_plusplus)
    extern "C" {
 # endif
 
@@ -230,7 +230,7 @@ extern void convertMountOptions     _((long, diDiskInfo_t *));
 extern void convertNFSMountOptions  _((long, long, long, diDiskInfo_t *));
 extern void di_testRemoteDisk       _((diDiskInfo_t *));
 
-# if defined(__cplusplus)
+# if defined (__cplusplus) || defined (c_plusplus)
    }
 # endif
 
