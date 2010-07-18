@@ -67,7 +67,7 @@ MANPERM = 644
 ###
 # mkconfig variables
 
-MKCONFIGPATH = ./mkconfig
+MKCONFIGPATH = mkconfig
 MKCONFIG_TYPE = sh
 MKC_REQLIB = mkconfig.reqlibs
 
@@ -88,7 +88,7 @@ all-perl:	di.env
 ###
 # environment
 
-di.env:	$(MKCONFIGPATH)/mkconfig.sh features/env.dat
+di.env:	features/env.dat
 	@-$(RM) -f di.env tests.done
 	CC=$(CC) $(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh features/env.dat
