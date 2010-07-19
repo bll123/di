@@ -4,7 +4,6 @@
 # Copyright 2006-2010 Brad Lanam, Walnut Creek, California USA
 #
 #
-output   config.h
 option-file dioptions.dat
 
 loadunit c-main
@@ -12,6 +11,8 @@ loadunit c-include-conflict
 loadunit c-quotactl
 loadunit c-setmntent
 loadunit c-statfs
+
+output   config.h
 
 standard
 
@@ -118,7 +119,7 @@ lib     mbrlen
 lib     memcpy
 lib     memset
 # AIX doesn't declare this :(
-# Look for MCTL_QUERY (see di.h)
+# Look for MCTL_QUERY (see below)
 lib     mntctl
 lib     next_dev
 lib     quotactl
