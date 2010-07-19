@@ -90,16 +90,6 @@
 # endif
 #endif
 
-#if ! _dcl_errno
-  extern int     errno;
-#endif
-#if ! _dcl_optind
-  extern int optind;
-#endif
-#if ! _dcl_optarg
-  extern char *optarg;
-#endif
-
 #define DI_NAME_LEN            MAXPATHLEN
 #define DI_SPEC_NAME_LEN       MAXPATHLEN
 #define DI_OPT_LEN             MAXPATHLEN
@@ -183,6 +173,16 @@ typedef struct
 # if defined (__cplusplus) || defined (c_plusplus)
    extern "C" {
 # endif
+
+#if ! _dcl_errno
+  extern int errno;
+#endif
+#if ! _dcl_optind
+  extern int optind;
+#endif
+#if ! _dcl_optarg
+  extern char *optarg;
+#endif
 
 /* workaround for AIX - mntctl not declared */
 # if _lib_mntctl && _npt_mntctl
