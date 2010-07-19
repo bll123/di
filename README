@@ -29,9 +29,9 @@ INSTALLATION
   To build with mkconfig.pl (requires perl):
       make all-perl
 
-  To change the options (NLS, WINAPI):
+  To change the options (NLS, WINAPI, default display):
     make dioptions.dat
-    # edit dioptions.dat
+    # edit dioptions.dat and change what you like
 
   The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.
@@ -48,7 +48,6 @@ INSTALLATION
     export BIN_SH=svr4 beforehand.
 
   Windows installation:
-
     Alternative 1 - uses config.win or config.mingw
       Cygwin gcc: make windows-gcc
       MS VC++:    nmake windows
@@ -78,7 +77,7 @@ BUGS AND KNOWN ISSUES
         - MacOSX, HP-UX
           - No access to users with quotas.
       - MS VC++ has not been tested in a *very* long while.
-      - A/UX, Ultrix, Irix, UNICOS, Next, Pyramid, SCO Unix, Sequent
+      - A/UX, Cray, Ultrix, Irix, UNICOS, Next, Pyramid, SCO Unix, Sequent
         have not been tested in a *very* long while.
     Known Issues
       - quotas:
