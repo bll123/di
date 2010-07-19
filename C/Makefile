@@ -185,7 +185,7 @@ clean:
 	@-$(RM) -rf $(PROG) $(MPROG) \
 		mingw-$(PROG).exe $(PROG).exe $(MPROG).exe \
 		*.o *.obj mkconfig.log \
-		tests.done _tmp_mkconfig \
+		tests.done _tmp_mkconfig tests.d/chksh* \
 		>/dev/null 2>&1
 
 # leaves:
