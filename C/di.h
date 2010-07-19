@@ -27,9 +27,6 @@
 #if _sys_param
 # include <sys/param.h>     /* MAXPATHLEN */
 #endif
-#if _sys_vmount
-# include <sys/vmount.h>     /* for AIX workaround */
-#endif
 
 #if ! defined (O_NOCTTY)
 # define O_NOCTTY 0
@@ -183,13 +180,13 @@ typedef struct
     _fs_size_t      iused;
 } diQuota_t;
 
+# if defined (__cplusplus) || defined (c_plusplus)
+   extern "C" {
+# endif
+
 /* workaround for AIX - mntctl not declared */
 # if _lib_mntctl && _npt_mntctl
   extern int mntctl _((int, int, char *));
-# endif
-
-# if defined (__cplusplus) || defined (c_plusplus)
-   extern "C" {
 # endif
 
  /* digetentries.c */
@@ -222,8 +219,8 @@ extern void di_saveInodeSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_siz
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
-	! _lib_mntctl && \
-	! _class_os__Volumes
+    ! _lib_mntctl && \
+    ! _class_os__Volumes
 extern char *chkMountOptions        _((const char *, const char *));
 #endif
 extern void convertMountOptions     _((long, diDiskInfo_t *));
@@ -254,21 +251,21 @@ typedef struct {
   void    *retlen;         /* Return length address */
 } VMS_ITMLST;
 
-#define DVI_IS_STRING 1
-#define DVI_IS_LONGWORD 2
-#define DVI_IS_QUADWORD 3
-#define DVI_IS_WORD 4
-#define DVI_IS_BYTE 5
-#define DVI_IS_VMSDATE 6
-#define DVI_IS_BITMAP 7   /* Each bit in the return value indicates something */
-#define DVI_IS_ENUM 8     /* Each returned value has a name, and we ought to */
+# define DVI_IS_STRING 1
+# define DVI_IS_LONGWORD 2
+# define DVI_IS_QUADWORD 3
+# define DVI_IS_WORD 4
+# define DVI_IS_BYTE 5
+# define DVI_IS_VMSDATE 6
+# define DVI_IS_BITMAP 7  /* Each bit in the return value indicates something */
+# define DVI_IS_ENUM 8    /* Each returned value has a name, and we ought to */
                           /* return the name instead of the value */
-#define DVI_IS_ODD 9      /* A catchall */
+# define DVI_IS_ODD 9     /* A catchall */
 
 
-#define DVI_IS_INPUT (1<<0)
-#define DVI_IS_OUTPUT (1<<1)
-#define DVI_ENT(a, b, c) {#a, DVI$_##a, b, c, DVI_IS_OUTPUT}
+# define DVI_IS_INPUT (1<<0)
+# define DVI_IS_OUTPUT (1<<1)
+# define DVI_ENT(a, b, c) {#a, DVI$_##a, b, c, DVI_IS_OUTPUT}
 
 typedef struct {
   char *name;         /* Pointer to the item name */
@@ -281,7 +278,7 @@ typedef struct {
 } genericID_t ;
 
 /* Macro to fill in a 'traditional' item-list entry */
-#define init_itemlist(ile, length, code, bufaddr, retlen_addr) \
+# define init_itemlist(ile, length, code, bufaddr, retlen_addr) \
 { \
     (ile)->buflen = (length); \
     (ile)->itmcode = (code); \
