@@ -196,10 +196,12 @@ realclean:
 	@-$(RM) -rf config.h di.env mkconfig.reqlibs \
 		mkconfig.cache mkconfig_*.vars \
 
+# leaves:
+#   dioptions.dat
 distclean:
 	@$(MAKE) realclean
 	@-$(RM) -rf pretests.done test_di \
-		_mkconfig_runtests _tmp_mkconfig dioptions.dat
+		_mkconfig_runtests _tmp_mkconfig
 		>/dev/null 2>&1
 
 ###
