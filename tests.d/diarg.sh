@@ -13,12 +13,17 @@ $_MKCONFIG_RUNTOPDIR/di -n -f M / 2>/dev/null | grep '^/[ ]*$' > /dev/null 2>&1
 rc=$?
 if [ $rc -ne 0 ]; then
   # cygwin
-  $_MKCONFIG_RUNTOPDIR/di -n -f M / 2>/dev/null | grep '^C:\\[ ]*$' > /dev/null 2>&1
+  $_MKCONFIG_RUNTOPDIR/di -n -f M / 2>/dev/null | grep '/usr/bin$' > /dev/null 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    # other machines w/odd setup
-    $_MKCONFIG_RUNTOPDIR/di -n -f M /boot 2>/dev/null | grep '^/boot[ ]*$' > /dev/null 2>&1
+    # cygwin
+    $_MKCONFIG_RUNTOPDIR/di -n -f M / 2>/dev/null | grep '^C:\\[ ]*$' > /dev/null 2>&1
     rc=$?
+    if [ $rc -ne 0 ]; then
+      # other machines w/odd setup
+      $_MKCONFIG_RUNTOPDIR/di -n -f M /boot 2>/dev/null | grep '^/boot[ ]*$' > /dev/null 2>&1
+      rc=$?
+    fi
   fi
 fi
 exit $rc
