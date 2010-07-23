@@ -167,6 +167,9 @@ diquota (diqinfo)
 #endif
   }
 
+  if (debug > 5) {
+    printf ("quota: quotactl on %s (%d)\n", diqinfo->name, _quotactl_pos);
+  }
 #if _lib_quotactl && _quotactl_pos == 1
   rc = quotactl (diqinfo->name, ucmd,
         (int) diqinfo->uid, (caddr_t) qiptr);
@@ -329,6 +332,9 @@ diquota_nfs (diqinfo)
     _fs_size_t              tsize;
     _fs_size_t              tblksize;
 
+    if (debug > 5) {
+      printf ("quota: diquota_nfs\n");
+    }
     timeout.tv_sec = 2;
     timeout.tv_usec = 0;
 
@@ -442,6 +448,9 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, cqinfo)
   fs_disk_quota_t   *xfsqinfo;
 # endif
 
+  if (debug > 5) {
+    printf ("quota: di_process_quotas\n");
+  }
   qinfo = (struct dqblk *) cqinfo;
   if (xfsflag) {
 # if _typ_fs_disk_quota_t
