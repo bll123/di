@@ -132,6 +132,7 @@
 #define _class_os__Volumes 0
 #define _npt_getenv 0
 #define _npt_getopt 0
+#define _npt_mntctl 1
 #define _npt_statfs 0
 #define _dcl_errno 1
 #define _dcl_optind 1
