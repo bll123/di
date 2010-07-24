@@ -167,6 +167,13 @@ diquota (diqinfo)
 #endif
   }
 
+#if defined (__FreeBSD__) && __FreeBSD__ == 5
+    /* quotactl on devfs fs panics the system (FreeBSD 5.1) */
+  if (strcmp (diqinfo->type, "ufs") != 0) {
+    return;
+  }
+#endif
+
   if (debug > 5) {
     printf ("quota: quotactl on %s (%d)\n", diqinfo->name, _quotactl_pos);
   }
