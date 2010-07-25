@@ -133,7 +133,7 @@ windows-gcc:
 		LDFLAGS="-g -O2" di-programs
 
 windows-mingw:
-	@$(MAKE) dioptions.dat
+	copy /y /b NUL:+features\dioptions.dat dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
 	copy /y /b NUL:+config.mingw config.h
