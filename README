@@ -1,4 +1,4 @@
-di - disk information utility (version 4.25.1).
+di - disk information utility (version 4.26).
 
 CONTENTS
   Description
@@ -114,25 +114,25 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.25 has been tested on the following platforms:
+    di 4.26 has been tested on the following platforms:
         AIX 5.1
         BSD 4.3
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4
         Cygwin
         Debian 4.0, 5.0, kFreeBSD 7.2
         Fedora 7, 12, 13
-        FreeBSD 4.9, 5.1, 7.0, 7.1, 7.2, 8.0
-        Haiku r1a1
+        FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0
+        Haiku r1a1, r1a2
         HP-UX 11.11 (bundled cc, gcc)
         MacOSX 8.11, 9.5
         Mandrake 9.2
         MinGW
         NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1
-        Nexenta 1.0.1_b85 2.0_b104
-        OpenBSD 4.4 4.5 4.6
-        OpenSolaris 200805 200906
+        Nexenta 1.0.1_b85, 2.0_b104
+        OpenBSD 4.4, 4.5, 4.6, 4.7
+        OpenSolaris 200805, 200906
         QNX 6.3
-        RedHat 7.1 7.3
+        RedHat 7.1, 7.3
         RHEL 5.2
         Solaris 8, 9, 10 (cc, gcc3, gcc4)
         Tru64 5.1B
@@ -149,8 +149,9 @@ PORTING
 
 CHANGES
 
-    4.25.1                                  [12 Jul 2010]
-        Updated build system to mkconfig-1.9.
+    4.26                                    [25 Jul 2010]
+        Fix FreeBSD 5 panic when trying to get quotas on devfs.
+        Updated build system to mkconfig-1.10.
 
     4.25                                    [4 Jul 2010]
         Added support for quotas.

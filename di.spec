@@ -1,5 +1,5 @@
 Name:           di
-Version:        4.25.1
+Version:        4.26
 Release:        1%{?dist}
 Summary:        'di' is a disk information utility, displaying everything (and more) that your 'df' command does.
 
