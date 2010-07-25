@@ -16,7 +16,7 @@ if [ "${di_c__command_rpmbuild}" = "0" ];then
   exit 0
 fi
 
-rvers=`rpmbuild --version | tr -cd '0-9'`
+rvers=`rpmbuild --version | tr -cd '0-9' | sed 's/^\(...\).*/\1/'`
 if [ $rvers -lt 470 ]; then
   echo ${EN} " old version skipped${EC}" >&5
   exit 0
