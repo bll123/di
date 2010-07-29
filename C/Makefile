@@ -239,7 +239,7 @@ install-prog:	di.env di-programs
 	$(CP) -f $(PROG)$(EXE_EXT) $(TARGET)
 	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
 	-$(RM) -f $(TARGET).old $(MTARGET).old > /dev/null 2>&1
-	-grep '^#define _enable_nls 1' config.h && \
+	-grep '^#define _enable_nls 1' config.h >/dev/null 2>&1 && \
 		(. ./di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		install-po)
 
