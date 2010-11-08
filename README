@@ -102,7 +102,7 @@ REQUIREMENTS
         cat chmod ln mkdir mv rm sed test
     mkconfig.sh:
         a shell that supports shell functions
-        cat egrep expr grep rm sed test
+        cat egrep expr grep rm sed sort test
     mkconfig.pl:
         cat perl rm
     mksetopt.sh:
