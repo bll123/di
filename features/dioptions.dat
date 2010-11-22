@@ -1,8 +1,3 @@
-#
-# Do:
-#   cd C; make dioptions.dat
-#   # edit C/dioptions.dat, not the top-level dioptions.dat.
-#
 # enable NLS?
 NLS=T
 # use windows API?
