@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ver=`grep DI_VERSION version.h | sed  -e 's/"$//' -e 's/.*"//'`
+ver=`grep DI_VERSION C/version.h | sed  -e 's/"$//' -e 's/.*"//'`
 
 PKG=di
 dir="${PKG}-${ver}"
