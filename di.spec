@@ -31,9 +31,6 @@ make LOCALEDIR=/usr/share/locale
 test -d $RPM_BUILD_ROOT || mkdir $RPM_BUILD_ROOT
 test -d $RPM_BUILD_ROOT/usr || mkdir $RPM_BUILD_ROOT/usr
 make prefix=$RPM_BUILD_ROOT/usr install
-rm -f $RPM_BUILD_ROOT/usr/bin/mi
-cd $RPM_BUILD_ROOT/usr/bin/
-ln -sf di mi
 
 %clean
 rm -rf $RPM_BUILD_ROOT
