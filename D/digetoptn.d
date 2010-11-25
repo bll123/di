@@ -184,6 +184,40 @@ unittest {
     writefln ("9:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
   }
 
+  // 10
+  cointa = int.init;
+  cointb = int.init;
+  cointc = int.init;
+  cointd = int.init;
+  ++tcount;
+  getopts (["-a1", "-d", "2"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
+  if (cointa != 1) { failures ~= tcount; }
+  if (cointb != 0) { failures ~= tcount; }
+  if (cointc != 0) { failures ~= tcount; }
+  if (cointd != 2) { failures ~= tcount; }
+  debug (1) {
+    writefln ("10:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+  }
+
+  // 11
+  cointa = int.init;
+  cointb = int.init;
+  cointc = int.init;
+  cointd = int.init;
+  ++tcount;
+  try {
+    getopts (["-a1", "-d"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
+  } catch {
+    cointd = 9;
+  }
+  if (cointa != 1) { failures ~= tcount; }
+  if (cointb != 0) { failures ~= tcount; }
+  if (cointc != 0) { failures ~= tcount; }
+  if (cointd != 9) { failures ~= tcount; }
+  debug (1) {
+    writefln ("11:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+  }
+
   write ("unittest: getopt: getopts: ");
   if (failures.length > 0) {
     writeln ("failed:", failures);
@@ -247,24 +281,24 @@ private int processOption (OV)
     static if (is(typeof(ov()) : void)) {
       ov ();
     } else static if (is(typeof(ov("")) : void)) {
-      if (! haveArg) { throw new Exception("Argument not specified for " ~ args[aidx]); }
+      if (! haveArg) { throw new Exception("Missing argument for " ~ args[aidx]); }
       ov (arg);
       if (! attachedArg) { ++rc; }
       ++rc;
     } else static if (is(typeof(ov("","")) : void)) {
-      if (! haveArg) { throw new Exception("Argument not specified for " ~ args[aidx]); }
+      if (! haveArg) { throw new Exception("Missing argument for " ~ args[aidx]); }
       ov (oa,arg);
       if (! attachedArg) { ++rc; }
       ++rc;
     }
   } else static if (is(typeof(*ov) == string) ||
         is(typeof(*ov) == char[])) {
-    if (! haveArg) { throw new Exception("Argument not specified for " ~ args[aidx]); }
+    if (! haveArg) { throw new Exception("Missing argument for " ~ args[aidx]); }
     *ov = cast(typeof(*ov)) arg;
     if (! attachedArg) { ++rc; }
     ++rc;
   } else static if (is(typeof(*ov) : real)) {
-    if (! haveArg) { throw new Exception("Argument not specified for " ~ args[aidx]); }
+    if (! haveArg) { throw new Exception("Missing argument for " ~ args[aidx]); }
     *ov = to!(typeof(*ov))(arg);
     if (! attachedArg) { ++rc; }
     ++rc;
