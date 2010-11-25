@@ -169,6 +169,21 @@ unittest {
     writefln ("8:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
   }
 
+  // 9
+  cointa = int.init;
+  cointb = int.init;
+  cointc = int.init;
+  cointd = int.init;
+  ++tcount;
+  getopts (["-a1", "3", "-d", "2"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
+  if (cointa != 1) { failures ~= tcount; }
+  if (cointb != 0) { failures ~= tcount; }
+  if (cointc != 0) { failures ~= tcount; }
+  if (cointd != 0) { failures ~= tcount; }
+  debug (1) {
+    writefln ("9:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+  }
+
   write ("unittest: getopt: getopts: ");
   if (failures.length > 0) {
     writeln ("failed:", failures);
