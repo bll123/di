@@ -33,6 +33,7 @@ outerfor:
     debug (1) {
       writefln ("getopts:%d:%s:%s:", i, args[i], args[i][j]);
     }
+
     int rc = 0;
 innerwhile:
     while (j < args[i].length && args[i][j] != '\0') {
@@ -55,167 +56,101 @@ innerwhile:
 
 // for getopts();
 unittest {
-  bool      coboola, coboolb, coboolc, coboold;
-  int       cointa, cointb, cointc, cointd;
+  bool      cobool[4];
+  int       coint[4];
 
   int[]     failures;
   int       tcount;
 
   // 1
-  coboola = bool.init;
-  coboolb = bool.init;
-  coboolc = bool.init;
-  coboold = bool.init;
+  cobool = (bool[4]).init;
   ++tcount;
-  getopts (["-abcd"], "c", &coboolc, "b", &coboolb, "a", &coboola, "d", &coboold);
-  if (coboola != true) { failures ~= tcount; }
-  if (coboolb != true) { failures ~= tcount; }
-  if (coboolc != true) { failures ~= tcount; }
-  if (coboold != true) { failures ~= tcount; }
+  getopts (["-abcd"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
+  if (cobool != [true,true,true,true]) { failures ~= tcount; }
 
   // 2
-  coboola = bool.init;
-  coboolb = bool.init;
-  coboolc = bool.init;
-  coboold = bool.init;
+  cobool = (bool[4]).init;
   ++tcount;
-  getopts (["-a", "-b", "-c", "-d"], "c", &coboolc, "b", &coboolb, "a", &coboola, "d", &coboold);
-  if (coboola != true) { failures ~= tcount; }
-  if (coboolb != true) { failures ~= tcount; }
-  if (coboolc != true) { failures ~= tcount; }
-  if (coboold != true) { failures ~= tcount; }
+  getopts (["-a", "-b", "-c", "-d"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
+  if (cobool != [true,true,true,true]) { failures ~= tcount; }
 
   // 3
-  coboola = bool.init;
-  coboolb = bool.init;
-  coboolc = bool.init;
-  coboold = bool.init;
+  cobool = (bool[4]).init;
   ++tcount;
-  getopts (["-b", "-c"], "c", &coboolc, "b", &coboolb, "a", &coboola, "d", &coboold);
-  if (coboola != false) { failures ~= tcount; }
-  if (coboolb != true) { failures ~= tcount; }
-  if (coboolc != true) { failures ~= tcount; }
-  if (coboold != false) { failures ~= tcount; }
+  getopts (["-b", "-c"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
+  if (cobool != [false,true,true,false]) { failures ~= tcount; }
 
   // 4
-  coboola = bool.init;
-  coboolb = bool.init;
-  coboolc = bool.init;
-  coboold = bool.init;
+  cobool = (bool[4]).init;
   ++tcount;
-  getopts (["-a", "-d"], "c", &coboolc, "b", &coboolb, "a", &coboola, "d", &coboold);
-  if (coboola != true) { failures ~= tcount; }
-  if (coboolb != false) { failures ~= tcount; }
-  if (coboolc != false) { failures ~= tcount; }
-  if (coboold != true) { failures ~= tcount; }
+  getopts (["-a", "-d"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
+  if (cobool != [true,false,false,true]) { failures ~= tcount; }
 
   // 5
-  cointa = int.init;
-  cointb = int.init;
-  cointc = int.init;
-  cointd = int.init;
+  coint = (int[4]).init;
   ++tcount;
-  getopts (["-a", "1", "-d", "2"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
-  if (cointa != 1) { failures ~= tcount; }
-  if (cointb != 0) { failures ~= tcount; }
-  if (cointc != 0) { failures ~= tcount; }
-  if (cointd != 2) { failures ~= tcount; }
+  getopts (["-a", "1", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
+  if (coint != [1,0,0,2]) { failures ~= tcount; }
   debug (1) {
-    writefln ("5:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+    writefln ("5:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
   }
 
   // 6
-  cointa = int.init;
-  cointb = int.init;
-  cointc = int.init;
-  cointd = int.init;
+  coint = (int[4]).init;
   ++tcount;
-  getopts (["-a1", "-d2"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
-  if (cointa != 1) { failures ~= tcount; }
-  if (cointb != 0) { failures ~= tcount; }
-  if (cointc != 0) { failures ~= tcount; }
-  if (cointd != 2) { failures ~= tcount; }
+  getopts (["-a1", "-d2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
+  if (coint != [1,0,0,2]) { failures ~= tcount; }
   debug (1) {
-    writefln ("6:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+    writefln ("6:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
   }
 
   // 7
-  cointa = int.init;
-  cointb = int.init;
-  cointc = int.init;
-  cointd = int.init;
+  coint = (int[4]).init;
   ++tcount;
-  getopts (["-a", "1", "3", "-d", "2"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
-  if (cointa != 1) { failures ~= tcount; }
-  if (cointb != 0) { failures ~= tcount; }
-  if (cointc != 0) { failures ~= tcount; }
-  if (cointd != 0) { failures ~= tcount; }
+  getopts (["-a", "1", "3", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
+  if (coint != [1,0,0,0]) { failures ~= tcount; }
   debug (1) {
-    writefln ("7:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+    writefln ("7:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
   }
 
   // 8
-  cointa = int.init;
-  cointb = int.init;
-  cointc = int.init;
-  cointd = int.init;
+  coint = (int[4]).init;
   ++tcount;
-  getopts (["-a", "1", "--", "-d", "2"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
-  if (cointa != 1) { failures ~= tcount; }
-  if (cointb != 0) { failures ~= tcount; }
-  if (cointc != 0) { failures ~= tcount; }
-  if (cointd != 0) { failures ~= tcount; }
+  getopts (["-a", "1", "--", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
+  if (coint != [1,0,0,0]) { failures ~= tcount; }
   debug (1) {
-    writefln ("8:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+    writefln ("8:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
   }
 
   // 9
-  cointa = int.init;
-  cointb = int.init;
-  cointc = int.init;
-  cointd = int.init;
+  coint = (int[4]).init;
   ++tcount;
-  getopts (["-a1", "3", "-d", "2"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
-  if (cointa != 1) { failures ~= tcount; }
-  if (cointb != 0) { failures ~= tcount; }
-  if (cointc != 0) { failures ~= tcount; }
-  if (cointd != 0) { failures ~= tcount; }
+  getopts (["-a1", "3", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
+  if (coint != [1,0,0,0]) { failures ~= tcount; }
   debug (1) {
-    writefln ("9:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+    writefln ("9:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
   }
 
   // 10
-  cointa = int.init;
-  cointb = int.init;
-  cointc = int.init;
-  cointd = int.init;
+  coint = (int[4]).init;
   ++tcount;
-  getopts (["-a1", "-d", "2"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
-  if (cointa != 1) { failures ~= tcount; }
-  if (cointb != 0) { failures ~= tcount; }
-  if (cointc != 0) { failures ~= tcount; }
-  if (cointd != 2) { failures ~= tcount; }
+  getopts (["-a1", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
+  if (coint != [1,0,0,2]) { failures ~= tcount; }
   debug (1) {
-    writefln ("10:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+    writefln ("10:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
   }
 
   // 11
-  cointa = int.init;
-  cointb = int.init;
-  cointc = int.init;
-  cointd = int.init;
+  coint = (int[4]).init;
   ++tcount;
   try {
-    getopts (["-a1", "-d"], "c", &cointc, "b", &cointb, "a", &cointa, "d", &cointd);
+    getopts (["-a1", "-d"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
   } catch {
-    cointd = 9;
+    coint[3] = 9;
   }
-  if (cointa != 1) { failures ~= tcount; }
-  if (cointb != 0) { failures ~= tcount; }
-  if (cointc != 0) { failures ~= tcount; }
-  if (cointd != 9) { failures ~= tcount; }
+  if (coint != [1,0,0,9]) { failures ~= tcount; }
   debug (1) {
-    writefln ("11:%d:%d:%d:%d", cointa, cointb, cointc, cointd);
+    writefln ("11:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
   }
 
   write ("unittest: getopt: getopts: ");
@@ -226,7 +161,8 @@ unittest {
   }
 }
 
-private int checkOption (OVL...)
+private int
+checkOption (OVL...)
     (string[] args, int aidx, int aidx2, OVL opts)
 {
   static if (opts.length > 0) {
@@ -247,7 +183,9 @@ private int checkOption (OVL...)
 }
 
 
-private int processOption (OV)
+// can't pass ov as a ref parameter -- doesn't handle delegates.
+private int
+processOption (OV)
     (string[] args, int aidx, int aidx2, string oa, OV ov)
 {
   int rc = 0;
@@ -271,38 +209,55 @@ private int processOption (OV)
     haveArg = true;
   }
   debug (1) {
-    writefln ("proc:arg:%s:att:%d:have:%d", arg, attachedArg, haveArg);
+    writefln ("proc:arg:%s:aidx:%d:aidx2:%d:i:%d:att:%d:have:%d",
+        arg, aidx, aidx2, i, attachedArg, haveArg);
   }
 
   static if (is(typeof(*ov) == bool)) {
     *ov = true;
-  } else static if (is(typeof(ov) == delegate) ||
-        is(typeof(*ov) == function)) {
+  } else static if (is(typeof(ov) == return)) {
     static if (is(typeof(ov()) : void)) {
       ov ();
     } else static if (is(typeof(ov("")) : void)) {
-      if (! haveArg) { throw new Exception("Missing argument for " ~ args[aidx]); }
+      if (! haveArg) { throw new Exception("Missing argument for -" ~ oa); }
       ov (arg);
       if (! attachedArg) { ++rc; }
       ++rc;
     } else static if (is(typeof(ov("","")) : void)) {
-      if (! haveArg) { throw new Exception("Missing argument for " ~ args[aidx]); }
+      if (! haveArg) { throw new Exception("Missing argument for -" ~ oa); }
       ov (oa,arg);
+      if (! attachedArg) { ++rc; }
+      ++rc;
+    }
+  } else static if (is(typeof(*ov) == return)) {
+    static if (is(typeof((*ov)()) : void)) {
+      (*ov)();
+    } else static if (is(typeof((*ov)("")) : void)) {
+      if (! haveArg) { throw new Exception("Missing argument for -" ~ oa); }
+      (*ov)(arg);
+      if (! attachedArg) { ++rc; }
+      ++rc;
+    } else static if (is(typeof((*ov)("","")) : void)) {
+      if (! haveArg) { throw new Exception("Missing argument for -" ~ oa); }
+      (*ov)(oa,arg);
       if (! attachedArg) { ++rc; }
       ++rc;
     }
   } else static if (is(typeof(*ov) == string) ||
         is(typeof(*ov) == char[])) {
-    if (! haveArg) { throw new Exception("Missing argument for " ~ args[aidx]); }
+    if (! haveArg) { throw new Exception("Missing argument for -" ~ oa); }
     *ov = cast(typeof(*ov)) arg;
     if (! attachedArg) { ++rc; }
     ++rc;
   } else static if (is(typeof(*ov) : real)) {
-    if (! haveArg) { throw new Exception("Missing argument for " ~ args[aidx]); }
+    if (! haveArg) { throw new Exception("Missing argument for -" ~ oa); }
     *ov = to!(typeof(*ov))(arg);
     if (! attachedArg) { ++rc; }
     ++rc;
   } else {
+    debug (1) {
+      writefln ("type: %s", typeof(ov).stringof);
+    }
     throw new Exception("Unhandled type passed to getopts()");
   }
 
@@ -312,284 +267,242 @@ private int processOption (OV)
   return rc;
 }
 
+version (unittest) {
+  static string ovstring2;
+
+  void doPOTest (T) (ref int tcount, string[] args,
+        int aidx, int aidx2, string opt, T var) {
+    ++tcount;
+    static if (is(typeof(*T) == string) ||
+        is(typeof(*T) == char[]) ||
+        is(typeof(*T) == bool) ||
+        is(typeof(*T) : real)) {
+      *var = typeof(*T).init;
+    }
+    processOption (args, aidx, aidx2, opt, var);
+  }
+}
+
 // for processOption()
 unittest {
-  bool   ovbool;
-  int    ovint;
-  double ovdbl;
-  string ovstring;
-  char[] ovchar;
+  bool      ovbool;
+  int       ovint;
+  double    ovdbl;
+  string    ovstring;
+  char[]    ovchar;
 
   int[]  failures;
   int    tcount;
   int    aidx = 0;
   int    aidx2 = 1;
 
-  // bool: single argument in first position.
-  ovbool = bool.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a"], aidx, aidx2, "a", &ovbool);
-  if (ovbool != true) { failures ~= tcount; }
-  // bool: two args, combined, first position
-  ovbool = bool.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-ab"], aidx, aidx2, "a", &ovbool);
-  if (ovbool != true) { failures ~= tcount; }
-  // bool: two args, combined, second position
-  ovbool = bool.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab"], aidx, aidx2, "b", &ovbool);
+  // 1 : bool: single argument in first position.
+  doPOTest (tcount, ["-a"], 0, 1, "a", &ovbool);
   if (ovbool != true) { failures ~= tcount; }
 
-  // int: catenated
-  ovint = int.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a5"], aidx, aidx2, "a", &ovint);
+  // 2: bool: two args, combined, first position
+  doPOTest (tcount, ["-ab"], 0, 1, "a", &ovbool);
+  if (ovbool != true) { failures ~= tcount; }
+
+  // 3: bool: two args, combined, second position
+  doPOTest (tcount, ["-ab"], 0, 2, "b", &ovbool);
+  if (ovbool != true) { failures ~= tcount; }
+
+  // 4: int: catenated
+  doPOTest (tcount, ["-a5"], 0, 1, "a", &ovint);
   if (ovint != 5) { failures ~= tcount; }
-  // int: separated
-  ovint = int.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a", "6"], aidx, aidx2, "a", &ovint);
+
+  // 5: int: separated
+  doPOTest (tcount, ["-a", "6"], 0, 1, "a", &ovint);
   if (ovint != 6) { failures ~= tcount; }
-  // int: catenated, second position
-  ovint = int.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab7"], aidx, aidx2, "b", &ovint);
+
+  // 6: int: catenated, second position
+  doPOTest (tcount, ["-ab7"], 0, 2, "b", &ovint);
   if (ovint != 7) { failures ~= tcount; }
-  // int: separate, second position
-  ovint = int.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab", "8"], aidx, aidx2, "b", &ovint);
+
+  // 7: int: separate, second position
+  doPOTest (tcount, ["-ab", "8"], 0, 2, "b", &ovint);
   if (ovint != 8) { failures ~= tcount; }
-  // int: no arg
-  ovint = int.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
+
+  // 8: int: no arg
   try {
-    processOption (["-a"], aidx, aidx2, "a", &ovint);
+    doPOTest (tcount, ["-a"], 0, 1, "a", &ovint);
   } catch {
     ovint = 9;
   }
   if (ovint != 9) { failures ~= tcount; }
 
-  // dbl: catenated
-  ovdbl = double.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a5.5"], aidx, aidx2, "a", &ovdbl);
+  // 9: dbl: catenated
+  doPOTest (tcount, ["-a5.5"], 0, 1, "a", &ovdbl);
   if (ovdbl != 5.5) { failures ~= tcount; }
-  // dbl: separated
-  ovdbl = double.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a", "6.5"], aidx, aidx2, "a", &ovdbl);
+
+  // 10: dbl: separated
+  doPOTest (tcount, ["-a", "6.5"], 0, 1, "a", &ovdbl);
   if (ovdbl != 6.5) { failures ~= tcount; }
-  // dbl: catenated, second position
-  ovdbl = double.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab7.5"], aidx, aidx2, "b", &ovdbl);
+
+  // 11: dbl: catenated, second position
+  doPOTest (tcount, ["-ab7.5"], 0, 2, "b", &ovdbl);
   if (ovdbl != 7.5) { failures ~= tcount; }
-  // dbl: separate, second position
-  ovdbl = double.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab", "8.5"], aidx, aidx2, "b", &ovdbl);
+
+  // 12: dbl: separate, second position
+  doPOTest (tcount, ["-ab", "8.5"], 0, 2, "b", &ovdbl);
   if (ovdbl != 8.5) { failures ~= tcount; }
-  // dbl: no arg
-  ovdbl = double.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
+
+  // 13: dbl: no arg
   try {
-    processOption (["-a"], aidx, aidx2, "a", &ovdbl);
+    doPOTest (tcount, ["-a"], 0, 1, "a", &ovdbl);
   } catch {
     ovdbl = 9.5;
   }
   if (ovdbl != 9.5) { failures ~= tcount; }
 
-  // string: catenated
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a5.5x"], aidx, aidx2, "a", &ovstring);
+  // 14: string: catenated
+  doPOTest (tcount, ["-a5.5x"], 0, 1, "a", &ovstring);
   if (ovstring != "5.5x") { failures ~= tcount; }
-  // string: separated
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a", "6.5x"], aidx, aidx2, "a", &ovstring);
+
+  // 15: string: separated
+  doPOTest (tcount, ["-a", "6.5x"], 0, 1, "a", &ovstring);
   if (ovstring != "6.5x") { failures ~= tcount; }
-  // string: catenated, second position
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab7.5x"], aidx, aidx2, "b", &ovstring);
+
+  // 16: string: catenated, second position
+  doPOTest (tcount, ["-ab7.5x"], 0, 2, "b", &ovstring);
   if (ovstring != "7.5x") { failures ~= tcount; }
-  // string: separate, second position
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab", "8.5x"], aidx, aidx2, "b", &ovstring);
+
+  // 17: string: separate, second position
+  doPOTest (tcount, ["-ab", "8.5x"], 0, 2, "b", &ovstring);
   if (ovstring != "8.5x") { failures ~= tcount; }
-  // string: no arg
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
+
+  // 18: string: no arg
   try {
-    processOption (["-a"], aidx, aidx2, "a", &ovstring);
+    doPOTest (tcount, ["-a"], 0, 1, "a", &ovstring);
   } catch {
     ovstring = "9.5x";
   }
   if (ovstring != "9.5x") { failures ~= tcount; }
 
-  // char: catenated
-  ovchar = (char[]).init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a5.5y"], aidx, aidx2, "a", &ovchar);
+  // 19: char: catenated
+  doPOTest (tcount, ["-a5.5y"], 0, 1, "a", &ovchar);
   if (ovchar != "5.5y") { failures ~= tcount; }
-  // char: separated
-  ovchar = (char[]).init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a", "6.5y"], aidx, aidx2, "a", &ovchar);
+
+  // 20: char: separated
+  doPOTest (tcount, ["-a", "6.5y"], 0, 1, "a", &ovchar);
   if (ovchar != "6.5y") { failures ~= tcount; }
-  // char: catenated, second position
-  ovchar = (char[]).init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab7.5y"], aidx, aidx2, "b", &ovchar);
+
+  // 21: char: catenated, second position
+  doPOTest (tcount, ["-ab7.5y"], 0, 2, "b", &ovchar);
   if (ovchar != "7.5y") { failures ~= tcount; }
-  // char: separate, second position
-  ovchar = (char[]).init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab", "8.5y"], aidx, aidx2, "b", &ovchar);
+
+  // 22: char: separate, second position
+  doPOTest (tcount, ["-ab", "8.5y"], 0, 2, "b", &ovchar);
   if (ovchar != "8.5y") { failures ~= tcount; }
-  // char: no arg
-  ovchar = (char[]).init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
+
+  // 23: char: no arg
   try {
-    processOption (["-a"], aidx, aidx2, "a", &ovchar);
+    doPOTest (tcount, ["-a"], 0, 1, "a", &ovchar);
   } catch {
     ovchar = cast(char[]) "9.5y";
   }
   if (ovchar != "9.5y") { failures ~= tcount; }
 
   auto d = delegate() { ovint = 1; };
-  // delegate: no arg
-  ++tcount;
-  processOption (["-a5.5x"], aidx, aidx2, "a", d);
+
+  // 24: delegate: no arg
+  ovint = ovint.init;
+  doPOTest (tcount, ["-a5.5x"], 0, 1, "a", d);
   if (ovint != 1) { failures ~= tcount; }
 
   auto d2 = delegate(string arg) { ovstring = arg; };
-  // delegate: one arg, catenated
-  ++tcount;
-  processOption (["-a5.5z"], aidx, aidx2, "a", d2);
+
+  // 25: delegate: one arg, catenated
+  ovstring = ovstring.init;
+  doPOTest (tcount, ["-a5.5z"], 0, 1, "a", d2);
   if (ovstring != "5.5z") { failures ~= tcount; }
-  // delegate: one arg, separated
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a", "6.5z"], aidx, aidx2, "a", d2);
+
+  // 26: delegate: one arg, separated
+  ovstring = ovstring.init;
+  doPOTest (tcount, ["-a", "6.5z"], 0, 1, "a", d2);
   if (ovstring != "6.5z") { failures ~= tcount; }
-  // delegate: one arg, catenated, second
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab7.5z"], aidx, aidx2, "b", d2);
+
+  // 27: delegate: one arg, catenated, second
+  ovstring = ovstring.init;
+  doPOTest (tcount, ["-ab7.5z"], 0, 2, "b", d2);
   if (ovstring != "7.5z") { failures ~= tcount; }
-  // delegate: one arg, separated, second
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab", "8.5z"], aidx, aidx2, "b", d2);
+
+  // 28: delegate: one arg, separated, second
+  ovstring = ovstring.init;
+  doPOTest (tcount, ["-ab", "8.5z"], 0, 2, "b", d2);
   if (ovstring != "8.5z") { failures ~= tcount; }
-  // delegate: one arg, no arg
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
+
+  // 29: delegate: one arg, no arg
+  ovstring = ovstring.init;
   try {
-    processOption (["-a"], aidx, aidx2, "a", d2);
+    doPOTest (tcount, ["-a"], 0, 1, "a", d2);
   } catch {
     ovstring = "9.5z";
   }
   if (ovstring != "9.5z") { failures ~= tcount; }
 
   auto d3 = delegate(string opt, string arg) { ovstring = opt ~ arg; };
-  // delegate: two arg, catenated
-  ++tcount;
-  processOption (["-a5.5z"], aidx, aidx2, "a", d3);
+
+  // 30: delegate: two arg, catenated
+  ovstring = ovstring.init;
+  doPOTest (tcount, ["-a5.5z"], 0, 1, "a", d3);
   if (ovstring != "a5.5z") { failures ~= tcount; }
-  // delegate: two arg, separated
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
-  processOption (["-a", "6.5z"], aidx, aidx2, "a", d3);
+
+  // 31: delegate: two arg, separated
+  ovstring = ovstring.init;
+  doPOTest (tcount, ["-a", "6.5z"], 0, 1, "a", d3);
   if (ovstring != "a6.5z") { failures ~= tcount; }
-  // delegate: two arg, catenated, second
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab7.5z"], aidx, aidx2, "b", d3);
+
+  // 32: delegate: two arg, catenated, second
+  ovstring = ovstring.init;
+  doPOTest (tcount, ["-ab7.5z"], 0, 2, "b", d3);
   if (ovstring != "b7.5z") { failures ~= tcount; }
-  // delegate: two arg, separated, second
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 2;
-  ++tcount;
-  processOption (["-ab", "8.5z"], aidx, aidx2, "b", d3);
+
+  // 33: delegate: two arg, separated, second
+  ovstring = ovstring.init;
+  doPOTest (tcount, ["-ab", "8.5z"], 0, 2, "b", d3);
   if (ovstring != "b8.5z") { failures ~= tcount; }
-  // delegate: two arg, no arg
-  ovstring = string.init;
-  aidx = 0;
-  aidx2 = 1;
-  ++tcount;
+
+  // 34: delegate: two arg, no arg
+  ovstring = ovstring.init;
   try {
-    processOption (["-a"], aidx, aidx2, "a", d3);
+    doPOTest (tcount, ["-a"], 0, 1, "a", d3);
   } catch {
     ovstring = "9.5z";
   }
   if (ovstring != "9.5z") { failures ~= tcount; }
 
-  // functions
+  auto d4 = function (string opt, string arg) { ovstring2 = opt ~ arg; };
+
+  // 35: function: two arg, catenated
+  ovstring2 = ovstring2.init;
+  doPOTest (tcount, ["-a5.5z"], 0, 1, "a", &d4);
+  if (ovstring2 != "a5.5z") { failures ~= tcount; }
+
+  // 36: function: two arg, separated
+  ovstring2 = ovstring2.init;
+  doPOTest (tcount, ["-a", "6.5z"], 0, 1, "a", &d4);
+  if (ovstring2 != "a6.5z") { failures ~= tcount; }
+
+  // 37: function: two arg, catenated, second
+  ovstring2 = ovstring2.init;
+  doPOTest (tcount, ["-ab7.5z"], 0, 2, "b", &d4);
+  if (ovstring2 != "b7.5z") { failures ~= tcount; }
+
+  // 38: function: two arg, separated, second
+  ovstring2 = ovstring2.init;
+  doPOTest (tcount, ["-ab", "8.5z"], 0, 2, "b", &d4);
+  if (ovstring2 != "b8.5z") { failures ~= tcount; }
+
+  // 39: function two arg, no arg
+  ovstring2 = ovstring2.init;
+  try {
+    doPOTest (tcount, ["-a"], 0, 1, "a", &d4);
+  } catch {
+    ovstring2 = "9.5z";
+  }
+  if (ovstring2 != "9.5z") { failures ~= tcount; }
 
   write ("unittest: getopt: processOption: ");
   if (failures.length > 0) {
@@ -598,4 +511,3 @@ unittest {
     writeln ("passed");
   }
 }
-
