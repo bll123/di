@@ -95,17 +95,21 @@
 #define DI_OPT_LEN             MAXPATHLEN
 #define DI_MNT_TIME_LEN        24
 
-#if _siz_long_long == 0
-    typedef unsigned long _fs_size_t;
-    typedef long _s_fs_size_t;
+#if _siz_long_long >= 4
+  typedef unsigned long long _fs_size_t;
+  typedef long long _s_fs_size_t;
+# define DI_LL "ll"
 #else
-# if _siz_long_long >= 8
-    typedef unsigned long long _fs_size_t;
-    typedef long long _s_fs_size_t;
-# else
-    typedef unsigned long _fs_size_t;
-    typedef long _s_fs_size_t;
-# endif
+  typedef unsigned long _fs_size_t;
+  typedef long _s_fs_size_t;
+# define DI_LL "l"
+#endif
+#if _siz_long_double >= 8
+  typedef long double _print_size_t;
+# define DI_Lf "Lf"
+#else
+  typedef double _print_size_t;
+# define DI_Lf "f"
 #endif
 
 typedef unsigned long __ulong;

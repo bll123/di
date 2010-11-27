@@ -226,8 +226,8 @@
 #define DI_DISP_HR              -20
 #define DI_DISP_HR_2            -21
 
-#define DI_PERC_FMT             " %3.0f%% "
-#define DI_POSIX_PERC_FMT       "    %3.0f%% "
+#define DI_PERC_FMT             " %%3.0%s%%%% "
+#define DI_POSIX_PERC_FMT       "    %%3.0%s%%%% "
 #define DI_JUST_LEFT            0
 #define DI_JUST_RIGHT           1
 
@@ -239,16 +239,16 @@ typedef struct
 
 typedef struct
 {
-    double          low;
-    double          high;
-    double          dbs;        /* display block size */
+    _print_size_t   low;
+    _print_size_t   high;
+    _print_size_t   dbs;        /* display block size */
     char            *format;
     char            *suffix;
 } sizeTable_t;
 
 typedef struct
 {
-    double          size;
+    _print_size_t   size;
     char            *disp[2];
 } dispTable_t;
 
@@ -274,14 +274,14 @@ typedef struct {
 } zoneInfo_t;
 
 typedef struct {
-    char         *formatString;
-    double       dispBlockSize;
-    double       baseDispSize;
-    unsigned int baseDispIdx;
-    __ulong      flags;
-    char         sortType [DI_SORT_MAX + 1];
-    unsigned int posix_compat;
-    unsigned int quota_check;
+    char            *formatString;
+    _print_size_t   dispBlockSize;
+    _print_size_t   baseDispSize;
+    unsigned int    baseDispIdx;
+    __ulong         flags;
+    char            sortType [DI_SORT_MAX + 1];
+    unsigned int    posix_compat;
+    unsigned int    quota_check;
 } diOptions_t;
 
 typedef struct {
@@ -364,7 +364,7 @@ static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, int));
 #endif
 static void cleanup             _((diData_t *, char *));
 static int  diCompare           _((const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int));
-static int  findDispSize        _((double));
+static int  findDispSize        _((_print_size_t));
 static int  getDiskSpecialInfo  _((diData_t *));
 static void getDiskStatInfo     _((diData_t *));
 static const char *getPrintFlagText _((int));
@@ -659,20 +659,20 @@ main (argc, argv)
         for (i = 0; i < DI_DISPTAB_SIZE; ++i)
         {
             printf ("i:%d ", i);
-            printf ("size: %8.2f ", dispTable[i].size);
+            printf ("size: %8.2Lf ", dispTable[i].size);
             printf ("%s ", dispTable[i].disp[0]);
             printf ("%s ", dispTable[i].disp[1]);
             printf ("\n");
         }
 
-        printf ("dispBlockSize: %8.2f\n", diopts->dispBlockSize);
+        printf ("dispBlockSize: %8.2Lf\n", diopts->dispBlockSize);
         for (i = 0; i < DI_SIZETAB_SIZE; ++i)
         {
             printf ("i:%d ", i);
             printf ("suffix: %s ", sizeTable[i].suffix);
-            printf ("low: %8.2f ", sizeTable[i].low);
-            printf ("high: %8.2f ", sizeTable[i].high);
-            printf ("dbs: %8.2f ", sizeTable[i].dbs);
+            printf ("low: %8.2Lf ", sizeTable[i].low);
+            printf ("high: %8.2Lf ", sizeTable[i].high);
+            printf ("dbs: %8.2Lf ", sizeTable[i].dbs);
             printf ("\n");
         }
     }
@@ -812,12 +812,12 @@ printDiskInfo (diData)
         diopts->dispBlockSize != DI_DISP_HR_2 &&
         (diopts->dispBlockSize > 0 && diopts->dispBlockSize <= DI_VAL_1024)) {
       Snprintf (diout->blockFormat,
-          DI_SPF(sizeof (diout->blockFormat), "%%%d.0f%%s"), (int) diout->width);
+          DI_SPF(sizeof (diout->blockFormat), "%%%d.0%s%%s"), (int) diout->width, DI_Lf);
     } else {
       Snprintf (diout->blockFormatNR,
-          DI_SPF(sizeof (diout->blockFormatNR), "%%%d.0f%%s"), (int) diout->width);
+          DI_SPF(sizeof (diout->blockFormatNR), "%%%d.0%s%%s"), (int) diout->width, DI_Lf);
       Snprintf (diout->blockFormat,
-          DI_SPF(sizeof (diout->blockFormat), "%%%d.1f%%s"), (int) diout->width);
+          DI_SPF(sizeof (diout->blockFormat), "%%%d.1%s%%s"), (int) diout->width, DI_Lf);
     }
 
     if (diopts->dispBlockSize == DI_DISP_HR ||
@@ -975,10 +975,18 @@ printInfo (diskInfo, diopts, diout)
     _fs_size_t          totAvail;
     char                *ptr;
     int                 valid;
-    double              temp;
+    _print_size_t       temp;
     int                 idx;
     int                 tidx;
+    static char         percFormat [15];
+    static char         posixPercFormat [15];
+    static int          percInit = FALSE;
 
+    if (! percInit) {
+      Snprintf (percFormat, DI_SPF (sizeof(percFormat), DI_PERC_FMT), DI_Lf);
+      Snprintf (posixPercFormat, DI_SPF (sizeof(posixPercFormat), DI_POSIX_PERC_FMT), DI_Lf);
+      percInit = TRUE;
+    }
     idx = 0;
     temp = 0.0;  /* gcc compile warning */
     if (diopts->dispBlockSize == DI_DISP_HR_2)
@@ -994,14 +1002,14 @@ printInfo (diskInfo, diopts, diout)
             {
                 case DI_FMT_BTOT:
                 {
-                    temp = (double) diskInfo->totalBlocks;
+                    temp = (_print_size_t) diskInfo->totalBlocks;
                     valid = TRUE;
                     break;
                 }
 
                 case DI_FMT_BTOT_AVAIL:
                 {
-                    temp = (double) (diskInfo->totalBlocks -
+                    temp = (_print_size_t) (diskInfo->totalBlocks -
                             (diskInfo->freeBlocks - diskInfo->availBlocks));
                     valid = TRUE;
                     break;
@@ -1009,28 +1017,28 @@ printInfo (diskInfo, diopts, diout)
 
                 case DI_FMT_BUSED:
                 {
-                    temp = (double) (diskInfo->totalBlocks - diskInfo->freeBlocks);
+                    temp = (_print_size_t) (diskInfo->totalBlocks - diskInfo->freeBlocks);
                     valid = TRUE;
                     break;
                 }
 
                 case DI_FMT_BCUSED:
                 {
-                    temp = (double) (diskInfo->totalBlocks - diskInfo->availBlocks);
+                    temp = (_print_size_t) (diskInfo->totalBlocks - diskInfo->availBlocks);
                     valid = TRUE;
                     break;
                 }
 
                 case DI_FMT_BFREE:
                 {
-                    temp = (double) diskInfo->freeBlocks;
+                    temp = (_print_size_t) diskInfo->freeBlocks;
                     valid = TRUE;
                     break;
                 }
 
                 case DI_FMT_BAVAIL:
                 {
-                    temp = (double) diskInfo->availBlocks;
+                    temp = (_print_size_t) diskInfo->availBlocks;
                     valid = TRUE;
                     break;
                 }
@@ -1038,7 +1046,7 @@ printInfo (diskInfo, diopts, diout)
 
             if (valid)
             {
-                temp *= (double) diskInfo->blockSize;
+                temp *= (_print_size_t) diskInfo->blockSize;
                 tidx = findDispSize (temp);
                     /* want largest index */
                 if (tidx > idx)
@@ -1115,11 +1123,11 @@ printInfo (diskInfo, diopts, diout)
                 totAvail = diskInfo->totalBlocks;
                 if (diopts->posix_compat == 1)
                 {
-                    printPerc (used, totAvail, DI_POSIX_PERC_FMT);
+                    printPerc (used, totAvail, posixPercFormat);
                 }
                 else
                 {
-                    printPerc (used, totAvail, DI_PERC_FMT);
+                    printPerc (used, totAvail, percFormat);
                 }
                 break;
             }
@@ -1130,11 +1138,11 @@ printInfo (diskInfo, diopts, diout)
                 totAvail = diskInfo->totalBlocks;
                 if (diopts->posix_compat == 1)
                 {
-                    printPerc (used, totAvail, DI_POSIX_PERC_FMT);
+                    printPerc (used, totAvail, posixPercFormat);
                 }
                 else
                 {
-                    printPerc (used, totAvail, DI_PERC_FMT);
+                    printPerc (used, totAvail, percFormat);
                 }
                 break;
             }
@@ -1146,11 +1154,11 @@ printInfo (diskInfo, diopts, diout)
                         (diskInfo->freeBlocks - diskInfo->availBlocks);
                 if (diopts->posix_compat == 1)
                 {
-                    printPerc (used, totAvail, DI_POSIX_PERC_FMT);
+                    printPerc (used, totAvail, posixPercFormat);
                 }
                 else
                 {
-                    printPerc (used, totAvail, DI_PERC_FMT);
+                    printPerc (used, totAvail, percFormat);
                 }
                 break;
             }
@@ -1160,7 +1168,7 @@ printInfo (diskInfo, diopts, diout)
                 _fs_size_t          bfree;
                 bfree = diskInfo->availBlocks;
                 totAvail = diskInfo->totalBlocks;
-                printPerc (bfree, totAvail, DI_PERC_FMT);
+                printPerc (bfree, totAvail, percFormat);
                 break;
             }
 
@@ -1169,7 +1177,7 @@ printInfo (diskInfo, diopts, diout)
                 _fs_size_t          bfree;
                 bfree = diskInfo->freeBlocks;
                 totAvail = diskInfo->totalBlocks;
-                printPerc (bfree, totAvail, DI_PERC_FMT);
+                printPerc (bfree, totAvail, percFormat);
                 break;
             }
 
@@ -1195,7 +1203,7 @@ printInfo (diskInfo, diopts, diout)
             {
                 used = diskInfo->totalInodes - diskInfo->availInodes;
                 totAvail = diskInfo->totalInodes;
-                printPerc (used, totAvail, DI_PERC_FMT);
+                printPerc (used, totAvail, percFormat);
                 break;
             }
 
@@ -1258,9 +1266,9 @@ printBlocks (diopts, diout, blocks, blockSize, idx)
     int                 idx;
 #endif
 {
-    double          tdbs;
-    double          mult;
-    double          temp;
+    _print_size_t   tdbs;
+    _print_size_t   mult;
+    _print_size_t   temp;
     char            *suffix;
     const char      *format;
 
@@ -1271,7 +1279,7 @@ printBlocks (diopts, diout, blocks, blockSize, idx)
 
     if (diopts->dispBlockSize == DI_DISP_HR)
     {
-        temp = (double) blocks * (double) blockSize;
+        temp = (_print_size_t) blocks * (_print_size_t) blockSize;
         idx = findDispSize (temp);
     }
 
@@ -1290,17 +1298,17 @@ printBlocks (diopts, diout, blocks, blockSize, idx)
       }
     }
 
-    mult = (double) blockSize / tdbs;
-    printf (format, (double) blocks * mult, suffix);
+    mult = (_print_size_t) blockSize / tdbs;
+    printf (format, (_print_size_t) blocks * mult, suffix);
 }
 
 
 static int
 #if _proto_stdc
-findDispSize (double siz)
+findDispSize (_print_size_t siz)
 #else
 findDispSize (siz)
-    double      siz;
+    _print_size_t      siz;
 #endif
 {
     int         i;
@@ -1333,28 +1341,22 @@ addTotals (diskInfo, totals, inpool)
     int            inpool;
 #endif
 {
-    double              mult;
+    _print_size_t       mult;
 
-    mult = (double) diskInfo->blockSize / (double) totals->blockSize;
+    mult = (_print_size_t) diskInfo->blockSize / (_print_size_t) totals->blockSize;
 
     if (debug > 2)
     {
-#if _siz_long_long >= 8
-        printf ("tot:%s:%s:inp:%d:bs:%lld:mult:%f\n",
+        printf ("tot:%s:%s:inp:%d:bs:%lld:mult:%Lf\n",
                     diskInfo->special, diskInfo->name,
                     inpool, diskInfo->blockSize, mult);
-#else
-        printf ("tot:%s:%s:inp:%d:bs:%ld:mult:%f\n",
-                    diskInfo->special, diskInfo->name,
-                    inpool, diskInfo->blockSize, mult);
-#endif
     }
 
     if (inpool)
     {
         if (debug > 2) {printf ("  tot:inpool:add total used\n"); }
         /* if in a pool of disks, add the total used to the totals also */
-        totals->totalBlocks += (_fs_size_t) ((double) (diskInfo->totalBlocks -
+        totals->totalBlocks += (_fs_size_t) ((_print_size_t) (diskInfo->totalBlocks -
                 diskInfo->freeBlocks) * mult);
         totals->totalInodes += diskInfo->totalInodes -
                 diskInfo->freeInodes;
@@ -1362,9 +1364,9 @@ addTotals (diskInfo, totals, inpool)
     else
     {
         if (debug > 2) {printf ("  tot:not inpool:add all totals\n"); }
-        totals->totalBlocks += (_fs_size_t) ((double) diskInfo->totalBlocks * mult);
-        totals->freeBlocks += (_fs_size_t) ((double) diskInfo->freeBlocks * mult);
-        totals->availBlocks += (_fs_size_t) ((double) diskInfo->availBlocks * mult);
+        totals->totalBlocks += (_fs_size_t) ((_print_size_t) diskInfo->totalBlocks * mult);
+        totals->freeBlocks += (_fs_size_t) ((_print_size_t) diskInfo->freeBlocks * mult);
+        totals->availBlocks += (_fs_size_t) ((_print_size_t) diskInfo->availBlocks * mult);
         totals->totalInodes += diskInfo->totalInodes;
         totals->freeInodes += diskInfo->freeInodes;
         totals->availInodes += diskInfo->availInodes;
@@ -1700,12 +1702,12 @@ printPerc (used, totAvail, format)
     const char      *format;
 #endif
 {
-    double      perc;
+    _print_size_t      perc;
 
 
     if (totAvail > 0L)
     {
-        perc = (double) used / (double) totAvail;
+        perc = (_print_size_t) used / (_print_size_t) totAvail;
         perc *= 100.0;
     }
     else
@@ -3123,10 +3125,10 @@ setDispBlockSize (ptr, diopts, diout)
     diOutput_t      *diout;
 #endif
 {
-    unsigned int len;
-    double       val;
-    char         *tptr;
-    static char  tempbl [15];
+    unsigned int    len;
+    _print_size_t   val;
+    char            *tptr;
+    static char     tempbl [15];
 
     if (isdigit ((int) (*ptr)))
     {
@@ -3249,7 +3251,8 @@ setDispBlockSize (ptr, diopts, diout)
             }
             else
             {
-                Snprintf (tempbl, DI_SPF (sizeof (tempbl), "%.0f %s"),
+                Snprintf (tempbl, DI_SPF (sizeof (tempbl), "%%.0%s %%s"), DI_Lf);
+                Snprintf (tempbl, DI_SPF (sizeof (tempbl), tempbl),
                     val, DI_GT (dispTable [idx].disp [diopts->baseDispIdx]));
                 diout->dispBlockLabel = tempbl;
             }
@@ -3274,7 +3277,8 @@ setDispBlockSize (ptr, diopts, diout)
 
         if (ok == 0)
         {
-            Snprintf (tempbl, DI_SPF(sizeof (tempbl), "%.0fb"), val);
+            Snprintf (tempbl, DI_SPF(sizeof (tempbl), "%%.0%sb"), DI_Lf);
+            Snprintf (tempbl, DI_SPF(sizeof (tempbl), tempbl), val);
             diout->dispBlockLabel = tempbl;
         }
     }  /* some oddball block size */

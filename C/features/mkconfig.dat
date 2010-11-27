@@ -171,6 +171,7 @@ member  struct statfs mount_info
 member  struct statfs f_type
 member  struct statvfs f_basetype
 size    long long
+size    long double
 
 # workaround for AIX
 # mntctl() is not declared
