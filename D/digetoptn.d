@@ -15,76 +15,97 @@ version (unittest) {
   import std.stdio;
 }
 
+enum string
+  endArgs       = "--",
+  longOptStart  = "--";
+enum char
+  shortOptStart = '-',
+  argAssign     = '=';
+
+struct ArgInfo {
+  string[]      args;
+  int           aidx;
+  int           asidx;
+  int           alen;
+  bool          longOptFlag;
+};
+
 int
-getopts (OVL...) (string[] args, OVL opts)
+getopts (OVL...) (string[] allargs, OVL opts)
 {
   assert (opts.length % 2 == 0);
-  int       i;
-  int       j;
+  ArgInfo   ainfo;
 
   debug (1) {
-    foreach (k, arg; args) {
+    foreach (k, arg; allargs) {
       writefln ("getopts:args:%d:%s:", k, arg);
     }
   }
 
-outerfor:
-  for (i = 0; i < args.length; ++i) {
-    j = 1;
-    if (args[i][0] != '-' || args[i] == "--") {
-      if (args[i] == "--") {
-        ++i;  // point to next argument.
-      }
-      debug (1) {
-        writefln ("getopts:nomore:i:%d:", i);
-      }
-      break outerfor;
-    }
-    debug (1) {
-      writefln ("getopts:%d:%s:%s:", i, args[i], args[i][j]);
-    }
+  with (ainfo) {
+    args = allargs;
 
-    int rc = 0;
-innerwhile:
-    while (j < args[i].length && args[i][j] != '\0') {
-      if (args[i][0..2] == "--") {
-        j = 2;
+outerfor:
+    for (aidx = 0; aidx < args.length; ++aidx) {
+      asidx = 1;
+      if (args[aidx][0] != shortOptStart || args[aidx] == endArgs) {
+        if (args[aidx] == longOptStart) {
+          ++aidx;  // point to next argument.
+        }
+        debug (1) {
+          writefln ("getopts:nomore:aidx:%d:", aidx);
+        }
+        break outerfor;
       }
       debug (1) {
-        writefln ("getopts:i:%d:j:%d:len:%d:a[ij]%s:%s:", i, j, args[i].length, args[i][j], args[i]);
+        writefln ("getopts:%d:%s:%s:", aidx, args[aidx], args[aidx][asidx]);
       }
-      rc = checkOption (args, i, j, opts);
-      if (rc < 0) {
-        string s;
-        if (args[i][0..2] == "--") {
-          s = format ("Unrecognized option %s", args[i]);
-        } else {
-          s = format ("Unrecognized option -%s", args[i][j]);
+
+      int rc = 0;
+      longOptFlag = false;
+      if (args[aidx][0..2] == longOptStart) {
+        asidx = 2;
+        longOptFlag = true;
+      }
+
+      alen = args[aidx].length;
+      if (longOptFlag) {
+        // check if there's an = assignment...
+        auto ival = indexOf (args[aidx], argAssign);
+        if (ival >= 0) {
+          alen = ival;
         }
+      }
+
+innerwhile:
+      while (asidx < args[aidx].length && args[aidx][asidx] != '\0') {
         debug (1) {
-          writefln ("** throwing %s", s);
+          writefln ("getopts:aidx:%d:asidx:%d:alen:%d:a[]:%s:%s:", aidx, asidx, args[aidx].length, args[aidx][asidx], args[aidx]);
         }
-        throw new Exception (s);
-      }
-      if (rc != 0) {
-        i += rc - 1;  // increment by rc less one, for loop will inc again
-        debug (1) {
-          writefln ("getopts:rc:%d:i:%d:", rc, i);
+
+        rc = checkOption (ainfo, opts);
+        if (rc != 0) {
+          aidx += rc - 1;  // increment by rc less one, for loop will inc again
+          debug (1) {
+            writefln ("getopts:rc:%d:aidx:%d:", rc, aidx);
+          }
+          break innerwhile;
         }
-        break innerwhile;
-      }
-      // handles boolean --arg
-      if (args[i][0..2] == "--") {
-        break innerwhile;
-      }
-      ++j;
-    }
-  }
+
+        // handles boolean --arg
+        if (longOptFlag) {
+          break innerwhile;
+        }
+
+        ++asidx;
+      } // while
+    } // for
+  } // with
 
   debug (1) {
-    writefln ("getopts:exit:i:%d", i);
+    writefln ("getopts:exit:aidx:%d", ainfo.aidx);
   }
-  return i;
+  return ainfo.aidx;
 }
 
 // for getopts();
@@ -270,140 +291,138 @@ unittest {
 
 private int
 checkOption (OVL...)
-    (string[] args, int aidx, int aidx2, OVL opts)
+    (ref ArgInfo ainfo, OVL opts)
 {
-  static if (opts.length > 0) {
-    auto opt = to!string(opts[0]);
-    if ((opt.length == 1 && opt[0] == args[aidx][aidx2]) ||
-        (opt.length > 1 && opt == args[aidx][2..$])) {
-      debug (1) {
-        writefln ("chk:found:%s:", opt);
+  with (ainfo) {
+    static if (opts.length > 0) {
+      auto opt = to!string(opts[0]);
+      if ((opt.length == 1 && opt[0] == args[aidx][asidx]) ||
+          (opt.length > 1 && opt == args[aidx][2..alen])) {
+        debug (1) {
+          writefln ("chk:found:%s:", opt);
+        }
+        return processOption (ainfo, opt, opts[1]);
+      } else {
+        return checkOption (ainfo, opts[2..$]);
       }
-      return processOption (args, aidx, aidx2, opt, opts[1]);
     } else {
-      return checkOption (args, aidx, aidx2, opts[2..$]);
+      string s;
+      if (args[aidx][0..2] == "--") {
+        s = format ("Unrecognized option %s", args[aidx]);
+      } else {
+        s = format ("Unrecognized option -%s", args[aidx][asidx]);
+      }
+      debug (1) {
+        writefln ("** throwing %s", s);
+      }
+      throw new Exception (s);
     }
-  } else {
-    return -1;
   }
 
   return 0;
 }
 
+private void
+checkHaveArg (in bool haveArg, in string oa)
+{
+  if (! haveArg) {
+    string s = "Missing argument for -" ~ oa;
+    debug (1) {
+      writefln ("** throwing %s", s);
+    }
+    throw new Exception(s);
+  }
+}
+
 // can't pass ov as a ref parameter -- doesn't handle delegates.
 private int
-processOption (OV)
-    (string[] args, int aidx, int aidx2, string oa, OV ov)
+processOption (OV) (ref ArgInfo ainfo, in string oa, OV ov)
 {
   int rc = 0;
 
-  debug (1) {
-    writefln ("proc:args[%d]:%s:", aidx, args[aidx]);
-  }
-
-  string    arg;
-  bool      attachedArg = false;
-  bool      haveArg = false;
-  auto      i = aidx2 + 1;
-  // if there is a --arg (aidx > 2 and prior char is -), there is no arg.
-  // if there's no more string, then there is no arg.
-  // if there's a null byte, there there is no arg.
-  if (! (aidx2 > 1 && args[aidx][aidx2 - 1] == '-') &&
-      args[aidx].length > i && args[aidx][i] != '\0') {
-    arg = args[aidx][i..$];
-    attachedArg = true;
-    haveArg = true;
-  } else if (args.length > aidx + 1) {
-    arg = args[aidx + 1];
-    haveArg = true;
-  }
-  debug (1) {
-    writefln ("proc:arg:%s:aidx:%d:aidx2:%d:i:%d:att:%d:have:%d",
-        arg, aidx, aidx2, i, attachedArg, haveArg);
-  }
-
-  static if (is(typeof(*ov) == bool)) {
-    *ov = true;
-  } else static if (is(typeof(ov) == return)) {
-    static if (is(typeof(ov()) : void)) {
-      ov ();
-    } else static if (is(typeof(ov("")) : void)) {
-      if (! haveArg) {
-        string s = "Missing argument for -" ~ oa;
-        debug (1) {
-          writefln ("** throwing %s", s);
-        }
-        throw new Exception(s);
-      }
-      ov (arg);
-      if (! attachedArg) { ++rc; }
-      ++rc;
-    } else static if (is(typeof(ov("","")) : void)) {
-      if (! haveArg) {
-        string s = "Missing argument for -" ~ oa;
-        debug (1) {
-          writefln ("** throwing %s", s);
-        }
-        throw new Exception(s);
-      }
-      ov (oa,arg);
-      if (! attachedArg) { ++rc; }
-      ++rc;
-    }
-  } else static if (is(typeof(*ov) == return)) {
-    static if (is(typeof((*ov)()) : void)) {
-      (*ov)();
-    } else static if (is(typeof((*ov)("")) : void)) {
-      if (! haveArg) {
-        string s = "Missing argument for -" ~ oa;
-        debug (1) {
-          writefln ("** throwing %s", s);
-        }
-        throw new Exception(s);
-      }
-      (*ov)(arg);
-      if (! attachedArg) { ++rc; }
-      ++rc;
-    } else static if (is(typeof((*ov)("","")) : void)) {
-      if (! haveArg) {
-        string s = "Missing argument for -" ~ oa;
-        debug (1) {
-          writefln ("** throwing %s", s);
-        }
-        throw new Exception(s);
-      }
-      (*ov)(oa,arg);
-      if (! attachedArg) { ++rc; }
-      ++rc;
-    }
-  } else static if (is(typeof(*ov) == string) ||
-        is(typeof(*ov) == char[])) {
-    if (! haveArg) {
-      string s = "Missing argument for -" ~ oa;
-      debug (1) {
-        writefln ("** throwing %s", s);
-      }
-      throw new Exception(s);
-    }
-    *ov = cast(typeof(*ov)) arg;
-    if (! attachedArg) { ++rc; }
-    ++rc;
-  } else static if (is(typeof(*ov) : real)) {
-    if (! haveArg) {
-      string s = "Missing argument for -" ~ oa;
-      debug (1) {
-        writefln ("** throwing %s", s);
-      }
-      throw new Exception(s);
-    }
-    *ov = to!(typeof(*ov))(arg);
-    if (! attachedArg) { ++rc; }
-    ++rc;
-  } else {
+  with (ainfo) {
     debug (1) {
-      writefln ("type: %s", typeof(ov).stringof);
+      writefln ("proc:args[%d]:%s:", aidx, args[aidx]);
     }
-    throw new Exception("Unhandled type passed to getopts()");
+
+    string    arg;
+    bool      attachedArg = false;
+    bool      haveArg = false;
+    auto      i = asidx + 1;
+
+    // if there is a --arg (asidx > 1 and prior char is -
+    //    and the length == alen), there is no arg.
+    // if there's no more string, then there is no arg.
+    // if there's a null byte, there there is no arg.
+    debug (1) {
+      writefln ("proc:aidx:%d:asidx:%d:alen:%d:i:%d:args:%s:", aidx, asidx, alen, i, args[aidx]);
+    }
+    if (! (asidx > 1 && args[aidx][asidx - 1] == longOptStart[1] &&
+            args[aidx].length == alen) &&
+          (alen > i && args[aidx][i] != '\0')) {
+      if (args[aidx].length != alen) {
+        arg = args[aidx][alen + 1..$];    // long option --arg=val
+      } else {
+        arg = args[aidx][i..$];       // short option -fval
+      }
+      attachedArg = true;
+      haveArg = true;
+    } else if (args.length > aidx + 1) {
+      arg = args[aidx + 1];
+      haveArg = true;
+    }
+    debug (1) {
+      writefln ("proc:arg:%s:aidx:%d:asidx:%d:i:%d:att:%d:have:%d",
+          arg, aidx, asidx, i, attachedArg, haveArg);
+    }
+
+    static if (is(typeof(*ov) == bool)) {
+      *ov = true;
+    } else static if (is(typeof(ov) == return)) {
+      static if (is(typeof(ov()) : void)) {
+        ov ();
+      } else static if (is(typeof(ov("")) : void)) {
+        checkHaveArg (haveArg, oa);
+        ov (arg);
+        if (! attachedArg) { ++rc; }
+        ++rc;
+      } else static if (is(typeof(ov("","")) : void)) {
+        checkHaveArg (haveArg, oa);
+        ov (oa,arg);
+        if (! attachedArg) { ++rc; }
+        ++rc;
+      }
+    } else static if (is(typeof(*ov) == return)) {
+      static if (is(typeof((*ov)()) : void)) {
+        (*ov)();
+      } else static if (is(typeof((*ov)("")) : void)) {
+        checkHaveArg (haveArg, oa);
+        (*ov)(arg);
+        if (! attachedArg) { ++rc; }
+        ++rc;
+      } else static if (is(typeof((*ov)("","")) : void)) {
+        checkHaveArg (haveArg, oa);
+        (*ov)(oa,arg);
+        if (! attachedArg) { ++rc; }
+        ++rc;
+      }
+    } else static if (is(typeof(*ov) == string) ||
+          is(typeof(*ov) == char[])) {
+      checkHaveArg (haveArg, oa);
+      *ov = cast(typeof(*ov)) arg;
+      if (! attachedArg) { ++rc; }
+      ++rc;
+    } else static if (is(typeof(*ov) : real)) {
+      checkHaveArg (haveArg, oa);
+      *ov = to!(typeof(*ov))(arg);
+      if (! attachedArg) { ++rc; }
+      ++rc;
+    } else {
+      debug (1) {
+        writefln ("type: %s", typeof(ov).stringof);
+      }
+      throw new Exception("Unhandled type passed to getopts()");
+    }
   }
 
   debug (1) {
@@ -415,8 +434,8 @@ processOption (OV)
 version (unittest) {
   static string ovstring2;
 
-  int doPOTest (T) (ref int tcount, string[] args,
-        int aidx, int aidx2, string opt, T var) {
+  int doPOTest (T) (ref int tcount, string[] allargs,
+        int taidx, int tasidx, string opt, T var) {
     ++tcount; writefln ("# %s test %d", "proc", tcount);
     static if (is(typeof(*T) == string) ||
         is(typeof(*T) == char[]) ||
@@ -424,7 +443,24 @@ version (unittest) {
         is(typeof(*T) : real)) {
       *var = typeof(*T).init;
     }
-    auto rc = processOption (args, aidx, aidx2, opt, var);
+
+    ArgInfo ainfo;
+
+    with (ainfo) {
+      args = allargs;
+      aidx = taidx;
+      asidx = tasidx;
+      alen = args[aidx].length;
+      auto ival = indexOf (args[aidx], argAssign);
+      if (ival >= 0) {
+        alen = ival;
+      }
+      longOptFlag = false;
+      if (args[aidx][0..2] == longOptStart) {
+        longOptFlag = true;
+      }
+    }
+    auto rc = processOption (ainfo, opt, var);
     return rc;
   }
 }
@@ -441,7 +477,7 @@ unittest {
   int[]  failures;
   int    tcount;
   int    aidx = 0;
-  int    aidx2 = 1;
+  int    asidx = 1;
 
   // 1 : bool: single argument in first position.
   rc = doPOTest (tcount, ["-a"], 0, 1, "a", &ovbool);
@@ -682,6 +718,25 @@ unittest {
     ovstring2 = "9.5z";
   }
   if (ovstring2 != "9.5z") { failures ~= tcount; }
+
+  // 40: --arg, string
+  ovstring = ovstring.init;
+  rc = doPOTest (tcount, ["--testa", "40"], 0, 2, "testa", &ovstring);
+  if (ovstring != "40") { failures ~= tcount; }
+  if (rc != 2) { failures ~= tcount; }
+
+  // 41: --arg, bool
+  ovbool = ovbool.init;
+  rc = doPOTest (tcount, ["--testa"], 0, 2, "testa", &ovbool);
+  if (ovbool != true) { failures ~= tcount; }
+  if (rc != 0) { failures ~= tcount; }
+  // boolean long option handled by getopts().
+
+  // 42: --arg, string
+  ovstring = ovstring.init;
+  rc = doPOTest (tcount, ["--testa=42"], 0, 2, "testa", &ovstring);
+  if (ovstring != "42") { failures ~= tcount; }
+  if (rc != 1) { failures ~= tcount; }
 
   write ("unittest: getopt: processOption: ");
   if (failures.length > 0) {
