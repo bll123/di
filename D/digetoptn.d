@@ -108,178 +108,110 @@ innerwhile:
   return ainfo.aidx;
 }
 
+version (unittest) {
+  mixin template MgetoptsTest(T) {
+    void test (string l, bool expected,
+        string[] o, string[] a, T[] r, int i) {
+      auto v = (T[4]).init;
+      int  idx;
+      ++tcount;
+      writefln ("# %s: %d: %s", testname, tcount, l);
+      try {
+        idx = getopts (a, o[2], &v[2], o[1], &v[1], o[0], &v[0], o[3], &v[3]);
+      } catch {
+        v = r;
+        if (expected) {     // don't pass a failure
+          v = v.init;
+        }
+      }
+      if (v != r) { failures ~= tcount; }
+      if (idx != i) { failures ~= tcount; }
+    }
+  }
+}
+
 // for getopts();
 unittest {
-  string    testname = "getopts";
-  bool      cobool[4];
-  int       coint[4];
-
   int[]     failures;
   int       tcount;
+
+  string    testname = "getopts";
+
+  bool      cobool[4];
+  int       coint[4];
   int       idx;
 
+  mixin MgetoptsTest!bool tbool;
+  mixin MgetoptsTest!int  tint;
+  mixin MgetoptsTest!int  tdouble;
+
   // 1
-  cobool = (bool[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-abcd"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
-  if (cobool != [true,true,true,true]) { failures ~= tcount; }
-  if (idx != 1) { failures ~= tcount; }
+  tbool.test ("boolean bundled, all", true, ["a", "b", "c", "d"],
+      ["-abcd"], [true,true,true,true], 1);
 
   // 2
-  cobool = (bool[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-a", "-b", "-c", "-d"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
-  if (cobool != [true,true,true,true]) { failures ~= tcount; }
-  if (idx != 4) { failures ~= tcount; }
+  tbool.test ("boolean separate, all", true, ["a", "b", "c", "d"],
+      ["-a", "-b", "-c", "-d"], [true,true,true,true], 4);
 
   // 3
-  cobool = (bool[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-b", "-c"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
-  if (cobool != [false,true,true,false]) { failures ~= tcount; }
-  if (idx != 2) { failures ~= tcount; }
+  tbool.test ("boolean separate, bc", true, ["a", "b", "c", "d"],
+      ["-b", "-c"], [false,true,true,false], 2);
 
   // 4
-  cobool = (bool[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-a", "-d"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
-  if (cobool != [true,false,false,true]) { failures ~= tcount; }
-  if (idx != 2) { failures ~= tcount; }
+  tbool.test ("boolean separate, ad", true, ["a", "b", "c", "d"],
+      ["-a", "-d"], [true,false,false,true], 2);
 
   // 5
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-a", "1", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
-  if (coint != [1,0,0,2]) { failures ~= tcount; }
-  if (idx != 4) { failures ~= tcount; }
-  debug (1) {
-    writefln ("5:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
-  }
+  tint.test ("int separate, ad", true, ["a", "b", "c", "d"],
+      ["-a", "1", "-d", "2"], [1,0,0,2], 4);
 
   // 6
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-a1", "-d2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
-  if (coint != [1,0,0,2]) { failures ~= tcount; }
-  if (idx != 2) { failures ~= tcount; }
-  debug (1) {
-    writefln ("6:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
-  }
+  tint.test ("int attached, ad", true, ["a", "b", "c", "d"],
+      ["-a1", "-d2"], [1,0,0,2], 2);
 
   // 7
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-a", "1", "3", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
-  if (coint != [1,0,0,0]) { failures ~= tcount; }
-  if (idx != 2) { failures ~= tcount; }
-  debug (1) {
-    writefln ("7:%d:%d:%d:%d:idx:%d", coint[0], coint[1], coint[2], coint[3], idx);
-  }
+  tint.test ("int non option stop arg", true, ["a", "b", "c", "d"],
+      ["-a", "1", "3", "-d", "2"], [1,0,0,0], 2);
 
   // 8 :
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-a", "1", "--", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
-  if (coint != [1,0,0,0]) { failures ~= tcount; }
-  if (idx != 3) { failures ~= tcount; }
-  debug (1) {
-    writefln ("8:%d:%d:%d:%d:idx:%d", coint[0], coint[1], coint[2], coint[3], idx);
-  }
+  tint.test ("int -- stop arg", true, ["a", "b", "c", "d"],
+      ["-a", "1", "--", "-d", "2"], [1,0,0,0], 3);
 
   // 9
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-a1", "3", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
-  if (coint != [1,0,0,0]) { failures ~= tcount; }
-  if (idx != 1) { failures ~= tcount; }
-  debug (1) {
-    writefln ("9:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
-  }
+  tint.test ("int attached non option stop arg", true, ["a", "b", "c", "d"],
+      ["-a1", "3", "-d", "2"], [1,0,0,0], 1);
 
   // 10
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-a1", "-d", "2"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
-  if (coint != [1,0,0,2]) { failures ~= tcount; }
-  if (idx != 3) { failures ~= tcount; }
-  debug (1) {
-    writefln ("10:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
-  }
+  tint.test ("int attached/separate", true, ["a", "b", "c", "d"],
+      ["-a1", "-d", "2"], [1,0,0,2], 3);
 
   // 11 : missing argument
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  try {
-    idx = getopts (["-a1", "-d"], "c", &coint[2], "b", &coint[1], "a", &coint[0], "d", &coint[3]);
-  } catch {
-    coint[3] = 9;
-  }
-  if (coint != [1,0,0,9]) { failures ~= tcount; }
-  debug (1) {
-    writefln ("11:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
-  }
+  tint.test ("int missing argument", false, ["a", "b", "c", "d"],
+      ["-a1", "-d"], [1,0,0,9], 0);
 
   // 12
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["--testa", "1", "--testd", "2"], "testc", &coint[2], "testb", &coint[1], "testa", &coint[0], "testd", &coint[3]);
-  if (coint != [1,0,0,2]) { failures ~= tcount; }
-  if (idx != 4) { failures ~= tcount; }
-  debug (1) {
-    writefln ("10:%d:%d:%d:%d", coint[0], coint[1], coint[2], coint[3]);
-  }
+  tint.test ("int long options", true, ["testa", "testb", "testc", "testd"],
+      ["--testa", "1", "--testd", "2"], [1,0,0,2], 4);
 
   // 13 : unrecognized option --arg should throw error
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  try {
-    idx = getopts (["--testz", "1", "--testd", "2"], "testc", &coint[2], "testb", &coint[1], "testa", &coint[0], "testd", &coint[3]);
-  } catch {
-    coint[0] = 999;
-    coint[3] = 999;
-  }
-  if (coint != [999,0,0,999]) { failures ~= tcount; }
+  tint.test ("int unrecognized long option", false, ["testa", "testb", "testc", "testd"],
+      ["--testz", "1", "--testd", "2"], [999,0,0,999], 0);
 
   // 14 : unrecognized option -x should throw error
-  coint = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  try {
-    idx = getopts (["-x", "1", "--testd", "2"], "testc", &coint[2], "testb", &coint[1], "testa", &coint[0], "testd", &coint[3]);
-  } catch {
-    coint[0] = 998;
-    coint[3] = 998;
-  }
-  if (coint != [998,0,0,998]) { failures ~= tcount; }
+  tint.test ("int unrecognized short option", false, ["testa", "testb", "testc", "testd"],
+      ["-x", "1", "--testd", "2"], [998,0,0,998], 0);
 
   // 15 : unrecognized option -x should throw error
-  coint = (int[4]).init;
-  cobool = (int[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  try {
-    idx = getopts (["-abxd"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
-  } catch {
-    coint[0] = 997;
-    coint[3] = 997;
-  }
-  if (coint != [997,0,0,997]) { failures ~= tcount; }
+  tbool.test ("boolean unrecognized option: bundled", false, ["a", "b", "c", "d"],
+      ["-abxd"], [true,true,true,true], 0);
 
   // 16 : --arg boolean
-  cobool = (bool[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  try {
-    idx = getopts (["--testa", "--testd", ], "testc", &cobool[2], "testb", &cobool[1], "testa", &cobool[0], "testd", &cobool[3]);
-    if (cobool != [true,0,0,true]) { failures ~= tcount; }
-    if (idx != 2) { failures ~= tcount; }
-  } catch {
-    failures ~= tcount;
-  }
+  tbool.test ("boolean long option", true, ["testa", "testb", "testc", "testd"],
+      ["--testa", "--testd"], [true,false,false,true], 2);
 
   // 17 : check returned index
-  cobool = (bool[4]).init;
-  ++tcount; writefln ("# %s test %d", testname, tcount);
-  idx = getopts (["-abcd"], "c", &cobool[2], "b", &cobool[1], "a", &cobool[0], "d", &cobool[3]);
-  if (cobool != [true,true,true,true]) { failures ~= tcount; }
-  if (idx != 1) { failures ~= tcount; }
+  tbool.test ("boolean check return idx", true, ["a","b","c","d"],
+      ["-abcd"], [true,true,true,true], 1);
 
   write ("unittest: getopt: getopts: ");
   if (failures.length > 0) {
