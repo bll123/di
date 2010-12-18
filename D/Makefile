@@ -9,8 +9,9 @@
 SHELL = /bin/sh
 OBJ_EXT = .o
 EXE_EXT =
-DC = dmd
 MAKE = make
+
+DC = dmd
 
 #
 # common programs
@@ -40,10 +41,14 @@ MKC_REQLIB = mkconfig.reqlibs
 
 # have to get various environment variables set up.
 
-all:	all-sh
+all:	di.env
+	. ./di.env; \
+	$(MAKE) -e MKCONFIG_TYPE=sh di-programs
 
-all-sh:	di.env
-	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=sh di-programs
+all-test: di.env
+	. ./di.env; \
+	$(MAKE) -e MKCONFIG_TYPE=sh \
+        DTESTFLAGS="$$DC_UNITTEST $$DC_COV" di-programs
 
 ###
 # environment
@@ -52,7 +57,7 @@ all-sh:	di.env
 
 di.env:	features/env.dat
 	@-$(RM) -f di.env tests.done
-	CC=$(CC) $(_MKCONFIG_SHELL) \
+	DC=$(DC) $(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh features/env.dat
 
 ###
@@ -61,14 +66,13 @@ di.env:	features/env.dat
 # leaves:
 #   config.d, di.env, mkconfig.reqlibs,
 #   mkconfig.cache, mkconfig_*.vars,
-#   dioptions.dat, pretests.done, test_di
+#   dioptions.dat
 clean:
-	@-rm -f di di.exe mi mi.exe *.o *.obj \
+	@-rm -f di di.exe mi mi.exe *.o *.obj *.lst mkconfig.log \
 	    > /dev/null 2>&1
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig, dioptions.dat
-#   pretests.done, test_di
 realclean:
 	@$(MAKE) clean
 	@-$(RM) -rf config.d di.env mkconfig.reqlibs \
@@ -79,8 +83,7 @@ realclean:
 #   dioptions.dat
 distclean:
 	@$(MAKE) realclean
-	@-$(RM) -rf pretests.done test_di \
-		_mkconfig_runtests _tmp_mkconfig \
+	@-$(RM) -rf _mkconfig_runtests _tmp_mkconfig \
 		>/dev/null 2>&1
 
 ###
@@ -110,57 +113,27 @@ $(MKC_REQLIB):	di.env config.d
 ###
 # executables
 
-OBJECTS = getopt$(OBJ_EXT) options$(OBJ_EXT) di$(OBJ_EXT)
-#DFLAGS = -debug -unittest 
-DFLAGS = -unittest 
+OBJECTS = config$(OBJ_EXT) di_getopt$(OBJ_EXT) display$(OBJ_EXT) options$(OBJ_EXT) di$(OBJ_EXT)
 
 di$(EXE_EXT):	$(OBJECTS)
-	$(DC) -ofdi$(EXE_EXT) $(OBJECTS)
+	$(DC) $(DC_OF)di$(EXE_EXT) $(OBJECTS)
 
 ###
 # objects
 
-di$(OBJ_EXT):	di.d options$(OBJ_EXT) getopt$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) di.d
+config$(OBJ_EXT):	config.d
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) config.d
 
-options$(OBJ_EXT):	options.d getopt$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) options.d
+di$(OBJ_EXT):	di.d config$(OBJ_EXT) \
+		options$(OBJ_EXT) display$(OBJ_EXT) di_getopt$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di.d
 
-getopt$(OBJ_EXT):	getopt.d
-	$(DC) -c $(DFLAGS) getopt.d
+options$(OBJ_EXT):	options.d config$(OBJ_EXT) \
+		display$(OBJ_EXT) di_getopt$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) options.d
 
-###
-# regression testing
+di_getopt$(OBJ_EXT):	di_getopt.d config$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di_getopt.d
 
-di-all-test:	pretests.done tests.done
-
-pretests.done:
-	cd $(MKCONFIGPATH); $(MAKE) CC=$(CC) tests.done
-
-tests.done: $(MKCONFIGPATH)/runtests.sh
-	@echo "## running tests"
-	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/runtests.sh ../tests.d
-	touch tests.done
-
-testrpmbuild:
-	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
-	$(MKDIR) -p ./rpmbuild/SOURCES
-	$(MKDIR) -p ./rpmbuild/BUILD
-	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
-	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
-	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
-	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
-	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
-
-rtest-env:
-	@echo "$(_MKCONFIG_SYSTYPE)"; \
-		echo "$(_MKCONFIG_SYSREV)"; \
-		echo "$(_MKCONFIG_SYSARCH)"; \
-		echo "$(CC)"; \
-		echo "$(_MKCONFIG_USING_GCC)"; \
-		echo "$(CFLAGS)"; \
-		echo "$(LDFLAGS)"; \
-		echo "$(LIBS)"; \
-		echo "$(OBJ_EXT)"; \
-		echo "$(EXE_EXT)"; \
-		echo "$(XMSGFMT)"
+display$(OBJ_EXT):	display.d config$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) display.d
