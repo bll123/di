@@ -1,9 +1,15 @@
+// written in the D programming language
 
 import std.stdio: writef;
+import std.string;
 
+import config;
 import options;
+import display;
 
-void main (char[][] args)
+void main (string[] args)
 {
-  processArgs (args);
+  getDIOptions (args);
+  initializeDisp ();
+  dumpDispTable ();
 }

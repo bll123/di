@@ -4,7 +4,7 @@ $Id$
 $Source$
 */
 
-module getopt;
+module di_getopt;
 
 import std.string;
 import std.conv;
@@ -14,6 +14,8 @@ debug (1) {
 version (unittest) {
   import std.stdio;
 }
+
+import config;
 
 enum string
   endArgs       = "--",
@@ -31,19 +33,19 @@ private struct ArgInfo {
 };
 
 int
-getopts (OVL...) (string[] allargs, OVL opts)
+getopt (OVL...) (string[] allargs, OVL opts)
 {
   assert (opts.length % 2 == 0);
   ArgInfo   ainfo;
 
   debug (1) {
     foreach (k, arg; allargs) {
-      writefln ("getopts:args:%d:%s:", k, arg);
+      writefln ("getopt:args:%d:%s:", k, arg);
     }
   }
 
   with (ainfo) {
-    args = allargs;
+    args = allargs[1..$];
 
 outerfor:
     for (aidx = 0; aidx < args.length; ++aidx) {
@@ -53,12 +55,12 @@ outerfor:
           ++aidx;  // point to next argument.
         }
         debug (1) {
-          writefln ("getopts:nomore:aidx:%d:", aidx);
+          writefln ("getopt:nomore:aidx:%d:", aidx);
         }
         break outerfor;
       }
       debug (1) {
-        writefln ("getopts:%d:%s:%s:", aidx, args[aidx], args[aidx][asidx]);
+        writefln ("getopt:%d:%s:%s:", aidx, args[aidx], args[aidx][asidx]);
       }
 
       int rc = 0;
@@ -80,14 +82,14 @@ outerfor:
 innerwhile:
       while (asidx < args[aidx].length && args[aidx][asidx] != '\0') {
         debug (1) {
-          writefln ("getopts:aidx:%d:asidx:%d:alen:%d:a[]:%s:%s:", aidx, asidx, args[aidx].length, args[aidx][asidx], args[aidx]);
+          writefln ("getopt:aidx:%d:asidx:%d:alen:%d:a[]:%s:%s:", aidx, asidx, args[aidx].length, args[aidx][asidx], args[aidx]);
         }
 
         rc = checkOption (ainfo, opts);
         if (rc != 0) {
           aidx += rc - 1;  // increment by rc less one, for loop will inc again
           debug (1) {
-            writefln ("getopts:rc:%d:aidx:%d:", rc, aidx);
+            writefln ("getopt:rc:%d:aidx:%d:", rc, aidx);
           }
           break innerwhile;
         }
@@ -103,7 +105,7 @@ innerwhile:
   } // with
 
   debug (1) {
-    writefln ("getopts:exit:aidx:%d", ainfo.aidx);
+    writefln ("getopt:exit:aidx:%d", ainfo.aidx);
   }
   return ainfo.aidx;
 }
@@ -111,15 +113,19 @@ innerwhile:
 private:
 
 version (unittest) {
-  mixin template MgetoptsTest(T) {
-    void test (string l, bool expected,
-        string[] o, string[] a, T[] r, int i) {
+  mixin template MgetoptTest(T) {
+    void
+    test (string l, bool expected,
+        string[] o, string[] a, T[] r, int i)
+    {
       auto v = (T[4]).init;
       int  idx;
       bool fail = false;
       ++tcount;
+
+      a = ["dummy"] ~ a;
       try {
-        idx = getopts (a, o[2], &v[2], o[1], &v[1], o[0], &v[0], o[3], &v[3]);
+        idx = getopt (a, o[2], &v[2], o[1], &v[1], o[0], &v[0], o[3], &v[3]);
         if (! expected) {
           idx = i - 1;
         }
@@ -140,20 +146,16 @@ version (unittest) {
   }
 }
 
-// for getopts();
+// for getopt();
 unittest {
   int       failures;
   int       tcount;
 
-  string    testname = "getopts";
+  string    testname = "getopt";
 
-  bool      cobool[4];
-  int       coint[4];
-  int       idx;
-
-  mixin MgetoptsTest!bool tbool;
-  mixin MgetoptsTest!int  tint;
-  mixin MgetoptsTest!int  tdouble;
+  mixin MgetoptTest!bool tbool;
+  mixin MgetoptTest!int  tint;
+  mixin MgetoptTest!int  tdouble;
 
   tbool.test ("boolean bundled, all", true, ["a", "b", "c", "d"],
       ["-abcd"], [true,true,true,true], 1);
@@ -190,9 +192,9 @@ unittest {
   tbool.test ("boolean check return idx", true, ["a","b","c","d"],
       ["-abcd"], [true,true,true,true], 1);
 
-  write ("unittest: getopt: getopts: ");
+  write ("unittest: getopt: getopt: ");
   if (failures > 0) {
-    writefln ("failed: %d", failures);
+    writefln ("failed: %d of %d", failures, tcount);
   } else {
     writeln ("passed");
   }
@@ -330,7 +332,7 @@ processOption (OV) (ref ArgInfo ainfo, in string oa, OV ov)
       debug (1) {
         writefln ("type: %s", typeof(ov).stringof);
       }
-      throw new Exception("Unhandled type passed to getopts()");
+      throw new Exception("Unhandled type passed to getopt()");
     }
   }
 
@@ -375,14 +377,16 @@ version (unittest) {
     } catch {
       rc = r;
 //writeln ("### C:rc:", rc, ":");
-      static if (! is(TV == return)) {
+      static if (! is(TV == return) &&
+        ! is(typeof(*v) == return)) {
         *v = rv;
       } else {
+//writeln ("### D:rv:", rv, ":");
         ovstring2 = rv;
       }
       if (expected) {
         rc = r - 1;  // fail
-//writeln ("### D:rc:", rc, ":");
+//writeln ("### E:rc:", rc, ":");
       }
     }
     return rc;
@@ -398,8 +402,8 @@ version (unittest) {
 
       ++tcount;
       rc = dopoTest!(T,T*) (expected, a, tai, tasi, o, rv, r, &v);
-//writeln ("### rc:", rc, ":r:", r, ":");
-//writeln ("### v:", v, ":rv:", rv, ":");
+//writeln ("### M:rc:", rc, ":r:", r, ":");
+//writeln ("### M:v:", v, ":rv:", rv, ":");
       if (rc != r) { fail = true; }
       if (v != rv) { fail = true; }
       if (fail)
@@ -411,7 +415,7 @@ version (unittest) {
     }
   }
 
-  private void
+  void
   POTestD (D) (ref int tcount, ref int failures, string testname,
       string l, bool expected,
       string[] a, int tai, int tasi, string o, string rv, int r, D dg)
@@ -422,8 +426,31 @@ version (unittest) {
     ++tcount;
     ovstring2 = ovstring2.init;
     rc = dopoTest!(string,D) (expected, a, tai, tasi, o, rv, r, dg);
-//writeln ("### rc:", rc, ":r:", r, ":");
-//writeln ("### ovs2:", ovstring2, ":rv:", rv, ":");
+//writeln ("### TD:rc:", rc, ":r:", r, ":");
+//writeln ("### TD:ovs2:", ovstring2, ":rv:", rv, ":");
+    if (rc != r) { fail = true; }
+    if (ovstring2 != rv) { fail = true; }
+    if (fail)
+    {
+      ++failures;
+    }
+    writefln ("# %s: %d: %s: %s",
+      testname, tcount, fail ? "fail" : "pass", l);
+  }
+  void
+
+  POTestF (F) (ref int tcount, ref int failures, string testname,
+      string l, bool expected,
+      string[] a, int tai, int tasi, string o, string rv, int r, F func)
+  {
+    bool  fail = false;
+    int   rc;
+
+    ++tcount;
+    ovstring2 = ovstring2.init;
+    rc = dopoTest!(string,F) (expected, a, tai, tasi, o, rv, r, func);
+//writeln ("### TF:rc:", rc, ":r:", r, ":");
+//writeln ("### TF:ovs2:", ovstring2, ":rv:", rv, ":");
     if (rc != r) { fail = true; }
     if (ovstring2 != rv) { fail = true; }
     if (fail)
@@ -447,6 +474,7 @@ unittest {
   mixin MPOTest!string  tstring;
   mixin MPOTest!(char[]) tchar;
   alias POTestD         tdelg;
+  alias POTestF         tfunc;
 
   tbool.test ("bool: single, first", true, ["-a"], 0, 1, "a", true, 0);
   tbool.test ("bool: combined, first", true, ["-ab"], 0, 1, "a", true, 0);
@@ -506,47 +534,22 @@ unittest {
   tdelg (tcount, failures, testname,
     "delegate: 2: no arg", false, ["-a"], 0, 1, "a", "9.5z", 0, d3);
 
-  auto d4 = function (string opt, string arg) { ovstring2 = opt ~ arg; };
+  auto f1 = function (string opt, string arg) { ovstring2 = opt ~ arg; };
 
-/+
-  // 35: function: two arg, catenated
-  ovstring2 = ovstring2.init;
-  rc = doPOTest (tcount, ["-a5.5z"], 0, 1, "a", &d4);
-  if (ovstring2 != "a5.5z") { failures ~= tcount; }
-  if (rc != 1) { failures ~= tcount; }
-
-  // 36: function: two arg, separated
-  ovstring2 = ovstring2.init;
-  rc = doPOTest (tcount, ["-a", "6.5z"], 0, 1, "a", &d4);
-  if (ovstring2 != "a6.5z") { failures ~= tcount; }
-  if (rc != 2) { failures ~= tcount; }
-
-  // 37: function: two arg, catenated, second
-  ovstring2 = ovstring2.init;
-  rc = doPOTest (tcount, ["-ab7.5z"], 0, 2, "b", &d4);
-  if (ovstring2 != "b7.5z") { failures ~= tcount; }
-  if (rc != 1) { failures ~= tcount; }
-
-  // 38: function: two arg, separated, second
-  ovstring2 = ovstring2.init;
-  rc = doPOTest (tcount, ["-ab", "8.5z"], 0, 2, "b", &d4);
-  if (ovstring2 != "b8.5z") { failures ~= tcount; }
-  if (rc != 2) { failures ~= tcount; }
-
-  // 39: function two arg, no arg
-  ovstring2 = ovstring2.init;
-  try {
-    rc = doPOTest (tcount, ["-a"], 0, 1, "a", &d4);
-  } catch {
-    ovstring2 = "9.5z";
-  }
-  if (ovstring2 != "9.5z") { failures ~= tcount; }
-
-+/
+  tfunc (tcount, failures, testname,
+    "function: attached", true, ["-a5.5z"], 0, 1, "a", "a5.5z", 1, f1);
+  tfunc (tcount, failures, testname,
+    "function: separated", true, ["-a", "6.5z"], 0, 1, "a", "a6.5z", 2, f1);
+  tfunc (tcount, failures, testname,
+    "function: attached, second", true, ["-ab7.5z"], 0, 2, "b", "b7.5z", 1, f1);
+  tfunc (tcount, failures, testname,
+    "function: separated, second", true, ["-ab", "8.5z"], 0, 2, "b", "b8.5z", 2, f1);
+  tfunc (tcount, failures, testname,
+    "function: no arg", false, ["-a"], 0, 1, "a", "9.5z", 0, f1);
 
   write ("unittest: getopt: processOption: ");
   if (failures > 0) {
-    writefln ("failed: %d", failures);
+    writefln ("failed: %d of %d", failures, tcount);
   } else {
     writeln ("passed");
   }
