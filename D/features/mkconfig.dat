@@ -1,0 +1,78 @@
+#
+# $Id$
+# $Source$
+# Copyright 2010 Brad Lanam, Walnut Creek, California USA
+#
+#
+option-file dioptions.dat
+
+loadunit d-main
+
+output   config.d
+
+standard
+
+clib    bindtextdomain -lintl, -lintl -liconv
+clib    endmntent
+clib    GetDiskFreeSpace
+clib    GetDiskFreeSpaceEx
+clib    GetDriveType
+clib    GetLogicalDriveStrings
+clib    GetVolumeInformation
+clib    getmntent -lgen
+clib    gettext -lintl, -lintl -liconv
+clib    getvfsstat
+clib    setlocale  -lintl, -lintl -liconv
+clib    setmntent
+clib    statvfs
+
+chdr    libintl.h
+chdr    locale.h
+chdr    mntent.h
+chdr    stdlib.h
+
+csys    statvfs.h
+csys    types.h
+
+# linux
+ctype   __fsblkcnt_t sys/statvfs.h
+ctype   __fsfilcnt_t sys/statvfs.h
+# linux, 64-bit interface
+ctype   __u_quad_t sys/statvfs.h
+ctype   __fsblkcnt64_t sys/statvfs.h
+ctype   __fsfilcnt64_t sys/statvfs.h
+# linux
+cstruct statvfs sys/statvfs.h
+
+# linux
+ctype   _IO_lock_t stdio.h
+ctype   __off64_t stdio.h
+cstruct _IO_marker stdio.h
+cstruct _IO_FILE stdio.h
+# linux
+ctype   FILE stdio.h
+
+# linux
+ctype   __quad_t sys/types.h
+ctype   __off_t sys/types.h
+cstruct mntent mntent.h
+
+cdcl    bindtextdomain libintl.h
+cdcl    endmntent mntent.h
+cdcl    GetDiskFreeSpace windows.h
+cdcl    GetDiskFreeSpaceEx windows.h
+cdcl    GetDriveType windows.h
+cdcl    GetLogicalDriveStrings windows.h
+cdcl    GetVolumeInformation windows.h
+cdcl    getmntent mntent.h
+cdcl    gettext libintl.h
+#cdcl    getvfsstat
+cdcl    setlocale locale.h
+cdcl    setmntent mntent.h
+cdcl    statvfs sys/statvfs.h
+
+#member  C_statvfs f_basetype
+
+# see dioptions.dat to change these
+option  DI_DEFAULT_FORMAT smbuvpT
+option  DI_DEFAULT_DISP_SIZE H
