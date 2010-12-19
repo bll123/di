@@ -116,7 +116,7 @@ $(MKC_REQLIB):	di.env config.d
 OBJECTS = config$(OBJ_EXT) di_getopt$(OBJ_EXT) display$(OBJ_EXT) options$(OBJ_EXT) di$(OBJ_EXT)
 
 di$(EXE_EXT):	$(OBJECTS)
-	$(DC) $(DC_OF)di$(EXE_EXT) $(OBJECTS)
+	$(MKCONFIGPATH)/mklink.sh -c ${DC} -o di$(EXE_EXT) -- $(OBJECTS)
 
 ###
 # objects
