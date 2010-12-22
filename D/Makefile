@@ -66,13 +66,12 @@ di.env:	features/env.dat
 # leaves:
 #   config.d, di.env, mkconfig.reqlibs,
 #   mkconfig.cache, mkconfig_*.vars,
-#   dioptions.dat
 clean:
 	@-rm -f di di.exe mi mi.exe *.o *.obj *.lst mkconfig.log \
 	    > /dev/null 2>&1
 
 # leaves:
-#   _mkconfig_runtests, _tmp_mkconfig, dioptions.dat
+#   _mkconfig_runtests, _tmp_mkconfig
 realclean:
 	@$(MAKE) clean
 	@-$(RM) -rf config.d di.env mkconfig.reqlibs \
@@ -80,7 +79,6 @@ realclean:
 		>/dev/null 2>&1
 
 # leaves:
-#   dioptions.dat
 distclean:
 	@$(MAKE) realclean
 	@-$(RM) -rf _mkconfig_runtests _tmp_mkconfig \
@@ -94,15 +92,14 @@ di-programs:	di$(EXE_EXT)
 ###
 # configuration file
 
-dioptions.dat:	../dioptions.dat
-	@cp ../dioptions.dat dioptions.dat
-	@chmod u+w dioptions.dat
+../dioptions.dat:	../features/dioptions.dat
+	cd ../;$(MAKE) dioptions.dat
 
-config.d:	di.env dioptions.dat features/mkconfig.dat
+config.d:	di.env ../dioptions.dat features/mkconfig.dat
 	@-$(RM) -f config.d tests.done
 	@if [ "$(DI_NO_NLS)" != "" ]; then \
 		echo "*** User requested no NLS"; \
-		$(MKCONFIGPATH)/mkcsetopt.sh -o dioptions.dat NLS F; fi
+		$(MKCONFIGPATH)/mkcsetopt.sh -o ../dioptions.dat NLS F; fi
 	@. ./di.env;$(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh \
 		features/mkconfig.dat; fi
@@ -113,7 +110,8 @@ $(MKC_REQLIB):	di.env config.d
 ###
 # executables
 
-OBJECTS = config$(OBJ_EXT) di_getopt$(OBJ_EXT) display$(OBJ_EXT) options$(OBJ_EXT) di$(OBJ_EXT)
+OBJECTS = config$(OBJ_EXT) di_getopt$(OBJ_EXT) diskpart$(OBJ_EXT) \
+	display$(OBJ_EXT) dispopts$(OBJ_EXT) di$(OBJ_EXT) options$(OBJ_EXT) 
 
 di$(EXE_EXT):	$(OBJECTS)
 	$(MKCONFIGPATH)/mklink.sh -c ${DC} -o di$(EXE_EXT) -- $(OBJECTS)
@@ -125,15 +123,23 @@ config$(OBJ_EXT):	config.d
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) config.d
 
 di$(OBJ_EXT):	di.d config$(OBJ_EXT) \
-		options$(OBJ_EXT) display$(OBJ_EXT) di_getopt$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di.d
-
-options$(OBJ_EXT):	options.d config$(OBJ_EXT) \
+		options$(OBJ_EXT) diskpart$(OBJ_EXT) \
 		display$(OBJ_EXT) di_getopt$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) options.d
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di.d
 
 di_getopt$(OBJ_EXT):	di_getopt.d config$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di_getopt.d
 
-display$(OBJ_EXT):	display.d config$(OBJ_EXT)
+diskpart$(OBJ_EXT):	diskpart.d config$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) diskpart.d
+
+display$(OBJ_EXT):	display.d config$(OBJ_EXT) dispopts$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) display.d
+
+dispopts$(OBJ_EXT):	dispopts.d config$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dispopts.d
+
+options$(OBJ_EXT):	options.d config$(OBJ_EXT) \
+		dispopts$(OBJ_EXT) di_getopt$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) options.d
+

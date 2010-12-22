@@ -4,7 +4,7 @@
 # Copyright 2010 Brad Lanam, Walnut Creek, California USA
 #
 #
-option-file dioptions.dat
+option-file ../dioptions.dat
 
 loadunit d-main
 
@@ -22,17 +22,24 @@ clib    GetVolumeInformation
 clib    getmntent -lgen
 clib    gettext -lintl, -lintl -liconv
 clib    getvfsstat
-clib    setlocale  -lintl, -lintl -liconv
 clib    setmntent
 clib    statvfs
 
-chdr    libintl.h
-chdr    locale.h
-chdr    mntent.h
+chdr    stdio.h
 chdr    stdlib.h
+chdr    libintl.h
+chdr    mntent.h
+chdr    windows.h
 
 csys    statvfs.h
 csys    types.h
+
+# Linux: _PATH_MOUNTED mntent.h; MNTTYPE_IGNORE mntent.h
+cdefstr     _PATH_MOUNTED mntent.h
+cdefstr     _PATH_MNTTAB mntent.h
+cdefstr     MOUNTED mntent.h
+cdefstr     MNTTAB mntent.h
+cdefstr     MNTTYPE_IGNORE mntent.h
 
 # linux
 ctype   __fsblkcnt_t sys/statvfs.h
@@ -45,16 +52,6 @@ ctype   __fsfilcnt64_t sys/statvfs.h
 cstruct statvfs sys/statvfs.h
 
 # linux
-ctype   _IO_lock_t stdio.h
-ctype   __off64_t stdio.h
-cstruct _IO_marker stdio.h
-cstruct _IO_FILE stdio.h
-# linux
-ctype   FILE stdio.h
-
-# linux
-ctype   __quad_t sys/types.h
-ctype   __off_t sys/types.h
 cstruct mntent mntent.h
 
 cdcl    bindtextdomain libintl.h
@@ -67,12 +64,17 @@ cdcl    GetVolumeInformation windows.h
 cdcl    getmntent mntent.h
 cdcl    gettext libintl.h
 #cdcl    getvfsstat
-cdcl    setlocale locale.h
 cdcl    setmntent mntent.h
 cdcl    statvfs sys/statvfs.h
 
-#member  C_statvfs f_basetype
+member  C_ST_statvfs f_basetype
 
 # see dioptions.dat to change these
 option  DI_DEFAULT_FORMAT smbuvpT
 option  DI_DEFAULT_DISP_SIZE H
+
+include
+
+import core.stdc.stdio;
+
+endinclude
