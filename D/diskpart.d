@@ -9,11 +9,12 @@ private import core.stdc.stdio;
 private import core.stdc.errno;
 
 import config;
-import options;
 
 class DiskPartitions {
 
 private:
+  int       debugLevel;
+
   static if (_cdefstr__PATH_MOUNTED) {
     alias _PATH_MOUNTED DI_MOUNT_FILE;
   } else static if (_cdefstr__PATH_MNTTAB) {
@@ -63,6 +64,18 @@ private:
 
 public:
 
+this () {}
+
+this (int dbg)
+{
+  this.debugLevel = dbg;
+}
+
+void
+setDebugLevel (int dbg) {
+  debugLevel = dbg;
+}
+
 void
 getEntries () {
   FILE *            f;
@@ -88,9 +101,9 @@ getEntries () {
     {
       diskPartitions.length += 1;
       auto dp = &diskPartitions[$-1];
-      dp.special = to!string(mntEntry.mnt_fsname);
-      dp.name = to!string(mntEntry.mnt_dir);
-      dp.fsType = to!string(mntEntry.mnt_type);
+      dp.special = to!(typeof(dp.special))(mntEntry.mnt_fsname);
+      dp.name = to!(typeof(dp.name))(mntEntry.mnt_dir);
+      dp.fsType = to!(typeof(dp.fsType))(mntEntry.mnt_type);
 
       if (to!string(mntEntry.mnt_fsname) == "none") {
         dp.printFlag = DI_PRNT_IGNORE;
@@ -113,9 +126,9 @@ getEntries () {
           diptr->isReadOnly = TRUE;
       }
 +/
-      dp.mountOptions = to!string(mntEntry.mnt_opts);
+      dp.mountOptions = to!(typeof(dp.mountOptions))(mntEntry.mnt_opts);
 
-      if (opts.debugLevel > 5)
+      if (debugLevel > 5)
       {
         writefln ("mnt:%s - %s : %s : %d %d",
             dp.name, dp.special, dp.fsType,
@@ -165,11 +178,11 @@ getPartitionInfo ()
         dp.availInodes = statBuf.f_favail;
         static if (_mem_C_ST_statvfs_f_basetype) {
           if (dp.fsType.length == 0) {
-            dp.fsType = to!string (statBuf.f_basetype);
+            dp.fsType = to!(typeof(dp.fsType))(statBuf.f_basetype);
           }
         }
 
-        if (opts.debugLevel > 5)
+        if (debugLevel > 5)
         {
           writefln ("part:%s : %.0f : %.0f %.0f %.0f",
               dp.name, dp.blockSize,
