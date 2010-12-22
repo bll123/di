@@ -302,6 +302,8 @@ processOption (OV) (ref ArgInfo ainfo, in string oa, OV ov)
         ov (oa,arg);
         if (! attachedArg) { ++rc; }
         ++rc;
+      } else {
+        throw new Exception("Unhandled delegate passed to getopt()");
       }
     } else static if (is(typeof(*ov) == return)) {
       static if (is(typeof((*ov)()) : void)) {
@@ -316,6 +318,8 @@ processOption (OV) (ref ArgInfo ainfo, in string oa, OV ov)
         (*ov)(oa,arg);
         if (! attachedArg) { ++rc; }
         ++rc;
+      } else {
+        throw new Exception("Unhandled function passed to getopt()");
       }
     } else static if (is(typeof(*ov) == string) ||
           is(typeof(*ov) == char[])) {
