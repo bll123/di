@@ -8,75 +8,34 @@ import std.ctype;
 import std.conv;
 
 import config;
-
-enum real
-  size1000 = 1000.0,
-  size1024 = 1024.0;
-enum int
-  idx1000 = 0,
-  idx1024 = 1;
-
-struct DisplayOpts {
-  bool              posixCompat = false;
-  real              dispBlockSize = 0;
-  real              baseDispSize = size1024;
-  int               baseDispIdx = idx1024;
-  short             width = 8;
-  short             inodeWidth = 7;
-  short             maxMountString = 15;
-  short             maxSpecialString = 18;
-  short             maxTypeString = 7;
-  short             maxOptString = 0;
-  short             maxMntTimeString = 0;
-  string            dbsstr = "H";
-  string            dispBlockLabel;
-  string            blockFormat[];
-  string            blockFormatNR[];   /* no radix */
-  string            blockLabelFormat[];
-  string            inodeFormat[];
-  string            inodeLabelFormat[];
-  string            mountFormat[];
-  string            mTimeFormat[];
-  string            optFormat[];
-  string            specialFormat[];
-  string            typeFormat[];
-}
-
-DisplayOpts dispOpts;
+import dispopts;
 
 struct DisplayTable {
-  char          key;
-  string        suffix;
   real          size;
   real          low;
   real          high;
+  char          key;
+  string        suffix;
   string        disp[2];
 };
 
 DisplayTable[] displayTable = [
-  // key,suffix,size,low,high,disp[2]
-  { 'b', " ", 0, 0, 0, [ "Bytes", "Bytes" ] },
-  { 'k', "K", 0, 0, 0, [ "KBytes", "KBytes" ] },
-  { 'm', "M", 0, 0, 0, [ "Megs", "Mebis" ] },
-  { 'g', "G", 0, 0, 0, [ "Gigs", "Gibis" ] },
-  { 't', "T", 0, 0, 0, [ "Teras", "Tebis" ] },
-  { 'p', "P", 0, 0, 0, [ "Petas", "Pebis" ] },
-  { 'e', "E", 0, 0, 0, [ "Exas", "Exbis" ] },
-  { 'z', "Z", 0, 0, 0, [ "Zettas", "Zebis" ] },
-  { 'y', "Y", 0, 0, 0, [ "Yottas", "Yobis" ] },
-  { 'h', "h", 0, 0, 0, [ "Size", "Size" ] },
-  { 'H', "H", 0, 0, 0, [ "Size", "Size" ]}
+  // size,low,high,key,suffix,disp[2]
+  { 0, 0, 0, 'b', " ", [ "Bytes", "Bytes" ] },
+  { 0, 0, 0, 'k', "K", [ "KBytes", "KBytes" ] },
+  { 0, 0, 0, 'm', "M", [ "Megs", "Mebis" ] },
+  { 0, 0, 0, 'g', "G", [ "Gigs", "Gibis" ] },
+  { 0, 0, 0, 't', "T", [ "Teras", "Tebis" ] },
+  { 0, 0, 0, 'p', "P", [ "Petas", "Pebis" ] },
+  { 0, 0, 0, 'e', "E", [ "Exas", "Exbis" ] },
+  { 0, 0, 0, 'z', "Z", [ "Zettas", "Zebis" ] },
+  { 0, 0, 0, 'y', "Y", [ "Yottas", "Yobis" ] },
+  { 0, 0, 0, 'h', "h", [ "Size", "Size" ] },
+  { 0, 0, 0, 'H', "H", [ "Size", "Size" ] }
   ];
 
-int[char] displayIdxs;
-bool      dispIdxsInitialized;
-
-void
-initializeDisp ()
-{
-  initializeDisplayIdxs ();
-  setDispBlockSize ();
-}
+size_t[char]    displayIdxs;
+bool            dispIdxsInitialized;
 
 void
 dumpDispTable ()
@@ -86,32 +45,19 @@ dumpDispTable ()
   }
 }
 
-private:
-
 void
-initializeDisplayIdxs ()
-{
-  if (! dispIdxsInitialized) {
-    foreach (idx, dt; displayTable) {
-      displayIdxs[dt.key] = idx;
-    }
-    dispIdxsInitialized = true;
-  }
-}
-
-void
-setDispBlockSize ()
+setDispBlockSize (ref DisplayOpts dispOpts)
 {
   size_t        i;
   real          val;
   char          c;
 
   initializeDisplayIdxs ();
-  i = 0;
+
   c = dispOpts.dbsstr[0];
   if (isdigit (c)) {
     val = to!(typeof(val))(dispOpts.dbsstr);
-    foreach (key, disp; displayTable) {
+    foreach (disp; displayTable) {
       if (val == disp.size) {
         c = disp.key;
       }
@@ -131,7 +77,7 @@ setDispBlockSize ()
   }
 
   if (c in displayIdxs) {
-    int idx = displayIdxs[c];
+    auto idx = displayIdxs [c];
     val *= displayTable [idx].size;
     dispOpts.dispBlockLabel = displayTable [idx].disp [dispOpts.baseDispIdx];
   } else {
@@ -153,17 +99,30 @@ setDispBlockSize ()
 //  displayTable [1].format = dispOpts.blockFormat;
 
   displayTable [0].size = 1;
-  displayTable [0].low = 1;
+  displayTable [0].low = 1; // temporary, reset below
   displayTable [0].high = dispOpts.baseDispSize;
   for (i = 1; i < displayTable.length; ++i)
   {
-    if (displayTable [i].key == 'h') { break; }
+    if (displayTable [i].key == 'h') { continue; }
 //    displayTable [i].format = dispOpts.blockFormat;
     displayTable [i].size = displayTable [i - 1].size * dispOpts.baseDispSize;
     displayTable [i].low = displayTable [i - 1].low * dispOpts.baseDispSize;
     displayTable [i].high = displayTable [i - 1].high * dispOpts.baseDispSize;
   }
   displayTable [0].low = 0;
+}
+
+private:
+
+void
+initializeDisplayIdxs ()
+{
+  if (! dispIdxsInitialized) {
+    foreach (idx, dt; displayTable) {
+      displayIdxs[dt.key] = idx;
+    }
+    dispIdxsInitialized = true;
+  }
 }
 
 unittest {
