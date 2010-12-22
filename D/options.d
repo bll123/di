@@ -6,7 +6,7 @@ import std.string;
 import std.ctype;
 import std.utf;
 import std.conv;
-import std.process;
+private import std.process;
 debug (1) {
   import std.stdio;
 }
@@ -15,7 +15,7 @@ version (unittest) {
 }
 
 import config;
-import display;
+import dispopts;
 import di_getopt;
 
 private immutable string DI_ALL_FORMAT = "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP";
@@ -44,99 +44,157 @@ struct Options {
   bool              unknown = false;
   bool[string]      includeList;
   bool[string]      ignoreList;
-  int               debugLevel = 0;
+  short             debugLevel = 0;
   string            formatString = DI_DEFAULT_FORMAT;
   string            sortType = "m";
   string            zoneDisplay;
 }
 
-Options opts;
-
 int
-getDIOptions (string[] args) {
+getDIOptions (string[] args, ref Options opts, ref DisplayOpts dispOpts) {
   int       idx;
   string    s;
 
-  with (opts) {
-    if ((s = getenv ("DIFMT")) != null)
-    {
-      formatString = s;
-    }
-
-      // gnu df
-    if ((s = getenv ("POSIXLY_CORRECT")) != null)
-    {
-      dispOpts.dbsstr = "512";
-      formatString = DI_POSIX_FORMAT;
-      dispOpts.posixCompat = true;
-    }
-
-      // bsd df
-    if ((s = getenv ("BLOCKSIZE")) != null)
-    {
-      dispOpts.dbsstr = s;
-    }
-
-        // gnu df
-    if ((s = getenv ("DF_BLOCK_SIZE")) != null)
-    {
-      dispOpts.dbsstr = s;
-    }
-
-    if ((s = getenv ("DI_ARGS")) != null)
-    {
-      processOpts (s);
-    }
-
-    idx = processOpts (args);
+  if ((s = getenv ("DIFMT")) != null)
+  {
+    opts.formatString = s;
   }
 
+    // gnu df
+  if ((s = getenv ("POSIXLY_CORRECT")) != null)
+  {
+    dispOpts.dbsstr = "512";
+    opts.formatString = DI_POSIX_FORMAT;
+    dispOpts.posixCompat = true;
+  }
+
+    // bsd df
+  if ((s = getenv ("BLOCKSIZE")) != null)
+  {
+    dispOpts.dbsstr = s;
+  }
+
+      // gnu df
+  if ((s = getenv ("DF_BLOCK_SIZE")) != null)
+  {
+    dispOpts.dbsstr = s;
+  }
+
+  if ((s = getenv ("DI_ARGS")) != null)
+  {
+    processOpts (s, opts, dispOpts);
+  }
+
+  idx = processOpts (args, opts, dispOpts);
+
   return idx;
+}
+
+unittest {
+  bool          fail;
+  int           failures;
+  int           tcount;
+  Options       opts;
+  DisplayOpts   dispOpts;
+
+  ++tcount;
+  fail = false;
+  opts = opts.init;
+  setenv ("DIFMT", "SMT", true);
+  getDIOptions ([""], opts, dispOpts);
+  if (opts.formatString != "SMT") { fail = true; }
+  writefln ("# %s: %s: %d: %s",
+    "getDIOptions:", fail ? "fail" : "pass", tcount, "Env: DIFMT");
+  if (fail) { ++failures; }
+  unsetenv ("DIFMT");
+
+  ++tcount;
+  fail = false;
+  opts = opts.init;
+  setenv ("POSIXLY_CORRECT", " ", true);
+  getDIOptions ([""], opts, dispOpts);
+  if (dispOpts.dbsstr != "512") { fail = true; }
+  if (opts.formatString != DI_POSIX_FORMAT) { fail = true; }
+  if (dispOpts.posixCompat != true) { fail = true; }
+  writefln ("# %s: %s: %d: %s",
+    "getDIOptions:", fail ? "fail" : "pass", tcount, "Env: POSIXLY_CORRECT");
+  if (fail) { ++failures; }
+  unsetenv ("POSIXLY_CORRECT");
+
+  ++tcount;
+  fail = false;
+  opts = opts.init;
+  setenv ("DF_BLOCK_SIZE", "kB", true);
+  getDIOptions ([""], opts, dispOpts);
+  if (dispOpts.dbsstr != "kB") { fail = true; }
+  writefln ("# %s: %s: %d: %s",
+    "getDIOptions:", fail ? "fail" : "pass", tcount, "Env: DF_BLOCK_SIZE");
+  if (fail) { ++failures; }
+  unsetenv ("DF_BLOCK_SIZE");
+
+  ++tcount;
+  fail = false;
+  opts = opts.init;
+  setenv ("BLOCKSIZE", "kB", true);
+  getDIOptions ([""], opts, dispOpts);
+  if (dispOpts.dbsstr != "kB") { fail = true; }
+  writefln ("# %s: %s: %d: %s",
+    "getDIOptions:", fail ? "fail" : "pass", tcount, "Env: BLOCKSIZE");
+  if (fail) { ++failures; }
+  unsetenv ("BLOCKSIZE");
+
+  write ("unittest: options: getDIOptions: ");
+  if (failures > 0) {
+    writefln ("failed: %d of %d", failures, tcount);
+  } else {
+    writeln ("passed");
+  }
 }
 
 private:
 
 int
-processOpts (string str) {
-  return processOpts (["dummy"] ~ split(strip(str)));
+processOpts (string str, ref Options opts, ref DisplayOpts dispOpts)
+{
+  return processOpts (["dummy"] ~ split(strip(str)), opts, dispOpts);
 }
 
 int
-processOpts (string[] args)
+processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
 {
   int       idx;
 
   with (opts) {
     idx = getopt (args,
-      "A", { formatString = DI_ALL_FORMAT; return 1; },
+      "A", { formatString = DI_ALL_FORMAT; },
       "a", &displayAll,
-      "b", &processBaseSize,
-      "B", &processBaseSize,
+      "b", (string arg) { processBaseSize (arg, dispOpts); },
+      "B", (string arg) { processBaseSize (arg, dispOpts); },
       "d", (string arg) { dispOpts.dbsstr = arg; if (dispOpts.dbsstr == "k") { hasdashk = true; } },
       "f", &formatString,
-      "F", &processIncludeList,     // solaris df compatibility
-      "g", { dispOpts.dbsstr = "g"; return 1; },
-      "h", { dispOpts.dbsstr = "h"; return 1; },
-      "H", { dispOpts.dbsstr = "H"; return 1; },
-      "I", &processIncludeList,
-      "k", { dispOpts.dbsstr = "k"; hasdashk = true; return 1; },
+         // solaris df compatibility
+      "F", (string arg) { processIncludeList (arg, opts); },
+      "g", { dispOpts.dbsstr = "g"; },
+      "h", { dispOpts.dbsstr = "h"; },
+      "H", { dispOpts.dbsstr = "H"; },
+      "I", (string arg) { processIncludeList (arg, opts); },
+      "k", { dispOpts.dbsstr = "k"; hasdashk = true; },
       "l", &localOnly,
       "L", &includeLoopback,
-      "m", { dispOpts.dbsstr = "m"; return 1; },
+      "m", { dispOpts.dbsstr = "m"; },
       "n", &noHeader,
-      "P", { if (!hasdashk) { dispOpts.dbsstr = "512"; }
+      "P", { if (! hasdashk) { dispOpts.dbsstr = "512"; }
              formatString = DI_POSIX_FORMAT;
-             dispOpts.posixCompat = true;
-             return 1; },
+             dispOpts.posixCompat = true; },
       "q", &noQuotaCheck,
-      "s", &processSort,
+      "s", (string arg) { sortType = processSort (arg); },
       "t", &displayTotal,
       "w", &dispOpts.width,
       "W", &dispOpts.inodeWidth,
-      "x", &processIgnoreList,
+      "x", (string arg) { processIgnoreList (arg, opts); },
       "X", &debugLevel,
       "z", &zoneDisplay,
-      "Z", { zoneDisplay = "all"; return 1; }
+      "Z", { zoneDisplay = "all"; }
       );
   }
 
@@ -154,9 +212,9 @@ version (unittest) {
 
       ++tcount;
       opts = opts.init;
-      i = processOpts (o);
-writeln ("### OA:i:", i, ":ri:", ri);
-writeln ("### OA:var:", var, ":rv:", rv);
+      i = processOpts (o, opts, dispOpts);
+//writeln ("### OA:i:", i, ":ri:", ri);
+//writeln ("### OA:var:", var, ":rv:", rv);
       if (var != rv) { fail = true; }
       if (i != ri) { fail = true; }
       if (fail)
@@ -170,275 +228,72 @@ writeln ("### OA:var:", var, ":rv:", rv);
 }
 
 unittest {
-  int       i;
+  int           failures;
+  int           tcount;
+  Options       opts;
+  DisplayOpts   dispOpts;
 
-  int       failures;
-  int       tcount;
-  string    sarr[];
-
+string s;
   mixin MoptionsTest!bool tbool;
   mixin MoptionsTest!string tstr;
+  mixin MoptionsTest!real treal;
+  mixin MoptionsTest!short tshort;
+  mixin MoptionsTest!(bool[string]) tbaa;
 
   with (opts) {
-    tbool.test ("displayAll", true, "-a", displayAll, true, 1);
-    tstr.test ("dispOpts.dbsstr", true, "-d k", dispOpts.dbsstr, "k", 2);
-    if (hasdashk != true) { ++failures; }
-    tstr.test ("dispOpts.dbsstr", true, "k", dispOpts.dbsstr, "k", 1);
-    if (hasdashk != true) { ++failures; }
-
-    // 6
-    ++tcount;
-    opts = opts.init;
-    auto s = "-k";
-    i = processOpts (s);
-    if (dispOpts.dbsstr != "k") { ++failures; }
-    if (hasdashk != true) { ++failures; }
-
-    // 7
-    ++tcount;
-    opts = opts.init;
-    s = "-d g";
-    i = processOpts (s);
-    if (dispOpts.dbsstr != "g") { ++failures; }
-    if (hasdashk != false) { ++failures; }
-
-    // 8
-    ++tcount;
-    opts = opts.init;
-    s = "-g";
-    i = processOpts (s);
-    if (dispOpts.dbsstr != "g") { ++failures; }
-    if (hasdashk != false) { ++failures; }
-
-    // 9
-    ++tcount;
-    opts = opts.init;
-    s = "-d m";
-    i = processOpts (s);
-    if (dispOpts.dbsstr != "m") { ++failures; }
-    if (hasdashk != false) { ++failures; }
-
-    // 10
-    ++tcount;
-    opts = opts.init;
-    s = "-m";
-    i = processOpts (s);
-    if (dispOpts.dbsstr != "m") { ++failures; }
-    if (hasdashk != false) { ++failures; }
-
-    // 11
-    ++tcount;
-    opts = opts.init;
-    s = "-d h";
-    i = processOpts (s);
-    if (dispOpts.dbsstr != "h") { ++failures; }
-    if (hasdashk != false) { ++failures; }
-
-    // 12
-    ++tcount;
-    opts = opts.init;
-    s = "-h";
-    i = processOpts (s);
-    if (dispOpts.dbsstr != "h") { ++failures; }
-    if (hasdashk != false) { ++failures; }
-
-    // 13
-    ++tcount;
-    opts = opts.init;
-    s = "-d H";
-    i = processOpts (s);
-    if (dispOpts.dbsstr != "H") { ++failures; }
-    if (hasdashk != false) { ++failures; }
-
-    // 14
-    ++tcount;
-    opts = opts.init;
-    s = "-H";
-    i = processOpts (s);
-    if (dispOpts.dbsstr != "H") { ++failures; }
-    if (hasdashk != false) { ++failures; }
-
-    // 15
-    ++tcount;
-    opts = opts.init;
-    s = "-A";
-    i = processOpts (s);
-    if (formatString != DI_ALL_FORMAT) { ++failures; }
-
-    // 16
-    ++tcount;
-    opts = opts.init;
-    s = "-b 1000";
-    i = processOpts (s);
-    if (dispOpts.baseDispSize != 1000.0) { ++failures; }
-
-    // 17
-    ++tcount;
-    opts = opts.init;
-    s = "-b d";
-    i = processOpts (s);
-    if (dispOpts.baseDispSize != 1000.0) { ++failures; }
-
-    // 18
-    ++tcount;
-    opts = opts.init;
-    s = "-b k";
-    i = processOpts (s);
-    if (dispOpts.baseDispSize != 1024.0) { ++failures; }
-
-    // 19
-    ++tcount;
-    opts = opts.init;
-    s = "-f smbuvpT";
-    i = processOpts (s);
-    if (formatString != "smbuvpT") { ++failures; }
-
-    // 20
-    ++tcount;
-    opts = opts.init;
-    s = "-I nfs";
-    i = processOpts (s);
-    if (includeList.keys != ["nfs"]) { ++failures; }
-
-    // 21
-    ++tcount;
-    opts = opts.init;
-    s = "-I nfs,jfs";
-    i = processOpts (s);
-    sarr = includeList.keys;
-    if (sarr.sort != ["jfs", "nfs"]) { ++failures; }
-
-    // 22
-    ++tcount;
-    opts = opts.init;
-    s = "-I nfs -I jfs";
-    i = processOpts (s);
-    sarr = includeList.keys;
-    if (sarr.sort != ["jfs", "nfs"]) { ++failures; }
-
-    // 23
-    ++tcount;
-    opts = opts.init;
-    s = "-l";
-    i = processOpts (s);
-    if (localOnly != true) { ++failures; }
-
-    // 24
-    ++tcount;
-    opts = opts.init;
-    s = "-L";
-    i = processOpts (s);
-    if (includeLoopback != true) { ++failures; }
-
-    // 25
-    ++tcount;
-    opts = opts.init;
-    s = "-n";
-    i = processOpts (s);
-    if (noHeader != true) { ++failures; }
-
-    // 26
-    ++tcount;
-    opts = opts.init;
-    s = "-P";
-    i = processOpts (s);
-    if (hasdashk && dispOpts.dbsstr != "k") { ++failures; }
-    if (! hasdashk && dispOpts.dbsstr != "512") { ++failures; }
-    if (dispOpts.posixCompat != true) { ++failures; }
-    if (formatString != DI_POSIX_FORMAT) { ++failures; }
-
-    // 27
-    ++tcount;
-    opts = opts.init;
-    s = "-q";
-    i = processOpts (s);
-    if (noQuotaCheck != true) { ++failures; }
-
-    // 28
-    ++tcount;
-    opts = opts.init;
-    s = "-s r";
-    i = processOpts (s);
-    if (sortType != "rm") { ++failures; }
-
-    // 29
-    ++tcount;
-    opts = opts.init;
-    s = "-s t";
-    i = processOpts (s);
-    if (sortType != "tm") { ++failures; }
-
-    // 30
-    ++tcount;
-    opts = opts.init;
-    s = "-s trsrm";
-    i = processOpts (s);
-    if (sortType != "trsrm") { ++failures; }
-
-    // 31
-    ++tcount;
-    opts = opts.init;
-    s = "-t";
-    i = processOpts (s);
-    if (displayTotal != true) { ++failures; }
-
-    // 32
-    ++tcount;
-    opts = opts.init;
-    s = "-w 12";
-    i = processOpts (s);
-    if (dispOpts.width != 12) { ++failures; }
-
-    // 33
-    ++tcount;
-    opts = opts.init;
-    s = "-W 12";
-    i = processOpts (s);
-    if (dispOpts.inodeWidth != 12) { ++failures; }
-
-    // 34
-    ++tcount;
-    opts = opts.init;
-    s = "-x nfs";
-    i = processOpts (s);
-    if (ignoreList.keys != ["nfs"]) { ++failures; }
-
-    // 35
-    ++tcount;
-    opts = opts.init;
-    s = "-x nfs,jfs";
-    i = processOpts (s);
-    sarr = ignoreList.keys;
-    if (sarr.sort != ["jfs", "nfs"]) { ++failures; }
-
-    // 36
-    ++tcount;
-    opts = opts.init;
-    s = "-x nfs -x jfs";
-    i = processOpts (s);
-    sarr = ignoreList.keys;
-    if (sarr.sort != ["jfs", "nfs"]) { ++failures; }
-
-    // 37
-    ++tcount;
-    opts = opts.init;
-    s = "-z some";
-    i = processOpts (s);
-    if (zoneDisplay != "some") { ++failures; }
-
-    // 38
-    ++tcount;
-    opts = opts.init;
-    s = "-Z";
-    i = processOpts (s);
-    if (zoneDisplay != "all") { ++failures; }
-
-    // 39
-    ++tcount;
-    opts = opts.init;
-    s = "-X 4";
-    i = processOpts (s);
-    if (debugLevel != 4) { ++failures; }
+    tbool.test ("-a: displayAll", true, "-a", displayAll, true, 1);
+    tstr.test ("-d k: dispOpts.dbsstr", true, "-d k", dispOpts.dbsstr, "k", 2);
+    tbool.test ("-d k: hasdashk", true, "-d k", hasdashk, true, 2);
+    tstr.test ("-k: dispOpts.dbsstr", true, "-k", dispOpts.dbsstr, "k", 1);
+    tbool.test ("-k: hasdashk", true, "-k", hasdashk, true, 1);
+    tstr.test ("-d g: dispOpts.dbsstr", true, "-d g", dispOpts.dbsstr, "g", 2);
+    tbool.test ("-d g: hasdashk", true, "-d g", hasdashk, false, 2);
+    tstr.test ("-g: dispOpts.dbsstr", true, "-g", dispOpts.dbsstr, "g", 1);
+    tbool.test ("-g: hasdashk", true, "-g", hasdashk, false, 1);
+    tstr.test ("-d m: dispOpts.dbsstr", true, "-d m", dispOpts.dbsstr, "m", 2);
+    tbool.test ("-d m: hasdashk", true, "-d m", hasdashk, false, 2);
+    tstr.test ("-m: dispOpts.dbsstr", true, "-m", dispOpts.dbsstr, "m", 1);
+    tbool.test ("-m: hasdashk", true, "-m", hasdashk, false, 1);
+    tstr.test ("-d h: dispOpts.dbsstr", true, "-d h", dispOpts.dbsstr, "h", 2);
+    tbool.test ("-d h: hasdashk", true, "-d h", hasdashk, false, 2);
+    tstr.test ("-h: dispOpts.dbsstr", true, "-h", dispOpts.dbsstr, "h", 1);
+    tbool.test ("-h: hasdashk", true, "-h", hasdashk, false, 1);
+    tstr.test ("-d H: dispOpts.dbsstr", true, "-d H", dispOpts.dbsstr, "H", 2);
+    tbool.test ("-d H: hasdashk", true, "-d H", hasdashk, false, 2);
+    tstr.test ("-H: dispOpts.dbsstr", true, "-H", dispOpts.dbsstr, "H", 1);
+    tbool.test ("-H: hasdashk", true, "-H", hasdashk, false, 1);
+    tstr.test ("-A: formatString", true, "-A", formatString, DI_ALL_FORMAT, 1);
+    treal.test ("-b 1000: dispOpts.baseDispSize", true, "-b 1000", dispOpts.baseDispSize, 1000.0, 2);
+    treal.test ("-b 1024: dispOpts.baseDispSize", true, "-b 1024", dispOpts.baseDispSize, 1024.0, 2);
+    treal.test ("-b d: dispOpts.baseDispSize", true, "-b d", dispOpts.baseDispSize, 1000.0, 2);
+    treal.test ("-b k: dispOpts.baseDispSize", true, "-b k", dispOpts.baseDispSize, 1024.0, 2);
+    tstr.test ("-f: formatString", true, "-f SMbuvpT", formatString, "SMbuvpT", 2);
+    tbaa.test ("-I nfs: includeList", true, "-I nfs", includeList, ["nfs":true], 2);
+    tbaa.test ("-I nfs,jfs: includeList", true, "-I nfs,jfs", includeList, ["nfs":true,"jfs":true], 2);
+    tbaa.test ("-I nfs -I jfs: includeList", true, "-I nfs -I jfs", includeList, ["nfs":true,"jfs":true], 4);
+    tbool.test ("-l: localOnly", true, "-l", localOnly, true, 1);
+    tbool.test ("-L: includeLoopback", true, "-L", includeLoopback, true, 1);
+    tbool.test ("-n: noHeader", true, "-n", noHeader, true, 1);
+    tstr.test ("-P: dispOpts.dbsstr", true, "-P", dispOpts.dbsstr, "512", 1);
+    tbool.test ("-P: dispOpts.posixCompat", true, "-P", dispOpts.posixCompat, true, 1);
+    tstr.test ("-P: formatString", true, "-P", formatString, DI_POSIX_FORMAT, 1);
+    tstr.test ("-P -k: dispOpts.dbsstr", true, "-P -k", dispOpts.dbsstr, "k", 2);
+    tstr.test ("-k -P: dispOpts.dbsstr", true, "-k -P", dispOpts.dbsstr, "k", 2);
+    tbool.test ("-P -k: hasdashk", true, "-P -k", hasdashk, true, 2);
+    tbool.test ("-k -P: hasdashk", true, "-k -P", hasdashk, true, 2);
+    tbool.test ("-q: noQuotaCheck", true, "-q", noQuotaCheck, true, 1);
+    tstr.test ("-s r: sortType", true, "-s r", sortType, "rm", 2);
+    tstr.test ("-s t: sortType", true, "-s t", sortType, "tm", 2);
+    tstr.test ("-s trsrm: sortType", true, "-s trsrm", sortType, "trsrm", 2);
+    tbool.test ("-t: displayTotal", true, "-q", displayTotal, true, 1);
+    tshort.test ("-w 12: dispOpts.width", true, "-w 12", dispOpts.width, 12, 2);
+    tshort.test ("-W 12: dispOpts.inodeWidth", true, "-W 12", dispOpts.width, 12, 2);
+    tbaa.test ("-x nfs: ignoreList", true, "-x nfs", ignoreList, ["nfs":true], 2);
+    tbaa.test ("-x nfs,jfs: ignoreList", true, "-x nfs,jfs", ignoreList, ["nfs":true,"jfs":true], 2);
+    tbaa.test ("-x nfs -x jfs: ignoreList", true, "-x nfs -x jfs", ignoreList, ["nfs":true,"jfs":true], 4);
+    tstr.test ("-z some: zoneDisplay", true, "-z some", zoneDisplay, "some", 2);
+    tstr.test ("-Z: zoneDisplay", true, "-Z", zoneDisplay, "all", 1);
+    tshort.test ("-X 4: debugLevel", true, "-X 4", debugLevel, 4, 2);
   }
 
   write ("unittest: options: processOpts: ");
@@ -450,7 +305,7 @@ unittest {
 }
 
 void
-processBaseSize (string opt, string arg)
+processBaseSize (string arg, ref DisplayOpts dispOpts)
 {
   size_t    i = 0;
   dchar     c;
@@ -475,22 +330,23 @@ processBaseSize (string opt, string arg)
   }
 }
 
-void
+string
 processSort (string arg)
 {
-  with (opts) {
-    sortType = arg;
-    if (arg == "r") {   // backwards compatibility
-      sortType = "rm";
-    }
-    if (arg == "t") {   // add some additional sorting...
-      sortType = "tm";
-    }
+  string sortType;
+
+  sortType = arg;
+  if (arg == "r") {   // backwards compatibility
+    sortType = "rm";
   }
+  if (arg == "t") {   // add some additional sorting...
+    sortType = "tm";
+  }
+  return sortType;
 }
 
 void
-processIncludeList (string arg)
+processIncludeList (string arg, ref Options opts)
 {
   foreach (str; split (arg, ",")) {
     opts.includeList[str] = true;
@@ -498,7 +354,7 @@ processIncludeList (string arg)
 }
 
 void
-processIgnoreList (string arg)
+processIgnoreList (string arg, ref Options opts)
 {
   foreach (str; split (arg, ",")) {
     opts.ignoreList[str] = true;
