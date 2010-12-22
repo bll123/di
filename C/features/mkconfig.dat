@@ -4,7 +4,7 @@
 # Copyright 2006-2010 Brad Lanam, Walnut Creek, California USA
 #
 #
-option-file dioptions.dat
+option-file ../dioptions.dat
 
 loadunit c-main
 loadunit c-include-conflict
