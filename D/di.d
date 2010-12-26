@@ -15,12 +15,9 @@ void main (string[] args)
   DisplayOpts   dispOpts;
 
   getDIOptions (args, opts, dispOpts);
-  setDispBlockSize (dispOpts);
-  if (opts.debugLevel > 10) {
-    dumpDispTable ();
-  }
 
   auto dpList = new DiskPartitions (opts.debugLevel);
   dpList.getEntries ();
   dpList.getPartitionInfo ();
+  displayAll (opts, dispOpts, dpList);
 }
