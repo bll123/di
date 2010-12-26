@@ -139,9 +139,10 @@ version (unittest) {
       if (idx != i) { fail = true; }
       if (fail) {
         ++failures;
+        writefln ("# %s: fail: %s", testname, l);
+        writefln ("  expected: %s got %s", r, v);
+        writefln ("  expected: %s got %s", i, idx);
       }
-      writefln ("# %s: %s: %d: %s",
-        testname, fail ? "fail" : "pass", tcount, l);
     }
   }
 }
@@ -413,9 +414,10 @@ version (unittest) {
       if (fail)
       {
         ++failures;
+        writefln ("# %s: fail: %s", testname, l);
+        writefln ("  expected: %s got %s", r, rc);
+        writefln ("  expected: %s got %s", rv, v);
       }
-      writefln ("# %s: %d: %s: %s",
-        testname, tcount, fail ? "fail" : "pass", l);
     }
   }
 
@@ -437,9 +439,10 @@ version (unittest) {
     if (fail)
     {
       ++failures;
+      writefln ("# %s: fail: %s", testname, l);
+      writefln ("  expected: %s got %s", r, rc);
+      writefln ("  expected: %s got %s", rv, ovstring2);
     }
-    writefln ("# %s: %d: %s: %s",
-      testname, tcount, fail ? "fail" : "pass", l);
   }
   void
 
@@ -460,9 +463,10 @@ version (unittest) {
     if (fail)
     {
       ++failures;
+      writefln ("# %s: fail: %s", testname, l);
+      writefln ("  expected: %s got %s", r, rc);
+      writefln ("  expected: %s got %s", rv, ovstring2);
     }
-    writefln ("# %s: %d: %s: %s",
-      testname, tcount, fail ? "fail" : "pass", l);
   }
 }
 
