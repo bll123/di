@@ -31,6 +31,8 @@ private:
     enum string MNTTYPE_IGNORE = "ignore";
   }
 
+public:
+
   struct DiskPartitions {
     real          totalBlocks;
     real          freeBlocks;
@@ -50,6 +52,7 @@ private:
     string        mountOptions;
     string        mountTime;
   };
+
   DiskPartitions[]      diskPartitions;
 
   // for printFlag
@@ -61,8 +64,6 @@ private:
     DI_PRNT_EXCLUDE = 4,
     DI_PRNT_FORCE = 5,
     DI_PRNT_SKIP = 6;
-
-public:
 
 this () {}
 
@@ -83,12 +84,13 @@ getEntries () {
 
   static if (_clib_getmntent && _clib_setmntent && _clib_endmntent)
   {
-    // #if _setmntent_args == 1
-    //  if ((f = setmntent (toStringz(DI_MOUNT_FILE))) == cast (FILE *) null)
-    // #else
-    if ((f = setmntent (toStringz(DI_MOUNT_FILE),
-        toStringz("r"))) == cast(FILE *) null)
-    // #endif
+    static if (_c_args_setmntent == 1)
+    {
+      f = setmntent (toStringz(DI_MOUNT_FILE));
+    } else static if (_c_args_setmntent == 2) {
+      f = setmntent (toStringz(DI_MOUNT_FILE), toStringz("r"));
+    }
+    if (f == cast(FILE *) null)
     {
       string s = format ("Unable to open %s errno %d", DI_MOUNT_FILE, getErrno());
       throw new Exception (s);
@@ -130,7 +132,7 @@ getEntries () {
 
       if (debugLevel > 5)
       {
-        writefln ("mnt:%s - %s : %s : %d %d",
+        writefln ("mnt:%s - %s:%s: %d %d",
             dp.name, dp.special, dp.fsType,
             dp.printFlag, dp.isReadOnly);
         writefln ("    %s", dp.mountOptions);
@@ -170,13 +172,13 @@ getPartitionInfo ()
         static if (SYSTYPE == "Linux") {
           dp.blockSize = statBuf.f_bsize;
         }
-        dp.totalBlocks = statBuf.f_blocks;
-        dp.freeBlocks = statBuf.f_bfree;
-        dp.availBlocks = statBuf.f_bavail;
+        dp.totalBlocks = cast(typeof(dp.totalBlocks)) statBuf.f_blocks;
+        dp.freeBlocks = cast(typeof(dp.freeBlocks)) statBuf.f_bfree;
+        dp.availBlocks = cast(typeof(dp.availBlocks)) statBuf.f_bavail;
         dp.totalInodes = statBuf.f_files;
         dp.freeInodes = statBuf.f_ffree;
         dp.availInodes = statBuf.f_favail;
-        static if (_mem_C_ST_statvfs_f_basetype) {
+        static if (_cmem_statvfs_f_basetype) {
           if (dp.fsType.length == 0) {
             dp.fsType = to!(typeof(dp.fsType))(statBuf.f_basetype);
           }
@@ -184,9 +186,8 @@ getPartitionInfo ()
 
         if (debugLevel > 5)
         {
-          writefln ("part:%s : %.0f : %.0f %.0f %.0f",
-              dp.name, dp.blockSize,
-              dp.totalBlocks, dp.freeBlocks, dp.availBlocks);
+          writefln ("part:%s: %.0f : %.0f %.0f %.0f", dp.name,
+              dp.blockSize, dp.totalBlocks, dp.freeBlocks, dp.availBlocks);
         }
       }
     }
