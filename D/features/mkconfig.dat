@@ -25,49 +25,52 @@ clib    getvfsstat
 clib    setmntent
 clib    statvfs
 
-chdr    stdio.h
-chdr    stdlib.h
 chdr    libintl.h
 chdr    mntent.h
 chdr    windows.h
 
-csys    statvfs.h
 csys    types.h
+csys    statvfs.h
+
+# di
+chdr    version.h
 
 # Linux: _PATH_MOUNTED mntent.h; MNTTYPE_IGNORE mntent.h
-cdefstr     _PATH_MOUNTED mntent.h
-cdefstr     _PATH_MNTTAB mntent.h
-cdefstr     MOUNTED mntent.h
-cdefstr     MNTTAB mntent.h
-cdefstr     MNTTYPE_IGNORE mntent.h
+cdefstr _PATH_MOUNTED
+cdefstr _PATH_MNTTAB
+cdefstr MOUNTED
+cdefstr MNTTAB
+cdefstr MNTTYPE_IGNORE
+
+# di
+cdefstr DI_VERSION
 
 # linux
-ctype   __fsblkcnt_t sys/statvfs.h
-ctype   __fsfilcnt_t sys/statvfs.h
+ctype   __fsblkcnt_t
+ctype   __fsfilcnt_t
 # linux, 64-bit interface
-ctype   __u_quad_t sys/statvfs.h
-ctype   __fsblkcnt64_t sys/statvfs.h
-ctype   __fsfilcnt64_t sys/statvfs.h
+ctype   __u_quad_t
+ctype   __fsblkcnt64_t
+ctype   __fsfilcnt64_t
 # linux
-cstruct statvfs sys/statvfs.h
+cstruct statvfs
 
 # linux
-cstruct mntent mntent.h
+cstruct mntent
 
-cdcl    bindtextdomain libintl.h
-cdcl    endmntent mntent.h
-cdcl    GetDiskFreeSpace windows.h
-cdcl    GetDiskFreeSpaceEx windows.h
-cdcl    GetDriveType windows.h
-cdcl    GetLogicalDriveStrings windows.h
-cdcl    GetVolumeInformation windows.h
-cdcl    getmntent mntent.h
-cdcl    gettext libintl.h
+cdcl    bindtextdomain
+cdcl    endmntent
+cdcl    GetDiskFreeSpace
+cdcl    GetDiskFreeSpaceEx
+cdcl    GetDriveType
+cdcl    GetLogicalDriveStrings
+cdcl    GetVolumeInformation
+cdcl    getmntent
+cdcl    gettext
 #cdcl    getvfsstat
-cdcl    setmntent mntent.h
-cdcl    statvfs sys/statvfs.h
-
-member  C_ST_statvfs f_basetype
+cdcl    args setmntent
+cdcl    statvfs 
+cmember  statvfs f_basetype
 
 # see dioptions.dat to change these
 option  DI_DEFAULT_FORMAT smbuvpT

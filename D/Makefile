@@ -11,6 +11,7 @@ OBJ_EXT = .o
 EXE_EXT =
 MAKE = make
 
+CC = cc
 DC = dmd
 
 #
@@ -25,9 +26,6 @@ LN = ln
 MKDIR = mkdir
 MV = mv
 RM = rm
-RPMBUILD = rpmbuild
-SED = sed
-TEST = test
 
 ###
 # mkconfig variables
@@ -43,12 +41,15 @@ MKC_REQLIB = mkconfig.reqlibs
 
 all:	di.env
 	. ./di.env; \
-	$(MAKE) -e MKCONFIG_TYPE=sh di-programs
+	$(MAKE) -e MKCONFIG_TYPE=sh \
+        DTESTFLAGS="$$DC_OPT $$DC_RELEASE $$DC_INLINE" di-programs
 
 all-test: di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
-        DTESTFLAGS="$$DC_UNITTEST $$DC_COV" di-programs
+        DTESTFLAGS="$$DC_UNITTEST $$DC_COV" \
+	LIBS="$(LIBS) $$DC_LIBS" \
+	di-programs
 
 ###
 # environment
@@ -57,7 +58,7 @@ all-test: di.env
 
 di.env:	features/env.dat
 	@-$(RM) -f di.env tests.done
-	DC=$(DC) $(_MKCONFIG_SHELL) \
+	DC=$(DC) CFLAGS="-I`pwd`/../C" $(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh features/env.dat
 
 ###
@@ -67,8 +68,10 @@ di.env:	features/env.dat
 #   config.d, di.env, mkconfig.reqlibs,
 #   mkconfig.cache, mkconfig_*.vars,
 clean:
-	@-rm -f di di.exe mi mi.exe *.o *.obj *.lst mkconfig.log \
-	    > /dev/null 2>&1
+	@-rm -f di di.exe mi mi.exe \
+		*.o *.obj *.lst *.gcno *.gcda *.gcov \
+		mkconfig.log \
+		> /dev/null 2>&1
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig
@@ -111,10 +114,10 @@ $(MKC_REQLIB):	di.env config.d
 # executables
 
 OBJECTS = config$(OBJ_EXT) di_getopt$(OBJ_EXT) diskpart$(OBJ_EXT) \
-	display$(OBJ_EXT) dispopts$(OBJ_EXT) di$(OBJ_EXT) options$(OBJ_EXT) 
+	display$(OBJ_EXT) dispopts$(OBJ_EXT) di$(OBJ_EXT) options$(OBJ_EXT)
 
 di$(EXE_EXT):	$(OBJECTS)
-	$(MKCONFIGPATH)/mklink.sh -c ${DC} -o di$(EXE_EXT) -- $(OBJECTS)
+	$(MKCONFIGPATH)/mklink.sh -c ${DC} -o di$(EXE_EXT) -- $(OBJECTS) $(LIBS)
 
 ###
 # objects
@@ -123,8 +126,9 @@ config$(OBJ_EXT):	config.d
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) config.d
 
 di$(OBJ_EXT):	di.d config$(OBJ_EXT) \
-		options$(OBJ_EXT) diskpart$(OBJ_EXT) \
-		display$(OBJ_EXT) di_getopt$(OBJ_EXT)
+		diskpart$(OBJ_EXT) display$(OBJ_EXT) \
+		dispopts$(OBJ_EXT) di_getopt$(OBJ_EXT) \
+		options$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di.d
 
 di_getopt$(OBJ_EXT):	di_getopt.d config$(OBJ_EXT)
@@ -133,7 +137,9 @@ di_getopt$(OBJ_EXT):	di_getopt.d config$(OBJ_EXT)
 diskpart$(OBJ_EXT):	diskpart.d config$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) diskpart.d
 
-display$(OBJ_EXT):	display.d config$(OBJ_EXT) dispopts$(OBJ_EXT)
+display$(OBJ_EXT):	display.d config$(OBJ_EXT) \
+		diskpart$(OBJ_EXT) dispopts$(OBJ_EXT) \
+		options$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) display.d
 
 dispopts$(OBJ_EXT):	dispopts.d config$(OBJ_EXT)
