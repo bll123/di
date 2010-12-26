@@ -103,9 +103,12 @@ unittest {
   setenv ("DIFMT", "SMT", true);
   getDIOptions ([""], opts, dispOpts);
   if (opts.formatString != "SMT") { fail = true; }
-  writefln ("# %s: %s: %d: %s",
-    "getDIOptions:", fail ? "fail" : "pass", tcount, "Env: DIFMT");
-  if (fail) { ++failures; }
+  if (fail)
+  {
+    ++failures;
+    writefln ("# %s: fail: %s", "getDIOptions:", "Env: DIFMT");
+    writefln ("  expected: %s got %s", "SMT", opts.formatString);
+  }
   unsetenv ("DIFMT");
 
   ++tcount;
@@ -116,9 +119,14 @@ unittest {
   if (dispOpts.dbsstr != "512") { fail = true; }
   if (opts.formatString != DI_POSIX_FORMAT) { fail = true; }
   if (dispOpts.posixCompat != true) { fail = true; }
-  writefln ("# %s: %s: %d: %s",
-    "getDIOptions:", fail ? "fail" : "pass", tcount, "Env: POSIXLY_CORRECT");
-  if (fail) { ++failures; }
+  if (fail)
+  {
+    ++failures;
+    writefln ("# %s: fail: %s", "getDIOptions:", "Env: POSIXLY_CORRECT");
+    writefln ("  expected: %s got %s", "512", dispOpts.dbsstr);
+    writefln ("  expected: %s got %s", DI_POSIX_FORMAT, opts.formatString);
+    writefln ("  expected: %s got %s", true, dispOpts.posixCompat);
+  }
   unsetenv ("POSIXLY_CORRECT");
 
   ++tcount;
@@ -127,9 +135,12 @@ unittest {
   setenv ("DF_BLOCK_SIZE", "kB", true);
   getDIOptions ([""], opts, dispOpts);
   if (dispOpts.dbsstr != "kB") { fail = true; }
-  writefln ("# %s: %s: %d: %s",
-    "getDIOptions:", fail ? "fail" : "pass", tcount, "Env: DF_BLOCK_SIZE");
-  if (fail) { ++failures; }
+  if (fail)
+  {
+    ++failures;
+    writefln ("# %s: fail: %s", "getDIOptions:", "Env: DF_BLOCK_SIZE");
+    writefln ("  expected: %s got %s", "kB", dispOpts.dbsstr);
+  }
   unsetenv ("DF_BLOCK_SIZE");
 
   ++tcount;
@@ -138,9 +149,12 @@ unittest {
   setenv ("BLOCKSIZE", "kB", true);
   getDIOptions ([""], opts, dispOpts);
   if (dispOpts.dbsstr != "kB") { fail = true; }
-  writefln ("# %s: %s: %d: %s",
-    "getDIOptions:", fail ? "fail" : "pass", tcount, "Env: BLOCKSIZE");
-  if (fail) { ++failures; }
+  if (fail)
+  {
+    ++failures;
+    writefln ("# %s: fail: %s", "getDIOptions:", "Env: BLOCKSIZE");
+    writefln ("  expected: %s got %s", "kB", dispOpts.dbsstr);
+  }
   unsetenv ("BLOCKSIZE");
 
   write ("unittest: options: getDIOptions: ");
@@ -220,9 +234,10 @@ version (unittest) {
       if (fail)
       {
         ++failures;
+        writefln ("# %s: fail: %s", "processOpts:", l);
+        writefln ("  expected: %s got %s", rv, var);
+        writefln ("  expected: %s got %s", ri, i);
       }
-      writefln ("# %s: %s: %d: %s",
-        "processOpts:", fail ? "fail" : "pass", tcount, l);
     }
   }
 }
