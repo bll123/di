@@ -158,6 +158,9 @@ diquota (diqinfo)
 #endif
     ;
   } else {
+    /* hp-ux doesn't have QCMD */
+    ucmd = Q_GETQUOTA;
+    gcmd = Q_GETQUOTA;
 #ifdef QCMD
     ucmd = QCMD (Q_GETQUOTA, USRQUOTA);
     gcmd = QCMD (Q_GETQUOTA, GRPQUOTA);
@@ -291,28 +294,30 @@ xdr_quota_rslt (xp, rslt)
   rptr = &rslt->getquota_rslt_u.gqr_rquota;
 # endif
 
+#define xdr_u_val _rquota_type
+
   if (! xdr_int (xp, &rptr->rq_bsize)) {
     return 0;
   }
   if (! xdr_bool (xp, &rptr->rq_active)) {
     return 0;
   }
-  if (! xdr_u_int (xp, &rptr->rq_bhardlimit)) {
+  if (! xdr_u_val (xp, &rptr->rq_bhardlimit)) {
     return 0;
   }
-  if (! xdr_u_int (xp, &rptr->rq_bsoftlimit)) {
+  if (! xdr_u_val (xp, &rptr->rq_bsoftlimit)) {
     return 0;
   }
-  if (! xdr_u_int (xp, &rptr->rq_curblocks)) {
+  if (! xdr_u_val (xp, &rptr->rq_curblocks)) {
     return 0;
   }
-  if (! xdr_u_int (xp, &rptr->rq_fhardlimit)) {
+  if (! xdr_u_val (xp, &rptr->rq_fhardlimit)) {
     return 0;
   }
-  if (! xdr_u_int (xp, &rptr->rq_fsoftlimit)) {
+  if (! xdr_u_val (xp, &rptr->rq_fsoftlimit)) {
     return 0;
   }
-  if (! xdr_u_int (xp, &rptr->rq_curfiles)) {
+  if (! xdr_u_val (xp, &rptr->rq_curfiles)) {
     return 0;
   }
   return (1);
