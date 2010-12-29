@@ -264,12 +264,18 @@ include
 # define Gid_t int
 #endif
 
+/* Do this the old-fashioned way for old compilers */
+/* Have to work around MacOSX's snprintf macro.    */
 #if _lib_snprintf
-# define Snprintf snprintf
-# define DI_SPF(a2,a3)         a2,a3
+# define Snprintf1 snprintf
+# define Snprintf2 snprintf
+# define Snprintf3 snprintf
+# define Snprintf4 snprintf
 #else
-# define Snprintf sprintf
-# define DI_SPF(a2,a3)         a3
+# define Snprintf1(a1,a2,a3) sprintf(a1,a3)
+# define Snprintf2(a1,a2,a3,a4) sprintf(a1,a3,a4)
+# define Snprintf3(a1,a2,a3,a4,a5) sprintf(a1,a3,a4,a5)
+# define Snprintf4(a1,a2,a3,a4,a5,a6) sprintf(a1,a3,a4,a5,a6)
 #endif
 
 #if ! _lib_strcoll
