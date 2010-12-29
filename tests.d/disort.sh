@@ -8,6 +8,8 @@ if [ "$1" = "-d" ]; then
   exit 0
 fi
 
+set -x
+
 grc=0
 
 LC_ALL="C"
@@ -29,13 +31,13 @@ dotest () {
 
 echo "## regular sort first, then di sort"
 echo "by special"
-$RUNTOPDIR/di -n -a -f S | sort > s1
-$RUNTOPDIR/di -n -a -f S -ss > s2
+${_MKCONFIG_RUNTOPDIR}/di -n -a -f S | sort > s1
+${_MKCONFIG_RUNTOPDIR}/di -n -a -f S -ss > s2
 dotest
 
 echo "by special reverse"
-$RUNTOPDIR/di -n -a -f S | sort -r > s1
-$RUNTOPDIR/di -n -a -f S -srs > s2
+${_MKCONFIG_RUNTOPDIR}/di -n -a -f S | sort -r > s1
+${_MKCONFIG_RUNTOPDIR}/di -n -a -f S -srs > s2
 dotest
 
 echo "by special w/total"

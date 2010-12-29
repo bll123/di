@@ -8,6 +8,8 @@ if [ "$1" = "-d" ]; then
   exit 0
 fi
 
+set -x
+
 grep '^#define _enable_nls 1' ${_MKCONFIG_RUNTOPDIR}/config.h
 hasnls=$?
 
@@ -16,8 +18,8 @@ if [ ${hasnls} -ne 0 ];then
   exit 0
 fi
 
-DI_LOCALE=${_MKCONFIG_RUNTOPDIR}/test_di/share/locale
-export DI_LOCALE
+DI_LOCALE_DIR=${_MKCONFIG_RUNTOPDIR}/test_di/share/locale
+export DI_LOCALE_DIR
 
 grc=1
 for l in "de" "de_DE" "de_DE.utf-8" "de_DE.UTF-8" \
