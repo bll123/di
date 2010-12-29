@@ -64,19 +64,19 @@ MANPERM = 644
 # all
 
 all:
-	cd C;$(MAKE) -e all
+	cd C >/dev/null;$(MAKE) -e all
 
 all-c:
-	cd C;$(MAKE) -e all
+	cd C >/dev/null;$(MAKE) -e all
 
 all-perl:
-	cd C;$(MAKE) -e all-perl
+	cd C >/dev/null;$(MAKE) -e all-perl
 
 all-test:
-	cd C;$(MAKE) -e all-test
+	cd C >/dev/null;$(MAKE) -e all-test
 
 all-d:
-	cd D;$(MAKE) -e all
+	cd D >/dev/null;$(MAKE) -e all
 
 ###
 # installation
@@ -87,14 +87,14 @@ install:
 
 build-po:
 	-. ./C/di.env; \
-		(cd po;for i in *.po; do \
+		(cd po >/dev/null;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
 		$${XMSGFMT} -o $$j.mo $$i; \
 	done)
 
 install-po: 	build-po
 	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
-	-(cd po;for i in *.po; do \
+	-(cd po >/dev/null;for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
 		$(TEST) -d $(INST_LOCALEDIR)/$$j || \
 			$(MKDIR) $(INST_LOCALEDIR)/$$j; \
@@ -140,24 +140,24 @@ tar:
 # cleaning
 
 clean:
-	@-(cd C;$(MAKE) clean > /dev/null 2>&1)
-	@-(cd mkconfig;$(MAKE) clean > /dev/null 2>&1)
-	@-(cd D;$(MAKE) clean > /dev/null 2>&1)
+	@-(cd C >/dev/null;$(MAKE) clean > /dev/null 2>&1)
+	@-(cd mkconfig >/dev/null;$(MAKE) clean > /dev/null 2>&1)
+	@-(cd D >/dev/null;$(MAKE) clean > /dev/null 2>&1)
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig, dioptions.dat
 #   pretests.done, test_di
 realclean:
-	@-(cd C;$(MAKE) realclean > /dev/null 2>&1)
-	@-(cd mkconfig;$(MAKE) realclean > /dev/null 2>&1)
-	@-(cd D;$(MAKE) realclean > /dev/null 2>&1)
+	@-(cd C >/dev/null;$(MAKE) realclean > /dev/null 2>&1)
+	@-(cd mkconfig >/dev/null;$(MAKE) realclean > /dev/null 2>&1)
+	@-(cd D >/dev/null;$(MAKE) realclean > /dev/null 2>&1)
 
 # leaves:
 #   dioptions.dat
 distclean:
-	@-(cd C;$(MAKE) distclean > /dev/null 2>&1)
-	@-(cd mkconfig;$(MAKE) distclean > /dev/null 2>&1)
-	@-(cd D;$(MAKE) distclean > /dev/null 2>&1)
+	@-(cd C >/dev/null;$(MAKE) distclean > /dev/null 2>&1)
+	@-(cd mkconfig >/dev/null;$(MAKE) distclean > /dev/null 2>&1)
+	@-(cd D >/dev/null;$(MAKE) distclean > /dev/null 2>&1)
 
 
 ###
