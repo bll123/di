@@ -6,10 +6,13 @@
 #  $Id$
 #
 
+CC = cc
+# for tests.done
+DC = gdc 
+
 SHELL = /bin/sh
 OBJ_EXT = .o
 EXE_EXT =
-CC = cc
 MAKE = make
 
 ###
@@ -267,7 +270,8 @@ all-test:	tests.done
 
 tests.done: $(MKCONFIGPATH)/runtests.sh
 	@echo "## running tests"
-	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/runtests.sh ../tests.d
+	CC=$(CC) DC=$(DC) $(_MKCONFIG_SHELL) \
+		$(MKCONFIGPATH)/runtests.sh ../tests.d
 	touch tests.done
 
 testrpmbuild:
