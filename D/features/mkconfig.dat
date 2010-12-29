@@ -12,6 +12,16 @@ output   config.d
 
 standard
 
+chdr    libintl.h
+chdr    mntent.h
+chdr    windows.h
+
+csys    types.h
+csys    statvfs.h
+
+# di
+chdr    version.h
+
 clib    bindtextdomain -lintl, -lintl -liconv
 clib    endmntent
 clib    GetDiskFreeSpace
@@ -24,16 +34,6 @@ clib    gettext -lintl, -lintl -liconv
 clib    getvfsstat
 clib    setmntent
 clib    statvfs
-
-chdr    libintl.h
-chdr    mntent.h
-chdr    windows.h
-
-csys    types.h
-csys    statvfs.h
-
-# di
-chdr    version.h
 
 # Linux: _PATH_MOUNTED mntent.h; MNTTYPE_IGNORE mntent.h
 cdefstr _PATH_MOUNTED
@@ -69,7 +69,7 @@ cdcl    getmntent
 cdcl    gettext
 #cdcl    getvfsstat
 cdcl    args setmntent
-cdcl    statvfs 
+cdcl    statvfs
 cmember  statvfs f_basetype
 
 # see dioptions.dat to change these
