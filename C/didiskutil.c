@@ -350,7 +350,7 @@ convertNFSMountOptions (flags, wsize, rsize, diptr)
     {
         char          tmp [64];
 
-        Snprintf (tmp, DI_SPF(sizeof (tmp), "wsize=%ld,"), wsize);
+        Snprintf1 (tmp, sizeof (tmp), "wsize=%ld,", wsize);
         strncat (diptr->options, tmp,
                 DI_OPT_LEN - strlen (diptr->options) - 1);
     }
@@ -360,7 +360,7 @@ convertNFSMountOptions (flags, wsize, rsize, diptr)
     {
         char          tmp [64];
 
-        Snprintf (tmp, DI_SPF(sizeof (tmp), "rsize=%ld,"), rsize);
+        Snprintf1 (tmp, sizeof (tmp), "rsize=%ld,", rsize);
         strncat (diptr->options, tmp,
                 DI_OPT_LEN - strlen (diptr->options) - 1);
     }

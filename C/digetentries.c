@@ -895,8 +895,8 @@ di_getDiskEntries (diskInfo, diCount)
         }
         else
         {
-            Snprintf (diptr->fsType, DI_SPF(sizeof (diptr->fsType),
-                      DI_UNKNOWN_FSTYPE), fstype);
+            Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
+                      DI_UNKNOWN_FSTYPE, fstype);
         }
 #  endif
 # endif /* else has sys/fs_types.h */
@@ -1078,8 +1078,8 @@ di_getDiskEntries (diskInfo, diCount)
         }
         else
         {
-            Snprintf (diptr->fsType, DI_SPF(sizeof (diptr->fsType),
-                      DI_UNKNOWN_FSTYPE), fstype);
+            Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
+                      DI_UNKNOWN_FSTYPE, fstype);
         }
 #   endif
 #  endif
@@ -1310,8 +1310,8 @@ di_getDiskEntries (diskInfo, diCount)
         }
         else
         {
-            Snprintf (diptr->fsType, DI_SPF(sizeof (diptr->fsType),
-                          "Unknown fstyp %.2d"), fstype);
+            Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
+                          "Unknown fstyp %.2d", fstype);
         }
 
         if ((fsdbuf [idx].fd_req.flags & MNT_RDONLY) == MNT_RDONLY)
