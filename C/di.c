@@ -811,13 +811,13 @@ printDiskInfo (diData)
     if (diopts->dispBlockSize != DI_DISP_HR &&
         diopts->dispBlockSize != DI_DISP_HR_2 &&
         (diopts->dispBlockSize > 0 && diopts->dispBlockSize <= DI_VAL_1024)) {
-      Snprintf (diout->blockFormat,
-          DI_SPF(sizeof (diout->blockFormat), "%%%d.0%s%%s"), (int) diout->width, DI_Lf);
+      Snprintf2 (diout->blockFormat, sizeof (diout->blockFormat),
+          "%%%d.0%s%%s", (int) diout->width, DI_Lf);
     } else {
-      Snprintf (diout->blockFormatNR,
-          DI_SPF(sizeof (diout->blockFormatNR), "%%%d.0%s%%s"), (int) diout->width, DI_Lf);
-      Snprintf (diout->blockFormat,
-          DI_SPF(sizeof (diout->blockFormat), "%%%d.1%s%%s"), (int) diout->width, DI_Lf);
+      Snprintf2 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
+          "%%%d.0%s%%s", (int) diout->width, DI_Lf);
+      Snprintf2 (diout->blockFormat, sizeof (diout->blockFormat),
+          "%%%d.1%s%%s", (int) diout->width, DI_Lf);
     }
 
     if (diopts->dispBlockSize == DI_DISP_HR ||
@@ -826,14 +826,14 @@ printDiskInfo (diData)
         ++diout->width;
     }
 
-    Snprintf (diout->blockLabelFormat,
-        DI_SPF(sizeof (diout->blockLabelFormat), "%%%ds"), (int) diout->width);
+    Snprintf1 (diout->blockLabelFormat,
+        sizeof (diout->blockLabelFormat), "%%%ds", (int) diout->width);
 #if _siz_long_long >= 8
-    Snprintf (diout->inodeFormat,
-        DI_SPF(sizeof (diout->inodeFormat), "%%%dllu"), (int) diout->inodeWidth);
+    Snprintf1 (diout->inodeFormat,
+        sizeof (diout->inodeFormat), "%%%dllu", (int) diout->inodeWidth);
 #else
-    Snprintf (diout->inodeFormat,
-        DI_SPF(sizeof (diout->inodeFormat), "%%%dlu"), (int) diout->inodeWidth);
+    Snprintf1 (diout->inodeFormat,
+        sizeof (diout->inodeFormat), "%%%dlu", (int) diout->inodeWidth);
 #endif
 
     diskInfo = diData->diskInfo;
@@ -983,8 +983,8 @@ printInfo (diskInfo, diopts, diout)
     static int          percInit = FALSE;
 
     if (! percInit) {
-      Snprintf (percFormat, DI_SPF (sizeof(percFormat), DI_PERC_FMT), DI_Lf);
-      Snprintf (posixPercFormat, DI_SPF (sizeof(posixPercFormat), DI_POSIX_PERC_FMT), DI_Lf);
+      Snprintf1 (percFormat, sizeof(percFormat), DI_PERC_FMT, DI_Lf);
+      Snprintf1 (posixPercFormat, sizeof(posixPercFormat), DI_POSIX_PERC_FMT, DI_Lf);
       percInit = TRUE;
     }
     idx = 0;
@@ -1651,7 +1651,7 @@ processTitles (diopts, diout)
           tlen = len + olen - ilen;  /* for the title only */
 
           jstr = justification == DI_JUST_LEFT ? "-" : "";
-          Snprintf (tformat, DI_SPF(sizeof (tformat), "%%%s%d.%ds"),
+          Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
               jstr, (int) tlen, (int) tlen);
 
           if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
@@ -1660,7 +1660,7 @@ processTitles (diopts, diout)
 /*fprintf (stderr, "%s: olen:%d wlen:%d ilen:%d len:%d tlen:%d %s\n", pstr, olen, wlen, ilen, len, tlen, tformat); */
           if (fstr != (char *) NULL) {
             if (tlen != len) {
-              Snprintf (tformat, DI_SPF(sizeof (tformat), "%%%s%d.%ds"),
+              Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
                   jstr, (int) len, (int) len);
             }
             strncpy (fstr, tformat, maxsize);
@@ -3251,8 +3251,8 @@ setDispBlockSize (ptr, diopts, diout)
             }
             else
             {
-                Snprintf (tempbl, DI_SPF (sizeof (tempbl), "%%.0%s %%s"), DI_Lf);
-                Snprintf (tempbl, DI_SPF (sizeof (tempbl), tempbl),
+                Snprintf1 (tempbl, sizeof (tempbl), "%%.0%s %%s", DI_Lf);
+                Snprintf2 (tempbl, sizeof (tempbl), tempbl,
                     val, DI_GT (dispTable [idx].disp [diopts->baseDispIdx]));
                 diout->dispBlockLabel = tempbl;
             }
@@ -3277,8 +3277,8 @@ setDispBlockSize (ptr, diopts, diout)
 
         if (ok == 0)
         {
-            Snprintf (tempbl, DI_SPF(sizeof (tempbl), "%%.0%sb"), DI_Lf);
-            Snprintf (tempbl, DI_SPF(sizeof (tempbl), tempbl), val);
+            Snprintf1 (tempbl, sizeof (tempbl), "%%.0%sb", DI_Lf);
+            Snprintf1 (tempbl, sizeof (tempbl), tempbl, val);
             diout->dispBlockLabel = tempbl;
         }
     }  /* some oddball block size */
