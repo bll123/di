@@ -1,36 +1,53 @@
-config.bsd43.cc		config.h for bsd43
-config.bsd43.gcc	config.h for bsd43
-config.mingw		config.h for windows (MinGW)
-config.vms		config.h for VMS
-config.vms.b		alternate config.h for VMS
-config.win		config.h for windows
-di.1			di Manual Page
-di.c			di source
-didiskutil.c		di source
-digetentries.c		di source
-digetinfo.c		di source
-diquota.c		di source
-di.h			di source
-dimntopt.h		di source
-di.spec			rpmspec file
+C/                      C di source
+C/config.bsd43.cc         config.h for bsd43
+C/config.bsd43.gcc        config.h for bsd43
+C/config.mingw            config.h for windows (MinGW)
+C/config.vms              config.h for VMS
+C/config.vms.b            alternate config.h for VMS
+C/config.win              config.h for windows
+C/di.c                    di source
+C/didiskutil.c            di source
+C/digetentries.c          di source
+C/digetinfo.c             di source
+C/di.h                    di source
+C/di.spec                 rpmspec file
+C/dimntopt.h              di source
+C/diquota.c               di source
+C/features/               di configuration
+C/features/env.dat          environment configuration
+C/features/mkconfig.dat     mkconfig configuration
+C/getopt.c                getopt source (from Cnews)
+C/Makefile                C Makefile
+C/realloc.c               di source
+C/strdup.c                di source
+C/strstr.c                di source
+C/trimchar.c              di source
+C/version.h               di source
+D/                      D di source
+D/di.d                    di source
+D/di_getopt.d             di source
+D/diskpart.d              di source
+D/display.d               di source
+D/dispopts.d              di source
+D/features/               di configuration
+D/features/env.dat          environment configuration
+D/features/mkconfig.dat     mkconfig configuration
+D/Makefile                D Makefile
+D/options.d               di source
+D/README                  D source README
+di.1                    di Manual Page
 features/
-features/dioptions.dat	di options
-features/env.dat	environment configuration
-features/mkconfig.dat	mkconfig configuration
-getopt.c		getopt source (from Cnews)
-LICENSE			License
-Makefile		Main Makefile
-MANIFEST		This file
-mktar.sh		Creates the tar file.
-po/			internationalization
+features/dioptions.dat  di options
+LICENSE                 License
+Makefile                Top Level Makefile
+MANIFEST                This file
+mktar.sh                Creates the tar file
+po/                     internationalization
 po/de.po
 po/en.po
 po/es.po
-README			Read This
-realloc.c		di source
-strdup.c		di source
-strstr.c		di source
-tests.d/		regression tests for di
+README                  Read This
+tests.d/                regression tests for di
 tests.d/buildpl.sh
 tests.d/buildsh.mksh
 tests.d/buildsh.sh
@@ -44,5 +61,3 @@ tests.d/ditot.sh
 tests.d/env.sh
 tests.d/rpmbuild.sh
 tests.d/test_order
-trimchar.c		di source
-version.h		di source
