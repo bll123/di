@@ -12,6 +12,8 @@ fi
 testshcapability
 
 grc=0
+stag=$1
+shift
 
 cd $_MKCONFIG_RUNTOPDIR
 
@@ -35,7 +37,7 @@ if [ $grc -eq 0 ]; then
     grep -v 'Using libs:' |
     grep -v 'di\.env' |
     grep -v '^CC=' > make_extra.log
-  extra=`wc -l make_extra.log`
+  extra=`cat make_extra.log | wc -l make_extra.log`
   if [ $extra -ne 0 ]; then
     echo "## extra output"
     grc=1
