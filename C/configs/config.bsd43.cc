@@ -47,6 +47,7 @@
 #define _hdr_util_string 0
 #define _hdr_wchar 0
 #define _hdr_windows 0
+#define _hdr_winioctl 0
 #define _hdr_zone 0
 #define _sys_dcmd_blk 0
 #define _sys_file 1
@@ -85,6 +86,8 @@
 #define _lib_bcopy 1
 #define _lib_bindtextdomain 0
 #define _lib_bzero 1
+#define _lib_CreateFile 0
+#define _lib_DeviceIoControl 0
 #define _lib_endmntent 1
 #define _lib_fs_stat_dev 0
 #define _lib_fshelp 0
@@ -124,6 +127,9 @@
 #define _lib_zone_getattr 0
 #define _lib_zone_list 0
 #define _quotactl_pos 2
+#define _rquota_xdr xdr_u_long
+#define _gqa_uid_xdr xdr_int
+#define _getfsstat_type 0
 #define _setmntent_args 2
 #define _statfs_args 2
 #define _class_os__Volumes 0
@@ -152,6 +158,7 @@
 #define _mem_struct_statfs_f_type 1
 #define _mem_struct_statvfs_f_basetype 0
 #define _siz_long_long 0
+#define _siz_long_double 0
 #define _has_std_quotas 1
 #define _enable_nls 0
 #define DI_DEFAULT_FORMAT "smbuvpT"
@@ -207,12 +214,18 @@
 # define Gid_t int
 #endif
 
+/* Do this the old-fashioned way for old compilers */
+/* Have to work around MacOSX's snprintf macro.    */
 #if _lib_snprintf
-# define Snprintf snprintf
-# define DI_SPF(a2,a3)         a2,a3
+# define Snprintf1 snprintf
+# define Snprintf2 snprintf
+# define Snprintf3 snprintf
+# define Snprintf4 snprintf
 #else
-# define Snprintf sprintf
-# define DI_SPF(a2,a3)         a3
+# define Snprintf1(a1,a2,a3,a4) sprintf(a1,a3,a4)
+# define Snprintf2(a1,a2,a3,a4,a5) sprintf(a1,a3,a4,a5)
+# define Snprintf3(a1,a2,a3,a4,a5,a6) sprintf(a1,a3,a4,a5,a6)
+# define Snprintf4(a1,a2,a3,a4,a5,a6,a7) sprintf(a1,a3,a4,a5,a6,a7)
 #endif
 
 #if ! _lib_strcoll
