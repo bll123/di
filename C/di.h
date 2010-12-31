@@ -201,6 +201,10 @@ extern void di_getDiskInfo          _((diDiskInfo_t **, int *));
 extern void diquota                 _((diQuota_t *));
  /* getopt.c */
 # if ! _lib_getopt || _npt_getopt
+#  if ! _lib_getopt
+extern char *optarg;
+extern int optind;
+#  endif
 extern int getopt                   _((int, char * const [], const char *));
 # endif
  /* strdup.c */
