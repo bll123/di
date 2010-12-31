@@ -466,7 +466,7 @@ main (argc, argv)
 #endif
 
     ptr = argv [0] + strlen (argv [0]) - 2;
-    if (memcmp (ptr, MPROG, 2) == 0)
+    if (memcmp (ptr, MPROG, (Size_t) 2) == 0)
     {
         diopts->formatString = DI_DEF_MOUNT_FORMAT;
     }
@@ -591,7 +591,7 @@ main (argc, argv)
                     zi->zones[i].rootpath, MAXPATHLEN);
             if (len >= 0)
             {
-                zi->zones[i].rootpathlen = len;
+                zi->zones[i].rootpathlen = (Size_t) len;
                 strncat (zi->zones[i].rootpath, "/", MAXPATHLEN - 1);
                 if (zi->zones[i].zoneid == 0)
                 {
@@ -795,7 +795,7 @@ printDiskInfo (diData)
     {
         di_initDiskInfo (&totals);
         totals.blockSize = 512;
-        strncpy (totals.name, DI_GT("Total"), DI_NAME_LEN);
+        strncpy (totals.name, DI_GT("Total"), (Size_t) DI_NAME_LEN);
         totals.printFlag = DI_PRNT_OK;
     }
 
@@ -2938,7 +2938,7 @@ checkIgnoreList (diskInfo, ignoreList)
         }
         if (strcmp (ptr, diskInfo->fsType) == 0 ||
             (strcmp (ptr, "fuse") == 0 &&
-             strncmp ("fuse", diskInfo->fsType, 4) == 0))
+             strncmp ("fuse", diskInfo->fsType, (Size_t) 4) == 0))
         {
             diskInfo->printFlag = DI_PRNT_EXCLUDE;
             diskInfo->doPrint = FALSE;
@@ -2979,7 +2979,7 @@ checkIncludeList (diskInfo, includeList)
 
         if (strcmp (ptr, diskInfo->fsType) == 0 ||
             (strcmp (ptr, "fuse") == 0 &&
-             strncmp ("fuse", diskInfo->fsType, 4) == 0))
+             strncmp ("fuse", diskInfo->fsType, (Size_t) 4) == 0))
         {
             diskInfo->printFlag = DI_PRNT_OK;
             diskInfo->doPrint = TRUE;
@@ -3220,7 +3220,7 @@ setDispBlockSize (ptr, diopts, diout)
 
             default:
             {
-                if (strncmp (ptr, "HUMAN", 5) == 0)
+                if (strncmp (ptr, "HUMAN", (Size_t) 5) == 0)
                 {
                     val = DI_DISP_HR;
                 }
