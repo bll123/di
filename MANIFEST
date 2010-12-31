@@ -34,7 +34,7 @@ D/features/env.dat          environment configuration
 D/features/mkconfig.dat     mkconfig configuration
 D/Makefile                D Makefile
 D/options.d               di source
-D/README                  D source README
+D/d.README                D source README
 di.1                    di Manual Page
 features/
 features/dioptions.dat  di options
