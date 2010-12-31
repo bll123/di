@@ -107,6 +107,9 @@
 #if _hdr_windows                    /* windows */
 # include <windows.h>
 #endif
+#if _hdr_winioctl                   /* windows */
+# include <winioctl.h>
+#endif
 #if _hdr_kernel_fs_info             /* BeOS */
 # include <kernel/fs_info.h>
 #endif
@@ -246,7 +249,7 @@ di_getDiskEntries (diskInfo, diCount)
         idx = *diCount;
         ++*diCount;
         *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
-                sizeof (diDiskInfo_t) * *diCount);
+                sizeof (diDiskInfo_t) * (Size_t) *diCount);
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
 
@@ -320,8 +323,8 @@ checkMountOptions (mntEntry, str)
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
     ! _lib_mntctl && \
-    ! _lib_GetDiskFreeSpace && \
-    ! _lib_GetDiskFreeSpaceEx && \
+    ! _lib_GetDriveType && \
+    ! _lib_GetLogicalDriveStrings && \
     ! _class_os__Volumes
 
 /*
@@ -372,9 +375,10 @@ di_getDiskEntries (diskInfo, diCount)
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
 
-        strncpy (diptr->special, mntEntry->mnt_fsname, DI_SPEC_NAME_LEN);
-        strncpy (diptr->name, mntEntry->mnt_dir, DI_NAME_LEN);
-        strncpy (diptr->fsType, mntEntry->mnt_type, DI_TYPE_LEN);
+        strncpy (diptr->special, mntEntry->mnt_fsname,
+            (Size_t) DI_SPEC_NAME_LEN);
+        strncpy (diptr->name, mntEntry->mnt_dir, (Size_t) DI_NAME_LEN);
+        strncpy (diptr->fsType, mntEntry->mnt_type, (Size_t) DI_TYPE_LEN);
 
         if (strcmp (mntEntry->mnt_fsname, "none") == 0) {
           diptr->printFlag = DI_PRNT_IGNORE;
@@ -405,7 +409,7 @@ di_getDiskEntries (diskInfo, diCount)
         {
             diptr->isReadOnly = TRUE;
         }
-        strncpy (diptr->options, mntEntry->mnt_opts, DI_OPT_LEN);
+        strncpy (diptr->options, mntEntry->mnt_opts, (Size_t) DI_OPT_LEN);
 
         if (debug > 1)
         {
@@ -427,8 +431,8 @@ di_getDiskEntries (diskInfo, diCount)
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
     ! _lib_getmnt && \
-    ! _lib_GetDiskFreeSpace && \
-    ! _lib_GetDiskFreeSpaceEx && \
+    ! _lib_GetDriveType && \
+    ! _lib_GetLogicalDriveStrings && \
     ! _lib_fs_stat_dev && \
     ! _class_os__Volumes && \
     ! _lib_sys_dollar_device_scan && \
@@ -576,8 +580,8 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
     ! _lib_getmnt && \
-    ! _lib_GetDiskFreeSpace && \
-    ! _lib_GetDiskFreeSpaceEx && \
+    ! _lib_GetDriveType && \
+    ! _lib_GetLogicalDriveStrings && \
     ! _lib_fs_stat_dev && \
     ! _class_os__Volumes && \
     ! _lib_sys_dollar_device_scan && \
@@ -654,6 +658,162 @@ di_getDiskEntries (diskInfo, diCount)
  * All of the following routines also replace di_getDiskInfo()
  */
 
+
+#if _lib_getfsstat && \
+    ! _lib_getvfsstat
+
+/*
+ * di_getDiskEntries
+ *
+ * OSF/1 / Digital Unix / Compaq Tru64 / FreeBSD / NetBSD 2.x / OpenBSD
+ *
+ */
+
+# if _dcl_mnt_names
+#  if ! defined (MNT_NUMTYPES)
+#   define MNT_NUMTYPES (sizeof(mnt_names)/sizeof(char *))
+#  endif
+# endif
+# define DI_UNKNOWN_FSTYPE       "(%.2d)?"
+
+int
+# if _proto_stdc
+di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
+# else
+di_getDiskEntries (diskInfo, diCount)
+    diDiskInfo_t **diskInfo;
+    int *diCount;
+# endif
+{
+    diDiskInfo_t     *diptr;
+    int             count;
+    int             idx;
+# if _dcl_mnt_names && _mem_struct_statfs_f_type
+    short           fstype;
+# endif
+    _getfsstat_type bufsize;
+    struct statfs   *mntbufp;
+    struct statfs   *sp;
+
+    if (debug > 0) { printf ("# getDiskEntries: getfsstat\n"); }
+    count = getfsstat ((struct statfs *) NULL, (_getfsstat_type) 0, MNT_NOWAIT);
+    if (count < 1)
+    {
+        fprintf (stderr, "Unable to do getfsstat () errno %d\n", errno);
+        return -1;
+    }
+    bufsize = (_getfsstat_type) (sizeof (struct statfs) * (Size_t) count);
+    mntbufp = malloc ((Size_t) bufsize);
+    memset ((char *) mntbufp, '\0', sizeof (struct statfs) * (Size_t) count);
+    count = getfsstat (mntbufp, bufsize, MNT_NOWAIT);
+
+    *diCount = count;
+    *diskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) * (Size_t) count);
+
+    if (*diskInfo == (diDiskInfo_t *) NULL)
+    {
+        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+        return -1;
+    }
+    memset ((char *) *diskInfo, '\0', sizeof (diDiskInfo_t) * (Size_t) count);
+
+    for (idx = 0; idx < count; idx++)
+    {
+        _fs_size_t          tblocksz;
+
+        diptr = *diskInfo + idx;
+        di_initDiskInfo (diptr);
+
+        sp = mntbufp + idx;
+# if defined (MNT_RDONLY)
+        if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY)
+        {
+            diptr->isReadOnly = TRUE;
+        }
+# endif
+# if defined (MNT_LOCAL)
+        if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL)
+        {
+            diptr->isLocal = FALSE;
+        }
+# endif
+        convertMountOptions ((long) sp->f_flags, diptr);
+# if _mem_struct_statfs_f_type
+#  if defined (MOUNT_NFS3)
+        if (sp->f_type == MOUNT_NFS3)
+        {
+            strncat (diptr->options, "v3,",
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+        }
+#  endif
+# endif
+# if _mem_struct_statfs_mount_info && \
+        defined (MOUNT_NFS) && \
+        (_mem_struct_statfs_f_type || _mem_struct_statfs_f_fstypename)
+#  if _mem_struct_statfs_f_type
+        if (sp->f_type == MOUNT_NFS
+#  endif
+#  if _mem_struct_statfs_f_fstypename
+        if (strcmp (sp->f_fstypename, MOUNT_NFS) == 0
+#  endif
+#  if _mem_struct_statfs_f_fstypename && defined (MOUNT_NFS3)
+                || strcmp (sp->f_fstypename, MOUNT_NFS3) == 0
+#  endif
+#  if _mem_struct_statfs_f_type && defined (MOUNT_NFS3)
+                || sp->f_type == MOUNT_NFS3
+#  endif
+           )
+        {
+            struct nfs_args *na;
+            na = &sp->mount_info.nfs_args;
+            convertNFSMountOptions (na->flags, na->wsize, na->rsize, diptr);
+        }
+# endif
+        trimChar (diptr->options, ',');
+
+        strncpy (diptr->special, sp->f_mntfromname, (Size_t) DI_SPEC_NAME_LEN);
+        strncpy (diptr->name, sp->f_mntonname, (Size_t) DI_NAME_LEN);
+# if _mem_struct_statfs_f_fsize
+        tblocksz = (_fs_size_t) sp->f_fsize;
+# endif
+# if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
+        tblocksz = (_fs_size_t) sp->f_bsize;
+# endif
+        di_saveBlockSizes (diptr, tblocksz,
+            (_fs_size_t) sp->f_blocks,
+            (_fs_size_t) sp->f_bfree,
+            (_fs_size_t) sp->f_bavail);
+        di_saveInodeSizes (diptr,
+            (_fs_size_t) sp->f_files,
+            (_fs_size_t) sp->f_ffree,
+            (_fs_size_t) sp->f_ffree);
+# if _mem_struct_statfs_f_fstypename
+        strncpy (diptr->fsType, sp->f_fstypename, (Size_t) DI_TYPE_LEN);
+# else
+#  if _lib_sysfs && _mem_struct_statfs_f_type
+        sysfs (GETFSTYP, sp->f_type, diptr->fsType);
+#  else
+#   if _dcl_mnt_names && _mem_struct_statfs_f_type
+        fstype = sp->f_type;
+        if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
+        {
+            strncpy (diptr->fsType, mnt_names [fstype], DI_TYPE_LEN);
+        }
+        else
+        {
+            Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
+                      DI_UNKNOWN_FSTYPE, fstype);
+        }
+#   endif
+#  endif
+# endif
+    }
+
+    free ((char *) mntbufp);
+    return 0;
+}
+
+#endif /* _lib_getfsstat */
 
 #if _lib_getmntinfo && \
     ! _lib_getfsstat && \
@@ -939,158 +1099,6 @@ di_getDiskEntries (diskInfo, diCount)
 }
 
 #endif /* _lib_getmntinfo */
-
-#if _lib_getfsstat && \
-    ! _lib_getvfsstat
-
-/*
- * di_getDiskEntries
- *
- * OSF/1 / Digital Unix / Compaq Tru64 / FreeBSD / NetBSD 2.x / OpenBSD
- *
- */
-
-# if _dcl_mnt_names
-#  define MNT_NUMTYPES (sizeof(mnt_names)/sizeof(char *))
-# endif
-# define DI_UNKNOWN_FSTYPE       "(%.2d)?"
-
-int
-# if _proto_stdc
-di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
-{
-    diDiskInfo_t     *diptr;
-    int             count;
-    int             idx;
-    short           fstype;
-    Size_t          bufsize;
-    struct statfs   *mntbufp;
-    struct statfs   *sp;
-
-    if (debug > 0) { printf ("# getDiskEntries: getfsstat\n"); }
-    count = getfsstat ((struct statfs *) NULL, 0, MNT_NOWAIT);
-    if (count < 1)
-    {
-        fprintf (stderr, "Unable to do getfsstat () errno %d\n", errno);
-        return -1;
-    }
-    bufsize = sizeof (struct statfs) * (Size_t) count;
-    mntbufp = malloc (bufsize);
-    memset ((char *) mntbufp, '\0', sizeof (struct statfs) * (Size_t) count);
-    count = getfsstat (mntbufp, (Size_t) bufsize, MNT_NOWAIT);
-
-    *diCount = count;
-    *diskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) * (Size_t) count);
-
-    if (*diskInfo == (diDiskInfo_t *) NULL)
-    {
-        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-        return -1;
-    }
-    memset ((char *) *diskInfo, '\0', sizeof (diDiskInfo_t) * (Size_t) count);
-
-    for (idx = 0; idx < count; idx++)
-    {
-        _fs_size_t          tblocksz;
-
-        diptr = *diskInfo + idx;
-        di_initDiskInfo (diptr);
-
-        sp = mntbufp + idx;
-# if defined (MNT_RDONLY)
-        if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY)
-        {
-            diptr->isReadOnly = TRUE;
-        }
-# endif
-# if defined (MNT_LOCAL)
-        if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL)
-        {
-            diptr->isLocal = FALSE;
-        }
-# endif
-        convertMountOptions ((long) sp->f_flags, diptr);
-# if _mem_struct_statfs_f_type
-#  if defined (MOUNT_NFS3)
-        if (sp->f_type == MOUNT_NFS3)
-        {
-            strncat (diptr->options, "v3,",
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-        }
-#  endif
-# endif
-# if _mem_struct_statfs_mount_info && \
-        defined (MOUNT_NFS) && \
-        (_mem_struct_statfs_f_type || _mem_struct_statfs_f_fstypename)
-#  if _mem_struct_statfs_f_type
-        if (sp->f_type == MOUNT_NFS
-#  endif
-#  if _mem_struct_statfs_f_fstypename
-        if (strcmp (sp->f_fstypename, MOUNT_NFS) == 0
-#  endif
-#  if _mem_struct_statfs_f_fstypename && defined (MOUNT_NFS3)
-                || strcmp (sp->f_fstypename, MOUNT_NFS3) == 0
-#  endif
-#  if _mem_struct_statfs_f_type && defined (MOUNT_NFS3)
-                || sp->f_type == MOUNT_NFS3
-#  endif
-           )
-        {
-            struct nfs_args *na;
-            na = &sp->mount_info.nfs_args;
-            convertNFSMountOptions (na->flags, na->wsize, na->rsize, diptr);
-        }
-# endif
-        trimChar (diptr->options, ',');
-
-        strncpy (diptr->special, sp->f_mntfromname, DI_SPEC_NAME_LEN);
-        strncpy (diptr->name, sp->f_mntonname, DI_NAME_LEN);
-# if _mem_struct_statfs_f_fsize
-        tblocksz = (_fs_size_t) sp->f_fsize;
-# endif
-# if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
-        tblocksz = (_fs_size_t) sp->f_bsize;
-# endif
-        di_saveBlockSizes (diptr, tblocksz,
-            (_fs_size_t) sp->f_blocks,
-            (_fs_size_t) sp->f_bfree,
-            (_fs_size_t) sp->f_bavail);
-        di_saveInodeSizes (diptr,
-            (_fs_size_t) sp->f_files,
-            (_fs_size_t) sp->f_ffree,
-            (_fs_size_t) sp->f_ffree);
-# if _mem_struct_statfs_f_fstypename
-        strncpy (diptr->fsType, sp->f_fstypename, DI_TYPE_LEN);
-# else
-#  if _lib_sysfs && _mem_struct_statfs_f_type
-        sysfs (GETFSTYP, sp->f_type, diptr->fsType);
-#  else
-#   if _dcl_mnt_names && _mem_struct_statfs_f_type
-        fstype = sp->f_type;
-        if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
-        {
-            strncpy (diptr->fsType, mnt_names [fstype], DI_TYPE_LEN);
-        }
-        else
-        {
-            Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
-                      DI_UNKNOWN_FSTYPE, fstype);
-        }
-#   endif
-#  endif
-# endif
-    }
-
-    free ((char *) mntbufp);
-    return 0;
-}
-
-#endif /* _lib_getfsstat */
 
 #if _lib_getvfsstat
 
@@ -1515,8 +1523,7 @@ di_getDiskEntries (diskInfo, diCount)
 #endif  /* _lib_mntctl */
 
 
-#if _lib_GetDiskFreeSpace && \
-    _lib_GetDriveType && \
+#if _lib_GetDriveType && \
     _lib_GetLogicalDriveStrings
 
 /*
@@ -1546,14 +1553,8 @@ di_getDiskEntries (diskInfo, diCount)
     char            buff [MSDOS_BUFFER_SIZE];
 
 
-# if _lib_GetDiskFreeSpaceEx
-    if (debug > 0) { printf ("# getDiskEntries: GetDiskFreeSpaceEx\n"); }
-# else
-#  if _lib_GetDiskFreeSpace
-    if (debug > 0) { printf ("# getDiskEntries: GetDiskFreeSpace\n"); }
-#  endif
-# endif
-    diskflag = DI_PRNT_IGNORE;
+    if (debug > 0) { printf ("# getDiskInfo: GetLogicalDriveStrings GetDriveType\n"); }
+    diskflag = DI_PRNT_SKIP;
     rc = (int) GetLogicalDriveStrings (MSDOS_BUFFER_SIZE, buff);
     *diCount = rc / BYTES_PER_LOGICAL_DRIVE;
 
@@ -1582,7 +1583,26 @@ di_getDiskEntries (diskInfo, diCount)
             /* first non-removable disk are floppies...     */
         else if (rc == DRIVE_REMOVABLE)
         {
-            diptr->printFlag = diskflag;
+          DWORD br;
+          BOOL bSuccess;
+          char handleName [MSDOS_BUFFER_SIZE];
+
+          diptr->printFlag = diskflag;
+          bSuccess = 1;
+          strcpy (handleName, "\\\\.\\");
+          strncat (handleName, p, MSDOS_BUFFER_SIZE);
+          handleName[strlen(handleName)-1] = '\0';
+          HANDLE hDevice = CreateFile (handleName,
+              GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+              NULL, OPEN_EXISTING, 0, NULL);
+
+          bSuccess = DeviceIoControl (hDevice,
+              IOCTL_STORAGE_CHECK_VERIFY,
+              NULL, 0, NULL, 0, &br, (LPOVERLAPPED) NULL);
+          if (! bSuccess)
+          {
+            diptr->printFlag = DI_PRNT_BAD;
+          }
         }
         else
         {
