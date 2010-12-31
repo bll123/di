@@ -72,6 +72,9 @@ all-c:
 all-perl:
 	cd C >/dev/null;$(MAKE) -e all-perl
 
+windows-gcc:
+	cd C >/dev/null;$(MAKE) -e windows-gcc
+
 all-test:
 	cd C >/dev/null;$(MAKE) -e all-test
 
