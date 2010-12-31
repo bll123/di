@@ -142,7 +142,7 @@ diquota (diqinfo)
   diqinfo->ilimit = 0;
   diqinfo->iused = 0;
 
-  if (strncmp (diqinfo->type, "nfs", 3) == 0 &&
+  if (strncmp (diqinfo->type, "nfs", (Size_t) 3) == 0 &&
       strcmp (diqinfo->type, "nfsd") != 0) {
 #if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
     diquota_nfs (diqinfo);
@@ -158,9 +158,11 @@ diquota (diqinfo)
 #endif
     ;
   } else {
+#if _has_std_quotas
     /* hp-ux doesn't have QCMD */
     ucmd = Q_GETQUOTA;
     gcmd = Q_GETQUOTA;
+#endif
 #ifdef QCMD
     ucmd = QCMD (Q_GETQUOTA, USRQUOTA);
     gcmd = QCMD (Q_GETQUOTA, GRPQUOTA);
@@ -258,7 +260,7 @@ xdr_quota_get (xp, args)
   if (! xdr_string (xp, &args->gqa_pathp, DI_RQ_PATHLEN)) {
     return 0;
   }
-  if (! xdr_int (xp, &args->gqa_uid)) {
+  if (! _gqa_uid_xdr (xp, &args->gqa_uid)) {
     return 0;
   }
   return 1;
@@ -294,30 +296,28 @@ xdr_quota_rslt (xp, rslt)
   rptr = &rslt->getquota_rslt_u.gqr_rquota;
 # endif
 
-#define xdr_u_val _rquota_type
-
   if (! xdr_int (xp, &rptr->rq_bsize)) {
     return 0;
   }
   if (! xdr_bool (xp, &rptr->rq_active)) {
     return 0;
   }
-  if (! xdr_u_val (xp, &rptr->rq_bhardlimit)) {
+  if (! _rquota_xdr (xp, &rptr->rq_bhardlimit)) {
     return 0;
   }
-  if (! xdr_u_val (xp, &rptr->rq_bsoftlimit)) {
+  if (! _rquota_xdr (xp, &rptr->rq_bsoftlimit)) {
     return 0;
   }
-  if (! xdr_u_val (xp, &rptr->rq_curblocks)) {
+  if (! _rquota_xdr (xp, &rptr->rq_curblocks)) {
     return 0;
   }
-  if (! xdr_u_val (xp, &rptr->rq_fhardlimit)) {
+  if (! _rquota_xdr (xp, &rptr->rq_fhardlimit)) {
     return 0;
   }
-  if (! xdr_u_val (xp, &rptr->rq_fsoftlimit)) {
+  if (! _rquota_xdr (xp, &rptr->rq_fsoftlimit)) {
     return 0;
   }
-  if (! xdr_u_val (xp, &rptr->rq_curfiles)) {
+  if (! _rquota_xdr (xp, &rptr->rq_curfiles)) {
     return 0;
   }
   return (1);
@@ -363,7 +363,8 @@ diquota_nfs (diqinfo)
     args.gqa_pathp = path;
     args.gqa_uid = (int) diqinfo->uid;
 
-    rqclnt = clnt_create (host, RQUOTAPROG, RQUOTAVERS, "udp");
+    rqclnt = clnt_create (host, (unsigned long) RQUOTAPROG, 
+        (unsigned long) RQUOTAVERS, "udp");
     if (rqclnt == (CLIENT *) NULL) {
       if (debug > 2) {
         printf ("quota: nfs: create failed %d\n", errno);
@@ -371,7 +372,7 @@ diquota_nfs (diqinfo)
       return;
     }
     rqclnt->cl_auth = authunix_create_default();
-    clnt_stat = clnt_call (rqclnt, RQUOTAPROC_GETQUOTA,
+    clnt_stat = clnt_call (rqclnt, (unsigned long) RQUOTAPROC_GETQUOTA,
         (xdrproc_t) xdr_quota_get, (caddr_t) &args,
         (xdrproc_t) xdr_quota_rslt, (caddr_t) &result, timeout);
     if (clnt_stat != RPC_SUCCESS) {
