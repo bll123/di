@@ -408,6 +408,12 @@ di_getDiskInfo (diskInfo, diCount)
     DWORD               fsFlags;
 
 
+# if _lib_GetDiskFreeSpaceEx
+    if (debug > 0) { printf ("# getDiskInfo: GetDiskFreeSpaceEx\n"); }
+# endif
+# if _lib_GetDiskFreeSpace
+    if (debug > 0) { printf ("# getDiskInfo: GetDiskFreeSpace\n"); }
+# endif
     if (debug > 0) { printf ("# getDiskInfo: GetVolumeInformation\n"); }
     for (i = 0; i < *diCount; ++i)
     {
