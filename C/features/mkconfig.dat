@@ -58,6 +58,7 @@ hdr     unistd.h
 hdr     util/string.h
 hdr     wchar.h
 hdr     windows.h
+hdr     winioctl.h
 hdr     zone.h
 sys     dcmd_blk.h
 sys     file.h
@@ -97,6 +98,8 @@ typ     uid_t
 lib     bcopy
 lib     bindtextdomain -lintl, -lintl -liconv
 lib     bzero
+lib     CreateFile
+lib     DeviceIoControl
 # unknown if -lsun, -lseq are needed (old irix, sequent)
 lib     endmntent -lsun, -lseq
 lib     fs_stat_dev
@@ -229,6 +232,9 @@ endif
 
 ifnotoption WINAPI
   set _hdr_windows 0
+  set _hdr_winioctl 0
+  set _lib_CreatFile 0
+  set _lib_DeviceIoControl 0
   set _lib_GetDiskFreeSpace 0
   set _lib_GetDiskFreeSpaceEx 0
   set _lib_GetDriveType 0
