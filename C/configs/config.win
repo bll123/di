@@ -47,6 +47,7 @@
 #define _hdr_util_string 0
 #define _hdr_wchar 1
 #define _hdr_windows 0
+#define _hdr_winioctl 0
 #define _hdr_zone 0
 #define _sys_dcmd_blk 0
 #define _sys_file 1
@@ -85,6 +86,8 @@
 #define _lib_bcopy 1
 #define _lib_bindtextdomain 1
 #define _lib_bzero 1
+#define _lib_CreateFile 0
+#define _lib_DeviceIoControl 0
 #define _lib_endmntent 1
 #define _lib_fs_stat_dev 0
 #define _lib_fshelp 0
@@ -125,6 +128,7 @@
 #define _lib_zone_list 0
 #define _quotactl_pos 0
 #define _rquota_xdr 0
+#define _gqa_uid_xdr 0
 #define _getfsstat_type 0
 #define _setmntent_args 3
 #define _statfs_args 2
