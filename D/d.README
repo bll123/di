@@ -1,3 +1,4 @@
-This code is in development
-and though it compiles,
-it is not usable.
+This code is in development.
+It is only included here as an
+example on how to use 'mkconfig'
+with the D language.
