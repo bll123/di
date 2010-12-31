@@ -8,7 +8,7 @@
 
 CC = cc
 # for tests.done
-DC = gdc 
+DC = gdc
 
 SHELL = /bin/sh
 OBJ_EXT = .o
@@ -116,6 +116,19 @@ windows-mingw:
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-g -O2" mingw-$(PROG).exe
 
+windows-dmc:
+	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
+	copy /y NUL: di.env
+	-del config.h
+	copy /y /b NUL:+config.dmc config.h
+	copy /y NUL: $(MKC_REQLIB)
+	$(MAKE) \
+		CC=dmc LD=dmc \
+		EXE_EXT=".exe" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -o \
+		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
+		LDFLAGS="-o" dmc-target
+
 os2-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	$(MAKE) MKCONFIG_TYPE=perl \
@@ -154,7 +167,7 @@ bsd43-gcc:
 #   ../dioptions.dat, tests.done, test_di
 clean:
 	@-$(RM) -rf $(PROG) $(MPROG) \
-		mingw-$(PROG).exe $(PROG).exe $(MPROG).exe \
+		mingw-$(PROG).exe dmc-$(PROG).exe $(PROG).exe $(MPROG).exe \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig tests.d/chksh* \
 		>/dev/null 2>&1
@@ -223,12 +236,18 @@ OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 $(PROG)$(EXE_EXT):	$(MKC_REQLIB) $(OBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
 	$(CC) -o $(PROG)$(EXE_EXT) \
-		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS) \
+		$(LDFLAGS) $(OBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_REQLIB)`
 
 mingw-$(PROG)$(EXE_EXT):	$(OBJECTS)
 	$(CC) -o mingw-$(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS)
+
+dmc-target:	$(OBJECTS) dmc-$(PROG)$(EXE_EXT)
+
+dmc-$(PROG)$(EXE_EXT):
+	$(CC) -o$(PROG)$(EXE_EXT) \
+		$(LDFLAGS) $(OBJECTS) $(LIBS)
 
 ###
 # objects
