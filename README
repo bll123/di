@@ -1,4 +1,4 @@
-di - disk information utility (version 4.26).
+di - disk information utility (version 4.27)
 
 CONTENTS
   Description
@@ -21,13 +21,13 @@ DESCRIPTION
 INSTALLATION
 
   To build with mkconfig.sh:
-    make
-    make install
+    make -e
+    make -e install
   Example to change compiler and prefix:
-    make CC=gcc prefix=/opt/bin
+    make CC=gcc prefix=/opt/bin -e
 
   To build with mkconfig.pl (requires perl):
-      make all-perl
+      make -e all-perl
 
   To change the options (NLS, WINAPI, default display):
     make dioptions.dat
@@ -49,12 +49,13 @@ INSTALLATION
 
   Windows installation:
     Alternative 1 - uses config.win or config.mingw
-      Cygwin gcc: make windows-gcc
-      MS VC++:    nmake windows
-      MinGW:      mingw32-make MAKE=mingw32-make CC=mingw32-gcc windows-mingw
+      Cygwin gcc: make -e windows-gcc
+      MinGW:
+        cd C;mingw32-make MAKE=mingw32-make CC=mingw32-gcc windows-mingw
+      dmc:        cd C;make windows-dmc
     Alternative 2 - builds a new config.h file (Cygwin).
-      make config.h
-      make
+      make -e config.h
+      make -e
 
     You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.
@@ -81,8 +82,12 @@ BUGS AND KNOWN ISSUES
         have not been tested in a *very* long while.
     Known Issues
       - quotas:
-        - Solaris ufs requires the quotas file to be readable.
+        - Solaris ufs requires the quotas file to be readable, or make
+          the di program setuid.  Neither recommended.
         - Linux 2.4 - not working
+      - Windows:
+        - The A: drive is seen, but the program fails as the A: drive
+          isn't really there.
 
     Send bug reports along with the output from 'di -A -a -X 5',
     output from your standard df command (as verbose as possible),
@@ -114,30 +119,29 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.26 has been tested on the following platforms:
+    di 4.27 has been tested on the following platforms:
         AIX 5.1
         BSD 4.3
-        CentOS 3.9, 4.8, 5.2, 5.3, 5.4
+        CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5
         Cygwin
         Debian 4.0, 5.0, kFreeBSD 7.2
-        Fedora 7, 12, 13
-        FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0
-        Haiku r1a1, r1a2
+        Fedora 7, 12, 13, 14
+        FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1
+        Haiku r1a1
         HP-UX 11.11 (bundled cc, gcc)
-        MacOSX 8.11, 9.5
+        MacOSX 10.4, 10.5
         Mandrake 9.2
         MinGW
         NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1
         Nexenta 1.0.1_b85, 2.0_b104
-        OpenBSD 4.4, 4.5, 4.6, 4.7
+        OpenBSD 4.4, 4.5, 4.6, 4.7, 4.8
         OpenSolaris 200805, 200906
         QNX 6.3
-        RedHat 7.1, 7.3
-        RHEL 5.2
+        RedHat 7.3
+        RHEL 5.2, 5.3
         Solaris 8, 9, 10 (cc, gcc3, gcc4)
         Tru64 5.1B
         Ubuntu 10
-        VMS
 
     di has been ported to the following systems in the past:
 
@@ -148,6 +152,19 @@ PORTING
         Sys V.3, Sys V.4, Ultrix, VMS, Windows, Xenix
 
 CHANGES
+
+    4.27                                    [29 Dec 2011]
+        Rearranged directory structure.
+        Added support for long double to hold zettas and yottas.
+        Added support for the windows digital mars c compiler.
+        Added a fix for windows removable drives.
+        Rewrote snprintf macros as they didn't work on MacOSX.
+        Fixed quotactl argument for systems w/o QCMD macro.
+        Check for type of structure members and call the correct xdr
+          function.
+        Many minor fixes for compiler warnings.
+        Fixed Makefiles to redirect 'cd' output (CDPATH).
+        Updated build system to mkconfig 1.11.
 
     4.26                                    [25 Jul 2010]
         Fix FreeBSD 5 panic when trying to get quotas on devfs.
