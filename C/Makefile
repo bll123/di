@@ -192,8 +192,13 @@ distclean:
 ###
 # installation
 
-install:	di-programs di.env
-	. ./di.env;cd ..;$(MAKE) prefix=$(prefix) LOCALEDIR=$(LOCALEDIR) install
+# if the install targets are out of date, 
+# the environment is needed.
+install:
+	@. ./di.env;$(MAKE) -e real-install
+
+real-install:	di-programs di.env
+	. ./di.env;cd ..;$(MAKE) -e prefix=$(prefix) LOCALEDIR=$(LOCALEDIR) install
 
 ###
 # programs
