@@ -25,7 +25,7 @@
 #define _hdr_linux_dqblk_xfs 0
 #define _hdr_linux_quota 0
 #define _hdr_libintl 0
-#define _hdr_locale 0
+#define _hdr_locale 1
 #define _hdr_malloc 1
 #define _hdr_memory 1
 #define _hdr_mntent 0
@@ -111,7 +111,7 @@
 #define _lib_mntctl 0
 #define _lib_next_dev 0
 #define _lib_quotactl 0
-#define _lib_setlocale 0
+#define _lib_setlocale 1
 #define _lib_setmntent 0
 #define _lib_snprintf 0
 #define _lib_statfs 0
