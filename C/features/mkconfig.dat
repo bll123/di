@@ -58,7 +58,7 @@ hdr     unistd.h
 hdr     util/string.h
 hdr     wchar.h
 hdr     windows.h
-hdr     winioctl.h
+hdr     winioctl.h windows.h
 hdr     zone.h
 sys     dcmd_blk.h
 sys     file.h
