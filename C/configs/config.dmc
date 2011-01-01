@@ -25,7 +25,7 @@
 #define _hdr_linux_dqblk_xfs 0
 #define _hdr_linux_quota 0
 #define _hdr_libintl 0
-#define _hdr_locale 1
+#define _hdr_locale 0
 #define _hdr_malloc 1
 #define _hdr_memory 1
 #define _hdr_mntent 0
@@ -83,9 +83,9 @@
 #define _typ_size_t 1
 #define _typ_uint_t 0
 #define _typ_uid_t 0
-#define _lib_bcopy 1
+#define _lib_bcopy 0
 #define _lib_bindtextdomain 0
-#define _lib_bzero 1
+#define _lib_bzero 0
 #define _lib_CreateFile 1
 #define _lib_DeviceIoControl 1
 #define _lib_endmntent 0
@@ -131,7 +131,7 @@
 #define _gqa_uid_xdr 0
 #define _getfsstat_type 0
 #define _setmntent_args 0
-#define _statfs_args 2
+#define _statfs_args 0
 #define _class_os__Volumes 0
 #define _npt_getenv 0
 #define _npt_getopt 0
@@ -148,14 +148,14 @@
 #define _mem_struct_dqblk_dqb_curfiles 0
 #define _mem_struct_getquota_rslt_gqr_status 0
 #define _mem_struct_getquota_rslt_gqr_rquota 0
-#define _mem_struct_statfs_f_bsize 1
+#define _mem_struct_statfs_f_bsize 0
 #define _mem_struct_statfs_f_fsize 0
 #define _mem_struct_statfs_f_fstyp 0
 #define _mem_struct_statfs_f_iosize 0
 #define _mem_struct_statfs_f_frsize 0
 #define _mem_struct_statfs_f_fstypename 0
 #define _mem_struct_statfs_mount_info 0
-#define _mem_struct_statfs_f_type 1
+#define _mem_struct_statfs_f_type 0
 #define _mem_struct_statvfs_f_basetype 0
 #define _siz_long_long 8
 #define _siz_long_double 12
