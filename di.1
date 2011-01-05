@@ -8,7 +8,7 @@
 .\"
 .\" brad.lanam.di_at_gmail.com
 .\"
-.TH di 1 "12 Nov 2010"
+.TH di 1 "5 Jan 2011"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -354,6 +354,13 @@ equivalent format strings for System V release 4 are:
 \fI/usr/bin/df \-k\fP     di \-dk \-f sbcvpm
 .br
 \fI/usr/ucb/df\fP        di \-dk \-f sbuv2m
+.RE
+.PP
+GNU df:
+.RS
+\fIdf\fP                 di -dk \-f SbuvpM
+.br
+\fIdf \-T\fP              di -dk \-f STbuvpM
 .RE
 .PP
 If you like your numbers to add up/calculate the percentage
