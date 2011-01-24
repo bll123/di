@@ -7,7 +7,7 @@ $Source$
 module di_getopt;
 
 import std.string;
-import std.conv;
+import std.conv : to;
 debug (1) {
   import std.stdio;
 }
