@@ -3,8 +3,7 @@
 module di_dispopts;
 
 import std.stdio;
-import std.ctype;
-import std.conv;
+import std.string;
 
 import config;
 
