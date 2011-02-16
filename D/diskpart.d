@@ -2,9 +2,9 @@
 
 module di_diskpart;
 
-import std.string;
-import std.conv;
 import std.stdio;
+import std.string;
+import std.conv : to;
 private import core.stdc.stdio;
 private import core.stdc.errno;
 
@@ -33,7 +33,7 @@ private:
 
 public:
 
-  struct DiskPartitions {
+  struct DiskPartition {
     real          totalBlocks;
     real          freeBlocks;
     real          availBlocks;
@@ -53,7 +53,7 @@ public:
     string        mountTime;
   };
 
-  DiskPartitions[]      diskPartitions;
+  DiskPartition[]      diskPartitions;
 
   // for printFlag
   enum byte
@@ -101,8 +101,8 @@ getEntries () {
 
     while ((mntEntry = getmntent (f)) != cast (C_ST_mntent *) null)
     {
-      diskPartitions.length += 1;
-      auto dp = &diskPartitions[$-1];
+      DiskPartition dp;
+
       dp.special = to!(typeof(dp.special))(mntEntry.mnt_fsname);
       dp.name = to!(typeof(dp.name))(mntEntry.mnt_dir);
       dp.fsType = to!(typeof(dp.fsType))(mntEntry.mnt_type);
@@ -137,6 +137,8 @@ getEntries () {
             dp.printFlag, dp.isReadOnly);
         writefln ("    %s", dp.mountOptions);
       }
+
+      diskPartitions ~= dp;
     } // while there are mount entries
   } // _clib_get/set/endmntent
 
