@@ -11,7 +11,6 @@ C/didiskutil.c            di source
 C/digetentries.c          di source
 C/digetinfo.c             di source
 C/di.h                    di source
-C/di.spec                 rpmspec file
 C/dimntopt.h              di source
 C/diquota.c               di source
 C/features/               di configuration
@@ -37,8 +36,9 @@ D/Makefile                D Makefile
 D/options.d               di source
 D/d.README                D source README
 di.1                    di Manual Page
+di.spec                 rpmspec file
 features/
-features/dioptions.dat  di options
+features/dioptions.dat    di options
 LICENSE                 License
 Makefile                Top Level Makefile
 MANIFEST                This file
