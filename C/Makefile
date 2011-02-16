@@ -57,11 +57,14 @@ MKC_REQLIB = mkconfig.reqlibs
 
 # have to get various environment variables set up.
 
+.PHONY: all
 all:	all-sh
 
+.PHONY: all-sh
 all-sh:	di.env
 	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=sh di-programs
 
+.PHONY: all-perl
 all-perl:	di.env
 	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
 
@@ -78,6 +81,7 @@ di.env:	features/env.dat
 
 # This was tested using vc++ 5.0. (many years ago)
 # seriously out of date; config.win is incorrect for this build.
+.PHONY: windows
 windows:
 	@$(MAKE) ../dioptions.dat
 	copy /y NUL: di.env
@@ -91,6 +95,7 @@ windows:
 		LDFLAGS="-nologo -O2" di-programs
 
 # This was tested using cygwin
+.PHONY: windows-gcc
 windows-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
@@ -103,6 +108,7 @@ windows-gcc:
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-g -O2" di-programs
 
+.PHONY: windows-mingw
 windows-mingw:
 	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
 	copy /y NUL: di.env
@@ -116,6 +122,7 @@ windows-mingw:
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-g -O2" mingw-$(PROG).exe
 
+.PHONY: windows-dmc
 windows-dmc:
 	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
 	copy /y NUL: di.env
@@ -129,6 +136,7 @@ windows-dmc:
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-o" dmc-target
 
+.PHONY: os2-gcc
 os2-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	$(MAKE) MKCONFIG_TYPE=perl \
@@ -136,6 +144,7 @@ os2-gcc:
 		CFLAGS="$(CFLAGS) -g -O2 \
 		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
 
+.PHONY: bsd43-cc
 bsd43-cc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
@@ -147,6 +156,7 @@ bsd43-cc:
 		CFLAGS="$(CFLAGS) -O" \
 		LDFLAGS="-O" di-programs
 
+.PHONY: bsd43-gcc
 bsd43-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
@@ -165,6 +175,7 @@ bsd43-gcc:
 #   config.h, di.env, mkconfig.reqlibs
 #   mkconfig.cache, mkconfig_*.vars,
 #   ../dioptions.dat, tests.done, test_di
+.PHONY: clean
 clean:
 	@-$(RM) -rf $(PROG) $(MPROG) \
 		mingw-$(PROG).exe dmc-$(PROG).exe $(PROG).exe $(MPROG).exe \
@@ -175,16 +186,18 @@ clean:
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig, ../dioptions.dat
 #   tests.done, test_di
+.PHONY: realclean
 realclean:
-	@$(MAKE) clean
+	@$(MAKE) clean > /dev/null 2>&1
 	@-$(RM) -rf config.h di.env mkconfig.reqlibs \
 		mkconfig.cache mkconfig_*.vars \
 		>/dev/null 2>&1
 
 # leaves:
 #   ../dioptions.dat
+.PHONY: distclean
 distclean:
-	@$(MAKE) realclean
+	@$(MAKE) realclean > /dev/null 2>&1
 	@-$(RM) -rf tests.done test_di \
 		_mkconfig_runtests _tmp_mkconfig \
 		>/dev/null 2>&1
@@ -192,12 +205,14 @@ distclean:
 ###
 # installation
 
+.PHONY: install
 install:	di-programs di.env
 	. ./di.env;cd ..;$(MAKE) -e prefix=$(prefix) LOCALEDIR=$(LOCALEDIR) install
 
 ###
 # programs
 
+.PHONY: di-programs
 di-programs:	$(PROG)$(EXE_EXT)
 
 ###
@@ -243,6 +258,7 @@ mingw-$(PROG)$(EXE_EXT):	$(OBJECTS)
 	$(CC) -o mingw-$(PROG)$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS)
 
+.PHONY: dmc-target
 dmc-target:	$(OBJECTS) dmc-$(PROG)$(EXE_EXT)
 
 dmc-$(PROG)$(EXE_EXT):
@@ -285,6 +301,7 @@ trimchar$(OBJ_EXT):	trimchar.c config.h di.h
 ###
 # regression testing
 
+.PHONY: all-test
 all-test:	tests.done
 
 tests.done: $(MKCONFIGPATH)/runtests.sh
@@ -293,16 +310,18 @@ tests.done: $(MKCONFIGPATH)/runtests.sh
 		$(MKCONFIGPATH)/runtests.sh ../tests.d
 	touch tests.done
 
+.PHONY: testrpmbuild
 testrpmbuild:
 	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
 	$(MKDIR) -p ./rpmbuild/SOURCES
 	$(MKDIR) -p ./rpmbuild/BUILD
 	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
-	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba di.spec
+	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba ../di.spec
 	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
 	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
 	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
 
+.PHONY: rtest-env
 rtest-env:
 	@echo "$(_MKCONFIG_SYSTYPE)"; \
 		echo "$(_MKCONFIG_SYSREV)"; \
