@@ -12,10 +12,21 @@ output   config.d
 
 standard
 
-chdr    libintl.h
-chdr    mntent.h
-chdr    windows.h
+csizes
 
+chdr    libintl.h
+chdr    linux/dqblk_xfs.h
+chdr    linux/quota.h
+chdr    mntent.h
+chdr    rpc/rpc.h
+chdr    rpcsvc/rquota.h
+chdr    rpc/types.h
+chdr    ufs/quota.h
+chdr    ufs/ufs/quota.h
+#chdr    windows.h
+
+csys    fs/ufs_quota.h
+csys    quota.h
 csys    types.h
 csys    statvfs.h
 
@@ -24,14 +35,15 @@ chdr    version.h
 
 clib    bindtextdomain -lintl, -lintl -liconv
 clib    endmntent
-clib    GetDiskFreeSpace
-clib    GetDiskFreeSpaceEx
-clib    GetDriveType
-clib    GetLogicalDriveStrings
-clib    GetVolumeInformation
+#clib    GetDiskFreeSpace
+#clib    GetDiskFreeSpaceEx
+#clib    GetDriveType
+#clib    GetLogicalDriveStrings
+#clib    GetVolumeInformation
 clib    getmntent -lgen
 clib    gettext -lintl, -lintl -liconv
 clib    getvfsstat
+clib    quotactl
 clib    setmntent
 clib    statvfs
 
@@ -46,31 +58,50 @@ cdefstr MNTTYPE_IGNORE
 cdefstr DI_VERSION
 
 # linux
-ctype   __fsblkcnt_t
-ctype   __fsfilcnt_t
+ctypeconv   int __fsblkcnt_t
+ctypeconv   int __fsfilcnt_t
 # linux, 64-bit interface
-ctype   __u_quad_t
-ctype   __fsblkcnt64_t
-ctype   __fsfilcnt64_t
+ctypeconv   int __fsblkcnt64_t
+ctypeconv   int __fsfilcnt64_t
 # linux
 cstruct statvfs
 
 # linux
 cstruct mntent
 
+# from rpcsvc/rquota.h
+ctypeconv   int bool_t
+ctypeconv   int u_int
+ctypeconv   int u_int64_t
+ctypeconv   int u_int32_t
+cstruct rquota
+ctypedef rquota
+cenum   gqr_status
+### need a check for typedef ...rquota
+### convert it to an alias.
+cstruct getquota_rslt
+cstruct dqblk
+
 cdcl    bindtextdomain
 cdcl    endmntent
-cdcl    GetDiskFreeSpace
-cdcl    GetDiskFreeSpaceEx
-cdcl    GetDriveType
-cdcl    GetLogicalDriveStrings
-cdcl    GetVolumeInformation
+#cdcl    GetDiskFreeSpace
+#cdcl    GetDiskFreeSpaceEx
+#cdcl    GetDriveType
+#cdcl    GetLogicalDriveStrings
+#cdcl    GetVolumeInformation
 cdcl    getmntent
 cdcl    gettext
 #cdcl    getvfsstat
 cdcl    args setmntent
 cdcl    statvfs
 cmember  statvfs f_basetype
+cmember  dqblk dqb_curspace
+cmember  dqblk dqb_curblocks
+cmember  dqblk dqb_fhardlimit
+cmember  dqblk dqb_fsoftlimit
+cmember  dqblk dqb_curfiles
+cmember  getquota_rslt gqr_status
+cmember  getquota_rslt gqr_rquota
 
 # see dioptions.dat to change these
 option  DI_DEFAULT_FORMAT smbuvpT
@@ -78,6 +109,6 @@ option  DI_DEFAULT_DISP_SIZE H
 
 include
 
-import core.stdc.stdio;
+import core.stdc.stdio;  // for FILE
 
 endinclude

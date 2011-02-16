@@ -76,14 +76,14 @@ clean:
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig
 realclean:
-	@$(MAKE) clean
+	@$(MAKE) clean > /dev/null 2>&1
 	@-$(RM) -rf config.d di.env mkconfig.reqlibs \
 		mkconfig.cache mkconfig_*.vars \
 		>/dev/null 2>&1
 
 # leaves:
 distclean:
-	@$(MAKE) realclean
+	@$(MAKE) realclean > /dev/null 2>&1
 	@-$(RM) -rf _mkconfig_runtests _tmp_mkconfig \
 		>/dev/null 2>&1
 

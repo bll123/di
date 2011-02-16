@@ -1,6 +1,6 @@
 // written in the D programming language
 
-import std.stdio: writef;
+import std.stdio;
 import std.string;
 
 import config;

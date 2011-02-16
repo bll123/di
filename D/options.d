@@ -3,10 +3,10 @@
 module options;
 
 import std.string;
-import std.ctype;
+import std.ctype : isdigit;
 import std.utf;
-import std.conv;
-private import std.process;
+import std.conv : to;
+private import std.process : getenv, setenv, unsetenv;
 debug (1) {
   import std.stdio;
 }
@@ -21,16 +21,7 @@ import di_getopt;
 private immutable string DI_ALL_FORMAT = "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP";
 private immutable string DI_POSIX_FORMAT = "SbuvpM";
 private immutable string DI_DEFAULT_FORMAT = "smbuvpT";
-
-enum char
-  sortNone = 'n',
-  sortMount = 'm',
-  sortSpecial = 's',
-  sortAvail = 'a',
-  sortReverse = 'r',
-  sortType = 't',
-  sortAscending = 'A',
-  sortDescending = 'D';
+private immutable string DI_DEFAULT_SORT = "m";
 
 struct Options {
   bool              displayAll = false;
@@ -46,7 +37,7 @@ struct Options {
   bool[string]      ignoreList;
   short             debugLevel = 0;
   string            formatString = DI_DEFAULT_FORMAT;
-  string            sortType = "m";
+  string            sortType = DI_DEFAULT_SORT;
   string            zoneDisplay;
 }
 
