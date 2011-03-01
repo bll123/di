@@ -4,7 +4,7 @@ $Id$
 $Source$
 */
 
-module di_getopt;
+module digetopt;
 
 import std.string;
 import std.conv : to;
