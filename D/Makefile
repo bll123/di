@@ -44,10 +44,13 @@ all:	di.env
 	$(MAKE) -e MKCONFIG_TYPE=sh \
         DTESTFLAGS="$$DC_OPT $$DC_RELEASE $$DC_INLINE" di-programs
 
+
+#        DTESTFLAGS="$$DC_UNITTEST $$DC_COV" \
+
 all-test: di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
-        DTESTFLAGS="$$DC_UNITTEST $$DC_COV" \
+        DTESTFLAGS="$$DC_UNITTEST " \
 	LIBS="$(LIBS) $$DC_LIBS" \
 	di-programs
 
@@ -113,11 +116,13 @@ $(MKC_REQLIB):	di.env config.d
 ###
 # executables
 
-OBJECTS = config$(OBJ_EXT) di_getopt$(OBJ_EXT) diskpart$(OBJ_EXT) \
+OBJECTS = config$(OBJ_EXT) digetopt$(OBJ_EXT) dilocale$(OBJ_EXT) \
+	diquota$(OBJ_EXT) diskpart$(OBJ_EXT) \
 	display$(OBJ_EXT) dispopts$(OBJ_EXT) di$(OBJ_EXT) options$(OBJ_EXT)
 
 di$(EXE_EXT):	$(OBJECTS)
-	$(MKCONFIGPATH)/mklink.sh -c ${DC} -o di$(EXE_EXT) -- $(OBJECTS) $(LIBS)
+	$(MKCONFIGPATH)/mklink.sh -e -c ${DC} -o di$(EXE_EXT) -- \
+		$(OBJECTS) $(LIBS)
 
 ###
 # objects
@@ -126,18 +131,25 @@ config$(OBJ_EXT):	config.d
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) config.d
 
 di$(OBJ_EXT):	di.d config$(OBJ_EXT) \
-		diskpart$(OBJ_EXT) display$(OBJ_EXT) \
-		dispopts$(OBJ_EXT) di_getopt$(OBJ_EXT) \
+		diskpart$(OBJ_EXT) dilocale$(OBJ_EXT) \
+		diquota$(OBJ_EXT) display$(OBJ_EXT) \
+		dispopts$(OBJ_EXT) digetopt$(OBJ_EXT) \
 		options$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di.d
 
-di_getopt$(OBJ_EXT):	di_getopt.d config$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di_getopt.d
+digetopt$(OBJ_EXT):	digetopt.d config$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) digetopt.d
+
+dilocale$(OBJ_EXT):	dilocale.d config$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dilocale.d
+
+diquota$(OBJ_EXT):	diquota.d config$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) diquota.d
 
 diskpart$(OBJ_EXT):	diskpart.d config$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) diskpart.d
 
-display$(OBJ_EXT):	display.d config$(OBJ_EXT) \
+display$(OBJ_EXT):	display.d config$(OBJ_EXT) dilocale$(OBJ_EXT) \
 		diskpart$(OBJ_EXT) dispopts$(OBJ_EXT) \
 		options$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) display.d
@@ -146,6 +158,6 @@ dispopts$(OBJ_EXT):	dispopts.d config$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dispopts.d
 
 options$(OBJ_EXT):	options.d config$(OBJ_EXT) \
-		dispopts$(OBJ_EXT) di_getopt$(OBJ_EXT)
+		dispopts$(OBJ_EXT) digetopt$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) options.d
 

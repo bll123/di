@@ -23,6 +23,7 @@ chdr    rpcsvc/rquota.h
 chdr    rpc/types.h
 chdr    ufs/quota.h
 chdr    ufs/ufs/quota.h
+chdr    locale.h
 #chdr    windows.h
 
 csys    fs/ufs_quota.h
@@ -44,15 +45,37 @@ clib    getmntent -lgen
 clib    gettext -lintl, -lintl -liconv
 clib    getvfsstat
 clib    quotactl
+clib    setlocale
 clib    setmntent
 clib    statvfs
+clib    textdomain -lintl, -lintl -liconv
+# NFS quotas
+#clib    auth_destroy
+#clib    clnt_call
+#clib    clnt_create
+#clib    clnt_destroy
+#clib    xdr_quota_get
+#clib    xdr_quota_rslt
 
+cdefint LC_ALL
+cdefint RQ_PATHLEN
+# for diquota.d
+cdefint __FreeBSD__
+# for diquota.d
+cdefint _AIX
 # Linux: _PATH_MOUNTED mntent.h; MNTTYPE_IGNORE mntent.h
 cdefstr _PATH_MOUNTED
 cdefstr _PATH_MNTTAB
 cdefstr MOUNTED
 cdefstr MNTTAB
 cdefstr MNTTYPE_IGNORE
+# linux
+cdefint BLOCK_SIZE
+# aix
+cdefint DQBSIZE
+# tru64, et. al.
+cdefint DEV_BSIZE
+
 
 # di
 cdefstr DI_VERSION
@@ -77,10 +100,14 @@ ctypeconv   int u_int32_t
 cstruct rquota
 ctypedef rquota
 cenum   gqr_status
-### need a check for typedef ...rquota
-### convert it to an alias.
 cstruct getquota_rslt
 cstruct dqblk
+# NFS quotas
+#cstruct getquota_args
+#cstruct XDR
+#cstruct CLIENT
+#cenum   clnt_stat
+#cstruct timeval
 
 cdcl    bindtextdomain
 cdcl    endmntent
@@ -92,8 +119,18 @@ cdcl    endmntent
 cdcl    getmntent
 cdcl    gettext
 #cdcl    getvfsstat
+cdcl    setlocale
 cdcl    args setmntent
 cdcl    statvfs
+cdcl    textdomain
+# NFS quotas
+#cdcl    auth_destroy
+#cdcl    clnt_call
+#cdcl    clnt_create
+#cdcl    clnt_destroy
+#cdcl    xdr_quota_get
+#cdcl    xdr_quota_rslt
+
 cmember  statvfs f_basetype
 cmember  dqblk dqb_curspace
 cmember  dqblk dqb_curblocks
@@ -103,12 +140,51 @@ cmember  dqblk dqb_curfiles
 cmember  getquota_rslt gqr_status
 cmember  getquota_rslt gqr_rquota
 
+command msgfmt
+command gmsgfmt
+
 # see dioptions.dat to change these
 option  DI_DEFAULT_FORMAT smbuvpT
 option  DI_DEFAULT_DISP_SIZE H
 
+ifnotoption NLS
+  set _lib_bindtextdomain 0
+  set _lib_gettext 0
+  set _lib_setlocale 0
+  set _lib_textdomain 0
+  set _hdr_libintl 0
+  set _hdr_locale 0
+  set _command_msgfmt 0
+  set _command_gmsgfmt 0
+endif
+
+if hasnls _clib_bindtextdomain && _clib_gettext && _clib_setlocale && \
+    _clib_textdomain && _hdr_libintl && _hdr_locale && \
+    ( _command_msgfmt || _command_gmsgfmt )
+  setint _enable_nls 1
+else
+  set _clib_bindtextdomain 0
+  set _clib_gettext 0
+  set _clib_setlocale 0
+  set _clib_textdomain 0
+  set _hdr_libintl 0
+  set _hdr_locale 0
+  set _command_msgfmt 0
+  set _command_gmsgfmt 0
+  setint _enable_nls 0
+endif
+
+if stdquotas _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
+    _sys_fs_ufs_quota || _sys_quota || _clib_quotactl
+  setint _has_std_quotas 1
+else
+  setint _has_std_quotas 0
+endif
+
 include
 
+enum string DI_PROG = "di";
+enum string DI_PREFIX = "/home/bll/DI/di/C/test_di";
 import core.stdc.stdio;  // for FILE
 
 endinclude
