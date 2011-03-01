@@ -16,11 +16,10 @@ version (unittest) {
 
 import config;
 import dispopts;
-import di_getopt;
+import digetopt;
 
 private immutable string DI_ALL_FORMAT = "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP";
 private immutable string DI_POSIX_FORMAT = "SbuvpM";
-private immutable string DI_DEFAULT_FORMAT = "smbuvpT";
 private immutable string DI_DEFAULT_SORT = "m";
 
 struct Options {
