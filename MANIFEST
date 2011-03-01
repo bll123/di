@@ -25,7 +25,8 @@ C/trimchar.c              di source
 C/version.h               di source
 D/                      D di source
 D/di.d                    di source
-D/di_getopt.d             di source
+D/digetopt.d             di source
+D/dilocale.d              di source
 D/diskpart.d              di source
 D/display.d               di source
 D/dispopts.d              di source
