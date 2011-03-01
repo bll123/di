@@ -1,50 +1,18 @@
 // written in the D programming language
 
-module di_display;
+module didisplay;
 
 import std.stdio;
 import std.string;
 import std.ctype : isdigit;
-import std.conv : tolower, to;
+import std.conv : tolower, to, chop;
 private import std.math : floor;
 
 import config;
 import options;
 import dispopts;
 import diskpart;
-
-struct DisplayData
-{
-  Options           *opts;
-  DisplayOpts       *dispOpts;
-  DiskPartitions    *dpList;
-  string            titleString;
-  string[dchar]     dispFmtString;
-};
-
-void
-displayAll (ref Options opts, ref DisplayOpts dispOpts,
-    ref DiskPartitions dpList)
-{
-  DisplayData       dispData;
-
-  initializeDisplayIdxs ();
-  initializeDisplayTable (dispOpts);
-  setDispBlockSize (dispOpts);
-  if (opts.debugLevel > 10) {
-    dumpDispTable ();
-  }
-
-  // why isn't there a more better way to do this?
-  dispData.opts = &opts;
-  dispData.dispOpts = &dispOpts;
-  dispData.dpList = &dpList;
-
-  findMaximums (dispData);
-  buildFormat (dispData);
-  displayTitle (dispData);
-  displayPartitions (dispData);
-}
+import dilocale;
 
 private:
 
@@ -58,7 +26,7 @@ enum char
   sortAscending = 'A',
   sortDescending = 'D';
 
-enum char
+enum dchar
   fmtMount = 'm',
   fmtMountFull = 'M',
   fmtSpecial = 's',
@@ -74,6 +42,8 @@ enum char
   fmtBlocksPercNotAvail = 'p',
   fmtBlocksPercUsed = '1',
   fmtBlocksPercBSD = '2',
+  fmtBlocksPercAvail = 'a',
+  fmtBlocksPercFree = '3',
   fmtInodesTot = 'i',
   fmtInodesUsed = 'U',
   fmtInodesFree = 'F',
@@ -81,13 +51,66 @@ enum char
   fmtMountTime = 'I',
   fmtMountOptions = 'O';
 
+enum int
+    FTYPE_NONE = 0,
+    FTYPE_STRING = 1,
+    FTYPE_SPACE = 2,
+    FTYPE_PERC_SPACE = 3,
+    FTYPE_INODE = 4,
+    FTYPE_PERC_INODE = 5;
+
+struct FormatInfo {
+  dchar         key;
+  int           ftype;
+  int           width;
+  string        title;
+};
+
+FormatInfo[] formatTypes = [
+  { fmtMount,               FTYPE_STRING,    15, "Mount" },
+  { fmtMountFull,           FTYPE_STRING,    15, "Mount" },
+  { fmtSpecial,             FTYPE_STRING,    15, "Filesystem" },
+  { fmtSpecialFull,         FTYPE_STRING,    15, "Filesystem" },
+  { fmtType,                FTYPE_STRING,    15, "fsType" },
+  { fmtTypeFull,            FTYPE_STRING,    15, "fs Type" },
+  { fmtBlocksTot,           FTYPE_SPACE,      8, "" },
+  { fmtBlocksTotAvail,      FTYPE_SPACE,      8, "" },
+  { fmtBlocksUsed,          FTYPE_SPACE,      8, "Used" },
+  { fmtBlocksCalcUsed,      FTYPE_SPACE,      8, "Used" },
+  { fmtBlocksFree,          FTYPE_SPACE,      8, "Free" },
+  { fmtBlocksAvail,         FTYPE_SPACE,      8, "Avail" },
+  { fmtBlocksPercNotAvail,  FTYPE_PERC_SPACE, 3, "%Used" },
+  { fmtBlocksPercUsed,      FTYPE_PERC_SPACE, 3, "%Used" },
+  { fmtBlocksPercBSD,       FTYPE_PERC_SPACE, 3, "%Used" },
+  { fmtBlocksPercAvail,     FTYPE_PERC_SPACE, 3, "%Free" },
+  { fmtBlocksPercFree,      FTYPE_PERC_SPACE, 3, "%Free" },
+  { fmtInodesTot,           FTYPE_INODE,      7, "Inodes" },
+  { fmtInodesUsed,          FTYPE_INODE,      7, "IUsed" },
+  { fmtInodesFree,          FTYPE_INODE,      7, "IFree" },
+  { fmtInodesPerc,          FTYPE_PERC_INODE, 3, "%IUsed" },
+  { fmtMountTime,           FTYPE_STRING,    15, "Mount Time" },
+  { fmtMountOptions,        FTYPE_STRING,    15, "Options" }
+];
+
+size_t[dchar]   formatTypesIdxs;
+bool            fmtInfoIdxsInitialized;
+
+struct DisplayData
+{
+  Options           *opts;
+  DisplayOpts       *dispOpts;
+  DiskPartitions    *dpList;
+  string            titleString;
+  string[dchar]     dispFmtString;
+};
+
 struct DisplayTable {
-  real          size;
-  real          low;
-  real          high;
-  char          key;
-  string        suffix;
-  string        disp[2];
+  real              size;
+  real              low;
+  real              high;
+  char              key;
+  string            suffix;
+  string            disp[2];
 };
 
 DisplayTable[] displayTable = [
@@ -109,184 +132,180 @@ DisplayTable[] displayTable = [
 size_t[char]    displayIdxs;
 bool            dispIdxsInitialized;
 
+public:
+
+void
+displayAll (ref Options opts, ref DisplayOpts dispOpts,
+    ref DiskPartitions dpList)
+{
+  DisplayData       dispData;
+
+  dispData.opts = &opts;
+  dispData.dispOpts = &dispOpts;
+  dispData.dpList = &dpList;
+
+  initializeIdxs ();
+  initializeTitles (dispOpts);
+  initializeDisplayTable (dispOpts);
+  setDispBlockSize (dispOpts);
+  if (opts.debugLevel > 10)
+  {
+    dumpDispTable ();
+  }
+
+  buildDisplayList (dispData);
+  displayTitle (dispData);
+  displayPartitions (dispData);
+}
+
+private:
+
 void
 dumpDispTable ()
 {
-  foreach (disp; displayTable) {
+  foreach (disp; displayTable)
+  {
     writefln ("%s %s %-6s sz:%25.0f\n  low:%25.0f high:%25.0f",
         disp.key, disp.suffix, disp.disp[0], disp.size, disp.low, disp.high);
   }
 }
 
 void
-findMaximums (ref DisplayData dispData)
+buildDisplayList (ref DisplayData dispData)
 {
-  foreach (dp; dispData.dpList.diskPartitions)
-  {
-  }
-}
+  int           precision = 0;
 
-void
-buildFormat (ref DisplayData dispData)
-{
+  if (dispData.dispOpts.dbsstr == "h" || dispData.dispOpts.dbsstr == "H")
+  {
+    precision = 1;
+  }
+
+  int[dchar] dpMax;
+
   foreach (dchar c; dispData.opts.formatString)
   {
+    if (formatTypes[formatTypesIdxs[c]].ftype == FTYPE_STRING)
+    {
+      dpMax[c] = 0;
+    }
+  }
+
+  foreach (dp; dispData.dpList.diskPartitions)
+  {
+    if (dp.printFlag != dp.DI_PRINT_OK)
+    {
+      continue;
+    }
+
+    setMaxLen (dp.special, dpMax[fmtSpecialFull]);
+    setMaxLen (dp.name, dpMax[fmtMountFull]);
+    setMaxLen (dp.fsType, dpMax[fmtTypeFull]);
+//    setMaxLen (dp.mountOptions, dpMax[fmtMountOptions]);
+    setMaxLen (dp.mountTime, dpMax[fmtMountTime]);
+  }
+
+  foreach (dchar c; dispData.opts.formatString)
+  {
+    auto title = DI_GT (formatTypes[formatTypesIdxs[c]].title);
+    auto ftype = formatTypes[formatTypesIdxs[c]].ftype;
+    auto width = formatTypes[formatTypesIdxs[c]].width;
+
     switch (c)
     {
-      case fmtMount:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "Mount");
-        break;
-      }
-
       case fmtMountFull:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "MountF");
-        break;
-      }
-
-      case fmtSpecial:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "Special");
-        break;
-      }
-
       case fmtSpecialFull:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "SpecialF");
-        break;
-      }
-
-      case fmtType:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "Type");
-        break;
-      }
-
       case fmtTypeFull:
+      case fmtMountTime:
+      case fmtMountOptions:
       {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "TypeF");
+        width = dpMax[c];
         break;
       }
 
       case fmtBlocksTot:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "BlocksT");
-        break;
-      }
-
       case fmtBlocksTotAvail:
       {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "BlocksTA");
-        break;
-      }
-
-      case fmtBlocksUsed:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "BlocksU");
-        break;
-      }
-
-      case fmtBlocksCalcUsed:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "BlocksC");
-        break;
-      }
-
-      case fmtBlocksFree:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "BlocksF");
-        break;
-      }
-
-      case fmtBlocksAvail:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "BlocksA");
-        break;
-      }
-
-      case fmtBlocksPercNotAvail:
-      {
-        dispData.dispFmtString[c] = "%s%% ";
-        dispData.titleString ~= format ("%s ", "Blocks%NA");
-        break;
-      }
-
-      case fmtBlocksPercUsed:
-      {
-        dispData.dispFmtString[c] = "%s%% ";
-        dispData.titleString ~= format ("%s ", "Blocks%U");
-        break;
-      }
-
-      case fmtBlocksPercBSD:
-      {
-        dispData.dispFmtString[c] = "%s%% ";
-        dispData.titleString ~= format ("%s ", "Blocks%B");
-        break;
-      }
-
-      case fmtInodesTot:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "InodeT");
-        break;
-      }
-
-      case fmtInodesUsed:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "InodeU");
-        break;
-      }
-
-      case fmtInodesFree:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "InodeF");
-        break;
-      }
-
-      case fmtInodesPerc:
-      {
-        dispData.dispFmtString[c] = "%s%% ";
-        dispData.titleString ~= format ("%s ", "Inode%");
-        break;
-      }
-
-      case fmtMountTime:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "MT");
-        break;
-      }
-
-      case fmtMountOptions:
-      {
-        dispData.dispFmtString[c] = "%s ";
-        dispData.titleString ~= format ("%s ", "Opt");
+        title = DI_GT (dispData.dispOpts.dispBlockLabel);
         break;
       }
 
       default:
       {
-        dispData.titleString ~= " ";
         break;
       }
     }
-  }
+
+    switch (ftype)
+    {
+      case FTYPE_STRING:
+      {
+        if (title.length > width)
+        {
+          width = title.length;
+        }
+        auto fmt = format ("%%-%ds ", width);
+        dispData.dispFmtString[c] = fmt;
+        dispData.titleString ~= format (fmt, title);
+        break;
+      }
+
+      case FTYPE_SPACE:
+      {
+        if (title.length > width)
+        {
+          width = title.length;
+        }
+        auto twidth = width;
+        if (dispData.dispOpts.dbsstr == "h" || dispData.dispOpts.dbsstr == "H")
+        {
+          --twidth;
+        }
+        auto fmt = format ("%%%d.%df", twidth, precision);
+        dispData.dispFmtString[c] = fmt;
+        fmt = format ("%%%ds ", width);
+        dispData.titleString ~= format (fmt, title);
+        break;
+      }
+
+      case FTYPE_PERC_SPACE:
+      {
+        auto fmt = "";
+        if (title.length > width)
+        {
+          width = title.length;
+        }
+        auto twidth = width - 2;
+        if (twidth < 1) { twidth = 1; }
+        fmt ~= format ("%%%d.0f%%%%  ", twidth);
+        dispData.dispFmtString[c] = fmt;
+        fmt = format ("%%%ds ", width);
+        dispData.titleString ~= format (fmt, title);
+        break;
+      }
+
+      case FTYPE_INODE:
+      {
+        if (title.length > width)
+        {
+          width = title.length;
+        }
+        auto fmt = format ("%%%d.0f ", width);
+        dispData.dispFmtString[c] = fmt;
+        fmt = format ("%%%ds ", width);
+        dispData.titleString ~= format (fmt, title);
+        break;
+      }
+
+      case FTYPE_PERC_INODE:
+      {
+        auto fmt = format ("%%%d.0f%%%% ", width);
+        dispData.dispFmtString[c] = fmt;
+        fmt = format ("%%%ds ", width);
+        dispData.titleString ~= format (fmt, title);
+        break;
+      }
+    } // switch on format type
+  } // for each format string char
 }
 
 void
@@ -296,149 +315,268 @@ displayTitle (ref DisplayData dispData)
   writeln (dispData.titleString);
 }
 
+
 void
 displayPartitions (ref DisplayData dispData)
 {
   foreach (dp; dispData.dpList.diskPartitions)
   {
-    string        temp;
-
-    if (dp.printFlag != dispData.dpList.DI_PRNT_OK)
+    if (dp.printFlag != dp.DI_PRINT_OK)
     {
       continue;
     }
 
+    string        outString;
+    string        sval;
+    real          rval;
+    real          uval;
+
     foreach (dchar c; dispData.opts.formatString)
     {
+      auto ftype = formatTypes[formatTypesIdxs[c]].ftype;
+
       switch (c)
       {
         case fmtMount:
-        {
-          temp ~= format (dispData.dispFmtString[c], dp.name);
-          break;
-        }
-
         case fmtMountFull:
         {
-          temp ~= format (dispData.dispFmtString[c], dp.name);
+          sval = dp.name;
           break;
         }
 
         case fmtSpecial:
-        {
-          temp ~= format (dispData.dispFmtString[c], dp.special);
-          break;
-        }
-
         case fmtSpecialFull:
         {
-          temp ~= format (dispData.dispFmtString[c], dp.special);
+          sval = dp.special;
           break;
         }
 
         case fmtType:
-        {
-          temp ~= format (dispData.dispFmtString[c], dp.fsType);
-          break;
-        }
-
         case fmtTypeFull:
         {
-          temp ~= format (dispData.dispFmtString[c], dp.fsType);
+          sval = dp.fsType;
           break;
         }
 
         case fmtBlocksTot:
         {
-          temp ~= format (dispData.dispFmtString[c],
-              dp.totalBlocks * dp.blockSize);
+          rval = dp.totalBlocks;
           break;
         }
 
         case fmtBlocksTotAvail:
         {
-          temp ~= format (dispData.dispFmtString[c],
-              dp.availBlocks * dp.blockSize);
+          rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
           break;
         }
 
         case fmtBlocksUsed:
         {
+          rval = dp.totalBlocks - dp.freeBlocks;
           break;
         }
 
         case fmtBlocksCalcUsed:
         {
+          rval = dp.totalBlocks - dp.availBlocks;
           break;
         }
 
         case fmtBlocksFree:
         {
+          rval = dp.freeBlocks;
           break;
         }
 
         case fmtBlocksAvail:
         {
+          rval = dp.availBlocks;
           break;
         }
 
         case fmtBlocksPercNotAvail:
         {
+          rval = dp.totalBlocks;
+          uval = dp.totalBlocks - dp.availBlocks;
           break;
         }
 
         case fmtBlocksPercUsed:
         {
+          rval = dp.totalBlocks;
+          uval = dp.totalBlocks - dp.freeBlocks;
           break;
         }
 
         case fmtBlocksPercBSD:
         {
+          rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
+          uval = dp.totalBlocks - dp.freeBlocks;
+          break;
+        }
+
+        case fmtBlocksPercAvail:
+        {
+          rval = dp.totalBlocks;
+          uval = dp.availBlocks;
+          break;
+        }
+
+        case fmtBlocksPercFree:
+        {
+          rval = dp.totalBlocks;
+          uval = dp.freeBlocks;
           break;
         }
 
         case fmtInodesTot:
         {
+          rval = dp.totalInodes;
           break;
         }
 
         case fmtInodesUsed:
         {
+          rval = dp.totalInodes - dp.freeInodes;
           break;
         }
 
         case fmtInodesFree:
         {
+          rval = dp.freeInodes;
           break;
         }
 
         case fmtInodesPerc:
         {
+          rval = dp.totalInodes;
+          uval = dp.totalInodes - dp.availInodes;
           break;
         }
 
         case fmtMountTime:
         {
+          sval = dp.mountTime;
           break;
         }
 
         case fmtMountOptions:
         {
+          sval = dp.mountOptions;
           break;
         }
 
         default:
         {
-          temp ~= c;
+          outString ~= c;
+          ftype = FTYPE_NONE;
+          break;
+        }
+      }  // switch on format character
+
+      switch (ftype)
+      {
+        case FTYPE_NONE:
+        {
+          break;
+        }
+
+        case FTYPE_STRING:
+        {
+          outString ~= format (dispData.dispFmtString[c], sval);
+          break;
+        }
+
+        case FTYPE_SPACE:
+        {
+          outString ~= blockDisplay (dispData, c, rval);
+          break;
+        }
+
+        case FTYPE_PERC_SPACE:
+        case FTYPE_PERC_INODE:
+        {
+          outString ~= percDisplay (dispData, c, rval, uval);
+          break;
+        }
+
+        case FTYPE_INODE:
+        {
+          outString ~= inodeDisplay (dispData, c, rval);
           break;
         }
       }
-    }
+    } // for each format character
 
-    writeln (temp);
-//    writefln ("%s %s %.1fG", dp.name, dp.special,
-//        dp.totalBlocks * dp.blockSize / 1024.0 / 1024.0 / 1024.0);
+    writeln (outString);
+  } // for each disk partition
+}
+
+auto
+findDispSize (real val)
+{
+  foreach (i, dt; displayTable)
+  {
+    if (val >= dt.low && val < dt.high)
+    {
+      return i;
+    }
   }
+
+  return displayIdxs['m'];
+}
+
+string
+blockDisplay (const DisplayData dispData, const dchar c, const real val)
+{
+  size_t        idx;
+  real          dbs = dispData.dispOpts.dispBlockSize;
+  string        suffix = "";
+
+  if (dispData.dispOpts.dbsstr == "h")
+  {
+    idx = findDispSize (val);
+  }
+
+  if (dispData.dispOpts.dbsstr == "h" || dispData.dispOpts.dbsstr == "H")
+  {
+    dbs = displayTable[idx].size;
+    suffix = displayTable[idx].suffix;
+  }
+
+  auto nval = val / dbs;
+  auto fmt = dispData.dispFmtString[c] ~ suffix ~ " ";
+  return format (fmt, nval);
+}
+
+string
+inodeDisplay (const DisplayData dispData, const dchar c, const real val)
+{
+  size_t        idx;
+  string        suffix = "";
+
+  auto fmt = dispData.dispFmtString[c];
+  return format (fmt, val);
+}
+
+string
+percDisplay (const DisplayData dispData, const dchar c,
+    const real tval, const real uval)
+{
+  real          perc;
+
+  if (tval > 0.0)
+  {
+    perc = uval / tval;
+    perc *= 100;
+  }
+  else
+  {
+    perc = 0.0;
+  }
+
+  auto fmt = dispData.dispFmtString[c];
+  return format (fmt, perc);
 }
 
 void
@@ -551,7 +689,7 @@ unittest {
     }
   }
 
-  initializeDisplayIdxs ();
+  initializeIdxs ();
 
   dispOpts.baseDispSize = size1024;
   dispOpts.baseDispIdx = idx1024;
@@ -640,12 +778,41 @@ initializeDisplayTable (ref DisplayOpts dispOpts)
 }
 
 void
-initializeDisplayIdxs ()
+initializeIdxs ()
 {
   if (! dispIdxsInitialized) {
     foreach (idx, dt; displayTable) {
       displayIdxs[dt.key] = idx;
     }
     dispIdxsInitialized = true;
+  }
+  if (! fmtInfoIdxsInitialized) {
+    foreach (idx, fi; formatTypes) {
+      formatTypesIdxs[fi.key] = idx;
+    }
+    fmtInfoIdxsInitialized = true;
+  }
+}
+
+void
+setMaxLen (string val, ref int max)
+{
+  int len = cast(int) val.length;
+  if (len > max)
+  {
+    max = len;
+  }
+}
+
+void
+initializeTitles (DisplayOpts dispOpts)
+{
+  if (dispOpts.posixCompat)
+  {
+    formatTypes[formatTypesIdxs[fmtMountFull]].title = "Mounted On";
+    formatTypes[formatTypesIdxs[fmtBlocksAvail]].title = "Available";
+    formatTypes[formatTypesIdxs[fmtBlocksPercNotAvail]].title = "Capacity";
+    formatTypes[formatTypesIdxs[fmtBlocksPercUsed]].title = "Capacity";
+    formatTypes[formatTypesIdxs[fmtBlocksPercBSD]].title = "Capacity";
   }
 }
