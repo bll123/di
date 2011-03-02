@@ -2464,31 +2464,31 @@ getMaxFormatLengths (diData)
               diData->disppooledfs = TRUE;
             }
 
-            len = strlen (dinfo->name);
+            len = (unsigned int) strlen (dinfo->name);
             if (len > diout->maxMountString)
             {
                 diout->maxMountString = len;
             }
 
-            len = strlen (dinfo->special);
+            len = (unsigned int) strlen (dinfo->special);
             if (len > diout->maxSpecialString)
             {
                 diout->maxSpecialString = len;
             }
 
-            len = strlen (dinfo->fsType);
+            len = (unsigned int) strlen (dinfo->fsType);
             if (len > diout->maxTypeString)
             {
                 diout->maxTypeString = len;
             }
 
-            len = strlen (dinfo->options);
+            len = (unsigned int) strlen (dinfo->options);
             if (len > diout->maxOptString)
             {
                 diout->maxOptString = len;
             }
 
-            len = strlen (dinfo->mountTime);
+            len = (unsigned int) strlen (dinfo->mountTime);
             if (len > diout->maxMntTimeString)
             {
                 diout->maxMntTimeString = len;
@@ -2895,7 +2895,7 @@ parseList (list, str)
     ptr = dstr;
     for (i = ocount; i < ncount; ++i)
     {
-        len = strlen (ptr);
+        len = (unsigned int) strlen (ptr);
         lptr = (char *) malloc ((Size_t) len + 1);
         if (lptr == (char *) NULL)
         {
@@ -3140,7 +3140,7 @@ setDispBlockSize (ptr, diopts, diout)
     }
 
     tptr = ptr;
-    len = strlen (ptr);
+    len = (unsigned int) strlen (ptr);
     if (! isdigit ((int) *tptr))
     {
         int             idx;
