@@ -54,19 +54,19 @@ class DiskPartitions {
 private:
   int       debugLevel;
 
-  static if (_cdefstr__PATH_MOUNTED) {
+  static if (_cdefine__PATH_MOUNTED) {
     alias _PATH_MOUNTED DI_MOUNT_FILE;
-  } else static if (_cdefstr__PATH_MNTTAB) {
+  } else static if (_cdefine__PATH_MNTTAB) {
     alias _PATH_MNTTAB DI_MOUNT_FILE;
-  } else static if (_cdefstr_MOUNTED) {
+  } else static if (_cdefine_MOUNTED) {
     alias MOUNTED DI_MOUNT_FILE;
-  } else static if (_cdefstr_MNTTAB) {
+  } else static if (_cdefine_MNTTAB) {
     alias MNTTAB DI_MOUNT_FILE;
   } else {
     enum string DI_MOUNT_FILE = "/etc/mnttab";
   }
 
-  static if (! _cdefstr_MNTTYPE_IGNORE) {
+  static if (! _cdefine_MNTTYPE_IGNORE) {
     enum string MNTTYPE_IGNORE = "ignore";
   }
 
