@@ -12,7 +12,7 @@ EXE_EXT =
 MAKE = make
 
 CC = cc
-DC = dmd
+DC = gdc
 
 #
 # common programs
@@ -39,10 +39,12 @@ MKC_REQLIB = mkconfig.reqlibs
 
 # have to get various environment variables set up.
 
+#        DTESTFLAGS="$$DC_OPT $$DC_RELEASE $$DC_INLINE" di-programs
+
 all:	di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
-        DTESTFLAGS="$$DC_OPT $$DC_RELEASE $$DC_INLINE" di-programs
+        DTESTFLAGS="$$DC_OPT $$DC_RELEASE " di-programs
 
 
 #        DTESTFLAGS="$$DC_UNITTEST $$DC_COV" \
@@ -143,7 +145,7 @@ digetopt$(OBJ_EXT):	digetopt.d config$(OBJ_EXT)
 dilocale$(OBJ_EXT):	dilocale.d config$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dilocale.d
 
-diquota$(OBJ_EXT):	diquota.d config$(OBJ_EXT)
+diquota$(OBJ_EXT):	diquota.d config$(OBJ_EXT) diskpart$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) diquota.d
 
 diskpart$(OBJ_EXT):	diskpart.d config$(OBJ_EXT)
