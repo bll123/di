@@ -4,8 +4,8 @@ module didisplay;
 
 import std.stdio;
 import std.string;
-import std.ctype : isdigit;
-import std.conv : tolower, to, chop;
+import std.ascii : isDigit, toLower;
+import std.conv : to, chop;
 private import std.math : floor;
 
 import config;
@@ -62,7 +62,7 @@ enum int
 struct FormatInfo {
   dchar         key;
   int           ftype;
-  int           width;
+  long          width;
   string        title;
 };
 
@@ -304,6 +304,11 @@ buildDisplayList (ref DisplayData dispData)
         dispData.titleString ~= format (fmt, title);
         break;
       }
+ 
+      default:
+      {
+        break;
+      }
     } // switch on format type
   } // for each format string char
 }
@@ -505,6 +510,11 @@ displayPartitions (ref DisplayData dispData)
           outString ~= inodeDisplay (dispData, c, rval);
           break;
         }
+
+        default:
+        {
+          break;
+        }
       }
     } // for each format character
 
@@ -588,7 +598,7 @@ setDispBlockSize (ref DisplayOpts dispOpts)
   val = 1024.0 * 1024.0;
 
   c = dispOpts.dbsstr[0];
-  if (isdigit (c)) {
+  if (isDigit (c)) {
     val = to!(typeof(val))(dispOpts.dbsstr);
     val = floor (val);  // make sure it's an integer value
 //writefln ("digit:%s:val=%25.0f", dispOpts.dbsstr, val);
@@ -601,7 +611,7 @@ setDispBlockSize (ref DisplayOpts dispOpts)
     }
   } else {
     if (c != 'H') {
-      c = cast(char) tolower (c);
+      c = cast(char) toLower (c);
     }
     if (dispOpts.dbsstr == "HUMAN") {
       c = 'h';
