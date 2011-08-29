@@ -8,11 +8,7 @@ option-file ../dioptions.dat
 
 loadunit c-main
 loadunit c-include-conflict
-loadunit c-quotactl
-loadunit c-setmntent
-loadunit c-statfs
 loadunit c-rquota
-loadunit c-getfsstat
 
 output   config.h
 
@@ -147,15 +143,24 @@ lib     textdomain  -lintl, -lintl -liconv
 lib     xdr_int -lnsl
 lib     zone_getattr
 lib     zone_list
-quotactl_pos
 # get the correct xdr types...
 rquota_xdr
 gqa_uid_xdr
 # to prevent warnings
 # some systems are u_int, size_t, u_long
-getfsstat_type
-setmntent_args
-statfs_args
+args noconst getfsstat
+args noconst getvfsstat
+args noconst quotactl
+setint _quotactl_pos_1 0
+setint _quotactl_pos_2 0
+if quotactl_pos_1 == _c_arg_1_quotactl 'char *'
+ setint _quotactl_pos_1 1
+endif
+if quotactl_pos_2 == _c_arg_2_quotactl 'char *'
+ setint _quotactl_pos_2 1
+endif
+args noconst setmntent
+args noconst statfs
 class   os::Volumes -lsyllable
 npt     getenv
 npt     getopt
