@@ -3,7 +3,7 @@
 module options;
 
 import std.string;
-import std.ctype : isdigit;
+import std.ascii : isDigit;
 import std.utf;
 import std.conv : to;
 private import std.process : getenv, setenv, unsetenv;
@@ -317,7 +317,7 @@ processBaseSize (string arg, ref DisplayOpts dispOpts)
 
   with (dispOpts) {
     c = decode (arg, i);
-    if (isdigit (c)) {
+    if (isDigit (c)) {
       baseDispSize = to!(typeof(baseDispSize))(arg);
       baseDispIdx = idx1000; // unknown, really
       if (baseDispSize == 1024.0) {
