@@ -233,8 +233,8 @@
 
 typedef struct
 {
-    unsigned int    count;
-    char            **list;
+    int    count;
+    char   **list;
 } iList_t;
 
 typedef struct
@@ -625,7 +625,7 @@ main (argc, argv)
 
         /* initialize dispTable array */
     dispTable [0].size = diopts->baseDispSize;
-    for (i = 1; i < DI_DISPTAB_SIZE; ++i)
+    for (i = 1; i < (int) DI_DISPTAB_SIZE; ++i)
     {
         dispTable [i].size = dispTable [i - 1].size *
                 diopts->baseDispSize;
@@ -641,7 +641,7 @@ main (argc, argv)
     sizeTable [1].low = diopts->baseDispSize;
     sizeTable [1].high = diopts->baseDispSize * diopts->baseDispSize;
     sizeTable [1].dbs = diopts->baseDispSize;
-    for (i = 2; i < DI_SIZETAB_SIZE; ++i)
+    for (i = 2; i < (int) DI_SIZETAB_SIZE; ++i)
     {
         sizeTable [i].format = diout->blockFormat;
         sizeTable [i].low = sizeTable [i - 1].low * diopts->baseDispSize;
@@ -656,7 +656,7 @@ main (argc, argv)
 
     if (debug > 5)
     {
-        for (i = 0; i < DI_DISPTAB_SIZE; ++i)
+        for (i = 0; i < (int) DI_DISPTAB_SIZE; ++i)
         {
             printf ("i:%d ", i);
             printf ("size: %8.2Lf ", dispTable[i].size);
@@ -666,7 +666,7 @@ main (argc, argv)
         }
 
         printf ("dispBlockSize: %8.2Lf\n", diopts->dispBlockSize);
-        for (i = 0; i < DI_SIZETAB_SIZE; ++i)
+        for (i = 0; i < (int) DI_SIZETAB_SIZE; ++i)
         {
             printf ("i:%d ", i);
             printf ("suffix: %s ", sizeTable[i].suffix);
@@ -1313,7 +1313,7 @@ findDispSize (siz)
 {
     int         i;
 
-    for (i = 0; i < DI_SIZETAB_SIZE; ++i)
+    for (i = 0; i < (int) DI_SIZETAB_SIZE; ++i)
     {
         if (siz >= sizeTable [i].low && siz < sizeTable [i].high)
         {
@@ -1849,7 +1849,7 @@ checkFileInfo (diData, optidx, argc, argv)
                   }
                 }
 
-                if (dinfo->st_dev != DI_UNKNOWN_DEV &&
+                if (dinfo->st_dev != (__ulong) DI_UNKNOWN_DEV &&
                     (__ulong) statBuf.st_dev == dinfo->st_dev &&
                     ! dinfo->isLoopback)
                 {
@@ -2109,11 +2109,15 @@ getDiskSpecialInfo (diData)
         {
             dinfo->sp_dev = (__ulong) statBuf.st_dev;
             dinfo->sp_rdev = (__ulong) statBuf.st_rdev;
-              /* linux labels it's "bind" loopback device    */
-              /* as a filesystem type of "none".  Brilliant. */
+              /* Solaris's loopback device is "lofs"            */
+              /* linux loopback device is "none"                */
               /* linux has rdev = 0                             */
+              /* DragonFlyBSD's loopback device is "null"       */
+              /* DragonFlyBSD has rdev = -1                     */
               /* solaris is more consistent; rdev != 0 for lofs */
+              /* solaris makes sense.                           */
             if ((strcmp (dinfo->fsType, "lofs") == 0 && dinfo->sp_rdev != 0) ||
+                 strcmp (dinfo->fsType, "null") == 0 ||
                  strcmp (dinfo->fsType, "none") == 0) {
               dinfo->isLoopback = TRUE;
               hasLoop = TRUE;
@@ -2857,13 +2861,13 @@ parseList (list, str)
     char        *str;
 #endif
 {
-    char         *dstr;
-    char         *ptr;
-    char         *lptr;
-    unsigned int count;
-    unsigned int ocount;
-    unsigned int ncount;
-    unsigned int i;
+    char        *dstr;
+    char        *ptr;
+    char        *lptr;
+    int         count;
+    int         ocount;
+    int         ncount;
+    int         i;
     unsigned int len;
 
     dstr = strdup (str);
@@ -2885,7 +2889,7 @@ parseList (list, str)
     list->count += count;
     ncount = list->count;
     list->list = (char **) _realloc ((char *) list->list,
-            list->count * sizeof (char *));
+            (Size_t) list->count * sizeof (char *));
     if (list->list == (char **) NULL)
     {
         fprintf (stderr, "malloc failed in parseList() (2).  errno %d\n", errno);
@@ -3265,7 +3269,7 @@ setDispBlockSize (ptr, diopts, diout)
         int         ok;
 
         ok = 0;
-        for (i = 0; i < DI_DISPTAB_SIZE; ++i)
+        for (i = 0; i < (int) DI_DISPTAB_SIZE; ++i)
         {
             if (val == dispTable [i].size)
             {
