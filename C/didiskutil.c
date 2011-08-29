@@ -128,6 +128,34 @@ convertMountOptions (flags, diptr)
                 DI_OPT_LEN - strlen (diptr->options) - 1);
     }
 #endif
+#if defined (MNT_EXRDONLY)
+    if ((flags & MNT_EXRDONLY) == MNT_EXRDONLY)
+    {
+        strncat (diptr->options, "expro,",
+                DI_OPT_LEN - strlen (diptr->options) - 1);
+    }
+#endif
+#if defined (MNT_DEFEXPORTED)
+    if ((flags & MNT_DEFEXPORTED) == MNT_DEFEXPORTED)
+    {
+        strncat (diptr->options, "exprwany,",
+                DI_OPT_LEN - strlen (diptr->options) - 1);
+    }
+#endif
+#if defined (MNT_EXPORTANON)
+    if ((flags & MNT_EXPORTANON) == MNT_EXPORTANON)
+    {
+        strncat (diptr->options, "expanon,",
+                DI_OPT_LEN - strlen (diptr->options) - 1);
+    }
+#endif
+#if defined (MNT_EXKERB)
+    if ((flags & MNT_EXKERB) == MNT_EXKERB)
+    {
+        strncat (diptr->options, "expkerb,",
+                DI_OPT_LEN - strlen (diptr->options) - 1);
+    }
+#endif
 #if defined (MNT_FORCE)
     if ((flags & MNT_FORCE) == MNT_FORCE)
     {
