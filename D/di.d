@@ -9,6 +9,7 @@ import dispopts;
 import diskpart;
 import display;
 import dilocale;
+import diquota;
 
 enum string FUSE_FS = "fuse";
 
@@ -24,12 +25,14 @@ void main (string[] args)
   dpList.getEntries ();
   preCheckDiskPartitions (dpList, opts);
   dpList.getPartitionInfo ();
+  checkDiskQuotas (dpList, opts);
   displayAll (opts, dispOpts, dpList);
 }
 
 void
 preCheckDiskPartitions (ref DiskPartitions dpList, Options opts)
 {
+/+
   if (opts.localOnly == true ||
     opts.includeList.length > 0 || opts.ignoreList.length > 0)
   {
@@ -53,11 +56,13 @@ preCheckDiskPartitions (ref DiskPartitions dpList, Options opts)
       }
     }  // for each disk partition
   } // if there's processing to be done
++/
 }
 
 void
 checkIncludeList (ref DiskPartition dp, Options opts)
 {
+/+
   if (opts.includeList.length > 0)
   {
     dp.setPrintFlag = dp.DI_PRINT_EXCLUDE;
@@ -68,6 +73,7 @@ checkIncludeList (ref DiskPartition dp, Options opts)
       dp.setPrintFlag = dp.DI_PRINT_OK;
     }
   }
++/
 }
 
 
