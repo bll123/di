@@ -85,6 +85,7 @@ command rpmbuild
 const   O_NOCTTY
 define  MCTL_QUERY
 typ     struct dqblk
+typ     struct ufs_dqblk
 typ     fs_disk_quota_t
 typ     gid_t
 typ     statvfs_t

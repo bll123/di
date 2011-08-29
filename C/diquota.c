@@ -121,6 +121,11 @@ diquota (diqinfo)
   int               xfsflag;
 #if _typ_struct_dqblk
   struct dqblk      qinfo;
+#endif
+#if _typ_struct_ufs_dqblk
+  struct ufs_dqblk  qinfo;
+#endif
+#if _typ_struct_dqblk || _typ_struct_ufs_dqblk
   char              *qiptr;
 #endif
 #if _typ_fs_disk_quota_t
@@ -167,7 +172,7 @@ diquota (diqinfo)
     ucmd = QCMD (Q_GETQUOTA, USRQUOTA);
     gcmd = QCMD (Q_GETQUOTA, GRPQUOTA);
 #endif
-#if _typ_struct_dqblk
+#if _typ_struct_dqblk || _typ_struct_ufs_dqblk
     qiptr = (char *) &qinfo;
 #endif
   }
@@ -456,7 +461,12 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, cqinfo)
   _fs_size_t        quotBlockSize = { DI_QUOT_BLOCK_SIZE };
   _fs_size_t        tsize;
   _fs_size_t        tlimit;
+# if _typ_struct_dqblk
   struct dqblk      *qinfo;
+# endif
+# if _typ_struct_ufs_dqblk
+  struct ufs_dqblk  *qinfo;
+# endif
 # if _typ_fs_disk_quota_t
   fs_disk_quota_t   *xfsqinfo;
 # endif
@@ -464,7 +474,12 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, cqinfo)
   if (debug > 5) {
     printf ("quota: di_process_quotas\n");
   }
+# if _typ_struct_dqblk
   qinfo = (struct dqblk *) cqinfo;
+# endif
+# if _typ_struct_ufs_dqblk
+  qinfo = (struct ufs_dqblk *) cqinfo;
+# endif
   if (xfsflag) {
 # if _typ_fs_disk_quota_t
     xfsqinfo = (fs_disk_quota_t *) cqinfo;
