@@ -24,6 +24,9 @@ fi
 
 DI_VERSION=`grep DI_VERSION version.h | sed  -e 's/"$//' -e 's/.*"//'`
 
+make -e di.env
+. ./di.env
+
 grc=0
 make -e DI_DIR=".." DI_VERSION=${DI_VERSION} testrpmbuild
 rc=$?
