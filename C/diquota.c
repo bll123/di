@@ -180,13 +180,13 @@ diquota (diqinfo)
 #endif
 
   if (debug > 5) {
-    printf ("quota: quotactl on %s (%d)\n", diqinfo->name, _quotactl_pos);
+    printf ("quota: quotactl on %s (%d %d)\n", diqinfo->name, _quotactl_pos_1, _quotactl_pos_2);
   }
-#if _lib_quotactl && _quotactl_pos == 1
+#if _lib_quotactl && _quotactl_pos_1
   rc = quotactl (diqinfo->name, ucmd,
         (int) diqinfo->uid, (caddr_t) qiptr);
 #endif
-#if _lib_quotactl && _quotactl_pos == 2
+#if _lib_quotactl && _quotactl_pos_2
 # if _AIX  /* AIX has linux compatibility routine, but still need name */
   rc = quotactl (ucmd, diqinfo->name,
         (int) diqinfo->uid, (caddr_t) qiptr);
@@ -221,11 +221,11 @@ diquota (diqinfo)
 
 # ifdef GRPQUOTA
   if (rc == 0 || errno != ESRCH) {
-#  if _lib_quotactl && _quotactl_pos == 1
+#  if _lib_quotactl && _quotactl_pos_1
     rc = quotactl (diqinfo->name, gcmd,
           (int) diqinfo->gid, (caddr_t) qiptr);
 #  endif
-#   if _lib_quotactl && _quotactl_pos == 2
+#   if _lib_quotactl && _quotactl_pos_2
     rc = quotactl (gcmd, diqinfo->special,
              (int) diqinfo->gid, (caddr_t) qiptr);
 #  endif
@@ -363,7 +363,7 @@ diquota_nfs (diqinfo)
     args.gqa_pathp = path;
     args.gqa_uid = (int) diqinfo->uid;
 
-    rqclnt = clnt_create (host, (unsigned long) RQUOTAPROG, 
+    rqclnt = clnt_create (host, (unsigned long) RQUOTAPROG,
         (unsigned long) RQUOTAVERS, "udp");
     if (rqclnt == (CLIENT *) NULL) {
       if (debug > 2) {
