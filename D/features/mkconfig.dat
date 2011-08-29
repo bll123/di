@@ -162,11 +162,11 @@ cdcl    endmntent
 cdcl    getegid
 cdcl    geteuid
 cdcl    getmntent
-cdcl    args quotactl
+cdcl    args noconst quotactl
 cdcl    gettext
-#cdcl    getvfsstat
+cdcl    args noconst getvfsstat
 cdcl    setlocale
-cdcl    args setmntent
+cdcl    args noconst setmntent
 cdcl    statvfs
 cdcl    textdomain
 
