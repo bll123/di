@@ -29,18 +29,18 @@ trimChar (str, ch)
     int          ch;
 #endif
 {
-    Size_t       len;
+  int     len;
 
-    len = strlen (str);
-    if (len > 0)
+  len = (int) strlen (str);
+  if (len > 0)
+  {
+    --len;
+  }
+  if (len >= 0)
+  {
+    if (str [len] == ch)
     {
-        --len;
+      str [len] = '\0';
     }
-    if (len >= 0)
-    {
-        if (str [len] == ch)
-        {
-            str [len] = '\0';
-        }
-    }
+  }
 }
