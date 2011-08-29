@@ -4,7 +4,8 @@ module didisplay;
 
 import std.stdio;
 import std.string;
-import std.ascii : isDigit, toLower;
+import std.ascii : isDigit;
+import std.uni : toLower;
 import std.conv : to, chop;
 private import std.math : floor;
 
