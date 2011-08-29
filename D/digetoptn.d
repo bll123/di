@@ -28,7 +28,7 @@ private struct ArgInfo {
   string[]      args;
   int           aidx;
   int           asidx;
-  int           alen;
+  long          alen;
   bool          longOptFlag;
 };
 
