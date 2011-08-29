@@ -159,7 +159,7 @@
 #endif
 
 #if (_lib_getmntent || \
-    _statfs_args > 0) && \
+    _args_statfs > 0) && \
     ! _lib_getmntinfo && \
     ! _lib_getfsstat && \
     ! _lib_getvfsstat && \
@@ -356,7 +356,7 @@ di_getDiskEntries (diskInfo, diCount)
 
     if (debug > 0) { printf ("# getDiskEntries: set/get/endmntent\n"); }
 /* if both are set not an ansi compiler... */
-#if _setmntent_args == 1
+#if _args_setmntent == 1
     if ((f = setmntent (DI_MOUNT_FILE)) == (FILE *) NULL)
 #else
     if ((f = setmntent (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
@@ -660,7 +660,7 @@ di_getDiskEntries (diskInfo, diCount)
 
 
 #if _lib_getfsstat && \
-    ! _lib_getvfsstat
+    ! (_lib_getvfsstat && _args_getvfsstat == 3)
 
 /*
  * di_getDiskEntries
@@ -691,18 +691,18 @@ di_getDiskEntries (diskInfo, diCount)
 # if _dcl_mnt_names && _mem_struct_statfs_f_type
     short           fstype;
 # endif
-    _getfsstat_type bufsize;
+    _c_arg_2_getfsstat bufsize;
     struct statfs   *mntbufp;
     struct statfs   *sp;
 
     if (debug > 0) { printf ("# getDiskEntries: getfsstat\n"); }
-    count = getfsstat ((struct statfs *) NULL, (_getfsstat_type) 0, MNT_NOWAIT);
+    count = getfsstat ((struct statfs *) NULL, (_c_arg_2_getfsstat) 0, MNT_NOWAIT);
     if (count < 1)
     {
         fprintf (stderr, "Unable to do getfsstat () errno %d\n", errno);
         return -1;
     }
-    bufsize = (_getfsstat_type) (sizeof (struct statfs) * (Size_t) count);
+    bufsize = (_c_arg_2_getfsstat) (sizeof (struct statfs) * (Size_t) count);
     mntbufp = malloc ((Size_t) bufsize);
     memset ((char *) mntbufp, '\0', sizeof (struct statfs) * (Size_t) count);
     count = getfsstat (mntbufp, bufsize, MNT_NOWAIT);
@@ -1100,7 +1100,7 @@ di_getDiskEntries (diskInfo, diCount)
 
 #endif /* _lib_getmntinfo */
 
-#if _lib_getvfsstat
+#if _lib_getvfsstat && _args_getvfsstat == 3
 
 /*
  * di_getDiskEntries
