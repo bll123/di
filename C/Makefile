@@ -172,8 +172,7 @@ bsd43-gcc:
 # cleaning
 
 # leaves:
-#   config.h, di.env, mkconfig.reqlibs
-#   mkconfig.cache, mkconfig_*.vars,
+#   config.h
 #   ../dioptions.dat, tests.done, test_di
 .PHONY: clean
 clean:
@@ -181,6 +180,7 @@ clean:
 		mingw-$(PROG).exe dmc-$(PROG).exe $(PROG).exe $(MPROG).exe \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig tests.d/chksh* \
+		di.env mkconfig.reqlibs mkconfig.cache mkconfig_*.vars \
 		>/dev/null 2>&1
 
 # leaves:
@@ -189,8 +189,7 @@ clean:
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean > /dev/null 2>&1
-	@-$(RM) -rf config.h di.env mkconfig.reqlibs \
-		mkconfig.cache mkconfig_*.vars \
+	@-$(RM) -rf config.h \
 		>/dev/null 2>&1
 
 # leaves:
@@ -310,6 +309,7 @@ tests.done: $(MKCONFIGPATH)/runtests.sh
 		$(MKCONFIGPATH)/runtests.sh ../tests.d
 	touch tests.done
 
+# needs environment
 .PHONY: testrpmbuild
 testrpmbuild:
 	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
@@ -317,10 +317,11 @@ testrpmbuild:
 	$(MKDIR) -p ./rpmbuild/BUILD
 	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
 	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba ../di.spec
-	$(TEST) -f ./rpmbuild/RPMS/i386/di-$(DI_VERSION)-1.i386.rpm || exit 1
+	$(TEST) -f ./rpmbuild/RPMS/$(MARCH)/di-$(DI_VERSION)-1.$(MARCH).rpm || exit 1
 	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
 	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
 
+# needs environment
 .PHONY: rtest-env
 rtest-env:
 	@echo "$(_MKCONFIG_SYSTYPE)"; \
