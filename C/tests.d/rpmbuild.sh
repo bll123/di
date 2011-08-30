@@ -16,6 +16,8 @@ if [ "${di_c__command_rpmbuild}" = "0" ];then
   exit 0
 fi
 
+march=`rpmbuild --showrc | grep '^build arch' | sed 's/.*: *//'`
+echo "## Machine Architecture: ${march}"
 rvers=`rpmbuild --version | tr -cd '0-9' | sed 's/^\(...\).*/\1/'`
 if [ $rvers -lt 470 ]; then
   echo ${EN} " old version skipped${EC}" >&5
@@ -28,7 +30,7 @@ make -e di.env
 . ./di.env
 
 grc=0
-make -e DI_DIR=".." DI_VERSION=${DI_VERSION} testrpmbuild
+make -e DI_DIR=".." DI_VERSION=${DI_VERSION} MARCH=${march} testrpmbuild
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 # leave a copy there...realclean will get them...
