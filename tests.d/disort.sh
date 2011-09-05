@@ -8,8 +8,6 @@ if [ "$1" = "-d" ]; then
   exit 0
 fi
 
-set -x
-
 grc=0
 
 LC_ALL="C"

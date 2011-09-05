@@ -8,8 +8,6 @@ if [ "$1" = "-d" ]; then
   exit 0
 fi
 
-set -x
-
 grep '^#define _enable_nls 1' ${_MKCONFIG_RUNTOPDIR}/config.h
 hasnls=$?
 
