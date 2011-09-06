@@ -128,7 +128,7 @@ lib     quotactl
 lib     setlocale  -lintl, -lintl -liconv
 # unknown if -lsun, -lseq are needed (old irix, sequent)
 lib     setmntent -lsun, -lseq
-lib     snprintf
+lib     snprintf -lsnprintf
 lib     statfs
 lib     statvfs
 lib     strcoll
