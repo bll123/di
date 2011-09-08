@@ -582,7 +582,7 @@ main (argc, argv)
         }
 
         zi->globalIdx = 0;
-        for (i = 0; i < zi->zoneCount; ++i)
+        for (i = 0; i < (int) zi->zoneCount; ++i)
         {
             int     len;
 
@@ -3028,7 +3028,7 @@ checkZone (diskInfo, zoneInfo, allFlag)
         return;
     }
 
-    for (i = 0; i < zoneInfo->zoneCount; ++i)
+    for (i = 0; i < (int) zoneInfo->zoneCount; ++i)
     {
         /* find the zone the filesystem is in, if non-global */
         if (debug > 5)
