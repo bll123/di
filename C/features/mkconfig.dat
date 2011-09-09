@@ -239,7 +239,7 @@ endif
 ifnotoption WINAPI
   set _hdr_windows 0
   set _hdr_winioctl 0
-  set _lib_CreatFile 0
+  set _lib_CreateFile 0
   set _lib_DeviceIoControl 0
   set _lib_GetDiskFreeSpace 0
   set _lib_GetDiskFreeSpaceEx 0
