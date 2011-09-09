@@ -77,6 +77,7 @@
 #define _const_O_NOCTTY 1
 #define _define_MCTL_QUERY 0
 #define _typ_struct_dqblk 0
+#define _typ_struct_ufs_dqblk 0
 #define _typ_fs_disk_quota_t 0
 #define _typ_gid_t 0
 #define _typ_statvfs_t 0
@@ -129,9 +130,13 @@
 #define _quotactl_pos 0
 #define _rquota_xdr 0
 #define _gqa_uid_xdr 0
-#define _getfsstat_type 0
-#define _setmntent_args 0
-#define _statfs_args 0
+#define _args_getfsstat 0
+#define _args_getvfsstat 0
+#define _args_quotactl 0
+#define _quotactl_pos_1 0
+#define _quotactl_pos_2 0
+#define _args_setmntent 0
+#define _args_statfs 0
 #define _class_os__Volumes 0
 #define _npt_getenv 0
 #define _npt_getopt 0
