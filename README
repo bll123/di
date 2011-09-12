@@ -103,10 +103,12 @@ REQUIREMENTS
 
     bourne/ksh/bash shell
     C compiler
+    awk (nawk/gawk)
     make
         cat chmod ln mkdir mv rm sed test
     mkconfig.sh:
-        a shell that supports shell functions
+        a bourne compatible shell that supports shell functions,
+          standard output from 'set'.
         cat egrep expr grep rm sed sort test
     mkconfig.pl:
         cat perl rm
