@@ -126,13 +126,14 @@ PORTING
         BSD 4.3
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5, 6.0
         Debian 4.0, 5.0, 6.0, 6-kFreeBSD 7.2, 6-kFreeBSD 8.1
+        DragonflyBSD 2.10.1
         Fedora 7, 12, 13, 14
         FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1, 8.2
         Haiku r1a3
         MacOSX 8.11 (10.4)
         Mandrake 9.2
         Mandriva 2011
-        NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1
+        NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1, 5.1
         Nexenta 1.0.1_b85, 2.0_b104
         OpenBSD 4.4, 4.5, 4.6, 4.7, 4.8, 4.9
         OpenSolaris 200805, 200906
@@ -147,11 +148,11 @@ PORTING
 
     di has been ported to the following systems in the past:
 
-        A/UX, AIX, BeOS, BSD, BSDI, Compaq Tru64, Convex, Cray UNICOS,
+        A/UX, AIX, BeOS, BSD, BSDI, Convex, Cray UNICOS,
         Cray UNICOS/mk, DragonflyBSD, FreeBSD, Haiku, HP/UX, Linux, MacOSX,
         NetBSD, Next, OpenBSD, OS/2, OSF/1, Pyramid, SCO Unix,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Syllable,
-        Sys V.3, Sys V.4, Ultrix, VMS, Windows, Xenix
+        Sys V.3, Sys V.4, Tru64, Ultrix, VMS, Windows, Xenix
 
 CHANGES
 
