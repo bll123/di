@@ -158,7 +158,7 @@ static if (_has_std_quotas) {
   diqinfo.ilimit = 0;
   diqinfo.iused = 0;
 
-  if (diqinfo.type[0..2] == "nfs" &&
+  if (diqinfo.type.length >= 3 && diqinfo.type[0..2] == "nfs" &&
       diqinfo.type != "nfsd") {
 static if (_hdr_rpc_rpc && _hdr_rpcsvc_rquota) {
     //diquota_nfs (diqinfo);
