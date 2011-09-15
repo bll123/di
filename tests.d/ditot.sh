@@ -9,7 +9,7 @@ if [ "$1" = "-d" ]; then
 fi
 
 unset DI_ARGS
-unset DI_FMT
+unset DIFMT
 FORMATS="b B u c f v i U F"
 
 grc=0

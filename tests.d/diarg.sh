@@ -9,7 +9,7 @@ if [ "$1" = "-d" ]; then
 fi
 
 unset DI_ARGS
-unset DI_FMT
+unset DIFMT
 # most all unix
 $_MKCONFIG_RUNTOPDIR/di -n -f M / 2>/dev/null | grep '^/[ ]*$' > /dev/null 2>&1
 rc=$?
