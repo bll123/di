@@ -9,7 +9,7 @@ if [ "$1" = "-d" ]; then
 fi
 
 unset DI_ARGS
-unset DI_FMT
+unset DIFMT
 $_MKCONFIG_RUNTOPDIR/di
 rc=$?
 exit $rc
