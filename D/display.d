@@ -198,11 +198,21 @@ buildDisplayList (ref DisplayData dispData)
       continue;
     }
 
-    setMaxLen (dp.special, dpMax[fmtSpecialFull]);
-    setMaxLen (dp.name, dpMax[fmtMountFull]);
-    setMaxLen (dp.fsType, dpMax[fmtTypeFull]);
+    if (fmtSpecialFull in dpMax) {
+      setMaxLen (dp.special, dpMax[fmtSpecialFull]);
+    }
+    if (fmtMountFull in dpMax) {
+      setMaxLen (dp.name, dpMax[fmtMountFull]);
+    }
+    if (fmtTypeFull in dpMax) {
+      setMaxLen (dp.fsType, dpMax[fmtTypeFull]);
+    }
+    if (fmtMountOptions in dpMax) {
 //    setMaxLen (dp.mountOptions, dpMax[fmtMountOptions]);
-    setMaxLen (dp.mountTime, dpMax[fmtMountTime]);
+    }
+    if (fmtMountTime in dpMax) {
+      setMaxLen (dp.mountTime, dpMax[fmtMountTime]);
+    }
   }
 
   foreach (dchar c; dispData.opts.formatString)
@@ -305,7 +315,7 @@ buildDisplayList (ref DisplayData dispData)
         dispData.titleString ~= format (fmt, title);
         break;
       }
- 
+
       default:
       {
         break;
