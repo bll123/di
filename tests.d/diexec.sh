@@ -8,6 +8,8 @@ if [ "$1" = "-d" ]; then
   exit 0
 fi
 
+unset DI_ARGS
+unset DI_FMT
 $_MKCONFIG_RUNTOPDIR/di
 rc=$?
 exit $rc

@@ -27,6 +27,8 @@ dotest () {
   fi
 }
 
+unset DI_ARGS
+unset DI_FMT
 echo "## regular sort first, then di sort"
 echo "by special"
 ${_MKCONFIG_RUNTOPDIR}/di -n -a -f S | sort > s1
