@@ -8,7 +8,8 @@ option-file ../dioptions.dat
 
 loadunit d-main
 
-output   config.d
+output  config.d
+prefix  di
 
 standard
 

@@ -10,7 +10,8 @@ loadunit c-main
 loadunit c-include-conflict
 loadunit c-rquota
 
-output   config.h
+output  config.h
+prefix  di
 
 standard
 
