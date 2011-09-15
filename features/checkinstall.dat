@@ -1,0 +1,26 @@
+output none
+prefix di
+
+command chmod
+command cp
+command grep
+command ln
+command mkdir
+command mv
+command rm
+command sed
+
+setint install_commands 0
+if install_cmds _command_chmod && _command_cp && _command_grep && \
+    _command_ln && _command_mkdir && _command_mv && _command_rm && \
+    _command_sed
+  setint install_commands 1
+endif
+
+if chk_install_cmds ! _setint_install_commands
+ echo
+ echo ** ERROR: The install requires the following commands:
+ echo **   chmod, cp, grep, ln, mkdir, mv, rm and sed
+ echo
+ exit
+endif

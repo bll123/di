@@ -1,0 +1,38 @@
+output none
+prefix di
+
+command awk
+command nawk
+command gawk
+command cat
+command date
+command egrep
+command grep
+command mkdir
+command rm
+command sed
+command sort
+command tr
+command uname
+command wc
+
+setint hasawk 0
+if hasawk _command_awk || _command_nawk || _command_gawk
+  setint hasawk 1
+endif
+
+setint build_commands 0
+if build_cmds _setint_hasawk && _command_cat && _command_date && \
+    _command_egrep && _command_grep && _command_mkdir && \
+    _command_rm && _command_sed && \
+    _command_sort && _command_tr && _command_uname && _command_wc
+  setint build_commands 1
+endif
+
+if chk_build_cmds ! _setint_build_commands
+ echo
+ echo ** ERROR: The build requires the following commands:
+ echo **   awk, cat, egrep, grep, mkdir, rm, sed, sort, tr and wc
+ echo
+ exit
+endif
