@@ -16,8 +16,9 @@ rm -f config.h.sh config.h.pl cache.pl cache.sh vars.pl vars.sh
 
 make -e config.h
 mv config.h config.h.sh
-grep -v '^di_env' mkconfig.cache | sort > cache.sh
+grep -v '^mkc_env' mkconfig.cache | sort > cache.sh
 mv mkconfig_c.vars vars.sh
+mv mkconfig_env.vars env_vars.sh
 mv mkconfig.log $_MKCONFIG_TSTRUNTMPDIR/mkconfig_sh.log
 mv di.env $_MKCONFIG_TSTRUNTMPDIR/di_sh.env
 mv mkconfig.cache $_MKCONFIG_TSTRUNTMPDIR/mkconfig_sh.cache

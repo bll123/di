@@ -11,7 +11,7 @@ fi
 cd $_MKCONFIG_RUNTOPDIR
 . ./mkconfig.cache
 
-if [ "${di_c__command_rpmbuild}" = "0" ];then
+if [ "${mkc_c__command_rpmbuild}" = "0" ];then
   echo ${EN} " skipped${EC}" >&5
   exit 0
 fi
