@@ -64,27 +64,33 @@ MANPERM = 644
 # all
 
 all:
+	$(MAKE) checkbuild
 	cd C >/dev/null;$(MAKE) -e all
 
 all-c:
+	$(MAKE) checkbuild
 	cd C >/dev/null;$(MAKE) -e all
 
 all-perl:
+	$(MAKE) checkperlbuild
 	cd C >/dev/null;$(MAKE) -e all-perl
 
 windows-gcc:
 	cd C >/dev/null;$(MAKE) -e windows-gcc
 
 all-test:
+	$(MAKE) checkbuild
 	cd C >/dev/null;$(MAKE) -e all-test
 
 all-d:
+	$(MAKE) checkbuild
 	cd D >/dev/null;$(MAKE) -e all
 
 ###
 # installation
 
 install:
+	$(MAKE) checkinstall
 	. ./C/di.env; \
 		$(MAKE) -e install-prog install-man
 
@@ -143,14 +149,18 @@ tar:
 # cleaning
 
 clean:
+	@-rm -rf mkconfig.cache mkconfig_mkc.vars mkconfig.log _tmp_mkconfig \
+		checkbuild checkperlbuild checkinstall > /dev/null 2>&1
 	@-(cd C >/dev/null;$(MAKE) clean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null;$(MAKE) clean > /dev/null 2>&1)
 	@-(cd D >/dev/null;$(MAKE) clean > /dev/null 2>&1)
 
 # leaves:
-#   _mkconfig_runtests, _tmp_mkconfig, dioptions.dat
-#   pretests.done, test_di
+#   */_mkconfig_runtests, */_tmp_mkconfig, dioptions.dat
+#   pretests.done, */test_di
 realclean:
+	@-rm -rf mkconfig.cache mkconfig_mkc.vars mkconfig.log _tmp_mkconfig \
+		checkbuild checkperlbuild checkinstall > /dev/null 2>&1
 	@-(cd C >/dev/null;$(MAKE) realclean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null;$(MAKE) realclean > /dev/null 2>&1)
 	@-(cd D >/dev/null;$(MAKE) realclean > /dev/null 2>&1)
@@ -158,6 +168,8 @@ realclean:
 # leaves:
 #   dioptions.dat
 distclean:
+	@-rm -rf mkconfig.cache mkconfig_mkc.vars mkconfig.log _tmp_mkconfig \
+		checkbuild checkperlbuild checkinstall > /dev/null 2>&1
 	@-(cd C >/dev/null;$(MAKE) distclean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null;$(MAKE) distclean > /dev/null 2>&1)
 	@-(cd D >/dev/null;$(MAKE) distclean > /dev/null 2>&1)
@@ -169,3 +181,22 @@ distclean:
 dioptions.dat:	features/dioptions.dat
 	@cp features/dioptions.dat dioptions.dat
 	@chmod u+w dioptions.dat
+
+###
+# pre-checks
+
+checkbuild:	features/checkbuild.dat
+	$(_MKCONFIG_SHELL) \
+		$(MKCONFIGPATH)/mkconfig.sh features/checkbuild.dat
+	touch checkbuild
+
+checkperlbuild:	features/checkperlbuild.dat
+	$(_MKCONFIG_SHELL) \
+		$(MKCONFIGPATH)/mkconfig.sh features/checkperlbuild.dat
+	touch checkperlbuild
+
+checkinstall:	features/checkinstall.dat
+	$(_MKCONFIG_SHELL) \
+		$(MKCONFIGPATH)/mkconfig.sh features/checkinstall.dat
+	touch checkinstall
+	
