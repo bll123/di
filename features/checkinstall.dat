@@ -1,5 +1,4 @@
 output none
-prefix di
 
 command chmod
 command cp
