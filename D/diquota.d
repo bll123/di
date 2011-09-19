@@ -25,7 +25,7 @@ struct diQuota_t {
 
 
 static if (_cdefine_BLOCK_SIZE) {
-  alias BLOCK_SIZE DI_QUOT_BLOCK_SIZE;  /* linux *?
+  alias BLOCK_SIZE DI_QUOT_BLOCK_SIZE;  /* linux */
 } else static if (_cdefine_DQBSIZE) {
   alias DQBSIZE DI_QUOT_BLOCK_SIZE;   /* aix */
 } else static if (_cdefine_DEV_BSIZE) {
@@ -161,7 +161,7 @@ static if (_has_std_quotas) {
   if (diqinfo.type.length >= 3 && diqinfo.type[0..2] == "nfs" &&
       diqinfo.type != "nfsd") {
 static if (_hdr_rpc_rpc && _hdr_rpcsvc_rquota) {
-    //diquota_nfs (diqinfo);
+    diquota_nfs (diqinfo);
 }
     return;
   }
@@ -198,11 +198,11 @@ static if (_cdefine___FreeBSD__ == 5) {
   if (opts.debugLevel > 5) {
     writefln ("quota: quotactl on %s (%s)", diqinfo.name, _c_arg_1_quotactl);
   }
-static if (_clib_quotactl && _c_arg_1_quotactl == "char") {
+static if (_clib_quotactl && _c_arg_1_quotactl == "char *") {
   rc = quotactl (toStringz(diqinfo.name), ucmd,
         cast(int) diqinfo.uid, cast(caddr_t) qiptr);
 }
-static if (_clib_quotactl && _c_arg_1_quotactl != "char") {
+static if (_clib_quotactl && _c_arg_1_quotactl != "char *") {
  /* AIX has linux compatibility routine, but still need name */
 static if (_cdefine__AIX) {
   rc = quotactl (ucmd, toStringz(diqinfo.name),
@@ -238,11 +238,11 @@ static if (_has_std_quotas) {
 
 static if (_cdefine_GRPQUOTA) {
   if (rc == 0 || getErrno != ESRCH) {
-static if (_clib_quotactl && _c_arg_1_quotactl == "char") {
+static if (_clib_quotactl && _c_arg_1_quotactl == "char *") {
     rc = quotactl (toStringz(diqinfo.name), gcmd,
           cast(int) diqinfo.gid, cast(caddr_t) qiptr);
 }
-static if (_clib_quotactl && _c_arg_1_quotactl != "char") {
+static if (_clib_quotactl && _c_arg_1_quotactl != "char *") {
     rc = quotactl (gcmd, toStringz(diqinfo.special),
              cast(int) diqinfo.gid, cast(caddr_t) qiptr);
 }
@@ -253,7 +253,6 @@ static if (_clib_quotactl && _c_arg_1_quotactl != "char") {
 } /* _has_std_quotas */
 }
 
-/+
 static if (_hdr_rpc_rpc && _hdr_rpcsvc_rquota) {
 
 static if (_cdefine_RQ_PATHLEN) {
@@ -265,9 +264,9 @@ static if (_cdefine_RQ_PATHLEN) {
 static C_TYP_bool_t
 xdr_quota_get (XDR *xp, C_ST_getquota_args *args)
 {
-  if (opts.debugLevel > 5) {
-    writefln ("quota: xdr_quota_get");
-  }
+//  if (opts.debugLevel > 5) {
+//    writefln ("quota: xdr_quota_get");
+//  }
 
   if (! xdr_string (xp, &args.gqa_pathp, DI_RQ_PATHLEN)) {
     return 0;
@@ -281,26 +280,25 @@ xdr_quota_get (XDR *xp, C_ST_getquota_args *args)
 static C_TYP_bool_t
 xdr_quota_rslt (XDR *xp, C_ST_getquota_rslt *rslt)
 {
-  int           quotastat;
-  C_ST_rquota   *rptr;
+  C_ENUM_gqr_status quotastat;
+  int               intquotastat;
+  C_ST_rquota       *rptr;
 
-  if (opts.debugLevel > 5) {
-    writefln ("quota: xdr_quota_rslt");
-  }
+//  if (opts.debugLevel > 5) {
+//    writefln ("quota: xdr_quota_rslt");
+//  }
 
-  if (! xdr_int (xp, &quotastat)) {
+
+  if (! xdr_int (xp, &intquotastat)) {
     return 0;
   }
+  quotastat = cast(C_ENUM_gqr_status) intquotastat;
 static if (_cmem_getquota_rslt_gqr_status) {
   rslt.gqr_status = quotastat;
 } else {
   rslt.status = quotastat;
 }
-static if (_cmem_getquota_rslt_gqr_rquota) {
   rptr = &rslt.gqr_rquota;
-} else {
-  rptr = &rslt.getquota_rslt_u.gqr_rquota;
-}
 
   if (! xdr_int (xp, &rptr.rq_bsize)) {
     return 0;
@@ -308,22 +306,22 @@ static if (_cmem_getquota_rslt_gqr_rquota) {
   if (! xdr_bool (xp, &rptr.rq_active)) {
     return 0;
   }
-  if (! _rquota_xdr (xp, &rptr.rq_bhardlimit)) {
+  if (! _rq_bhardlimit_xdr (xp, &rptr.rq_bhardlimit)) {
     return 0;
   }
-  if (! _rquota_xdr (xp, &rptr.rq_bsoftlimit)) {
+  if (! _rq_bsoftlimit_xdr (xp, &rptr.rq_bsoftlimit)) {
     return 0;
   }
-  if (! _rquota_xdr (xp, &rptr.rq_curblocks)) {
+  if (! _rq_curblocks_xdr (xp, &rptr.rq_curblocks)) {
     return 0;
   }
-  if (! _rquota_xdr (xp, &rptr.rq_fhardlimit)) {
+  if (! _rq_fhardlimit_xdr (xp, &rptr.rq_fhardlimit)) {
     return 0;
   }
-  if (! _rquota_xdr (xp, &rptr.rq_fsoftlimit)) {
+  if (! _rq_fsoftlimit_xdr (xp, &rptr.rq_fsoftlimit)) {
     return 0;
   }
-  if (! _rquota_xdr (xp, &rptr.rq_curfiles)) {
+  if (! _rq_curfiles_xdr (xp, &rptr.rq_curfiles)) {
     return 0;
   }
   return (1);
@@ -333,56 +331,58 @@ static void
 diquota_nfs (diQuota_t *diqinfo)
 {
     C_ST_CLIENT             *rqclnt;
-    enum C_ENUM_clnt_stat   clnt_stat;
+    C_ENUM_clnt_stat        clnt_stat;
     C_ST_timeval            timeout;
-    char                    host [DI_SPEC_NAME_LEN];
-    char                    *ptr;
-    char                    *path;
+    string                  host;
+    string                  path;
+    char[]                  pathz;
     C_ST_getquota_args      args;
     C_ST_getquota_rslt      result;
     C_ST_rquota             *rptr;
     int                     quotastat;
-    _fs_size_t              tsize;
+    real                    tsize;
 
-    if (opts.debugLevel > 5) {
-      writefln ("quota: diquota_nfs");
-    }
+//    if (opts.debugLevel > 5) {
+//      writefln ("quota: diquota_nfs");
+//    }
     timeout.tv_sec = 2;
     timeout.tv_usec = 0;
 
-    strcpy (host, diqinfo.special);
+    host = diqinfo.special;
     path = host;
-    ptr = strchr (host, ':');
-    if (ptr != cast(char *) NULL) {
-      *ptr = '\0';
-      path = ptr + 1;
+    auto idx = indexOf (host, ':');
+    if (idx != -1) {
+      --idx;
+      path = host[0..idx];
     }
-    if (opts.debugLevel > 2) {
-      writefln ("quota: nfs: host: %s path: %s", host, path);
-    }
-    args.gqa_pathp = path;
-    args.gqa_uid = cast(int) diqinfo.uid;
+//    if (opts.debugLevel > 2) {
+//      writefln ("quota: nfs: host: %s path: %s", host, path);
+//    }
+    pathz = path.dup;
+    pathz ~= '\0';
+    args.gqa_pathp = pathz.ptr;
+    args.gqa_uid = cast(C_TYP_gqa_uid) diqinfo.uid;
 
-    rqclnt = clnt_create (host, cast(ulong) RQUOTAPROG,
-        cast(ulong) RQUOTAVERS, "udp");
-    if (rqclnt == cast(CLIENT *) NULL) {
-      if (opts.debugLevel > 2) {
-        writefln ("quota: nfs: create failed %d", getErrno);
-      }
+    rqclnt = clnt_create (toStringz(host), cast(ulong) RQUOTAPROG,
+        cast(ulong) RQUOTAVERS, toStringz("udp"));
+    if (rqclnt == cast(CLIENT *) null) {
+//      if (opts.debugLevel > 2) {
+//        writefln ("quota: nfs: create failed %d", getErrno);
+//      }
       return;
     }
     rqclnt.cl_auth = authunix_create_default();
-    clnt_stat = clnt_call (rqclnt, cast(ulong) RQUOTAPROC_GETQUOTA,
-        cast(xdrproc_t) xdr_quota_get, cast(caddr_t) &args,
-        cast(xdrproc_t) xdr_quota_rslt, cast(caddr_t) &result, timeout);
+    clnt_stat = C_MACRO_clnt_call (rqclnt, cast(ulong) RQUOTAPROC_GETQUOTA,
+        cast(xdrproc_t) &xdr_quota_get, cast(caddr_t) &args,
+        cast(xdrproc_t) &xdr_quota_rslt, cast(caddr_t) &result, timeout);
     if (clnt_stat != RPC_SUCCESS) {
-      if (opts.debugLevel > 2) {
-        writefln ("quota: nfs: not success");
-      }
+//      if (opts.debugLevel > 2) {
+//        writefln ("quota: nfs: not success");
+//      }
       if (rqclnt.cl_auth) {
-        auth_destroy (rqclnt.cl_auth);
+        C_MACRO_auth_destroy (rqclnt.cl_auth);
       }
-      clnt_destroy (rqclnt);
+      C_MACRO_clnt_destroy (rqclnt);
       return;
     }
 
@@ -392,19 +392,13 @@ static if (_cmem_getquota_rslt_gqr_status) {
     quotastat = result.status;
 }
     if (quotastat == 1) {
-static if (_cmem_getquota_rslt_gqr_rquota) {
       rptr = &result.gqr_rquota;
-} else {
-      rptr = &result.getquota_rslt_u.gqr_rquota;
-}
 
-      if (opts.debugLevel > 2) {
-        writefln ("quota: nfs: status 1");
-        writefln ("quota: nfs: rq_bsize: %d", rptr.rq_bsize);
-        writefln ("quota: nfs: rq_active: %d", rptr.rq_active);
-      }
-
-      tblksize = 512;
+//      if (opts.debugLevel > 2) {
+//        writefln ("quota: nfs: status 1");
+//        writefln ("quota: nfs: rq_bsize: %d", rptr.rq_bsize);
+//        writefln ("quota: nfs: rq_active: %d", rptr.rq_active);
+//      }
 
       diqinfo.limit = rptr.rq_bhardlimit * rptr.rq_bsize;
       tsize = rptr.rq_bsoftlimit * rptr.rq_bsize;
@@ -426,12 +420,11 @@ static if (_cmem_getquota_rslt_gqr_rquota) {
     }
 
     if (rqclnt.cl_auth) {
-      auth_destroy (rqclnt.cl_auth);
+      C_MACRO_auth_destroy (rqclnt.cl_auth);
     }
-    clnt_destroy (rqclnt);
+    C_MACRO_clnt_destroy (rqclnt);
 }
 } /* have rpc headers */
-+/
 
 static if (_has_std_quotas) {
 static void
