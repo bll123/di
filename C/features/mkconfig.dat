@@ -145,8 +145,13 @@ lib     xdr_int -lnsl
 lib     zone_getattr
 lib     zone_list
 # get the correct xdr types...
-rquota_xdr
-gqa_uid_xdr
+memberxdr rquota rq_bhardlimit
+memberxdr rquota rq_bsoftlimit
+memberxdr rquota rq_curblocks
+memberxdr rquota rq_fhardlimit
+memberxdr rquota rq_fsoftlimit
+memberxdr rquota rq_curfiles
+memberxdr getquota_args gqa_uid
 # to prevent warnings
 # some systems are u_int, size_t, u_long
 args noconst getfsstat
