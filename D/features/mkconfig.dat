@@ -14,60 +14,104 @@ standard
 
 csizes
 
+# di.d: for version
+chdr    version.h
+
+# NLS support:
+# libintl.h has dcls for gettext(), et. al.
 chdr    libintl.h
-chdr    linux/dqblk_xfs.h
-chdr    linux/quota.h
+# locale.h has LC_ALL
+chdr    locale.h
+# unistd.h has geteuid, et. al.
+chdr    unistd.h
+
+# diskpart.d:
+#   linux
+# _PATH_MOUNTED MNTTYPE_IGNORE
 chdr    mntent.h
+# for struct statvfs, statvfs()
+#   linux
+csys    statvfs.h
+
+# diquota.d:
+# XGETQUOTA
+#   linux
+chdr    linux/dqblk_xfs.h
+#   solaris
+csys    fs/ufs_quota.h
+# quotas: QCMD, SUBCMD*, struct dqblk, USRQUOTA, GRPQUOTA
+#   linux
+csys    quota.h
+# quotas: uid_t, gid_t
+csys    types.h
+
+# NFS quotas
+chdr    rpc/auth.h
+chdr    rpc/clnt.h
 chdr    rpc/rpc.h
 chdr    rpcsvc/rquota.h
 chdr    rpc/types.h
-chdr    ufs/quota.h
-chdr    ufs/ufs/quota.h
-chdr    locale.h
-chdr    unistd.h
-#chdr    windows.h
 
-csys    fs/ufs_quota.h
-csys    quota.h
-csys    types.h
-csys    statvfs.h
-
-# di
-chdr    version.h
+### For NLS support
 
 clib    bindtextdomain -lintl, -lintl -liconv
+clib    gettext -lintl, -lintl -liconv
+clib    setlocale
+clib    textdomain -lintl, -lintl -liconv
+cdefine hex LC_ALL
+cdcl    bindtextdomain
+cdcl    gettext
+cdcl    setlocale
+cdcl    textdomain
+command msgfmt
+command gmsgfmt
+
+### diskpart.d:
+
+# get/set/endmntent
+#   linux
 clib    endmntent
+cdcl    endmntent
+#   unixware needs -lgen
+clib    getmntent -lgen
+cdcl    getmntent
+clib    setmntent
+cdcl    args noconst setmntent
+# Linux: statvfs
+clib    statvfs
+cdcl    statvfs
+# Linux: from statvfs.h
+cstruct statvfs
+cmember statvfs f_basetype
+# Linux: from mntent.h
+cdefine string _PATH_MOUNTED
+cdefine string _PATH_MNTTAB
+cdefine string MOUNTED
+cdefine string MNTTAB
+# Linux: from mntent.h
+cdefine string MNTTYPE_IGNORE
+# Linux: from mntent.h
+cstruct mntent
+# Linux: from statvfs.h
+ctype int __fsblkcnt_t
+ctype int __fsfilcnt_t
+# Linux: 64-bit: from statvfs.h
+ctype int __fsblkcnt64_t
+ctype int __fsfilcnt64_t
+
+### diquota.d
+
+# uid/gid; geteuid, getegid
+ctype int gid_t
+ctype int __gid_t
+ctype int uid_t
+ctype int __uid_t
 clib    getegid
 clib    geteuid
-clib    getmntent -lgen
-clib    gettext -lintl, -lintl -liconv
-clib    getvfsstat
-clib    quotactl
-clib    setlocale
-clib    setmntent
-clib    statvfs
-clib    textdomain -lintl, -lintl -liconv
+cdcl    getegid
+cdcl    geteuid
 
-# windows
-#clib    GetDiskFreeSpace
-#clib    GetDiskFreeSpaceEx
-#clib    GetDriveType
-#clib    GetLogicalDriveStrings
-#clib    GetVolumeInformation
-
-# NFS quotas
-clib    auth_destroy
-clib    clnt_call
-clib    clnt_create
-clib    clnt_destroy
-clib    xdr_quota_get
-clib    xdr_quota_rslt
-
-cdefine hex LC_ALL
-cdefine int TRUE
-cdefine int FALSE
-
-# for diquota.d
+# from sys/quota.h
 cdefine hex SUBCMDSHIFT
 cdefine hex SUBCMDMASK
 cmacro  QCMD sys/quota.h int int
@@ -75,128 +119,126 @@ cdefine hex Q_GETQUOTA
 cdefine hex Q_XGETQUOTA
 cdefine hex USRQUOTA
 cdefine hex GRPQUOTA
-cdefine int RQ_PATHLEN
-cdefine int __FreeBSD__
-cdefine int _AIX
-# Linux: _PATH_MOUNTED mntent.h; MNTTYPE_IGNORE mntent.h
-cdefine string _PATH_MOUNTED
-cdefine string _PATH_MNTTAB
-cdefine string MOUNTED
-cdefine string MNTTAB
-cdefine string MNTTYPE_IGNORE
-# linux
-cdefine hex BLOCK_SIZE
-# aix
-cdefine hex DQBSIZE
-# tru64, et. al.
-cdefine hex DEV_BSIZE
 
-# di
-cdefine string DI_VERSION
+# from rpcsvc/rquota.h
+cdefine int RQUOTAPROG
+cdefine int RQUOTAVERS
+cdefine int RQUOTAPROC_GETQUOTA
 
-# uid/gid; geteuid, getegid
-ctype int gid_t
-ctype int __gid_t
-ctype int uid_t
-ctype int __uid_t
-
-# linux
-ctype int __fsblkcnt_t
-ctype int __fsfilcnt_t
-# linux, 64-bit interface
-ctype int __fsblkcnt64_t
-ctype int __fsfilcnt64_t
-# statvfs structure
-cstruct statvfs
-
-# linux
-cstruct mntent
+# from sys/quota.h
+#   linux
+clib    quotactl
+cdcl    args noconst quotactl
+cstruct dqblk
+cmember  dqblk dqb_curspace
+cmember  dqblk dqb_curblocks
+cmember  dqblk dqb_fhardlimit
+cmember  dqblk dqb_fsoftlimit
+cmember  dqblk dqb_curfiles
 
 # from linux/dqblk_xfs.h
+#   linux
 ctype int __s8
 ctype int __s16
 ctype int __s32
 ctype int __u16
 ctype int __u32
 ctype int __u64
+
+# Linux:
+cdefine hex BLOCK_SIZE
+# Linux: xfs quotas
 cstruct fs_disk_quota
+
+# Tru64, et. al.
+cdefine hex DEV_BSIZE
+# FreeBSD:
+cdefine int __FreeBSD__
+# AIX:
+cdefine hex DQBSIZE
+cdefine int _AIX
+
+# from rpcsvc/rquota.h
+#   linux
+cdefine int TRUE
+cdefine int FALSE
+ctype int u_int64_t
+ctype int u_int32_t
+ctypedef __caddr_t
+ctypedef caddr_t
+
+# from rpc/auth.h
+clib authunix_create_default
+cdcl authunix_create_default
+cmacro auth_destroy rpc/auth.h 'AUTH *'
+
+# from rpc/clnt.h
+cdefine int RPC_SUCCESS
+cmacro clnt_call rpc/clnt.h 'CLIENT *' u_long xdrproc_t caddr_t xdrproc_t caddr_t 'struct timeval'
+cmacro clnt_destroy rpc/clnt.h 'CLIENT *'
+clib    clnt_create
+cdcl    clnt_create
+
+# NFS quotas
+clib    xdr_quota_get
+cdcl    xdr_quota_get
+clib    xdr_quota_rslt
+cdcl    xdr_quota_rslt
+clib    xdr_string
+cdcl    xdr_string
+clib    xdr_int
+cdcl    xdr_int
+clib    xdr_u_int
+cdcl    xdr_u_int
+clib    xdr_bool
+cdcl    xdr_bool
+
+cdefine int RQ_PATHLEN
 
 # from rpcsvc/rquota.h
 ctype int bool_t
 ctype int enum_t
 ctype int u_int
 ctype int u_long
-ctype int u_int64_t
-ctype int u_int32_t
 ctype int int32_t
 cstruct rquota
 ctypedef rquota
+cmemberxdr rquota rq_bhardlimit
+cmemberxdr rquota rq_bsoftlimit
+cmemberxdr rquota rq_curblocks
+cmemberxdr rquota rq_fhardlimit
+cmemberxdr rquota rq_fsoftlimit
+cmemberxdr rquota rq_curfiles
 cenum   gqr_status
 ctypedef gqr_status
 cstruct getquota_rslt
-cstruct dqblk
+cmember  getquota_rslt gqr_status
+cmember  getquota_rslt gqr_rquota
 
-# NFS quotas
 cenum xdr_op
 cenum clnt_stat
 cenum auth_stat
-ctypedef __caddr_t
-ctypedef caddr_t
 ctypedef xdrproc_t
 ctype int  __time_t
 ctype int  __suseconds_t
 cstruct timeval
 cstruct rpc_err
 cstruct getquota_args
+cmembertype getquota_args gqa_uid
+cmemberxdr getquota_args gqa_uid
 cstruct opaque_auth
 cunion des_block
-cstruct XDR
-ctypedef XDR
 cstruct AUTH
 ctypedef AUTH
 cstruct CLIENT
 ctypedef CLIENT
+cstruct XDR
+ctypedef XDR
 
-cdcl    bindtextdomain
-cdcl    endmntent
-cdcl    getegid
-cdcl    geteuid
-cdcl    getmntent
-cdcl    args noconst quotactl
-cdcl    gettext
-cdcl    args noconst getvfsstat
-cdcl    setlocale
-cdcl    args noconst setmntent
-cdcl    statvfs
-cdcl    textdomain
+### di.d
+cdefine string DI_VERSION
 
-# windows
-#cdcl    GetDiskFreeSpace
-#cdcl    GetDiskFreeSpaceEx
-#cdcl    GetDriveType
-#cdcl    GetLogicalDriveStrings
-#cdcl    GetVolumeInformation
-
-# NFS quotas
-cdcl    auth_destroy
-cdcl    clnt_call
-cdcl    clnt_create
-cdcl    clnt_destroy
-cdcl    xdr_quota_get
-cdcl    xdr_quota_rslt
-
-cmember  statvfs f_basetype
-cmember  dqblk dqb_curspace
-cmember  dqblk dqb_curblocks
-cmember  dqblk dqb_fhardlimit
-cmember  dqblk dqb_fsoftlimit
-cmember  dqblk dqb_curfiles
-cmember  getquota_rslt gqr_status
-cmember  getquota_rslt gqr_rquota
-
-command msgfmt
-command gmsgfmt
-
+### options
 # see dioptions.dat to change these
 option  DI_DEFAULT_FORMAT smbuvpT
 option  DI_DEFAULT_DISP_SIZE H
@@ -242,7 +284,6 @@ static if (_ctype_uid_t > 0) {
 } else {
   alias int     Uid_t;
 }
-
 static if (_ctype_gid_t > 0) {
   alias C_TYP_gid_t   Gid_t;
 } else {
@@ -251,6 +292,7 @@ static if (_ctype_gid_t > 0) {
 
 enum string DI_PROG = "di";
 enum string DI_PREFIX = "/home/bll/DI/di/C/test_di";
+// needed for getmntent()
 import core.stdc.stdio;  // for FILE
 
 endinclude
