@@ -12,24 +12,27 @@ cd $_MKCONFIG_RUNTOPDIR
 grc=0
 
 make realclean
-rm -f config.h.sh config.h.pl cache.pl cache.sh vars.pl vars.sh
+rm -f config.h.sh config.h.pl cache.pl cache.sh \
+    vars.pl vars.sh
 
 make -e config.h
 mv config.h config.h.sh
 grep -v '^mkc_env' mkconfig.cache | sort > cache.sh
-mv mkconfig_c.vars vars.sh
-mv mkconfig_env.vars env_vars.sh
+sort mkconfig_c.vars > vars.sh
+mv mkconfig.cache $_MKCONFIG_TSTRUNTMPDIR/mkconfig_sh.cache
+mv mkconfig_c.vars $_MKCONFIG_TSTRUNTMPDIR/mkconfig_c_sh.vars
+mv mkconfig_env.vars $_MKCONFIG_TSTRUNTMPDIR/mkconfig_env_sh.vars
 mv mkconfig.log $_MKCONFIG_TSTRUNTMPDIR/mkconfig_sh.log
 mv di.env $_MKCONFIG_TSTRUNTMPDIR/di_sh.env
-mv mkconfig.cache $_MKCONFIG_TSTRUNTMPDIR/mkconfig_sh.cache
 
 make -e MKCONFIG_TYPE=perl config.h
 mv config.h config.h.pl
 sort mkconfig.cache > cache.pl
-mv mkconfig_c.vars vars.pl
+sort mkconfig_c.vars > vars.pl
+mv mkconfig.cache $_MKCONFIG_TSTRUNTMPDIR/mkconfig_pl.cache
+mv mkconfig_c.vars $_MKCONFIG_TSTRUNTMPDIR/mkconfig_c_pl.vars
 mv mkconfig.log $_MKCONFIG_TSTRUNTMPDIR/mkconfig_pl.log
 mv di.env $_MKCONFIG_TSTRUNTMPDIR/di_pl.env
-mv mkconfig.cache $_MKCONFIG_TSTRUNTMPDIR/mkconfig_pl.cache
 
 echo "## diff config.h.sh config.h.pl"
 diff -w config.h.sh config.h.pl
