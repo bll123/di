@@ -70,12 +70,12 @@ outerfor:
         longOptFlag = true;
       }
 
-      alen = args[aidx].length;
+      alen = cast(uint) args[aidx].length;
       if (longOptFlag) {
         // check if there's an = assignment...
         auto ival = indexOf (args[aidx], argAssign);
         if (ival >= 0) {
-          alen = ival;
+          alen = cast(uint) ival;
         }
       }
 
