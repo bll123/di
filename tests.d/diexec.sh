@@ -3,7 +3,7 @@
 . $_MKCONFIG_DIR/testfuncs.sh
 
 maindodisplay $1 'execute di'
-maindoquery $1 $_MKC_SH
+maindoquery $1 $_MKC_ONCE
 
 getsname $0
 dosetup $@
