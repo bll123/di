@@ -1,12 +1,12 @@
 #!/bin/sh
-#
-#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
-#
 
-if [ "$1" = "-d" ]; then
-  echo ${EN} " di nls${EC}"
-  exit 0
-fi
+. $_MKCONFIG_DIR/testfuncs.sh
+
+maindodisplay $1 'di nls'
+maindoquery $1 $_MKC_SH
+
+getsname $0
+dosetup $@
 
 grep '^#define _enable_nls 1' ${_MKCONFIG_RUNTOPDIR}/config.h
 hasnls=$?

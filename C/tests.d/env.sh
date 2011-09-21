@@ -1,9 +1,12 @@
 #!/bin/sh
 
-if [ "$1" = "-d" ]; then
-  echo ${EN} " check environment in make${EC}"
-  exit 0
-fi
+. $_MKCONFIG_DIR/testfuncs.sh
+
+maindodisplay $1 'check environment in make'
+maindoquery $1 $_MKC_SH
+
+getsname $0
+dosetup $@
 
 cd ${_MKCONFIG_RUNTOPDIR}
 rc=$?
@@ -16,7 +19,7 @@ make di.env
 
 . ./di.env
 
-make --version | egrep "GNU Make" 
+make --version | egrep "GNU Make"
 rc=$?
 if [ $rc -eq 0 ]; then
   make -e --no-print-directory rtest-env > \

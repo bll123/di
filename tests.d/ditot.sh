@@ -1,12 +1,12 @@
 #!/bin/sh
-#
-#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
-#
 
-if [ "$1" = "-d" ]; then
-  echo ${EN} " di totals${EC}"
-  exit 0
-fi
+. $_MKCONFIG_DIR/testfuncs.sh
+
+maindodisplay $1 'di totals'
+maindoquery $1 $_MKC_SH
+
+getsname $0
+dosetup $@
 
 unset DI_ARGS
 unset DIFMT

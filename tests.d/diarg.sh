@@ -1,12 +1,12 @@
 #!/bin/sh
-#
-#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
-#
 
-if [ "$1" = "-d" ]; then
-  echo ${EN} " di w/argument${EC}"
-  exit 0
-fi
+. $_MKCONFIG_DIR/testfuncs.sh
+
+maindodisplay $1 'run di w/arguments'
+maindoquery $1 $_MKC_SH
+
+getsname $0
+dosetup $@
 
 unset DI_ARGS
 unset DIFMT
@@ -28,4 +28,5 @@ if [ $rc -ne 0 ]; then
     fi
   fi
 fi
+
 exit $rc

@@ -1,12 +1,12 @@
 #!/bin/sh
-#
-#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
-#
 
-if [ "$1" = "-d" ]; then
-  echo ${EN} " compare mkconfig.sh mkconfig.pl${EC}"
-  exit 0
-fi
+. $_MKCONFIG_DIR/testfuncs.sh
+
+maindodisplay $1 'compare mkconfig.sh mkconfig.pl'
+maindoquery $1 $_MKC_SH
+
+getsname $0
+dosetup $@
 
 cd $_MKCONFIG_RUNTOPDIR
 grc=0
@@ -34,22 +34,13 @@ mv mkconfig_c.vars $_MKCONFIG_TSTRUNTMPDIR/mkconfig_c_pl.vars
 mv mkconfig.log $_MKCONFIG_TSTRUNTMPDIR/mkconfig_pl.log
 mv di.env $_MKCONFIG_TSTRUNTMPDIR/di_pl.env
 
-echo "## diff config.h.sh config.h.pl"
-diff -w config.h.sh config.h.pl
-rc=$?
-if [ $rc -ne 0 ]; then grc=$rc; fi
+chkdiff config.h.sh config.h.pl
 mv config.h.sh config.h.pl $_MKCONFIG_TSTRUNTMPDIR
 
-echo "## diff cache.sh cache.pl"
-diff -w cache.sh cache.pl
-rc=$?
-if [ $rc -ne 0 ]; then grc=$rc; fi
+chkdiff cache.sh cache.pl
 mv cache.sh cache.pl $_MKCONFIG_TSTRUNTMPDIR
 
-echo "## diff vars.sh vars.pl"
-diff -w vars.sh vars.pl
-rc=$?
-if [ $rc -ne 0 ]; then grc=$rc; fi
+chkdiff vars.sh vars.pl
 mv vars.sh vars.pl $_MKCONFIG_TSTRUNTMPDIR
 
 exit $grc

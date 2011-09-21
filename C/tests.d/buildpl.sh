@@ -1,20 +1,20 @@
 #!/bin/sh
-#
-#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
-#
 
-if [ "$1" = "-d" ]; then
-  echo ${EN} " build w/mkconfig.pl${EC}"
-  exit 0
-fi
+. $_MKCONFIG_DIR/testfuncs.sh
+
+maindodisplay $1 'build w/mkconfig.pl'
+maindoquery $1 $_MKC_SH
+
+getsname $0
+dosetup $@
 
 cd $_MKCONFIG_RUNTOPDIR
 make realclean
 instdir="`pwd`/test_di"
 make -e prefix=${instdir} all-perl
-rc=$?
+grc=$?
 # leave a copy there...realclean will get them...
 cp mkconfig.log mkconfig.cache mkconfig*.vars di.env mkconfig.reqlibs \
     $_MKCONFIG_TSTRUNTMPDIR
 
-exit $rc
+exit $grc

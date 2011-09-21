@@ -1,14 +1,12 @@
 #!/bin/sh
-#
-#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
-#
 
-if [ "$1" = "-d" ]; then
-  echo ${EN} " di sort${EC}"
-  exit 0
-fi
+. $_MKCONFIG_DIR/testfuncs.sh
 
-grc=0
+maindodisplay $1 'di sort'
+maindoquery $1 $_MKC_SH
+
+getsname $0
+dosetup $@
 
 LC_ALL="C"
 export LC_ALL

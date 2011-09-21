@@ -1,13 +1,12 @@
 #!/bin/sh
-#
-#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
-#
 
-if [ "$1" = "-d" ]; then
-  echo ${EN} " install${EC}"
-  exit 0
-fi
+. $_MKCONFIG_DIR/testfuncs.sh
 
+maindodisplay $1 install
+maindoquery $1 $_MKC_SH
+
+getsname $0
+dosetup $@
 
 cd $_MKCONFIG_RUNTOPDIR
 grc=0

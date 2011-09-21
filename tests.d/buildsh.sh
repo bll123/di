@@ -1,19 +1,15 @@
 #!/bin/sh
-#
-#  Copyright 2010 Brad Lanam Walnut Creek, CA USA
-#
 
-if [ "$1" = "-d" ]; then
-  echo ${EN} " build w/mkconfig.sh${EC}"
-  exit 0
-fi
+. $_MKCONFIG_DIR/testfuncs.sh
+
+maindodisplay $1 'build w/mkconfig.sh'
+maindoquery $1 $_MKC_SH
+
+getsname $0
+dosetup $@
 
 . $_MKCONFIG_DIR/shellfuncs.sh
 testshcapability
-
-grc=0
-stag=$1
-shift
 
 cd $_MKCONFIG_RUNTOPDIR
 
@@ -26,7 +22,7 @@ if [ $rc != 0 ]; then grc=$rc; fi
 if [ $grc -eq 0 ]; then
   systype=`uname -s`
   # haiku has too many warnings to deal with
-  if [ "$systype" != "Haiku" ]; then 
+  if [ "$systype" != "Haiku" ]; then
     # openbsd: malloc.h, always misused, in file included, in function
     # openbsd: unfortunately, some output is on separate lines.
     # solaris: tokens ignored... (dollar sign)
@@ -52,8 +48,8 @@ if [ $grc -eq 0 ]; then
       grep -v '^CC=' |
       grep -v '#warning' |
       grep -v 'strcpy.*always misused' |
-      grep -v '^In file included' | 
-      grep -v ': In function' | 
+      grep -v '^In file included' |
+      grep -v ': In function' |
       grep -v 'tokens ignored at end of directive line' |
       grep -v 'Function has no return statement : main' |
       grep -v '^ *from [^ ]*.c:[0-9]*:$' |
@@ -79,3 +75,4 @@ cp mkconfig.log mkconfig.cache mkconfig*.vars di.env mkconfig.reqlibs \
 rm -f make.log make_extra.log >/dev/null 2>&1
 
 exit $grc
+
