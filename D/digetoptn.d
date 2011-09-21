@@ -28,7 +28,7 @@ private struct ArgInfo {
   string[]      args;
   int           aidx;
   int           asidx;
-  uint          alen;
+  size_t        alen;
   bool          longOptFlag;
 };
 
@@ -70,12 +70,12 @@ outerfor:
         longOptFlag = true;
       }
 
-      alen = cast(uint) args[aidx].length;
+      alen = args[aidx].length;
       if (longOptFlag) {
         // check if there's an = assignment...
         auto ival = indexOf (args[aidx], argAssign);
         if (ival >= 0) {
-          alen = cast(uint) ival;
+          alen = ival;
         }
       }
 
@@ -361,10 +361,10 @@ version (unittest) {
       args = a;
       aidx = tai;
       asidx = tasi;
-      alen = args[aidx].length;
+      alen = cast(typeof(alen)) args[aidx].length;
       auto ival = indexOf (args[aidx], argAssign);
       if (ival >= 0) {
-        alen = ival;
+        alen = cast(typeof(alen)) ival;
       }
       longOptFlag = false;
       if (args[aidx][0..2] == longOptStart) {
