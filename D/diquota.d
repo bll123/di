@@ -271,7 +271,7 @@ xdr_quota_get (XDR *xp, C_ST_getquota_args *args)
   if (! xdr_string (xp, &args.gqa_pathp, DI_RQ_PATHLEN)) {
     return 0;
   }
-  if (! _gqa_uid_xdr (xp, &args.gqa_uid)) {
+  if (! xdr_gqa_uid (xp, &args.gqa_uid)) {
     return 0;
   }
   return 1;
@@ -306,22 +306,22 @@ static if (_cmem_getquota_rslt_gqr_status) {
   if (! xdr_bool (xp, &rptr.rq_active)) {
     return 0;
   }
-  if (! _rq_bhardlimit_xdr (xp, &rptr.rq_bhardlimit)) {
+  if (! xdr_rq_bhardlimit (xp, &rptr.rq_bhardlimit)) {
     return 0;
   }
-  if (! _rq_bsoftlimit_xdr (xp, &rptr.rq_bsoftlimit)) {
+  if (! xdr_rq_bsoftlimit (xp, &rptr.rq_bsoftlimit)) {
     return 0;
   }
-  if (! _rq_curblocks_xdr (xp, &rptr.rq_curblocks)) {
+  if (! xdr_rq_curblocks (xp, &rptr.rq_curblocks)) {
     return 0;
   }
-  if (! _rq_fhardlimit_xdr (xp, &rptr.rq_fhardlimit)) {
+  if (! xdr_rq_fhardlimit (xp, &rptr.rq_fhardlimit)) {
     return 0;
   }
-  if (! _rq_fsoftlimit_xdr (xp, &rptr.rq_fsoftlimit)) {
+  if (! xdr_rq_fsoftlimit (xp, &rptr.rq_fsoftlimit)) {
     return 0;
   }
-  if (! _rq_curfiles_xdr (xp, &rptr.rq_curfiles)) {
+  if (! xdr_rq_curfiles (xp, &rptr.rq_curfiles)) {
     return 0;
   }
   return (1);
