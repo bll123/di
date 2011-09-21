@@ -70,19 +70,18 @@ di.env:	features/env.dat
 # cleaning
 
 # leaves:
-#   config.d
+#   config.d, di.env
 clean:
 	@-rm -f di di.exe mi mi.exe \
 		*.o *.obj *.lst *.gcno *.gcda *.gcov \
 		mkconfig.log mkconfig.reqlibs mkconfig.cache mkconfig_*.vars \
-		di.env \
 		> /dev/null 2>&1
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig
 realclean:
 	@$(MAKE) clean > /dev/null 2>&1
-	@-$(RM) -rf config.d \
+	@-$(RM) -rf config.d di.env \
 		>/dev/null 2>&1
 
 # leaves:
