@@ -1419,6 +1419,7 @@ processTitles (diopts, diout)
     char            *fstr;
     Size_t          maxsize;
     char            tformat [30];
+    char            ttitle [2];
     int             first;
 
 
@@ -1682,7 +1683,9 @@ processTitles (diopts, diout)
               first = FALSE;
             }
             if (diopts->csv_output) {
-              printf ("%s", pstr);
+              ttitle[0] = *ptr;
+              ttitle[1] = '\0';
+              printf ("%s", ttitle);
             } else {
               printf (tformat, pstr);
             }
