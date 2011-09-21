@@ -99,10 +99,12 @@
   typedef unsigned long long _fs_size_t;
   typedef long long _s_fs_size_t;
 # define DI_LL "ll"
+# define DI_LLu "llu"
 #else
   typedef unsigned long _fs_size_t;
   typedef long _s_fs_size_t;
 # define DI_LL "l"
+# define DI_LLu "lu"
 #endif
 #if _siz_long_double >= 8
   typedef long double _print_size_t;
