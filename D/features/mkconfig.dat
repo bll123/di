@@ -114,7 +114,7 @@ cdcl    geteuid
 # from sys/quota.h
 cdefine hex SUBCMDSHIFT
 cdefine hex SUBCMDMASK
-cmacro  QCMD sys/quota.h int int
+cmacro  QCMD sys/quota.h int int int
 cdefine hex Q_GETQUOTA
 cdefine hex Q_XGETQUOTA
 cdefine hex USRQUOTA
@@ -170,12 +170,12 @@ ctypedef caddr_t
 # from rpc/auth.h
 clib authunix_create_default
 cdcl authunix_create_default
-cmacro auth_destroy rpc/auth.h 'AUTH *'
+cmacro auth_destroy rpc/auth.h void 'AUTH *'
 
 # from rpc/clnt.h
 cdefine int RPC_SUCCESS
-cmacro clnt_call rpc/clnt.h 'CLIENT *' u_long xdrproc_t caddr_t xdrproc_t caddr_t 'struct timeval'
-cmacro clnt_destroy rpc/clnt.h 'CLIENT *'
+cmacro clnt_call rpc/clnt.h clnt_stat 'CLIENT *' u_long xdrproc_t caddr_t xdrproc_t caddr_t 'struct timeval'
+cmacro clnt_destroy rpc/clnt.h void 'CLIENT *'
 clib    clnt_create
 cdcl    clnt_create
 
