@@ -173,14 +173,14 @@ bsd43-gcc:
 
 # leaves:
 #   config.h
-#   ../dioptions.dat, tests.done, test_di
+#   ../dioptions.dat, tests.done, test_di, di.env
 .PHONY: clean
 clean:
 	@-$(RM) -rf $(PROG) $(MPROG) \
 		mingw-$(PROG).exe dmc-$(PROG).exe $(PROG).exe $(MPROG).exe \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig tests.d/chksh* \
-		di.env mkconfig.reqlibs mkconfig.cache mkconfig_*.vars \
+		mkconfig.reqlibs mkconfig.cache mkconfig_*.vars \
 		>/dev/null 2>&1
 
 # leaves:
@@ -189,7 +189,7 @@ clean:
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean > /dev/null 2>&1
-	@-$(RM) -rf config.h \
+	@-$(RM) -rf config.h di.env \
 		>/dev/null 2>&1
 
 # leaves:
