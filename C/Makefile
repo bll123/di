@@ -306,7 +306,7 @@ all-test:	tests.done
 tests.done: $(MKCONFIGPATH)/runtests.sh
 	@echo "## running tests"
 	CC=$(CC) DC=$(DC) $(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/runtests.sh ../tests.d
+		$(MKCONFIGPATH)/runtests.sh ./tests.d
 	touch tests.done
 
 # needs environment
