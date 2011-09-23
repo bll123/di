@@ -19,13 +19,15 @@ make di.env
 
 . ./di.env
 
-make --version | egrep "GNU Make"
+make --version 2>&1 | egrep "GNU Make" > /dev/null 2>&1
 rc=$?
 if [ $rc -eq 0 ]; then
-  make -e --no-print-directory rtest-env > \
+  make -e --no-print-directory rtest-env |
+    sed -e 's/^ *//' -e 's/ *$//' > ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
         ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
 else
-  make -e rtest-env > ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
+  make -e rtest-env | 
+    sed -e 's/^ *//' -e 's/ *$//' > ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
 fi
 
 cd ${_MKCONFIG_TSTRUNTMPDIR}
@@ -35,7 +37,7 @@ if [ $rc -ne 0 ]; then
   exit $rc
 fi
 
-> e1 echo "${_MKCONFIG_SYSTYPE}
+echo "${_MKCONFIG_SYSTYPE}
 ${_MKCONFIG_SYSREV}
 ${_MKCONFIG_SYSARCH}
 ${CC}
@@ -45,10 +47,11 @@ ${LDFLAGS}
 ${LIBS}
 ${OBJ_EXT}
 ${EXE_EXT}
-${XMSGFMT}"
+${XMSGFMT}" | 
+sed -e 's/^ *//' -e 's/ *$//' > e1
 
-echo "## diff e1 (env) e2 (make)"
-diff -b e1 e2
-rc=$?
+chkdiff e1 e2
 
-exit $rc
+testcleanup e1 e2 env.log
+
+exit $grc
