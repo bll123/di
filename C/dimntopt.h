@@ -19,7 +19,10 @@
 # define _DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>             /* MNT_...; M_... (hp-ux) */
 #endif
-#if _sys_mntent                     /* Solaris */
+#if _sys_mnttab                     /* SCO_SV, UnixWare */
+# include <sys/mnttab.h>            /* required for mntent.h */ 
+#endif
+#if _sys_mntent                     /* Solaris, SCO_SV, UnixWare */
 # include <sys/mntent.h>            /* MNTOPT_... */
 #endif
 #if _sys_fstypes                    /* NetBSD */
