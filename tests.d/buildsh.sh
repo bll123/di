@@ -32,6 +32,7 @@ if [ $grc -eq 0 ]; then
     # AIX: extra msg from make: Target <target> is up to date
     # Tru64: complains about long long being a new feature.
     # Tru64: extra ----^ lines
+    # SCO_SV: warning: `/*' within comment
     cat make.log |
       grep -v 'dioptions.dat' |
       grep -v '^load\-unit:' |
@@ -58,6 +59,7 @@ if [ $grc -eq 0 ]; then
       grep -v '^------' |
       grep -v 'is a new feature' |
       grep -v '^ *typedef.* long long ' |
+      grep -v 'warning: .... within comment' |
       cat > make_extra.log
     extra=`cat make_extra.log | wc -l`
     if [ $extra -ne 0 ]; then
