@@ -73,8 +73,7 @@ all-perl:	di.env
 
 di.env:	features/env.dat
 	@-$(RM) -f di.env tests.done
-	CC=$(CC) $(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkconfig.sh features/env.dat
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkconfig.sh features/env.dat
 
 ###
 # specific builds
@@ -324,15 +323,15 @@ testrpmbuild:
 # needs environment
 .PHONY: rtest-env
 rtest-env:
-	@echo "$(_MKCONFIG_SYSTYPE)"; \
-		echo "$(_MKCONFIG_SYSREV)"; \
-		echo "$(_MKCONFIG_SYSARCH)"; \
-		echo "$(CC)"; \
-		echo "$(_MKCONFIG_USING_GCC)"; \
-		echo "$(CFLAGS)"; \
-		echo "$(LDFLAGS)"; \
-		echo "$(LIBS)"; \
-		echo "$(OBJ_EXT)"; \
-		echo "$(EXE_EXT)"; \
-		echo "$(XMSGFMT)"
+	@echo "$(_MKCONFIG_SYSTYPE)"
+	@echo "$(_MKCONFIG_SYSREV)"
+	@echo "$(_MKCONFIG_SYSARCH)"
+	@echo "$(CC)"
+	@echo "$(_MKCONFIG_USING_GCC)"
+	@echo "$(CFLAGS)"
+	@echo "$(LDFLAGS)"
+	@echo "$(LIBS)"
+	@echo "$(OBJ_EXT)"
+	@echo "$(EXE_EXT)"
+	@echo "$(XMSGFMT)"
 
