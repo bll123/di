@@ -34,8 +34,10 @@ hdr     libintl.h
 hdr     locale.h
 hdr     malloc.h
 hdr     memory.h
-hdr     mntent.h
+# put this out of order; UnixWare & SCO need the struct mnttab dcl
+# for mntent.h
 hdr     mnttab.h
+hdr     mntent.h
 hdr     rpc/rpc.h
 hdr     rpcsvc/rquota.h
 hdr     ssdef.h
