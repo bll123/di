@@ -48,7 +48,7 @@ ${EXE_EXT}
 ${XMSGFMT}"
 
 echo "## diff e1 (env) e2 (make)"
-diff -w e1 e2
+diff -b e1 e2
 rc=$?
 
 exit $rc
