@@ -8,16 +8,16 @@
 .\"
 .\" brad.lanam.di_at_gmail.com
 .\"
-.TH di 1 "5 Jan 2011"
+.TH di 1 "23 Sep 2011"
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-AaghHklLmnPqtZ] [-b block-size] [-d display-size] [-f format]
+.\" di [-AacghHklLmnPqtZ] [-b block-size] [-d display-size] [-f format]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x exclude-fstyp-list] [-X debug-level]
 .\" [-z zone-name] [file [...]]
 .B di
-[\fB\-AaghHklLmnPtZ\fP]
+[\fB\-AacghHklLmnPtZ\fP]
 [\fB\-b\fP \fIblock\-size\fP]
 [\fB\-d\fP \fIdisplay\-size\fP]
 [\fB\-f\fP \fIformat\fP]
@@ -74,6 +74,11 @@ printed \- e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 Change the base block size from 1024 (default) to the size specified.
 \fIblock\-size\fP may be one of: k\ \-\ 1024 bytes, si\ \-\ 1000 bytes,
 or a specific size.
+.TP
+.B \-c
+.br
+Comma separated values are output.  The titles are output as the
+format string specifiers.  See also the \-n flag.
 .TP
 .B \-d
 .I display\-size
