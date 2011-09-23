@@ -82,7 +82,7 @@
 #if _sys_fs_types               /* OSF/1, AROS */
 # include <sys/fs_types.h>
 #endif
-#if _sys_mnttab                 /* Solaris */
+#if _sys_mnttab                 /* Solaris, SCO_SV, UnixWare */
 # include <sys/mnttab.h>        /* getmntent(); MNTTAB */
 #endif
 
