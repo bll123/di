@@ -12,7 +12,7 @@ LC_ALL="C"
 export LC_ALL
 
 dotest () {
-  diff -w s1 s2
+  diff -b s1 s2
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "=== s1"
