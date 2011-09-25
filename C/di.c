@@ -826,7 +826,7 @@ printDiskInfo (diData)
       if (diopts->csv_output) {
         Snprintf1 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
             "%%.0%s%%s", DI_Lf);
-        Snprintf2 (diout->blockFormat, sizeof (diout->blockFormat),
+        Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
             "%%.1%s%%s", DI_Lf);
       } else {
         Snprintf2 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
@@ -843,11 +843,11 @@ printDiskInfo (diData)
     }
 
     if (diopts->csv_output) {
-      Snprintf1 (diout->inodeFormat,
-          sizeof (diout->inodeFormat), "%%%s", DI_LLu);
+      Snprintf1 (diout->inodeFormat, sizeof (diout->inodeFormat), 
+          "%%%s", DI_LLu);
     } else {
-      Snprintf1 (diout->inodeFormat,
-          sizeof (diout->inodeFormat), "%%%d%s", (int) diout->inodeWidth, DI_LLu);
+      Snprintf2 (diout->inodeFormat, sizeof (diout->inodeFormat), 
+          "%%%d%s", (int) diout->inodeWidth, DI_LLu);
     }
 
     diskInfo = diData->diskInfo;
@@ -2844,7 +2844,7 @@ processArgs (argc, argv, diData, dbsstr)
                 break;
             }
 
-            case 't':
+            case 't': 
             {
                 diopts->flags |= DI_F_TOTAL;
                 break;
