@@ -21,6 +21,19 @@ C/Makefile                C Makefile
 C/realloc.c               di source
 C/strdup.c                di source
 C/strstr.c                di source
+C/tests.d/                regression tests for di
+C/tests.d/buildpl.sh
+C/tests.d/buildsh.sh
+C/tests.d/compshpl.sh
+C/tests.d/diarg.sh
+C/tests.d/diexec.sh
+C/tests.d/diinst.sh
+C/tests.d/dinls.sh
+C/tests.d/disort.sh
+C/tests.d/ditot.sh
+C/tests.d/env.sh
+C/tests.d/rpmbuild.sh
+C/tests.d/test_order
 C/trimchar.c              di source
 C/version.h               di source
 D/                      D di source
@@ -53,17 +66,3 @@ po/de.po
 po/en.po
 po/es.po
 README                  Read This
-tests.d/                regression tests for di
-tests.d/buildpl.sh
-tests.d/buildsh.mksh
-tests.d/buildsh.sh
-tests.d/compshpl.sh
-tests.d/diarg.sh
-tests.d/diexec.sh
-tests.d/diinst.sh
-tests.d/dinls.sh
-tests.d/disort.sh
-tests.d/ditot.sh
-tests.d/env.sh
-tests.d/rpmbuild.sh
-tests.d/test_order
