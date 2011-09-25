@@ -216,6 +216,13 @@ else
   setint _has_std_quotas 0
 endif
 
+if stdnfsquotas _hdr_rpc_rpc && _hdr_rpcsvc_rquota && _lib_xdr_int && \
+    xdr_rq_bhardlimit && xdr_gqa_uid
+  setint _has_std_nfs_quotas 1
+else
+  setint _has_std_nfs_quotas 0
+endif
+
 ifnotoption NLS
   set _lib_bindtextdomain 0
   set _lib_gettext 0

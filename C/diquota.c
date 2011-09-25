@@ -69,7 +69,7 @@
   extern "C" {
 #endif
 
-#if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
+#if _has_std_nfs_quotas
 static bool_t xdr_quota_get _((XDR *, struct getquota_args *));
 static bool_t xdr_quota_rslt _((XDR *, struct getquota_rslt *));
 static void diquota_nfs _((diQuota_t *));
@@ -149,7 +149,7 @@ diquota (diqinfo)
 
   if (strncmp (diqinfo->type, "nfs", (Size_t) 3) == 0 &&
       strcmp (diqinfo->type, "nfsd") != 0) {
-#if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
+#if _has_std_nfs_quotas
     diquota_nfs (diqinfo);
 #endif
     return;
@@ -241,7 +241,7 @@ diquota (diqinfo)
 #endif /* _has_std_quotas */
 }
 
-#if _hdr_rpc_rpc && _hdr_rpcsvc_rquota
+#if _has_std_nfs_quotas
 
 #ifdef RQ_PATHLEN
 # define DI_RQ_PATHLEN  RQ_PATHLEN
@@ -442,7 +442,7 @@ diquota_nfs (diqinfo)
     }
     clnt_destroy (rqclnt);
 }
-#endif  /* have rpc headers */
+#endif  /* have std nfs quotas */
 
 #if _has_std_quotas
 static void
