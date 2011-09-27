@@ -216,7 +216,7 @@ else
 endif
 
 if stdnfsquotas _hdr_rpc_rpc && _hdr_rpcsvc_rquota && _lib_xdr_int && \
-    xdr_rq_bhardlimit && xdr_gqa_uid
+    _memberxdr_rquota_rq_bhardlimit && _memberxdr_getquota_args_gqa_uid
   setint _has_std_nfs_quotas 1
 else
   setint _has_std_nfs_quotas 0
