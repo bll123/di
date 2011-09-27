@@ -8,7 +8,6 @@ option-file ../dioptions.dat
 
 loadunit c-main
 loadunit c-include-conflict
-loadunit c-rquota
 
 output  config.h
 
