@@ -1,7 +1,7 @@
 #
 #  di makefile
 #
-#  Copyright 2001-2010 Brad Lanam Walnut Creek CA, USA
+#  Copyright 2001-2011 Brad Lanam Walnut Creek CA, USA
 #
 #  $Id$
 #
