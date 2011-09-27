@@ -28,8 +28,8 @@
 #define _hdr_locale 1
 #define _hdr_malloc 1
 #define _hdr_memory 1
-#define _hdr_mntent 1
 #define _hdr_mnttab 0
+#define _hdr_mntent 1
 #define _hdr_rpc_rpc 0
 #define _hdr_rpcsvc_rquota 0
 #define _hdr_ssdef 0
@@ -87,7 +87,7 @@
 #define _lib_bcopy 1
 #define _lib_bindtextdomain 1
 #define _lib_bzero 1
-#define _lib_CreateFile 1
+#define _lib_CreateFile 0
 #define _lib_DeviceIoControl 0
 #define _lib_endmntent 1
 #define _lib_fs_stat_dev 0
@@ -127,8 +127,13 @@
 #define _lib_xdr_int 0
 #define _lib_zone_getattr 0
 #define _lib_zone_list 0
-#define _rquota_xdr 0
-#define _gqa_uid_xdr 0
+#define _memberxdr_rquota_rq_bhardlimit 0
+#define _memberxdr_rquota_rq_bsoftlimit 0
+#define _memberxdr_rquota_rq_curblocks 0
+#define _memberxdr_rquota_rq_fhardlimit 0
+#define _memberxdr_rquota_rq_fsoftlimit 0
+#define _memberxdr_rquota_rq_curfiles 0
+#define _memberxdr_getquota_args_gqa_uid 0
 #define _args_getfsstat 0
 #define _args_getvfsstat 0
 #define _args_quotactl 0
@@ -170,6 +175,7 @@
 #define _siz_long_long 8
 #define _siz_long_double 12
 #define _has_std_quotas 0
+#define _has_std_nfs_quotas 0
 #define _enable_nls 1
 #define DI_DEFAULT_FORMAT "smbuvpT"
 #define DI_DEFAULT_DISP_SIZE "H"

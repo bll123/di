@@ -130,8 +130,13 @@
 #define _lib_xdr_int 0
 #define _lib_zone_getattr 0
 #define _lib_zone_list 0
-#define _rquota_xdr 0
-#define _gqa_uid_xdr 0
+#define _memberxdr_rquota_rq_bhardlimit 0
+#define _memberxdr_rquota_rq_bsoftlimit 0
+#define _memberxdr_rquota_rq_curblocks 0
+#define _memberxdr_rquota_rq_fhardlimit 0
+#define _memberxdr_rquota_rq_fsoftlimit 0
+#define _memberxdr_rquota_rq_curfiles 0
+#define _memberxdr_getquota_args_gqa_uid 0
 #define _args_getfsstat 0
 #define _args_getvfsstat 0
 #define _args_quotactl 0
@@ -167,6 +172,7 @@
 #define _siz_long_long 0
 #define _siz_long_double 0
 #define _has_std_quotas 0
+#define _has_std_nfs_quotas 0
 #define _enable_nls 0
 #define DI_DEFAULT_FORMAT "smbuvpT"
 #define DI_DEFAULT_DISP_SIZE "H"
