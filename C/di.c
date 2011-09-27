@@ -2899,6 +2899,7 @@ processArgs (argc, argv, diData, dbsstr)
 
     if (diopts->csv_output) {
       diopts->flags &= (__ulong) (~ DI_F_TOTAL);
+    }
 }
 
 static void
