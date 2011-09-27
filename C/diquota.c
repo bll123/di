@@ -2,7 +2,7 @@
  * $Id$
  * $Source$
  *
- * Copyright 2010 Brad Lanam, Walnut Creek, CA
+ * Copyright 2011 Brad Lanam, Walnut Creek, CA
  */
 
 #include "config.h"

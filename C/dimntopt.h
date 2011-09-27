@@ -1,7 +1,7 @@
 /*
  * $Id$
  * $Source$
- * Copyright 2010 Brad Lanam, Walnut Creek, CA
+ * Copyright 2011 Brad Lanam, Walnut Creek, CA
  */
 
 #ifndef __INC_DIMNTOPT_H_
@@ -20,7 +20,7 @@
 # include <sys/mount.h>             /* MNT_...; M_... (hp-ux) */
 #endif
 #if _sys_mnttab                     /* SCO_SV, UnixWare */
-# include <sys/mnttab.h>            /* required for mntent.h */ 
+# include <sys/mnttab.h>            /* required for mntent.h */
 #endif
 #if _sys_mntent                     /* Solaris, SCO_SV, UnixWare */
 # include <sys/mntent.h>            /* MNTOPT_... */
