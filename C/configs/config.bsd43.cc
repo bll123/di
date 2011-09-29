@@ -127,8 +127,6 @@
 #define _lib_xdr_int 1
 #define _lib_zone_getattr 0
 #define _lib_zone_list 0
-#define _rquota_xdr xdr_u_long
-#define _gqa_uid_xdr xdr_int
 #define xdr_rq_bhardlimit xdr_u_long
 #define _memberxdr_rquota_rq_bhardlimit 1
 #define xdr_rq_bsoftlimit xdr_u_long
