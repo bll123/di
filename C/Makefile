@@ -167,6 +167,30 @@ bsd43-gcc:
 		CFLAGS="$(CFLAGS) -O2" \
 		LDFLAGS="-O2" di-programs
 
+.PHONY: ultrix-cc
+ultrix-cc:
+	@$(MAKE) ../dioptions.dat
+	@echo ':' > di.env;chmod a+rx di.env
+	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	$(CP) config.ultrix.cc config.h
+	@touch $(MKC_REQLIB)
+	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
+		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -O" \
+		LDFLAGS="-O" di-programs
+
+.PHONY: ultrix-gcc
+ultrix-gcc:
+	@$(MAKE) ../dioptions.dat
+	@echo ':' > di.env;chmod a+rx di.env
+	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	$(CP) config.ultrix.gcc config.h
+	@echo '-lintl' > $(MKC_REQLIB)
+	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
+		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -O2" \
+		LDFLAGS="-O2" di-programs
+
 ###
 # cleaning
 
