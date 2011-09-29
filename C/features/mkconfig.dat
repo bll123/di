@@ -33,12 +33,12 @@ hdr     libintl.h
 hdr     locale.h
 hdr     malloc.h
 hdr     memory.h
-# put this out of order; UnixWare & SCO need the struct mnttab dcl
-# for mntent.h
-hdr     mnttab.h
 hdr     mntent.h
-hdr     rpc/rpc.h
-hdr     rpcsvc/rquota.h
+hdr     mnttab.h
+# ULTRIX requires time.h
+hdr     rpc/rpc.h time.h
+# ULTRIX requires rpc/rpc.h
+hdr     rpcsvc/rquota.h time.h rpc/rpc.h
 hdr     ssdef.h
 hdr     starlet.h
 hdr     storage/Directory.h
@@ -66,7 +66,8 @@ sys     fstypes.h
 sys     ftype.h
 sys     io.h
 sys     mntctl.h
-sys     mntent.h
+# SCO OpenServer/UnixWare require sys/mnttab.h for struct mnttab declaration.
+sys     mntent.h sys/mnttab.h
 sys     mnttab.h
 sys     mount.h
 sys     quota.h
@@ -170,6 +171,7 @@ args noconst setmntent
 args noconst statfs
 class   os::Volumes -lsyllable
 npt     getenv
+npt     getmnt
 npt     getopt
 npt     mntctl
 npt     statfs _lib_statfs
