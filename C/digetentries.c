@@ -1219,6 +1219,10 @@ di_getDiskEntries (diskInfo, diCount)
 
 #if _lib_getmnt
 
+# if _npt_getmnt
+  int getmnt _((int *, struct fs_data *, int, int, char *));
+# endif
+
 /*
  * di_getDiskEntries
  *
@@ -1241,7 +1245,7 @@ di_getDiskEntries (diskInfo, diCount)
 {
     diDiskInfo_t     *diptr;
     int             count;
-    Size_t          bufsize;
+    int             bufsize;
     int             idx;
     short           fstype;
     struct fs_data  *fsdbuf;
@@ -1251,7 +1255,7 @@ di_getDiskEntries (diskInfo, diCount)
 
     if (debug > 0) { printf ("# getDiskEntries: getmnt\n"); }
     bufsize = NMOUNT * sizeof (struct fs_data);  /* enough for max # mounts */
-    fsdbuf = (struct fs_data *) malloc (bufsize);
+    fsdbuf = (struct fs_data *) malloc ((Size_t) bufsize);
     if (fsdbuf == (struct fs_data *) NULL)
     {
         fprintf (stderr, "malloc (%d) for getmnt () failed errno %d\n",
