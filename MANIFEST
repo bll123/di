@@ -3,6 +3,8 @@ C/config.bsd43.cc         config.h for bsd43
 C/config.bsd43.gcc        config.h for bsd43
 C/config.dmc              config.h for windows (DMC)
 C/config.mingw            config.h for windows (MinGW)
+C/config.ultrix.cc        config.h for ultrix
+C/config.ultrix.gcc       config.h for ultrix
 C/config.vms              config.h for VMS
 C/config.vms.b            alternate config.h for VMS
 C/config.win              config.h for windows
