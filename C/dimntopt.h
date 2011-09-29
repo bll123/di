@@ -28,9 +28,6 @@
 #if _sys_fstypes                    /* NetBSD */
 # include <sys/fstypes.h>
 #endif
-#if _sys_fs_types                   /* OSF/1 */
-# include <sys/fs_types.h>
-#endif
 #if _sys_vmount                     /* AIX */
 # include <sys/vmount.h>            /* MNT_... */
 #endif
