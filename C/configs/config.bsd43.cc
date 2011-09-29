@@ -161,6 +161,7 @@
 #define _args_statfs 2
 #define _class_os__Volumes 0
 #define _npt_getenv 1
+#define _npt_getmnt 1
 #define _npt_getopt 1
 #define _npt_mntctl 1
 #define _npt_statfs 1
