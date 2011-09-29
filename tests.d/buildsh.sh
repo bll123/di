@@ -60,6 +60,9 @@ if [ $grc -eq 0 ]; then
       grep -v 'is a new feature' |
       grep -v '^ *typedef.* long long ' |
       grep -v 'warning: .... within comment' |
+      grep -v 'Unknown option.*-Wextra.*ignored.' |
+      grep -v 'Unknown option.*-Wno-unused-but-set-variable.*ignored' |
+      grep -v 'Unknown option.*-Wno-unused-parameter.*ignored' |
       cat > make_extra.log
     extra=`cat make_extra.log | wc -l`
     if [ $extra -ne 0 ]; then
