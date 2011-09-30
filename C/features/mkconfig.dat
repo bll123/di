@@ -35,10 +35,8 @@ hdr     malloc.h
 hdr     memory.h
 hdr     mntent.h
 hdr     mnttab.h
-# ULTRIX requires time.h
-hdr     rpc/rpc.h time.h
-# ULTRIX requires rpc/rpc.h
-hdr     rpcsvc/rquota.h time.h rpc/rpc.h
+hdr     rpc/rpc.h
+hdr     rpcsvc/rquota.h
 hdr     ssdef.h
 hdr     starlet.h
 hdr     storage/Directory.h
