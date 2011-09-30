@@ -1,6 +1,8 @@
 #ifndef __INC_CONFIG_H
 #define __INC_CONFIG_H 1
 
+/* ULTRIX requires time.h for rpc/rpc.h */
+/* ULTRIX requires rpc/rpc.h for rpcsvc/rquota.h */
 #define _hdr_stdio 1
 #define _hdr_stdlib 1
 #define _sys_types 1
