@@ -43,6 +43,9 @@ if [ $grc -eq 0 ]; then
       grep -v 'Leaving directory' |
       grep -v 'Entering directory' |
       grep -v 'cc \-[co]' |
+      grep -v 'cc32 \-[co]' |
+      grep -v 'cc64 \-[co]' |
+      grep -v 'xlc \-[co]' |
       grep -v digetentries.o |
       grep -v '\*\*\* ' |
       grep -v 'di\.env' |
