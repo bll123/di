@@ -44,5 +44,6 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/locale/en/LC_MESSAGES/di.mo
 /usr/share/locale/es/LC_MESSAGES/di.mo
 /usr/share/man/man1/di.1.gz
+# For Mandriva 2011, change di.1.gz to di.1.xv
 
 %changelog
