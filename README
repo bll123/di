@@ -1,4 +1,4 @@
-di - disk information utility (version 4.28)
+di - disk information utility (version 4.29)
 
 CONTENTS
   Description
@@ -24,14 +24,17 @@ INSTALLATION
     make -e
     make -e install
   Example to change compiler and prefix:
-    make CC=gcc prefix=/opt/bin -e
+    CC=gcc prefix=/opt/bin make -e
 
-  To build with mkconfig.pl (requires perl):
+  If you don't have a bourne shell compatible shell,
+  Try building with perl:
+      cd C
       make -e all-perl
 
   To change the options (NLS, WINAPI, default display):
     make dioptions.dat
-    # edit dioptions.dat and change what you like
+    Edit dioptions.dat and change what you like.
+    Then: make -e
 
   The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.
@@ -44,21 +47,47 @@ INSTALLATION
   The internationalization files are automatically built and installed if
   your system supports internationalization.
 
-  Tru64
-    export BIN_SH=svr4 beforehand.
-
   Windows installation:
     Alternative 1 - uses config.win or config.mingw
       Cygwin gcc: make -e windows-gcc
-      MinGW:
-        cd C;mingw32-make MAKE=mingw32-make CC=mingw32-gcc windows-mingw
-      dmc:        cd C;make windows-dmc
+      MinGW: cd C;mingw32-make MAKE=mingw32-make CC=mingw32-gcc windows-mingw
+      dmc:   cd C;make windows-dmc
     Alternative 2 - builds a new config.h file (Cygwin).
       make -e config.h
       make -e
 
     You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.
+
+  HP-UX:
+    Some versions of gcc on HP-UX break the include files.
+    If you see:    header: rpc/rpc.h ... no
+    try: env CC=gcc CFLAGS="-D_LABEL_T" make -e
+
+    On some HP-UX systems, quotactl isn't declared.
+    If you want quota support, make sure config.h has:
+      #define _lib_quotactl 1
+      #define _args_quotactl 4
+      #define _c_arg_1__quotactl int
+      #define _c_arg_2__quotactl char *
+      #define _c_arg_3__quotactl int
+      #define _c_arg_4__quotactl caddr_T
+      #define _quotactl_pos_1 0
+      #define _quotactl_pos_2 1
+
+    64-bit:
+      env CFLAGS="-z +Z +DD64" LDFLAGS="+DD64" make -e
+    64-bit gcc:
+      env CC=gcc CFLAGS="-fPIC -mlp64 -D_LABEL_T" \
+          LDFLAGS="-mlp64 -L/usr/lib/hpux64" make -e 
+    32-bit:
+      env CFLAGS="-z +Z +DD32" LDFLAGS="+DD32" make -e
+    32-bit gcc:
+      env CC=gcc CFLAGS="-fPIC -milp32 -D_LABEL_T" \
+          LDFLAGS="-milp32 -L/usr/lib/hpux32" make -e 
+
+  Tru64
+    export BIN_SH=svr4 beforehand.
 
   Installation Permissions:
     Some old systems (Sys V variants) only allow root to read the
@@ -75,10 +104,12 @@ BUGS AND KNOWN ISSUES
           I have access to a Tru64 system w/quotas, but there's
           only one filesystem per pool.
       - quotas:
-        - MacOSX, HP-UX
+        - MacOSX
           - No access to users with quotas.
+        - HP-UX
+          - quotactl() isn't declared.
       - MS VC++ has not been tested in a *very* long while.
-      - A/UX, Cray, Ultrix, Irix, UNICOS, Next, Pyramid, SCO Unix, Sequent
+      - A/UX, Cray, Irix, UNICOS, Next, Pyramid, SCO Unix, Sequent
         have not been tested in a *very* long while.
     Known Issues
       - quotas:
@@ -116,21 +147,22 @@ REQUIREMENTS
         mv rm sed test
     NLS:
         msgfmt sed
-    runtests.sh:
-        ar cat cp dc diff env expr grep mv rm sed sort test tr
+
+    runtests.sh (not a requirement for building or installing):
+        ar cat cp dc diff env expr egrep mv rm sed sort test tr
 
 PORTING
 
-    di 4.28 has been tested on the following platforms:
+    di 4.29 has been tested on the following platforms:
         AIX 5.1
-        BSD 4.3
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5, 6.0
         Debian 4.0, 5.0, 6.0, 6-kFreeBSD 7.2, 6-kFreeBSD 8.1
         DragonflyBSD 2.10.1
         Fedora 7, 12, 13, 14
         FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1, 8.2
         Haiku r1a3
-        MacOSX 8.11 (10.4)
+        HP-UX 10.20, 11.00, 11.11, 11.23, 11.31 (cc, gcc, 32-bit, 64-bit)
+        MacOSX 8.11(10.4)
         Mandrake 9.2
         Mandriva 2011
         NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1, 5.1
@@ -139,22 +171,35 @@ PORTING
         OpenSolaris 200805, 200906
         QNX 6.3
         RedHat 7.1, 7.3
+        SCO OpenServer 6.0.0
         Solaris 8, 9, 10 (cc, gcc3, gcc4)
         Solaris 2.6 (sparc gcc3)
         Tru64 5.1B
+        ULTRIX 4.5
+        UnixWare 7.1.4
         Windows - Cygwin
         Windows - MinGW
         Windows - dmc
 
     di has been ported to the following systems in the past:
 
-        A/UX, AIX, BeOS, BSD, BSDI, Convex, Cray UNICOS,
-        Cray UNICOS/mk, DragonflyBSD, FreeBSD, Haiku, HP/UX, Linux, MacOSX,
-        NetBSD, Next, OpenBSD, OS/2, OSF/1, Pyramid, SCO Unix,
+        A/UX, AIX, BeOS, BSD, BSDI, Convex, Cray UNICOS, Cray UNICOS/mk,
+        DragonflyBSD, FreeBSD, Haiku, HP/UX, Linux, MacOSX, NetBSD, Next,
+        OpenBSD, OS/2, OSF/1, Pyramid, SCO OpenServer, SCO Unix,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Syllable,
-        Sys V.3, Sys V.4, Tru64, Ultrix, VMS, Windows, Xenix
+        System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+
+    4.29                                    [30 Sep 2011]
+        Added the -c option to output in CSV format
+           (request by H.Merijn Brand).
+        Fixed bB format titles.
+        Added checks to make sure required programs for
+           build/install are present.
+        Various fixes for HP-UX, ULTRIX, SCO OpenServer, UnixWare.
+        Added pre-generated config.h files for ULTRIX.
+        Updated build system to mkconfig-1.17.
 
     4.28                                    [11 Sep 2011]
         Fixed compiler warnings for 64-bit.
@@ -613,6 +658,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2010 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2011 Brad Lanam, Walnut Creek, CA, USA
     brad.lanam.di_at_gmail.com
     http://www.gentoo.com/di/
