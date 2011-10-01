@@ -1,5 +1,5 @@
 Name:           di
-Version:        4.28
+Version:        4.29
 Release:        1%{?dist}
 Summary:        'di' is a disk information utility, displaying everything (and more) that your 'df' command does.
 
@@ -10,7 +10,7 @@ Source0:        http://www.gentoo.com/di/di-%{version}.tar.gz
 Source1:        http://www.fossies.org/unix/misc/di-%{version}.tar.gz
 BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
-# Build requires: cat cp grep ln msgfmt mv rm sed sort test uname uniq
+# Build requires: cat cp grep ln msgfmt mv rm sed sort test uname tr wc
 #BuildRequires:
 #Requires:
 
