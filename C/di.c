@@ -82,6 +82,7 @@
 #include "config.h"
 #include "di.h"
 #include "version.h"
+#include "getoptn.h"
 
 #if _hdr_stdio
 # include <stdio.h>
@@ -103,9 +104,6 @@
 #endif
 #if _sys_file
 # include <sys/file.h>
-#endif
-#if _hdr_getopt
-# include <getopt.h>
 #endif
 #if _hdr_string
 # include <string.h>
@@ -157,13 +155,6 @@
 #endif
 
 /* end of system specific includes/configurations */
-
-#define DI_F_ALL               0x00000001
-#define DI_F_LOCAL_ONLY        0x00000002
-#define DI_F_TOTAL             0x00000010
-#define DI_F_NO_HEADER         0x00000020
-#define DI_F_DEBUG_HDR         0x00000040
-#define DI_F_EXCLUDE_LOOPBACK  0x00000080
 
 #define DI_FMT_VALID_CHARS     "mMsStTbBucfvp12a3iUFPIO"
 
@@ -276,15 +267,20 @@ typedef struct {
 } zoneInfo_t;
 
 typedef struct {
-    char            *formatString;
+    const char      *formatString;
     _print_size_t   dispBlockSize;
     _print_size_t   baseDispSize;
     unsigned int    baseDispIdx;
-    __ulong         flags;
     char            sortType [DI_SORT_MAX + 1];
     unsigned int    posix_compat;
     unsigned int    quota_check;
     unsigned int    csv_output;
+    unsigned int    excludeLoopback;
+    unsigned int    printTotals;
+    unsigned int    printDebugHeader;
+    unsigned int    printHeader;
+    unsigned int    printAllColumns;
+    unsigned int    localOnly;
 } diOptions_t;
 
 typedef struct {
@@ -358,13 +354,13 @@ static void addTotals           _((const diDiskInfo_t *, diDiskInfo_t *, int));
 static void checkDiskInfo       _((diData_t *, int));
 static void checkDiskQuotas     _((diData_t *));
 static void getMaxFormatLengths _((diData_t *));
-static int  checkFileInfo       _((diData_t *, int, int, char *[]));
+static int  checkFileInfo       _((diData_t *, int, int, const char *const[]));
 static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
 static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
 static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, int));
 #endif
-static void cleanup             _((diData_t *, char *));
+static void cleanup             _((diData_t *, const char *));
 static int  diCompare           _((const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int));
 static int  findDispSize        _((_print_size_t));
 static int  getDiskSpecialInfo  _((diData_t *));
@@ -378,7 +374,7 @@ static void printInfo           _((diDiskInfo_t *, diOptions_t *, diOutput_t *))
 static void printBlocks         _((const diOptions_t *, const diOutput_t *, _fs_size_t, _fs_size_t, int));
 static void processTitles       _((diOptions_t *, diOutput_t *));
 static void printPerc           _((_fs_size_t, _fs_size_t, const char *));
-static void processArgs         _((int, char * const [], diData_t *, char *));
+static int processArgs          _((int, const char * const [], diData_t *, char *, Size_t));
 static void setDispBlockSize    _((char *, diOptions_t *, diOutput_t *));
 static void sortArray           _((diOptions_t *, diDiskInfo_t *, int, int));
 static void usage               _((void));
@@ -389,23 +385,25 @@ static void usage               _((void));
 
 int
 #if _proto_stdc
-main (int argc, char *argv [])
+main (int argc, const char * argv [])
 #else
 main (argc, argv)
-    int                 argc;
-    char                * argv [];
+    int         argc;
+    const char  * argv [];
 #endif
 {
     diData_t            diData;
     diOptions_t         *diopts;
     diOutput_t          *diout;
     int                 i;
+    int                 optidx;
     int                 hasLoop;
     char                *ptr;
 #if _enable_nls
     char                *localeptr;
 #endif
-    char                *argvptr;
+    const char          *argvptr;
+    char                *dptr;
     char                dbsstr [30];
 
         /* initialization */
@@ -434,10 +432,15 @@ main (argc, argv)
     diopts->formatString = DI_DEFAULT_FORMAT;
         /* change default display format here */
     diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
-    diopts->flags = 0;
+    diopts->excludeLoopback = FALSE;
+    diopts->printTotals = FALSE;
+    diopts->printDebugHeader = FALSE;
+    diopts->printHeader = TRUE;
+    diopts->localOnly = FALSE;
+    diopts->excludeLoopback = FALSE;
     /* loopback devices (lofs) should be excluded by default */
 #if ! _lib_sys_dollar_device_scan  /* not VMS */
-    diopts->flags |= DI_F_EXCLUDE_LOOPBACK;
+    diopts->excludeLoopback = TRUE;
 #endif
     strcpy (diopts->sortType, "m"); /* default - sort by mount point */
     diopts->posix_compat = FALSE;
@@ -448,7 +451,7 @@ main (argc, argv)
 
     diout = &diData.output;
     diout->width = 8;
-    diout->inodeWidth = 7;
+    diout->inodeWidth = 9;
     diout->maxMountString = 0;  /* 15 */
     diout->maxSpecialString = 0; /* 18 */
     diout->maxTypeString = 0; /* 7 */
@@ -468,8 +471,8 @@ main (argc, argv)
     ptr = textdomain (PROG);
 #endif
 
-    ptr = argv [0] + strlen (argv [0]) - 2;
-    if (memcmp (ptr, MPROG, (Size_t) 2) == 0)
+    argvptr = argv [0] + strlen (argv [0]) - 2;
+    if (memcmp (argvptr, MPROG, (Size_t) 2) == 0)
     {
         diopts->formatString = DI_DEF_MOUNT_FORMAT;
     }
@@ -502,26 +505,22 @@ main (argc, argv)
         strncpy (dbsstr, ptr, sizeof (dbsstr));
     }
 
-    argvptr = (char *) NULL;
+    dptr = (char *) NULL;
     if ((ptr = getenv ("DI_ARGS")) != (char *) NULL)
     {
         char        *tptr;
         int         nargc;
-        int         ooptind;
-        char        *ooptarg;
-        char        *nargv [DI_MAX_ARGV];
+        const char  *nargv [DI_MAX_ARGV];
 
-        argvptr = strdup (ptr);
-        if (argvptr == (char *) NULL)
+        dptr = strdup (ptr);
+        if (dptr == (char *) NULL)
         {
             fprintf (stderr, "strdup failed in main() (1).  errno %d\n", errno);
             exit (1);
         }
-        ooptind = optind;
-        ooptarg = optarg;
-        if (argvptr != (char *) NULL)
+        if (dptr != (char *) NULL)
         {
-            tptr = strtok (argvptr, DI_ARGV_SEP);
+            tptr = strtok (dptr, DI_ARGV_SEP);
             nargc = 1;
             nargv[0] = argv[0];
             while (tptr != (char *) NULL)
@@ -533,13 +532,11 @@ main (argc, argv)
                 nargv[nargc++] = tptr;
                 tptr = strtok ((char *) NULL, DI_ARGV_SEP);
             }
-            processArgs (nargc, nargv, &diData, dbsstr);
-            optind = ooptind;     /* reset so command line can be parsed */
-            optarg = ooptarg;
+            processArgs (nargc, nargv, &diData, dbsstr, sizeof (dbsstr));
         }
     }
 
-    processArgs (argc, argv, &diData, dbsstr);
+    optidx = processArgs (argc, argv, &diData, dbsstr, sizeof (dbsstr));
     if (debug > 0 && (ptr = getenv ("DI_ARGS")) != (char *) NULL)
     {
         printf ("# DI_ARGS:%s\n", ptr);
@@ -658,7 +655,7 @@ main (argc, argv)
         printf ("di version %s\n", DI_VERSION);
     }
 
-    if (debug > 5)
+    if (debug > 30)
     {
         for (i = 0; i < (int) DI_DISPTAB_SIZE; ++i)
         {
@@ -685,26 +682,25 @@ main (argc, argv)
 
     if (di_getDiskEntries (&diData.diskInfo, &diData.count) < 0)
     {
-        cleanup (&diData, argvptr);
+        cleanup (&diData, dptr);
         exit (1);
     }
 
     hasLoop = FALSE;
     preCheckDiskInfo (&diData);
-    if (optind < argc ||
-        (diopts->flags & DI_F_EXCLUDE_LOOPBACK) == DI_F_EXCLUDE_LOOPBACK)
+    if (optidx < argc || diopts->excludeLoopback)
     {
       getDiskStatInfo (&diData);
       hasLoop = getDiskSpecialInfo (&diData);
     }
-    if (optind < argc)
+    if (optidx < argc)
     {
         int     rc;
 
-        rc = checkFileInfo (&diData, optind, argc, argv);
+        rc = checkFileInfo (&diData, optidx, argc, argv);
         if (rc < 0)
         {
-            cleanup (&diData, argvptr);
+            cleanup (&diData, dptr);
             exit (1);
         }
     }
@@ -715,7 +711,7 @@ main (argc, argv)
     }
     printDiskInfo (&diData);
 
-    cleanup (&diData, argvptr);
+    cleanup (&diData, dptr);
     exit (0);
 }
 
@@ -728,11 +724,11 @@ main (argc, argv)
 
 static void
 #if _proto_stdc
-cleanup (diData_t *diData, char *argvptr)
+cleanup (diData_t *diData, const char *dptr)
 #else
-cleanup (diData, argvptr)
-    diData_t        *diData;
-    char            *argvptr;
+cleanup (diData, dptr)
+    diData_t   *diData;
+    const char *dptr;
 #endif
 {
     if (diData->diskInfo != (diDiskInfo_t *) NULL)
@@ -752,9 +748,9 @@ cleanup (diData, argvptr)
         free ((char *) diData->includeList.list);
     }
 
-    if (argvptr != (char *) NULL)
+    if (dptr != (char *) NULL)
     {
-        free ((char *) argvptr);
+        free ((char *) dptr);
     }
 
     if (diData->zoneInfo.zones != (zoneSummary_t *) NULL)
@@ -795,7 +791,7 @@ printDiskInfo (diData)
     diopts = &diData->options;
     diout = &diData->output;
 
-    if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
+    if (diopts->printTotals)
     {
         di_initDiskInfo (&totals);
         totals.blockSize = 512;
@@ -851,7 +847,7 @@ printDiskInfo (diData)
     }
 
     diskInfo = diData->diskInfo;
-    if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
+    if (diopts->printTotals)
     {
         int                  allocated;
 
@@ -961,7 +957,7 @@ printDiskInfo (diData)
       printInfo (dinfo, diopts, diout);
     }
 
-    if ((diopts->flags & DI_F_TOTAL) == DI_F_TOTAL)
+    if (diopts->printTotals)
     {
       printInfo (&totals, diopts, diout);
     }
@@ -987,7 +983,7 @@ printInfo (diskInfo, diopts, diout)
 {
     _fs_size_t          used;
     _fs_size_t          totAvail;
-    char                *ptr;
+    const char          *ptr;
     char                tfmt[2];
     int                 valid;
     _print_size_t       temp;
@@ -1410,7 +1406,7 @@ processTitles (diopts, diout)
     diOutput_t    *diout;
 #endif
 {
-    char            *ptr;
+    const char      *ptr;
     int             valid;
     Size_t          wlen;
     Size_t          *wlenptr;
@@ -1424,7 +1420,7 @@ processTitles (diopts, diout)
 
 
     first = TRUE;
-    if ((diopts->flags & DI_F_DEBUG_HDR) == DI_F_DEBUG_HDR)
+    if (diopts->printDebugHeader)
     {
         printf (DI_GT("di version %s Default Format: %s\n"),
                 DI_VERSION, DI_DEFAULT_FORMAT);
@@ -1561,7 +1557,7 @@ processTitles (diopts, diout)
                 wlenptr = &diout->inodeWidth;
                 fstr = diout->inodeLabelFormat;
                 maxsize = sizeof (diout->inodeLabelFormat);
-                pstr = "Used";
+                pstr = "Iused";
                 break;
             }
 
@@ -1572,14 +1568,14 @@ processTitles (diopts, diout)
                 wlenptr = &diout->inodeWidth;
                 fstr = diout->inodeLabelFormat;
                 maxsize = sizeof (diout->inodeLabelFormat);
-                pstr = "Free";
+                pstr = "Ifree";
                 break;
             }
 
             case DI_FMT_IPERC:
             {
                 wlen = 6;
-                pstr = "%Used";
+                pstr = "%Iused";
                 break;
             }
 
@@ -1648,7 +1644,7 @@ processTitles (diopts, diout)
 
             default:
             {
-              if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
+              if (diopts->printHeader) {
                 printf ("%c", *ptr);
               }
               valid = FALSE;
@@ -1675,7 +1671,7 @@ processTitles (diopts, diout)
           Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
               jstr, (int) tlen, (int) tlen);
 
-          if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
+          if (diopts->printHeader) {
             if (diopts->csv_output) {
               if (! first) {
                 printf (",");
@@ -1710,7 +1706,7 @@ processTitles (diopts, diout)
         }
 
         ++ptr;
-        if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
+        if (diopts->printHeader) {
           if (! diopts->csv_output && *ptr && valid)
           {
               printf (" ");
@@ -1718,7 +1714,7 @@ processTitles (diopts, diout)
         }
     }
 
-    if ((diopts->flags & DI_F_NO_HEADER) != DI_F_NO_HEADER) {
+    if (diopts->printHeader) {
       printf ("\n");
     }
 }
@@ -1759,13 +1755,17 @@ printPerc (used, totAvail, format)
 
 static int
 #if _proto_stdc
-checkFileInfo (diData_t *diData, int optidx, int argc, char *argv [])
+checkFileInfo (
+    diData_t *diData,
+    int optidx,
+    int argc,
+    const char * const argv [])
 #else
 checkFileInfo (diData, optidx, argc, argv)
     diData_t            *diData;
     int                 optidx;
     int                 argc;
-    char                *argv [];
+    const char          * const argv [];
 #endif
 {
     int                 rc;
@@ -2231,7 +2231,7 @@ checkDiskInfo (diData, hasLoop)
               printf ("chk: skipping(%s):%s\n",
                   getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
           }
-          dinfo->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
+          dinfo->doPrint = (char) diopts->printAllColumns;
         }
 
             /* Solaris reports a cdrom as having no free blocks,   */
@@ -2280,7 +2280,7 @@ checkDiskInfo (diData, hasLoop)
           if ((_s_fs_size_t) dinfo->totalBlocks <= 0L)
           {
             dinfo->printFlag = DI_PRNT_IGNORE;
-            dinfo->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
+            dinfo->doPrint = (char) diopts->printAllColumns;
             if (debug > 2)
             {
                 printf ("chk: ignore: totalBlocks <= 0: %s\n",
@@ -2293,8 +2293,7 @@ checkDiskInfo (diData, hasLoop)
       checkIncludeList (dinfo, &diData->includeList);
     } /* for all disks */
 
-    if (hasLoop &&
-        (diopts->flags & DI_F_EXCLUDE_LOOPBACK) == DI_F_EXCLUDE_LOOPBACK)
+    if (hasLoop && diopts->excludeLoopback)
     {
           /* this loop sets duplicate entries to be ignored. */
       for (i = 0; i < diData->count; ++i)
@@ -2345,7 +2344,7 @@ checkDiskInfo (diData, hasLoop)
               }
 
               dinfo->printFlag = DI_PRNT_IGNORE;
-              dinfo->doPrint = (char) ((diopts->flags & DI_F_ALL) == DI_F_ALL);
+              dinfo->doPrint = (char) diopts->printAllColumns;
               if (debug > 2)
               {
                   printf ("dup: chk: ignore: %s duplicate of %s\n",
@@ -2576,8 +2575,7 @@ preCheckDiskInfo (diData)
             printf ("## prechk:%s:\n", dinfo->name);
         }
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
-        checkZone (dinfo, &diData->zoneInfo,
-            ((diopts->flags & DI_F_ALL) == DI_F_ALL));
+        checkZone (dinfo, &diData->zoneInfo, diopts->printAllColumns);
 #endif
 
         if (strcmp (dinfo->fsType, "zfs") == 0 ||
@@ -2589,12 +2587,11 @@ preCheckDiskInfo (diData)
         if (dinfo->printFlag == DI_PRNT_OK)
         {
               /* don't bother w/this check is all flag is set. */
-          if ((diopts->flags & DI_F_ALL) != DI_F_ALL)
+          if (! diopts->printAllColumns)
           {
             di_testRemoteDisk (dinfo);
 
-            if (dinfo->isLocal == FALSE &&
-                    (diopts->flags & DI_F_LOCAL_ONLY) == DI_F_LOCAL_ONLY)
+            if (dinfo->isLocal == FALSE && diopts->localOnly)
             {
                 dinfo->printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
@@ -2655,251 +2652,211 @@ usage ()
 }
 
 
+struct pa_tmp {
+  diData_t        *diData;
+  diOptions_t     *diopts;
+  diOutput_t      *diout;
+  char            *dbsstr;
+};
+
 static void
 #if _proto_stdc
-processArgs (int argc,
-             char * const argv [],
-             diData_t *diData,
-             char *dbsstr)
+processOptions (const char *arg, char *valptr)
 #else
-processArgs (argc, argv, diData, dbsstr)
-    int             argc;
-    char            * const argv [];
-    diData_t        *diData;
-    char            *dbsstr;
+processOptions (arg, valptr)
+    const char *arg;
+    char *valptr;
 #endif
 {
-    int         ch;
-    int         hasdashk;
-    diOptions_t *diopts;
-    diOutput_t  *diout;
+  struct pa_tmp     *padata;
 
-
-    diopts = &diData->options;
-    diout = &diData->output;
-    hasdashk = 0;
-    while ((ch = getopt (argc, argv,
-        "Aab:B:cd:D:f:F:ghHi:I:klLmnPqs:tvw:W:x:X:z:Z")) != -1)
+  padata = (struct pa_tmp *) valptr;
+  if (strcmp (arg, "-a") == 0) {
+    padata->diopts->printAllColumns = TRUE;
+    strcpy (padata->diData->zoneInfo.zoneDisplay, "all");
+  } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
+    usage();
+    exit (0);
+  } else if (strcmp (arg, "-P") == 0) {
+    if (strcmp (padata->dbsstr, "k") != 0) /* don't override -k option */
     {
-        switch (ch)
-        {
-            case 'A':   /* for debugging */
-            {
-                diopts->formatString = DI_ALL_FORMAT;
-                break;
-            }
-
-            case 'a':
-            {
-                diopts->flags |= DI_F_ALL;
-                strcpy (diData->zoneInfo.zoneDisplay, "all");
-                break;
-            }
-
-            case 'b':
-            case 'B':
-            {
-              if (isdigit ((int) (*optarg)))
-              {
-                diopts->baseDispSize = atof (optarg);
-                diopts->baseDispIdx = DI_DISP_1000_IDX; /* unknown, really */
-                if (diopts->baseDispSize == DI_VAL_1024)
-                {
-                  diopts->baseDispIdx = DI_DISP_1024_IDX;
-                }
-              }
-              else if (strcmp (optarg, "k") == 0)
-              {
-                diopts->baseDispSize = DI_VAL_1024;
-                diopts->baseDispIdx = DI_DISP_1024_IDX;
-              }
-              else if (strcmp (optarg, "d") == 0 ||
-                  strcmp (optarg, "si") == 0)
-              {
-                diopts->baseDispSize = DI_VAL_1000;
-                diopts->baseDispIdx = DI_DISP_1000_IDX;
-              }
-              break;
-            }
-
-            case 'c':
-            {
-                diopts->csv_output = TRUE;
-                break;
-            }
-
-            case 'd':
-            {
-                strncpy (dbsstr, optarg, sizeof (dbsstr));
-                break;
-            }
-
-                /* for debugging; can be replaced */
-            case 'D':
-            {
-                debug = atoi (optarg);
-                break;
-            }
-
-            case 'f':
-            {
-                diopts->formatString = optarg;
-                break;
-            }
-
-            case 'g':
-            {
-                strncpy (dbsstr, "g", sizeof (dbsstr));
-                break;
-            }
-
-            case 'h':
-            {
-                strncpy (dbsstr, "h", sizeof (dbsstr));
-                break;
-            }
-
-            case 'H':
-            {
-                strncpy (dbsstr, "H", sizeof (dbsstr));
-                break;
-            }
-
-            case 'm':
-            {
-                strncpy (dbsstr, "m", sizeof (dbsstr));
-                break;
-            }
-
-            case 'i':  /* backwards compatibility */
-            case 'x':  /* preferred */
-            {
-                parseList (&diData->ignoreList, optarg);
-                break;
-            }
-
-            case 'F':  /* compatibility w/other df */
-            case 'I':
-            {
-                parseList (&diData->includeList, optarg);
-                break;
-            }
-
-            case 'k':
-            {
-                strncpy (dbsstr, "k", sizeof (dbsstr));
-                hasdashk = 1;
-                break;
-            }
-
-            case 'l':
-            {
-                diopts->flags |= DI_F_LOCAL_ONLY;
-                break;
-            }
-
-            case 'L':
-            {
-                diopts->flags &= (__ulong) ~ DI_F_EXCLUDE_LOOPBACK;
-                break;
-            }
-
-            case 'n':
-            {
-                diopts->flags |= DI_F_NO_HEADER;
-                break;
-            }
-
-            case 'P':
-            {
-                if (hasdashk == 0) /* don't override -k option */
-                {
-                    strncpy (dbsstr, "512", sizeof (dbsstr));
-                }
-                diopts->formatString = DI_POSIX_FORMAT;
-                diopts->posix_compat = TRUE;
-                diopts->csv_output = FALSE;
-                break;
-            }
-
-            case 'q':
-            {
-                diopts->quota_check = FALSE;
-                break;
-            }
-
-            case 's':
-            {
-                strncpy (diopts->sortType, optarg, sizeof (diopts->sortType));
-                    /* for backwards compatibility                       */
-                    /* reverse by itself - change to reverse mount point */
-                if (strcmp (diopts->sortType, "r") == 0)
-                {
-                    strcpy (diopts->sortType, "rm");
-                }
-                    /* add some sense to the sort order */
-                if (strcmp (diopts->sortType, "t") == 0)
-                {
-                    strcpy (diopts->sortType, "tm");
-                }
-                break;
-            }
-
-            case 't':
-            {
-                diopts->flags |= DI_F_TOTAL;
-                break;
-            }
-
-            case 'v':
-            {
-                break;
-            }
-
-            case 'w':
-            {
-                diout->width = (unsigned int) atoi (optarg);
-                break;
-            }
-
-            case 'W':
-            {
-                diout->inodeWidth = (unsigned int) atoi (optarg);
-                break;
-            }
-
-            case 'X':
-            {
-                debug = atoi (optarg);
-                diopts->flags |= DI_F_DEBUG_HDR | DI_F_TOTAL;
-                diopts->flags &= (__ulong) (~ DI_F_NO_HEADER);
-                diout->width = 10;
-                diout->inodeWidth = 10;
-                break;
-            }
-
-            case 'z':
-            {
-                strcpy (diData->zoneInfo.zoneDisplay, optarg);
-                break;
-            }
-            case 'Z':
-            {
-                strcpy (diData->zoneInfo.zoneDisplay, "all");
-                break;
-            }
-
-            case '?':
-            {
-                usage ();
-                exit (1);
-            }
-        }
+      strcpy (padata->dbsstr, "512");
     }
+    padata->diopts->formatString = DI_POSIX_FORMAT;
+    padata->diopts->posix_compat = TRUE;
+    padata->diopts->csv_output = FALSE;
+  } else if (strcmp (arg, "--si") == 0) {
+    padata->diopts->baseDispSize = DI_VAL_1000;
+    padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
+    strcpy (padata->dbsstr, "H");
+  } else if (strcmp (arg, "--version") == 0) {
+    printf (DI_GT("di version %s  Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
+    exit (0);
+  } else {
+    fprintf (stderr, "di_panic: bad option setup\n");
+  }
 
-    if (diopts->csv_output) {
-      diopts->flags &= (__ulong) (~ DI_F_TOTAL);
+  return;
+}
+
+static void
+#if _proto_stdc
+processOptionsVal (const char *arg, char *valptr, char *value)
+#else
+processOptionsVal (arg, valptr, value)
+    const char  *arg;
+    char        *valptr;
+    char        *value;
+#endif
+{
+  struct pa_tmp     *padata;
+
+  padata = (struct pa_tmp *) valptr;
+
+  if (strcmp (arg, "-B") == 0) {
+    if (isdigit ((int) (*value)))
+    {
+      padata->diopts->baseDispSize = atof (value);
+      padata->diopts->baseDispIdx = DI_DISP_1000_IDX; /* unknown, really */
+      if (padata->diopts->baseDispSize == DI_VAL_1024)
+      {
+        padata->diopts->baseDispIdx = DI_DISP_1024_IDX;
+      }
     }
+    else if (strcmp (value, "k") == 0)
+    {
+      padata->diopts->baseDispSize = DI_VAL_1024;
+      padata->diopts->baseDispIdx = DI_DISP_1024_IDX;
+    }
+    else if (strcmp (value, "d") == 0 ||
+        strcmp (value, "si") == 0)
+    {
+      padata->diopts->baseDispSize = DI_VAL_1000;
+      padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
+    }
+  } else if (strcmp (arg, "-I") == 0) {
+    parseList (&padata->diData->includeList, value);
+  } else if (strcmp (arg, "-s") == 0) {
+    strncpy (padata->diopts->sortType, value,
+        sizeof (padata->diopts->sortType));
+      /* for backwards compatibility                       */
+      /* reverse by itself - change to reverse mount point */
+    if (strcmp (padata->diopts->sortType, "r") == 0)
+    {
+        strcpy (padata->diopts->sortType, "rm");
+    }
+        /* add some sense to the sort order */
+    if (strcmp (padata->diopts->sortType, "t") == 0)
+    {
+        strcpy (padata->diopts->sortType, "tm");
+    }
+  } else if (strcmp (arg, "-x") == 0) {
+    parseList (&padata->diData->ignoreList, value);
+  } else {
+    fprintf (stderr, "di_panic: bad option setup\n");
+  }
+
+  return;
+}
+
+static int
+#if _proto_stdc
+processArgs (int argc,
+             const char * const argv [],
+             diData_t *diData,
+             char *dbsstr,
+             Size_t dbsstr_sz)
+#else
+processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
+    int             argc;
+    const char      * const argv [];
+    diData_t        *diData;
+    char            *dbsstr;
+    Size_t          dbsstr_sz;
+#endif
+{
+  int         optidx;
+  diOptions_t *diopts;
+  diOutput_t  *diout;
+  struct pa_tmp padata;
+
+  diopts = &diData->options;
+  diout = &diData->output;
+
+  padata.diData = diData;
+  padata.diopts = diopts;
+  padata.diout = diout;
+  padata.dbsstr = dbsstr;
+
+  getoptn_opt_t opts[] = {
+    { "-A", GETOPTN_STRPTR, &diopts->formatString, 0, DI_ALL_FORMAT },
+    { "-a", GETOPTN_FUNC_BOOL, &padata, 0, processOptions },
+    { "--all", GETOPTN_ALIAS, "-a", 0, NULL },
+    { "-B", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
+    { "-b", GETOPTN_ALIAS, "-B", 0, NULL },
+    { "--block-size", GETOPTN_ALIAS, "-B", 0, NULL },
+    { "-c", GETOPTN_BOOL, &diopts->csv_output,
+      sizeof(diopts->csv_output), NULL },
+    { "--csv-output", GETOPTN_ALIAS, "-c", 0, NULL },
+    { "-d", GETOPTN_STRING, dbsstr, dbsstr_sz, NULL },
+    { "--display-size", GETOPTN_ALIAS, "-d", 0, NULL },
+    { "-f", GETOPTN_STRPTR, &diopts->formatString, 0, NULL },
+    { "--format-string", GETOPTN_ALIAS, "-f", 0, NULL },
+    { "-F", GETOPTN_ALIAS, "-I", 0, NULL },
+    { "-g", GETOPTN_STRING, dbsstr, dbsstr_sz, "g" },
+    { "-h", GETOPTN_STRING, dbsstr, dbsstr_sz, "h" },
+    { "-H", GETOPTN_STRING, dbsstr, dbsstr_sz, "H" },
+    { "--help", GETOPTN_FUNC_BOOL, NULL, 0, processOptions },
+    { "--human-readable", GETOPTN_ALIAS, "-H", 0, NULL },
+    { "-?", GETOPTN_FUNC_BOOL, NULL, 0, processOptions },
+    { "-i", GETOPTN_ALIAS, "-x", 0, NULL },
+    { "-I", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
+    { "--inodes", GETOPTN_IGNORE, NULL, 0, NULL },
+    { "-k", GETOPTN_STRING, dbsstr, dbsstr_sz, "k" },
+    { "-l", GETOPTN_BOOL, &diopts->localOnly,
+      sizeof (diopts->localOnly), NULL },
+    { "--local", GETOPTN_ALIAS, "-l", 0, NULL },
+    { "-L", GETOPTN_BOOL, &diopts->excludeLoopback,
+      sizeof (diopts->excludeLoopback), NULL },
+    { "-m", GETOPTN_STRING, dbsstr, dbsstr_sz, "m" },
+    { "-n", GETOPTN_BOOL, &diopts->printHeader,
+      sizeof (diopts->printHeader), NULL },
+    { "--no-sync", GETOPTN_IGNORE, NULL, 0, NULL },
+    { "-P", GETOPTN_FUNC_BOOL, &padata, 0, processOptions },
+    { "--portability", GETOPTN_ALIAS, "-P", 0, NULL },
+    { "--print-type", GETOPTN_IGNORE, NULL, 0, NULL },
+    { "-q", GETOPTN_BOOL, &diopts->quota_check,
+      sizeof (diopts->quota_check), NULL },
+    { "-s", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
+    { "--si", GETOPTN_FUNC_BOOL, &padata, 0, processOptions },
+    { "--sync", GETOPTN_IGNORE, NULL, 0, NULL },
+    { "-t", GETOPTN_BOOL, &diopts->printTotals,
+      sizeof (diopts->printTotals), NULL },
+    { "--total", GETOPTN_ALIAS, "-t", 0, NULL },
+    { "--type", GETOPTN_ALIAS, "-F", 0, NULL },
+    { "-v", GETOPTN_IGNORE,     NULL, 0, NULL },
+    { "--version", GETOPTN_FUNC_BOOL, NULL, 0, processOptions },
+    { "-w", GETOPTN_SIZET, &diout->width,
+      sizeof (diout->width), NULL },
+    { "-W", GETOPTN_SIZET, &diout->inodeWidth,
+      sizeof (diout->inodeWidth), NULL },
+    { "-x", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
+    { "--exclude-type", GETOPTN_ALIAS, "-x", 0, NULL },
+    { "-X", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
+    { "-z", GETOPTN_STRING, &diData->zoneInfo.zoneDisplay,
+      sizeof (diData->zoneInfo.zoneDisplay), NULL },
+    { "-Z", GETOPTN_STRING, &diData->zoneInfo.zoneDisplay,
+      sizeof (diData->zoneInfo.zoneDisplay), "all" }
+  };
+
+  optidx = getoptn (GETOPTN_LEGACY, argc, argv,
+       sizeof (opts) / sizeof (getoptn_opt_t), opts);
+
+  if (diopts->csv_output) {
+    diopts->printTotals = FALSE;
+  }
+
+  return optidx;
 }
 
 static void
