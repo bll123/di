@@ -2,7 +2,7 @@
 
 . $_MKCONFIG_DIR/testfuncs.sh
 
-maindodisplay $1 'getoptn works'
+maindodisplay $1 'getoptn'
 maindoquery $1 $_MKC_ONCE
 
 getsname $0
@@ -17,8 +17,7 @@ make getoptn_test.exe > ${_MKCONFIG_TSTRUNTMPDIR}/make.log 2>&1
 rc=$?
 if [ $rc != 0 ]; then grc=$rc; fi
 if [ $grc -eq 0 ]; then
-  # it would be preferable to have the interlaced output...
-  ./getoptn_test.exe 2>&1 | sort > ${_MKCONFIG_TSTRUNTMPDIR}/getoptn_test.out
+  ./getoptn_test.exe > ${_MKCONFIG_TSTRUNTMPDIR}/getoptn_test.out 2>&1
   chkdiff ${_MKCONFIG_RUNTESTDIR}/getoptn.txt \
       ${_MKCONFIG_TSTRUNTMPDIR}/getoptn_test.out
 fi
