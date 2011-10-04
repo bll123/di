@@ -268,7 +268,7 @@ OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		diquota$(OBJ_EXT) \
 		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
-		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getopt$(OBJ_EXT)
+		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getoptn$(OBJ_EXT)
 
 $(PROG)$(EXE_EXT):	$(MKC_REQLIB) $(OBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
@@ -290,7 +290,7 @@ dmc-$(PROG)$(EXE_EXT):
 ###
 # objects
 
-di$(OBJ_EXT):		di.c config.h di.h version.h
+di$(OBJ_EXT):		di.c config.h di.h getoptn.h version.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(DI_CPPFLAGS) di.c
 
 digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
@@ -305,8 +305,8 @@ digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
 diquota$(OBJ_EXT):	diquota.c config.h di.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) diquota.c
 
-getopt$(OBJ_EXT):	getopt.c config.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) getopt.c
+getoptn$(OBJ_EXT):	getoptn.c config.h getoptn.h
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) getoptn.c
 
 realloc$(OBJ_EXT):	realloc.c config.h di.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) realloc.c
