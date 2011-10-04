@@ -137,7 +137,7 @@ static const char *
 getoption_value (getoptn_info_t *info, getoptn_opt_t *opt)
 #else
 getoption_value (info, opt)
-    getoptn_info_t      info;
+    getoptn_info_t      *info;
     getoptn_opt_t       *opt;
 #endif
 {
@@ -146,7 +146,7 @@ getoption_value (info, opt)
   ptr = (char *) NULL;
   if (opt->option_type != GETOPTN_FUNC_VALUE &&
       opt->value2 != (void *) NULL) {
-    ptr = opt->value2;
+    ptr = (const char *) opt->value2;
     return ptr;
   }
 
@@ -419,9 +419,9 @@ main (int argc, const char * const argv[])
     { "--c", GETOPTN_ALIAS,      "-c", 0, NULL },
     { "-bc", GETOPTN_BOOL,       &k, sizeof(k), NULL },
     { "-d",  GETOPTN_DOUBLE,     &d, sizeof(d), NULL },
-    { "-f1",  GETOPTN_INT,        &i, sizeof(l), NULL },
-    { "-f2",  GETOPTN_LONG,        &i, sizeof(i), NULL },
-    { "-f3",  GETOPTN_LONG,        &l, sizeof(i), NULL },
+    { "-f1",  GETOPTN_INT,       &i, 8, NULL },
+    { "-f2",  GETOPTN_LONG,      &i, 2, NULL },
+    { "-f3",  GETOPTN_LONG,      &l, 12, NULL },
     { "--i", GETOPTN_INT,        &i, sizeof(i), NULL },
     { "-i",  GETOPTN_INT,        &i, sizeof(i), NULL },
     { "-i15",GETOPTN_INT,        &j, sizeof(j), NULL },
@@ -440,7 +440,7 @@ main (int argc, const char * const argv[])
 
   /* test 1 */
   ++testno;
-  *s = '\0';
+  memset (s, '\0', sizeof (s));
   ac = 2;
   sprintf (tmp, "test: %d", testno);
   av[0] = tmp;
@@ -662,7 +662,7 @@ main (int argc, const char * const argv[])
 
   /* test 15 */
   ++testno;
-  *s = '\0';
+  memset (s, '\0', sizeof (s));
   ac = 2;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -692,7 +692,7 @@ main (int argc, const char * const argv[])
 
   /* test 17 */
   ++testno;
-  *s = '\0';
+  memset (s, '\0', sizeof (s));
   i = 0;
   ac = 2;
   sprintf (tmp, "test %d", testno);
@@ -708,7 +708,7 @@ main (int argc, const char * const argv[])
 
   /* test 18 */
   ++testno;
-  *s = '\0';
+  memset (s, '\0', sizeof (s));
   ac = 2;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -723,7 +723,7 @@ main (int argc, const char * const argv[])
 
   /* test 19 */
   ++testno;
-  *s = '\0';
+  memset (s, '\0', sizeof (s));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -815,7 +815,7 @@ main (int argc, const char * const argv[])
 
   /* test 26 */
   ++testno;
-  *s = '\0';
+  memset (s, '\0', sizeof (s));
   i = 0;
   ac = 2;
   sprintf (tmp, "test %d", testno);
@@ -960,7 +960,7 @@ main (int argc, const char * const argv[])
   optidx = getoptn (GETOPTN_MODERN, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts);
   if (i != 0 || l != 0 || optidx != 2) {
-    fprintf (stderr, "fail test %d\n", testno);
+    fprintf (stderr, "fail test %d; %d %ld %d\n", testno, i, l, optidx);
     grc = 1;
   }
 
@@ -979,7 +979,7 @@ main (int argc, const char * const argv[])
   optidx = getoptn (GETOPTN_MODERN, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts);
   if (i != 0 || l != 0 || optidx != 2) {
-    fprintf (stderr, "fail test %d\n", testno);
+    fprintf (stderr, "fail test %d; %d %ld %d\n", testno, i, l, optidx);
     grc = 1;
   }
 
@@ -998,7 +998,7 @@ main (int argc, const char * const argv[])
   optidx = getoptn (GETOPTN_MODERN, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts);
   if (i != 0 || l != 0 || optidx != 2) {
-    fprintf (stderr, "fail test %d\n", testno);
+    fprintf (stderr, "fail test %d; %d %ld %d\n", testno, i, l, optidx);
     grc = 1;
   }
 
@@ -1046,7 +1046,7 @@ main (int argc, const char * const argv[])
   i = 0;
   j = 0;
   k = 0;
-  *s = '\0';
+  memset (s, '\0', sizeof (s));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -1065,7 +1065,7 @@ main (int argc, const char * const argv[])
   i = 0;
   j = 0;
   k = 0;
-  *s = '\0';
+  memset (s, '\0', sizeof (s));
   ac = 5;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -1086,7 +1086,7 @@ main (int argc, const char * const argv[])
   i = 0;
   j = 0;
   k = 0;
-  *s = '\0';
+  memset (s, '\0', sizeof (s));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -1102,7 +1102,7 @@ main (int argc, const char * const argv[])
 
   /* test 41 */
   ++testno;
-  *s2 = '\0';
+  memset (s2, '\0', sizeof (s2));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -1118,7 +1118,7 @@ main (int argc, const char * const argv[])
 
   /* test 42 - short string */
   ++testno;
-  *s2 = '\0';
+  memset (s2, '\0', sizeof (s2));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -1134,7 +1134,7 @@ main (int argc, const char * const argv[])
 
   /* test 43 - short string */
   ++testno;
-  *s2 = '\0';
+  memset (s2, '\0', sizeof (s2));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -1150,7 +1150,7 @@ main (int argc, const char * const argv[])
 
   /* test 44 - short string */
   ++testno;
-  *s2 = '\0';
+  memset (s2, '\0', sizeof (s2));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -1166,7 +1166,7 @@ main (int argc, const char * const argv[])
 
   /* test 45 - null ptr */
   ++testno;
-  *s2 = '\0';
+  memset (s2, '\0', sizeof (s2));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -1183,7 +1183,7 @@ main (int argc, const char * const argv[])
 
   /* test 46 - null ptr */
   ++testno;
-  *s2 = '\0';
+  memset (s2, '\0', sizeof (s2));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
@@ -1200,7 +1200,7 @@ main (int argc, const char * const argv[])
 
   /* test 47 - null ptr */
   ++testno;
-  *s2 = '\0';
+  memset (s2, '\0', sizeof (s2));
   ac = 3;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
