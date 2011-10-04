@@ -22,7 +22,6 @@ hdr     dvsdef.h
 hdr     errno.h
 hdr     fcntl.h
 hdr     fshelp.h
-hdr     getopt.h
 hdr     gui/window.h
 hdr     kernel/fs_info.h
 hdr     limits.h
@@ -112,7 +111,6 @@ lib     getmnt
 # -lsun, -lseq are untested (old irix, sequent)
 lib     getmntent -lgen, -lsun, -lseq
 lib     getmntinfo
-lib     getopt
 lib     gettext -lintl, -lintl -liconv
 lib     getvfsstat
 lib     getzoneid
@@ -170,13 +168,10 @@ args noconst statfs
 class   os::Volumes -lsyllable
 npt     getenv
 npt     getmnt
-npt     getopt
 npt     mntctl
 npt     statfs _lib_statfs
 dcl     int  errno
 dcl     ptr  mnt_names
-dcl     int  optind
-dcl     ptr  optarg
 member  struct dqblk dqb_curspace
 member  struct dqblk dqb_curblocks
 member  struct dqblk dqb_fhardlimit
@@ -200,12 +195,6 @@ size    long double
 # mntctl() is not declared
 if AIX_mntctl _sys_vmount && _define_MCTL_QUERY
   set _lib_mntctl 1
-endif
-
-# workaround for old cygwin
-# if we have a getopt header, there's probably a getopt lib function
-if chkgetopt _hdr_getopt && ! _lib_getopt
-  set _lib_getopt 1
 endif
 
 if stdquotas _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
