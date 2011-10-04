@@ -204,13 +204,13 @@ diquota (diqinfo)
   {
     int             fd;
     struct quotctl  qop;
-    char            tname [DI_NAME_LEN];
+    char            tname [DI_NAME_LEN + 1];
 
     qop.op = Q_GETQUOTA;
     qop.uid = diqinfo->uid;
     qop.addr = (caddr_t) qiptr;
-    strcpy (tname, diqinfo->name);
-    strcat (tname, "/quotas");
+    strncpy (tname, diqinfo->name, DI_NAME_LEN);
+    strncat (tname, "/quotas", DI_NAME_LEN);
     fd = open (tname, O_RDONLY | O_NOCTTY);
     if (fd >= 0) {
       rc = ioctl (fd, Q_QUOTACTL, &qop);
@@ -339,7 +339,7 @@ diquota_nfs (diqinfo)
     CLIENT                  *rqclnt;
     enum clnt_stat          clnt_stat;
     struct timeval          timeout;
-    char                    host [DI_SPEC_NAME_LEN];
+    char                    host [DI_SPEC_NAME_LEN + 1];
     char                    *ptr;
     char                    *path;
     struct getquota_args    args;
@@ -355,7 +355,7 @@ diquota_nfs (diqinfo)
     timeout.tv_sec = 2;
     timeout.tv_usec = 0;
 
-    strcpy (host, diqinfo->special);
+    strncpy (host, diqinfo->special, DI_SPEC_NAME_LEN);
     path = host;
     ptr = strchr (host, ':');
     if (ptr != (char *) NULL) {

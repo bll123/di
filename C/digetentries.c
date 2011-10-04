@@ -475,7 +475,7 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
 {
     diDiskInfo_t    *diptr;
     int             idx;
-    char            path [MAXPATHLEN];
+    char            path [MAXPATHLEN + 1];
     int             len;   /* current length of path */
     DIR             *dirp;
     struct dirent   *dent;
@@ -493,7 +493,7 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
       return 0;
     }
 
-    strcpy (path, ipath);
+    strncpy (path, ipath, MAXPATHLEN);
     len = strlen (path);
 
     if (!(dirp = opendir(path))) {
@@ -513,7 +513,7 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
       }
 
       path[len] = '/';
-      strcpy (&path[len+1], dent->d_name);
+      strncpy (&path[len+1], dent->d_name, MAXPATHLEN - len - 1);
       if (debug > 4) { printf ("check: %s\n", path); }
 
       memset(&statinfo, 0, sizeof(statinfo));
@@ -562,7 +562,7 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
       strncpy (diptr->special, tspecial, DI_SPEC_NAME_LEN);
       strncpy (diptr->name, path + 11, DI_NAME_LEN);
       if (*diptr->name == '\0') {
-        strcpy (diptr->name, "/");
+        strncpy (diptr->name, "/", DI_NAME_LEN);
       }
       if (debug > 4) { printf ("found: %s %s\n", diptr->special, diptr->name); }
     }
@@ -1589,11 +1589,11 @@ di_getDiskEntries (diskInfo, diCount)
         {
           DWORD br;
           BOOL bSuccess;
-          char handleName [MSDOS_BUFFER_SIZE];
+          char handleName [MSDOS_BUFFER_SIZE + 1];
 
           diptr->printFlag = diskflag;
           bSuccess = 1;
-          strcpy (handleName, "\\\\.\\");
+          strncpy (handleName, "\\\\.\\", MSDOS_BUFFER_SIZE);
           strncat (handleName, p, MSDOS_BUFFER_SIZE);
           handleName[strlen(handleName)-1] = '\0';
           HANDLE hDevice = CreateFile (handleName,
