@@ -36,14 +36,11 @@ TEST = test
 #
 prefix = /usr/local
 LOCALEDIR = $(prefix)/share/locale
-PROG = di
-MPROG = mi
 
 ###
 # additional flags/libraries
 #
-DI_CPPFLAGS = -DPROG=\"$(PROG)\" -DMPROG=\"$(MPROG)\" \
-	-DDI_LOCALE_DIR=\"$(LOCALEDIR)\"
+DI_CPPFLAGS = -DDI_LOCALE_DIR=\"$(LOCALEDIR)\"
 
 ###
 # mkconfig variables
@@ -119,7 +116,7 @@ windows-mingw:
 		EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
-		LDFLAGS="-g -O2" mingw-$(PROG).exe
+		LDFLAGS="-g -O2" mingw-di.exe
 
 .PHONY: windows-dmc
 windows-dmc:
@@ -141,7 +138,7 @@ os2-gcc:
 	$(MAKE) MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
-		LDFLAGS="-g -O2 -Zexe" $(PROG).exe
+		LDFLAGS="-g -O2 -Zexe" di.exe
 
 .PHONY: bsd43-cc
 bsd43-cc:
@@ -199,11 +196,12 @@ ultrix-gcc:
 #   ../dioptions.dat, tests.done, test_di, di.env
 .PHONY: clean
 clean:
-	@-$(RM) -rf $(PROG) $(MPROG) \
-		mingw-$(PROG).exe dmc-$(PROG).exe $(PROG).exe $(MPROG).exe \
+	@-$(RM) -rf di mi \
+		di.exe mingw-di.exe dmc-di.exe mi.exe \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig tests.d/chksh* \
 		mkconfig.cache mkconfig_*.vars \
+        getoptn_test* \
 		>/dev/null 2>&1
 
 # leaves:
@@ -235,7 +233,7 @@ install:	di-programs di.env
 # programs
 
 .PHONY: di-programs
-di-programs:	$(PROG)$(EXE_EXT)
+di-programs:	di$(EXE_EXT)
 
 ###
 # configuration file
@@ -266,25 +264,25 @@ $(MKC_REQLIB):	di.env config.h
 
 OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		diquota$(OBJ_EXT) \
+		diquota$(OBJ_EXT) getoptn$(OBJ_EXT) \
 		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
-		strstr$(OBJ_EXT) trimchar$(OBJ_EXT) getoptn$(OBJ_EXT)
+		strstr$(OBJ_EXT) trimchar$(OBJ_EXT)
 
-$(PROG)$(EXE_EXT):	$(MKC_REQLIB) $(OBJECTS)
+di$(EXE_EXT):	$(MKC_REQLIB) $(OBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
-	$(CC) -o $(PROG)$(EXE_EXT) \
+	$(CC) -o di$(EXE_EXT) \
 		$(LDFLAGS) $(OBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_REQLIB)`
 
-mingw-$(PROG)$(EXE_EXT):	$(OBJECTS)
-	$(CC) -o mingw-$(PROG)$(EXE_EXT) \
+mingw-di$(EXE_EXT):	$(OBJECTS)
+	$(CC) -o mingw-di$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS)
 
 .PHONY: dmc-target
-dmc-target:	$(OBJECTS) dmc-$(PROG)$(EXE_EXT)
+dmc-target:	$(OBJECTS) dmc-di$(EXE_EXT)
 
-dmc-$(PROG)$(EXE_EXT):
-	$(CC) -o$(PROG)$(EXE_EXT) \
+dmc-di$(EXE_EXT):
+	$(CC) -odmc-di$(EXE_EXT) \
 		$(LDFLAGS) $(OBJECTS) $(LIBS)
 
 ###
@@ -358,4 +356,10 @@ rtest-env:
 	@echo "$(OBJ_EXT)"
 	@echo "$(EXE_EXT)"
 	@echo "$(XMSGFMT)"
+
+getoptn_test$(OBJ_EXT):	getoptn.c config.h getoptn.h
+	$(CC) -o getoptn_test$(OBJ_EXT) -DTEST_GETOPTN=1 -c getoptn.c
+
+getoptn_test.exe:	config.h getoptn_test$(OBJ_EXT)
+	$(CC) -o getoptn_test.exe $(LDFLAGS) getoptn_test$(OBJ_EXT)
 
