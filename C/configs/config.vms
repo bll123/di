@@ -1,9 +1,6 @@
 #ifndef __INC_CONFIG_H
 #define __INC_CONFIG_H 1
 
-#define MPROG "mi"
-#define PROG "di"
-
 #define _hdr_stdio 1
 #define _hdr_stdlib 1
 #define _sys_types 1
@@ -21,7 +18,6 @@
 #define _hdr_errno 1
 #define _hdr_fcntl 1
 #define _hdr_fshelp 0
-#define _hdr_getopt 0
 #define _hdr_gui_window 0
 #define _hdr_kernel_fs_info 0
 #define _hdr_limits 1
@@ -104,7 +100,6 @@
 #define _lib_getmnt 0
 #define _lib_getmntent 0
 #define _lib_getmntinfo 0
-#define _lib_getopt 1
 #define _lib_gettext 1
 #define _lib_getvfsstat 0
 #define _lib_getzoneid 0
@@ -147,12 +142,9 @@
 #define _class_os__Volumes 0
 #define _npt_getenv 0
 #define _npt_getmnt 1
-#define _npt_getopt 0
 #define _npt_mntctl 1
 #define _npt_statfs 0
 #define _dcl_errno 1
-#define _dcl_optind 1
-#define _dcl_optarg 1
 #define _dcl_mnt_names 0
 #define _mem_struct_dqblk_dqb_curspace 0
 #define _mem_struct_dqblk_dqb_curblocks 0
