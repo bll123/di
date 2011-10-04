@@ -18,7 +18,8 @@ C/diquota.c               di source
 C/features/               di configuration
 C/features/env.dat          environment configuration
 C/features/mkconfig.dat     mkconfig configuration
-C/getopt.c                getopt source (from Cnews)
+C/getoptn.h               di source
+C/getoptn.c               di source
 C/Makefile                C Makefile
 C/realloc.c               di source
 C/strdup.c                di source
@@ -34,6 +35,8 @@ C/tests.d/dinls.sh
 C/tests.d/disort.sh
 C/tests.d/ditot.sh
 C/tests.d/env.sh
+C/tests.d/getoptn.sh
+C/tests.d/getoptn.txt
 C/tests.d/rpmbuild.sh
 C/tests.d/test_order
 C/trimchar.c              di source
