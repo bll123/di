@@ -37,12 +37,12 @@
 #define GETOPTN_LONG        2
 #define GETOPTN_DOUBLE      3
 #define GETOPTN_STRING      4
-#define GETOPTN_DFLT        5
+#define GETOPTN_STRPTR      5
 #define GETOPTN_FUNC_BOOL   6
 #define GETOPTN_FUNC_VALUE  7
 #define GETOPTN_ALIAS       8
 #define GETOPTN_IGNORE      9
-#define GETOPTN_STRPTR      10
+#define GETOPTN_SIZET      10
 
 typedef struct {
   const char    *option;
