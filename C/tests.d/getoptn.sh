@@ -10,10 +10,10 @@ dosetup $@
 
 cd $_MKCONFIG_RUNTOPDIR
 
-set -x
-
 make realclean
-make getoptn_test.exe > ${_MKCONFIG_TSTRUNTMPDIR}/make.log 2>&1
+make -e di.env
+. ./di.env
+make -e getoptn_test.exe > ${_MKCONFIG_TSTRUNTMPDIR}/make.log 2>&1
 rc=$?
 if [ $rc != 0 ]; then grc=$rc; fi
 if [ $grc -eq 0 ]; then
