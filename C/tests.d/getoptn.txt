@@ -1,8 +1,14 @@
 ** expect argument missing
-** expect invalid size
-** expect invalid size
-** expect invalid size
 test 32: -i argument missing
-test 33: invalid size
-test 34: invalid size
-test 35: invalid size
+** expect invalid size
+test 33: int: invalid size (line 7)
+** expect invalid size
+test 34: long: invalid size (line 8)
+** expect invalid size
+test 35: long: invalid size (line 9)
+** expect invalid pointer
+test 45: string: invalid pointer (line 21)
+** expect invalid pointer
+test 46: func_bool: invalid function ptr (line 22)
+** expect invalid pointer
+test 47: func_val: invalid function ptr (line 23)
