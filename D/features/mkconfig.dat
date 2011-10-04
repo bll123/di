@@ -173,7 +173,6 @@ cdcl authunix_create_default
 cmacro auth_destroy rpc/auth.h void 'AUTH *'
 
 # from rpc/clnt.h
-cdefine int RPC_SUCCESS
 cmacro clnt_call rpc/clnt.h clnt_stat 'CLIENT *' u_long xdrproc_t caddr_t xdrproc_t caddr_t 'struct timeval'
 cmacro clnt_destroy rpc/clnt.h void 'CLIENT *'
 clib    clnt_create
@@ -275,6 +274,13 @@ if stdquotas _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
   setint _has_std_quotas 1
 else
   setint _has_std_quotas 0
+endif
+
+if stdnfsquotas _hdr_rpc_rpc && _hdr_rpcsvc_rquota && _clib_xdr_int && \
+    _cmemberxdr_rquota_rq_bhardlimit && _cmemberxdr_getquota_args_gqa_uid
+  setint _has_std_nfs_quotas 1
+else
+  setint _has_std_nfs_quotas 0
 endif
 
 include
