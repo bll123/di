@@ -252,8 +252,8 @@ typedef struct
 
 typedef struct {
     zoneid_t    zoneid;
-    char        name [ZONENAME_MAX];
-    char        rootpath [MAXPATHLEN];
+    char        name [ZONENAME_MAX + 1];
+    char        rootpath [MAXPATHLEN + 1];
     Size_t      rootpathlen;
 } zoneSummary_t;
 
@@ -262,7 +262,7 @@ typedef struct {
     zoneid_t        myzoneid;
     zoneSummary_t   *zones;
     Uint_t          zoneCount;
-    char            zoneDisplay [MAXPATHLEN];
+    char            zoneDisplay [MAXPATHLEN + 1];
     int             globalIdx;
 } zoneInfo_t;
 
@@ -442,7 +442,7 @@ main (argc, argv)
 #if ! _lib_sys_dollar_device_scan  /* not VMS */
     diopts->excludeLoopback = TRUE;
 #endif
-    strcpy (diopts->sortType, "m"); /* default - sort by mount point */
+    strncpy (diopts->sortType, "m", DI_SORT_MAX); /* default - by mount point*/
     diopts->posix_compat = FALSE;
     diopts->baseDispSize = DI_VAL_1024;
     diopts->baseDispIdx = DI_DISP_1024_IDX;
@@ -467,12 +467,12 @@ main (argc, argv)
     if ((localeptr = getenv ("DI_LOCALE_DIR")) == (char *) NULL) {
       localeptr = DI_LOCALE_DIR;
     }
-    ptr = bindtextdomain (PROG, localeptr);
-    ptr = textdomain (PROG);
+    ptr = bindtextdomain ("di", localeptr);
+    ptr = textdomain ("di");
 #endif
 
     argvptr = argv [0] + strlen (argv [0]) - 2;
-    if (memcmp (argvptr, MPROG, (Size_t) 2) == 0)
+    if (memcmp (argvptr, "mi", (Size_t) 2) == 0)
     {
         diopts->formatString = DI_DEF_MOUNT_FORMAT;
     }
@@ -532,11 +532,11 @@ main (argc, argv)
                 nargv[nargc++] = tptr;
                 tptr = strtok ((char *) NULL, DI_ARGV_SEP);
             }
-            processArgs (nargc, nargv, &diData, dbsstr, sizeof (dbsstr));
+            processArgs (nargc, nargv, &diData, dbsstr, sizeof (dbsstr) - 1);
         }
     }
 
-    optidx = processArgs (argc, argv, &diData, dbsstr, sizeof (dbsstr));
+    optidx = processArgs (argc, argv, &diData, dbsstr, sizeof (dbsstr) - 1);
     if (debug > 0 && (ptr = getenv ("DI_ARGS")) != (char *) NULL)
     {
         printf ("# DI_ARGS:%s\n", ptr);
@@ -593,7 +593,7 @@ main (argc, argv)
             if (len >= 0)
             {
                 zi->zones[i].rootpathlen = (Size_t) len;
-                strncat (zi->zones[i].rootpath, "/", MAXPATHLEN - 1);
+                strncat (zi->zones[i].rootpath, "/", MAXPATHLEN);
                 if (zi->zones[i].zoneid == 0)
                 {
                     zi->globalIdx = i;
@@ -604,7 +604,7 @@ main (argc, argv)
                 if (*zi->zoneDisplay == '\0' &&
                     zi->myzoneid == zi->zones[i].zoneid)
                 {
-                    strncpy (zi->zoneDisplay, zi->zones[i].name, ZONENAME_MAX);
+                    strncpy (zi->zoneDisplay, zi->zones[i].name, MAXPATHLEN);
                 }
                 if (debug > 4)
                 {
@@ -857,10 +857,10 @@ printDiskInfo (diData)
           char tempSortType [DI_SORT_MAX + 1];
               /* in order to find the main pool entries,              */
               /* we must have the array sorted by special device name */
-          strcpy (tempSortType, diopts->sortType);
-          strcpy (diopts->sortType, "s");
+          strncpy (tempSortType, diopts->sortType, DI_SORT_MAX);
+          strncpy (diopts->sortType, "s", DI_SORT_MAX);
           sortArray (diopts, diskInfo, diData->count, DI_TOT_SORT_IDX);
-          strcpy (diopts->sortType, tempSortType);
+          strncpy (diopts->sortType, tempSortType, DI_SORT_MAX);
           diData->totsorted = TRUE;
         }
 
@@ -1797,10 +1797,10 @@ checkFileInfo (diData, optidx, argc, argv)
     {
       char tempSortType [DI_SORT_MAX + 1];
 
-      strcpy (tempSortType, diopts->sortType);
-      strcpy (diopts->sortType, "s");
+      strncpy (tempSortType, diopts->sortType, DI_SORT_MAX);
+      strncpy (diopts->sortType, "s", DI_SORT_MAX);
       sortArray (diopts, diskInfo, diData->count, DI_TOT_SORT_IDX);
-      strcpy (diopts->sortType, tempSortType);
+      strncpy (diopts->sortType, tempSortType, DI_SORT_MAX);
       diData->totsorted = TRUE;
     }
 
@@ -2657,6 +2657,7 @@ struct pa_tmp {
   diOptions_t     *diopts;
   diOutput_t      *diout;
   char            *dbsstr;
+  Size_t          dbsstr_sz;
 };
 
 static void
@@ -2673,14 +2674,14 @@ processOptions (arg, valptr)
   padata = (struct pa_tmp *) valptr;
   if (strcmp (arg, "-a") == 0) {
     padata->diopts->printAllColumns = TRUE;
-    strcpy (padata->diData->zoneInfo.zoneDisplay, "all");
+    strncpy (padata->diData->zoneInfo.zoneDisplay, "all", MAXPATHLEN);
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     usage();
     exit (0);
   } else if (strcmp (arg, "-P") == 0) {
     if (strcmp (padata->dbsstr, "k") != 0) /* don't override -k option */
     {
-      strcpy (padata->dbsstr, "512");
+      strncpy (padata->dbsstr, "512", padata->dbsstr_sz);
     }
     padata->diopts->formatString = DI_POSIX_FORMAT;
     padata->diopts->posix_compat = TRUE;
@@ -2688,7 +2689,7 @@ processOptions (arg, valptr)
   } else if (strcmp (arg, "--si") == 0) {
     padata->diopts->baseDispSize = DI_VAL_1000;
     padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
-    strcpy (padata->dbsstr, "H");
+    strncpy (padata->dbsstr, "H", padata->dbsstr_sz);
   } else if (strcmp (arg, "--version") == 0) {
     printf (DI_GT("di version %s  Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
     exit (0);
@@ -2743,15 +2744,22 @@ processOptionsVal (arg, valptr, value)
       /* reverse by itself - change to reverse mount point */
     if (strcmp (padata->diopts->sortType, "r") == 0)
     {
-        strcpy (padata->diopts->sortType, "rm");
+        strncpy (padata->diopts->sortType, "rm", DI_SORT_MAX);
     }
         /* add some sense to the sort order */
     if (strcmp (padata->diopts->sortType, "t") == 0)
     {
-        strcpy (padata->diopts->sortType, "tm");
+        strncpy (padata->diopts->sortType, "tm", DI_SORT_MAX);
     }
   } else if (strcmp (arg, "-x") == 0) {
     parseList (&padata->diData->ignoreList, value);
+  } else if (strcmp (arg, "-X") == 0) {
+    debug = atoi (value);
+    padata->diopts->printDebugHeader = TRUE;
+    padata->diopts->printTotals = TRUE;
+    padata->diopts->printHeader = TRUE;
+    padata->diout->width = 10;
+    padata->diout->inodeWidth = 10;
   } else {
     fprintf (stderr, "di_panic: bad option setup\n");
   }
@@ -2775,79 +2783,257 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
     Size_t          dbsstr_sz;
 #endif
 {
-  int         optidx;
-  diOptions_t *diopts;
-  diOutput_t  *diout;
+  int           i;
+  int           optidx;
+  diOptions_t   *diopts;
+  diOutput_t    *diout;
   struct pa_tmp padata;
+
+    /* the really old compilers don't have automatic initialization */
+  static getoptn_opt_t opts[] = {
+    { "-A",     GETOPTN_STRPTR,
+        NULL  /*&diopts->formatString*/,
+        0,
+        (void *) DI_ALL_FORMAT },
+    { "-a",     GETOPTN_FUNC_BOOL,
+        NULL  /*&padata*/,
+        0,
+        NULL  /*processOptions*/ },
+    { "--all",  GETOPTN_ALIAS,
+        (void *) "-a",
+        0,
+        NULL },
+    { "-B",     GETOPTN_FUNC_VALUE,
+        NULL  /*&padata*/,
+        0,
+        NULL  /*processOptionsVal*/ },
+    { "-b",     GETOPTN_ALIAS,
+        (void *) "-B",
+        0,
+        NULL },
+    { "--block-size",   GETOPTN_ALIAS,      /* 5 */
+        (void *) "-B",
+        0,
+        NULL },
+    { "-c",     GETOPTN_BOOL,
+        NULL  /*&diopts->csv_output*/,
+        0  /*sizeof(diopts->csv_output)*/,
+        NULL },
+    { "--csv-output", GETOPTN_ALIAS,
+        (void *) "-c",
+        0,
+        NULL },
+    { "-d",     GETOPTN_STRING,
+        NULL  /*dbsstr*/,
+        0  /*dbsstr_sz*/,
+        NULL },
+    { "--display-size",     GETOPTN_ALIAS,
+        (void *) "-d",
+        0,
+        NULL },
+    { "-f",     GETOPTN_STRPTR,             /* 10 */
+        NULL  /*&diopts->formatString*/,
+        0,
+        NULL },
+    { "--format-string",    GETOPTN_ALIAS,
+        (void *) "-f",
+        0,
+        NULL },
+    { "-F",     GETOPTN_ALIAS,
+        (void *) "-I",
+        0,
+        NULL },
+    { "-g",     GETOPTN_STRING,
+        NULL  /*dbsstr*/,
+        0  /*dbsstr_sz*/,
+        (void *) "g" },
+    { "-h",     GETOPTN_STRING,
+        NULL  /*dbsstr*/,
+        0  /*dbsstr_sz*/,
+        (void *) "h" },
+    { "-H",     GETOPTN_STRING,             /* 15 */
+        NULL  /*dbsstr*/,
+        0  /*dbsstr_sz*/,
+        (void *) "H" },
+    { "--help", GETOPTN_FUNC_BOOL,
+        NULL,
+        0,
+        NULL  /*processOptions*/ },
+    { "--human-readable",   GETOPTN_ALIAS,
+        (void *) "-H",
+        0,
+        NULL },
+    { "-?",     GETOPTN_FUNC_BOOL,
+        NULL,
+        0,
+        NULL  /*processOptions*/ },
+    { "-i",     GETOPTN_ALIAS,
+        (void *) "-x",
+        0,
+        NULL },
+    { "-I",     GETOPTN_FUNC_VALUE,         /* 20 */
+        NULL  /*&padata*/,
+        0,
+        NULL  /*processOptionsVal*/ },
+    { "--inodes",GETOPTN_IGNORE,
+        NULL,
+        0,
+        NULL },
+    { "-k",     GETOPTN_STRING,
+        NULL  /*dbsstr*/,
+        0  /*dbsstr_sz*/,
+        (void *) "k" },
+    { "-l",     GETOPTN_BOOL,
+        NULL  /*&diopts->localOnly*/,
+        0  /*sizeof (diopts->localOnly)*/,
+        NULL },
+    { "--local",GETOPTN_ALIAS,
+        (void *) "-l",
+        0,
+        NULL },
+    { "-L",     GETOPTN_BOOL,               /* 25 */
+        NULL  /*&diopts->excludeLoopback*/,
+        0  /*sizeof (diopts->excludeLoopback)*/,
+        NULL },
+    { "-m",     GETOPTN_STRING,
+        NULL  /*dbsstr*/,
+        0  /*dbsstr_sz*/,
+        (void *) "m" },
+    { "-n",     GETOPTN_BOOL,
+        NULL  /*&diopts->printHeader*/,
+        0  /*sizeof (diopts->printHeader)*/,
+        NULL },
+    { "--no-sync",  GETOPTN_IGNORE,
+        NULL,
+        0,
+        NULL },
+    { "-P",     GETOPTN_FUNC_BOOL,
+        NULL  /*&padata*/,
+        0,
+        NULL  /*processOptions*/ },
+    { "--portability",  GETOPTN_ALIAS,      /* 30 */
+        (void *) "-P",
+        0,
+        NULL },
+    { "--print-type",   GETOPTN_IGNORE,
+        NULL,
+        0,
+        NULL },
+    { "-q",     GETOPTN_BOOL,
+        NULL  /*&diopts->quota_check*/,
+        0  /*sizeof (diopts->quota_check)*/,
+        NULL },
+    { "-s",     GETOPTN_FUNC_VALUE,
+        NULL  /*&padata*/,
+        0,
+        NULL  /*processOptionsVal*/ },
+    { "--si",   GETOPTN_FUNC_BOOL,
+        NULL  /*&padata*/,
+        0,
+        NULL  /*processOptions*/ },
+    { "--sync", GETOPTN_IGNORE,             /* 35 */
+        NULL,
+        0,
+        NULL },
+    { "-t",     GETOPTN_BOOL,
+        NULL  /*&diopts->printTotals*/,
+        0  /*sizeof (diopts->printTotals)*/,
+        NULL },
+    { "--total",GETOPTN_ALIAS,
+        (void *) "-t",
+        0,
+        NULL },
+    { "--type", GETOPTN_ALIAS,
+        (void *) "-F",
+        0,
+        NULL },
+    { "-v",     GETOPTN_IGNORE,
+        NULL,
+        0,
+        NULL },
+    { "--version", GETOPTN_FUNC_BOOL,       /* 40 */
+        NULL,
+        0,
+        NULL  /*processOptions*/ },
+    { "-w",     GETOPTN_SIZET,
+        NULL  /*&diout->width*/,
+        0  /*sizeof (diout->width)*/,
+        NULL },
+    { "-W",     GETOPTN_SIZET,
+        NULL  /*&diout->inodeWidth*/,
+        0  /*sizeof (diout->inodeWidth)*/,
+        NULL },
+    { "-x",     GETOPTN_FUNC_VALUE,
+        NULL  /*&padata*/,
+        0,
+        NULL  /*processOptionsVal*/ },
+    { "--exclude-type",     GETOPTN_ALIAS,
+        (void *) "-x",
+        0,
+        NULL },
+    { "-X",     GETOPTN_FUNC_VALUE,
+        NULL  /*&padata*/,
+        0,
+        NULL  /*processOptionsVal*/ },
+    { "-z",     GETOPTN_STRING,             /* 46 */
+        NULL  /*&diData->zoneInfo.zoneDisplay*/,
+        0  /*sizeof (diData->zoneInfo.zoneDisplay)*/,
+        NULL },
+    { "-Z",     GETOPTN_STRING,
+        NULL  /*&diData->zoneInfo.zoneDisplay*/,
+        0  /*sizeof (diData->zoneInfo.zoneDisplay)*/,
+        (void *) "all" }
+  };
+  static int dbsids[] = { 8, 13, 14, 15, 22, 26 };
+  static int paidb[] = { 1, 16, 18, 29, 34, 40, };
+  static int paidv[] = { 3, 20, 33, 43, 45 };
 
   diopts = &diData->options;
   diout = &diData->output;
+
+    /* this is seriously gross, but the old compilers don't have    */
+    /* automatic array initialization                               */
+  opts[0].valptr = (void *) &diopts->formatString;   /* -A */
+  opts[6].valptr = (void *) &diopts->csv_output;     /* -c */
+  opts[6].valsiz = sizeof (diopts->csv_output);
+  opts[10].valptr = (void *) &diopts->formatString;  /* -f */
+  opts[23].valptr = (void *) &diopts->localOnly;     /* -l */
+  opts[23].valsiz = sizeof (diopts->localOnly);
+  opts[25].valptr = (void *) &diopts->excludeLoopback; /* -L */
+  opts[25].valsiz = sizeof (diopts->excludeLoopback);
+  opts[27].valptr = (void *) &diopts->printHeader;   /* -n */
+  opts[27].valsiz = sizeof (diopts->printHeader);
+  opts[32].valptr = (void *) &diopts->quota_check;    /* -q */
+  opts[32].valsiz = sizeof (diopts->quota_check);
+  opts[36].valptr = (void *) &diopts->printTotals;    /* -t */
+  opts[36].valsiz = sizeof (diopts->printTotals);
+  opts[41].valptr = (void *) &diout->width;          /* -w */
+  opts[41].valsiz = sizeof (diout->width);
+  opts[42].valptr = (void *) &diout->inodeWidth;     /* -W */
+  opts[42].valsiz = sizeof (diout->inodeWidth);
+  opts[46].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -z */
+  opts[46].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
+  opts[47].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -Z */
+  opts[47].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
+
+  for (i = 0; i < (int) (sizeof (dbsids) / sizeof (int)); ++i) {
+    opts[dbsids[i]].valptr = (void *) dbsstr;
+    opts[dbsids[i]].valsiz = dbsstr_sz;
+  }
+  for (i = 0; i < (int) (sizeof (paidb) / sizeof (int)); ++i) {
+    opts[paidb[i]].valptr = (void *) &padata;
+    opts[paidb[i]].value2 = (void *) processOptions;
+  }
+  for (i = 0; i < (int) (sizeof (paidv) / sizeof (int)); ++i) {
+    opts[paidv[i]].valptr = (void *) &padata;
+    opts[paidv[i]].value2 = (void *) processOptionsVal;
+  }
 
   padata.diData = diData;
   padata.diopts = diopts;
   padata.diout = diout;
   padata.dbsstr = dbsstr;
-
-  getoptn_opt_t opts[] = {
-    { "-A", GETOPTN_STRPTR, &diopts->formatString, 0, DI_ALL_FORMAT },
-    { "-a", GETOPTN_FUNC_BOOL, &padata, 0, processOptions },
-    { "--all", GETOPTN_ALIAS, "-a", 0, NULL },
-    { "-B", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
-    { "-b", GETOPTN_ALIAS, "-B", 0, NULL },
-    { "--block-size", GETOPTN_ALIAS, "-B", 0, NULL },
-    { "-c", GETOPTN_BOOL, &diopts->csv_output,
-      sizeof(diopts->csv_output), NULL },
-    { "--csv-output", GETOPTN_ALIAS, "-c", 0, NULL },
-    { "-d", GETOPTN_STRING, dbsstr, dbsstr_sz, NULL },
-    { "--display-size", GETOPTN_ALIAS, "-d", 0, NULL },
-    { "-f", GETOPTN_STRPTR, &diopts->formatString, 0, NULL },
-    { "--format-string", GETOPTN_ALIAS, "-f", 0, NULL },
-    { "-F", GETOPTN_ALIAS, "-I", 0, NULL },
-    { "-g", GETOPTN_STRING, dbsstr, dbsstr_sz, "g" },
-    { "-h", GETOPTN_STRING, dbsstr, dbsstr_sz, "h" },
-    { "-H", GETOPTN_STRING, dbsstr, dbsstr_sz, "H" },
-    { "--help", GETOPTN_FUNC_BOOL, NULL, 0, processOptions },
-    { "--human-readable", GETOPTN_ALIAS, "-H", 0, NULL },
-    { "-?", GETOPTN_FUNC_BOOL, NULL, 0, processOptions },
-    { "-i", GETOPTN_ALIAS, "-x", 0, NULL },
-    { "-I", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
-    { "--inodes", GETOPTN_IGNORE, NULL, 0, NULL },
-    { "-k", GETOPTN_STRING, dbsstr, dbsstr_sz, "k" },
-    { "-l", GETOPTN_BOOL, &diopts->localOnly,
-      sizeof (diopts->localOnly), NULL },
-    { "--local", GETOPTN_ALIAS, "-l", 0, NULL },
-    { "-L", GETOPTN_BOOL, &diopts->excludeLoopback,
-      sizeof (diopts->excludeLoopback), NULL },
-    { "-m", GETOPTN_STRING, dbsstr, dbsstr_sz, "m" },
-    { "-n", GETOPTN_BOOL, &diopts->printHeader,
-      sizeof (diopts->printHeader), NULL },
-    { "--no-sync", GETOPTN_IGNORE, NULL, 0, NULL },
-    { "-P", GETOPTN_FUNC_BOOL, &padata, 0, processOptions },
-    { "--portability", GETOPTN_ALIAS, "-P", 0, NULL },
-    { "--print-type", GETOPTN_IGNORE, NULL, 0, NULL },
-    { "-q", GETOPTN_BOOL, &diopts->quota_check,
-      sizeof (diopts->quota_check), NULL },
-    { "-s", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
-    { "--si", GETOPTN_FUNC_BOOL, &padata, 0, processOptions },
-    { "--sync", GETOPTN_IGNORE, NULL, 0, NULL },
-    { "-t", GETOPTN_BOOL, &diopts->printTotals,
-      sizeof (diopts->printTotals), NULL },
-    { "--total", GETOPTN_ALIAS, "-t", 0, NULL },
-    { "--type", GETOPTN_ALIAS, "-F", 0, NULL },
-    { "-v", GETOPTN_IGNORE,     NULL, 0, NULL },
-    { "--version", GETOPTN_FUNC_BOOL, NULL, 0, processOptions },
-    { "-w", GETOPTN_SIZET, &diout->width,
-      sizeof (diout->width), NULL },
-    { "-W", GETOPTN_SIZET, &diout->inodeWidth,
-      sizeof (diout->inodeWidth), NULL },
-    { "-x", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
-    { "--exclude-type", GETOPTN_ALIAS, "-x", 0, NULL },
-    { "-X", GETOPTN_FUNC_VALUE, &padata, 0, processOptionsVal },
-    { "-z", GETOPTN_STRING, &diData->zoneInfo.zoneDisplay,
-      sizeof (diData->zoneInfo.zoneDisplay), NULL },
-    { "-Z", GETOPTN_STRING, &diData->zoneInfo.zoneDisplay,
-      sizeof (diData->zoneInfo.zoneDisplay), "all" }
-  };
+  padata.dbsstr_sz = dbsstr_sz;
 
   optidx = getoptn (GETOPTN_LEGACY, argc, argv,
        sizeof (opts) / sizeof (getoptn_opt_t), opts);
