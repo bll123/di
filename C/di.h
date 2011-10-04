@@ -183,12 +183,6 @@ typedef struct
 #if ! _dcl_errno
   extern int errno;
 #endif
-#if ! _dcl_optind
-  extern int optind;
-#endif
-#if ! _dcl_optarg
-  extern char *optarg;
-#endif
 
 /* workaround for AIX - mntctl not declared */
 # if _lib_mntctl && _npt_mntctl
@@ -201,14 +195,6 @@ extern int  di_getDiskEntries       _((diDiskInfo_t **, int *));
 extern void di_getDiskInfo          _((diDiskInfo_t **, int *));
  /* diquota.c */
 extern void diquota                 _((diQuota_t *));
- /* getopt.c */
-# if ! _lib_getopt || _npt_getopt
-#  if ! _lib_getopt
-extern char *optarg;
-extern int optind;
-#  endif
-extern int getopt                   _((int, char * const [], const char *));
-# endif
  /* strdup.c */
 # if ! _lib_strdup
 extern char *strdup                 _((const char *));
