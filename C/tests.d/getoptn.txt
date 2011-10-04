@@ -1,0 +1,8 @@
+** expect argument missing
+** expect invalid size
+** expect invalid size
+** expect invalid size
+test 32: -i argument missing
+test 33: invalid size
+test 34: invalid size
+test 35: invalid size
