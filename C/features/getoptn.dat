@@ -1,0 +1,15 @@
+#
+# $Id$
+# $Source$
+# Copyright 2006-2011 Brad Lanam, Walnut Creek, California USA
+#
+#
+
+loadunit c-main
+
+output  gconfig.h
+
+standard
+
+hdr     math.h
+lib     fabs -lm
