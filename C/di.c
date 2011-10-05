@@ -2944,7 +2944,7 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         0,
         NULL },
     { "--type", GETOPTN_ALIAS,
-        (void *) "-F",
+        (void *) "-I",
         0,
         NULL },
     { "-v",     GETOPTN_IGNORE,
