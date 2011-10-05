@@ -369,6 +369,7 @@ getoptn (style, argc, argv, optcount, opts)
 
 #if TEST_GETOPTN
 
+#include <math.h>
 #include <assert.h>
 
 static void
@@ -435,7 +436,10 @@ main (int argc, const char * const argv[])
     { "-s2",  GETOPTN_STRING,    &s2, sizeof(s2), NULL },
     { "-np1",  GETOPTN_STRING,   NULL, sizeof(s2), NULL },
     { "-np2",  GETOPTN_FUNC_BOOL, NULL, sizeof(s2), NULL },
-    { "-np3",  GETOPTN_FUNC_VALUE, NULL, sizeof(s2), NULL }
+    { "-np3",  GETOPTN_FUNC_VALUE, NULL, sizeof(s2), NULL },
+    { "-z1", GETOPTN_ALIAS,      "--c", 0, NULL },
+    { "-z2", GETOPTN_ALIAS,      "-z1", 0, NULL },
+    { "-z3", GETOPTN_ALIAS,      "-z2", 0, NULL }
   };
 
   /* test 1 */
@@ -685,8 +689,8 @@ main (int argc, const char * const argv[])
   av[2] = NULL;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (d != 1.2 || optidx != 2) {
-    fprintf (stderr, "fail test %d\n", testno);
+  if (fabs(d - 1.2) > 0.00001 || optidx != 2) {
+    fprintf (stderr, "fail test %d: %.2g %d\n", testno, d, optidx);
     grc = 1;
   }
 
@@ -1212,6 +1216,24 @@ main (int argc, const char * const argv[])
        sizeof (opts) / sizeof (getoptn_opt_t), opts);
   if (strcmp (s2, "") != 0) {
     fprintf (stderr, "fail test %d: %s %d\n", testno, s2, optidx);
+    grc = 1;
+  }
+
+  /* test 48 - alias chain */
+  ++testno;
+  i = 0;
+  j = 0;
+  k = 0;
+  memset (s2, '\0', sizeof (s2));
+  ac = 2;
+  sprintf (tmp, "test %d", testno);
+  av[0] = tmp;
+  av[1] = "-z3";
+  av[2] = NULL;
+  optidx = getoptn (GETOPTN_LEGACY, ac, av,
+       sizeof (opts) / sizeof (getoptn_opt_t), opts);
+  if (i != 0 || j != 1) {
+    fprintf (stderr, "fail test %d\n");
     grc = 1;
   }
 
