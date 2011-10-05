@@ -369,8 +369,11 @@ getoptn (style, argc, argv, optcount, opts)
 
 #if TEST_GETOPTN
 
-#include <math.h>
-#include <assert.h>
+#include "gconfig.h"
+
+#if _hdr_math
+# include <math.h>
+#endif
 
 static void
 process_opts (const char *arg, char *valptr) {
