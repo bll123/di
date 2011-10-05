@@ -14,8 +14,9 @@ testshcapability
 cd $_MKCONFIG_RUNTOPDIR
 
 instdir="`pwd`/test_di"
-make realclean
-make -e prefix=${instdir} all-sh > make.log 2>&1
+unset MAKEFLAGS
+${MAKE:-make} ${TMAKEFLAGS} realclean
+${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} all-sh > make.log 2>&1
 rc=$?
 if [ $rc != 0 ]; then grc=$rc; fi
 

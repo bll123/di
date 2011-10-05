@@ -11,11 +11,12 @@ dosetup $@
 cd $_MKCONFIG_RUNTOPDIR
 grc=0
 
-make realclean
+unset MAKEFLAGS
+${MAKE:-make} ${TMAKEFLAGS} realclean
 rm -f config.h.sh config.h.pl cache.pl cache.sh \
     vars.pl vars.sh
 
-make -e config.h
+${MAKE:-make} ${TMAKEFLAGS} -e config.h
 mv config.h config.h.sh
 grep -v '^mkc_env' mkconfig.cache | sort > cache.sh
 sort mkconfig_c.vars > vars.sh
@@ -25,7 +26,7 @@ mv mkconfig_env.vars $_MKCONFIG_TSTRUNTMPDIR/mkconfig_env_sh.vars
 mv mkconfig.log $_MKCONFIG_TSTRUNTMPDIR/mkconfig_sh.log
 mv di.env $_MKCONFIG_TSTRUNTMPDIR/di_sh.env
 
-make -e MKCONFIG_TYPE=perl config.h
+${MAKE:-make} ${TMAKEFLAGS} -e MKCONFIG_TYPE=perl config.h
 mv config.h config.h.pl
 sort mkconfig.cache > cache.pl
 sort mkconfig_c.vars > vars.pl

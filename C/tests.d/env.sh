@@ -15,18 +15,19 @@ if [ $rc -ne 0 ]; then
   exit $rc
 fi
 
-make di.env
+${MAKE:-make} di.env
 
 . ./di.env
 
-make --version 2>&1 | egrep "GNU Make" > /dev/null 2>&1
+unset MAKEFLAGS
+${MAKE:-make} ${TMAKEFLAGS} --version 2>&1 | egrep "GNU Make" > /dev/null 2>&1
 rc=$?
 if [ $rc -eq 0 ]; then
-  make -e --no-print-directory rtest-env |
+  ${MAKE:-make} ${TMAKEFLAGS} -e --no-print-directory rtest-env |
     sed -e 's/^ *//' -e 's/ *$//' > ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
         ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
 else
-  make -e rtest-env | 
+  ${MAKE:-make} ${TMAKEFLAGS} -e rtest-env | 
     sed -e 's/^ *//' -e 's/ *$//' > ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
 fi
 

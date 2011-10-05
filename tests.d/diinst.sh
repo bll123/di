@@ -11,7 +11,8 @@ dosetup $@
 cd $_MKCONFIG_RUNTOPDIR
 grc=0
 instdir="`pwd`/test_di"
-make -e prefix=${instdir} install
+unset MAKEFLAGS
+${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} install
 rc=$?
 
 # leave a copy laying around...make realclean will clean it up

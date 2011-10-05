@@ -26,11 +26,12 @@ fi
 
 DI_VERSION=`grep DI_VERSION version.h | sed  -e 's/"$//' -e 's/.*"//'`
 
-make -e di.env
+unset MAKEFLAGS
+${MAKE:-make} ${TMAKEFLAGS} -e di.env
 . ./di.env
 
 grc=0
-make -e DI_DIR=".." DI_VERSION=${DI_VERSION} MARCH=${march} testrpmbuild
+${MAKE:-make} ${TMAKEFLAGS} -e DI_DIR=".." DI_VERSION=${DI_VERSION} MARCH=${march} testrpmbuild
 rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 # leave a copy there...realclean will get them...

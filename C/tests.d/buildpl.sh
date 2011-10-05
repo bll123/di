@@ -9,9 +9,10 @@ getsname $0
 dosetup $@
 
 cd $_MKCONFIG_RUNTOPDIR
-make realclean
+unset MAKEFLAGS
+${MAKE:-make} ${TMAKEFLAGS} realclean
 instdir="`pwd`/test_di"
-make -e prefix=${instdir} all-perl
+${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} all-perl
 grc=$?
 # leave a copy there...realclean will get them...
 set +f
