@@ -36,7 +36,7 @@ rc=$?
 if [ $rc -ne 0 ]; then grc=$rc; fi
 # leave a copy there...realclean will get them...
 set +f
-cp mkconfig.log mkconfig.cache mkconfig*.vars di.env mkconfig.reqlibs \
+cp mkconfig.log mkconfig.cache mkconfig*.vars di.env di.reqlibs \
     $_MKCONFIG_TSTRUNTMPDIR
 set -f
 
