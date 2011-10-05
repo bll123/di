@@ -79,7 +79,7 @@ fi
 mkdir -p $_MKCONFIG_TSTRUNTMPDIR/buildsh${stag}
 # leave these laying around for use by install.sh and rpmbuild.sh test
 set +f
-cp mkconfig.log mkconfig.cache mkconfig*.vars di.env mkconfig.reqlibs \
+cp mkconfig.log mkconfig.cache mkconfig*.vars di.env di.reqlibs \
     make.log make_extra.log \
     $_MKCONFIG_TSTRUNTMPDIR/buildsh${stag}
 rm -f make.log make_extra.log >/dev/null 2>&1

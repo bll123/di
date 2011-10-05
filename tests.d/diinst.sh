@@ -17,7 +17,7 @@ rc=$?
 
 # leave a copy laying around...make realclean will clean it up
 set +f
-cp mkconfig.log mkconfig.cache mkconfig*.vars di.env mkconfig.reqlibs \
+cp mkconfig.log mkconfig.cache mkconfig*.vars di.env di.reqlibs \
     $_MKCONFIG_TSTRUNTMPDIR
 set -f
 
