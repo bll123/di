@@ -95,7 +95,7 @@ windows:
 windows-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	$(CP) -f config.win config.h
 	@echo '-lintl' > $(MKC_REQLIB)
 	$(MAKE) \
@@ -144,7 +144,7 @@ os2-gcc:
 bsd43-cc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	$(CP) config.bsd43.cc config.h
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
@@ -156,7 +156,7 @@ bsd43-cc:
 bsd43-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	$(CP) config.bsd43.gcc config.h
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
@@ -168,7 +168,7 @@ bsd43-gcc:
 ultrix-cc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	$(CP) config.ultrix.cc config.h
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
@@ -180,7 +180,7 @@ ultrix-cc:
 ultrix-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkconfig_*.vars tests.done
+	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	$(CP) config.ultrix.gcc config.h
 	@echo '-lintl' > $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
@@ -192,7 +192,7 @@ ultrix-gcc:
 # cleaning
 
 # leaves:
-#   config.h
+#   config.h gconfig.h
 #   ../dioptions.dat, tests.done, test_di, di.env
 .PHONY: clean
 clean:
@@ -200,8 +200,8 @@ clean:
 		di.exe mingw-di.exe dmc-di.exe mi.exe \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig tests.d/chksh* \
-		mkconfig.cache mkconfig_*.vars \
-        getoptn_test* \
+		mkconfig.cache mkc*.vars \
+		getoptn_test* gconfig.h \
 		>/dev/null 2>&1
 
 # leaves:
@@ -210,7 +210,7 @@ clean:
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean > /dev/null 2>&1
-	@-$(RM) -rf config.h di.env mkconfig.reqlibs \
+	@-$(RM) -rf config.h gconfig.h di.env mkconfig.reqlibs \
 		>/dev/null 2>&1
 
 # leaves:
@@ -357,9 +357,23 @@ rtest-env:
 	@echo "$(EXE_EXT)"
 	@echo "$(XMSGFMT)"
 
-getoptn_test$(OBJ_EXT):	getoptn.c config.h getoptn.h
+# not really dep on config.h, but need to deparallelize it.
+# as mkconfig uses the same temp dir for both in this case.
+gconfig.h:	di.env features/getoptn.dat config.h
+	@-$(RM) -f gconfig.h
+	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
+		. ./di.env;$(_MKCONFIG_SHELL) \
+		$(MKCONFIGPATH)/mkconfig.sh \
+		features/getoptn.dat; fi
+	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
+		. ./di.env;perl \
+		$(MKCONFIGPATH)/mkconfig.pl \
+		features/getoptn.dat; fi
+
+getoptn_test$(OBJ_EXT):	getoptn.c config.h gconfig.h getoptn.h
 	$(CC) -o getoptn_test$(OBJ_EXT) -DTEST_GETOPTN=1 -c getoptn.c
 
-getoptn_test.exe:	config.h getoptn_test$(OBJ_EXT)
-	$(CC) -o getoptn_test.exe $(LDFLAGS) getoptn_test$(OBJ_EXT)
+getoptn_test.exe:	getoptn_test$(OBJ_EXT)
+	$(CC) -o getoptn_test.exe $(LDFLAGS) getoptn_test$(OBJ_EXT) \
+		`$(CAT) $(MKC_REQLIB)`
 
