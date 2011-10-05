@@ -47,7 +47,7 @@ DI_CPPFLAGS = -DDI_LOCALE_DIR=\"$(LOCALEDIR)\"
 
 MKCONFIGPATH = ../mkconfig
 MKCONFIG_TYPE = sh
-MKC_REQLIB = mkconfig.reqlibs
+MKC_REQLIB = di.reqlibs
 
 ###
 # main
@@ -192,7 +192,7 @@ ultrix-gcc:
 # cleaning
 
 # leaves:
-#   config.h gconfig.h
+#   config.h gconfig.h di.reqlibs
 #   ../dioptions.dat, tests.done, test_di, di.env
 .PHONY: clean
 clean:
@@ -201,7 +201,7 @@ clean:
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig tests.d/chksh* \
 		mkconfig.cache mkc*.vars \
-		getoptn_test* gconfig.h \
+		getoptn_test* gconfig.h getoptn.reqlibs \
 		>/dev/null 2>&1
 
 # leaves:
@@ -210,7 +210,7 @@ clean:
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean > /dev/null 2>&1
-	@-$(RM) -rf config.h gconfig.h di.env mkconfig.reqlibs \
+	@-$(RM) -rf config.h gconfig.h di.env $(MKC_REQLIB) \
 		>/dev/null 2>&1
 
 # leaves:
@@ -256,7 +256,8 @@ config.h:	di.env ../dioptions.dat features/mkconfig.dat
 		features/mkconfig.dat; fi
 
 $(MKC_REQLIB):	di.env config.h
-	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh config.h
+	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh \
+		-l $(MKC_REQLIB) config.h
 
 
 ###
@@ -373,7 +374,11 @@ gconfig.h:	di.env features/getoptn.dat config.h
 getoptn_test$(OBJ_EXT):	getoptn.c config.h gconfig.h getoptn.h
 	$(CC) -o getoptn_test$(OBJ_EXT) -DTEST_GETOPTN=1 -c getoptn.c
 
-getoptn_test.exe:	getoptn_test$(OBJ_EXT)
+getoptn.reqlibs:	di.env gconfig.h
+	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh \
+		-l getoptn.reqlibs gconfig.h
+
+getoptn_test.exe:	getoptn_test$(OBJ_EXT) getoptn.reqlibs
 	$(CC) -o getoptn_test.exe $(LDFLAGS) getoptn_test$(OBJ_EXT) \
-		`$(CAT) $(MKC_REQLIB)`
+		`$(CAT) getoptn.reqlibs`
 
