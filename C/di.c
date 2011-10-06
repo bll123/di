@@ -358,7 +358,7 @@ static int  checkFileInfo       _((diData_t *, int, int, const char *const[]));
 static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
 static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
-static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, int));
+static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, unsigned int));
 #endif
 static void cleanup             _((diData_t *, const char *));
 static int  diCompare           _((const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int));
@@ -712,7 +712,7 @@ main (argc, argv)
     printDiskInfo (&diData);
 
     cleanup (&diData, dptr);
-    exit (0);
+    return 0;
 }
 
 /*
@@ -3204,12 +3204,12 @@ checkIncludeList (diskInfo, includeList)
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
 static void
 # if _proto_stdc
-checkZone (diDiskInfo_t *diskInfo, zoneInfo_t *zoneInfo, int allFlag)
+checkZone (diDiskInfo_t *diskInfo, zoneInfo_t *zoneInfo, unsigned int allFlag)
 # else
 checkZone (diskInfo, zoneInfo, allFlag)
     diDiskInfo_t *diskInfo;
-    zoneInfo_t  *zoneInfo;
-    int         allFlag;
+    zoneInfo_t   *zoneInfo;
+    unsigned int allFlag;
 # endif
 {
     int         i;
