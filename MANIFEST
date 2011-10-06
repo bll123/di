@@ -17,6 +17,7 @@ C/dimntopt.h              di source
 C/diquota.c               di source
 C/features/               di configuration
 C/features/env.dat          environment configuration
+C/features/getoptn.dat      getoptn test configuration
 C/features/mkconfig.dat     mkconfig configuration
 C/getoptn.h               di source
 C/getoptn.c               di source
