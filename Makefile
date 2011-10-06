@@ -65,45 +65,44 @@ MANPERM = 644
 
 all:
 	$(MAKE) checkbuild
-	cd C >/dev/null;$(MAKE) -e all
+	cd C >/dev/null && $(MAKE) -e all
 
 all-c:
 	$(MAKE) checkbuild
-	cd C >/dev/null;$(MAKE) -e all
+	cd C >/dev/null && $(MAKE) -e all
 
 all-perl:
 	$(MAKE) checkperlbuild
-	cd C >/dev/null;$(MAKE) -e all-perl
+	cd C >/dev/null && $(MAKE) -e all-perl
 
 windows-gcc:
-	cd C >/dev/null;$(MAKE) -e windows-gcc
+	cd C >/dev/null && $(MAKE) -e windows-gcc
 
 all-test:
 	$(MAKE) checkbuild
-	cd C >/dev/null;$(MAKE) -e all-test
+	cd C >/dev/null && $(MAKE) -e all-test
 
 all-d:
 	$(MAKE) checkbuild
-	cd D >/dev/null;$(MAKE) -e all
+	cd D >/dev/null && $(MAKE) -e all
 
 ###
 # installation
 
 install:
 	$(MAKE) checkinstall
-	. ./C/di.env; \
-		$(MAKE) -e install-prog install-man
+	. ./C/di.env; $(MAKE) -e install-prog install-man
 
 build-po:
 	-. ./C/di.env; \
-		(cd po >/dev/null;for i in *.po; do \
+		(cd po >/dev/null && for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
 		$${XMSGFMT} -o $$j.mo $$i; \
 	done)
 
 install-po: 	build-po
 	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
-	-(cd po >/dev/null;for i in *.po; do \
+	-(cd po >/dev/null && for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
 		$(TEST) -d $(INST_LOCALEDIR)/$$j || \
 			$(MKDIR) $(INST_LOCALEDIR)/$$j; \
@@ -142,37 +141,37 @@ installperms:
 tar:
 	@-rm -f $(MKCONFIGPATH)/*.tar.gz \
 		di-[0-9].[0-9][0-9][a-z].tar.gz > /dev/null 2>&1
-	cd $(MKCONFIGPATH);$(MAKE) tar
+	cd $(MKCONFIGPATH) && $(MAKE) tar
 	./mktar.sh
 
 ###
 # cleaning
 
 clean:
-	@-rm -rf mkconfig.cache mkconfig_mkc.vars mkconfig.log _tmp_mkconfig \
+	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log _tmp_mkconfig \
 		checkbuild checkperlbuild checkinstall > /dev/null 2>&1
-	@-(cd C >/dev/null;$(MAKE) clean > /dev/null 2>&1)
-	@-(cd mkconfig >/dev/null;$(MAKE) clean > /dev/null 2>&1)
-	@-(cd D >/dev/null;$(MAKE) clean > /dev/null 2>&1)
+	@-(cd C >/dev/null && $(MAKE) clean > /dev/null 2>&1)
+	@-(cd mkconfig >/dev/null && $(MAKE) clean > /dev/null 2>&1)
+	@-(cd D >/dev/null && $(MAKE) clean > /dev/null 2>&1)
 
 # leaves:
 #   */_mkconfig_runtests, */_tmp_mkconfig, dioptions.dat
 #   pretests.done, */test_di
 realclean:
-	@-rm -rf mkconfig.cache mkconfig_mkc.vars mkconfig.log _tmp_mkconfig \
+	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log _tmp_mkconfig \
 		checkbuild checkperlbuild checkinstall > /dev/null 2>&1
-	@-(cd C >/dev/null;$(MAKE) realclean > /dev/null 2>&1)
-	@-(cd mkconfig >/dev/null;$(MAKE) realclean > /dev/null 2>&1)
-	@-(cd D >/dev/null;$(MAKE) realclean > /dev/null 2>&1)
+	@-(cd C >/dev/null && $(MAKE) realclean > /dev/null 2>&1)
+	@-(cd mkconfig >/dev/null && $(MAKE) realclean > /dev/null 2>&1)
+	@-(cd D >/dev/null && $(MAKE) realclean > /dev/null 2>&1)
 
 # leaves:
 #   dioptions.dat
 distclean:
-	@-rm -rf mkconfig.cache mkconfig_mkc.vars mkconfig.log _tmp_mkconfig \
+	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log _tmp_mkconfig \
 		checkbuild checkperlbuild checkinstall > /dev/null 2>&1
-	@-(cd C >/dev/null;$(MAKE) distclean > /dev/null 2>&1)
-	@-(cd mkconfig >/dev/null;$(MAKE) distclean > /dev/null 2>&1)
-	@-(cd D >/dev/null;$(MAKE) distclean > /dev/null 2>&1)
+	@-(cd C >/dev/null && $(MAKE) distclean > /dev/null 2>&1)
+	@-(cd mkconfig >/dev/null && $(MAKE) distclean > /dev/null 2>&1)
+	@-(cd D >/dev/null && $(MAKE) distclean > /dev/null 2>&1)
 
 
 ###
