@@ -41,6 +41,7 @@ if [ $grc -eq 0 ]; then
       grep -v '^option\-file:' |
       grep -v ' \.\.\. ' |
       grep -vi mkconfig |
+      grep -v reqlibs |
       grep -v 'Leaving directory' |
       grep -v 'Entering directory' |
       grep -v 'cc \-[co]' |
@@ -79,7 +80,7 @@ fi
 mkdir -p $_MKCONFIG_TSTRUNTMPDIR/buildsh${stag}
 # leave these laying around for use by install.sh and rpmbuild.sh test
 set +f
-cp mkconfig.log mkconfig.cache mkconfig*.vars di.env di.reqlibs \
+cp mkconfig.log mkconfig.cache mkc*.vars di.env di.reqlibs \
     make.log make_extra.log \
     $_MKCONFIG_TSTRUNTMPDIR/buildsh${stag}
 rm -f make.log make_extra.log >/dev/null 2>&1

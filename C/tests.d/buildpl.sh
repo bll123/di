@@ -16,7 +16,7 @@ ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} all-perl
 grc=$?
 # leave a copy there...realclean will get them...
 set +f
-cp mkconfig.log mkconfig.cache mkconfig*.vars di.env di.reqlibs \
+cp mkconfig.log mkconfig.cache mkc*.vars di.env di.reqlibs \
     $_MKCONFIG_TSTRUNTMPDIR
 set -f
 
