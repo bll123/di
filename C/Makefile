@@ -358,9 +358,7 @@ rtest-env:
 	@echo "$(EXE_EXT)"
 	@echo "$(XMSGFMT)"
 
-# not really dep on config.h, but need to deparallelize it.
-# as mkconfig uses the same temp dir for both in this case.
-gconfig.h:	di.env features/getoptn.dat config.h
+gconfig.h:	di.env features/getoptn.dat
 	@-$(RM) -f gconfig.h
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./di.env;$(_MKCONFIG_SHELL) \
@@ -371,7 +369,7 @@ gconfig.h:	di.env features/getoptn.dat config.h
 		$(MKCONFIGPATH)/mkconfig.pl \
 		features/getoptn.dat; fi
 
-getoptn_test$(OBJ_EXT):	getoptn.c config.h gconfig.h getoptn.h
+getoptn_test$(OBJ_EXT):	getoptn.c gconfig.h getoptn.h
 	$(CC) -o getoptn_test$(OBJ_EXT) -DTEST_GETOPTN=1 -c getoptn.c
 
 getoptn.reqlibs:	di.env gconfig.h
