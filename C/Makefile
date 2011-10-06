@@ -188,6 +188,16 @@ ultrix-gcc:
 		CFLAGS="$(CFLAGS) -O2" \
 		LDFLAGS="-O2" di-programs
 
+.PHONY: hpux-cc
+hpux-cc:
+	@$(MAKE) -e ../dioptions.dat
+	@$(MAKE) -e di.env
+	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
+	$(CP) config.hpux.bcc config.h
+	@sleep 2;touch $(MKC_REQLIB)
+	. ./di.env;$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL)
+		CFLAGS="$(CFLAGS) -O" LDFLAGS="-O" di-programs
+
 ###
 # cleaning
 
