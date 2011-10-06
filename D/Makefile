@@ -32,7 +32,7 @@ RM = rm
 
 MKCONFIGPATH = ../mkconfig
 MKCONFIG_TYPE = sh
-MKC_REQLIB = mkconfig.reqlibs
+MKC_REQLIB = di.reqlibs
 
 ###
 # main
@@ -70,18 +70,18 @@ di.env:	features/env.dat
 # cleaning
 
 # leaves:
-#   config.d, di.env
+#   config.d, di.env, di.reqlibs
 clean:
 	@-rm -f di di.exe mi mi.exe \
 		*.o *.obj *.lst *.gcno *.gcda *.gcov \
-		mkconfig.log mkconfig.reqlibs mkconfig.cache mkconfig_*.vars \
+		mkconfig.log mkconfig.cache mkc*.vars \
 		> /dev/null 2>&1
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig
 realclean:
 	@$(MAKE) clean > /dev/null 2>&1
-	@-$(RM) -rf config.d di.env \
+	@-$(RM) -rf config.d di.env $(MKC_REQLIB) \
 		>/dev/null 2>&1
 
 # leaves:
@@ -111,7 +111,8 @@ config.d:	di.env ../dioptions.dat features/mkconfig.dat
 		features/mkconfig.dat; fi
 
 $(MKC_REQLIB):	di.env config.d
-	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh config.d
+	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh -l \
+		$(MKC_REQLIB) config.d
 
 ###
 # executables
