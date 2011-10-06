@@ -125,7 +125,6 @@
 #define _lib_xdr_int 0
 #define _lib_zone_getattr 0
 #define _lib_zone_list 0
-#define _quotactl_pos 0
 #define _memberxdr_rquota_rq_bhardlimit 0
 #define _memberxdr_rquota_rq_bsoftlimit 0
 #define _memberxdr_rquota_rq_curblocks 0
