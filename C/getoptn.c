@@ -17,7 +17,11 @@
  *
  */
 
-#include "config.h"
+#if TEST_GETOPTN
+# include "gconfig.h"
+#else
+# include "config.h"
+#endif
 #include "getoptn.h"
 
 #if _hdr_stdio
@@ -368,8 +372,6 @@ getoptn (style, argc, argv, optcount, opts)
 }
 
 #if TEST_GETOPTN
-
-#include "gconfig.h"
 
 #if _hdr_math
 # include <math.h>

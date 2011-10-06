@@ -7,7 +7,11 @@
 #ifndef __INC_GETOPTN_H_
 #define __INC_GETOPTN_H_
 
-#include "config.h"
+#if TEST_GETOPTN
+# include "gconfig.h"
+#else
+# include "config.h"
+#endif
 
 #if _sys_types
 # include <sys/types.h>
