@@ -120,6 +120,7 @@ windows-mingw:
 
 .PHONY: windows-dmc
 windows-dmc:
+	@echo "** DMC compilation is broken as of version 4.30."
 	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
