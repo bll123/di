@@ -11,5 +11,18 @@ output  gconfig.h
 
 standard
 
+hdr     string.h
+hdr     strings.h
 hdr     math.h
 lib     fabs -lm
+typ     size_t
+
+include
+
+#if _typ_size_t
+# define Size_t size_t
+#else
+# define Size_t unsigned int
+#endif
+
+endinclude
