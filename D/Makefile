@@ -41,6 +41,7 @@ MKC_REQLIB = di.reqlibs
 
 #        DTESTFLAGS="$$DC_OPT $$DC_RELEASE $$DC_INLINE" di-programs
 
+.PHONY: all
 all:	di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
@@ -49,6 +50,7 @@ all:	di.env
 
 #        DTESTFLAGS="$$DC_UNITTEST $$DC_COV" \
 
+.PHONY: all-test
 all-test: di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
@@ -71,6 +73,7 @@ di.env:	features/env.dat
 
 # leaves:
 #   config.d, di.env, di.reqlibs
+.PHONY: clean
 clean:
 	@-rm -f di di.exe mi mi.exe \
 		*.o *.obj *.lst *.gcno *.gcda *.gcov \
@@ -79,12 +82,14 @@ clean:
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig
+.PHONY: realclean
 realclean:
 	@$(MAKE) clean > /dev/null 2>&1
 	@-$(RM) -rf config.d di.env $(MKC_REQLIB) \
 		>/dev/null 2>&1
 
 # leaves:
+.PHONY: distclean
 distclean:
 	@$(MAKE) realclean > /dev/null 2>&1
 	@-$(RM) -rf _mkconfig_runtests _tmp_mkconfig \
@@ -93,6 +98,7 @@ distclean:
 ###
 # programs
 
+.PHONY: di-programs
 di-programs:	di$(EXE_EXT)
 
 ###
