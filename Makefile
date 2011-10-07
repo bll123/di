@@ -71,6 +71,10 @@ all-c:
 	$(MAKE) checkbuild
 	cd C >/dev/null && $(MAKE) -e all
 
+all-d:
+	$(MAKE) checkbuild
+	cd D >/dev/null && $(MAKE) -e all
+
 all-perl:
 	$(MAKE) checkperlbuild
 	cd C >/dev/null && $(MAKE) -e all-perl
@@ -78,13 +82,9 @@ all-perl:
 windows-gcc:
 	cd C >/dev/null && $(MAKE) -e windows-gcc
 
-all-test:
-	$(MAKE) checkbuild
-	cd C >/dev/null && $(MAKE) -e all-test
-
-all-d:
-	$(MAKE) checkbuild
-	cd D >/dev/null && $(MAKE) -e all
+test:
+	cd mkconfig >/dev/null && $(MAKE) -e test
+	cd C >/dev/null && $(MAKE) -e test
 
 ###
 # installation
