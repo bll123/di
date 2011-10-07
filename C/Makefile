@@ -65,6 +65,9 @@ all-sh:	di.env
 all-perl:	di.env
 	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
 
+.PHONY: test
+test:		tests.done
+
 ###
 # environment
 
@@ -192,18 +195,18 @@ ultrix-gcc:
 .PHONY: hpux-cc
 hpux-cc:
 	@$(MAKE) -e ../dioptions.dat
-	@$(MAKE) -e di.env
+	@$(MAKE) CC=/usr/ccs/bin/cc -e di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	$(CP) config.hpux.bcc config.h
-	@sleep 2;touch $(MKC_REQLIB)
-	. ./di.env;$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL)
-		CFLAGS="$(CFLAGS) -O" LDFLAGS="-O" di-programs
+	@sleep 1;touch $(MKC_REQLIB)
+	. ./di.env;$(MAKE) -e CC=/usr/ccs/bin/cc \
+		_MKCONFIG_SHELL=$(MKCONFIG_SHELL) di-programs
 
 ###
 # cleaning
 
 # leaves:
-#   config.h gconfig.h di.reqlibs
+#   config.h di.reqlibs
 #   ../dioptions.dat, tests.done, test_di, di.env
 .PHONY: clean
 clean:
