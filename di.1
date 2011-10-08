@@ -8,17 +8,17 @@
 .\"
 .\" brad.lanam.di_at_gmail.com
 .\"
-.TH di 1 "23 Sep 2011"
+.TH di 1 "8 Oct 2011"
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-AacghHklLmnPqtZ] [-b block-size] [-d display-size] [-f format]
+.\" di [-AacghHklLmnPqtZ] [-B block-size] [-d display-size] [-f format]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x exclude-fstyp-list] [-X debug-level]
 .\" [-z zone-name] [file [...]]
 .B di
 [\fB\-AacghHklLmnPtZ\fP]
-[\fB\-b\fP \fIblock\-size\fP]
+[\fB\-B\fP \fIblock\-size\fP]
 [\fB\-d\fP \fIdisplay\-size\fP]
 [\fB\-f\fP \fIformat\fP]
 [\fB\-I\fP \fIinclude\-fstyp\-list\fP]
@@ -64,31 +64,36 @@ Print all fields (used for debugging).  Mount points and special
 device names are printed at full width.
 .TP
 .B \-a
+(compatibility: \fB\-\-all\fP)
+.br
 Prints all mounted devices (normally, those with 0 total blocks are not
 printed \- e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .TP
-.B \-b
+.B \-B
 .I block\-size
-(compatibility: \-B)
+(compatibility: \fB\-\-block\-size\fP, \fB\-b\fP)
 .br
 Change the base block size from 1024 (default) to the size specified.
 \fIblock\-size\fP may be one of: k\ \-\ 1024 bytes, si\ \-\ 1000 bytes,
 or a specific size.
 .TP
 .B \-c
+(alias: \fB\-\-csv\-output\fP)
 .br
 Comma separated values are output.  The titles are output as the
 format string specifiers.  Totals are turned off. See also the \-n flag.
 .TP
 .B \-d
 .I display\-size
+(alias: \fB\-\-display\-size\fP)
+.br
 Display the blocks in units specified by \fIdisplay\-size\fP.
 Note that if the base block size is SI units of 1000 bytes, the
 display size is calculated using those units.
 \fIdisplay\-size\fP
 may be one of: 512\ \-\ POSIX, k\ \-\ kilobytes,
-m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, P\ \-\ petabytes,
-E\ \-\ exabytes, Z\ \-\ zettabytes, Y\ \-\ yottabytes,
+m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, p\ \-\ petabytes,
+e\ \-\ exabytes, z\ \-\ zettabytes, y\ \-\ yottabytes,
 h\ \-\ Scaled alternative 1, H\ \-\ Scaled alternative 2,
 or a specific value to use as the block size.
 .IP
@@ -110,43 +115,53 @@ Use the specified format string \fIformat\fP.  See the
 \fBFormat Strings\fP section.
 .TP
 .B \-g
-(alias for: \-dg)
+(alias for: \fB\-dg\fP)
 .br
 Display sizes in gigabytes.
 .TP
 .B \-h
-(alias for: \-dh)
+(alias for: \fB\-dh\fP)
 .br
 Display partition sizes in scaled alternative 1 format.
 .TP
+.B \-\-help
+.br
+Display some basic usage information.
+.TP
 .B \-H
-(alias for: \-dH)
+(alias for: \fB\-dH\fP; compatibility: \fB\-\-human\-readable\fP)
 .br
 Display partition sizes in scaled alternative 2 format.
 .TP
 .B \-I
 .I include\-fstype\-list
-(compatibility: \-F)
+(compatibility: \fB\-F\fP, \fB\-\-type\fP)
 .br
 Include \fIonly\fP the file system types listed in \fIinclude\-fstyp\-list\fP.
 The list is a comma separated list of file system types.
 Multiple \-I options may be specified.  If the 'fuse' filesystem type
 is specified, all fuse* filesystems will be included.
-e.g. \-I nfs,rfs or \-I nfs \-I rfs.
+.br
+e.g. \-I nfs,tmpfs or \-I nfs \-I tmpfs.
+.TP
+.B \-\-inodes
+Ignored.  Use the \-f option.
 .TP
 .B \-k
-(alias for: \-dk)
+(alias for: \fB\-dk\fP)
 .br
 Display sizes in Kbytes.
 .TP
 .B \-l
+(compatibility: \fB\-\-local\fP)
+.br
 Display only local file systems.
 .TP
 .B \-L
 Turn off check for duplicate filesystems (loopback (lofs/none) mounts).
 .TP
 .B \-m
-(alias for: \-dm)
+(alias for: \fB\-dm\fP)
 .br
 Display sizes in megabytes.
 .TP
@@ -154,9 +169,17 @@ Display sizes in megabytes.
 Do not print a header line above the list of file systems.  Useful when
 parsing the output of \fIdi\fP.
 .TP
+.B \-\-no\-sync
+Ignored.
+.TP
 .B \-P
+(compatibility: \fB\-\-portability\fP)
+.br
 Output format is POSIX standard.
 512 byte block size is the default.  The \-k option may be used.
+.TP
+.B \-\-print\-type
+Ignored.  Use the \-f option.
 .TP
 .B \-q
 Disable quota checks.
@@ -175,7 +198,15 @@ These sort options may be combined in any order.  e.g.: di \-stsrm \- by
 type, special, reversed mount;
 di \-strsrm \- by type, reversed special, mount.
 .TP
+.B \-\-si
+An alias for \fB-dH -Bsi\fP.
+.TP
+.B \-\-sync
+Ignored.
+.TP
 .B \-t
+(compatibility: \fB\-\-total\fP)
+.br
 Print a totals line below the list of file systems.
 Pooled filesystems (zfs, advfs) have only the main pool added to the total.
 It is up to the user
@@ -187,7 +218,14 @@ fuse* filesystems.
 .B \-w
 .I block\-width
 .br
-Set the print width for block values.  Default is eight.
+Set the print width for block values.  The default is eight.
+.TP
+.B \-v
+Ignored.
+.TP
+.B \-\-version
+.br
+Display di's version and default format string.
 .TP
 .B \-W
 .I inode\-width
@@ -196,13 +234,13 @@ Set the print width for inode values.  Default is seven.
 .TP
 .B \-x
 .I exclude\-fstype\-list
-(old: \-i)
+(compatibility: \fB\-\-exclude\-type\fP)
 .br
 Exclude the file system types listed in \fIexclude\-fstyp\-list\fP.
 The list is a comma separated list of file system types.
 Multiple \-x options may be specified.  If the 'fuse' filesystem
 type is excluded, all fuse* filesystems will be excluded.
-e.g. \-x nfs,rfs or \-x nfs \-x rfs.
+e.g. \-x nfs,tmpfs or \-x nfs \-x tmpfs.
 .TP
 .B \-X
 .I level
@@ -216,7 +254,7 @@ Display the filesystems for the specified zone.
 The zone must be visible to the user.
 .TP
 .B \-Z
-(alias for: \-z all)
+(alias for: \fB\-z all\fP)
 .br
 Display the filesystems for all visible zones.
 .SH Format Strings
@@ -352,7 +390,6 @@ will print two lines of data for each filesystem.
 .SH Examples
 Various \fIdf\fP
 equivalent format strings for System V release 4 are:
-.PP
 .RS
 \fI/usr/bin/df \-v\fP     di \-P \-f msbuf1
 .br
@@ -360,12 +397,25 @@ equivalent format strings for System V release 4 are:
 .br
 \fI/usr/ucb/df\fP        di \-dk \-f sbuv2m
 .RE
-.PP
 GNU df:
 .RS
-\fIdf\fP                 di -dk \-f SbuvpM
+\fIdf\fP                 di \-dk \-f SbuvpM \-w 10
 .br
-\fIdf \-T\fP              di -dk \-f STbuvpM
+\fIdf \-T\fP              di \-dk \-f STbuvpM \-w 10
+.RE
+AIX df:
+.RS
+\fIdf\fP                 di \-d 512 \-f Sbf1UPM \-w 10
+.br
+\fIdf \-I\fP              di -d 512 \-f Sbuf1M
+.br
+\fIdf \-I \-M\fP           di \-d 512 \-f SMbuf1 \-w 10
+.RE
+HP-UX bdf:
+.RS
+\fIbdf\fP                di \-d k \-f Sbuv2M
+.br
+\fIbdf \-i\fP             di \-d k \-f Sbuv2UFPM
 .RE
 .PP
 If you like your numbers to add up/calculate the percentage
