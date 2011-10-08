@@ -121,21 +121,6 @@ windows-mingw:
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-g -O2" mingw-di.exe
 
-.PHONY: windows-dmc
-windows-dmc:
-	@echo "** DMC compilation is broken as of version 4.30."
-	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
-	copy /y NUL: di.env
-	-del config.h
-	copy /y /b NUL:+config.dmc config.h
-	copy /y NUL: $(MKC_REQLIB)
-	$(MAKE) \
-		CC=dmc LD=dmc \
-		EXE_EXT=".exe" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -o \
-		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
-		LDFLAGS="-o" dmc-target
-
 .PHONY: os2-gcc
 os2-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
@@ -211,7 +196,7 @@ hpux-cc:
 .PHONY: clean
 clean:
 	@-$(RM) -rf di mi \
-		di.exe mingw-di.exe dmc-di.exe mi.exe \
+		di.exe mingw-di.exe mi.exe \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig tests.d/chksh* \
 		mkconfig.cache mkc*.vars \
@@ -292,13 +277,6 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(OBJECTS)
 mingw-di$(EXE_EXT):	$(OBJECTS)
 	$(CC) -o mingw-di$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS)
-
-.PHONY: dmc-target
-dmc-target:	$(OBJECTS) dmc-di$(EXE_EXT)
-
-dmc-di$(EXE_EXT):
-	$(CC) -odmc-di$(EXE_EXT) \
-		$(LDFLAGS) $(OBJECTS) $(LIBS)
 
 ###
 # objects
