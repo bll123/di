@@ -1,4 +1,4 @@
-di - disk information utility (version 4.29)
+di - disk information utility (version 4.30)
 
 CONTENTS
   Description
@@ -28,8 +28,7 @@ INSTALLATION
 
   If you don't have a bourne shell compatible shell,
   Try building with perl:
-      cd C
-      make -e all-perl
+      cd C;make -e all-perl
 
   To change the options (NLS, WINAPI, default display):
     make dioptions.dat
@@ -49,9 +48,8 @@ INSTALLATION
 
   Windows installation:
     Alternative 1 - uses config.win or config.mingw
-      Cygwin gcc: make -e windows-gcc
+      Cygwin gcc: cd C;make -e windows-gcc
       MinGW: cd C;mingw32-make MAKE=mingw32-make CC=mingw32-gcc windows-mingw
-      dmc:   cd C;make windows-dmc
     Alternative 2 - builds a new config.h file (Cygwin).
       make -e config.h
       make -e
@@ -71,7 +69,7 @@ INSTALLATION
       #define _c_arg_1__quotactl int
       #define _c_arg_2__quotactl char *
       #define _c_arg_3__quotactl int
-      #define _c_arg_4__quotactl caddr_T
+      #define _c_arg_4__quotactl caddr_t
       #define _quotactl_pos_1 0
       #define _quotactl_pos_2 1
 
@@ -85,6 +83,8 @@ INSTALLATION
     32-bit gcc:
       env CC=gcc CFLAGS="-fPIC -milp32 -D_LABEL_T" \
           LDFLAGS="-milp32 -L/usr/lib/hpux32" make -e 
+    Bundled cc:
+      cd C;make hpux-cc
 
   Tru64
     export BIN_SH=svr4 beforehand.
@@ -106,8 +106,6 @@ BUGS AND KNOWN ISSUES
       - quotas:
         - MacOSX
           - No access to users with quotas.
-        - HP-UX
-          - quotactl() isn't declared.
       - MS VC++ has not been tested in a *very* long while.
       - A/UX, Cray, Irix, UNICOS, Next, Pyramid, SCO Unix, Sequent
         have not been tested in a *very* long while.
@@ -116,9 +114,8 @@ BUGS AND KNOWN ISSUES
         - Solaris ufs requires the quotas file to be readable, or make
           the di program setuid.  Neither recommended.
         - Linux 2.4 - not working
-      - Windows:
-        - The A: drive is seen, but the program fails as the A: drive
-          isn't really there.
+        - HP-UX
+          - quotactl() isn't declared.
 
     Send bug reports along with the output from 'di -A -a -X 5',
     output from your standard df command (as verbose as possible),
@@ -153,7 +150,7 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.29 has been tested on the following platforms:
+    di 4.30 has been tested on the following platforms:
         AIX 5.1
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5, 6.0
         Debian 4.0, 5.0, 6.0, 6-kFreeBSD 7.2, 6-kFreeBSD 8.1
@@ -161,7 +158,6 @@ PORTING
         Fedora 7, 12, 13, 14
         FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1, 8.2
         Haiku r1a3
-        HP-UX 10.20, 11.00, 11.11, 11.23, 11.31 (cc, gcc, 32-bit, 64-bit)
         MacOSX 8.11(10.4)
         Mandrake 9.2
         Mandriva 2011
@@ -179,7 +175,6 @@ PORTING
         UnixWare 7.1.4
         Windows - Cygwin
         Windows - MinGW
-        Windows - dmc
 
     di has been ported to the following systems in the past:
 
@@ -190,6 +185,15 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+
+    4.30                                    [8 Oct 2011]
+        Added support for long options.  
+        GNU df compatible long options have been added and 
+          are processed appropriately.
+        Removed program name settings from Makefile and di.c.
+        Minor code cleanup.
+        Added hp-ux bundled cc static target.
+        Updated build system to mkconfig-1.18.
 
     4.29                                    [30 Sep 2011]
         Added the -c option to output in CSV format
