@@ -1662,7 +1662,6 @@ processTitles (diopts, diout)
           pstr = DI_GT (pstr);
           olen = (Size_t) strlen (pstr);
           ilen = (Size_t) istrlen (pstr);
-/* fprintf (stderr, "%s: olen:%d wlen:%d ilen:%d\n", pstr, olen, wlen, ilen); */
           wlen = ilen > wlen ? ilen : wlen;
           len = wlen;
           tlen = len + olen - ilen;  /* for the title only */
@@ -1686,7 +1685,6 @@ processTitles (diopts, diout)
               printf (tformat, pstr);
             }
           }
-/* fprintf (stderr, "%s: olen:%d wlen:%d ilen:%d len:%d tlen:%d %s\n", pstr, olen, wlen, ilen, len, tlen, tformat); */
           if (fstr != (char *) NULL) {
             if (diopts->csv_output) {
               strncpy (tformat, "%s", sizeof (tformat));
@@ -1699,7 +1697,6 @@ processTitles (diopts, diout)
             }
             strncpy (fstr, tformat, maxsize);
           }
-/* fprintf (stderr, "%s: %s\n", pstr, tformat); */
           if (wlenptr != (Size_t *) NULL) {
             *wlenptr = wlen;
           }
