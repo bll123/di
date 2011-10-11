@@ -15,11 +15,13 @@ BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 #Requires:
 
 %description
-'di' is a disk information utility, displaying everything
-(and more) that your 'df' command does. It features the
-ability to display your disk usage in whatever format you
-desire. It is designed to be highly portable across many
-platforms.  Great for heterogenous networks.
+'di' is a disk information utility, displaying everything (and
+more) that your 'df' command does. It features the ability to display
+your disk usage in whatever format you prefer. It also
+checks the user and group quotas, so that the user
+sees the space available for their use, not the system wide
+disk space. It is designed to be portable across many platforms
+and is great for heterogenous networks.
 
 %prep
 %setup -q
