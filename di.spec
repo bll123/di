@@ -27,12 +27,12 @@ and is great for heterogenous networks.
 %setup -q
 
 %build
-make LOCALEDIR=/usr/share/locale
+make -e LOCALEDIR=/usr/share/locale
 
 %install
 test -d $RPM_BUILD_ROOT || mkdir $RPM_BUILD_ROOT
 test -d $RPM_BUILD_ROOT/usr || mkdir $RPM_BUILD_ROOT/usr
-make prefix=$RPM_BUILD_ROOT/usr install
+make -e prefix=$RPM_BUILD_ROOT/usr install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
