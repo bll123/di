@@ -1422,7 +1422,7 @@ processTitles (diopts, diout)
     first = TRUE;
     if (diopts->printDebugHeader)
     {
-        printf (DI_GT("di version %s Default Format: %s\n"),
+        printf (DI_GT("di version %s    Default Format: %s\n"),
                 DI_VERSION, DI_DEFAULT_FORMAT);
     }
 
@@ -2688,7 +2688,7 @@ processOptions (arg, valptr)
     padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
     strncpy (padata->dbsstr, "H", padata->dbsstr_sz);
   } else if (strcmp (arg, "--version") == 0) {
-    printf (DI_GT("di version %s  Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
+    printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
     exit (0);
   } else {
     fprintf (stderr, "di_panic: bad option setup\n");
