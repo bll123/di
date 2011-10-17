@@ -23,11 +23,11 @@ private immutable string DI_POSIX_FORMAT = "SbuvpM";
 private immutable string DI_DEFAULT_SORT = "m";
 
 struct Options {
+  bool              csvOutput = false;
   bool              displayAll = false;
-  bool              hasdashk = false;
   bool              localOnly = false;
   bool              includeLoopback = false;
-  bool              noHeader = false;
+  bool              printHeader = true;
   bool              noQuotaCheck = false;
   bool              displayTotal = true;
   bool              debugHeader = false;
@@ -169,37 +169,84 @@ processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
   int       idx;
 
   with (opts) {
-    idx = getopt (args,
-      "A", { formatString = DI_ALL_FORMAT; },
-      "a", &displayAll,
-      "b", (string arg) { processBaseSize (arg, dispOpts); },
-      "B", (string arg) { processBaseSize (arg, dispOpts); },
-      "d", (string arg) { dispOpts.dbsstr = arg; if (dispOpts.dbsstr == "k") { hasdashk = true; } },
-      "f", &formatString,
-         // solaris df compatibility
-      "F", (string arg) { processIncludeList (arg, opts); },
-      "g", { dispOpts.dbsstr = "g"; },
-      "h", { dispOpts.dbsstr = "h"; },
-      "H", { dispOpts.dbsstr = "H"; },
-      "I", (string arg) { processIncludeList (arg, opts); },
-      "k", { dispOpts.dbsstr = "k"; hasdashk = true; },
-      "l", &localOnly,
-      "L", &includeLoopback,
-      "m", { dispOpts.dbsstr = "m"; },
-      "n", &noHeader,
-      "P", { if (! hasdashk) { dispOpts.dbsstr = "512"; }
-             formatString = DI_POSIX_FORMAT;
-             dispOpts.posixCompat = true; },
-      "q", &noQuotaCheck,
-      "s", (string arg) { sortType = processSort (arg); },
-      "t", &displayTotal,
-      "w", &dispOpts.width,
-      "W", &dispOpts.inodeWidth,
-      "x", (string arg) { processIgnoreList (arg, opts); },
-      "X", &debugLevel,
-      "z", &zoneDisplay,
-      "Z", { zoneDisplay = "all"; }
-      );
+    auto delA = delegate (string arg, string val)
+        { formatString = DI_ALL_FORMAT; };
+    auto delB = delegate (string arg, string val)
+        { processBaseSize (val, dispOpts); };
+    auto delg = delegate (string arg, string val)
+        { dispOpts.dbsstr = "g"; };
+    auto delh = delegate (string arg, string val)
+        { dispOpts.dbsstr = "h"; };
+    auto delH = delegate (string arg, string val)
+        { dispOpts.dbsstr = "H"; };
+    auto delI = delegate (string arg, string val)
+        { processIncludeList (val, opts); };
+    auto delk = delegate (string arg, string val)
+        { dispOpts.dbsstr = "k"; };
+    auto delm = delegate (string arg, string val)
+        { dispOpts.dbsstr = "m"; };
+    auto delP = delegate (string arg, string val)
+        { if (dispOpts.dbsstr != "k") { dispOpts.dbsstr = "512"; }
+          formatString = DI_POSIX_FORMAT;
+          dispOpts.posixCompat = true; };
+    auto dels = delegate (string arg, string val)
+        { sortType = processSort (val); };
+    auto delx = delegate (string arg, string val)
+        { processIgnoreList (val, opts); };
+    auto delZ = delegate (string arg, string val)
+        { zoneDisplay = "all";  };
+
+    OptInfo[] options = [
+      { "-A",     GETOPTN_FUNC_NOARG,     cast(void *) null, delA },
+      { "-a",     GETOPTN_BOOL,         cast(void *) &displayAll, null },
+      { "--all",  GETOPTN_ALIAS,        cast(void *) &"-a", null },
+      { "-b",     GETOPTN_ALIAS,        cast(void *) &"-B", null },
+      { "--block-size", GETOPTN_ALIAS,  cast(void *) &"-B", null },
+      { "-B",     GETOPTN_FUNC_ARG,     cast(void *) null, delB },
+      { "-c",     GETOPTN_BOOL,         cast(void *) &csvOutput, null },
+      { "--csv-output", GETOPTN_ALIAS,  cast(void *) &"-c", null },
+      { "-d",     GETOPTN_STRING,       cast(void *) &dispOpts.dbsstr, null },
+      { "-f",     GETOPTN_STRING,       cast(void *) &formatString, null },
+      { "--format-string", GETOPTN_ALIAS, cast(void *) &"-f", null },
+      { "-F",     GETOPTN_ALIAS,        cast(void *) &"-I", null },
+      { "-g",     GETOPTN_FUNC_NOARG,   cast(void *) null, delg },
+      { "-h",     GETOPTN_FUNC_NOARG,   cast(void *) null, delh },
+      { "-H",     GETOPTN_FUNC_NOARG,   cast(void *) null, delH },
+      { "--help", GETOPTN_IGNORE,       cast(void *) null,
+            null }, // ### need delegate
+      { "--human-readable", GETOPTN_ALIAS, cast(void *) &"-H", null },
+      { "-?",     GETOPTN_ALIAS,        cast(void *) &"--help", null },
+      { "-I",     GETOPTN_FUNC_ARG,     cast(void *) null, delI },
+      { "--inodes", GETOPTN_IGNORE,     cast(void *) null, null },
+      { "-k",     GETOPTN_FUNC_NOARG,   cast(void *) null, delk },
+      { "-l",     GETOPTN_BOOL,         cast(void *) &localOnly, null },
+      { "--local", GETOPTN_ALIAS,       cast(void *) &"-l", null },
+      { "-L",     GETOPTN_BOOL,         cast(void *) &includeLoopback, null },
+      { "-m",     GETOPTN_FUNC_NOARG,   cast(void *) null, delm },
+      { "-n",     GETOPTN_BOOL,         cast(void *) &printHeader, null },
+      { "--no-sync", GETOPTN_IGNORE,    cast(void *) null, null },
+      { "-P",     GETOPTN_FUNC_NOARG,   cast(void *) null, delP },
+      { "--portability", GETOPTN_ALIAS, cast(void *) &"-P", null },
+      { "--print-type", GETOPTN_IGNORE, cast(void *) null, null },
+      { "-q",     GETOPTN_BOOL,         cast(void *) &noQuotaCheck, null },
+      { "-s",     GETOPTN_FUNC_ARG,     cast(void *) null, dels },
+      { "--si",   GETOPTN_IGNORE,       cast(void *) null,
+            null, },  // ### need delegate
+      { "--sync", GETOPTN_IGNORE,       cast(void *) null, null },
+      { "-t",     GETOPTN_BOOL,         cast(void *) &displayTotal, null },
+      { "--total", GETOPTN_ALIAS,       cast(void *) &"-t", null },
+      { "-v",     GETOPTN_IGNORE,       cast(void *) null, null },
+      { "--version", GETOPTN_IGNORE,    cast(void *) null,
+            null }, // ### need delegate
+      { "-w",     GETOPTN_SHORT,        cast(void *) &dispOpts.width, null },
+      { "-W",     GETOPTN_SHORT,        cast(void *) &dispOpts.inodeWidth, null },
+      { "-x",     GETOPTN_FUNC_ARG,     cast(void *) null, delx },
+      { "--exclude-type", GETOPTN_ALIAS, cast(void *) &"-x", null },
+      { "-X",     GETOPTN_SHORT,        cast(void *) &debugLevel, null },
+      { "-z",     GETOPTN_STRING,       cast(void *) &zoneDisplay, null },
+      { "-Z",     GETOPTN_FUNC_NOARG,   cast(void *) null, delZ },
+      ];
+    idx = getoptn (GETOPTN_LEGACY, args, options);
   }
 
   return idx;
@@ -248,25 +295,15 @@ string s;
   with (opts) {
     tbool.test ("-a: displayAll", true, "-a", displayAll, true, 1);
     tstr.test ("-d k: dispOpts.dbsstr", true, "-d k", dispOpts.dbsstr, "k", 2);
-    tbool.test ("-d k: hasdashk", true, "-d k", hasdashk, true, 2);
     tstr.test ("-k: dispOpts.dbsstr", true, "-k", dispOpts.dbsstr, "k", 1);
-    tbool.test ("-k: hasdashk", true, "-k", hasdashk, true, 1);
     tstr.test ("-d g: dispOpts.dbsstr", true, "-d g", dispOpts.dbsstr, "g", 2);
-    tbool.test ("-d g: hasdashk", true, "-d g", hasdashk, false, 2);
     tstr.test ("-g: dispOpts.dbsstr", true, "-g", dispOpts.dbsstr, "g", 1);
-    tbool.test ("-g: hasdashk", true, "-g", hasdashk, false, 1);
     tstr.test ("-d m: dispOpts.dbsstr", true, "-d m", dispOpts.dbsstr, "m", 2);
-    tbool.test ("-d m: hasdashk", true, "-d m", hasdashk, false, 2);
     tstr.test ("-m: dispOpts.dbsstr", true, "-m", dispOpts.dbsstr, "m", 1);
-    tbool.test ("-m: hasdashk", true, "-m", hasdashk, false, 1);
     tstr.test ("-d h: dispOpts.dbsstr", true, "-d h", dispOpts.dbsstr, "h", 2);
-    tbool.test ("-d h: hasdashk", true, "-d h", hasdashk, false, 2);
     tstr.test ("-h: dispOpts.dbsstr", true, "-h", dispOpts.dbsstr, "h", 1);
-    tbool.test ("-h: hasdashk", true, "-h", hasdashk, false, 1);
     tstr.test ("-d H: dispOpts.dbsstr", true, "-d H", dispOpts.dbsstr, "H", 2);
-    tbool.test ("-d H: hasdashk", true, "-d H", hasdashk, false, 2);
     tstr.test ("-H: dispOpts.dbsstr", true, "-H", dispOpts.dbsstr, "H", 1);
-    tbool.test ("-H: hasdashk", true, "-H", hasdashk, false, 1);
     tstr.test ("-A: formatString", true, "-A", formatString, DI_ALL_FORMAT, 1);
     treal.test ("-b 1000: dispOpts.baseDispSize", true, "-b 1000", dispOpts.baseDispSize, 1000.0, 2);
     treal.test ("-b 1024: dispOpts.baseDispSize", true, "-b 1024", dispOpts.baseDispSize, 1024.0, 2);
@@ -278,14 +315,12 @@ string s;
     tbaa.test ("-I nfs -I jfs: includeList", true, "-I nfs -I jfs", includeList, ["nfs":true,"jfs":true], 4);
     tbool.test ("-l: localOnly", true, "-l", localOnly, true, 1);
     tbool.test ("-L: includeLoopback", true, "-L", includeLoopback, true, 1);
-    tbool.test ("-n: noHeader", true, "-n", noHeader, true, 1);
+    tbool.test ("-n: printHeader", true, "-n", printHeader, false, 1);
     tstr.test ("-P: dispOpts.dbsstr", true, "-P", dispOpts.dbsstr, "512", 1);
     tbool.test ("-P: dispOpts.posixCompat", true, "-P", dispOpts.posixCompat, true, 1);
     tstr.test ("-P: formatString", true, "-P", formatString, DI_POSIX_FORMAT, 1);
     tstr.test ("-P -k: dispOpts.dbsstr", true, "-P -k", dispOpts.dbsstr, "k", 2);
     tstr.test ("-k -P: dispOpts.dbsstr", true, "-k -P", dispOpts.dbsstr, "k", 2);
-    tbool.test ("-P -k: hasdashk", true, "-P -k", hasdashk, true, 2);
-    tbool.test ("-k -P: hasdashk", true, "-k -P", hasdashk, true, 2);
     tbool.test ("-q: noQuotaCheck", true, "-q", noQuotaCheck, true, 1);
     tstr.test ("-s r: sortType", true, "-s r", sortType, "rm", 2);
     tstr.test ("-s t: sortType", true, "-s t", sortType, "tm", 2);
