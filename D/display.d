@@ -53,12 +53,12 @@ enum dchar
   fmtMountOptions = 'O';
 
 enum int
-    FTYPE_NONE = 0,
-    FTYPE_STRING = 1,
-    FTYPE_SPACE = 2,
-    FTYPE_PERC_SPACE = 3,
-    FTYPE_INODE = 4,
-    FTYPE_PERC_INODE = 5;
+  FTYPE_NONE = 0,
+  FTYPE_STRING = 1,
+  FTYPE_SPACE = 2,
+  FTYPE_PERC_SPACE = 3,
+  FTYPE_INODE = 4,
+  FTYPE_PERC_INODE = 5;
 
 struct FormatInfo {
   dchar         key;
@@ -327,7 +327,7 @@ buildDisplayList (ref DisplayData dispData)
 void
 displayTitle (ref DisplayData dispData)
 {
-  if (dispData.opts.noHeader) { return; }
+  if (! dispData.opts.printHeader) { return; }
   writeln (dispData.titleString);
 }
 
