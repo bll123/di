@@ -48,13 +48,13 @@ all:	di.env
         DTESTFLAGS="$$DC_OPT $$DC_RELEASE " di-programs
 
 
-#        DTESTFLAGS="$$DC_UNITTEST $$DC_COV" \
+#        DTESTFLAGS="$$DC_UNITTEST $$DC_COV $$DC_DEBUG" \
 
 .PHONY: all-test
 all-test: di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
-        DTESTFLAGS="$$DC_UNITTEST " \
+        DTESTFLAGS="$$DC_UNITTEST" \
 	LIBS="$(LIBS) $$DC_LIBS" \
 	di-programs
 
