@@ -24,6 +24,7 @@ enum string
 enum char
   shortOptStart = '-',
   argAssign     = '=';
+// enum getoptType {} doesn't seem to work.
 enum byte
   GETOPTN_LEGACY = 0,
   GETOPTN_MODERN = 1;
@@ -45,9 +46,12 @@ enum byte
 private struct ArgInfo {
   string        arg;
   string        argval;
-  int           asidx;
+  int           asidx;      // for short options; current position in arg str
+  int           avidx;      // for short options; start of arg val
   size_t        alen;
   bool          longOptFlag;
+  bool          attachedArg;
+  bool          haveArg;
 };
 
 struct OptInfo {
@@ -65,7 +69,7 @@ getoptn (getoptType gtype, string[] allargs, OptInfo[] opts)
 
   debug (1) {
     foreach (k, arg; allargs) {
-      writefln ("getopt:args:%d:%s:", k, arg);
+      writefln ("getoptn:args:%d:%s:", k, arg);
     }
   }
 
@@ -75,21 +79,25 @@ outerfor:
     for (auto aidx = 1; aidx < allargs.length; ++aidx) {
       arg = allargs[aidx];
       argval = null;
+      attachedArg = false;
+      haveArg = false;
       if (allargs.length > aidx + 1) {
         argval = allargs[aidx + 1];
       }
       asidx = 1;
+      avidx = 2;
       if (arg[0] != shortOptStart || arg == endArgs) {
+        if (arg == endArgs) { ++aidx; }
         debug (1) {
-          writefln ("getopt:nomore:aidx:%d:", aidx);
+          writefln ("getoptn:nomore:aidx:%d:", aidx);
         }
+        rv = aidx;
         break outerfor;
       }
 
       int rc = 0;
       longOptFlag = false;
       if (arg[0..2] == longOptStart) {
-        asidx = 2;
         longOptFlag = true;
       }
 
@@ -100,39 +108,47 @@ outerfor:
         alen = ival;
       }
       debug (1) {
-        writefln ("getopt:%d:%s:%s:", aidx, arg, arg[0..alen]);
+        writefln ("getoptn:%d:%s:%s:", aidx, arg, arg[0..alen]);
       }
 
 innerwhile:
       while (asidx < arg.length && arg[asidx] != '\0') {
         debug (1) {
-          writefln ("getopt:aidx:%d:asidx:%d:alen:%d:a[]:%s:%s:", aidx, asidx, arg.length, arg[asidx], arg);
+          writefln ("getoptn:aidx:%d:asidx:%d:alen:%d:avidx:%d:arg:%s:", aidx, asidx, arg.length, avidx, arg);
         }
 
-        rc = checkOption (gtype, ainfo, arg, opts);
+        rc = checkOption (gtype, ainfo, arg[0..alen], opts);
+        debug (1) {
+          writefln ("getoptn:co:rc:%d", rc);
+        }
+        rv = aidx + 1;
+
+        // if the option had an argument, process the next arg
+        // otherwise, it was a boolean, and asidx is used.
         if (rc != 0) {
           aidx += rc - 1;  // increment by rc less one, for loop will inc again
-          debug (1) {
-            writefln ("getopt:rc:%d:aidx:%d:", rc, aidx);
+          rv = aidx + 1;
+          if (haveArg) {
+            break innerwhile;
           }
         }
-        rv = aidx;
 
         // handles boolean --arg
         if (longOptFlag || gtype == GETOPTN_MODERN) {
           debug (1) {
-            writefln ("getopt:break inner:");
+            writefln ("getoptn:break inner:");
           }
           break innerwhile;
         }
 
         ++asidx;
+        ++avidx;
       } // while
     } // for
   } // with
 
   debug (1) {
-    writefln ("getopt:exit:");
+    writefln ("getoptn:exit:%d:rv:%d", allargs.length, rv);
   }
   return rv;
 }
@@ -144,7 +160,7 @@ version (unittest) {
     void
     test (getoptType gtype, string l, bool expok,
         T[] res, T init, T[] expected,
-        OptInfo[] opts, string[] a, int count)
+        OptInfo[] opts, string[] a, int wantrc)
     {
       for (auto i = 0; i < 4; ++i) {
         res[i] = init;
@@ -164,6 +180,12 @@ version (unittest) {
             }
           }
         }
+        if (idx != wantrc) {
+          fail = true;
+          debug (1) {
+            writefln ("  getoptn:idx:%d:want:%d:", idx, wantrc);
+          }
+        }
         if (! expok) {
           fail = true;
           debug (1) {
@@ -176,12 +198,6 @@ version (unittest) {
             writefln ("  getoptn: expected success");
           }
           fail = true;
-        }
-      }
-      if (idx != count) {
-        fail = true;
-        debug (1) {
-          writefln ("  getoptn: idx:%d:count:%d:", idx, count);
         }
       }
       if (fail) {
@@ -206,7 +222,7 @@ unittest {
 
   mixin MgetoptTest!bool tbool;
   mixin MgetoptTest!int  tint;
-  mixin MgetoptTest!int  tdouble;
+  mixin MgetoptTest!double  tdouble;
 
   OptInfo[] opta = [
     { "-a", GETOPTN_BOOL, cast(void *) &rb[0], null },
@@ -215,87 +231,59 @@ unittest {
     { "-d", GETOPTN_BOOL, cast(void *) &rb[3], null }
     ];
   tbool.test (GETOPTN_LEGACY, "boolean bundled, all", true,
-      rb, false, [true,true,true,true], opta, ["-abcd"], 1);
-  OptInfo[] optb = [
-    { "-a", GETOPTN_BOOL, cast(void *) &rb[0], null },
-    { "-b", GETOPTN_BOOL, cast(void *) &rb[1], null },
-    { "-c", GETOPTN_BOOL, cast(void *) &rb[2], null },
-    { "-d", GETOPTN_BOOL, cast(void *) &rb[3], null }
-    ];
+      rb, false, [true,true,true,true], opta, ["-abcd"], 2);
   tbool.test (GETOPTN_LEGACY, "boolean separate, all", true,
-      rb, false, [true,true,true,true], optb,
-      ["-a", "-b", "-c", "-d"], 4);
-  OptInfo[] optc = [
-    { "-a", GETOPTN_BOOL, cast(void *) &rb[0], null },
-    { "-b", GETOPTN_BOOL, cast(void *) &rb[1], null },
-    { "-c", GETOPTN_BOOL, cast(void *) &rb[2], null },
-    { "-d", GETOPTN_BOOL, cast(void *) &rb[3], null }
-    ];
+      rb, false, [true,true,true,true], opta,
+      ["-a", "-b", "-c", "-d"], 5);
   tbool.test (GETOPTN_LEGACY, "boolean separate, bc", true,
-      rb, false, [false,true,true,false], optc, ["-b", "-c"], 2);
-  OptInfo[] optd = [
-    { "-a", GETOPTN_BOOL, cast(void *) &rb[0], null },
-    { "-b", GETOPTN_BOOL, cast(void *) &rb[1], null },
-    { "-c", GETOPTN_BOOL, cast(void *) &rb[2], null },
-    { "-d", GETOPTN_BOOL, cast(void *) &rb[3], null }
-    ];
+      rb, false, [false,true,true,false], opta, ["-b", "-c"], 3);
   tbool.test (GETOPTN_LEGACY, "boolean separate, ad", true,
-      rb, false, [true,false,false,true], optd, ["-a", "-d"], 2);
+      rb, false, [true,false,false,true], opta, ["-a", "-d"], 3);
+  tbool.test (GETOPTN_LEGACY, "boolean unrecognized option: bundled", false,
+      rb, false, [true,true,true,true], opta, ["-abxd"], 0);
+  OptInfo[] optb = [
+    { "--testa", GETOPTN_BOOL, cast(void *) &rb[0], null },
+    { "--testb", GETOPTN_BOOL, cast(void *) &rb[1], null },
+    { "--testc", GETOPTN_BOOL, cast(void *) &rb[2], null },
+    { "--testd", GETOPTN_BOOL, cast(void *) &rb[3], null }
+    ];
+  tbool.test (GETOPTN_LEGACY, "boolean long option", true,
+      rb, false, [true,false,false,true], optb, ["--testa", "--testd"], 3);
+  tbool.test (GETOPTN_LEGACY, "boolean check return idx", true,
+      rb, false, [true,true,true,true], opta, ["-abcd"], 2);
 
-/+
-  tint.test ("int separate, ad", true,
-      [GETOPTN_NUMERIC, GETOPTN_NUMERIC, GETOPTN_NUMERIC, GETOPTN_NUMERIC],
-      ["a", "b", "c", "d"],
-      ["-a", "1", "-d", "2"], [1,0,0,2], 4);
-  tint.test ("int attached, ad", true,
-      [GETOPTN_NUMERIC, GETOPTN_NUMERIC, GETOPTN_NUMERIC, GETOPTN_NUMERIC],
-      ["a", "b", "c", "d"],
-      ["-a1", "-d2"], [1,0,0,2], 2);
-  tint.test ("int non option stop arg", true,
-      [GETOPTN_NUMERIC, GETOPTN_NUMERIC, GETOPTN_NUMERIC, GETOPTN_NUMERIC],
-      ["a", "b", "c", "d"],
-      ["-a", "1", "3", "-d", "2"], [1,0,0,0], 2);
-  tint.test ("int -- stop arg", true,
-      [GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC],
-      ["a", "b", "c", "d"],
-      ["-a", "1", "--", "-d", "2"], [1,0,0,0], 3);
-  tint.test ("int attached non option stop arg", true,
-      [GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC],
-      ["a", "b", "c", "d"],
-      ["-a1", "3", "-d", "2"], [1,0,0,0], 1);
-  tint.test ("int attached/separate", true,
-      [GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC],
-      ["a", "b", "c", "d"],
-      ["-a1", "-d", "2"], [1,0,0,2], 3);
-  tint.test ("int missing argument", false,
-      [GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC],
-      ["a", "b", "c", "d"],
-      ["-a1", "-d"], [1,0,0,9], 0);
-  tint.test ("int long options", true,
-      [GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC],
-      ["testa", "testb", "testc", "testd"],
-      ["--testa", "1", "--testd", "2"], [1,0,0,2], 4);
-  tint.test ("int unrecognized long option", false,
-      [GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC],
-      ["testa", "testb", "testc", "testd"],
-      ["--testz", "1", "--testd", "2"], [999,0,0,999], 0);
-  tint.test ("int unrecognized short option", false,
-      [GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC,GETOPTN_NUMERIC],
-      ["testa", "testb", "testc", "testd"],
-      ["-x", "1", "--testd", "2"], [998,0,0,998], 0);
-  tbool.test ("boolean unrecognized option: bundled", false,
-      [GETOPTN_BOOL,GETOPTN_BOOL,GETOPTN_BOOL,GETOPTN_BOOL],
-      ["a", "b", "c", "d"],
-      ["-abxd"], [true,true,true,true], 0);
-  tbool.test ("boolean long option", true,
-      [GETOPTN_BOOL,GETOPTN_BOOL,GETOPTN_BOOL,GETOPTN_BOOL],
-      ["testa", "testb", "testc", "testd"],
-      ["--testa", "--testd"], [true,false,false,true], 2);
-  tbool.test ("boolean check return idx", true,
-      [GETOPTN_BOOL,GETOPTN_BOOL,GETOPTN_BOOL,GETOPTN_BOOL],
-      ["a","b","c","d"],
-      ["-abcd"], [true,true,true,true], 1);
-+/
+  OptInfo[] opte = [
+    { "-a", GETOPTN_INT, cast(void*) &ri[0], null },
+    { "-b", GETOPTN_INT, cast(void*) &ri[1], null },
+    { "-c", GETOPTN_INT, cast(void*) &ri[2], null },
+    { "-d", GETOPTN_INT, cast(void*) &ri[3], null }
+    ];
+  tint.test (GETOPTN_LEGACY, "int separate, ad", true,
+      ri, 0, [1,0,0,2], opte, ["-a", "1", "-d", "2"], 5);
+  tint.test (GETOPTN_LEGACY, "int attached, ad", true,
+      ri, 0, [1,0,0,2], opte, ["-a1", "-d2"], 3);
+  tint.test (GETOPTN_LEGACY, "int non option stop arg", true,
+      ri, 0, [1,0,0,0], opte, ["-a", "1", "3", "-d", "2"], 3);
+  tint.test (GETOPTN_LEGACY, "int -- stop arg", true,
+      ri, 0, [1,0,0,0], opte, ["-a", "1", "--", "-d", "2"], 4);
+  tint.test (GETOPTN_LEGACY, "int attached non option stop arg", true,
+      ri, 0, [1,0,0,0], opte, ["-a1", "3", "-d", "2"], 2);
+  tint.test (GETOPTN_LEGACY, "int attached separate", true,
+      ri, 0, [1,0,0,2], opte, ["-a1", "-d", "2"], 4);
+  tint.test (GETOPTN_LEGACY, "int missing", false,
+      ri, 0, [1,0,0,9], opte, ["-a1", "-d"], 0);
+  OptInfo[] optf = [
+    { "--testa", GETOPTN_INT, cast(void*) &ri[0], null },
+    { "--testb", GETOPTN_INT, cast(void*) &ri[1], null },
+    { "--testc", GETOPTN_INT, cast(void*) &ri[2], null },
+    { "--testd", GETOPTN_INT, cast(void*) &ri[3], null }
+    ];
+  tint.test (GETOPTN_LEGACY, "int long options", true,
+      ri, 0, [1,0,0,2], optf, ["--testa", "1", "--testd", "2"], 5);
+  tint.test (GETOPTN_LEGACY, "int unrecognized long option", false,
+      ri, 0, [999,0,0,999], optf, ["--testz", "1", "--testd", "2"], 0);
+  tint.test (GETOPTN_LEGACY, "int unrecognized short option", false,
+      ri, 0, [998,0,0,998], optf, ["-x", "1", "--testd", "2"], 0);
 
   write ("unittest: digetopt: getoptn: ");
   if (failures > 0) {
@@ -315,7 +303,7 @@ checkOption (getoptType gtype, ref ArgInfo ainfo, string chkarg, OptInfo[] opts)
         writefln ("chk:%s:%s:%d", chkarg, opt.option, asidx);
       }
       if ((opt.option.length == 2 && opt.option[1] == chkarg[asidx]) ||
-          (opt.option == chkarg[0..alen])) {
+          (opt.option == chkarg)) {
         debug (1) {
           writefln ("chk:found:%s:", opt.option);
         }
@@ -326,22 +314,147 @@ checkOption (getoptType gtype, ref ArgInfo ainfo, string chkarg, OptInfo[] opts)
           return 1;
         } else if (opt.otype == GETOPTN_ALIAS) {
           debug (1) {
-            writefln ("chk:alias:%s:", opt.otype);
+            writefln ("chk:alias:%s:", *(cast(string*)opt.optval));
           }
           asidx = 1;
           return checkOption (gtype, ainfo, *(cast(string*)opt.optval), opts);
         } else {
           debug (1) {
             writefln ("chk:do process");
+            writefln ("chk:proc:%s:%s:%s:%d", arg, chkarg, opt.option, asidx);
           }
           return processOption (gtype, ainfo, opt);
         }
       }
     }
+
+    string s = "Unrecognized option: " ~ arg;
+    throw new Exception(s);
   }
 
   return 0;
 }
+
+version (unittest) {
+  bool
+  docoTest (T) (getoptType gtype, string[] a, OptInfo[] opt, bool expok,
+          T init, ref T res, T expres, int expret, ref int rv)
+  {
+    int       rc;
+    bool      fail;
+    ArgInfo   ainfo;
+
+    res = init;
+    with (ainfo) {
+      arg = a[0];
+      argval = null;
+      attachedArg = false;
+      haveArg = false;
+      if (a.length > 1) {
+        argval = a[1];
+      }
+      asidx = 1;
+      avidx = 2;
+      alen = arg.length;
+      auto ival = indexOf (arg, argAssign);
+      if (ival >= 0) {
+        alen = ival;
+      }
+      longOptFlag = false;
+      if (arg[0..2] == longOptStart) {
+        longOptFlag = true;
+      }
+    }
+    try {
+      rc = checkOption (gtype, ainfo, ainfo.arg[0..ainfo.alen], opt);
+      rv = rc;
+      if (rc != expret) {
+        fail = true;
+      }
+      if (expres != res) {
+        fail = true;
+      }
+      if (! expok) {
+        fail = true;
+      }
+    } catch {
+      if (expok) {
+        fail = true;
+      }
+    }
+    return fail;
+  }
+
+  mixin template MCOTest (T) {
+    void test (T) (getoptType gtype, string label, string[] a,
+        OptInfo[] opt, bool expok, T init, ref T res, T expres, int expret)
+    {
+      bool  fail;
+      int   rv;
+
+      ++tcount;
+      fail = docoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
+      if (fail)
+      {
+        ++failures;
+        writefln ("# %s: fail: %s", testname, label);
+        writefln ("  expected ok    : %d got %d", expok, fail);
+        writefln ("  expected return: %s got %s", expret, rv);
+        writefln ("  expected value : %s got %s", expres, res);
+      }
+    }
+  }
+}
+
+unittest {
+  string                testname = "chk";
+  int                   failures;
+  int                   tcount;
+
+  bool                          rb;
+  mixin MCOTest!bool            tbool;
+  string                        rs;
+  mixin MCOTest!string          tstr;
+
+  OptInfo opta[] = [ { "-a", GETOPTN_BOOL, cast(void *) &rb, null },
+    { "-b", GETOPTN_ALIAS, cast(void *) &"-a", null } ];
+  tbool.test (GETOPTN_LEGACY, "co: alias: single", ["-b"], opta, true, false, rb, true, 1);
+  OptInfo optb[] = [ { "-a", GETOPTN_BOOL, cast(void *) &rb, null },
+    { "-b", GETOPTN_ALIAS, cast(void *) &"-a", null },
+    { "-c", GETOPTN_ALIAS, cast(void *) &"-b", null } ];
+  tbool.test (GETOPTN_LEGACY, "co: alias: double", ["-c"], optb, true, false, rb, true, 1);
+  OptInfo optc[] = [ { "-a", GETOPTN_BOOL, cast(void *) &rb, null },
+    { "-b", GETOPTN_ALIAS, cast(void *) &"-a", null },
+    { "--clong", GETOPTN_ALIAS, cast(void *) &"-b", null } ];
+  tbool.test (GETOPTN_LEGACY, "co: alias: long", ["--clong"], optc, true, false, rb, true, 1);
+
+  OptInfo optd[] = [ { "-a", GETOPTN_STRING, cast(void *) &rs, null },
+    { "-b", GETOPTN_ALIAS, cast(void *) &"-a", null } ];
+  tstr.test (GETOPTN_LEGACY, "co: alias: arg,=", ["-b=def"], optd, true, "abc", rs, "def", 1);
+  OptInfo opte[] = [ { "-a", GETOPTN_STRING, cast(void *) &rs, null },
+    { "--blong", GETOPTN_ALIAS, cast(void *) &"-a", null } ];
+  tstr.test (GETOPTN_LEGACY, "co: alias: long,arg,=", ["--blong=def"], opte, true, "abc", rs, "def", 1);
+  OptInfo optf[] = [ { "--along", GETOPTN_STRING, cast(void *) &rs, null },
+    { "-b", GETOPTN_ALIAS, cast(void *) &"--along", null } ];
+  tstr.test (GETOPTN_LEGACY, "co: alias: short,arg,=", ["-b=def"], optf, true, "abc", rs, "def", 1);
+  OptInfo optg[] = [ { "-a", GETOPTN_STRING, cast(void *) &rs, null },
+    { "-b", GETOPTN_ALIAS, cast(void *) &"-a", null } ];
+  tstr.test (GETOPTN_LEGACY, "co: alias: arg,sep", ["-b", "def"], optg, true, "abc", rs, "def", 2);
+  OptInfo opth[] = [ { "-a", GETOPTN_STRING, cast(void *) &rs, null },
+    { "--blong", GETOPTN_ALIAS, cast(void *) &"-a", null } ];
+  tstr.test (GETOPTN_LEGACY, "co: alias: long,arg,sep", ["--blong", "def"], opth, true, "abc", rs, "def", 2);
+  OptInfo opti[] = [ { "--along", GETOPTN_STRING, cast(void *) &rs, null },
+    { "-b", GETOPTN_ALIAS, cast(void *) &"--along", null } ];
+  tstr.test (GETOPTN_LEGACY, "co: alias: short,arg,sep", ["-b", "def"], opti, true, "abc", rs, "def", 2);
+
+  write ("unittest: digetopt: checkOption: ");
+  if (failures > 0) {
+    writefln ("failed: %d of %d", failures, tcount);
+  } else {
+    writeln ("passed");
+  }
+}
+
 
 void
 checkHaveArg (in bool haveArg, in string oa)
@@ -365,14 +478,11 @@ processOption (getoptType gtype, ref ArgInfo ainfo, OptInfo opt)
       writefln ("## proc:arg:%s:", arg);
     }
 
-    bool      attachedArg = false;
-    bool      haveArg = false;
-
     // if length != alen there is a =argval
     // if LEGACY && there's more string and not a boolean, then is argval
     debug (1) {
-      writefln ("       :otype:%d:alen:%d:len:%d:asidx:%d:arg:%s:",
-            opt.otype, alen, arg.length, asidx, arg);
+      writefln ("       :otype:%d:alen:%d:len:%d:asidx:%d:avidx:%d:arg:%s:",
+            opt.otype, alen, arg.length, asidx, avidx, arg);
     }
     if (opt.otype != GETOPTN_BOOL && arg.length != alen) {
       argval = arg[alen + 1..$];    // -...=val
@@ -382,8 +492,8 @@ processOption (getoptType gtype, ref ArgInfo ainfo, OptInfo opt)
         writefln ("       :att:=:%s:", argval);
       }
     } else if (gtype == GETOPTN_LEGACY && opt.otype != GETOPTN_BOOL &&
-        ! longOptFlag && arg.length > asidx + 1) {
-      argval = arg[asidx + 1..$];       // short option -fval
+        ! longOptFlag && arg.length > avidx) {
+      argval = arg[avidx..$];       // short option -fval
       attachedArg = true;
       haveArg = true;
       debug (1) {
@@ -396,8 +506,8 @@ processOption (getoptType gtype, ref ArgInfo ainfo, OptInfo opt)
       }
     }
     debug (1) {
-      writefln ("       :arg:%s:asidx:%d:att:%d:have:%d:argval:%s:",
-          arg, asidx, attachedArg, haveArg, argval);
+      writefln ("       :arg:%s:asidx:%d:avidx:%d:att:%d:have:%d:argval:%s:",
+          arg, asidx, avidx, attachedArg, haveArg, argval);
     }
 
     if (opt.otype == GETOPTN_IGNORE) {
@@ -461,8 +571,6 @@ processOption (getoptType gtype, ref ArgInfo ainfo, OptInfo opt)
 }
 
 version (unittest) {
-  static string ovstring2;
-
   bool
   dopoTest (T) (getoptType gtype, string[] a, OptInfo opt, bool expok,
           T init, ref T res, T expres, int expret, ref int rv)
@@ -475,10 +583,13 @@ version (unittest) {
     with (ainfo) {
       arg = a[0];
       argval = null;
+      attachedArg = false;
+      haveArg = false;
       if (a.length > 1) {
         argval = a[1];
       }
       asidx = 1;
+      avidx = 2;
       alen = arg.length;
       auto ival = indexOf (arg, argAssign);
       if (ival >= 0) {
@@ -486,7 +597,6 @@ version (unittest) {
       }
       longOptFlag = false;
       if (arg[0..2] == longOptStart) {
-        asidx = 2;
         longOptFlag = true;
       }
     }
