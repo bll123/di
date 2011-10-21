@@ -279,7 +279,7 @@ typedef struct {
     unsigned int    printTotals;
     unsigned int    printDebugHeader;
     unsigned int    printHeader;
-    unsigned int    printAllColumns;
+    unsigned int    displayAll;
     unsigned int    localOnly;
 } diOptions_t;
 
@@ -2228,7 +2228,7 @@ checkDiskInfo (diData, hasLoop)
               printf ("chk: skipping(%s):%s\n",
                   getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
           }
-          dinfo->doPrint = (char) diopts->printAllColumns;
+          dinfo->doPrint = (char) diopts->displayAll;
         }
 
             /* Solaris reports a cdrom as having no free blocks,   */
@@ -2277,7 +2277,7 @@ checkDiskInfo (diData, hasLoop)
           if ((_s_fs_size_t) dinfo->totalBlocks <= 0L)
           {
             dinfo->printFlag = DI_PRNT_IGNORE;
-            dinfo->doPrint = (char) diopts->printAllColumns;
+            dinfo->doPrint = (char) diopts->displayAll;
             if (debug > 2)
             {
                 printf ("chk: ignore: totalBlocks <= 0: %s\n",
@@ -2341,7 +2341,7 @@ checkDiskInfo (diData, hasLoop)
               }
 
               dinfo->printFlag = DI_PRNT_IGNORE;
-              dinfo->doPrint = (char) diopts->printAllColumns;
+              dinfo->doPrint = (char) diopts->displayAll;
               if (debug > 2)
               {
                   printf ("dup: chk: ignore: %s duplicate of %s\n",
@@ -2572,7 +2572,7 @@ preCheckDiskInfo (diData)
             printf ("## prechk:%s:\n", dinfo->name);
         }
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
-        checkZone (dinfo, &diData->zoneInfo, diopts->printAllColumns);
+        checkZone (dinfo, &diData->zoneInfo, diopts->displayAll);
 #endif
 
         if (strcmp (dinfo->fsType, "zfs") == 0 ||
@@ -2584,7 +2584,7 @@ preCheckDiskInfo (diData)
         if (dinfo->printFlag == DI_PRNT_OK)
         {
               /* don't bother w/this check is all flag is set. */
-          if (! diopts->printAllColumns)
+          if (! diopts->displayAll)
           {
             di_testRemoteDisk (dinfo);
 
@@ -2670,7 +2670,7 @@ processOptions (arg, valptr)
 
   padata = (struct pa_tmp *) valptr;
   if (strcmp (arg, "-a") == 0) {
-    padata->diopts->printAllColumns = TRUE;
+    padata->diopts->displayAll = TRUE;
     strncpy (padata->diData->zoneInfo.zoneDisplay, "all", MAXPATHLEN);
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     usage();
