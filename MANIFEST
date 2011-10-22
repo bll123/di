@@ -46,6 +46,7 @@ C/version.h               di source
 D/                      D di source
 D/di.d                    di source
 D/digetopt.d              di source
+D/dihelp.d                di source
 D/dilocale.d              di source
 D/diquota.d               di source
 D/diskpart.d              di source
