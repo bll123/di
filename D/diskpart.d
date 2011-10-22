@@ -15,6 +15,7 @@ struct DiskPartition {
 public:
   bool          isRemote;
   bool          isReadOnly;
+  bool          doPrint;
   byte          printFlag;
   uint          st_dev;         // disk device number
   uint          sp_dev;         // special device number
@@ -46,6 +47,26 @@ public:
   setPrintFlag (byte pFlag)
   {
     printFlag = pFlag;
+  }
+
+  @property void
+  setDoPrint (bool v)
+  {
+    doPrint = v;
+  }
+
+  void
+  checkPartSizes () {
+    if (this.freeBlocks < 0.0) {
+      this.freeBlocks = 0.0;
+    }
+    if (this.availBlocks < 0.0) {
+      this.availBlocks = 0.0;
+    }
+    if (this.totalInodes < 0.0) {
+      this.freeInodes = 0.0;
+      this.availInodes = 0.0;
+    }
   }
 }; // struct DiskPartition
 
