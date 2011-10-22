@@ -19,8 +19,9 @@ struct DisplayOpts {
   real              dispBlockSize = 0;
   real              baseDispSize = size1024;
   int               baseDispIdx = idx1024;
-  short             width = 8;
-  short             inodeWidth = 7;
+  short             precision = 0;
+  short             width = 0;
+  short             inodeWidth = 0;
   string            dbsstr = "H";
   string            dispBlockLabel;
 }
