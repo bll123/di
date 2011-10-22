@@ -56,10 +56,10 @@ checkDiskQuotas (ref DiskPartitions dpList, Options opts)
 
   uid = 0;
   gid = 0;
-static if (_has_std_quotas) {
-  uid = geteuid ();
-  gid = getegid ();
-}
+  static if (_has_std_quotas) {
+    uid = geteuid ();
+    gid = getegid ();
+  }
 
   foreach (ref dp; dpList.diskPartitions)
   {
@@ -137,17 +137,17 @@ diquota (diQuota_t *diqinfo, Options opts)
 {
   int               rc;
   int               xfsflag;
-static if (_cstruct_dqblk) {
-  C_ST_dqblk       qinfo;
-  char             *qiptr;
-}
-static if (_cstruct_fs_disk_quota) {
-  C_ST_fs_disk_quota   xfsqinfo;
-}
-static if (_has_std_quotas) {
-  int               ucmd;
-  int               gcmd;
-}
+  static if (_cstruct_dqblk) {
+    C_ST_dqblk       qinfo;
+    char             *qiptr;
+  }
+  static if (_cstruct_fs_disk_quota) {
+    C_ST_fs_disk_quota   xfsqinfo;
+  }
+  static if (_has_std_quotas) {
+    int               ucmd;
+    int               gcmd;
+  }
 
   if (opts.debugLevel > 5) {
     writefln ("quota: diquota %s %s ", diqinfo.name, diqinfo.fsType);
@@ -165,103 +165,103 @@ static if (_has_std_quotas) {
     if (opts.debugLevel > 5) {
       writefln ("quota: diquota: nfs");
     }
-static if (_has_std_nfs_quotas) {
-    diquota_nfs (diqinfo, opts);
-}
+    static if (_has_std_nfs_quotas) {
+      diquota_nfs (diqinfo, opts);
+    }
     return;
   }
   if (diqinfo.fsType == "xfs") {
     if (opts.debugLevel > 5) {
       writefln ("quota: diquota: xfs");
     }
-static if (_hdr_linux_dqblk_xfs) {
-    ucmd = C_MACRO_QCMD (Q_XGETQUOTA, USRQUOTA);
-    gcmd = C_MACRO_QCMD (Q_XGETQUOTA, GRPQUOTA);
-    qiptr = cast(char *) &xfsqinfo;
-    xfsflag = TRUE;
-}
+    static if (_hdr_linux_dqblk_xfs) {
+      ucmd = C_MACRO_QCMD (Q_XGETQUOTA, USRQUOTA);
+      gcmd = C_MACRO_QCMD (Q_XGETQUOTA, GRPQUOTA);
+      qiptr = cast(char *) &xfsqinfo;
+      xfsflag = TRUE;
+    }
     ;
   } else {
-static if (_has_std_quotas) {
-    /* hp-ux doesn't have QCMD */
-    ucmd = Q_GETQUOTA;
-    gcmd = Q_GETQUOTA;
-}
-static if (_cmacro_QCMD) {
-    ucmd = C_MACRO_QCMD (Q_GETQUOTA, USRQUOTA);
-    gcmd = C_MACRO_QCMD (Q_GETQUOTA, GRPQUOTA);
-}
-static if (_cstruct_dqblk) {
-    qiptr = cast(char *) &qinfo;
-}
+    static if (_has_std_quotas) {
+      /* hp-ux doesn't have QCMD */
+      ucmd = Q_GETQUOTA;
+      gcmd = Q_GETQUOTA;
+    }
+    static if (_cmacro_QCMD) {
+      ucmd = C_MACRO_QCMD (Q_GETQUOTA, USRQUOTA);
+      gcmd = C_MACRO_QCMD (Q_GETQUOTA, GRPQUOTA);
+    }
+    static if (_cstruct_dqblk) {
+      qiptr = cast(char *) &qinfo;
+    }
   }
 
-static if (_cdefine___FreeBSD__ == 5) {
-    /* quotactl on devfs fs panics the system (FreeBSD 5.1) */
-  if (strcmp (diqinfo.fsType, "ufs") != 0) {
-    return;
+  static if (_cdefine___FreeBSD__ == 5) {
+      /* quotactl on devfs fs panics the system (FreeBSD 5.1) */
+    if (strcmp (diqinfo.fsType, "ufs") != 0) {
+      return;
+    }
   }
-}
 
   if (opts.debugLevel > 5) {
     writefln ("quota: quotactl on %s (%s)", diqinfo.name, _c_arg_1_quotactl);
   }
-static if (_clib_quotactl && _c_arg_1_quotactl == "char *") {
-  rc = quotactl (toStringz(diqinfo.name), ucmd,
-        cast(int) diqinfo.uid, cast(caddr_t) qiptr);
-}
-static if (_clib_quotactl && _c_arg_2_quotactl == "char *") {
- /* AIX has linux compatibility routine, but still need name */
-  static if (_cdefine__AIX) {
-    rc = quotactl (ucmd, toStringz(diqinfo.name),
-          cast(int) diqinfo.uid, cast(caddr_t) qiptr);
-  } else {
-    rc = quotactl (ucmd, toStringz(diqinfo.special),
+  static if (_clib_quotactl && _c_arg_1_quotactl == "char *") {
+    rc = quotactl (toStringz(diqinfo.name), ucmd,
           cast(int) diqinfo.uid, cast(caddr_t) qiptr);
   }
-}
-static if (_sys_fs_ufs_quota) {       /* Solaris */
-  {
-    int             fd;
-    C_ST_quotctl    qop;
-    char            tname [DI_NAME_LEN];
-
-    qop.op = Q_GETQUOTA;
-    qop.uid = diqinfo.uid;
-    qop.addr = cast(caddr_t) qiptr;
-    strcpy (tname, diqinfo.name);
-    strcat (tname, "/quotas");
-    fd = open (tname, O_RDONLY | O_NOCTTY);
-    if (fd >= 0) {
-      rc = ioctl (fd, Q_QUOTACTL, &qop);
-      close (fd);
+  static if (_clib_quotactl && _c_arg_2_quotactl == "char *") {
+    /* AIX has linux compatibility routine, but still need name */
+    static if (_cdefine__AIX) {
+      rc = quotactl (ucmd, toStringz(diqinfo.name),
+            cast(int) diqinfo.uid, cast(caddr_t) qiptr);
     } else {
-      rc = fd;
+      rc = quotactl (ucmd, toStringz(diqinfo.special),
+            cast(int) diqinfo.uid, cast(caddr_t) qiptr);
     }
   }
-} /* _sys_fs_ufs_quota */
+  static if (_sys_fs_ufs_quota) {       /* Solaris */
+    {
+      int             fd;
+      C_ST_quotctl    qop;
+      char            tname [DI_NAME_LEN];
+
+      qop.op = Q_GETQUOTA;
+      qop.uid = diqinfo.uid;
+      qop.addr = cast(caddr_t) qiptr;
+      strcpy (tname, diqinfo.name);
+      strcat (tname, "/quotas");
+      fd = open (tname, O_RDONLY | O_NOCTTY);
+      if (fd >= 0) {
+        rc = ioctl (fd, Q_QUOTACTL, &qop);
+        close (fd);
+      } else {
+        rc = fd;
+      }
+    }
+  } /* _sys_fs_ufs_quota */
 
   if (opts.debugLevel > 5) {
     writefln ("quota: quotactl on %s : rc %d : errno %d", diqinfo.name, rc, getErrno);
   }
-static if (_has_std_quotas) {
-  di_process_quotas ("usr", diqinfo, rc, xfsflag, qiptr, opts);
+  static if (_has_std_quotas) {
+    di_process_quotas ("usr", diqinfo, rc, xfsflag, qiptr, opts);
 
-static if (_cdefine_GRPQUOTA) {
-  if (rc == 0 || getErrno != ESRCH) {
-static if (_clib_quotactl && _c_arg_1_quotactl == "char *") {
-    rc = quotactl (toStringz(diqinfo.name), gcmd,
-          cast(int) diqinfo.gid, cast(caddr_t) qiptr);
-}
-static if (_clib_quotactl && _c_arg_1_quotactl != "char *") {
-    rc = quotactl (gcmd, toStringz(diqinfo.special),
-             cast(int) diqinfo.gid, cast(caddr_t) qiptr);
-}
+    static if (_cdefine_GRPQUOTA) {
+      if (rc == 0 || getErrno != ESRCH) {
+        static if (_clib_quotactl && _c_arg_1_quotactl == "char *") {
+          rc = quotactl (toStringz(diqinfo.name), gcmd,
+              cast(int) diqinfo.gid, cast(caddr_t) qiptr);
+        }
+        static if (_clib_quotactl && _c_arg_1_quotactl != "char *") {
+          rc = quotactl (gcmd, toStringz(diqinfo.special),
+              cast(int) diqinfo.gid, cast(caddr_t) qiptr);
+        }
 
-    di_process_quotas ("grp", diqinfo, rc, xfsflag, qiptr, opts);
-  }
-} /* _cdefine_GRPQUOTA */
-} /* _has_std_quotas */
+        di_process_quotas ("grp", diqinfo, rc, xfsflag, qiptr, opts);
+      }
+    } /* _cdefine_GRPQUOTA */
+  } /* _has_std_quotas */
 }
 
 static if (_has_std_nfs_quotas) {
@@ -297,11 +297,11 @@ extern (C) {
       return 0;
     }
     quotastat = cast(C_ENUM_gqr_status) intquotastat;
-  static if (_cmem_getquota_rslt_gqr_status) {
-    rslt.gqr_status = quotastat;
-  } else {
-    rslt.status = quotastat;
-  }
+    static if (_cmem_getquota_rslt_gqr_status) {
+      rslt.gqr_status = quotastat;
+    } else {
+      rslt.status = quotastat;
+    }
     rptr = &rslt.gqr_rquota;
 
     if (! xdr_int (xp, &rptr.rq_bsize)) {
@@ -395,11 +395,11 @@ diquota_nfs (diQuota_t *diqinfo, Options opts)
       return;
     }
 
-static if (_cmem_getquota_rslt_gqr_status) {
-    quotastat = result.gqr_status;
-} else {
-    quotastat = result.status;
-}
+    static if (_cmem_getquota_rslt_gqr_status) {
+      quotastat = result.gqr_status;
+    } else {
+      quotastat = result.status;
+    }
     if (quotastat == 1) {
       rptr = &result.gqr_rquota;
 
@@ -436,6 +436,7 @@ static if (_cmem_getquota_rslt_gqr_status) {
 } /* have rpc headers */
 
 static if (_has_std_quotas) {
+
 static void
 di_process_quotas (string tag, diQuota_t *diqinfo,
                   int rc, int xfsflag, char *cqinfo, Options opts)
@@ -444,27 +445,27 @@ di_process_quotas (string tag, diQuota_t *diqinfo,
   real              tsize;
   real              tlimit;
   C_ST_dqblk        *qinfo;
-static if (_cstruct_fs_disk_quota) {
-  C_ST_fs_disk_quota   *xfsqinfo;
-}
+  static if (_cstruct_fs_disk_quota) {
+    C_ST_fs_disk_quota   *xfsqinfo;
+  }
 
   if (opts.debugLevel > 5) {
     writefln ("quota: di_process_quotas");
   }
   qinfo = cast(C_ST_dqblk *) cqinfo;
   if (xfsflag) {
-static if (_cstruct_fs_disk_quota) {
-    xfsqinfo = cast(C_ST_fs_disk_quota *) cqinfo;
-}
+    static if (_cstruct_fs_disk_quota) {
+      xfsqinfo = cast(C_ST_fs_disk_quota *) cqinfo;
+    }
     quotBlockSize = 512;
   }
 
   if (rc == 0) {
     tlimit = 0;
     if (xfsflag) {
-static if (_cstruct_fs_disk_quota) {
-      tsize = xfsqinfo.d_blk_hardlimit;
-}
+      static if (_cstruct_fs_disk_quota) {
+        tsize = xfsqinfo.d_blk_hardlimit;
+      }
       ;
     } else {
       tsize = qinfo.dqb_bhardlimit;
@@ -479,9 +480,9 @@ static if (_cstruct_fs_disk_quota) {
     }
 
     if (xfsflag) {
-static if (_cstruct_fs_disk_quota) {
-      tsize = xfsqinfo.d_blk_softlimit;
-}
+      static if (_cstruct_fs_disk_quota) {
+        tsize = xfsqinfo.d_blk_softlimit;
+      }
       ;
     } else {
       tsize = qinfo.dqb_bsoftlimit;
@@ -506,26 +507,26 @@ static if (_cstruct_fs_disk_quota) {
       return;
     }
 
-static if (_cmem_dqblk_dqb_curspace) {
+    static if (_cmem_dqblk_dqb_curspace) {
 // OLD:    tsize = qinfo.dqb_curspace / diqinfo.blockSize;
-    if (tsize > diqinfo.used || diqinfo.used == 0) {
-      diqinfo.used = tsize;
+      if (tsize > diqinfo.used || diqinfo.used == 0) {
+        diqinfo.used = tsize;
+      }
     }
-}
-static if (_cmem_dqblk_dqb_curblocks) {
-    if (xfsflag) {
-static if (_cstruct_fs_disk_quota) {
-      tsize = xfsqinfo.d_bcount;
-}
-      ;
-    } else {
-      tsize = qinfo.dqb_curblocks;
-    }
+    static if (_cmem_dqblk_dqb_curblocks) {
+      if (xfsflag) {
+        static if (_cstruct_fs_disk_quota) {
+          tsize = xfsqinfo.d_bcount;
+        }
+        ;
+      } else {
+        tsize = qinfo.dqb_curblocks;
+      }
 // OLD:    tsize = tsize * quotBlockSize / diqinfo.blockSize;
-    if (tsize > diqinfo.used || diqinfo.used == 0) {
-      diqinfo.used = tsize;
+      if (tsize > diqinfo.used || diqinfo.used == 0) {
+        diqinfo.used = tsize;
+      }
     }
-}
 
     if (opts.debugLevel > 2) {
       writefln ("quota: %s %s used: %f limit: %f", tag, diqinfo.name,
@@ -533,9 +534,9 @@ static if (_cstruct_fs_disk_quota) {
     }
 
     if (xfsflag) {
-static if (_cstruct_fs_disk_quota) {
-      tsize = xfsqinfo.d_ino_hardlimit;
-}
+      static if (_cstruct_fs_disk_quota) {
+        tsize = xfsqinfo.d_ino_hardlimit;
+      }
       ;
     } else {
       tsize = qinfo.dqb_ihardlimit;
@@ -549,9 +550,9 @@ static if (_cstruct_fs_disk_quota) {
     }
 
     if (xfsflag) {
-static if (_cstruct_fs_disk_quota) {
-      tsize = xfsqinfo.d_ino_softlimit;
-}
+      static if (_cstruct_fs_disk_quota) {
+        tsize = xfsqinfo.d_ino_softlimit;
+      }
       ;
     } else {
       tsize = qinfo.dqb_isoftlimit;
@@ -573,9 +574,9 @@ static if (_cstruct_fs_disk_quota) {
     }
 
     if (xfsflag) {
-static if (_cstruct_fs_disk_quota) {
-      tsize = xfsqinfo.d_icount;
-}
+      static if (_cstruct_fs_disk_quota) {
+        tsize = xfsqinfo.d_icount;
+      }
       ;
     } else {
       tsize = qinfo.dqb_curinodes;
