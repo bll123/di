@@ -26,13 +26,13 @@ void main (string[] args)
   preCheckDiskPartitions (dpList, opts);
   dpList.getPartitionInfo ();
   checkDiskQuotas (dpList, opts);
+  checkDiskPartitions (dpList, opts);
   displayAll (opts, dispOpts, dpList);
 }
 
 void
 preCheckDiskPartitions (ref DiskPartitions dpList, Options opts)
 {
-/+
   if (opts.localOnly == true ||
     opts.includeList.length > 0 || opts.ignoreList.length > 0)
   {
@@ -56,13 +56,11 @@ preCheckDiskPartitions (ref DiskPartitions dpList, Options opts)
       }
     }  // for each disk partition
   } // if there's processing to be done
-+/
 }
 
 void
 checkIncludeList (ref DiskPartition dp, Options opts)
 {
-/+
   if (opts.includeList.length > 0)
   {
     dp.setPrintFlag = dp.DI_PRINT_EXCLUDE;
@@ -73,36 +71,37 @@ checkIncludeList (ref DiskPartition dp, Options opts)
       dp.setPrintFlag = dp.DI_PRINT_OK;
     }
   }
-+/
 }
 
 
 void
-usage ()
+checkDiskPartitions (ref DiskPartitions dpList, Options opts)
 {
-    writefln (DI_GT("di version %s    Default Format: %s"), DI_VERSION, DI_DEFAULT_FORMAT);
-                /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
-    writeln (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]"));
-    writeln (DI_GT("       [-I include-fstyp-list] [file [...]]"));
-    writeln (DI_GT("   -a   : print all mounted devices"));
-    writeln (DI_GT("   -d x : size to print blocks in (512 - POSIX, k - kbytes,"));
-    writeln (DI_GT("          m - megabytes, g - gigabytes, t - terabytes, h - human readable)."));
-    writeln (DI_GT("   -f x : use format string <x>"));
-    writeln (DI_GT("   -I x : include only file system types in <x>"));
-    writeln (DI_GT("   -x x : exclude file system types in <x>"));
-    writeln (DI_GT("   -l   : display local filesystems only"));
-    writeln (DI_GT("   -n   : don't print header"));
-    writeln (DI_GT("   -t   : print totals"));
-    writeln (DI_GT(" Format string values:"));
-    writeln (DI_GT("    m - mount point                     M - mount point, full length"));
-    writeln (DI_GT("    b - total kbytes                    B - kbytes available for use"));
-    writeln (DI_GT("    u - used kbytes                     c - calculated kbytes in use"));
-    writeln (DI_GT("    f - kbytes free                     v - kbytes available"));
-    writeln (DI_GT("    p - percentage not avail. for use   1 - percentage used"));
-    writeln (DI_GT("    2 - percentage of user-available space in use."));
-    writeln (DI_GT("    i - total file slots (i-nodes)      U - used file slots"));
-    writeln (DI_GT("    F - free file slots                 P - percentage file slots used"));
-    writeln (DI_GT("    s - filesystem name                 S - filesystem name, full length"));
-    writeln (DI_GT("    t - disk partition type             T - partition type, full length"));
-    writeln (DI_GT("See manual page for more options."));
+  foreach (ref dp; dpList.diskPartitions)
+  {
+    if (dp.printFlag == dp.DI_PRINT_EXCLUDE ||
+        dp.printFlag == dp.DI_PRINT_BAD ||
+        dp.printFlag == dp.DI_PRINT_OUTOFZONE) {
+      dp.setDoPrint (FALSE);
+      continue;
+    }
+
+    if (dp.printFlag == dp.DI_PRINT_IGNORE ||
+        dp.printFlag == dp.DI_PRINT_SKIP) {
+      dp.setDoPrint (opts.displayAll);
+      continue;
+    }
+
+    dp.checkPartSizes;
+
+    if (dp.printFlag == dp.DI_PRINT_OK) {
+      if (dp.totalBlocks <= 0.0) {
+        dp.setPrintFlag (dp.DI_PRINT_IGNORE);
+        dp.setDoPrint (opts.displayAll);
+      }
+    }
+
+    checkIncludeList (dp, opts);
+  }
 }
+
