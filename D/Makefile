@@ -54,7 +54,7 @@ all:	di.env
 all-test: di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
-        DTESTFLAGS="$$DC_UNITTEST" \
+        DTESTFLAGS="$$DC_UNITTEST " \
 	LIBS="$(LIBS) $$DC_LIBS" \
 	di-programs
 
@@ -123,9 +123,10 @@ $(MKC_REQLIB):	di.env config.d
 ###
 # executables
 
-OBJECTS = config$(OBJ_EXT) digetopt$(OBJ_EXT) dilocale$(OBJ_EXT) \
-	diquota$(OBJ_EXT) diskpart$(OBJ_EXT) \
-	display$(OBJ_EXT) dispopts$(OBJ_EXT) di$(OBJ_EXT) options$(OBJ_EXT)
+OBJECTS = config$(OBJ_EXT) di$(OBJ_EXT) \
+	dihelp$(OBJ_EXT) digetopt$(OBJ_EXT) \
+	dilocale$(OBJ_EXT) diquota$(OBJ_EXT) diskpart$(OBJ_EXT) \
+	display$(OBJ_EXT) dispopts$(OBJ_EXT) options$(OBJ_EXT)
 
 di$(EXE_EXT):	$(OBJECTS)
 	$(MKCONFIGPATH)/mklink.sh -e -c ${DC} -o di$(EXE_EXT) -- \
@@ -138,14 +139,17 @@ config$(OBJ_EXT):	config.d
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) config.d
 
 di$(OBJ_EXT):	di.d config$(OBJ_EXT) \
-		diskpart$(OBJ_EXT) dilocale$(OBJ_EXT) \
+		diskpart$(OBJ_EXT) digetopt$(OBJ_EXT) \
+		dihelp$(OBJ_EXT) dilocale$(OBJ_EXT) \
 		diquota$(OBJ_EXT) display$(OBJ_EXT) \
-		dispopts$(OBJ_EXT) digetopt$(OBJ_EXT) \
-		options$(OBJ_EXT)
+		dispopts$(OBJ_EXT) options$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di.d
 
 digetopt$(OBJ_EXT):	digetopt.d config$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) digetopt.d
+
+dihelp$(OBJ_EXT):	dihelp.d config$(OBJ_EXT)
+	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dihelp.d
 
 dilocale$(OBJ_EXT):	dilocale.d config$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dilocale.d
@@ -165,6 +169,6 @@ dispopts$(OBJ_EXT):	dispopts.d config$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dispopts.d
 
 options$(OBJ_EXT):	options.d config$(OBJ_EXT) \
-		dispopts$(OBJ_EXT) digetopt$(OBJ_EXT)
+		dispopts$(OBJ_EXT) digetopt$(OBJ_EXT) dihelp$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) options.d
 

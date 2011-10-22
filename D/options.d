@@ -15,8 +15,9 @@ version (unittest) {
 }
 
 import config;
-import dispopts;
+import dihelp;
 import digetopt;
+import dispopts;
 
 private immutable string DI_ALL_FORMAT = "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP";
 private immutable string DI_POSIX_FORMAT = "SbuvpM";
@@ -29,7 +30,7 @@ struct Options {
   bool              includeLoopback = false;
   bool              printHeader = true;
   bool              noQuotaCheck = false;
-  bool              displayTotal = true;
+  bool              displayTotal = false;
   bool              debugHeader = false;
   bool              unknown = false;
   bool[string]      includeList;
@@ -181,6 +182,8 @@ processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
         { dispOpts.dbsstr = "h"; };
     auto delH = delegate (string arg, string val)
         { dispOpts.dbsstr = "H"; };
+    auto delhelp = delegate (string arg, string val)
+        { usage(); exit (0); };
     auto delI = delegate (string arg, string val)
         { processIncludeList (val, opts); };
     auto delk = delegate (string arg, string val)
@@ -193,6 +196,12 @@ processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
           dispOpts.posixCompat = true; };
     auto dels = delegate (string arg, string val)
         { sortType = processSort (val); };
+    auto delsi = delegate (string arg, string val)
+        { dispOpts.baseDispSize = size1000;
+          dispOpts.baseDispIdx = idx1000;
+          dispOpts.dbsstr = "H"; };
+    auto delversion = delegate (string arg, string val)
+        { dispVersion(); exit (0); };
     auto delx = delegate (string arg, string val)
         { processIgnoreList (val, opts); };
     auto delZ = delegate (string arg, string val)
@@ -214,8 +223,7 @@ processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
       { "-g",     GETOPTN_FUNC_NOARG,   cast(void *) null, delg },
       { "-h",     GETOPTN_FUNC_NOARG,   cast(void *) null, delh },
       { "-H",     GETOPTN_FUNC_NOARG,   cast(void *) null, delH },
-      { "--help", GETOPTN_IGNORE,       cast(void *) null,
-            null }, // ### need delegate
+      { "--help", GETOPTN_FUNC_NOARG,       cast(void *) null, delhelp },
       { "--human-readable", GETOPTN_ALIAS, cast(void *) &"-H", null },
       { "-?",     GETOPTN_ALIAS,        cast(void *) &"--help", null },
       { "-I",     GETOPTN_FUNC_ARG,     cast(void *) null, delI },
@@ -232,14 +240,12 @@ processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
       { "--print-type", GETOPTN_IGNORE, cast(void *) null, null },
       { "-q",     GETOPTN_BOOL,         cast(void *) &noQuotaCheck, null },
       { "-s",     GETOPTN_FUNC_ARG,     cast(void *) null, dels },
-      { "--si",   GETOPTN_IGNORE,       cast(void *) null,
-            null, },  // ### need delegate
+      { "--si",   GETOPTN_FUNC_NOARG,   cast(void *) null, delsi },
       { "--sync", GETOPTN_IGNORE,       cast(void *) null, null },
       { "-t",     GETOPTN_BOOL,         cast(void *) &displayTotal, null },
       { "--total", GETOPTN_ALIAS,       cast(void *) &"-t", null },
       { "-v",     GETOPTN_IGNORE,       cast(void *) null, null },
-      { "--version", GETOPTN_IGNORE,    cast(void *) null,
-            null }, // ### need delegate
+      { "--version", GETOPTN_FUNC_NOARG, cast(void *) null, delversion },
       { "-w",     GETOPTN_SHORT,        cast(void *) &dispOpts.width, null },
       { "-W",     GETOPTN_SHORT,        cast(void *) &dispOpts.inodeWidth, null },
       { "-x",     GETOPTN_FUNC_ARG,     cast(void *) null, delx },
@@ -327,7 +333,7 @@ string s;
     tstr.test ("-s r: sortType", true, "-s r", sortType, "rm", 3);
     tstr.test ("-s t: sortType", true, "-s t", sortType, "tm", 3);
     tstr.test ("-s trsrm: sortType", true, "-s trsrm", sortType, "trsrm", 3);
-    tbool.test ("-t: displayTotal", true, "-q", displayTotal, true, 2);
+    tbool.test ("-t: displayTotal", true, "-t", displayTotal, true, 2);
     tshort.test ("-w 12: dispOpts.width", true, "-w 12", dispOpts.width, 12, 3);
     tshort.test ("-W 12: dispOpts.inodeWidth", true, "-W 12", dispOpts.width, 12, 3);
     tbaa.test ("-x nfs: ignoreList", true, "-x nfs", ignoreList, ["nfs":true], 3);
@@ -402,4 +408,3 @@ processIgnoreList (string arg, ref Options opts)
     opts.ignoreList[str] = true;
   }
 }
-
