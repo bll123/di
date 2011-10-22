@@ -52,6 +52,10 @@ chdr    rpc/rpc.h
 chdr    rpcsvc/rquota.h
 chdr    rpc/types.h
 
+### Other C library routines
+clib    exit
+cdcl    exit
+
 ### For NLS support
 
 clib    bindtextdomain -lintl, -lintl -liconv
@@ -298,7 +302,16 @@ static if (_ctype_gid_t > 0) {
 
 enum string DI_PROG = "di";
 enum string DI_PREFIX = "/home/bll/DI/di/C/test_di";
+
 // needed for getmntent()
 import core.stdc.stdio;  // for FILE
+
+static if (_enable_nls) {
+  import std.string;
+  import std.conv : to;
+  auto DI_GT (string txt) { return (to!string(gettext(toStringz(txt)))); }
+} else {
+  auto DI_GT (string txt) { return (txt); }
+}
 
 endinclude
