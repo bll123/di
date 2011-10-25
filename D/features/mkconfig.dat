@@ -26,31 +26,38 @@ chdr    locale.h
 chdr    unistd.h
 
 # diskpart.d:
-#   linux
-# _PATH_MOUNTED MNTTYPE_IGNORE
+# Linux:
+#   _PATH_MOUNTED MNTTYPE_IGNORE
 chdr    mntent.h
-# for struct statvfs, statvfs()
-#   linux
+# Linux:
+#   for struct statvfs, statvfs()
 csys    statvfs.h
+# FreeBSD:
+#   for getfsstat(); MNT_NOWAIT; struct statfs
+csys    mount.h
 
 # diquota.d:
-# XGETQUOTA
-#   linux
+# Linux:
+#   XGETQUOTA
 chdr    linux/dqblk_xfs.h
-#   solaris
+# Solaris:
 csys    fs/ufs_quota.h
-# quotas: QCMD, SUBCMD*, struct dqblk, USRQUOTA, GRPQUOTA
-#   linux
+# Linux:
+#   quotas: QCMD, SUBCMD*, struct dqblk, USRQUOTA, GRPQUOTA
 csys    quota.h
-# quotas: uid_t, gid_t
+#   quotas: uid_t, gid_t
 csys    types.h
+# FreeBSD:
+#   quotas: QCMD, SUBCMD*, struct dqblk, USRQUOTA, GRPQUOTA
+chdr    ufs/ufs/quota.h
 
 # NFS quotas
-chdr    rpc/auth.h
-chdr    rpc/clnt.h
+chdr    rpc/types.h
+# FreeBSD has broken rpc headers
+chdr    rpc/auth.h rpc/types.h
+chdr    rpc/clnt.h rpc/types.h rpc/auth.h
 chdr    rpc/rpc.h
 chdr    rpcsvc/rquota.h
-chdr    rpc/types.h
 
 ### Other C library routines
 clib    exit
@@ -72,11 +79,15 @@ command gmsgfmt
 
 ### diskpart.d:
 
-# get/set/endmntent
-#   linux
+# FreeBSD:
+#   getfsstat
+clib    getfsstat
+cdcl    args noconst getfsstat
+# Linux:
+#   get/set/endmntent
 clib    endmntent
 cdcl    endmntent
-#   unixware needs -lgen
+#   some unixware needs -lgen
 clib    getmntent -lgen
 cdcl    getmntent
 clib    setmntent
@@ -102,6 +113,16 @@ ctype int __fsfilcnt_t
 # Linux: 64-bit: from statvfs.h
 ctype int __fsblkcnt64_t
 ctype int __fsfilcnt64_t
+# FreeBSD: struct statfs from mount.h
+ctype int uint32_t
+ctype int uint64_t
+ctype int int64_t
+cstruct fsid
+cstruct statfs
+cdefine int MNT_NOWAIT
+# FreeBSD: for struct statvfs from statvfs.h
+ctype int fsblkcnt_t
+ctype int fsfilcnt_t
 
 ### diquota.d
 
@@ -118,7 +139,12 @@ cdcl    geteuid
 # from sys/quota.h
 cdefine hex SUBCMDSHIFT
 cdefine hex SUBCMDMASK
-cmacro  QCMD sys/quota.h int int int
+if sysquota _sys_quota
+ cmacro  QCMD sys/quota.h int int int
+endif
+if ufsufsquota _hdr_ufs_ufs_quota
+ cmacro  QCMD ufs/ufs/quota.h int int int
+endif
 cdefine hex Q_GETQUOTA
 cdefine hex Q_XGETQUOTA
 cdefine hex USRQUOTA
@@ -175,6 +201,8 @@ ctypedef caddr_t
 clib authunix_create_default
 cdcl authunix_create_default
 cmacro auth_destroy rpc/auth.h void 'AUTH *'
+clib auth_destroy
+cdcl auth_destroy
 
 # from rpc/clnt.h
 cmacro clnt_call rpc/clnt.h clnt_stat 'CLIENT *' u_long xdrproc_t caddr_t xdrproc_t caddr_t 'struct timeval'
@@ -222,8 +250,16 @@ cenum xdr_op
 cenum clnt_stat
 cenum auth_stat
 ctypedef xdrproc_t
+# Linux:
 ctype int  __time_t
 ctype int  __suseconds_t
+# FreeBSD:
+ctype int time_t
+ctype int suseconds_t
+ctype int rpcproc_t
+ctype int rpcprog_t
+ctype int rpcvers_t
+#
 cstruct timeval
 cstruct rpc_err
 cstruct getquota_args
