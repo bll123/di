@@ -14,6 +14,7 @@ debug (1) {
 }
 version (unittest) {
   import std.stdio;
+  import std.math;
 }
 
 import config;
@@ -166,7 +167,7 @@ version (unittest) {
         res[i] = init;
       }
       int  idx;
-      bool fail = false;
+      int fail = 0;
       ++tcount;
 
       a = ["dummy"] ~ a;
@@ -174,30 +175,28 @@ version (unittest) {
         idx = getoptn (gtype, a, opts);
         for (auto i = 0; i < 4; ++i) {
           if (expected[i] != res[i]) {
-            fail = true;
+            fail = 1;
             debug (1) {
               writefln ("  getoptn: %d: exp:%s:res:%s:", i, expected[i], res[i]);
             }
           }
         }
         if (idx != wantrc) {
-          fail = true;
+          fail = 2;
           debug (1) {
             writefln ("  getoptn:idx:%d:want:%d:", idx, wantrc);
           }
         }
         if (! expok) {
-          fail = true;
+          fail = 3;
           debug (1) {
             writefln ("  getoptn: expected failure");
           }
         }
-      } catch {
+      } catch (Exception e) {
         if (expok) {
-          debug (1) {
-            writefln ("  getoptn: expected success");
-          }
-          fail = true;
+          writefln ("  getoptn: expected success; got: %s", e.msg);
+          fail = 4;
         }
       }
       if (fail) {
@@ -336,12 +335,12 @@ checkOption (getoptType gtype, ref ArgInfo ainfo, string chkarg, OptInfo[] opts)
 }
 
 version (unittest) {
-  bool
+  int
   docoTest (T) (getoptType gtype, string[] a, OptInfo[] opt, bool expok,
           T init, ref T res, T expres, int expret, ref int rv)
   {
     int       rc;
-    bool      fail;
+    int       fail;
     ArgInfo   ainfo;
 
     res = init;
@@ -369,17 +368,18 @@ version (unittest) {
       rc = checkOption (gtype, ainfo, ainfo.arg[0..ainfo.alen], opt);
       rv = rc;
       if (rc != expret) {
-        fail = true;
+        fail = 2;
       }
       if (expres != res) {
-        fail = true;
+        fail = 1;
       }
       if (! expok) {
-        fail = true;
+        fail = 3;
       }
-    } catch {
+    } catch (Exception e) {
       if (expok) {
-        fail = true;
+        writefln ("  getoptn: expected success; got: %s", e.msg);
+        fail = 4;
       }
     }
     return fail;
@@ -389,16 +389,16 @@ version (unittest) {
     void test (T) (getoptType gtype, string label, string[] a,
         OptInfo[] opt, bool expok, T init, ref T res, T expres, int expret)
     {
-      bool  fail;
       int   rv;
 
       ++tcount;
-      fail = docoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
-      if (fail)
+      auto fail = docoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
+      if (fail > 0)
       {
         ++failures;
         writefln ("# %s: fail: %s", testname, label);
-        writefln ("  expected ok    : %d got %d", expok, fail);
+        writefln ("  expected ok    : %d", expok);
+        writefln ("  fail return    : %d", fail);
         writefln ("  expected return: %s got %s", expret, rv);
         writefln ("  expected value : %s got %s", expres, res);
       }
@@ -571,12 +571,12 @@ processOption (getoptType gtype, ref ArgInfo ainfo, OptInfo opt)
 }
 
 version (unittest) {
-  bool
+  int
   dopoTest (T) (getoptType gtype, string[] a, OptInfo opt, bool expok,
           T init, ref T res, T expres, int expret, ref int rv)
   {
     int       rc;
-    bool      fail;
+    int       fail;
     ArgInfo   ainfo;
 
     res = init;
@@ -604,17 +604,18 @@ version (unittest) {
       rc = processOption (gtype, ainfo, opt);
       rv = rc;
       if (rc != expret) {
-        fail = true;
+        fail = 2;
       }
       if (expres != res) {
-        fail = true;
+        fail = 1;
       }
       if (! expok) {
-        fail = true;
+        fail = 3;
       }
-    } catch {
+    } catch (Exception e) {
       if (expok) {
-        fail = true;
+        writefln ("  getoptn: expected success; got: %s", e.msg);
+        fail = 4;
       }
     }
     return fail;
@@ -624,16 +625,16 @@ version (unittest) {
     void test (T) (getoptType gtype, string label, string[] a,
         OptInfo opt, bool expok, T init, ref T res, T expres, int expret)
     {
-      bool  fail;
       int   rv;
 
       ++tcount;
-      fail = dopoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
-      if (fail)
+      auto fail = dopoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
+      if (fail > 0)
       {
         ++failures;
         writefln ("# %s: fail: %s", testname, label);
-        writefln ("  expected ok    : %d got %d", expok, fail);
+        writefln ("  expected ok    : %d", expok);
+        writefln ("  fail return    : %d", fail);
         writefln ("  expected return: %s got %s", expret, rv);
         writefln ("  expected value : %s got %s", expres, res);
       }
@@ -646,16 +647,16 @@ version (unittest) {
 
       void tester (T) (getoptType gtype, string label, string[] a, OptInfo opt,
             bool expok, T init, ref T res, T expres, int expret) {
-        bool  fail;
         int   rv;
 
         ++tcount;
-        fail = dopoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
-        if (fail)
+        auto fail = dopoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
+        if (fail > 0)
         {
           ++failures;
           writefln ("# %s: fail: %s", testname, label);
-          writefln ("  expected ok    : %d got %d", expok, fail);
+          writefln ("  expected ok    : %d", expok);
+          writefln ("  fail return    : %d", fail);
           writefln ("  expected return: %s got %s", expret, rv);
           writefln ("  expected value : %s got %s", expres, res);
         }
@@ -694,44 +695,45 @@ version (unittest) {
 
       void tester (T) (getoptType gtype, string label, string[] a, OptInfo opt,
             bool expok, T init, ref T res, T expres, int expret) {
-        bool  fail;
         int   rv;
 
         ++tcount;
-        fail = dopoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
-        if (fail)
+        auto fail = dopoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
+        if (fail > 0)
         {
-          ++failures;
-          writefln ("# %s: fail: %s", testname, label);
-          writefln ("  expected ok    : %d got %d", expok, fail);
-          writefln ("  expected return: %s got %s", expret, rv);
-          writefln ("  expected value : %s got %s", expres, res);
+          if (fail == 1 && fabs(expres - res) > 0.000001) {
+            ++failures;
+            writefln ("# %s: fail: %s", testname, label);
+            writefln ("  expected ok    : %d", expok);
+            writefln ("  fail return    : %d", fail);
+            writefln ("  expected return: %s got %s", expret, rv);
+          }
         }
       }
 
       OptInfo opt1 = { "-a", otype, cast(void *) &v, null };
-      tester (GETOPTN_LEGACY, lab ~ " leg,sopt,sep", ["-a", "1.5"], opt1, true,
-          cast(T) 0, v, cast(T) 1.5, 2);
-      tester (GETOPTN_LEGACY, lab ~ " leg,sopt,att", ["-a1.5"], opt1, true,
-          cast(T) 0, v, cast(T) 1.5, 1);
-      tester (GETOPTN_LEGACY, lab ~ " leg,sopt,=", ["-a=1.5"], opt1, true,
-          cast(T) 0, v, cast(T) 1.5, 1);
+      tester (GETOPTN_LEGACY, lab ~ " leg,sopt,sep", ["-a", "1.25"], opt1, true,
+          cast(T) 0, v, cast(T) 1.25, 2);
+      tester (GETOPTN_LEGACY, lab ~ " leg,sopt,att", ["-a1.25"], opt1, true,
+          cast(T) 0, v, cast(T) 1.25, 1);
+      tester (GETOPTN_LEGACY, lab ~ " leg,sopt,=", ["-a=1.25"], opt1, true,
+          cast(T) 0, v, cast(T) 1.25, 1);
       tester (GETOPTN_LEGACY, lab ~ " leg,sopt,miss", ["-a"], opt1, false,
           cast(T) 0, v, cast(T) 0, 0);
-      tester (GETOPTN_MODERN, lab ~ " mod,sopt,att", ["-a1.5"], opt1, false,
+      tester (GETOPTN_MODERN, lab ~ " mod,sopt,att", ["-a1.25"], opt1, false,
           cast(T) 0, v, cast(T) 0, 1);
-      tester (GETOPTN_MODERN, lab ~ " mod,sopt,=", ["-a=1.5"], opt1, true,
-          cast(T) 0, v, cast(T) 1.5, 1);
+      tester (GETOPTN_MODERN, lab ~ " mod,sopt,=", ["-a=1.25"], opt1, true,
+          cast(T) 0, v, cast(T) 1.25, 1);
       OptInfo opt2 = { "--a", otype, cast(void *) &v, null };
-      tester (GETOPTN_MODERN, lab ~ " mod,lopt,=", ["--a=1.5"], opt2, true,
-          cast(T) 0, v, cast(T) 1.5, 1);
-      tester (GETOPTN_MODERN, lab ~ " mod,lopt,sep", ["--a", "1.5"], opt2, true,
-          cast(T) 0, v, cast(T) 1.5, 2);
+      tester (GETOPTN_MODERN, lab ~ " mod,lopt,=", ["--a=1.25"], opt2, true,
+          cast(T) 0, v, cast(T) 1.25, 1);
+      tester (GETOPTN_MODERN, lab ~ " mod,lopt,sep", ["--a", "1.25"], opt2, true,
+          cast(T) 0, v, cast(T) 1.25, 2);
       tester (GETOPTN_MODERN, lab ~ " mod,lopt,miss", ["--a"], opt2, false,
           cast(T) 0, v, cast(T) 0, 1);
-      tester (GETOPTN_MODERN, lab ~ " mod,lopt,att", ["--a1.5"], opt2, false,
+      tester (GETOPTN_MODERN, lab ~ " mod,lopt,att", ["--a1.25"], opt2, false,
           cast(T) 0, v, cast(T) 0, 1);
-      tester (GETOPTN_LEGACY, lab ~ " mod,lopt,att", ["--a1.5"], opt2, false,
+      tester (GETOPTN_LEGACY, lab ~ " mod,lopt,att", ["--a1.25"], opt2, false,
           cast(T) 0, v, cast(T) 0, 1);
     }
   }
@@ -742,16 +744,16 @@ version (unittest) {
 
       void tester (T) (getoptType gtype, string label, string[] a, OptInfo opt,
             bool expok, T init, ref T res, T expres, int expret) {
-        bool  fail;
         int   rv;
 
         ++tcount;
-        fail = dopoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
-        if (fail)
+        auto fail = dopoTest!(T) (gtype, a, opt, expok, init, res, expres, expret, rv);
+        if (fail > 0)
         {
           ++failures;
           writefln ("# %s: fail: %s", testname, label);
-          writefln ("  expected ok    : %d got %d", expok, fail);
+          writefln ("  expected ok    : %d", expok);
+          writefln ("  fail return    : %d", fail);
           writefln ("  expected return: %s got %s", expret, rv);
           writefln ("  expected value : %s got %s", expres, res);
         }
@@ -789,16 +791,16 @@ version (unittest) {
         OptInfo opt, bool expok, ref string res,
         string expres, int expret)
     {
-      bool  fail;
       int   rv;
 
       ++tcount;
-      fail = dopoTest!string (gtype, a, opt, expok, null, res, expres, expret, rv);
-      if (fail)
+      auto fail = dopoTest!string (gtype, a, opt, expok, null, res, expres, expret, rv);
+      if (fail > 0)
       {
         ++failures;
         writefln ("# %s: fail: %s", testname, label);
-        writefln ("  expected ok    : %d got %d", expok, fail);
+        writefln ("  expected ok    : %d", expok);
+        writefln ("  fail return    : %d", fail);
         writefln ("  expected return: %s got %s", expret, rv);
         writefln ("  expected value : %s got %s", expres, res);
       }
