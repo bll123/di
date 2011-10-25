@@ -128,9 +128,9 @@ OBJECTS = config$(OBJ_EXT) di$(OBJ_EXT) \
 	dilocale$(OBJ_EXT) diquota$(OBJ_EXT) diskpart$(OBJ_EXT) \
 	display$(OBJ_EXT) dispopts$(OBJ_EXT) options$(OBJ_EXT)
 
-di$(EXE_EXT):	$(OBJECTS)
-	$(MKCONFIGPATH)/mklink.sh -e -c ${DC} -o di$(EXE_EXT) -- \
-		$(OBJECTS) $(LIBS)
+di$(EXE_EXT):	$(OBJECTS) $(MKC_REQLIB)
+	$(MKCONFIGPATH)/mklink.sh -e -c $(DC) -o di$(EXE_EXT) -- \
+		$(OBJECTS) $(LIBS) `cat $(MKC_REQLIB)`
 
 ###
 # objects
