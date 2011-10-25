@@ -148,7 +148,7 @@ di$(OBJ_EXT):	di.d config$(OBJ_EXT) \
 digetopt$(OBJ_EXT):	digetopt.d config$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) digetopt.d
 
-dihelp$(OBJ_EXT):	dihelp.d config$(OBJ_EXT)
+dihelp$(OBJ_EXT):	dihelp.d config$(OBJ_EXT) dilocale$(OBJ_EXT)
 	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dihelp.d
 
 dilocale$(OBJ_EXT):	dilocale.d config$(OBJ_EXT)
