@@ -5,6 +5,7 @@ module didiskpart;
 import std.stdio;
 import std.string;
 import std.conv : to;
+private import core.memory : GC;
 private import core.stdc.stdio;
 private import core.stdc.errno;
 
@@ -109,11 +110,12 @@ public:
 
   void
   getEntries () {
-    FILE *            f;
-    C_ST_mntent *     mntEntry;
-
-    static if (_clib_getmntent && _clib_setmntent && _clib_endmntent)
+    static if (_clib_getmntent && _clib_setmntent && _clib_endmntent &&
+        ! _clib_getfsstat)
     {
+      FILE *            f;
+      C_ST_mntent *     mntEntry;
+
       static if (_c_args_setmntent == 1)
       {
         f = setmntent (toStringz(DI_MOUNT_FILE));
@@ -175,13 +177,155 @@ public:
       } // while there are mount entries
     } // _clib_get/set/endmntent
 
+    static if (_clib_getfsstat) {
+      C_ST_statfs *mntbufp;
+
+//      if (debug > 0) { printf ("# getDiskEntries: getfsstat\n"); }
+      auto count = getfsstat (cast(C_ST_statfs *) null,
+          cast(_c_arg_2_getfsstat_alias) 0, MNT_NOWAIT);
+      if (count < 1)
+      {
+//          fprintf (stderr, "Unable to do getfsstat () errno %d\n", errno);
+          return;
+      }
+      auto bufsize = C_ST_statfs.sizeof * cast(size_t)count;
+      mntbufp = cast(C_ST_statfs*) GC.calloc (bufsize);
+      count = getfsstat (mntbufp, cast(_c_arg_2_getfsstat_alias)bufsize,
+            MNT_NOWAIT);
+
+/+
+# if _dcl_mnt_names
+#  if ! defined (MNT_NUMTYPES)
+#   define MNT_NUMTYPES (sizeof(mnt_names)/sizeof(char *))
+#  endif
+# endif
+# define DI_UNKNOWN_FSTYPE       "(%.2d)?"
+
+    diDiskInfo_t     *diptr;
+    int             count;
+    int             idx;
+# if _dcl_mnt_names && _mem_struct_statfs_f_type
+    short           fstype;
+# endif
+    _c_arg_2_getfsstat bufsize;
+    struct statfs   *mntbufp;
+    struct statfs   *sp;
+
+    *diCount = count;
+    *diskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) * (Size_t) count);
+
+    if (*diskInfo == (diDiskInfo_t *) NULL)
+    {
+        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+        return -1;
+    }
+    memset ((char *) *diskInfo, '\0', sizeof (diDiskInfo_t) * (Size_t) count);
+
+    for (idx = 0; idx < count; idx++)
+    {
+        _fs_size_t          tblocksz;
+
+        diptr = *diskInfo + idx;
+        di_initDiskInfo (diptr);
+
+        sp = mntbufp + idx;
+# if defined (MNT_RDONLY)
+        if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY)
+        {
+            diptr->isReadOnly = TRUE;
+        }
+# endif
+# if defined (MNT_LOCAL)
+        if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL)
+        {
+            diptr->isLocal = FALSE;
+        }
+# endif
+        convertMountOptions ((long) sp->f_flags, diptr);
+# if _mem_struct_statfs_f_type
+#  if defined (MOUNT_NFS3)
+        if (sp->f_type == MOUNT_NFS3)
+        {
+            strncat (diptr->options, "v3,",
+                    DI_OPT_LEN - strlen (diptr->options) - 1);
+        }
+#  endif
+# endif
+# if _mem_struct_statfs_mount_info && \
+        defined (MOUNT_NFS) && \
+        (_mem_struct_statfs_f_type || _mem_struct_statfs_f_fstypename)
+#  if _mem_struct_statfs_f_type
+        if (sp->f_type == MOUNT_NFS
+#  endif
+#  if _mem_struct_statfs_f_fstypename
+        if (strcmp (sp->f_fstypename, MOUNT_NFS) == 0
+#  endif
+#  if _mem_struct_statfs_f_fstypename && defined (MOUNT_NFS3)
+                || strcmp (sp->f_fstypename, MOUNT_NFS3) == 0
+#  endif
+#  if _mem_struct_statfs_f_type && defined (MOUNT_NFS3)
+                || sp->f_type == MOUNT_NFS3
+#  endif
+           )
+        {
+            struct nfs_args *na;
+            na = &sp->mount_info.nfs_args;
+            convertNFSMountOptions (na->flags, na->wsize, na->rsize, diptr);
+        }
+# endif
+        trimChar (diptr->options, ',');
+
+        strncpy (diptr->special, sp->f_mntfromname, (Size_t) DI_SPEC_NAME_LEN);
+        strncpy (diptr->name, sp->f_mntonname, (Size_t) DI_NAME_LEN);
+# if _mem_struct_statfs_f_fsize
+        tblocksz = (_fs_size_t) sp->f_fsize;
+# endif
+# if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
+        tblocksz = (_fs_size_t) sp->f_bsize;
+# endif
+        di_saveBlockSizes (diptr, tblocksz,
+            (_fs_size_t) sp->f_blocks,
+            (_fs_size_t) sp->f_bfree,
+            (_fs_size_t) sp->f_bavail);
+        di_saveInodeSizes (diptr,
+            (_fs_size_t) sp->f_files,
+            (_fs_size_t) sp->f_ffree,
+            (_fs_size_t) sp->f_ffree);
+# if _mem_struct_statfs_f_fstypename
+        strncpy (diptr->fsType, sp->f_fstypename, (Size_t) DI_TYPE_LEN);
+# else
+#  if _lib_sysfs && _mem_struct_statfs_f_type
+        sysfs (GETFSTYP, sp->f_type, diptr->fsType);
+#  else
+#   if _dcl_mnt_names && _mem_struct_statfs_f_type
+        fstype = sp->f_type;
+        if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
+        {
+            strncpy (diptr->fsType, mnt_names [fstype], DI_TYPE_LEN);
+        }
+        else
+        {
+            Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
+                      DI_UNKNOWN_FSTYPE, fstype);
+        }
+#   endif
+#  endif
+# endif
+    }
+
+    free ((char *) mntbufp);
+    return 0;
++/
+
+    }
+
     return;
   }
 
   void
   getPartitionInfo ()
   {
-    static if (_clib_statvfs) {
+    static if (_clib_statvfs && ! _clib_getfsstat) {
       C_ST_statvfs        statBuf;
 
       foreach (ref dp; diskPartitions)
