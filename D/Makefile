@@ -117,7 +117,7 @@ config.d:	di.env ../dioptions.dat features/mkconfig.dat
 		features/mkconfig.dat; fi
 
 $(MKC_REQLIB):	di.env config.d
-	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh -l \
+	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh -o \
 		$(MKC_REQLIB) config.d
 
 ###
