@@ -196,7 +196,7 @@ diquota (diQuota_t *diqinfo, Options opts)
     }
   }
 
-  static if (_cdefine___FreeBSD__ == 5) {
+  static if (_cdefine___FreeBSD__ && _t_FreeBSD__ == 5) {
       /* quotactl on devfs fs panics the system (FreeBSD 5.1) */
     if (strcmp (diqinfo.fsType, "ufs") != 0) {
       return;
