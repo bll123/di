@@ -93,10 +93,10 @@ private:
   }
 
   void
-  copyCstring (D,C) (ref D a, C b)
+  copyCstring (ref string a, char[] b)
   {
     auto l = strlen(b.ptr);
-    a = to!(D)(b[0..l]);
+    a = to!(string)(b[0..l]);
   }
 
 public:
