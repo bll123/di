@@ -136,7 +136,7 @@ bool            dispIdxsInitialized;
 public:
 
 void
-displayAll (ref Options opts, ref DisplayOpts dispOpts,
+doDisplay (ref Options opts, ref DisplayOpts dispOpts,
     ref DiskPartitions dpList)
 {
   DisplayData       dispData;
