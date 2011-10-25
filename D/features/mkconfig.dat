@@ -26,6 +26,8 @@ chdr    locale.h
 chdr    unistd.h
 
 # diskpart.d:
+# All:
+chdr    string.h
 # Linux:
 #   _PATH_MOUNTED MNTTYPE_IGNORE
 chdr    mntent.h
@@ -79,6 +81,19 @@ command gmsgfmt
 
 ### diskpart.d:
 
+# All:
+clib strlen
+cdcl strlen
+# FreeBSD: for struct statfs from mount.h
+ctype int uid_t
+ctype int int32_t
+ctype int int64_t
+ctype int uint32_t
+ctype int uint64_t
+cstruct fsid
+# FreeBSD: for struct statvfs from statvfs.h
+ctype int fsblkcnt_t
+ctype int fsfilcnt_t
 # FreeBSD:
 #   getfsstat
 clib    getfsstat
@@ -92,12 +107,6 @@ clib    getmntent -lgen
 cdcl    getmntent
 clib    setmntent
 cdcl    args noconst setmntent
-# Linux: statvfs
-clib    statvfs
-cdcl    statvfs
-# Linux: from statvfs.h
-cstruct statvfs
-cmember statvfs f_basetype
 # Linux: from mntent.h
 cdefine string _PATH_MOUNTED
 cdefine string _PATH_MNTTAB
@@ -107,29 +116,39 @@ cdefine string MNTTAB
 cdefine string MNTTYPE_IGNORE
 # Linux: from mntent.h
 cstruct mntent
-# Linux: from statvfs.h
+# Linux: for struct statvfs from statvfs.h
 ctype int __fsblkcnt_t
 ctype int __fsfilcnt_t
-# Linux: 64-bit: from statvfs.h
+# Linux: 64-bit: for struct statvfs from statvfs.h
 ctype int __fsblkcnt64_t
 ctype int __fsfilcnt64_t
-# FreeBSD: struct statfs from mount.h
-ctype int uint32_t
-ctype int uint64_t
-ctype int int64_t
-cstruct fsid
+# Linux: statvfs
+clib    statvfs
+cdcl    statvfs
+# Linux: from statvfs.h
+cstruct statvfs
+# FreeBSD: from mount.h
 cstruct statfs
+# FreeBSD: from mount.h
 cdefine int MNT_NOWAIT
-# FreeBSD: for struct statvfs from statvfs.h
-ctype int fsblkcnt_t
-ctype int fsfilcnt_t
+cdefine hex MNT_RDONLY
+cdefine hex MNT_LOCAL
+
+# Linux: from statvfs.h
+cmember statvfs f_basetype
+# FreeBSD: struct statfs from mount.h
+cmember statfs f_fstypename
+cmember statfs f_ftype
+cmember statfs f_fsize
+cmember statfs f_bsize
 
 ### diquota.d
 
 # uid/gid; geteuid, getegid
 ctype int gid_t
 ctype int __gid_t
-ctype int uid_t
+# done above
+#ctype int uid_t
 ctype int __uid_t
 clib    getegid
 clib    geteuid
@@ -229,7 +248,8 @@ ctype int bool_t
 ctype int enum_t
 ctype int u_int
 ctype int u_long
-ctype int int32_t
+# done above
+#ctype int int32_t
 cstruct rquota
 ctypedef rquota
 cmemberxdr rquota rq_bhardlimit
