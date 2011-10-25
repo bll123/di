@@ -201,8 +201,6 @@ ctypedef caddr_t
 clib authunix_create_default
 cdcl authunix_create_default
 cmacro auth_destroy rpc/auth.h void 'AUTH *'
-clib auth_destroy
-cdcl auth_destroy
 
 # from rpc/clnt.h
 cmacro clnt_call rpc/clnt.h clnt_stat 'CLIENT *' u_long xdrproc_t caddr_t xdrproc_t caddr_t 'struct timeval'
@@ -341,13 +339,5 @@ enum string DI_PREFIX = "/home/bll/DI/di/C/test_di";
 
 // needed for getmntent()
 import core.stdc.stdio;  // for FILE
-
-static if (_enable_nls) {
-  import std.string;
-  import std.conv : to;
-  auto DI_GT (string txt) { return (to!string(gettext(toStringz(txt)))); }
-} else {
-  auto DI_GT (string txt) { return (txt); }
-}
 
 endinclude
