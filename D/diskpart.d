@@ -92,6 +92,13 @@ private:
     enum string MNTTYPE_IGNORE = "ignore";
   }
 
+  void
+  copyCstring (D,C) (ref D a, C b)
+  {
+    auto l = strlen(b.ptr);
+    a = to!(D)(b[0..l]);
+  }
+
 public:
 
   DiskPartition[]      diskPartitions;
@@ -135,9 +142,10 @@ public:
       {
         DiskPartition dp;
 
+
         dp.special = to!(typeof(dp.special))(mntEntry.mnt_fsname);
-        dp.name = to!(typeof(dp.name))(mntEntry.mnt_dir);
-        dp.fsType = to!(typeof(dp.fsType))(mntEntry.mnt_type);
+        dp.name = to!(typeof(dp.special))(mntEntry.mnt_dir);
+        dp.fsType = to!(typeof(dp.special))(mntEntry.mnt_type);
 
         if (dp.special == "none") {
           dp.printFlag = dp.DI_PRINT_IGNORE;
@@ -149,7 +157,7 @@ public:
           dp.isRemote = true;
         }
 
-    /+
+/+
         if ((devp = strstr (mntEntry->mnt_opts, "dev=")) != (char *) NULL)
         {
             if (devp != mntEntry->mnt_opts)
@@ -162,7 +170,7 @@ public:
         {
             diptr->isReadOnly = TRUE;
         }
-  +/
++/
         dp.mountOptions = to!(typeof(dp.mountOptions))(mntEntry.mnt_opts);
 
         if (debugLevel > 5)
@@ -193,6 +201,60 @@ public:
       count = getfsstat (mntbufp, cast(_c_arg_2_getfsstat_alias)bufsize,
             MNT_NOWAIT);
 
+      for (auto idx = 0; idx < count; idx++)
+      {
+        DiskPartition dp;
+
+        auto sp = mntbufp + idx;
+        copyCstring (dp.special, sp.f_mntfromname);
+        copyCstring (dp.name, sp.f_mntonname);
+        static if (_cmem_statfs_f_fstypename) {
+          copyCstring (dp.fsType, sp.f_fstypename);
+//        } else static if (_lib_sysfs && _cmem_statfs_f_type) {
+//          char fbuff [DI_TYPE_LEN];
+//          sysfs (GETFSTYP, sp.f_type, fbuff);
+//          copyCstring (dp.fsType, fbuff);
+//        } else static if (_dcl_mnt_names && _cmem_statfs_f_type) {
+//          ;
+        }
+
+        if (dp.fsType.length > 2 && dp.fsType[0..2] == "nfs") {
+          dp.isRemote = true;
+        }
+        static if (_cdefine_MNT_RDONLY) {
+          if ((sp.f_flags & MNT_RDONLY) == MNT_RDONLY)
+          {
+            dp.isReadOnly = TRUE;
+          }
+        }
+        static if (_cdefine_MNT_LOCAL) {
+          if ((sp.f_flags & MNT_LOCAL) != MNT_LOCAL)
+          {
+            dp.isRemote = TRUE;
+          }
+        }
+
+        static if (_cmem_statfs_f_fsize) {
+          dp.blockSize = sp.f_fsize;
+        } else static if (_cmem_statfs_f_bsize) {
+          dp.blockSize = sp.f_bsize;
+        }
+        dp.totalBlocks = cast(typeof(dp.totalBlocks)) sp.f_blocks *
+            dp.blockSize;
+        dp.freeBlocks = cast(typeof(dp.freeBlocks)) sp.f_bfree *
+            dp.blockSize;
+        dp.availBlocks = cast(typeof(dp.availBlocks)) sp.f_bavail *
+            dp.blockSize;
+        dp.totalInodes = sp.f_files;
+        dp.freeInodes = sp.f_ffree;
+        dp.availInodes = sp.f_ffree;
+
+        diskPartitions ~= dp;
+      }
+      GC.free (mntbufp);
+      return;
+    }
+
 /+
 # if _dcl_mnt_names
 #  if ! defined (MNT_NUMTYPES)
@@ -201,46 +263,6 @@ public:
 # endif
 # define DI_UNKNOWN_FSTYPE       "(%.2d)?"
 
-    diDiskInfo_t     *diptr;
-    int             count;
-    int             idx;
-# if _dcl_mnt_names && _mem_struct_statfs_f_type
-    short           fstype;
-# endif
-    _c_arg_2_getfsstat bufsize;
-    struct statfs   *mntbufp;
-    struct statfs   *sp;
-
-    *diCount = count;
-    *diskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) * (Size_t) count);
-
-    if (*diskInfo == (diDiskInfo_t *) NULL)
-    {
-        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-        return -1;
-    }
-    memset ((char *) *diskInfo, '\0', sizeof (diDiskInfo_t) * (Size_t) count);
-
-    for (idx = 0; idx < count; idx++)
-    {
-        _fs_size_t          tblocksz;
-
-        diptr = *diskInfo + idx;
-        di_initDiskInfo (diptr);
-
-        sp = mntbufp + idx;
-# if defined (MNT_RDONLY)
-        if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY)
-        {
-            diptr->isReadOnly = TRUE;
-        }
-# endif
-# if defined (MNT_LOCAL)
-        if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL)
-        {
-            diptr->isLocal = FALSE;
-        }
-# endif
         convertMountOptions ((long) sp->f_flags, diptr);
 # if _mem_struct_statfs_f_type
 #  if defined (MOUNT_NFS3)
@@ -275,28 +297,6 @@ public:
 # endif
         trimChar (diptr->options, ',');
 
-        strncpy (diptr->special, sp->f_mntfromname, (Size_t) DI_SPEC_NAME_LEN);
-        strncpy (diptr->name, sp->f_mntonname, (Size_t) DI_NAME_LEN);
-# if _mem_struct_statfs_f_fsize
-        tblocksz = (_fs_size_t) sp->f_fsize;
-# endif
-# if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
-        tblocksz = (_fs_size_t) sp->f_bsize;
-# endif
-        di_saveBlockSizes (diptr, tblocksz,
-            (_fs_size_t) sp->f_blocks,
-            (_fs_size_t) sp->f_bfree,
-            (_fs_size_t) sp->f_bavail);
-        di_saveInodeSizes (diptr,
-            (_fs_size_t) sp->f_files,
-            (_fs_size_t) sp->f_ffree,
-            (_fs_size_t) sp->f_ffree);
-# if _mem_struct_statfs_f_fstypename
-        strncpy (diptr->fsType, sp->f_fstypename, (Size_t) DI_TYPE_LEN);
-# else
-#  if _lib_sysfs && _mem_struct_statfs_f_type
-        sysfs (GETFSTYP, sp->f_type, diptr->fsType);
-#  else
 #   if _dcl_mnt_names && _mem_struct_statfs_f_type
         fstype = sp->f_type;
         if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
@@ -309,17 +309,8 @@ public:
                       DI_UNKNOWN_FSTYPE, fstype);
         }
 #   endif
-#  endif
-# endif
     }
-
-    free ((char *) mntbufp);
-    return 0;
 +/
-
-    }
-
-    return;
   }
 
   void
@@ -362,7 +353,7 @@ public:
           dp.availInodes = statBuf.f_favail;
           static if (_cmem_statvfs_f_basetype) {
             if (dp.fsType.length == 0) {
-              dp.fsType = to!(typeof(dp.fsType))(statBuf.f_basetype);
+              copyCstring (dp.fsType, statBuf.f_basetype);
             }
           }
 
