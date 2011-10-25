@@ -8,6 +8,12 @@ import config;
 
 enum string DI_LOCALE_DIR = DI_PREFIX ~ "/share/locale";
 
+static if (_enable_nls) {
+  auto DI_GT (string txt) { return (to!string(gettext(toStringz(txt)))); }
+} else {
+  auto DI_GT (string txt) { return (txt); }
+}
+
 void
 initLocale ()
 {
