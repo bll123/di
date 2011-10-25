@@ -256,7 +256,7 @@ config.h:	di.env ../dioptions.dat features/mkconfig.dat
 
 $(MKC_REQLIB):	di.env config.h
 	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh \
-		-l $(MKC_REQLIB) config.h
+		-o $(MKC_REQLIB) config.h
 
 
 ###
