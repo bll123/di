@@ -89,6 +89,9 @@ unittest {
   DisplayOpts   dispOpts;
 
   unsetenv ("DI_ARGS");
+  unsetenv ("BLOCKSIZE");
+  unsetenv ("DF_BLOCK_SIZE");
+  unsetenv ("POSIXLY_CORRECT");
 
   ++tcount;
   fail = false;
