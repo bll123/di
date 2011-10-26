@@ -17,7 +17,9 @@ public:
   bool          isRemote;
   bool          isReadOnly;
   bool          doPrint;
+  bool          isPooledFS;
   byte          printFlag;
+  ushort        index;
   uint          st_dev;         // disk device number
   uint          sp_dev;         // special device number
   uint          sp_rdev;        // special rdev #
@@ -56,8 +58,15 @@ public:
     doPrint = v;
   }
 
+  @property void
+  setPooledFS (bool v)
+  {
+    isPooledFS = v;
+  }
+
   void
-  checkPartSizes () {
+  checkPartSizes ()
+  {
     if (this.freeBlocks < 0.0) {
       this.freeBlocks = 0.0;
     }
@@ -69,12 +78,26 @@ public:
       this.availInodes = 0.0;
     }
   }
+
+  void
+  initDiskPartition ()
+  {
+    this.totalBlocks = 0.0;
+    this.freeBlocks = 0.0;
+    this.availBlocks = 0.0;
+    this.totalInodes = 0.0;
+    this.freeInodes = 0.0;
+    this.availInodes = 0.0;
+  }
+
 }; // struct DiskPartition
+
 
 class DiskPartitions {
 
 private:
   int       debugLevel;
+  short     indexCount;
 
   static if (_cdefine__PATH_MOUNTED) {
     alias _PATH_MOUNTED DI_MOUNT_FILE;
@@ -143,6 +166,7 @@ public:
         DiskPartition dp;
 
 
+        dp.initDiskPartition;
         dp.special = to!(typeof(dp.special))(mntEntry.mnt_fsname);
         dp.name = to!(typeof(dp.special))(mntEntry.mnt_dir);
         dp.fsType = to!(typeof(dp.special))(mntEntry.mnt_type);
@@ -181,6 +205,7 @@ public:
           writefln ("    %s", dp.mountOptions);
         }
 
+        dp.index = indexCount++;
         diskPartitions ~= dp;
       } // while there are mount entries
     } // _clib_get/set/endmntent
@@ -205,6 +230,7 @@ public:
       {
         DiskPartition dp;
 
+        dp.initDiskPartition;
         auto sp = mntbufp + idx;
         copyCstring (dp.special, sp.f_mntfromname);
         copyCstring (dp.name, sp.f_mntonname);
@@ -249,6 +275,7 @@ public:
         dp.freeInodes = sp.f_ffree;
         dp.availInodes = sp.f_ffree;
 
+        dp.index = indexCount++;
         diskPartitions ~= dp;
       }
       GC.free (mntbufp);
@@ -368,5 +395,4 @@ public:
 
     return;
   }
-
 }; // class DiskPartitions
