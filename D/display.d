@@ -346,6 +346,9 @@ displayPartitions (ref DisplayData dispData, bool hasPooled)
   }
 
   if (dispData.opts.displayTotal) {
+    bool      inpool;
+    string    lastpool;
+
     totdp.initDiskPartition;
     totdp.name = DI_GT("Total");
 
@@ -355,18 +358,51 @@ displayPartitions (ref DisplayData dispData, bool hasPooled)
 
     foreach (size_t i, size_t v; sortIndex)
     {
-      auto dp = dispData.dpList.diskPartitions[v];
+      bool      startpool;
+      auto      dp = dispData.dpList.diskPartitions[v];
 
-      if (! dp.doPrint) {
-        continue;
+      startpool = false;
+
+      if (hasPooled && dp.isPooledFS) {
+        if (lastpool.length == 0 ||
+            (dp.special.length >= lastpool.length &&
+             lastpool != dp.special[0..lastpool.length])) {
+          lastpool = dp.special;
+          auto si = indexOf (lastpool, "#");  /* for advfs */
+          if (si >= 0) {
+            lastpool.length = si;
+          }
+          si = indexOf (lastpool, "/");  /* for zfs */
+          if (si >= 0) {
+            lastpool.length = si;
+          }
+          inpool = false;
+          startpool = true;
+        }
+      } else {
+        inpool = false;
       }
 
-      totdp.totalBlocks += dp.totalBlocks;
-      totdp.freeBlocks += dp.freeBlocks;
-      totdp.availBlocks += dp.availBlocks;
-      totdp.totalInodes += dp.totalInodes;
-      totdp.freeInodes += dp.freeInodes;
-      totdp.availInodes += dp.availInodes;
+      if (dp.doPrint) {
+        /* only add in a pooled filesystem if it's the first in the list    */
+        /* belonging to that pool                                           */
+        if (! inpool) {
+          totdp.totalBlocks += dp.totalBlocks;
+          totdp.freeBlocks += dp.freeBlocks;
+          totdp.availBlocks += dp.availBlocks;
+          totdp.totalInodes += dp.totalInodes;
+          totdp.freeInodes += dp.freeInodes;
+          totdp.availInodes += dp.availInodes;
+        } else {
+          /* if in a pool of disks, add the total used to the totals */
+          totdp.totalBlocks += dp.totalBlocks - dp.freeBlocks;
+          totdp.totalInodes += dp.totalInodes - dp.freeInodes;
+        }
+      }
+
+      if (startpool) {
+        inpool = true;
+      }
     }
   }
 
