@@ -71,7 +71,7 @@ test:		tests.done
 ###
 # environment
 
-di.env:	features/env.dat
+di.env:	features/env.dat ../dioptions.dat
 	@-$(RM) -f di.env tests.done
 	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkconfig.sh features/env.dat
 
