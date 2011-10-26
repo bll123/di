@@ -115,7 +115,7 @@ struct DisplayTable {
 
 DisplayTable[] displayTable = [
   // size == low except for bytes
-  // size,low,high,key,suffix,disp[2]
+  // size,low,high,precision,key,suffix,disp[1000,1024]
   { 0, 0, 0, 0, 'b', " ", [ "Bytes", "Bytes" ] },
   { 0, 0, 0, 0, 'k', "K", [ "KBytes", "KBytes" ] },
   { 0, 0, 0, 1, 'm', "M", [ "Megs", "Mebis" ] },
@@ -140,10 +140,6 @@ doDisplay (Options opts, ref DisplayOpts dispOpts,
 {
   DisplayData       dispData;
 
-  dispData.opts = opts;
-  dispData.dispOpts = dispOpts;
-  dispData.dpList = dpList;
-
   initializeIdxs ();
   initializeTitles (dispOpts);
   initializeDisplayTable (dispOpts);
@@ -152,6 +148,10 @@ doDisplay (Options opts, ref DisplayOpts dispOpts,
   {
     dumpDispTable ();
   }
+
+  dispData.opts = opts;
+  dispData.dispOpts = dispOpts;
+  dispData.dpList = dpList;
 
   buildDisplayList (dispData);
   displayTitle (dispData);
@@ -758,13 +758,11 @@ setDispBlockSize (ref DisplayOpts dispOpts)
   }
 
   if (c in displayIdxs) {
-//writefln ("found:%s", c);
     auto idx = displayIdxs [c];
     dispOpts.dispBlockLabel = displayTable [idx].disp [dispOpts.baseDispIdx];
     val = displayTable [idx].size;
     dispOpts.precision = displayTable [idx].precision;
   } else {
-//writefln ("not found:%s", c);
     foreach (idx, disp; displayTable)
     {
       if (disp.key == 'h') { break; }
