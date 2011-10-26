@@ -42,7 +42,7 @@ MKC_REQLIB = di.reqlibs
 #        DTESTFLAGS="$$DC_OPT $$DC_RELEASE $$DC_INLINE" di-programs
 
 .PHONY: all
-all:	di.env
+all:	di.env ../dioptions.dat
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
         DTESTFLAGS="$$DC_OPT $$DC_RELEASE " di-programs
