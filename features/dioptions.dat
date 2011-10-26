@@ -1,8 +1,8 @@
 # This is the 'di' options file.
-# It will not be removed when the directory 
+# It will not be removed when the directory
 # is cleaned, so your settings will be saved.
 #
-# Once you have it set up, you can reuse it 
+# Once you have it set up, you can reuse it
 # to rebuild 'di' with your preferences.
 #
 # When a new version of 'di' is released, you
@@ -16,7 +16,7 @@ WINAPI=F
 # The default output format
 #
 # default:
-# DI_DEFAULT_FORMAT=smbuvpT 
+# DI_DEFAULT_FORMAT=smbuvpT
 # alternatives:
 # DI_DEFAULT_FORMAT=MbuvpT
 #
@@ -31,8 +31,9 @@ WINAPI=F
 # DI_DEFAULT_DISP_SIZE=H
 #
 # The environment variables:
-#   CC, CFLAGS, LDFLAGS, LIBS, DC and DFLAGS
+#   CC, CFLAGS, LDFLAGS, LIBS, SHCFLAGS, SHLDFLAGS,
+#   DC and DFLAGS
 # may be set here. If these variables are set in
 # the environment, they will override any settings
 # here.
-# 
+#
