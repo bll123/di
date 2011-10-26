@@ -18,14 +18,13 @@ import dilocale;
 private:
 
 enum char
-  sortNone = 'n',
-  sortMount = 'm',
-  sortSpecial = 's',
-  sortAvail = 'a',
-  sortReverse = 'r',
-  sortType = 't',
-  sortAscending = 'A',
-  sortDescending = 'D';
+  DI_SORT_NONE = 'n',
+  DI_SORT_MOUNT = 'm',
+  DI_SORT_SPECIAL = 's',
+  DI_SORT_AVAIL = 'a',
+  DI_SORT_REVERSE = 'r',
+  DI_SORT_TYPE = 't',
+  DI_SORT_ASCENDING = 1;
 
 enum dchar
   fmtMount = 'm',
@@ -97,9 +96,9 @@ bool            fmtInfoIdxsInitialized;
 
 struct DisplayData
 {
-  Options           *opts;
-  DisplayOpts       *dispOpts;
-  DiskPartitions    *dpList;
+  Options           opts;
+  DisplayOpts       dispOpts;
+  DiskPartitions    dpList;
   string            titleString;
   string[dchar]     dispFmtString;
 };
@@ -137,13 +136,13 @@ public:
 
 void
 doDisplay (Options opts, ref DisplayOpts dispOpts,
-    ref DiskPartitions dpList)
+    ref DiskPartitions dpList, bool hasPooled)
 {
   DisplayData       dispData;
 
-  dispData.opts = &opts;
-  dispData.dispOpts = &dispOpts;
-  dispData.dpList = &dpList;
+  dispData.opts = opts;
+  dispData.dispOpts = dispOpts;
+  dispData.dpList = dpList;
 
   initializeIdxs ();
   initializeTitles (dispOpts);
@@ -156,7 +155,7 @@ doDisplay (Options opts, ref DisplayOpts dispOpts,
 
   buildDisplayList (dispData);
   displayTitle (dispData);
-  displayPartitions (dispData);
+  displayPartitions (dispData, hasPooled);
 }
 
 private:
@@ -187,8 +186,7 @@ buildDisplayList (ref DisplayData dispData)
 
   foreach (dp; dispData.dpList.diskPartitions)
   {
-    if (dp.printFlag != dp.DI_PRINT_OK)
-    {
+    if (! dp.doPrint) {
       continue;
     }
 
@@ -202,7 +200,7 @@ buildDisplayList (ref DisplayData dispData)
       setMaxLen (dp.fsType, dpMax[fmtTypeFull]);
     }
     if (fmtMountOptions in dpMax) {
-//    setMaxLen (dp.mountOptions, dpMax[fmtMountOptions]);
+      setMaxLen (dp.mountOptions, dpMax[fmtMountOptions]);
     }
     if (fmtMountTime in dpMax) {
       setMaxLen (dp.mountTime, dpMax[fmtMountTime]);
@@ -337,265 +335,311 @@ displayTitle (ref DisplayData dispData)
 
 
 void
-displayPartitions (ref DisplayData dispData)
+displayPartitions (ref DisplayData dispData, bool hasPooled)
 {
-  foreach (dp; dispData.dpList.diskPartitions)
-  {
-    if (dp.printFlag != dp.DI_PRINT_OK)
+  DiskPartition     totdp;
+  size_t[]          sortIndex;
+
+  if (dispData.opts.displayTotal) {
+    totdp.initDiskPartition;
+    totdp.name = DI_GT("Total");
+
+    sortIndex.length = dispData.dpList.diskPartitions.length;
+    for (int i = 0; i < sortIndex.length; ++i) {
+      sortIndex[i] = i;
+    }
+    if (hasPooled) {
+      sortPartitions (dispData.dpList.diskPartitions, sortIndex, "s");
+    }
+
+    foreach (size_t i, size_t v; sortIndex)
     {
+      auto dp = dispData.dpList.diskPartitions[v];
+
+      if (! dp.doPrint) {
+        continue;
+      }
+
+      totdp.totalBlocks += dp.totalBlocks;
+      totdp.freeBlocks += dp.freeBlocks;
+      totdp.availBlocks += dp.availBlocks;
+      totdp.totalInodes += dp.totalInodes;
+      totdp.freeInodes += dp.freeInodes;
+      totdp.availInodes += dp.availInodes;
+    }
+  }
+
+  sortPartitions (dispData.dpList.diskPartitions, sortIndex,
+        dispData.opts.sortType);
+
+  foreach (size_t i, size_t v; sortIndex)
+  {
+    auto dp = dispData.dpList.diskPartitions[v];
+
+    if (! dp.doPrint) {
       continue;
     }
 
-    string      outString;
-    string      sval;
-    real        rval;
-    real        uval;
-    size_t      dHidx;
+    printPartition (dispData, dp);
+  } // for each disk partition
 
-    if (dispData.dispOpts.dbsstr == "H") {
-      real mval = 0.0;
+  if (dispData.opts.displayTotal) {
+    printPartition (dispData, totdp);
+  }
+}
 
-      foreach (dchar c; dispData.opts.formatString)
-      {
-        if (c in formatTypesIdxs) {
-          auto ftype = formatTypes[formatTypesIdxs[c]].ftype;
+void
+printPartition (ref DisplayData dispData, DiskPartition dp)
+{
+  string      outString;
+  string      sval;
+  real        rval;
+  real        uval;
+  size_t      dHidx;
 
-          if (ftype == FTYPE_SPACE) {
-            switch (c)
-            {
-              case fmtBlocksTot:
-              {
-                rval = dp.totalBlocks;
-                break;
-              }
-
-              case fmtBlocksTotAvail:
-              {
-                rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
-                break;
-              }
-
-              case fmtBlocksUsed:
-              {
-                rval = dp.totalBlocks - dp.freeBlocks;
-                break;
-              }
-
-              case fmtBlocksCalcUsed:
-              {
-                rval = dp.totalBlocks - dp.availBlocks;
-                break;
-              }
-
-              case fmtBlocksFree:
-              {
-                rval = dp.freeBlocks;
-                break;
-              }
-
-              case fmtBlocksAvail:
-              {
-                rval = dp.availBlocks;
-                break;
-              }
-
-              default:
-              {
-                break;
-              }
-            }  // switch on format character
-
-            if (rval > mval) {
-              mval = rval;
-            }
-          }  // is FTYPE_SPACE
-        }  // valid format character
-      } // for each character in format string
-
-      dHidx = findDispSize (mval);
-    } // if -d H
+  if (dispData.dispOpts.dbsstr == "H") {
+    real mval = 0.0;
 
     foreach (dchar c; dispData.opts.formatString)
     {
       if (c in formatTypesIdxs) {
         auto ftype = formatTypes[formatTypesIdxs[c]].ftype;
 
-        switch (c)
+        if (ftype == FTYPE_SPACE) {
+          switch (c)
+          {
+            case fmtBlocksTot:
+            {
+              rval = dp.totalBlocks;
+              break;
+            }
+
+            case fmtBlocksTotAvail:
+            {
+              rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
+              break;
+            }
+
+            case fmtBlocksUsed:
+            {
+              rval = dp.totalBlocks - dp.freeBlocks;
+              break;
+            }
+
+            case fmtBlocksCalcUsed:
+            {
+              rval = dp.totalBlocks - dp.availBlocks;
+              break;
+            }
+
+            case fmtBlocksFree:
+            {
+              rval = dp.freeBlocks;
+              break;
+            }
+
+            case fmtBlocksAvail:
+            {
+              rval = dp.availBlocks;
+              break;
+            }
+
+            default:
+            {
+              break;
+            }
+          }  // switch on format character
+
+          if (rval > mval) {
+            mval = rval;
+          }
+        }  // is FTYPE_SPACE
+      }  // valid format character
+    } // for each character in format string
+
+    dHidx = findDispSize (mval);
+  } // if -d H
+
+  foreach (dchar c; dispData.opts.formatString)
+  {
+    if (c in formatTypesIdxs) {
+      auto ftype = formatTypes[formatTypesIdxs[c]].ftype;
+
+      switch (c)
+      {
+        case fmtMount:
+        case fmtMountFull:
         {
-          case fmtMount:
-          case fmtMountFull:
-          {
-            sval = dp.name;
-            break;
-          }
-
-          case fmtSpecial:
-          case fmtSpecialFull:
-          {
-            sval = dp.special;
-            break;
-          }
-
-          case fmtType:
-          case fmtTypeFull:
-          {
-            sval = dp.fsType;
-            break;
-          }
-
-          case fmtBlocksTot:
-          {
-            rval = dp.totalBlocks;
-            break;
-          }
-
-          case fmtBlocksTotAvail:
-          {
-            rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
-            break;
-          }
-
-          case fmtBlocksUsed:
-          {
-            rval = dp.totalBlocks - dp.freeBlocks;
-            break;
-          }
-
-          case fmtBlocksCalcUsed:
-          {
-            rval = dp.totalBlocks - dp.availBlocks;
-            break;
-          }
-
-          case fmtBlocksFree:
-          {
-            rval = dp.freeBlocks;
-            break;
-          }
-
-          case fmtBlocksAvail:
-          {
-            rval = dp.availBlocks;
-            break;
-          }
-
-          case fmtBlocksPercNotAvail:
-          {
-            rval = dp.totalBlocks;
-            uval = dp.totalBlocks - dp.availBlocks;
-            break;
-          }
-
-          case fmtBlocksPercUsed:
-          {
-            rval = dp.totalBlocks;
-            uval = dp.totalBlocks - dp.freeBlocks;
-            break;
-          }
-
-          case fmtBlocksPercBSD:
-          {
-            rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
-            uval = dp.totalBlocks - dp.freeBlocks;
-            break;
-          }
-
-          case fmtBlocksPercAvail:
-          {
-            rval = dp.totalBlocks;
-            uval = dp.availBlocks;
-            break;
-          }
-
-          case fmtBlocksPercFree:
-          {
-            rval = dp.totalBlocks;
-            uval = dp.freeBlocks;
-            break;
-          }
-
-          case fmtInodesTot:
-          {
-            rval = dp.totalInodes;
-            break;
-          }
-
-          case fmtInodesUsed:
-          {
-            rval = dp.totalInodes - dp.freeInodes;
-            break;
-          }
-
-          case fmtInodesFree:
-          {
-            rval = dp.freeInodes;
-            break;
-          }
-
-          case fmtInodesPerc:
-          {
-            rval = dp.totalInodes;
-            uval = dp.totalInodes - dp.availInodes;
-            break;
-          }
-
-          case fmtMountTime:
-          {
-            sval = dp.mountTime;
-            break;
-          }
-
-          case fmtMountOptions:
-          {
-            sval = dp.mountOptions;
-            break;
-          }
-
-          default:
-          {
-            break;
-          }
-        }  // switch on format character
-
-        switch (ftype)
-        {
-          case FTYPE_STRING:
-          {
-            outString ~= format (dispData.dispFmtString[c], sval);
-            break;
-          }
-
-          case FTYPE_SPACE:
-          {
-            outString ~= blockDisplay (dispData, c, rval, dHidx);
-            break;
-          }
-
-          case FTYPE_PERC_SPACE:
-          case FTYPE_PERC_INODE:
-          {
-            outString ~= percDisplay (dispData, c, rval, uval);
-            break;
-          }
-
-          case FTYPE_INODE:
-          {
-            outString ~= inodeDisplay (dispData, c, rval);
-            break;
-          }
-
-          default:
-          {
-            break;
-          }
+          sval = dp.name;
+          break;
         }
-      } else {
-        outString ~= c;
-      }
-    } // for each format character
 
-    writeln (outString);
-  } // for each disk partition
+        case fmtSpecial:
+        case fmtSpecialFull:
+        {
+          sval = dp.special;
+          break;
+        }
+
+        case fmtType:
+        case fmtTypeFull:
+        {
+          sval = dp.fsType;
+          break;
+        }
+
+        case fmtBlocksTot:
+        {
+          rval = dp.totalBlocks;
+          break;
+        }
+
+        case fmtBlocksTotAvail:
+        {
+          rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
+          break;
+        }
+
+        case fmtBlocksUsed:
+        {
+          rval = dp.totalBlocks - dp.freeBlocks;
+          break;
+        }
+
+        case fmtBlocksCalcUsed:
+        {
+          rval = dp.totalBlocks - dp.availBlocks;
+          break;
+        }
+
+        case fmtBlocksFree:
+        {
+          rval = dp.freeBlocks;
+          break;
+        }
+
+        case fmtBlocksAvail:
+        {
+          rval = dp.availBlocks;
+          break;
+        }
+
+        case fmtBlocksPercNotAvail:
+        {
+          rval = dp.totalBlocks;
+          uval = dp.totalBlocks - dp.availBlocks;
+          break;
+        }
+
+        case fmtBlocksPercUsed:
+        {
+          rval = dp.totalBlocks;
+          uval = dp.totalBlocks - dp.freeBlocks;
+          break;
+        }
+
+        case fmtBlocksPercBSD:
+        {
+          rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
+          uval = dp.totalBlocks - dp.freeBlocks;
+          break;
+        }
+
+        case fmtBlocksPercAvail:
+        {
+          rval = dp.totalBlocks;
+          uval = dp.availBlocks;
+          break;
+        }
+
+        case fmtBlocksPercFree:
+        {
+          rval = dp.totalBlocks;
+          uval = dp.freeBlocks;
+          break;
+        }
+
+        case fmtInodesTot:
+        {
+          rval = dp.totalInodes;
+          break;
+        }
+
+        case fmtInodesUsed:
+        {
+          rval = dp.totalInodes - dp.freeInodes;
+          break;
+        }
+
+        case fmtInodesFree:
+        {
+          rval = dp.freeInodes;
+          break;
+        }
+
+        case fmtInodesPerc:
+        {
+          rval = dp.totalInodes;
+          uval = dp.totalInodes - dp.availInodes;
+          break;
+        }
+
+        case fmtMountTime:
+        {
+          sval = dp.mountTime;
+          break;
+        }
+
+        case fmtMountOptions:
+        {
+          sval = dp.mountOptions;
+          break;
+        }
+
+        default:
+        {
+          break;
+        }
+      }  // switch on format character
+
+      switch (ftype)
+      {
+        case FTYPE_STRING:
+        {
+          outString ~= format (dispData.dispFmtString[c], sval);
+          break;
+        }
+
+        case FTYPE_SPACE:
+        {
+          outString ~= blockDisplay (dispData, c, rval, dHidx);
+          break;
+        }
+
+        case FTYPE_PERC_SPACE:
+        case FTYPE_PERC_INODE:
+        {
+          outString ~= percDisplay (dispData, c, rval, uval);
+          break;
+        }
+
+        case FTYPE_INODE:
+        {
+          outString ~= inodeDisplay (dispData, c, rval);
+          break;
+        }
+
+        default:
+        {
+          break;
+        }
+      }
+    } else {
+      outString ~= c;
+    }
+  } // for each format character
+
+  writeln (outString);
 }
 
 auto
@@ -905,4 +949,104 @@ initializeTitles (DisplayOpts dispOpts)
     formatTypes[formatTypesIdxs[fmtBlocksPercUsed]].title = "Capacity";
     formatTypes[formatTypesIdxs[fmtBlocksPercBSD]].title = "Capacity";
   }
+}
+
+private void
+sortPartitions (ref DiskPartition[] dps,
+        ref size_t[] sortIndex, string sortType)
+{
+  int    gap;
+
+  auto count = dps.length;
+  if (count <= 1)
+  {
+    return;
+  }
+
+  gap = 1;
+  while (gap < count)
+  {
+    gap = 3 * gap + 1;
+  }
+
+  for (gap /= 3; gap > 0; gap /= 3)
+  {
+    for (int i = gap; i < count; ++i)
+    {
+      auto tempIndex = sortIndex[i];
+      auto j = i - gap;
+
+      while (j >= 0 &&
+            dpCompare (dps, sortType, sortIndex[j], tempIndex) > 0)
+      {
+        sortIndex[j+gap] = sortIndex[j];
+        j = j - gap;
+      }
+
+      j += gap;
+      if (j != i)
+      {
+        sortIndex[j] = tempIndex;
+      }
+    }
+  }
+}
+
+private int
+dpCompare (ref DiskPartition[] dps, string sortType, size_t i, size_t j)
+{
+  int       rc;
+  int       sortOrder;
+
+      /* reset sort order to the default start value */
+  sortOrder = DI_SORT_ASCENDING;
+  rc = 0;
+
+  foreach (char st; sortType) {
+    switch (st) {
+      case DI_SORT_NONE: {
+        break;
+      }
+
+      case DI_SORT_MOUNT: {
+        rc = strcoll (toStringz(dps[i].name), toStringz(dps[j].name));
+        rc *= sortOrder;
+        break;
+      }
+
+      case DI_SORT_REVERSE: {
+        sortOrder *= -1;
+        break;
+      }
+
+      case DI_SORT_SPECIAL: {
+        rc = strcoll (toStringz(dps[i].special), toStringz(dps[j].special));
+        rc *= sortOrder;
+        break;
+      }
+
+      case DI_SORT_TYPE: {
+        rc = strcoll (toStringz(dps[i].fsType), toStringz(dps[j].fsType));
+        rc *= sortOrder;
+        break;
+      }
+
+      case DI_SORT_AVAIL: {
+        auto v = dps[i].availBlocks - dps[j].availBlocks;
+        rc = v < 0.00001 ? 0 : v > 0.0 ? 1 : -1;
+        rc *= sortOrder;
+        break;
+      }
+
+      default: {
+        break;
+      }
+    } /* switch on sort type */
+
+    if (rc != 0) {
+      return rc;
+    }
+  }
+
+  return rc;
 }
