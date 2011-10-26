@@ -84,6 +84,10 @@ command gmsgfmt
 # All:
 clib strlen
 cdcl strlen
+clib strcoll
+cdcl strcoll
+clib strcmp
+cdcl strcmp
 # FreeBSD: for struct statfs from mount.h
 ctype int uid_t
 ctype int int32_t
@@ -352,6 +356,9 @@ static if (_ctype_gid_t > 0) {
   alias C_TYP_gid_t   Gid_t;
 } else {
   alias int     Gid_t;
+}
+static if (! _clib_strcoll) {
+  alias strcoll strcmp;
 }
 
 enum string DI_PROG = "di";
