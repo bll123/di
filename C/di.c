@@ -869,11 +869,9 @@ printDiskInfo (diData)
             diDiskInfo_t    *dinfo;
             int             ispooled;
             int             startpool;
-            int             poolmain;
 
             ispooled = FALSE;
             startpool = FALSE;
-            poolmain = FALSE;
             dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
 
                 /* is it a pooled filesystem type? */
@@ -888,32 +886,23 @@ printDiskInfo (diData)
                 char        *ptr;
 
                 strncpy (lastpool, dinfo->special, sizeof (lastpool));
-                if (strcmp (dinfo->fsType, "advfs") == 0) {
-                  ptr = strchr (lastpool, '#');
-                  if (ptr != (char *) NULL) {
-                    *ptr = '\0';
-                  }
+                ptr = strchr (lastpool, '#');
+                if (ptr != (char *) NULL) {
+                  *ptr = '\0';
+                }
+                ptr = strchr (lastpool, '/');
+                if (ptr != (char *) NULL) {
+                  *ptr = '\0';
                 }
                 lastpoollen = strlen (lastpool);
                 inpool = FALSE;
-              }
-
-              if (strncmp (lastpool, dinfo->special, lastpoollen) == 0)
-              {
                 startpool = TRUE;
-                if (inpool == FALSE)
-                {
-                  poolmain = TRUE;
-                }
               }
             } else {
               inpool = FALSE;
             }
 
-            /* need to run addTotals for pooled filesystems */
-            /* if a pooled filesystem is being displayed    */
-            if (dinfo->doPrint ||
-                (diData->disppooledfs && (inpool || poolmain)))
+            if (dinfo->doPrint)
             {
               addTotals (dinfo, &totals, inpool);
             }
@@ -1350,9 +1339,9 @@ static void
 addTotals (const diDiskInfo_t *diskInfo, diDiskInfo_t *totals, int inpool)
 #else
 addTotals (diskInfo, totals, inpool)
-    const diDiskInfo_t   *diskInfo;
-    diDiskInfo_t   *totals;
-    int            inpool;
+    const diDiskInfo_t  *diskInfo;
+    diDiskInfo_t        *totals;
+    int                 inpool;
 #endif
 {
     _print_size_t       mult;
@@ -1361,9 +1350,9 @@ addTotals (diskInfo, totals, inpool)
 
     if (debug > 2)
     {
-        printf ("tot:%s:%s:inp:%d:bs:%lld:mult:%Lf\n",
+        printf ("tot:%s:%s:bs:%lld:mult:%Lf:inp:%d\n",
                     diskInfo->special, diskInfo->name,
-                    inpool, diskInfo->blockSize, mult);
+                    diskInfo->blockSize, mult, inpool);
     }
 
     if (inpool)
