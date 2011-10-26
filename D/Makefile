@@ -42,10 +42,11 @@ MKC_REQLIB = di.reqlibs
 #        DTESTFLAGS="$$DC_OPT $$DC_RELEASE $$DC_INLINE" di-programs
 
 .PHONY: all
-all:	di.env ../dioptions.dat
+all:	di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
-        DTESTFLAGS="$$DC_OPT $$DC_RELEASE " di-programs
+		DTESTFLAGS="$$DC_OPT $$DC_RELEASE " \
+		di-programs
 
 
 #        DTESTFLAGS="$$DC_UNITTEST $$DC_COV $$DC_DEBUG" \
@@ -54,18 +55,18 @@ all:	di.env ../dioptions.dat
 all-test: di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
-        DTESTFLAGS="$$DC_UNITTEST " \
-	LIBS="$(LIBS) $$DC_LIBS" \
-	di-programs
+		DTESTFLAGS="$$DC_UNITTEST " \
+		LIBS="$(LIBS) $$DC_LIBS" \
+		di-programs
 
 ###
 # environment
 
 #### possibly merge features/env.dat w/C version???
 
-di.env:	features/env.dat
+di.env:	features/env.dat ../dioptions.dat
 	@-$(RM) -f di.env tests.done
-	DC=$(DC) CFLAGS="-I`pwd`/../C" $(_MKCONFIG_SHELL) \
+	CFLAGS="-I`pwd`/../C" $(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh features/env.dat
 
 ###
