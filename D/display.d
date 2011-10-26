@@ -340,14 +340,15 @@ displayPartitions (ref DisplayData dispData, bool hasPooled)
   DiskPartition     totdp;
   size_t[]          sortIndex;
 
+  sortIndex.length = dispData.dpList.diskPartitions.length;
+  for (int i = 0; i < sortIndex.length; ++i) {
+    sortIndex[i] = i;
+  }
+
   if (dispData.opts.displayTotal) {
     totdp.initDiskPartition;
     totdp.name = DI_GT("Total");
 
-    sortIndex.length = dispData.dpList.diskPartitions.length;
-    for (int i = 0; i < sortIndex.length; ++i) {
-      sortIndex[i] = i;
-    }
     if (hasPooled) {
       sortPartitions (dispData.dpList.diskPartitions, sortIndex, "s");
     }
