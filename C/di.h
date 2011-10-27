@@ -4,8 +4,8 @@
  * Copyright 1994-2011 Brad Lanam, Walnut Creek, CA
  */
 
-#ifndef __INC_DI_H_
-#define __INC_DI_H_
+#ifndef _INC_DI_H
+#define _INC_DI_H
 
 #include "config.h"
 
@@ -176,6 +176,85 @@ typedef struct
     _fs_size_t      iused;
 } diQuota_t;
 
+typedef struct
+{
+    int    count;
+    char   **list;
+} iList_t;
+
+#if ! _lib_zone_list
+# define zoneid_t       int
+# define ZONENAME_MAX   65
+#endif
+
+typedef struct {
+    zoneid_t    zoneid;
+    char        name [ZONENAME_MAX + 1];
+    char        rootpath [MAXPATHLEN + 1];
+    Size_t      rootpathlen;
+} zoneSummary_t;
+
+typedef struct {
+    Uid_t           uid;
+    zoneid_t        myzoneid;
+    zoneSummary_t   *zones;
+    Uint_t          zoneCount;
+    char            zoneDisplay [MAXPATHLEN + 1];
+    int             globalIdx;
+} zoneInfo_t;
+
+#define DI_SORT_MAX             10
+
+typedef struct {
+    const char      *formatString;
+    _print_size_t   dispBlockSize;
+    _print_size_t   baseDispSize;
+    unsigned int    baseDispIdx;
+    char            sortType [DI_SORT_MAX + 1];
+    unsigned int    posix_compat;
+    unsigned int    quota_check;
+    unsigned int    csv_output;
+    unsigned int    excludeLoopback;
+    unsigned int    printTotals;
+    unsigned int    printDebugHeader;
+    unsigned int    printHeader;
+    unsigned int    displayAll;
+    unsigned int    localOnly;
+} diOptions_t;
+
+typedef struct {
+    Size_t       inodeWidth;
+    Size_t       maxMntTimeString;
+    Size_t       maxMountString;
+    Size_t       maxOptString;
+    Size_t       maxSpecialString;
+    Size_t       maxTypeString;
+    Size_t       width;
+    char         *dispBlockLabel;
+    char         blockFormat [15];
+    char         blockFormatNR [15];   /* no radix */
+    char         inodeFormat [15];
+    char         inodeLabelFormat [15];
+    char         mountFormat [10];
+    char         mTimeFormat [15];
+    char         optFormat [15];
+    char         specialFormat [15];
+    char         typeFormat [10];
+} diOutput_t;
+
+typedef struct {
+    int             count;
+    int             haspooledfs;
+    int             disppooledfs;
+    int             totsorted;
+    diOptions_t     options;
+    diOutput_t      output;
+    diDiskInfo_t    *diskInfo;
+    iList_t         ignoreList;
+    iList_t         includeList;
+    zoneInfo_t      zoneInfo;
+} diData_t;
+
 # if defined (__cplusplus) || defined (c_plusplus)
    extern "C" {
 # endif
@@ -283,4 +362,4 @@ typedef struct {
 
 # endif
 
-#endif /* __INC_DI_H_ */
+#endif /* _INC_DI_H */
