@@ -298,6 +298,12 @@ ctypedef XDR
 
 ### di.d
 cdefine string DI_VERSION
+clib    zone_list
+cdcl    zone_list
+clib    getzoneid
+cdcl    getzoneid
+clib    zone_getattr
+cdcl    zone_getattr
 
 ### options
 # see dioptions.dat to change these
