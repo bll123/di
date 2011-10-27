@@ -64,6 +64,12 @@ public:
     isPooledFS = v;
   }
 
+  @property void
+  setRemote (bool v)
+  {
+    isRemote = v;
+  }
+
   void
   checkPartSizes ()
   {
