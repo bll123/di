@@ -264,8 +264,8 @@ $(MKC_REQLIB):	di.env config.h
 
 OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		diquota$(OBJ_EXT) getoptn$(OBJ_EXT) \
-		realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
+		diquota$(OBJ_EXT) display$(OBJ_EXT) getoptn$(OBJ_EXT) \
+		options$(OBJ_EXT) realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT)
 
 di$(EXE_EXT):	$(MKC_REQLIB) $(OBJECTS)
@@ -281,7 +281,8 @@ mingw-di$(EXE_EXT):	$(OBJECTS)
 ###
 # objects
 
-di$(OBJ_EXT):		di.c config.h di.h getoptn.h version.h
+di$(OBJ_EXT):		di.c config.h di.h display.h getoptn.h \
+				options.h version.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(DI_CPPFLAGS) di.c
 
 digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
@@ -296,8 +297,14 @@ digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
 diquota$(OBJ_EXT):	diquota.c config.h di.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) diquota.c
 
+display$(OBJ_EXT):	display.c config.h di.h display.h options.h version.h 
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) display.c
+
 getoptn$(OBJ_EXT):	getoptn.c config.h getoptn.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) getoptn.c
+
+options$(OBJ_EXT):	options.c config.h di.h options.h
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) options.c
 
 realloc$(OBJ_EXT):	realloc.c config.h di.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) realloc.c
