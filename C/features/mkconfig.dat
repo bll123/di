@@ -77,8 +77,7 @@ sys     vfstab.h
 sys     vmount.h
 include_conflict time.h sys/time.h
 include_conflict sys/quota.h linux/quota.h
-command msgfmt
-command gmsgfmt
+command msgfmt gmsgfmt
 # rpmbuild used for regression tests
 command rpmbuild
 const   O_NOCTTY
@@ -219,12 +218,11 @@ ifnotoption NLS
   set _hdr_libintl 0
   set _hdr_locale 0
   set _command_msgfmt 0
-  set _command_gmsgfmt 0
 endif
 
 if hasnls _lib_bindtextdomain && _lib_gettext && _lib_setlocale && \
     _lib_textdomain && _hdr_libintl && _hdr_locale && \
-    ( _command_msgfmt || _command_gmsgfmt )
+    _command_msgfmt
   setint _enable_nls 1
 else
   set _lib_bindtextdomain 0
@@ -234,7 +232,6 @@ else
   set _hdr_libintl 0
   set _hdr_locale 0
   set _command_msgfmt 0
-  set _command_gmsgfmt 0
   setint _enable_nls 0
 endif
 

@@ -76,8 +76,7 @@ cdcl    bindtextdomain
 cdcl    gettext
 cdcl    setlocale
 cdcl    textdomain
-command msgfmt
-command gmsgfmt
+command msgfmt gmsgfmt
 
 ### diskpart.d:
 
@@ -318,12 +317,11 @@ ifnotoption NLS
   set _hdr_libintl 0
   set _hdr_locale 0
   set _command_msgfmt 0
-  set _command_gmsgfmt 0
 endif
 
 if hasnls _clib_bindtextdomain && _clib_gettext && _clib_setlocale && \
     _clib_textdomain && _hdr_libintl && _hdr_locale && \
-    ( _command_msgfmt || _command_gmsgfmt )
+    _command_msgfmt
   setint _enable_nls 1
 else
   set _clib_bindtextdomain 0
@@ -333,7 +331,6 @@ else
   set _hdr_libintl 0
   set _hdr_locale 0
   set _command_msgfmt 0
-  set _command_gmsgfmt 0
   setint _enable_nls 0
 endif
 

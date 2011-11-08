@@ -71,7 +71,6 @@
 #define _inc_conflict__hdr_time__sys_time 1
 #define _inc_conflict__sys_quota__hdr_linux_quota 1
 #define _command_msgfmt 0
-#define _command_gmsgfmt 0
 #define _command_rpmbuild 0
 #define _const_O_NOCTTY 0
 #define _define_MCTL_QUERY 0
