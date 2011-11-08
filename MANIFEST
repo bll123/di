@@ -1,7 +1,7 @@
 C/                      C di source
+C/Makefile                C Makefile
 C/config.bsd43.cc         config.h for BSD43
 C/config.bsd43.gcc        config.h for BSD43
-C/config.dmc              config.h for Windows (DMC)
 C/config.hpux.bcc         config.h for HP-UX (bundled cc)
 C/config.mingw            config.h for Windows (MinGW)
 C/config.ultrix.cc        config.h for ULTRIX
@@ -10,19 +10,22 @@ C/config.vms              config.h for VMS
 C/config.vms.b            alternate config.h for VMS
 C/config.win              config.h for windows
 C/di.c                    di source
+C/di.h                    di source
 C/didiskutil.c            di source
 C/digetentries.c          di source
 C/digetinfo.c             di source
-C/di.h                    di source
 C/dimntopt.h              di source
 C/diquota.c               di source
+C/display.c               di source
+C/display.h               di source
 C/features/               di configuration
 C/features/env.dat          environment configuration
 C/features/getoptn.dat      getoptn test configuration
 C/features/mkconfig.dat     mkconfig configuration
-C/getoptn.h               di source
 C/getoptn.c               di source
-C/Makefile                C Makefile
+C/getoptn.h               di source
+C/options.c               di source
+C/options.h               di source
 C/realloc.c               di source
 C/strdup.c                di source
 C/strstr.c                di source
@@ -44,6 +47,8 @@ C/tests.d/test_order
 C/trimchar.c              di source
 C/version.h               di source
 D/                      D di source
+D/Makefile                D Makefile
+D/d.README                D source README
 D/di.d                    di source
 D/digetopt.d              di source
 D/dihelp.d                di source
@@ -55,22 +60,20 @@ D/dispopts.d              di source
 D/features/               di configuration
 D/features/env.dat          environment configuration
 D/features/mkconfig.dat     mkconfig configuration
-D/Makefile                D Makefile
 D/options.d               di source
-D/d.README                D source README
+LICENSE                 License
+MANIFEST                This file
+Makefile                Top Level Makefile
+README                  Read This
 di.1                    di Manual Page
 di.spec                 rpmspec file
 features/
-features/dioptions.dat    di options
 features/checkbuild.dat
-features/checkperlbuild.dat
 features/checkinstall.dat
-LICENSE                 License
-Makefile                Top Level Makefile
-MANIFEST                This file
+features/checkperlbuild.dat
+features/dioptions.dat    di options
 mktar.sh                Creates the tar file
 po/                     internationalization
 po/de.po
 po/en.po
 po/es.po
-README                  Read This
