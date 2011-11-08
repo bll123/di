@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. $_MKCONFIG_DIR/testfuncs.sh
+. $_MKCONFIG_DIR/bin/testfuncs.sh
 
 maindodisplay $1 'check environment in make'
 maindoquery $1 $_MKC_ONCE
@@ -27,7 +27,7 @@ if [ $rc -eq 0 ]; then
     sed -e 's/^ *//' -e 's/ *$//' > ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
         ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
 else
-  ${MAKE:-make} ${TMAKEFLAGS} -e rtest-env | 
+  ${MAKE:-make} ${TMAKEFLAGS} -e rtest-env |
     sed -e 's/^ *//' -e 's/ *$//' > ${_MKCONFIG_TSTRUNTMPDIR}/e2 2>/dev/null
 fi
 
@@ -48,7 +48,7 @@ ${LDFLAGS}
 ${LIBS}
 ${OBJ_EXT}
 ${EXE_EXT}
-${XMSGFMT}" | 
+${XMSGFMT}" |
 sed -e 's/^ *//' -e 's/ *$//' > e1
 
 chkdiff e1 e2
