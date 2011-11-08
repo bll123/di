@@ -115,13 +115,16 @@ install-po: 	build-po
 install-prog:
 	$(TEST) -d $(INSTALL_DIR) || $(MKDIR) $(INSTALL_DIR)
 	$(TEST) -d $(INSTALL_BIN_DIR) || $(MKDIR) $(INSTALL_BIN_DIR)
-	$(TEST) ! -f $(TARGET) || $(MV) -f $(TARGET) $(TARGET).old
 	$(CP) -f ./C/$(PROG)$(EXE_EXT) $(TARGET)
 	-$(RM) -f $(MTARGET) > /dev/null 2>&1
 	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
-	-$(RM) -f $(TARGET).old > /dev/null 2>&1
-	-grep '^#define _enable_nls 1' C/config.h >/dev/null 2>&1 && \
+	@-test -f C/config.h && \
+		grep '^#define _enable_nls 1' C/config.h >/dev/null 2>&1 && \
 		(. ./C/di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
+		install-po)
+	@-test -f D/config.d && \
+		grep '^enum int_enable_nls = 1;' D/config.d >/dev/null 2>&1 && \
+		(. ./D/di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		install-po)
 
 install-man:
