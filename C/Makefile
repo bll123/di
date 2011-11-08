@@ -45,7 +45,7 @@ DI_CPPFLAGS = -DDI_LOCALE_DIR=\"$(LOCALEDIR)\"
 ###
 # mkconfig variables
 
-MKCONFIGPATH = ../mkconfig
+MKC_DIR = ../mkconfig
 MKCONFIG_TYPE = sh
 MKC_REQLIB = di.reqlibs
 
@@ -73,7 +73,7 @@ test:		tests.done
 
 di.env:	features/env.dat ../dioptions.dat
 	@-$(RM) -f di.env tests.done
-	CC=$(CC) $(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkconfig.sh features/env.dat
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh features/env.dat
 
 ###
 # specific builds
@@ -244,18 +244,18 @@ config.h:	di.env ../dioptions.dat features/mkconfig.dat
 	@-$(RM) -f config.h tests.done
 	@if [ "$(DI_NO_NLS)" != "" ]; then \
 		echo "*** User requested no NLS"; \
-		$(MKCONFIGPATH)/mkcsetopt.sh -o ../dioptions.dat NLS F; fi
+		$(MKC_DIR)/mkc.sh -setopt -o ../dioptions.dat NLS F; fi
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./di.env;$(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkconfig.sh \
+		$(MKC_DIR)/mkconfig.sh \
 		features/mkconfig.dat; fi
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
 		. ./di.env;perl \
-		$(MKCONFIGPATH)/mkconfig.pl \
+		$(MKC_DIR)/mkconfig.pl \
 		features/mkconfig.dat; fi
 
 $(MKC_REQLIB):	di.env config.h
-	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh \
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
 		-o $(MKC_REQLIB) config.h
 
 
@@ -324,10 +324,10 @@ trimchar$(OBJ_EXT):	trimchar.c config.h di.h
 .PHONY: all-test
 all-test:	tests.done
 
-tests.done: $(MKCONFIGPATH)/runtests.sh
+tests.done: $(MKC_DIR)/runtests.sh
 	@echo "## running tests"
 	CC=$(CC) DC=$(DC) $(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/runtests.sh ./tests.d
+		$(MKC_DIR)/runtests.sh ./tests.d
 	touch tests.done
 
 # needs environment
@@ -361,19 +361,19 @@ gconfig.h:	di.env features/getoptn.dat
 	@-$(RM) -f gconfig.h
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./di.env;$(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkconfig.sh \
+		$(MKC_DIR)/mkconfig.sh \
 		features/getoptn.dat; fi
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
 		. ./di.env;perl \
-		$(MKCONFIGPATH)/mkconfig.pl \
+		$(MKC_DIR)/mkconfig.pl \
 		features/getoptn.dat; fi
 
 getoptn_test$(OBJ_EXT):	getoptn.c gconfig.h getoptn.h
 	$(CC) -o getoptn_test$(OBJ_EXT) -DTEST_GETOPTN=1 -c getoptn.c
 
 getoptn.reqlibs:	di.env gconfig.h
-	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh \
-		-l getoptn.reqlibs gconfig.h
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
+		-o getoptn.reqlibs gconfig.h
 
 getoptn_test.exe:	getoptn_test$(OBJ_EXT) getoptn.reqlibs
 	$(CC) -o getoptn_test.exe $(LDFLAGS) getoptn_test$(OBJ_EXT) \
