@@ -30,7 +30,7 @@ RM = rm
 ###
 # mkconfig variables
 
-MKCONFIGPATH = ../mkconfig
+MKC_DIR = ../mkconfig
 MKCONFIG_TYPE = sh
 MKC_REQLIB = di.reqlibs
 
@@ -67,7 +67,7 @@ all-test: di.env
 di.env:	features/env.dat ../dioptions.dat
 	@-$(RM) -f di.env tests.done
 	CFLAGS="-I`pwd`/../C" $(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkconfig.sh features/env.dat
+		$(MKC_DIR)/mkconfig.sh features/env.dat
 
 ###
 # cleaning
@@ -112,64 +112,65 @@ config.d:	di.env ../dioptions.dat features/mkconfig.dat
 	@-$(RM) -f config.d tests.done
 	@if [ "$(DI_NO_NLS)" != "" ]; then \
 		echo "*** User requested no NLS"; \
-		$(MKCONFIGPATH)/mkcsetopt.sh -o ../dioptions.dat NLS F; fi
+		$(MKC_DIR)/mkcsetopt.sh -o ../dioptions.dat NLS F; fi
 	@. ./di.env;$(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkconfig.sh \
+		$(MKC_DIR)/mkconfig.sh \
 		features/mkconfig.dat; fi
 
 $(MKC_REQLIB):	di.env config.d
-	$(_MKCONFIG_SHELL) $(MKCONFIGPATH)/mkreqlib.sh -o \
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib -o \
 		$(MKC_REQLIB) config.d
 
 ###
 # executables
 
 OBJECTS = config$(OBJ_EXT) di$(OBJ_EXT) \
-	dihelp$(OBJ_EXT) digetopt$(OBJ_EXT) \
-	dilocale$(OBJ_EXT) diquota$(OBJ_EXT) diskpart$(OBJ_EXT) \
-	display$(OBJ_EXT) dispopts$(OBJ_EXT) options$(OBJ_EXT)
+	dihelp$(OBJ_EXT) dilocale$(OBJ_EXT) \
+	diquota$(OBJ_EXT) diskpart$(OBJ_EXT) display$(OBJ_EXT) \
+	dispopts$(OBJ_EXT) digetoptn$(OBJ_EXT) options$(OBJ_EXT)
 
 di$(EXE_EXT):	$(OBJECTS) $(MKC_REQLIB)
-	$(MKCONFIGPATH)/mklink.sh -e -c $(DC) -o di$(EXE_EXT) -- \
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -c $(DC) \
+		-o di$(EXE_EXT) -- $(LDFLAGS) \
 		$(OBJECTS) $(LIBS) `cat $(MKC_REQLIB)`
 
 ###
 # objects
 
 config$(OBJ_EXT):	config.d
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) config.d
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
 di$(OBJ_EXT):	di.d config$(OBJ_EXT) \
-		diskpart$(OBJ_EXT) digetopt$(OBJ_EXT) \
-		dihelp$(OBJ_EXT) dilocale$(OBJ_EXT) \
-		diquota$(OBJ_EXT) display$(OBJ_EXT) \
-		dispopts$(OBJ_EXT) options$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) di.d
+		diskpart$(OBJ_EXT) dihelp$(OBJ_EXT) \
+		dilocale$(OBJ_EXT) diquota$(OBJ_EXT) \
+		display$(OBJ_EXT) dispopts$(OBJ_EXT) \
+		digetoptn$(OBJ_EXT) options$(OBJ_EXT)
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
-digetopt$(OBJ_EXT):	digetopt.d config$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) digetopt.d
+digetoptn$(OBJ_EXT):	digetoptn.d config$(OBJ_EXT)
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
 dihelp$(OBJ_EXT):	dihelp.d config$(OBJ_EXT) dilocale$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dihelp.d
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
 dilocale$(OBJ_EXT):	dilocale.d config$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dilocale.d
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
 diquota$(OBJ_EXT):	diquota.d config$(OBJ_EXT) diskpart$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) diquota.d
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
 diskpart$(OBJ_EXT):	diskpart.d config$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) diskpart.d
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
 display$(OBJ_EXT):	display.d config$(OBJ_EXT) dilocale$(OBJ_EXT) \
 		diskpart$(OBJ_EXT) dispopts$(OBJ_EXT) \
 		options$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) display.d
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
 dispopts$(OBJ_EXT):	dispopts.d config$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) dispopts.d
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
 options$(OBJ_EXT):	options.d config$(OBJ_EXT) \
-		dispopts$(OBJ_EXT) digetopt$(OBJ_EXT) dihelp$(OBJ_EXT)
-	$(DC) -c $(DFLAGS) $(DTESTFLAGS) options.d
+		dispopts$(OBJ_EXT) dihelp$(OBJ_EXT) digetoptn$(OBJ_EXT)
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -comp -c $(DC) -- $(DFLAGS) $(DTESTFLAGS) $<
 
