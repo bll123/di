@@ -16,7 +16,7 @@ version (unittest) {
 
 import config;
 import dihelp;
-import digetopt;
+import digetoptn;
 import dispopts;
 
 private immutable string DI_ALL_FORMAT = "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP";
@@ -172,7 +172,8 @@ processOpts (string str, ref Options opts, ref DisplayOpts dispOpts)
 int
 processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
 {
-  int       idx;
+  int               idx;
+  OptInfo[string]   options;
 
   with (opts) {
     auto delA = delegate (string arg, string val)
@@ -210,56 +211,54 @@ processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
     auto delZ = delegate (string arg, string val)
         { zoneDisplay = "all";  };
 
-    OptInfo[] options = [
-      { "-A",     GETOPTN_FUNC_NOARG,     cast(void *) null, delA },
-      { "-a",     GETOPTN_BOOL,         cast(void *) &displayAll, null },
-      { "--all",  GETOPTN_ALIAS,        cast(void *) &"-a", null },
-      { "-b",     GETOPTN_ALIAS,        cast(void *) &"-B", null },
-      { "--block-size", GETOPTN_ALIAS,  cast(void *) &"-B", null },
-      { "-B",     GETOPTN_FUNC_ARG,     cast(void *) null, delB },
-      { "-c",     GETOPTN_BOOL,         cast(void *) &csvOutput, null },
-      { "--csv-output", GETOPTN_ALIAS,  cast(void *) &"-c", null },
-      { "-d",     GETOPTN_STRING,       cast(void *) &dispOpts.dbsstr, null },
-      { "-f",     GETOPTN_STRING,       cast(void *) &formatString, null },
-      { "--format-string", GETOPTN_ALIAS, cast(void *) &"-f", null },
-      { "-F",     GETOPTN_ALIAS,        cast(void *) &"-I", null },
-      { "-g",     GETOPTN_FUNC_NOARG,   cast(void *) null, delg },
-      { "-h",     GETOPTN_FUNC_NOARG,   cast(void *) null, delh },
-      { "-H",     GETOPTN_FUNC_NOARG,   cast(void *) null, delH },
-      { "--help", GETOPTN_FUNC_NOARG,       cast(void *) null, delhelp },
-      { "--human-readable", GETOPTN_ALIAS, cast(void *) &"-H", null },
-      { "-?",     GETOPTN_ALIAS,        cast(void *) &"--help", null },
-      { "-I",     GETOPTN_FUNC_ARG,     cast(void *) null, delI },
-      { "--inodes", GETOPTN_IGNORE,     cast(void *) null, null },
-      { "-k",     GETOPTN_FUNC_NOARG,   cast(void *) null, delk },
-      { "-l",     GETOPTN_BOOL,         cast(void *) &localOnly, null },
-      { "--local", GETOPTN_ALIAS,       cast(void *) &"-l", null },
-      { "-L",     GETOPTN_BOOL,         cast(void *) &includeLoopback, null },
-      { "-m",     GETOPTN_FUNC_NOARG,   cast(void *) null, delm },
-      { "-n",     GETOPTN_BOOL,         cast(void *) &printHeader, null },
-      { "--no-sync", GETOPTN_IGNORE,    cast(void *) null, null },
-      { "-P",     GETOPTN_FUNC_NOARG,   cast(void *) null, delP },
-      { "--portability", GETOPTN_ALIAS, cast(void *) &"-P", null },
-      { "--print-type", GETOPTN_IGNORE, cast(void *) null, null },
-      { "-q",     GETOPTN_BOOL,         cast(void *) &noQuotaCheck, null },
-      { "-s",     GETOPTN_FUNC_ARG,     cast(void *) null, dels },
-      { "--si",   GETOPTN_FUNC_NOARG,   cast(void *) null, delsi },
-      { "--sync", GETOPTN_IGNORE,       cast(void *) null, null },
-      { "-t",     GETOPTN_BOOL,         cast(void *) &displayTotal, null },
-      { "--total", GETOPTN_ALIAS,       cast(void *) &"-t", null },
-      { "-v",     GETOPTN_IGNORE,       cast(void *) null, null },
-      { "--version", GETOPTN_FUNC_NOARG, cast(void *) null, delversion },
-      { "-w",     GETOPTN_SHORT,        cast(void *) &dispOpts.width, null },
-      { "-W",     GETOPTN_SHORT,        cast(void *) &dispOpts.inodeWidth, null },
-      { "-x",     GETOPTN_FUNC_ARG,     cast(void *) null, delx },
-      { "--exclude-type", GETOPTN_ALIAS, cast(void *) &"-x", null },
-      { "-X",     GETOPTN_SHORT,        cast(void *) &debugLevel, null },
-      { "-z",     GETOPTN_STRING,       cast(void *) &zoneDisplay, null },
-      { "-Z",     GETOPTN_FUNC_NOARG,   cast(void *) null, delZ },
-      ];
+    goinit (options, "-A", GETOPTN_FUNC_NOARG,   cast(void *) null, delA);
+    goinit (options, "-a", GETOPTN_BOOL,     cast(void *) &displayAll, null);
+    goinit (options, "--all", GETOPTN_ALIAS,    cast(void *) &"-a", null);
+    goinit (options, "-b",   GETOPTN_ALIAS,    cast(void *) &"-B", null );
+    goinit (options, "--block-size", GETOPTN_ALIAS, cast(void *) &"-B", null );
+    goinit (options, "-B",   GETOPTN_FUNC_ARG,   cast(void *) null, delB );
+    goinit (options, "-c",   GETOPTN_BOOL,     cast(void *) &csvOutput, null );
+    goinit (options, "--csv-output", GETOPTN_ALIAS, cast(void *) &"-c", null );
+    goinit (options, "-d",   GETOPTN_STRING,    cast(void *) &dispOpts.dbsstr, null );
+    goinit (options, "-f",   GETOPTN_STRING,    cast(void *) &formatString, null );
+    goinit (options, "--format-string", GETOPTN_ALIAS, cast(void *) &"-f", null );
+    goinit (options, "-F",   GETOPTN_ALIAS,    cast(void *) &"-I", null );
+    goinit (options, "-g",   GETOPTN_FUNC_NOARG,  cast(void *) null, delg );
+    goinit (options, "-h",   GETOPTN_FUNC_NOARG,  cast(void *) null, delh );
+    goinit (options, "-H",   GETOPTN_FUNC_NOARG,  cast(void *) null, delH );
+    goinit (options, "--help", GETOPTN_FUNC_NOARG,    cast(void *) null, delhelp );
+    goinit (options, "--human-readable", GETOPTN_ALIAS, cast(void *) &"-H", null );
+    goinit (options, "-?",   GETOPTN_ALIAS,    cast(void *) &"--help", null );
+    goinit (options, "-I",   GETOPTN_FUNC_ARG,   cast(void *) null, delI );
+    goinit (options, "--inodes", GETOPTN_IGNORE,   cast(void *) null, null );
+    goinit (options, "-k",   GETOPTN_FUNC_NOARG,  cast(void *) null, delk );
+    goinit (options, "-l",   GETOPTN_BOOL,     cast(void *) &localOnly, null );
+    goinit (options, "--local", GETOPTN_ALIAS,    cast(void *) &"-l", null );
+    goinit (options, "-L",   GETOPTN_BOOL,     cast(void *) &includeLoopback, null );
+    goinit (options, "-m",   GETOPTN_FUNC_NOARG,  cast(void *) null, delm );
+    goinit (options, "-n",   GETOPTN_BOOL,     cast(void *) &printHeader, null );
+    goinit (options, "--no-sync", GETOPTN_IGNORE,  cast(void *) null, null );
+    goinit (options, "-P",   GETOPTN_FUNC_NOARG,  cast(void *) null, delP );
+    goinit (options, "--portability", GETOPTN_ALIAS, cast(void *) &"-P", null );
+    goinit (options, "--print-type", GETOPTN_IGNORE, cast(void *) null, null );
+    goinit (options, "-q",   GETOPTN_BOOL,     cast(void *) &noQuotaCheck, null );
+    goinit (options, "-s",   GETOPTN_FUNC_ARG,   cast(void *) null, dels );
+    goinit (options, "--si",  GETOPTN_FUNC_NOARG,  cast(void *) null, delsi );
+    goinit (options, "--sync", GETOPTN_IGNORE,    cast(void *) null, null );
+    goinit (options, "-t",   GETOPTN_BOOL,     cast(void *) &displayTotal, null );
+    goinit (options, "--total", GETOPTN_ALIAS,    cast(void *) &"-t", null );
+    goinit (options, "-v",   GETOPTN_IGNORE,    cast(void *) null, null );
+    goinit (options, "--version", GETOPTN_FUNC_NOARG, cast(void *) null, delversion );
+    goinit (options, "-w",   GETOPTN_SHORT,    cast(void *) &dispOpts.width, null );
+    goinit (options, "-W",   GETOPTN_SHORT,    cast(void *) &dispOpts.inodeWidth, null );
+    goinit (options, "-x",   GETOPTN_FUNC_ARG,   cast(void *) null, delx );
+    goinit (options, "--exclude-type", GETOPTN_ALIAS, cast(void *) &"-x", null );
+    goinit (options, "-X",   GETOPTN_SHORT,    cast(void *) &debugLevel, null );
+    goinit (options, "-z",   GETOPTN_STRING,    cast(void *) &zoneDisplay, null );
+    goinit (options, "-Z",   GETOPTN_FUNC_NOARG,  cast(void *) null, delZ );
+
     idx = getoptn (GETOPTN_LEGACY, args, options);
   }
-
   return idx;
 }
 
