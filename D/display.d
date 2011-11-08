@@ -6,7 +6,7 @@ import std.stdio;
 import std.string;
 import std.ascii : isDigit;
 import std.uni : toLower;
-import std.conv : to, chop;
+import std.conv : to;
 private import std.math : floor;
 
 import config;
@@ -27,29 +27,29 @@ enum char
   DI_SORT_ASCENDING = 1;
 
 enum dchar
-  fmtMount = 'm',
-  fmtMountFull = 'M',
-  fmtSpecial = 's',
-  fmtSpecialFull = 'S',
-  fmtType = 't',
-  fmtTypeFull = 'T',
-  fmtBlocksTot = 'b',
-  fmtBlocksTotAvail = 'B',
-  fmtBlocksUsed = 'u',
-  fmtBlocksCalcUsed = 'c',
-  fmtBlocksFree = 'f',
-  fmtBlocksAvail = 'v',
-  fmtBlocksPercNotAvail = 'p',
-  fmtBlocksPercUsed = '1',
-  fmtBlocksPercBSD = '2',
-  fmtBlocksPercAvail = 'a',
-  fmtBlocksPercFree = '3',
-  fmtInodesTot = 'i',
-  fmtInodesUsed = 'U',
-  fmtInodesFree = 'F',
-  fmtInodesPerc = 'P',
-  fmtMountTime = 'I',
-  fmtMountOptions = 'O';
+  FMT_MOUNT = 'm',
+  FMT_MOUNT_FULL = 'M',
+  FMT_SPECIAL = 's',
+  FMT_SPECIAL_FULL = 'S',
+  FMT_TYPE = 't',
+  FMT_TYPE_FULL = 'T',
+  FMT_BLOCKS_TOT = 'b',
+  FMT_BLOCKS_TOT_AVAIL = 'B',
+  FMT_BLOCKS_USED = 'u',
+  FMT_BLOCKS_CALC_USED = 'c',
+  FMT_BLOCKS_FREE = 'f',
+  FMT_BLOCKS_AVAIL = 'v',
+  FMT_BLOCKS_PERC_NOT_AVAIL = 'p',
+  FMT_BLOCKS_PERC_USED = '1',
+  FMT_BLOCKS_PERC_USED_AVAIL = '2',
+  FMT_BLOCKS_PERC_AVAIL = 'a',
+  FMT_BLOCKS_PERC_FREE = '3',
+  FMT_INODES_TOT = 'i',
+  FMT_INODES_USED = 'U',
+  FMT_INODES_FREE = 'F',
+  FMT_INODES_PERC = 'P',
+  FMT_MOUNT_TIME = 'I',
+  FMT_MOUNT_OPTIONS = 'O';
 
 enum int
   FTYPE_STRING = 1,
@@ -66,29 +66,29 @@ struct FormatInfo {
 };
 
 FormatInfo[] formatTypes = [
-  { fmtMount,               FTYPE_STRING,    15, "Mount" },
-  { fmtMountFull,           FTYPE_STRING,    15, "Mount" },
-  { fmtSpecial,             FTYPE_STRING,    15, "Filesystem" },
-  { fmtSpecialFull,         FTYPE_STRING,    15, "Filesystem" },
-  { fmtType,                FTYPE_STRING,    15, "fsType" },
-  { fmtTypeFull,            FTYPE_STRING,    15, "fs Type" },
-  { fmtBlocksTot,           FTYPE_SPACE,      8, "" },
-  { fmtBlocksTotAvail,      FTYPE_SPACE,      8, "" },
-  { fmtBlocksUsed,          FTYPE_SPACE,      8, "Used" },
-  { fmtBlocksCalcUsed,      FTYPE_SPACE,      8, "Used" },
-  { fmtBlocksFree,          FTYPE_SPACE,      8, "Free" },
-  { fmtBlocksAvail,         FTYPE_SPACE,      8, "Avail" },
-  { fmtBlocksPercNotAvail,  FTYPE_PERC_SPACE, 3, "%Used" },
-  { fmtBlocksPercUsed,      FTYPE_PERC_SPACE, 3, "%Used" },
-  { fmtBlocksPercBSD,       FTYPE_PERC_SPACE, 3, "%Used" },
-  { fmtBlocksPercAvail,     FTYPE_PERC_SPACE, 3, "%Free" },
-  { fmtBlocksPercFree,      FTYPE_PERC_SPACE, 3, "%Free" },
-  { fmtInodesTot,           FTYPE_INODE,      7, "Inodes" },
-  { fmtInodesUsed,          FTYPE_INODE,      7, "IUsed" },
-  { fmtInodesFree,          FTYPE_INODE,      7, "IFree" },
-  { fmtInodesPerc,          FTYPE_PERC_INODE, 3, "%IUsed" },
-  { fmtMountTime,           FTYPE_STRING,    15, "Mount Time" },
-  { fmtMountOptions,        FTYPE_STRING,    15, "Options" }
+  { FMT_MOUNT,                  FTYPE_STRING,    15, "Mount" },
+  { FMT_MOUNT_FULL,             FTYPE_STRING,    15, "Mount" },
+  { FMT_SPECIAL,                FTYPE_STRING,    15, "Filesystem" },
+  { FMT_SPECIAL_FULL,           FTYPE_STRING,    15, "Filesystem" },
+  { FMT_TYPE,                   FTYPE_STRING,    15, "fsType" },
+  { FMT_TYPE_FULL,              FTYPE_STRING,    15, "fs Type" },
+  { FMT_BLOCKS_TOT,             FTYPE_SPACE,      8, "" },
+  { FMT_BLOCKS_TOT_AVAIL,       FTYPE_SPACE,      8, "" },
+  { FMT_BLOCKS_USED,            FTYPE_SPACE,      8, "Used" },
+  { FMT_BLOCKS_CALC_USED,       FTYPE_SPACE,      8, "Used" },
+  { FMT_BLOCKS_FREE,            FTYPE_SPACE,      8, "Free" },
+  { FMT_BLOCKS_AVAIL,           FTYPE_SPACE,      8, "Avail" },
+  { FMT_BLOCKS_PERC_NOT_AVAIL,  FTYPE_PERC_SPACE, 3, "%Used" },
+  { FMT_BLOCKS_PERC_USED,       FTYPE_PERC_SPACE, 3, "%Used" },
+  { FMT_BLOCKS_PERC_USED_AVAIL, FTYPE_PERC_SPACE, 3, "%Used" },
+  { FMT_BLOCKS_PERC_AVAIL,      FTYPE_PERC_SPACE, 3, "%Free" },
+  { FMT_BLOCKS_PERC_FREE,       FTYPE_PERC_SPACE, 3, "%Free" },
+  { FMT_INODES_TOT,             FTYPE_INODE,      7, "Inodes" },
+  { FMT_INODES_USED,            FTYPE_INODE,      7, "IUsed" },
+  { FMT_INODES_FREE,            FTYPE_INODE,      7, "IFree" },
+  { FMT_INODES_PERC,            FTYPE_PERC_INODE, 3, "%IUsed" },
+  { FMT_MOUNT_TIME,             FTYPE_STRING,    15, "Mount Time" },
+  { FMT_MOUNT_OPTIONS,          FTYPE_STRING,    15, "Options" }
 ];
 
 size_t[dchar]   formatTypesIdxs;
@@ -173,7 +173,8 @@ dumpDispTable ()
 void
 buildDisplayList (ref DisplayData dispData)
 {
-  int[dchar] dpMax;
+  int[dchar]    dpMax;
+  bool          first = true;
 
   foreach (dchar c; dispData.opts.formatString)
   {
@@ -190,20 +191,20 @@ buildDisplayList (ref DisplayData dispData)
       continue;
     }
 
-    if (fmtSpecialFull in dpMax) {
-      setMaxLen (dp.special, dpMax[fmtSpecialFull]);
+    if (FMT_SPECIAL_FULL in dpMax) {
+      setMaxLen (dp.special, dpMax[FMT_SPECIAL_FULL]);
     }
-    if (fmtMountFull in dpMax) {
-      setMaxLen (dp.name, dpMax[fmtMountFull]);
+    if (FMT_MOUNT_FULL in dpMax) {
+      setMaxLen (dp.name, dpMax[FMT_MOUNT_FULL]);
     }
-    if (fmtTypeFull in dpMax) {
-      setMaxLen (dp.fsType, dpMax[fmtTypeFull]);
+    if (FMT_TYPE_FULL in dpMax) {
+      setMaxLen (dp.fsType, dpMax[FMT_TYPE_FULL]);
     }
-    if (fmtMountOptions in dpMax) {
-      setMaxLen (dp.mountOptions, dpMax[fmtMountOptions]);
+    if (FMT_MOUNT_OPTIONS in dpMax) {
+      setMaxLen (dp.mountOptions, dpMax[FMT_MOUNT_OPTIONS]);
     }
-    if (fmtMountTime in dpMax) {
-      setMaxLen (dp.mountTime, dpMax[fmtMountTime]);
+    if (FMT_MOUNT_TIME in dpMax) {
+      setMaxLen (dp.mountTime, dpMax[FMT_MOUNT_TIME]);
     }
   }
 
@@ -216,18 +217,18 @@ buildDisplayList (ref DisplayData dispData)
 
       switch (c)
       {
-        case fmtMountFull:
-        case fmtSpecialFull:
-        case fmtTypeFull:
-        case fmtMountTime:
-        case fmtMountOptions:
+        case FMT_MOUNT_FULL:
+        case FMT_SPECIAL_FULL:
+        case FMT_TYPE_FULL:
+        case FMT_MOUNT_TIME:
+        case FMT_MOUNT_OPTIONS:
         {
           width = dpMax[c];
           break;
         }
 
-        case fmtBlocksTot:
-        case fmtBlocksTotAvail:
+        case FMT_BLOCKS_TOT:
+        case FMT_BLOCKS_TOT_AVAIL:
         {
           title = DI_GT (dispData.dispOpts.dispBlockLabel);
           break;
@@ -239,6 +240,10 @@ buildDisplayList (ref DisplayData dispData)
         }
       }
 
+      if (dispData.opts.csvOutput) {
+        title = to!string(c);
+      }
+
       switch (ftype)
       {
         case FTYPE_STRING:
@@ -248,7 +253,16 @@ buildDisplayList (ref DisplayData dispData)
             width = title.length;
           }
           auto fmt = format ("%%-%ds ", width);
+          if (dispData.opts.csvOutput) {
+            fmt = "\"%s\"";
+          }
           dispData.dispFmtString[c] = fmt;
+          if (dispData.opts.csvOutput) {
+            fmt = "%s";
+          }
+          if (dispData.opts.csvOutput && ! first) {
+            dispData.titleString ~= ",";
+          }
           dispData.titleString ~= format (fmt, title);
           break;
         }
@@ -268,24 +282,41 @@ buildDisplayList (ref DisplayData dispData)
             --twidth;
           }
           auto fmt = format ("%%%d.%df", twidth, dispData.dispOpts.precision);
+          if (dispData.opts.csvOutput) {
+            fmt = format ("%%.%df", dispData.dispOpts.precision);
+          }
           dispData.dispFmtString[c] = fmt;
           fmt = format ("%%%ds ", width);
+          if (dispData.opts.csvOutput) {
+            fmt = "%s";
+          }
+          if (dispData.opts.csvOutput && ! first) {
+            dispData.titleString ~= ",";
+          }
           dispData.titleString ~= format (fmt, title);
           break;
         }
 
         case FTYPE_PERC_SPACE:
         {
-          auto fmt = "";
           if (title.length > width)
           {
             width = title.length;
           }
           auto twidth = width - 2;
           if (twidth < 1) { twidth = 1; }
-          fmt ~= format ("%%%d.0f%%%%  ", twidth);
+          auto fmt = format ("%%%d.0f%%%%  ", twidth);
+          if (dispData.opts.csvOutput) {
+            fmt = "%.0f%%";
+          }
           dispData.dispFmtString[c] = fmt;
           fmt = format ("%%%ds ", width);
+          if (dispData.opts.csvOutput) {
+            fmt = "%s";
+          }
+          if (dispData.opts.csvOutput && ! first) {
+            dispData.titleString ~= ",";
+          }
           dispData.titleString ~= format (fmt, title);
           break;
         }
@@ -300,8 +331,17 @@ buildDisplayList (ref DisplayData dispData)
             width = dispData.dispOpts.inodeWidth;
           }
           auto fmt = format ("%%%d.0f ", width);
+          if (dispData.opts.csvOutput) {
+            fmt = "%.0f";
+          }
           dispData.dispFmtString[c] = fmt;
           fmt = format ("%%%ds ", width);
+          if (dispData.opts.csvOutput) {
+            fmt = "%s";
+          }
+          if (dispData.opts.csvOutput && ! first) {
+            dispData.titleString ~= ",";
+          }
           dispData.titleString ~= format (fmt, title);
           break;
         }
@@ -309,8 +349,17 @@ buildDisplayList (ref DisplayData dispData)
         case FTYPE_PERC_INODE:
         {
           auto fmt = format ("%%%d.0f%%%% ", width);
+          if (dispData.opts.csvOutput) {
+            fmt = "%.0f%%";
+          }
           dispData.dispFmtString[c] = fmt;
           fmt = format ("%%%ds ", width);
+          if (dispData.opts.csvOutput) {
+            fmt = "%s";
+          }
+          if (dispData.opts.csvOutput && ! first) {
+            dispData.titleString ~= ",";
+          }
           dispData.titleString ~= format (fmt, title);
           break;
         }
@@ -323,6 +372,7 @@ buildDisplayList (ref DisplayData dispData)
     } else {
       dispData.titleString ~= format ("%s", c);
     }
+    first = false;
   } // for each format string char
 }
 
@@ -433,6 +483,7 @@ printPartition (ref DisplayData dispData, DiskPartition dp)
   real        rval;
   real        uval;
   size_t      dHidx;
+  bool        first = true;
 
   if (dispData.dispOpts.dbsstr == "H") {
     real mval = 0.0;
@@ -445,37 +496,37 @@ printPartition (ref DisplayData dispData, DiskPartition dp)
         if (ftype == FTYPE_SPACE) {
           switch (c)
           {
-            case fmtBlocksTot:
+            case FMT_BLOCKS_TOT:
             {
               rval = dp.totalBlocks;
               break;
             }
 
-            case fmtBlocksTotAvail:
+            case FMT_BLOCKS_TOT_AVAIL:
             {
               rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
               break;
             }
 
-            case fmtBlocksUsed:
+            case FMT_BLOCKS_USED:
             {
               rval = dp.totalBlocks - dp.freeBlocks;
               break;
             }
 
-            case fmtBlocksCalcUsed:
+            case FMT_BLOCKS_CALC_USED:
             {
               rval = dp.totalBlocks - dp.availBlocks;
               break;
             }
 
-            case fmtBlocksFree:
+            case FMT_BLOCKS_FREE:
             {
               rval = dp.freeBlocks;
               break;
             }
 
-            case fmtBlocksAvail:
+            case FMT_BLOCKS_AVAIL:
             {
               rval = dp.availBlocks;
               break;
@@ -504,130 +555,130 @@ printPartition (ref DisplayData dispData, DiskPartition dp)
 
       switch (c)
       {
-        case fmtMount:
-        case fmtMountFull:
+        case FMT_MOUNT:
+        case FMT_MOUNT_FULL:
         {
           sval = dp.name;
           break;
         }
 
-        case fmtSpecial:
-        case fmtSpecialFull:
+        case FMT_SPECIAL:
+        case FMT_SPECIAL_FULL:
         {
           sval = dp.special;
           break;
         }
 
-        case fmtType:
-        case fmtTypeFull:
+        case FMT_TYPE:
+        case FMT_TYPE_FULL:
         {
           sval = dp.fsType;
           break;
         }
 
-        case fmtBlocksTot:
+        case FMT_BLOCKS_TOT:
         {
           rval = dp.totalBlocks;
           break;
         }
 
-        case fmtBlocksTotAvail:
+        case FMT_BLOCKS_TOT_AVAIL:
         {
           rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
           break;
         }
 
-        case fmtBlocksUsed:
+        case FMT_BLOCKS_USED:
         {
           rval = dp.totalBlocks - dp.freeBlocks;
           break;
         }
 
-        case fmtBlocksCalcUsed:
+        case FMT_BLOCKS_CALC_USED:
         {
           rval = dp.totalBlocks - dp.availBlocks;
           break;
         }
 
-        case fmtBlocksFree:
+        case FMT_BLOCKS_FREE:
         {
           rval = dp.freeBlocks;
           break;
         }
 
-        case fmtBlocksAvail:
+        case FMT_BLOCKS_AVAIL:
         {
           rval = dp.availBlocks;
           break;
         }
 
-        case fmtBlocksPercNotAvail:
+        case FMT_BLOCKS_PERC_NOT_AVAIL:
         {
           rval = dp.totalBlocks;
           uval = dp.totalBlocks - dp.availBlocks;
           break;
         }
 
-        case fmtBlocksPercUsed:
+        case FMT_BLOCKS_PERC_USED:
         {
           rval = dp.totalBlocks;
           uval = dp.totalBlocks - dp.freeBlocks;
           break;
         }
 
-        case fmtBlocksPercBSD:
+        case FMT_BLOCKS_PERC_USED_AVAIL:
         {
           rval = dp.totalBlocks - (dp.freeBlocks - dp.availBlocks);
           uval = dp.totalBlocks - dp.freeBlocks;
           break;
         }
 
-        case fmtBlocksPercAvail:
+        case FMT_BLOCKS_PERC_AVAIL:
         {
           rval = dp.totalBlocks;
           uval = dp.availBlocks;
           break;
         }
 
-        case fmtBlocksPercFree:
+        case FMT_BLOCKS_PERC_FREE:
         {
           rval = dp.totalBlocks;
           uval = dp.freeBlocks;
           break;
         }
 
-        case fmtInodesTot:
+        case FMT_INODES_TOT:
         {
           rval = dp.totalInodes;
           break;
         }
 
-        case fmtInodesUsed:
+        case FMT_INODES_USED:
         {
           rval = dp.totalInodes - dp.freeInodes;
           break;
         }
 
-        case fmtInodesFree:
+        case FMT_INODES_FREE:
         {
           rval = dp.freeInodes;
           break;
         }
 
-        case fmtInodesPerc:
+        case FMT_INODES_PERC:
         {
           rval = dp.totalInodes;
           uval = dp.totalInodes - dp.availInodes;
           break;
         }
 
-        case fmtMountTime:
+        case FMT_MOUNT_TIME:
         {
           sval = dp.mountTime;
           break;
         }
 
-        case fmtMountOptions:
+        case FMT_MOUNT_OPTIONS:
         {
           sval = dp.mountOptions;
           break;
@@ -643,25 +694,38 @@ printPartition (ref DisplayData dispData, DiskPartition dp)
       {
         case FTYPE_STRING:
         {
+          if (dispData.opts.csvOutput && ! first) {
+            outString ~= ",";
+          }
           outString ~= format (dispData.dispFmtString[c], sval);
           break;
         }
 
         case FTYPE_SPACE:
         {
-          outString ~= blockDisplay (dispData, c, rval, dHidx);
+          if (dispData.opts.csvOutput && ! first) {
+            outString ~= ",";
+          }
+          outString ~= blockDisplay (dispData, c, rval, dHidx,
+                dispData.opts.csvOutput);
           break;
         }
 
         case FTYPE_PERC_SPACE:
         case FTYPE_PERC_INODE:
         {
+          if (dispData.opts.csvOutput && ! first) {
+            outString ~= ",";
+          }
           outString ~= percDisplay (dispData, c, rval, uval);
           break;
         }
 
         case FTYPE_INODE:
         {
+          if (dispData.opts.csvOutput && ! first) {
+            outString ~= ",";
+          }
           outString ~= inodeDisplay (dispData, c, rval);
           break;
         }
@@ -674,6 +738,7 @@ printPartition (ref DisplayData dispData, DiskPartition dp)
     } else {
       outString ~= c;
     }
+    first = false;
   } // for each format character
 
   writeln (outString);
@@ -695,7 +760,7 @@ findDispSize (real val)
 
 string
 blockDisplay (const DisplayData dispData, const dchar c,
-        const real val, const size_t dHidx)
+        const real val, const size_t dHidx, bool csvOutput)
 {
   size_t        idx;
   real          dbs = dispData.dispOpts.dispBlockSize;
@@ -715,7 +780,12 @@ blockDisplay (const DisplayData dispData, const dchar c,
   }
 
   auto nval = val / dbs;
-  auto fmt = dispData.dispFmtString[c] ~ suffix ~ " ";
+  auto fmt = dispData.dispFmtString[c] ~ suffix;
+  if (! csvOutput) {
+    fmt ~= " ";
+  } else {
+    fmt = "\"" ~ fmt ~ "\"";
+  }
   return format (fmt, nval);
 }
 
@@ -978,11 +1048,11 @@ initializeTitles (DisplayOpts dispOpts)
 {
   if (dispOpts.posixCompat)
   {
-    formatTypes[formatTypesIdxs[fmtMountFull]].title = "Mounted On";
-    formatTypes[formatTypesIdxs[fmtBlocksAvail]].title = "Available";
-    formatTypes[formatTypesIdxs[fmtBlocksPercNotAvail]].title = "Capacity";
-    formatTypes[formatTypesIdxs[fmtBlocksPercUsed]].title = "Capacity";
-    formatTypes[formatTypesIdxs[fmtBlocksPercBSD]].title = "Capacity";
+    formatTypes[formatTypesIdxs[FMT_MOUNT_FULL]].title = "Mounted On";
+    formatTypes[formatTypesIdxs[FMT_BLOCKS_AVAIL]].title = "Available";
+    formatTypes[formatTypesIdxs[FMT_BLOCKS_PERC_NOT_AVAIL]].title = "Capacity";
+    formatTypes[formatTypesIdxs[FMT_BLOCKS_PERC_USED]].title = "Capacity";
+    formatTypes[formatTypesIdxs[FMT_BLOCKS_PERC_USED_AVAIL]].title = "Capacity";
   }
 }
 
