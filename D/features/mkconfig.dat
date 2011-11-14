@@ -16,6 +16,10 @@ csizes
 
 # di.d: for version
 chdr    version.h
+# stat()
+csys    stat.h
+# O_RDONLY
+chdr    fcntl.h
 
 # NLS support:
 # libintl.h has dcls for gettext(), et. al.
@@ -297,12 +301,31 @@ ctypedef XDR
 
 ### di.d
 cdefine string DI_VERSION
-clib    zone_list
-cdcl    zone_list
-clib    getzoneid
-cdcl    getzoneid
-clib    zone_getattr
-cdcl    zone_getattr
+cstruct timespec
+ctype   int __dev_t
+ctype   int __ino_t
+ctype   int __ino64_t
+ctype   int __mode_t
+ctype   int __nlink_t
+ctype   int __off_t
+ctype   int __off64_t
+ctype   int __blksize_t
+ctype   int __blkcnt_t
+ctype   int __blkcnt64_t
+#ctype   int __uid_t
+#ctype   int __gid_t
+#ctype   int __time_t
+cstruct stat
+clib    stat
+cdcl    stat
+clib    fstat
+cdcl    fstat
+cdefine int O_RDONLY
+cdefine int O_NOCTTY
+clib    open
+cdcl    open
+clib    close
+cdcl    close
 
 ### options
 # see dioptions.dat to change these
