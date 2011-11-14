@@ -1,5 +1,5 @@
 #
-#  di makefile
+#  di makefile - top level
 #
 #  Copyright 2001-2011 Brad Lanam Walnut Creek CA, USA
 #
@@ -8,6 +8,7 @@
 
 SHELL = /bin/sh
 MAKE = make
+FROMDIR = C
 
 ###
 # mkconfig variables
@@ -29,6 +30,8 @@ RM = rm
 RPMBUILD = rpmbuild
 SED = sed
 TEST = test
+
+MKC_DIR = ./mkconfig
 
 ###
 # installation options
@@ -63,36 +66,52 @@ MANPERM = 644
 ###
 # all
 
+.PHONY: all
 all:
 	$(MAKE) checkbuild
 	cd C >/dev/null && $(MAKE) -e all
 
+.PHONY: all-c
 all-c:
 	$(MAKE) checkbuild
 	cd C >/dev/null && $(MAKE) -e all
 
+.PHONY: all-d
 all-d:
 	$(MAKE) checkbuild
 	cd D >/dev/null && $(MAKE) -e all
 
+.PHONY: all-perl
 all-perl:
 	$(MAKE) checkperlbuild
 	cd C >/dev/null && $(MAKE) -e all-perl
 
+.PHONY: windows-gcc
 windows-gcc:
 	cd C >/dev/null && $(MAKE) -e windows-gcc
 
+.PHONY: test
 test:
 	cd mkconfig >/dev/null && $(MAKE) -e test
 	cd C >/dev/null && $(MAKE) -e test
+	$(MAKE) -e tests.done
+
+tests.done: $(MKC_DIR)/runtests.sh
+	@echo "## running tests"
+	CC=$(CC) DC=$(DC) $(_MKCONFIG_SHELL) \
+		$(MKC_DIR)/runtests.sh ./tests.d
+	touch tests.done
+
 
 ###
 # installation
 
+.PHONY: install
 install:
 	$(MAKE) checkinstall
-	. ./C/di.env; $(MAKE) -e install-prog install-man
+	. ./C/di.env; $(MAKE) -e FROMDIR=$(FROMDIR) install-prog install-man
 
+.PHONY: build.po
 build-po:
 	-. ./C/di.env; \
 		(cd po >/dev/null && for i in *.po; do \
@@ -100,6 +119,7 @@ build-po:
 		$${XMSGFMT} -o $$j.mo $$i; \
 	done)
 
+.PHONY: install-po
 install-po: 	build-po
 	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
 	-(cd po >/dev/null && for i in *.po; do \
@@ -112,27 +132,30 @@ install-po: 	build-po
 		$(RM) -f $$j.mo; \
 		done)
 
+.PHONY: install-prog
 install-prog:
 	$(TEST) -d $(INSTALL_DIR) || $(MKDIR) $(INSTALL_DIR)
 	$(TEST) -d $(INSTALL_BIN_DIR) || $(MKDIR) $(INSTALL_BIN_DIR)
-	$(CP) -f ./C/$(PROG)$(EXE_EXT) $(TARGET)
+	$(CP) -f ./$(FROMDIR)/$(PROG)$(EXE_EXT) $(TARGET)
 	-$(RM) -f $(MTARGET) > /dev/null 2>&1
 	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
-	@-test -f C/config.h && \
-		grep '^#define _enable_nls 1' C/config.h >/dev/null 2>&1 && \
-		(. ./C/di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
+	@-test -f $(FROMDIR)/config.h && \
+		grep '^#define _enable_nls 1' $(FROMDIR)/config.h >/dev/null 2>&1 && \
+		(. ./$(FROMDIR)/di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		install-po)
-	@-test -f D/config.d && \
-		grep '^enum int_enable_nls = 1;' D/config.d >/dev/null 2>&1 && \
-		(. ./D/di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
+	@-test -f $(FROMDIR)/config.d && \
+		grep '^enum int _enable_nls = 1;' $(FROMDIR)/config.d >/dev/null 2>&1 && \
+		(. ./$(FROMDIR)/di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
 		install-po)
 
+.PHONY: install-man
 install-man:
 	-$(TEST) -d $(DI_MANINSTDIR) || $(MKDIR) -p $(DI_MANINSTDIR)
 	-$(TEST) -d $(DI_MANDIR) || $(MKDIR) -p $(DI_MANDIR)
 	$(CP) -f di.1 $(DI_MANDIR)/$(MAN_TARGET)
 	$(CHMOD) $(MANPERM) $(DI_MANDIR)/$(MAN_TARGET)
 
+.PHONY: installperms
 installperms:
 	$(CHOWN) $(USER) $(TARGET)
 	$(CHGRP) $(GROUP) $(TARGET)
@@ -141,6 +164,7 @@ installperms:
 ###
 # packaging
 
+.PHONY: tar
 tar:
 	@-rm -f $(MKCONFIGPATH)/*.tar.gz \
 		di-[0-9].[0-9][0-9][a-z].tar.gz > /dev/null 2>&1
@@ -150,28 +174,31 @@ tar:
 ###
 # cleaning
 
+.PHONY: clean
 clean:
 	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log _tmp_mkconfig \
-		checkbuild checkperlbuild checkinstall > /dev/null 2>&1
+		checkbuild checkperlbuild checkinstall \
+		tests.done > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) clean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null && $(MAKE) clean > /dev/null 2>&1)
 	@-(cd D >/dev/null && $(MAKE) clean > /dev/null 2>&1)
 
-# leaves:
-#   */_mkconfig_runtests, */_tmp_mkconfig, dioptions.dat
-#   pretests.done, */test_di
+.PHONY: realclean
 realclean:
 	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log _tmp_mkconfig \
-		checkbuild checkperlbuild checkinstall > /dev/null 2>&1
+		checkbuild checkperlbuild checkinstall \
+		tests.done > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) realclean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null && $(MAKE) realclean > /dev/null 2>&1)
 	@-(cd D >/dev/null && $(MAKE) realclean > /dev/null 2>&1)
 
 # leaves:
 #   dioptions.dat
+.PHONY: distclean
 distclean:
 	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log _tmp_mkconfig \
-		checkbuild checkperlbuild checkinstall > /dev/null 2>&1
+		checkbuild checkperlbuild checkinstall \
+		tests.done > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) distclean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null && $(MAKE) distclean > /dev/null 2>&1)
 	@-(cd D >/dev/null && $(MAKE) distclean > /dev/null 2>&1)
@@ -181,8 +208,8 @@ distclean:
 # dioptions.dat
 
 dioptions.dat:	features/dioptions.dat
-	@cp features/dioptions.dat dioptions.dat
-	@chmod u+w dioptions.dat
+	@$(CP) features/dioptions.dat dioptions.dat
+	@$(CHMOD) u+w dioptions.dat
 
 ###
 # pre-checks
@@ -201,4 +228,4 @@ checkinstall:	features/checkinstall.dat
 	$(_MKCONFIG_SHELL) \
 		$(MKCONFIGPATH)/mkconfig.sh features/checkinstall.dat
 	touch checkinstall
-	
+
