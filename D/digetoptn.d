@@ -99,7 +99,7 @@ outerfor:
         debug (1) {
           writefln ("getoptn:nomore:aidx:%d:", aidx);
         }
-        rv = aidx;
+        rv = aidx - 1; // end of loop adds one
         break outerfor;
       }
 
@@ -129,13 +129,13 @@ innerwhile:
         debug (1) {
           writefln ("getoptn:co:rc:%d", rc);
         }
-        rv = aidx + 1;
+        rv = aidx; // end of loop adds one
 
         // if the option had an argument, process the next arg
         // otherwise, it was a boolean, and asidx is used.
         if (rc != 0) {
           aidx += rc - 1;  // increment by rc less one, for loop will inc again
-          rv = aidx + 1;
+          rv = aidx; // end of loop adds one
           if (haveArg) {
             break innerwhile;
           }
@@ -156,9 +156,9 @@ innerwhile:
   } // with
 
   debug (1) {
-    writefln ("getoptn:exit:%d:rv:%d", allargs.length, rv);
+    writefln ("getoptn:exit:%d:rv:%d", allargs.length, rv + 1);
   }
-  return rv;
+  return rv + 1;
 }
 
 private:
@@ -235,6 +235,8 @@ unittest {
   goinit (opta, "-b", GETOPTN_BOOL, cast(void *) &rb[1], null);
   goinit (opta, "-c", GETOPTN_BOOL, cast(void *) &rb[2], null);
   goinit (opta, "-d", GETOPTN_BOOL, cast(void *) &rb[3], null);
+  tbool.test (GETOPTN_LEGACY, "boolean bundled, no args", true,
+      rb, false, [false,false,false,false], opta, [], 1);
   tbool.test (GETOPTN_LEGACY, "boolean bundled, all", true,
       rb, false, [true,true,true,true], opta, ["-abcd"], 2);
   tbool.test (GETOPTN_LEGACY, "boolean separate, all", true,
@@ -289,11 +291,9 @@ unittest {
   tint.test (GETOPTN_LEGACY, "int unrecognized short option", false,
       ri, 0, [998,0,0,998], optf, ["-x", "1", "--testd", "2"], 0);
 
-  write ("unittest: digetopt: getoptn: ");
   if (failures > 0) {
+    write ("unittest: digetopt: getoptn: ");
     writefln ("failed: %d of %d", failures, tcount);
-  } else {
-    writeln ("passed");
   }
 }
 
@@ -478,11 +478,9 @@ unittest {
   goinit (opti, "-b", GETOPTN_ALIAS, cast(void *) &"--along", null);
   tstr.test (GETOPTN_LEGACY, "co: alias: short,arg,sep", ["-b", "def"], opti, true, "abc", rs, "def", 2);
 
-  write ("unittest: digetopt: checkOption: ");
   if (failures > 0) {
+    write ("unittest: digetopt: checkOption: ");
     writefln ("failed: %d of %d", failures, tcount);
-  } else {
-    writeln ("passed");
   }
 }
 
@@ -890,10 +888,8 @@ unittest {
   OptInfo opte = { GETOPTN_FUNC_ARG, cast(void *) rs, d2 };
   tfunc.test (GETOPTN_MODERN, "func: mod,arg", ["-a", "def"] , opte, true, rs, "def", 2);
 
-  write ("unittest: digetopt: processOption: ");
   if (failures > 0) {
+    write ("unittest: digetopt: processOption: ");
     writefln ("failed: %d of %d", failures, tcount);
-  } else {
-    writeln ("passed");
   }
 }
