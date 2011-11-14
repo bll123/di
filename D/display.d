@@ -7,6 +7,7 @@ import std.string;
 import std.ascii : isDigit;
 import std.uni : toLower;
 import std.conv : to;
+private import std.utf : count;
 private import std.math : floor;
 
 import config;
@@ -68,25 +69,25 @@ struct FormatInfo {
 FormatInfo[] formatTypes = [
   { FMT_MOUNT,                  FTYPE_STRING,    15, "Mount" },
   { FMT_MOUNT_FULL,             FTYPE_STRING,    15, "Mount" },
-  { FMT_SPECIAL,                FTYPE_STRING,    15, "Filesystem" },
-  { FMT_SPECIAL_FULL,           FTYPE_STRING,    15, "Filesystem" },
-  { FMT_TYPE,                   FTYPE_STRING,    15, "fsType" },
-  { FMT_TYPE_FULL,              FTYPE_STRING,    15, "fs Type" },
+  { FMT_SPECIAL,                FTYPE_STRING,    18, "Filesystem" },
+  { FMT_SPECIAL_FULL,           FTYPE_STRING,    18, "Filesystem" },
+  { FMT_TYPE,                   FTYPE_STRING,     7, "fsType" },
+  { FMT_TYPE_FULL,              FTYPE_STRING,     7, "fs Type" },
   { FMT_BLOCKS_TOT,             FTYPE_SPACE,      8, "" },
   { FMT_BLOCKS_TOT_AVAIL,       FTYPE_SPACE,      8, "" },
   { FMT_BLOCKS_USED,            FTYPE_SPACE,      8, "Used" },
   { FMT_BLOCKS_CALC_USED,       FTYPE_SPACE,      8, "Used" },
   { FMT_BLOCKS_FREE,            FTYPE_SPACE,      8, "Free" },
   { FMT_BLOCKS_AVAIL,           FTYPE_SPACE,      8, "Avail" },
-  { FMT_BLOCKS_PERC_NOT_AVAIL,  FTYPE_PERC_SPACE, 3, "%Used" },
-  { FMT_BLOCKS_PERC_USED,       FTYPE_PERC_SPACE, 3, "%Used" },
-  { FMT_BLOCKS_PERC_USED_AVAIL, FTYPE_PERC_SPACE, 3, "%Used" },
-  { FMT_BLOCKS_PERC_AVAIL,      FTYPE_PERC_SPACE, 3, "%Free" },
-  { FMT_BLOCKS_PERC_FREE,       FTYPE_PERC_SPACE, 3, "%Free" },
-  { FMT_INODES_TOT,             FTYPE_INODE,      7, "Inodes" },
-  { FMT_INODES_USED,            FTYPE_INODE,      7, "IUsed" },
-  { FMT_INODES_FREE,            FTYPE_INODE,      7, "IFree" },
-  { FMT_INODES_PERC,            FTYPE_PERC_INODE, 3, "%IUsed" },
+  { FMT_BLOCKS_PERC_NOT_AVAIL,  FTYPE_PERC_SPACE, 6, "%Used" },
+  { FMT_BLOCKS_PERC_USED,       FTYPE_PERC_SPACE, 6, "%Used" },
+  { FMT_BLOCKS_PERC_USED_AVAIL, FTYPE_PERC_SPACE, 6, "%Used" },
+  { FMT_BLOCKS_PERC_AVAIL,      FTYPE_PERC_SPACE, 5, "%Free" },
+  { FMT_BLOCKS_PERC_FREE,       FTYPE_PERC_SPACE, 5, "%Free" },
+  { FMT_INODES_TOT,             FTYPE_INODE,      9, "Inodes" },
+  { FMT_INODES_USED,            FTYPE_INODE,      9, "IUsed" },
+  { FMT_INODES_FREE,            FTYPE_INODE,      9, "IFree" },
+  { FMT_INODES_PERC,            FTYPE_PERC_INODE, 6, "%IUsed" },
   { FMT_MOUNT_TIME,             FTYPE_STRING,    15, "Mount Time" },
   { FMT_MOUNT_OPTIONS,          FTYPE_STRING,    15, "Options" }
 ];
@@ -158,6 +159,47 @@ doDisplay (Options opts, ref DisplayOpts dispOpts,
   displayPartitions (dispData, hasPooled);
 }
 
+void
+sortPartitions (ref DiskPartition[] dps,
+        ref size_t[] sortIndex, string sortType)
+{
+  int    gap;
+
+  auto count = dps.length;
+  if (count <= 1)
+  {
+    return;
+  }
+
+  gap = 1;
+  while (gap < count)
+  {
+    gap = 3 * gap + 1;
+  }
+
+  for (gap /= 3; gap > 0; gap /= 3)
+  {
+    for (int i = gap; i < count; ++i)
+    {
+      auto tempIndex = sortIndex[i];
+      auto j = i - gap;
+
+      while (j >= 0 &&
+            dpCompare (dps, sortType, sortIndex[j], tempIndex) > 0)
+      {
+        sortIndex[j+gap] = sortIndex[j];
+        j = j - gap;
+      }
+
+      j += gap;
+      if (j != i)
+      {
+        sortIndex[j] = tempIndex;
+      }
+    }
+  }
+}
+
 private:
 
 void
@@ -211,6 +253,7 @@ buildDisplayList (ref DisplayData dispData)
   foreach (dchar c; dispData.opts.formatString)
   {
     if (c in formatTypesIdxs) {
+      string fmt;
       auto title = DI_GT (formatTypes[formatTypesIdxs[c]].title);
       auto ftype = formatTypes[formatTypesIdxs[c]].ftype;
       auto width = formatTypes[formatTypesIdxs[c]].width;
@@ -244,35 +287,26 @@ buildDisplayList (ref DisplayData dispData)
         title = to!string(c);
       }
 
+      auto utflen = std.utf.count (title);
+      if (utflen > width)
+      {
+        width = utflen;
+      }
+
       switch (ftype)
       {
         case FTYPE_STRING:
         {
-          if (title.length > width)
-          {
-            width = title.length;
-          }
-          auto fmt = format ("%%-%ds ", width);
+          fmt = format ("%%-%ds ", width);
           if (dispData.opts.csvOutput) {
             fmt = "\"%s\"";
           }
           dispData.dispFmtString[c] = fmt;
-          if (dispData.opts.csvOutput) {
-            fmt = "%s";
-          }
-          if (dispData.opts.csvOutput && ! first) {
-            dispData.titleString ~= ",";
-          }
-          dispData.titleString ~= format (fmt, title);
           break;
         }
 
         case FTYPE_SPACE:
         {
-          if (title.length > width)
-          {
-            width = title.length;
-          }
           if (dispData.dispOpts.width != 0) {
             width = dispData.dispOpts.width;
           }
@@ -281,86 +315,46 @@ buildDisplayList (ref DisplayData dispData)
           {
             --twidth;
           }
-          auto fmt = format ("%%%d.%df", twidth, dispData.dispOpts.precision);
+          fmt = format ("%%%d.%df", twidth, dispData.dispOpts.precision);
           if (dispData.opts.csvOutput) {
             fmt = format ("%%.%df", dispData.dispOpts.precision);
           }
           dispData.dispFmtString[c] = fmt;
-          fmt = format ("%%%ds ", width);
-          if (dispData.opts.csvOutput) {
-            fmt = "%s";
-          }
-          if (dispData.opts.csvOutput && ! first) {
-            dispData.titleString ~= ",";
-          }
-          dispData.titleString ~= format (fmt, title);
           break;
         }
 
         case FTYPE_PERC_SPACE:
         {
-          if (title.length > width)
-          {
-            width = title.length;
-          }
           auto twidth = width - 2;
           if (twidth < 1) { twidth = 1; }
-          auto fmt = format ("%%%d.0f%%%%  ", twidth);
+          fmt = format ("%%%d.0f%%%%  ", twidth);
           if (dispData.opts.csvOutput) {
             fmt = "%.0f%%";
           }
           dispData.dispFmtString[c] = fmt;
-          fmt = format ("%%%ds ", width);
-          if (dispData.opts.csvOutput) {
-            fmt = "%s";
-          }
-          if (dispData.opts.csvOutput && ! first) {
-            dispData.titleString ~= ",";
-          }
-          dispData.titleString ~= format (fmt, title);
           break;
         }
 
         case FTYPE_INODE:
         {
-          if (title.length > width)
-          {
-            width = title.length;
-          }
           if (dispData.dispOpts.inodeWidth != 0) {
             width = dispData.dispOpts.inodeWidth;
           }
-          auto fmt = format ("%%%d.0f ", width);
+          fmt = format ("%%%d.0f ", width);
           if (dispData.opts.csvOutput) {
             fmt = "%.0f";
           }
           dispData.dispFmtString[c] = fmt;
-          fmt = format ("%%%ds ", width);
-          if (dispData.opts.csvOutput) {
-            fmt = "%s";
-          }
-          if (dispData.opts.csvOutput && ! first) {
-            dispData.titleString ~= ",";
-          }
-          dispData.titleString ~= format (fmt, title);
           break;
         }
 
         case FTYPE_PERC_INODE:
         {
-          auto fmt = format ("%%%d.0f%%%% ", width);
+          fmt = format ("%%%d.0f%%%% ", width);
           if (dispData.opts.csvOutput) {
             fmt = "%.0f%%";
           }
           dispData.dispFmtString[c] = fmt;
-          fmt = format ("%%%ds ", width);
-          if (dispData.opts.csvOutput) {
-            fmt = "%s";
-          }
-          if (dispData.opts.csvOutput && ! first) {
-            dispData.titleString ~= ",";
-          }
-          dispData.titleString ~= format (fmt, title);
           break;
         }
 
@@ -369,6 +363,22 @@ buildDisplayList (ref DisplayData dispData)
           break;
         }
       } // switch on format type
+
+      auto twid = width + title.length - utflen;
+      if (dispData.opts.csvOutput) {
+        fmt = "%s";
+      } else {
+        if (ftype == FTYPE_STRING) {
+          fmt = format ("%%-%ds ", twid);
+        } else {
+          fmt = format ("%%%ds ", twid);
+        }
+      }
+      if (dispData.opts.csvOutput && ! first) {
+        dispData.titleString ~= ",";
+      }
+      dispData.titleString ~= format (fmt, title);
+
     } else {
       dispData.titleString ~= format ("%s", c);
     }
@@ -991,11 +1001,9 @@ unittest {
   test ("Posix-1024", true, "k", size1024, idx1024, "1024-blocks", 1024.0);
   test ("Posix-512", true, "512", size1024, idx1024, "512-blocks", 512.0);
 
-  write ("unittest: display: setDispBlockSize: ");
   if (failures > 0) {
+    write ("unittest: display: setDispBlockSize: ");
     writefln ("failed: %d of %d", failures, tcount);
-  } else {
-    writeln ("passed");
   }
 }
 
@@ -1056,48 +1064,7 @@ initializeTitles (DisplayOpts dispOpts)
   }
 }
 
-private void
-sortPartitions (ref DiskPartition[] dps,
-        ref size_t[] sortIndex, string sortType)
-{
-  int    gap;
-
-  auto count = dps.length;
-  if (count <= 1)
-  {
-    return;
-  }
-
-  gap = 1;
-  while (gap < count)
-  {
-    gap = 3 * gap + 1;
-  }
-
-  for (gap /= 3; gap > 0; gap /= 3)
-  {
-    for (int i = gap; i < count; ++i)
-    {
-      auto tempIndex = sortIndex[i];
-      auto j = i - gap;
-
-      while (j >= 0 &&
-            dpCompare (dps, sortType, sortIndex[j], tempIndex) > 0)
-      {
-        sortIndex[j+gap] = sortIndex[j];
-        j = j - gap;
-      }
-
-      j += gap;
-      if (j != i)
-      {
-        sortIndex[j] = tempIndex;
-      }
-    }
-  }
-}
-
-private int
+int
 dpCompare (ref DiskPartition[] dps, string sortType, size_t i, size_t j)
 {
   int       rc;
