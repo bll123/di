@@ -1,5 +1,5 @@
 #
-#  di makefile
+#  di makefile - C
 #
 #  Copyright 2001-2011 Brad Lanam Walnut Creek CA, USA
 #
@@ -226,7 +226,7 @@ distclean:
 
 .PHONY: install
 install:	di-programs di.env
-	. ./di.env;cd ..;$(MAKE) -e prefix=$(prefix) LOCALEDIR=$(LOCALEDIR) install
+	. ./di.env;cd ..;$(MAKE) -e prefix=$(prefix) LOCALEDIR=$(LOCALEDIR) FROMDIR=C install
 
 ###
 # programs
@@ -297,7 +297,7 @@ digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
 diquota$(OBJ_EXT):	diquota.c config.h di.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) diquota.c
 
-display$(OBJ_EXT):	display.c config.h di.h display.h options.h version.h 
+display$(OBJ_EXT):	display.c config.h di.h display.h options.h version.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) display.c
 
 getoptn$(OBJ_EXT):	getoptn.c config.h getoptn.h
