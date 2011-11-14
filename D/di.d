@@ -17,16 +17,26 @@ void main (string[] args)
 {
   Options       opts;
   DisplayOpts   dispOpts;
+  bool          hasLoopback;
 
   initLocale ();
-  getDIOptions (args, opts, dispOpts);
+  auto optidx = getDIOptions (args, opts, dispOpts);
 
   auto dpList = new DiskPartitions (opts.debugLevel);
   dpList.getEntries ();
   auto hasPooled = preCheckDiskPartitions (dpList, opts);
+  if (optidx < args.length || opts.includeLoopback == false) {
+    getDiskStatInfo (dpList);
+    hasLoopback = getDiskSpecialInfo (dpList);
+  }
+  if (optidx < args.length) {
+    auto rc = checkFileInfo (dpList, opts, hasPooled, args, optidx);
+  }
   dpList.getPartitionInfo ();
-  checkDiskQuotas (dpList, opts);
-  checkDiskPartitions (dpList, opts);
+  checkDiskPartitions (dpList, opts, hasLoopback);
+  if (opts.quotaCheck) {
+    checkDiskQuotas (dpList, opts);
+  }
   doDisplay (opts, dispOpts, dpList, hasPooled);
 }
 
@@ -52,17 +62,13 @@ preCheckDiskPartitions (ref DiskPartitions dpList, Options opts)
       dp.setPrintFlag = dp.DI_PRINT_IGNORE;
     }
 
-//    static if (_lib_zone_list && _lib_getzoneid && _lib_zone_getattr) {
-//      checkZone (dp, &diData->zoneInfo, opts.displayAll);
-//    }
-
     checkIncludeList (dp, opts);
 
     if (opts.ignoreList.length > 0)
     {
       if (opts.ignoreList.get (dp.fsType, false) ||
           (dp.fsType[0..3] == FUSE_FS &&
-          opts.ignoreList.get (FUSE_FS, false)))
+           opts.ignoreList.get (FUSE_FS, false)))
       {
         dp.setPrintFlag = dp.DI_PRINT_EXCLUDE;
       }
@@ -90,9 +96,9 @@ checkIncludeList (ref DiskPartition dp, Options opts)
   }
 }
 
-
 void
-checkDiskPartitions (ref DiskPartitions dpList, Options opts)
+checkDiskPartitions (ref DiskPartitions dpList, Options opts,
+        bool hasLoopback)
 {
   foreach (ref dp; dpList.diskPartitions)
   {
@@ -121,205 +127,119 @@ checkDiskPartitions (ref DiskPartitions dpList, Options opts)
       }
     }
 
+    if (hasLoopback && opts.includeLoopback == false) {
+      if (dp.isLoopback) {
+        dp.setPrintFlag = dp.DI_PRINT_IGNORE;
+        dp.setDoPrint = opts.displayAll;
+      }
+    }
+
     checkIncludeList (dp, opts);
   }
 }
 
-/+
-
-typedef struct {
-    Uid_t           uid;
-    zoneid_t        myzoneid;
-    zoneSummary_t   *zones;
-    Uint_t          zoneCount;
-    char            zoneDisplay [MAXPATHLEN + 1];
-    int             globalIdx;
-} zoneInfo_t;
-
-diData.zoneInfo.uid = geteuid ();
-diData.zoneInfo.zoneDisplay [0] = '\0';
-diData.zoneInfo.zoneCount = 0;
-diData.zoneInfo.zones = (zoneSummary_t *) NULL;
-
-// initialize zone info
-
-#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
-    {
-        zoneid_t        *zids = (zoneid_t *) NULL;
-        zoneInfo_t      *zi;
-
-        zi = &diData.zoneInfo;
-        zi->myzoneid = getzoneid ();
-
-        if (zone_list (zids, &zi->zoneCount) == 0)
-        {
-            if (zi->zoneCount > 0)
-            {
-                zids = malloc (sizeof (zoneid_t) * zi->zoneCount);
-                if (zids == (zoneid_t *) NULL)
-                {
-                    fprintf (stderr, "malloc failed in main() (1).  errno %d\n", errno);
-                    exit (1);
-                }
-                zone_list (zids, &zi->zoneCount);
-                zi->zones = malloc (sizeof (zoneSummary_t) *
-                        zi->zoneCount);
-                if (zi->zones == (zoneSummary_t *) NULL)
-                {
-                    fprintf (stderr, "malloc failed in main() (2).  errno %d\n", errno);
-                    exit (1);
-                }
-            }
-        }
-
-        zi->globalIdx = 0;
-        for (i = 0; i < (int) zi->zoneCount; ++i)
-        {
-            int     len;
-
-            zi->zones[i].zoneid = zids[i];
-            len = zone_getattr (zids[i], ZONE_ATTR_ROOT,
-                    zi->zones[i].rootpath, MAXPATHLEN);
-            if (len >= 0)
-            {
-                zi->zones[i].rootpathlen = (Size_t) len;
-                strncat (zi->zones[i].rootpath, "/", MAXPATHLEN);
-                if (zi->zones[i].zoneid == 0)
-                {
-                    zi->globalIdx = i;
-                }
-
-                len = zone_getattr (zids[i], ZONE_ATTR_NAME,
-                        zi->zones[i].name, ZONENAME_MAX);
-                if (*zi->zoneDisplay == '\0' &&
-                    zi->myzoneid == zi->zones[i].zoneid)
-                {
-                    strncpy (zi->zoneDisplay, zi->zones[i].name, MAXPATHLEN);
-                }
-                if (debug > 4)
-                {
-                    printf ("zone:%d:%s:%s:\n", (int) zi->zones[i].zoneid,
-                            zi->zones[i].name, zi->zones[i].rootpath);
-                }
-            }
-        }
-
-        free ((void *) zids);
-    }
-
-    if (debug > 4)
-    {
-        printf ("zone:my:%d:%s:glob:%d:\n", (int) diData.zoneInfo.myzoneid,
-                diData.zoneInfo.zoneDisplay, diData.zoneInfo.globalIdx);
-    }
-#endif
-
-// clean up zones
-if (diData->zoneInfo.zones != (zoneSummary_t *) NULL)
+void
+getDiskStatInfo (ref DiskPartitions dpList)
 {
-  free ((void *) diData->zoneInfo.zones);
+  C_ST_stat statBuf;
+
+  foreach (ref dp; dpList.diskPartitions) {
+    if (dp.printFlag == dp.DI_PRINT_EXCLUDE ||
+        dp.printFlag == dp.DI_PRINT_BAD ||
+        dp.printFlag == dp.DI_PRINT_OUTOFZONE)
+    {
+      continue;
+    }
+
+    dp.st_dev = dp.DI_UNKNOWN_DEV;
+    if (stat (toStringz (dp.name), &statBuf) == 0) {
+      dp.setSt_dev = cast(uint) statBuf.st_dev;
+    }
+  }
+}
+
+bool
+getDiskSpecialInfo (ref DiskPartitions dpList)
+{
+  C_ST_stat statBuf;
+  bool      hasLoopback;
+
+  foreach (ref dp; dpList.diskPartitions) {
+    if (dp.name[0] == '/' &&
+        stat (toStringz(dp.special), &statBuf) == 0) {
+      dp.setSp_dev = cast(uint) statBuf.st_dev;
+      dp.setSp_rdev = cast(uint) statBuf.st_rdev;
+        /* Solaris's loopback device is "lofs"            */
+        /* linux loopback device is "none"                */
+        /* linux has rdev = 0                             */
+        /* DragonFlyBSD's loopback device is "null"       */
+        /* DragonFlyBSD has rdev = -1                     */
+        /* solaris is more consistent; rdev != 0 for lofs */
+        /* solaris makes sense.                           */
+      if ((dp.fsType == "lofs" && dp.sp_rdev != 0) ||
+          dp.fsType == "null" || dp.fsType == "none") {
+        dp.setLoopback = true;
+        hasLoopback = true;
+      } else {
+        dp.setSp_dev = 0;
+        dp.setSp_rdev = 0;
+      }
+    }
+  }
+
+  return hasLoopback;
 }
 
 
-static if (_lib_zone_list && _lib_getzoneid && _lib_zone_getattr) {
-checkZone (DiskPartition dp, zoneInfo_t *zoneInfo, bool displayAll)
+bool
+checkFileInfo (ref DiskPartitions dpList, Options opts,
+    bool hasPooled, string[] args, int optidx)
 {
-    int         i;
-    int         idx = { -1 };
+  C_ST_stat statBuf;
 
-    if (strcmp (zoneInfo->zoneDisplay, "all") == 0 &&
-        zoneInfo->uid == 0)
-    {
-        return;
+  foreach (ref dp; dpList.diskPartitions) {
+    if (dp.printFlag == dp.DI_PRINT_OK) {
+      dp.setPrintFlag = dp.DI_PRINT_IGNORE;
+    }
+  }
+
+  if (hasPooled) {
+    size_t[]          sortIndex;
+
+    sortIndex.length = dpList.diskPartitions.length;
+    for (int i = 0; i < sortIndex.length; ++i) {
+      sortIndex[i] = i;
+    }
+    sortPartitions (dpList.diskPartitions, sortIndex, "s");
+  }
+
+  for (auto i = optidx; i < args.length; ++i) {
+    auto fd = open (toStringz(args[i]), O_RDONLY | O_NOCTTY);
+    C_TYP_int rc;
+    if (fd < 0) {
+      rc = stat (toStringz(args[i]), &statBuf);
+    } else {
+      rc = fstat (fd, &statBuf);
+      close (fd);
     }
 
-    for (i = 0; i < (int) zoneInfo->zoneCount; ++i)
-    {
-        /* find the zone the filesystem is in, if non-global */
-        if (debug > 5)
+    if (rc == 0) {
+      foreach (ref dp; dpList.diskPartitions) {
+        if (opts.debugLevel > 5)
         {
-            printf (" checkZone:%s:compare:%d:%s:\n",
-                    diskInfo->name,
-                    zoneInfo->zones[i].rootpathlen,
-                    zoneInfo->zones[i].rootpath);
-        }
-        if (strncmp (zoneInfo->zones[i].rootpath,
-             diskInfo->name, zoneInfo->zones[i].rootpathlen) == 0)
-        {
-            if (debug > 4)
-            {
-                printf (" checkZone:%s:found zone:%s:\n",
-                        diskInfo->name, zoneInfo->zones[i].name);
-            }
-            idx = i;
-            break;
-        }
-        if (idx == -1)
-        {
-            idx = zoneInfo->globalIdx;
-        }
-    }
-
-        /* no root access, ignore any zones     */
-        /* that don't match our zone id         */
-        /* this will override any ignore flags  */
-        /* already set                          */
-    if (zoneInfo->uid != 0)
-    {
-        if (debug > 5)
-        {
-            printf (" checkZone:uid non-zero:chk zone:%d:%d:\n",
-                    (int) zoneInfo->myzoneid,
-                    (int) zoneInfo->zones[idx].zoneid);
-        }
-        if (zoneInfo->myzoneid != zoneInfo->zones[idx].zoneid)
-        {
-            if (debug > 4)
-            {
-                printf (" checkZone:not root, not zone:%d:%d:outofzone:\n",
-                        (int) zoneInfo->myzoneid,
-                        (int) zoneInfo->zones[idx].zoneid);
-            }
-            diskInfo->printFlag = DI_PRNT_OUTOFZONE;
-        }
-    }
-
-    if (debug > 5)
-    {
-        printf (" checkZone:chk name:%s:%s:\n",
-                zoneInfo->zoneDisplay, zoneInfo->zones[idx].name);
-    }
-        /* not the zone we want. ignore */
-    if (! displayAll &&
-        diskInfo->printFlag == DI_PRNT_OK &&
-        strcmp (zoneInfo->zoneDisplay, "all") != 0 &&
-        strcmp (zoneInfo->zoneDisplay,
-                zoneInfo->zones[idx].name) != 0)
-    {
-        if (debug > 4)
-        {
-            printf (" checkZone:wrong zone:ignore:\n");
+          writefln ("check %s against %s: %d %d", args[i], dp.name,
+              cast(uint) statBuf.st_dev, dp.st_dev);
         }
 
-        diskInfo->printFlag = DI_PRNT_IGNORE;
-    }
-
-        /* if displaying a non-global zone,   */
-        /* don't display loopback filesystems */
-    if (! displayAll &&
-        diskInfo->printFlag == DI_PRNT_OK &&
-        strcmp (zoneInfo->zoneDisplay, "global") != 0 &&
-        diskInfo->isLoopback)
-    {
-        if (debug > 4)
-        {
-            printf (" checkZone:non-global/lofs:ignore:\n");
+        if (dp.st_dev != dp.DI_UNKNOWN_DEV &&
+            cast(uint) statBuf.st_dev == dp.st_dev &&
+            ! dp.isLoopback) {
+          dp.setPrintFlag = dp.DI_PRINT_FORCE;
+          break;
         }
+      } // for each partition
+    } // if stat of file worked
+  } // for each command line argument
 
-        diskInfo->printFlag = DI_PRNT_IGNORE;
-    }
-
-    return;
+  return true;
 }
-} /* static if */
-+/
