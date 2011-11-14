@@ -27,6 +27,9 @@
 #if _sys_param
 # include <sys/param.h>     /* MAXPATHLEN */
 #endif
+#if _hdr_zone
+# include <zone.h>
+#endif
 
 #if ! defined (O_NOCTTY)
 # define O_NOCTTY 0
