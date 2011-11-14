@@ -8,21 +8,24 @@ maindoquery $1 $_MKC_ONCE
 getsname $0
 dosetup $@
 
-cd $_MKCONFIG_RUNTOPDIR
-. ./mkconfig.cache
+. $_MKCONFIG_DIR/bin/shellfuncs.sh
+locatecmd locrpmbuild rpmbuild
 
-if [ "${mkc_c__command_rpmbuild}" = "0" ];then
+if [ "${locrpmbuild}" = "" ];then
   echo ${EN} " skipped${EC}" >&5
   exit 0
 fi
 
-march=`rpmbuild --showrc | grep '^build arch' | sed 's/.*: *//'`
-echo "## Machine Architecture: ${march}"
 rvers=`rpmbuild --version | tr -cd '0-9' | sed 's/^\(...\).*/\1/'`
 if [ $rvers -lt 470 ]; then
   echo ${EN} " old version skipped${EC}" >&5
   exit 0
 fi
+
+march=`rpmbuild --showrc | grep '^build arch' | sed 's/.*: *//'`
+echo "## Machine Architecture: ${march}"
+
+cd ${_MKCONFIG_RUNTOPDIR}
 
 DI_VERSION=`grep DI_VERSION version.h | sed  -e 's/"$//' -e 's/.*"//'`
 
