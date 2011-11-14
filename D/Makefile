@@ -1,5 +1,5 @@
 #
-#  di makefile
+#  di makefile - D
 #
 #  Copyright 2011 Brad Lanam Walnut Creek CA, USA
 #
@@ -41,13 +41,12 @@ MKC_REQLIB = di.reqlibs
 
 #        DTESTFLAGS="$$DC_OPT $$DC_RELEASE $$DC_INLINE" di-programs
 
+# compiling w/o the unittest flag fails for DMD2
 .PHONY: all
 all:	di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
-		DTESTFLAGS="$$DC_OPT $$DC_RELEASE " \
-		di-programs
-
+		DTESTFLAGS="$$DC_UNITTEST" di-programs
 
 #        DTESTFLAGS="$$DC_UNITTEST $$DC_COV $$DC_DEBUG" \
 
@@ -55,9 +54,8 @@ all:	di.env
 all-test: di.env
 	. ./di.env; \
 	$(MAKE) -e MKCONFIG_TYPE=sh \
-		DTESTFLAGS="$$DC_UNITTEST " \
-		LIBS="$(LIBS) $$DC_LIBS" \
-		di-programs
+		DTESTFLAGS="$$DC_UNITTEST $$DC_COV " \
+		LIBS="$(LIBS) $$DC_LIBS" di-programs
 
 ###
 # environment
@@ -95,6 +93,13 @@ distclean:
 	@$(MAKE) realclean > /dev/null 2>&1
 	@-$(RM) -rf _mkconfig_runtests _tmp_mkconfig \
 		>/dev/null 2>&1
+
+###
+# installation
+
+.PHONY: install
+install:	di-programs di.env
+	. ./di.env;cd ..;$(MAKE) -e prefix=$(prefix) LOCALEDIR=$(LOCALEDIR) FROMDIR=D install
 
 ###
 # programs
