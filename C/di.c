@@ -1220,6 +1220,7 @@ initZones (diData)
 
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
   {
+    int             i;
     zoneid_t        *zids = (zoneid_t *) NULL;
     zoneInfo_t      *zi;
 
