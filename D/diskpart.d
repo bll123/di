@@ -18,6 +18,7 @@ public:
   bool          isReadOnly;
   bool          doPrint;
   bool          isPooledFS;
+  bool          isLoopback;
   byte          printFlag;
   ushort        index;
   uint          st_dev;         // disk device number
@@ -36,7 +37,10 @@ public:
   string        mountOptions;
   string        mountTime;
 
-  // for printFlag
+  // for .st_dev
+  enum DI_UNKNOWN_DEV = 0xFFFFFFFF;
+
+  // for .printFlag
   enum byte
     DI_PRINT_OK = 0,
     DI_PRINT_IGNORE = 1,
@@ -47,32 +51,47 @@ public:
     DI_PRINT_SKIP = 6;
 
   @property void
-  setPrintFlag (byte pFlag)
-  {
+  setPrintFlag (byte pFlag) {
     printFlag = pFlag;
   }
 
   @property void
-  setDoPrint (bool v)
-  {
+  setDoPrint (bool v) {
     doPrint = v;
   }
 
   @property void
-  setPooledFS (bool v)
-  {
+  setPooledFS (bool v) {
     isPooledFS = v;
   }
 
   @property void
-  setRemote (bool v)
-  {
+  setRemote (bool v) {
     isRemote = v;
   }
 
+  @property void
+  setLoopback (bool v) {
+    isLoopback = v;
+  }
+
+  @property void
+  setSt_dev (uint v) {
+    st_dev = v;
+  }
+
+  @property void
+  setSp_dev (uint v) {
+    sp_dev = v;
+  }
+
+  @property void
+  setSp_rdev (uint v) {
+    sp_rdev = v;
+  }
+
   void
-  checkPartSizes ()
-  {
+  checkPartSizes () {
     if (this.freeBlocks < 0.0) {
       this.freeBlocks = 0.0;
     }
@@ -86,8 +105,7 @@ public:
   }
 
   void
-  initDiskPartition ()
-  {
+  initDiskPartition () {
     this.totalBlocks = 0.0;
     this.freeBlocks = 0.0;
     this.availBlocks = 0.0;
