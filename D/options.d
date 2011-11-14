@@ -29,7 +29,7 @@ struct Options {
   bool              localOnly = false;
   bool              includeLoopback = false;
   bool              printHeader = true;
-  bool              noQuotaCheck = false;
+  bool              quotaCheck = true;
   bool              displayTotal = false;
   bool              debugHeader = false;
   bool              unknown = false;
@@ -153,11 +153,9 @@ unittest {
   }
   unsetenv ("BLOCKSIZE");
 
-  write ("unittest: options: getDIOptions: ");
   if (failures > 0) {
+    write ("unittest: options: getDIOptions: ");
     writefln ("failed: %d of %d", failures, tcount);
-  } else {
-    writeln ("passed");
   }
 }
 
@@ -229,6 +227,7 @@ processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
     goinit (options, "--help", GETOPTN_FUNC_NOARG,    cast(void *) null, delhelp );
     goinit (options, "--human-readable", GETOPTN_ALIAS, cast(void *) &"-H", null );
     goinit (options, "-?",   GETOPTN_ALIAS,    cast(void *) &"--help", null );
+    goinit (options, "-i",   GETOPTN_ALIAS,     cast(void *) &"-x", null );
     goinit (options, "-I",   GETOPTN_FUNC_ARG,   cast(void *) null, delI );
     goinit (options, "--inodes", GETOPTN_IGNORE,   cast(void *) null, null );
     goinit (options, "-k",   GETOPTN_FUNC_NOARG,  cast(void *) null, delk );
@@ -241,12 +240,13 @@ processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
     goinit (options, "-P",   GETOPTN_FUNC_NOARG,  cast(void *) null, delP );
     goinit (options, "--portability", GETOPTN_ALIAS, cast(void *) &"-P", null );
     goinit (options, "--print-type", GETOPTN_IGNORE, cast(void *) null, null );
-    goinit (options, "-q",   GETOPTN_BOOL,     cast(void *) &noQuotaCheck, null );
+    goinit (options, "-q",   GETOPTN_BOOL,     cast(void *) &quotaCheck, null );
     goinit (options, "-s",   GETOPTN_FUNC_ARG,   cast(void *) null, dels );
     goinit (options, "--si",  GETOPTN_FUNC_NOARG,  cast(void *) null, delsi );
     goinit (options, "--sync", GETOPTN_IGNORE,    cast(void *) null, null );
     goinit (options, "-t",   GETOPTN_BOOL,     cast(void *) &displayTotal, null );
     goinit (options, "--total", GETOPTN_ALIAS,    cast(void *) &"-t", null );
+    goinit (options, "--type", GETOPTN_ALIAS,    cast(void *) &"-I", null );
     goinit (options, "-v",   GETOPTN_IGNORE,    cast(void *) null, null );
     goinit (options, "--version", GETOPTN_FUNC_NOARG, cast(void *) null, delversion );
     goinit (options, "-w",   GETOPTN_SHORT,    cast(void *) &dispOpts.width, null );
@@ -331,7 +331,7 @@ string s;
     tstr.test ("-P: formatString", true, "-P", formatString, DI_POSIX_FORMAT, 2);
     tstr.test ("-P -k: dispOpts.dbsstr", true, "-P -k", dispOpts.dbsstr, "k", 3);
     tstr.test ("-k -P: dispOpts.dbsstr", true, "-k -P", dispOpts.dbsstr, "k", 3);
-    tbool.test ("-q: noQuotaCheck", true, "-q", noQuotaCheck, true, 2);
+    tbool.test ("-q: quotaCheck", true, "-q", quotaCheck, false, 2);
     tstr.test ("-s r: sortType", true, "-s r", sortType, "rm", 3);
     tstr.test ("-s t: sortType", true, "-s t", sortType, "tm", 3);
     tstr.test ("-s trsrm: sortType", true, "-s trsrm", sortType, "trsrm", 3);
@@ -346,11 +346,9 @@ string s;
     tshort.test ("-X 4: debugLevel", true, "-X 4", debugLevel, 4, 3);
   }
 
-  write ("unittest: options: processOpts: ");
   if (failures > 0) {
+    write ("unittest: options: processOpts: ");
     writefln ("failed: %d of %d", failures, tcount);
-  } else {
-    writeln ("passed");
   }
 }
 
