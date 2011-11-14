@@ -127,14 +127,12 @@
 #if _hdr_zone
 # include <zone.h>
 #endif
-/*
 #if _sys_file
 # include <sys/file.h>
 #endif
-#if _hdr_fcntl
+#if _hdr_fcntl          /* O_RDONLY, O_NOCTTY */
 # include <fcntl.h>
 #endif
-*/
 
 #if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
