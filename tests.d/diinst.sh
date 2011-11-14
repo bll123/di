@@ -8,22 +8,50 @@ maindoquery $1 $_MKC_ONCE
 getsname $0
 dosetup $@
 
-cd $_MKCONFIG_RUNTOPDIR
-grc=0
-instdir="`pwd`/test_di"
-unset MAKEFLAGS
-${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} install
-rc=$?
+for d in C D; do
+  tdir=$_MKCONFIG_RUNTOPDIR/$d
+  (
+    cd $tdir
+    if [ $? -eq 0 ]; then
+      instdir="`pwd`/test_di"
+      ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} all > make.log 2>&1
+    fi
+  )
+  if [ -x ${tdir}/di ]; then
+    echo ${EN} " ${d}${EC}" >&5
+    cd ${tdir}
+    grc=0
 
-# leave a copy laying around...make realclean will clean it up
-set +f
-cp mkconfig.log mkconfig.cache mkc*.vars di.env di.reqlibs \
-    $_MKCONFIG_TSTRUNTMPDIR
-set -f
+    instdir="`pwd`/test_di"
+    unset MAKEFLAGS
+    ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} install
+    rc=$?
 
-if [ $rc -ne 0 ]; then grc=$rc; fi
-${instdir}/bin/di
-rc=$?
-if [ $rc -ne 0 ]; then grc=$rc; fi
+    # leave a copy laying around...make realclean will clean it up
+    set +f
+    cp mkconfig.log mkconfig.cache mkc*.vars di.env di.reqlibs \
+        $_MKCONFIG_TSTRUNTMPDIR
+    set -f
+
+    if [ $rc -ne 0 ]; then grc=$rc; fi
+    ${instdir}/bin/di
+    rc=$?
+    if [ $rc -ne 0 ]; then grc=$rc; fi
+    if [ $grc -ne 0 ]; then
+      echo ${EN} "*${EC}" >&5
+    fi
+  else
+    if [ $d = C ]; then
+      echo "## no di executable found for dir $d"
+      grc=1
+    fi
+  fi
+
+  for f in make.log; do
+    if [ -f $f ]; then
+      mv $f $_MKCONFIG_TSTRUNTMPDIR/${f}.${d};
+    fi
+  done
+done
 
 exit $grc
