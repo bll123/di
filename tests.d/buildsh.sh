@@ -23,7 +23,7 @@ for d in C D; do
       ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} di.env > make.log 2>&1
       (
         . ./di.env
-        if [ "${DVERSION}" != "2" ]; then
+        if [ "${DVERSION}" = "" -o "${DVERSION}" = "1" ]; then
           exit 1
         fi
         exit 0
