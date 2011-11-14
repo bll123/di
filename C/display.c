@@ -36,15 +36,6 @@
 # include <wchar.h>
 #endif
 
-/*
-#if _hdr_locale
-# include <locale.h>
-#endif
-#if _sys_stat
-# include <sys/stat.h>
-#endif
-*/
-
 extern int debug;
 
 #define DI_FMT_VALID_CHARS     "mMsStTbBucfvp12a3iUFPIO"
