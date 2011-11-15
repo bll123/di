@@ -204,6 +204,7 @@ process_opt (info, opt, optinfo)
 {
   const char    *ptr;
 
+  ptr = (char *) NULL;
   if (opt->option_type == GETOPTN_INT ||
       opt->option_type == GETOPTN_LONG ||
       opt->option_type == GETOPTN_SIZET ||
