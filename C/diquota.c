@@ -487,6 +487,10 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, cqinfo)
     quotBlockSize = 512;
   }
 
+  if (diqinfo->blockSize == 0) {
+    diqinfo->blockSize = 512;  /* set it to something to prevent crashes */
+  }
+
   if (rc == 0) {
     tlimit = 0;
     if (xfsflag) {
@@ -500,6 +504,7 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, cqinfo)
     if (debug > 2) {
       printf ("quota: %s %s orig hard: %lld\n", tag, diqinfo->name, tsize);
     }
+
     tsize = tsize * quotBlockSize / diqinfo->blockSize;
     if (tsize != 0 && (tsize < diqinfo->limit || diqinfo->limit == 0)) {
       diqinfo->limit = tsize;
