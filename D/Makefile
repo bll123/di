@@ -136,8 +136,7 @@ OBJECTS = config$(OBJ_EXT) di$(OBJ_EXT) \
 
 di$(EXE_EXT):	$(OBJECTS) $(MKC_REQLIB)
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -c $(DC) \
-		-o di$(EXE_EXT) -- $(LDFLAGS) \
-		$(OBJECTS) $(LIBS) `cat $(MKC_REQLIB)`
+	-o di$(EXE_EXT) -r $(MKC_REQLIB) -- $(LDFLAGS) $(OBJECTS) $(LIBS)
 
 ###
 # objects
