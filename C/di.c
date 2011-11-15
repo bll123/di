@@ -343,6 +343,7 @@ checkFileInfo (diData, optidx, argc, argv)
 
 
     rc = 0;
+    diopts = &diData->options;
 
         /* turn everything off */
     for (j = 0; j < diData->count; ++j)
@@ -350,13 +351,11 @@ checkFileInfo (diData, optidx, argc, argv)
       diDiskInfo_t        *dinfo;
 
       dinfo = &diData->diskInfo[j];
-      if (dinfo->printFlag == DI_PRNT_OK)
+      if (dinfo->printFlag == DI_PRNT_OK && ! diopts->displayAll)
       {
         dinfo->printFlag = DI_PRNT_IGNORE;
       }
     }
-
-    diopts = &diData->options;
 
     diskInfo = diData->diskInfo;
     if (diData->haspooledfs && ! diData->totsorted)
