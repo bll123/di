@@ -33,7 +33,8 @@ for d in C D; do
     cd $tdir
     if [ $? -eq 0 ]; then
       instdir="`pwd`/test_di"
-      ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} all > make.log 2>&1
+      ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} all
+        > ${_MKCONFIG_TSTRUNTMPDIR}/make.log 2>&1
     fi
   )
   if [ -x $tdir/di ]; then
@@ -123,12 +124,6 @@ for d in C D; do
       grc=1
     fi
   fi
-
-  for f in make.log; do
-    if [ -f $f ]; then
-      mv $f $_MKCONFIG_TSTRUNTMPDIR/${f}.${d};
-    fi
-  done
 done
 
 exit $grc
