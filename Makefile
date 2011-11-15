@@ -174,18 +174,22 @@ tar:
 ###
 # cleaning
 
+# Leaves:
+#  _tmp_mkconfig/, _mkconfig_runtests/
 .PHONY: clean
 clean:
-	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log _tmp_mkconfig \
+	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
 		checkbuild checkperlbuild checkinstall \
 		tests.done > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) clean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null && $(MAKE) clean > /dev/null 2>&1)
 	@-(cd D >/dev/null && $(MAKE) clean > /dev/null 2>&1)
 
+# Leaves:
+#  _tmp_mkconfig/, _mkconfig_runtests/
 .PHONY: realclean
 realclean:
-	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log _tmp_mkconfig \
+	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
 		checkbuild checkperlbuild checkinstall \
 		tests.done > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) realclean > /dev/null 2>&1)
@@ -196,8 +200,8 @@ realclean:
 #   dioptions.dat
 .PHONY: distclean
 distclean:
-	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log _tmp_mkconfig \
-		checkbuild checkperlbuild checkinstall \
+	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
+		_mkconfig_runtests checkbuild checkperlbuild checkinstall \
 		tests.done > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) distclean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null && $(MAKE) distclean > /dev/null 2>&1)
