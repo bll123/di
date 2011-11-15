@@ -20,7 +20,7 @@ for d in C D; do
 
     if [ $d = D ]; then
       ${MAKE:-make} ${TMAKEFLAGS} realclean
-      ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} di.env > make.log 2>&1
+      ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} di.env > env.make.log 2>&1
       (
         . ./di.env
         if [ "${DVERSION}" = "" -o "${DVERSION}" = "1" ]; then
@@ -107,7 +107,7 @@ for d in C D; do
   mkdir -p $_MKCONFIG_TSTRUNTMPDIR/buildsh_${d}${stag}
   set +f
   for f in mkconfig.log mkconfig.cache mkc*.vars di.env di.reqlibs \
-      make.log make_extra.log; do
+      env.make.log make.log make_extra.log; do
     if [ -f $f ]; then
       mv $f $_MKCONFIG_TSTRUNTMPDIR/buildsh_${d}${stag}
     fi
