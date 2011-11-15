@@ -25,6 +25,14 @@ for d in C D; do
     grc=$?
     if [ $grc -ne 0 ]; then
       echo ${EN} "*${EC}" >&5
+    else
+      # look for invalid floating point numbers
+      ${tdir}/di -n | egrep '(inf|nan)'
+      rc=$?
+      if [ $rc -eq 0 ]; then
+        echo ${EN} "*${EC}" >&5
+        grc=1
+      fi
     fi
   else
     if [ $d = C ]; then

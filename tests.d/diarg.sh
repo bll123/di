@@ -72,6 +72,17 @@ for d in C D; do
       else
         echo "## $cmd ok"
       fi
+      case $a in
+        "-d"*)
+          cmd="${tdir}/di -n $a"
+          eval "$cmd | egrep '(inf|nan)'"
+          rc=$?
+          if [ $rc -eq 0 ]; then
+            echo ${EN} "*${EC}" >&5
+            grc=1
+          fi
+          ;;
+      esac
     done
 
     if [ $grc -ne 0 ]; then
