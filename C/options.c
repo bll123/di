@@ -194,8 +194,8 @@ getDIOptions (argc, argv, diData)
     printf ("# blocksize: %s\n", dbsstr);
   }
 
-  setDispBlockSize (dbsstr, diopts, diout);
   initDisplayTable (diopts);
+  setDispBlockSize (dbsstr, diopts, diout);
 
   return optidx;
 }
