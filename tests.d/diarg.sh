@@ -64,7 +64,6 @@ for d in C D; do
       cmd="${tdir}/di $a > /dev/null"
       o=`eval $cmd 2>&1`
       rc=$?
-      o=`echo $o | grep -v 'Permission denied'`
       if [ $rc -ne 0 ]; then grc=$rc; fi
       if [ "$o" != "" ]; then
         echo "## $cmd failed with output:"
