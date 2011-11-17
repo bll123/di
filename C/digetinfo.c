@@ -191,8 +191,11 @@ di_getDiskInfo (diskInfo, diCount)
             }
             else
             {
+              diptr->printFlag = DI_PRNT_BAD;
+              if (errno != EACCES) {
                 fprintf (stderr, "statvfs: %s ", diptr->name);
                 perror ("");
+              }
             }
         }
     } /* for each entry */
@@ -291,8 +294,11 @@ di_getDiskInfo (diskInfo, diCount)
             } /* if we got the info */
             else
             {
+              diptr->printFlag = DI_PRNT_BAD;
+              if (errno != EACCES) {
                 fprintf (stderr, "statfs: %s ", diptr->name);
                 perror ("");
+              }
             }
         }
     } /* for each entry */
@@ -366,8 +372,11 @@ di_getDiskInfo (diskInfo, diCount)
             } /* if we got the info */
             else
             {
+              diptr->printFlag = DI_PRNT_BAD;
+              if (errno != EACCES) {
                 fprintf (stderr, "statfs: %s ", diptr->name);
                 perror ("");
+              }
             }
         }
     } /* for each entry */
