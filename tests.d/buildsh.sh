@@ -13,14 +13,19 @@ testshcapability
 
 for d in C D; do
   tdir=$_MKCONFIG_RUNTOPDIR/$d
-  if [ -d ${tdir} -a "${DC}" != "" ]; then
+  if [ -d ${tdir} ]; then
     cd $tdir
     instdir="`pwd`/test_di"
     unset MAKEFLAGS
 
-    if [ $d = D ]; then
+    if [ $d = D -a "$DC" != "" ]; then
       ${MAKE:-make} ${TMAKEFLAGS} realclean
       ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} di.env > env.make.log 2>&1
+      rc=$?
+      if [ $rc -ne 0 -o ! -f ./di.env ]; then
+        test -f env.make.log && rm -f env.make.log
+        continue;
+      fi
       (
         . ./di.env
         if [ "${DVERSION}" = "" -o "${DVERSION}" = "1" ]; then
@@ -30,6 +35,7 @@ for d in C D; do
       )
       rc=$?
       if [ $rc -ne 0 ]; then
+        test -f env.make.log && rm -f env.make.log
         continue
       fi
     fi
@@ -95,7 +101,7 @@ for d in C D; do
           grep -v FLAGS= |
           grep -v -- '--' |
           cat > make_extra.log
-        extra=`cat make_extra.log | wc -l`
+        extra=`cat make_extra.log | wc -l | sed -e 's/^ *//'`
         if [ $extra -ne 0 ]; then
           echo "## extra output"
           grc=1
@@ -113,8 +119,6 @@ for d in C D; do
     fi
   done
   set -f
-  mv $_MKCONFIG_TSTRUNTMPDIR/buildsh.log${stag}  \
-      $_MKCONFIG_TSTRUNTMPDIR/buildsh_${d}.log${stag}
 done
 
 exit $grc
