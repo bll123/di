@@ -488,9 +488,11 @@ checkFileInfo (diData, optidx, argc, argv)
         } /* if stat ok */
         else
         {
+          if (errno != EACCES) {
             fprintf (stderr, "stat: %s ", argv[i]);
             perror ("");
-            rc = -1;
+          }
+          rc = -1;
         }
     } /* for each file specified on command line */
 
@@ -541,8 +543,10 @@ getDiskStatInfo (diData)
         }
         else
         {
+          if (errno != EACCES) {
             fprintf (stderr, "stat: %s ", dinfo->name);
             perror ("");
+          }
         }
     }
 }
