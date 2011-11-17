@@ -1445,7 +1445,7 @@ di_getDiskEntries (diskInfo, diCount)
     if (num == -1)
     {
         free ((char *) vmbuf);
-        fprintf (stderr,"%s errno %d\n", strerror (errno), errno);
+        fprintf (stderr, "%s errno %d\n", strerror (errno), errno);
         return -1;
     }
 
