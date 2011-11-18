@@ -1189,9 +1189,11 @@ checkZone (diskInfo, zoneInfo, allFlag)
 static void
 initLocale ()
 {
+#if _enable_nls || (_lib_setlocale && defined (LC_ALL))
+  char      *ptr;
+#endif
 #if _enable_nls
   char      *localeptr;
-  char      *ptr;
 #endif
 
 #if _lib_setlocale && defined (LC_ALL)
