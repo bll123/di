@@ -91,7 +91,7 @@ realclean:
 .PHONY: distclean
 distclean:
 	@$(MAKE) realclean > /dev/null 2>&1
-	@-$(RM) -rf _mkconfig_runtests _tmp_mkconfig \
+	@-$(RM) -rf _mkconfig_runtests _tmp_mkconfig test_di \
 		>/dev/null 2>&1
 
 ###
