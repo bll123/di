@@ -31,14 +31,7 @@ C/strdup.c                di source
 C/strstr.c                di source
 C/tests.d/                regression tests for di
 C/tests.d/buildpl.sh
-C/tests.d/buildsh.sh
 C/tests.d/compshpl.sh
-C/tests.d/diarg.sh
-C/tests.d/diexec.sh
-C/tests.d/diinst.sh
-C/tests.d/dinls.sh
-C/tests.d/disort.sh
-C/tests.d/ditot.sh
 C/tests.d/env.sh
 C/tests.d/getoptn.sh
 C/tests.d/getoptn.txt
@@ -50,7 +43,7 @@ D/                      D di source
 D/Makefile                D Makefile
 D/d.README                D source README
 D/di.d                    di source
-D/digetopt.d              di source
+D/digetoptn.d             di source
 D/dihelp.d                di source
 D/dilocale.d              di source
 D/diquota.d               di source
@@ -77,3 +70,12 @@ po/                     internationalization
 po/de.po
 po/en.po
 po/es.po
+tests.d/                  regression tests for di
+tests.d/buildsh.sh
+tests.d/diarg.sh
+tests.d/diexec.sh
+tests.d/diinst.sh
+tests.d/dinls.sh
+tests.d/disort.sh
+tests.d/ditot.sh
+tests.d/test_order
