@@ -1,4 +1,19 @@
+di - disk information utility (version 4.31)
+
 This code is in development.
 It is only included here as an
 example on how to use 'mkconfig'
 with the D language.
+
+As of 2011-11-18, the code will not link without the 
+second set of unittest blocks in options.d.  No idea why.
+
+CHANGES
+
+    4.31                                    [20 Nov 2011]
+        Most command line arguments are working.
+        Updated build system to mkconfig-1.19
+
+COPYRIGHT
+
+    Copyright 2011 Brad Lanam, Walnut Creek, CA, USA
