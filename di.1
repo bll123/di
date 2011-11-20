@@ -8,7 +8,7 @@
 .\"
 .\" brad.lanam.di_at_gmail.com
 .\"
-.TH di 1 "8 Oct 2011"
+.TH di 1 "17 Nov 2011"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -50,8 +50,11 @@ with total blocks <= 0; filesystems marked by the operating
 system as "ignore" or "none";
 loopback filesystems that are duplicates
 of other normally mounted filesystems (filesystem type of 'lofs'
-or linux 'none');
+, 'none', or 'nullfs');
 loopback filesystems that are part of a zone (Solaris).
+.PP
+Filesystems that the user does not have permissions to access will
+not be displayed at all.
 .PP
 \fImi\fP Displays the mounted filesystem information.
 .PP
