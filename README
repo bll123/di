@@ -1,4 +1,4 @@
-di - disk information utility (version 4.30)
+di - disk information utility (version 4.31)
 
 CONTENTS
   Description
@@ -20,7 +20,13 @@ DESCRIPTION
 
 INSTALLATION
 
-  To build with mkconfig.sh:
+  To build:
+    make -e dioptions.dat
+    # Edit dioptions.dat and change it 
+    # to set your preferences.  
+    # Add your CC, CFLAGS and LDFLAGS settings.
+    # This file will not be removed and can be reused 
+    # for the next release.
     make -e
     make -e install
   Example to change compiler and prefix:
@@ -28,15 +34,11 @@ INSTALLATION
 
   If you don't have a bourne shell compatible shell,
   Try building with perl:
-      cd C;make -e all-perl
-
-  To change the options (NLS, WINAPI, default display):
-    make dioptions.dat
-    Edit dioptions.dat and change what you like.
-    Then: make -e
+      make -e all-perl
 
   The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
-  variables may be set and exported prior to running make.
+  variables may be set and exported prior to running make.  This 
+  will override any settings in 'dioptions.dat'.
 
   The LOCALEDIR environment variable defaults to ${prefix}/share/locale.
   The installation uses the INSTALL_DIR (default ${prefix}),
@@ -100,8 +102,7 @@ INSTALLATION
 BUGS AND KNOWN ISSUES
     What's Not Tested:
       - pooled filesystems on Tru64.
-        - fixes in di-4.25 to handle pool domains properly.
-          I have access to a Tru64 system w/quotas, but there's
+        - I have access to a Tru64 system w/quotas, but there's
           only one filesystem per pool.
       - quotas:
         - MacOSX
@@ -131,7 +132,7 @@ REQUIREMENTS
 
     bourne/ksh/bash shell
     C compiler
-    awk (nawk/gawk)
+    awk (mawk/nawk/gawk)
     make
         cat chmod ln mkdir mv rm sed test
     mkconfig.sh:
@@ -150,20 +151,19 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.30 has been tested on the following platforms:
+    di 4.31 has been tested on the following platforms:
         AIX 5.1
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5, 6.0
         Debian 4.0, 5.0, 6.0, 6-kFreeBSD 7.2, 6-kFreeBSD 8.1
         DragonflyBSD 2.10.1
-        Fedora 7, 12, 13, 14
+        Fedora 7, 12, 13, 14, 16
         FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1, 8.2
         Haiku r1a3
-        MacOSX 8.11(10.4)
         Mandrake 9.2
         Mandriva 2011
         NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1, 5.1
         Nexenta 1.0.1_b85, 2.0_b104
-        OpenBSD 4.4, 4.5, 4.6, 4.7, 4.8, 4.9
+        OpenBSD 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0
         OpenSolaris 200805, 200906
         QNX 6.3
         RedHat 7.1, 7.3
@@ -185,6 +185,14 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+
+    4.31                                    [20 Nov 2011]
+        Filesystems that would return a 'Permission Denied'
+          are not displayed at all, even with -a.
+        Fixed totals with pooled filesystems (when main pool not mounted).
+        Fixed a very rare divide by 0 condition.
+        Code cleanup.
+        Updated build system to mkconfig-1.19.
 
     4.30                                    [8 Oct 2011]
         Added support for long options.  
