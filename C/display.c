@@ -670,9 +670,6 @@ printInfo (diskInfo, diopts, diout)
 
         case DI_FMT_MOUNT_TIME:
         {
-          if (diout->maxMntTimeString > 0) {
-            printf (diout->mTimeFormat, diskInfo->mountTime);
-          }
           break;
         }
 
@@ -983,7 +980,7 @@ processTitles (diopts, diout)
                 wlenptr = &diout->inodeWidth;
                 fstr = diout->inodeLabelFormat;
                 maxsize = sizeof (diout->inodeLabelFormat);
-                pstr = "Iused";
+                pstr = "IUsed";
                 break;
             }
 
@@ -994,14 +991,14 @@ processTitles (diopts, diout)
                 wlenptr = &diout->inodeWidth;
                 fstr = diout->inodeLabelFormat;
                 maxsize = sizeof (diout->inodeLabelFormat);
-                pstr = "Ifree";
+                pstr = "IFree";
                 break;
             }
 
             case DI_FMT_IPERC:
             {
                 wlen = 6;
-                pstr = "%Iused";
+                pstr = "%IUsed";
                 break;
             }
 
@@ -1057,14 +1054,6 @@ processTitles (diopts, diout)
 
             case DI_FMT_MOUNT_TIME:
             {
-                pstr = "";
-                if (diout->maxMntTimeString > 0) {
-                  wlen = diout->maxMntTimeString;
-                  wlenptr = &diout->maxMntTimeString;
-                  fstr = diout->mTimeFormat;
-                  maxsize = sizeof (diout->mTimeFormat);
-                  pstr = "Mount Time";
-                }
                 break;
             }
 
@@ -1113,7 +1102,7 @@ processTitles (diopts, diout)
           }
           if (fstr != (char *) NULL) {
             if (diopts->csv_output) {
-              strncpy (tformat, "%s", sizeof (tformat));
+              strncpy (tformat, "\"%s\"", sizeof (tformat));
             }
             if (tlen != len) {
               if (! diopts->csv_output) {
