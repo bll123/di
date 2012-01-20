@@ -92,7 +92,6 @@ windows-gcc:
 
 .PHONY: test
 test:
-	cd mkconfig >/dev/null && $(MAKE) -e test
 	cd C >/dev/null && $(MAKE) -e test
 	$(MAKE) -e tests.done
 
