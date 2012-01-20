@@ -17,7 +17,8 @@ rm -f config.h.sh config.h.pl cache.pl cache.sh \
     vars.pl vars.sh
 
 ${MAKE:-make} ${TMAKEFLAGS} -e config.h
-mv config.h config.h.sh
+sed -e '/Created on: /,/Using: mkc/d' config.h > config.h.sh
+rm -f config.h
 grep -v '^mkc_env' mkconfig.cache | sort > cache.sh
 sort mkc_config_c.vars > vars.sh
 mv mkconfig.cache ${_MKCONFIG_TSTRUNTMPDIR}/mkconfig_sh.cache
@@ -27,7 +28,8 @@ mv mkconfig.log ${_MKCONFIG_TSTRUNTMPDIR}/mkconfig_sh.log
 mv di.env ${_MKCONFIG_TSTRUNTMPDIR}/di_sh.env
 
 ${MAKE:-make} ${TMAKEFLAGS} -e MKCONFIG_TYPE=perl config.h
-mv config.h config.h.pl
+sed -e '/Created on: /,/Using: mkc/d' config.h > config.h.pl
+rm -f config.h
 sort mkconfig.cache > cache.pl
 sort mkc_config_c.vars > vars.pl
 mv mkconfig.cache $_MKCONFIG_TSTRUNTMPDIR/mkconfig_pl.cache
