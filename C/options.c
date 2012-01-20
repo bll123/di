@@ -69,7 +69,7 @@ static dispTable_t dispTable [] =
 
 #define DI_POSIX_FORMAT         "SbuvpM"
 #define DI_DEF_MOUNT_FORMAT     "MST\n\tO"
-#define DI_ALL_FORMAT           "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
+#define DI_ALL_FORMAT           "MTS\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 
 # if defined (__cplusplus) || defined (c_plusplus)
    extern "C" {
