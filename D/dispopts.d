@@ -1,6 +1,6 @@
 // written in the D programming language
 
-module didispopts;
+module dispopts;
 
 import std.stdio;
 import std.string;
@@ -24,5 +24,5 @@ struct DisplayOpts {
   short             inodeWidth = 0;
   string            dbsstr = "H";
   string            dispBlockLabel;
-}
+};
 
