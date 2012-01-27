@@ -4,7 +4,7 @@ $Id$
 $Source$
 */
 
-module getoptn;
+module digetoptn;
 
 import std.variant;
 import std.string;
@@ -65,7 +65,7 @@ void
 goinit (ref OptInfo[string] oiaa, string option, getoptType otype,
     void *optval, void delegate (string option, string argval) odg)
 {
-  OptInfo   oi = { otype, optval, odg };
+  OptInfo   oi = { otype: otype, optval: optval, odg: odg };
   oiaa[option] = oi;
 }
 
