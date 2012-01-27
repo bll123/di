@@ -1,6 +1,6 @@
 // written in the D programming language
 
-module didisplay;
+module display;
 
 import std.stdio;
 import std.string;
@@ -17,15 +17,6 @@ import diskpart;
 import dilocale;
 
 private:
-
-enum char
-  DI_SORT_NONE = 'n',
-  DI_SORT_MOUNT = 'm',
-  DI_SORT_SPECIAL = 's',
-  DI_SORT_AVAIL = 'a',
-  DI_SORT_REVERSE = 'r',
-  DI_SORT_TYPE = 't',
-  DI_SORT_ASCENDING = 1;
 
 enum dchar
   FMT_MOUNT = 'm',
@@ -67,29 +58,98 @@ struct FormatInfo {
 };
 
 FormatInfo[] formatTypes = [
-  { FMT_MOUNT,                  FTYPE_STRING,    15, "Mount" },
-  { FMT_MOUNT_FULL,             FTYPE_STRING,    15, "Mount" },
-  { FMT_SPECIAL,                FTYPE_STRING,    18, "Filesystem" },
-  { FMT_SPECIAL_FULL,           FTYPE_STRING,    18, "Filesystem" },
-  { FMT_TYPE,                   FTYPE_STRING,     7, "fsType" },
-  { FMT_TYPE_FULL,              FTYPE_STRING,     7, "fs Type" },
-  { FMT_BLOCKS_TOT,             FTYPE_SPACE,      8, "" },
-  { FMT_BLOCKS_TOT_AVAIL,       FTYPE_SPACE,      8, "" },
-  { FMT_BLOCKS_USED,            FTYPE_SPACE,      8, "Used" },
-  { FMT_BLOCKS_CALC_USED,       FTYPE_SPACE,      8, "Used" },
-  { FMT_BLOCKS_FREE,            FTYPE_SPACE,      8, "Free" },
-  { FMT_BLOCKS_AVAIL,           FTYPE_SPACE,      8, "Avail" },
-  { FMT_BLOCKS_PERC_NOT_AVAIL,  FTYPE_PERC_SPACE, 6, "%Used" },
-  { FMT_BLOCKS_PERC_USED,       FTYPE_PERC_SPACE, 6, "%Used" },
-  { FMT_BLOCKS_PERC_USED_AVAIL, FTYPE_PERC_SPACE, 6, "%Used" },
-  { FMT_BLOCKS_PERC_AVAIL,      FTYPE_PERC_SPACE, 5, "%Free" },
-  { FMT_BLOCKS_PERC_FREE,       FTYPE_PERC_SPACE, 5, "%Free" },
-  { FMT_INODES_TOT,             FTYPE_INODE,      9, "Inodes" },
-  { FMT_INODES_USED,            FTYPE_INODE,      9, "IUsed" },
-  { FMT_INODES_FREE,            FTYPE_INODE,      9, "IFree" },
-  { FMT_INODES_PERC,            FTYPE_PERC_INODE, 6, "%IUsed" },
-  { FMT_MOUNT_TIME,             FTYPE_STRING,    15, "Mount Time" },
-  { FMT_MOUNT_OPTIONS,          FTYPE_STRING,    15, "Options" }
+  { key:   FMT_MOUNT,
+    ftype: FTYPE_STRING,
+    width: 15,
+    title: "Mount" },
+  { key:   FMT_MOUNT_FULL,
+    ftype: FTYPE_STRING,
+    width: 15,
+    title: "Mount" },
+  { key:   FMT_SPECIAL,
+    ftype: FTYPE_STRING,
+    width: 18,
+    title: "Filesystem" },
+  { key:   FMT_SPECIAL_FULL,
+    ftype: FTYPE_STRING,
+    width: 18,
+    title: "Filesystem" },
+  { key:   FMT_TYPE,
+    ftype: FTYPE_STRING,
+    width: 7,
+    title: "fsType" },
+  { key:   FMT_TYPE_FULL,
+    ftype: FTYPE_STRING,
+    width: 7,
+    title: "fs Type" },
+  { key:   FMT_BLOCKS_TOT,
+    ftype: FTYPE_SPACE,
+    width: 8,
+    title: "" },
+  { key:   FMT_BLOCKS_TOT_AVAIL,
+    ftype: FTYPE_SPACE,
+    width: 8,
+    title: "" },
+  { key:   FMT_BLOCKS_USED,
+    ftype: FTYPE_SPACE,
+    width: 8,
+    title: "Used" },
+  { key:   FMT_BLOCKS_CALC_USED,
+    ftype: FTYPE_SPACE,
+    width: 8,
+    title: "Used" },
+  { key:   FMT_BLOCKS_FREE,
+    ftype: FTYPE_SPACE,
+    width: 8,
+    title: "Free" },
+  { key:   FMT_BLOCKS_AVAIL,
+    ftype: FTYPE_SPACE,
+    width: 8,
+    title: "Avail" },
+  { key:   FMT_BLOCKS_PERC_NOT_AVAIL,
+    ftype: FTYPE_PERC_SPACE,
+    width: 6,
+    title: "%Used" },
+  { key:   FMT_BLOCKS_PERC_USED,
+    ftype: FTYPE_PERC_SPACE,
+    width: 6,
+    title: "%Used" },
+  { key:   FMT_BLOCKS_PERC_USED_AVAIL,
+    ftype: FTYPE_PERC_SPACE,
+    width: 6,
+    title: "%Used" },
+  { key:   FMT_BLOCKS_PERC_AVAIL,
+    ftype: FTYPE_PERC_SPACE,
+    width: 5,
+    title: "%Free" },
+  { key:   FMT_BLOCKS_PERC_FREE,
+    ftype: FTYPE_PERC_SPACE,
+    width: 5,
+    title: "%Free" },
+  { key:   FMT_INODES_TOT,
+    ftype: FTYPE_INODE,
+    width: 9,
+    title: "Inodes" },
+  { key:   FMT_INODES_USED,
+    ftype: FTYPE_INODE,
+    width: 9,
+    title: "IUsed" },
+  { key:   FMT_INODES_FREE,
+    ftype: FTYPE_INODE,
+    width: 9,
+    title: "IFree" },
+  { key:   FMT_INODES_PERC,
+    ftype: FTYPE_PERC_INODE,
+    width: 6,
+    title: "%IUsed" },
+  { key:   FMT_MOUNT_TIME,
+    ftype: FTYPE_STRING,
+    width: 0,
+    title: "" },
+  { key:   FMT_MOUNT_OPTIONS,
+    ftype: FTYPE_STRING,
+    width: 15,
+    title: "Options" }
 ];
 
 size_t[dchar]   formatTypesIdxs;
@@ -99,7 +159,7 @@ struct DisplayData
 {
   Options           opts;
   DisplayOpts       dispOpts;
-  DiskPartitions    dpList;
+  DiskPartitions    dps;
   string            titleString;
   string[dchar]     dispFmtString;
 };
@@ -116,18 +176,28 @@ struct DisplayTable {
 
 DisplayTable[] displayTable = [
   // size == low except for bytes
-  // size,low,high,precision,key,suffix,disp[1000,1024]
-  { 0, 0, 0, 0, 'b', " ", [ "Bytes", "Bytes" ] },
-  { 0, 0, 0, 0, 'k', "K", [ "KBytes", "KBytes" ] },
-  { 0, 0, 0, 1, 'm', "M", [ "Megs", "Mebis" ] },
-  { 0, 0, 0, 1, 'g', "G", [ "Gigs", "Gibis" ] },
-  { 0, 0, 0, 1, 't', "T", [ "Teras", "Tebis" ] },
-  { 0, 0, 0, 1, 'p', "P", [ "Petas", "Pebis" ] },
-  { 0, 0, 0, 1, 'e', "E", [ "Exas", "Exbis" ] },
-  { 0, 0, 0, 1, 'z', "Z", [ "Zettas", "Zebis" ] },
-  { 0, 0, 0, 1, 'y', "Y", [ "Yottas", "Yobis" ] },
-  { 0, 0, 0, 1, 'h', "h", [ "Size", "Size" ] },
-  { 0, 0, 0, 1, 'H', "H", [ "Size", "Size" ] }
+  { size: 0, low: 0, high: 0, precision: 0, key: 'b',
+    suffix: " ", disp: [ "Bytes", "Bytes" ] },
+  { size: 0, low: 0, high: 0, precision: 0, key: 'k',
+    suffix: "K", disp: [ "KBytes", "KBytes" ] },
+  { size: 0, low: 0, high: 0, precision: 1, key: 'm',
+    suffix: "M", disp: [ "Megs", "Mebis" ] },
+  { size: 0, low: 0, high: 0, precision: 1, key: 'g',
+    suffix: "G", disp: [ "Gigs", "Gibis" ] },
+  { size: 0, low: 0, high: 0, precision: 1, key: 't',
+    suffix: "T", disp: [ "Teras", "Tebis" ] },
+  { size: 0, low: 0, high: 0, precision: 1, key: 'p',
+    suffix: "P", disp: [ "Petas", "Pebis" ] },
+  { size: 0, low: 0, high: 0, precision: 1, key: 'e',
+    suffix: "E", disp: [ "Exas", "Exbis" ] },
+  { size: 0, low: 0, high: 0, precision: 1, key: 'z',
+    suffix: "Z", disp: [ "Zettas", "Zebis" ] },
+  { size: 0, low: 0, high: 0, precision: 1, key: 'y',
+    suffix: "Y", disp: [ "Yottas", "Yobis" ] },
+  { size: 0, low: 0, high: 0, precision: 1, key: 'h',
+    suffix: "h", disp: [ "Size", "Size" ] },
+  { size: 0, low: 0, high: 0, precision: 1, key: 'H',
+    suffix: "H", disp: [ "Size", "Size" ] }
   ];
 
 size_t[char]    displayIdxs;
@@ -137,7 +207,7 @@ public:
 
 void
 doDisplay (Options opts, ref DisplayOpts dispOpts,
-    ref DiskPartitions dpList, bool hasPooled)
+    DiskPartitions dps, bool hasPooled)
 {
   DisplayData       dispData;
 
@@ -152,52 +222,11 @@ doDisplay (Options opts, ref DisplayOpts dispOpts,
 
   dispData.opts = opts;
   dispData.dispOpts = dispOpts;
-  dispData.dpList = dpList;
+  dispData.dps = dps;
 
   buildDisplayList (dispData);
   displayTitle (dispData);
   displayPartitions (dispData, hasPooled);
-}
-
-void
-sortPartitions (ref DiskPartition[] dps,
-        ref size_t[] sortIndex, string sortType)
-{
-  int    gap;
-
-  auto count = dps.length;
-  if (count <= 1)
-  {
-    return;
-  }
-
-  gap = 1;
-  while (gap < count)
-  {
-    gap = 3 * gap + 1;
-  }
-
-  for (gap /= 3; gap > 0; gap /= 3)
-  {
-    for (int i = gap; i < count; ++i)
-    {
-      auto tempIndex = sortIndex[i];
-      auto j = i - gap;
-
-      while (j >= 0 &&
-            dpCompare (dps, sortType, sortIndex[j], tempIndex) > 0)
-      {
-        sortIndex[j+gap] = sortIndex[j];
-        j = j - gap;
-      }
-
-      j += gap;
-      if (j != i)
-      {
-        sortIndex[j] = tempIndex;
-      }
-    }
-  }
 }
 
 private:
@@ -227,7 +256,7 @@ buildDisplayList (ref DisplayData dispData)
     }
   }
 
-  foreach (dp; dispData.dpList.diskPartitions)
+  foreach (dp; dispData.dps.diskPartitions)
   {
     if (! dp.doPrint) {
       continue;
@@ -244,9 +273,6 @@ buildDisplayList (ref DisplayData dispData)
     }
     if (FMT_MOUNT_OPTIONS in dpMax) {
       setMaxLen (dp.mountOptions, dpMax[FMT_MOUNT_OPTIONS]);
-    }
-    if (FMT_MOUNT_TIME in dpMax) {
-      setMaxLen (dp.mountTime, dpMax[FMT_MOUNT_TIME]);
     }
   }
 
@@ -297,7 +323,7 @@ buildDisplayList (ref DisplayData dispData)
       {
         case FTYPE_STRING:
         {
-          fmt = format ("%%-%ds ", width);
+          fmt = format ("%%-%d.%ds ", width, width);
           if (dispData.opts.csvOutput) {
             fmt = "\"%s\"";
           }
@@ -369,9 +395,9 @@ buildDisplayList (ref DisplayData dispData)
         fmt = "%s";
       } else {
         if (ftype == FTYPE_STRING) {
-          fmt = format ("%%-%ds ", twid);
+          fmt = format ("%%-%d.%ds ", twid, twid);
         } else {
-          fmt = format ("%%%ds ", twid);
+          fmt = format ("%%%d.%ds ", twid, twid);
         }
       }
       if (dispData.opts.csvOutput && ! first) {
@@ -397,10 +423,9 @@ displayTitle (ref DisplayData dispData)
 void
 displayPartitions (ref DisplayData dispData, bool hasPooled)
 {
-  DiskPartition     totdp;
-  size_t[]          sortIndex;
+  size_t[]      sortIndex;
 
-  sortIndex.length = dispData.dpList.diskPartitions.length;
+  sortIndex.length = dispData.dps.diskPartitions.length;
   for (int i = 0; i < sortIndex.length; ++i) {
     sortIndex[i] = i;
   }
@@ -409,17 +434,17 @@ displayPartitions (ref DisplayData dispData, bool hasPooled)
     bool      inpool;
     string    lastpool;
 
-    totdp.initDiskPartition;
-    totdp.name = DI_GT("Total");
+    dispData.dps.tot.initDiskPartition;
+    dispData.dps.tot.name = DI_GT("Total");
 
     if (hasPooled) {
-      sortPartitions (dispData.dpList.diskPartitions, sortIndex, "s");
+      dispData.dps.sortPartitions (sortIndex, "s");
     }
 
     foreach (size_t i, size_t v; sortIndex)
     {
       bool      startpool;
-      auto      dp = dispData.dpList.diskPartitions[v];
+      auto      dp = dispData.dps.diskPartitions[v];
 
       startpool = false;
 
@@ -447,16 +472,16 @@ displayPartitions (ref DisplayData dispData, bool hasPooled)
         /* only add in a pooled filesystem if it's the first in the list    */
         /* belonging to that pool                                           */
         if (! inpool) {
-          totdp.totalBlocks += dp.totalBlocks;
-          totdp.freeBlocks += dp.freeBlocks;
-          totdp.availBlocks += dp.availBlocks;
-          totdp.totalInodes += dp.totalInodes;
-          totdp.freeInodes += dp.freeInodes;
-          totdp.availInodes += dp.availInodes;
+          dispData.dps.tot.totalBlocks += dp.totalBlocks;
+          dispData.dps.tot.freeBlocks += dp.freeBlocks;
+          dispData.dps.tot.availBlocks += dp.availBlocks;
+          dispData.dps.tot.totalInodes += dp.totalInodes;
+          dispData.dps.tot.freeInodes += dp.freeInodes;
+          dispData.dps.tot.availInodes += dp.availInodes;
         } else {
           /* if in a pool of disks, add the total used to the totals */
-          totdp.totalBlocks += dp.totalBlocks - dp.freeBlocks;
-          totdp.totalInodes += dp.totalInodes - dp.freeInodes;
+          dispData.dps.tot.totalBlocks += dp.totalBlocks - dp.freeBlocks;
+          dispData.dps.tot.totalInodes += dp.totalInodes - dp.freeInodes;
         }
       }
 
@@ -466,12 +491,11 @@ displayPartitions (ref DisplayData dispData, bool hasPooled)
     }
   }
 
-  sortPartitions (dispData.dpList.diskPartitions, sortIndex,
-        dispData.opts.sortType);
+  dispData.dps.sortPartitions (sortIndex, dispData.opts.sortType);
 
   foreach (size_t i, size_t v; sortIndex)
   {
-    auto dp = dispData.dpList.diskPartitions[v];
+    auto dp = dispData.dps.diskPartitions[v];
 
     if (! dp.doPrint) {
       continue;
@@ -481,12 +505,12 @@ displayPartitions (ref DisplayData dispData, bool hasPooled)
   } // for each disk partition
 
   if (dispData.opts.displayTotal) {
-    printPartition (dispData, totdp);
+    printPartition (dispData, dispData.dps.tot);
   }
 }
 
 void
-printPartition (ref DisplayData dispData, DiskPartition dp)
+printPartition (ref DisplayData dispData, DiskPartitions.DiskPartition dp)
 {
   string      outString;
   string      sval;
@@ -684,7 +708,6 @@ printPartition (ref DisplayData dispData, DiskPartition dp)
 
         case FMT_MOUNT_TIME:
         {
-          sval = dp.mountTime;
           break;
         }
 
@@ -931,8 +954,9 @@ unittest {
     if (fail)
     {
       ++failures;
-      writefln ("# %s: %s: %s",
-        "setDispBlockSize:", "fail", l);
+      writefln ("# setDispBlockSize-fail: %s", l);
+      writefln ("  using:dbsstr:%s: bds:%.0f: bdi:%d: rdbl:%s: rdbs:%.0f:",
+         dbsstr, bds, bdi, rdbl, rdbs);
       writefln ("  expected: %s got %s", rdbl, dispOpts.dispBlockLabel);
       writefln ("  expected: %.0f got %.0f", rdbs, dispOpts.dispBlockSize);
     }
@@ -1064,61 +1088,3 @@ initializeTitles (DisplayOpts dispOpts)
   }
 }
 
-int
-dpCompare (ref DiskPartition[] dps, string sortType, size_t i, size_t j)
-{
-  int       rc;
-  int       sortOrder;
-
-      /* reset sort order to the default start value */
-  sortOrder = DI_SORT_ASCENDING;
-  rc = 0;
-
-  foreach (char st; sortType) {
-    switch (st) {
-      case DI_SORT_NONE: {
-        break;
-      }
-
-      case DI_SORT_MOUNT: {
-        rc = strcoll (toStringz(dps[i].name), toStringz(dps[j].name));
-        rc *= sortOrder;
-        break;
-      }
-
-      case DI_SORT_REVERSE: {
-        sortOrder *= -1;
-        break;
-      }
-
-      case DI_SORT_SPECIAL: {
-        rc = strcoll (toStringz(dps[i].special), toStringz(dps[j].special));
-        rc *= sortOrder;
-        break;
-      }
-
-      case DI_SORT_TYPE: {
-        rc = strcoll (toStringz(dps[i].fsType), toStringz(dps[j].fsType));
-        rc *= sortOrder;
-        break;
-      }
-
-      case DI_SORT_AVAIL: {
-        auto v = dps[i].availBlocks - dps[j].availBlocks;
-        rc = v < 0.00001 ? 0 : v > 0.0 ? 1 : -1;
-        rc *= sortOrder;
-        break;
-      }
-
-      default: {
-        break;
-      }
-    } /* switch on sort type */
-
-    if (rc != 0) {
-      return rc;
-    }
-  }
-
-  return rc;
-}
