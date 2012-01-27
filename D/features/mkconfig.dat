@@ -301,20 +301,32 @@ ctypedef XDR
 
 ### di.d
 cdefine string DI_VERSION
+# for struct stat
 cstruct timespec
 ctype   int __dev_t
+ctype   int fflags_t
+ctype   int ino_t
 ctype   int __ino_t
 ctype   int __ino64_t
+ctype   int mode_t
 ctype   int __mode_t
+ctype   int nlink_t
 ctype   int __nlink_t
+ctype   int off_t
 ctype   int __off_t
 ctype   int __off64_t
+ctype   int blksize_t
 ctype   int __blksize_t
+ctype   int blkcnt_t
 ctype   int __blkcnt_t
 ctype   int __blkcnt64_t
 #ctype   int __uid_t
 #ctype   int __gid_t
 #ctype   int __time_t
+ctype   int __int32_t
+#ctype   int int32_t
+ctype   int __uint32_t
+#ctype   int uint32_t
 cstruct stat
 clib    stat
 cdcl    stat
