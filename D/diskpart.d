@@ -1,6 +1,6 @@
 // written in the D programming language
 
-module didiskpart;
+module diskpart;
 
 import std.stdio;
 import std.string;
@@ -11,144 +11,75 @@ private import core.stdc.errno;
 
 import config;
 
-struct DiskPartition {
+class DiskPartitions {
 
 public:
-  bool          isRemote;
-  bool          isReadOnly;
-  bool          doPrint;
-  bool          isPooledFS;
-  bool          isLoopback;
-  byte          printFlag;
-  ushort        index;
-  uint          st_dev;         // disk device number
-  uint          sp_dev;         // special device number
-  uint          sp_rdev;        // special rdev #
-  real          totalBlocks;
-  real          freeBlocks;
-  real          availBlocks;
-  real          blockSize;
-  real          totalInodes;
-  real          freeInodes;
-  real          availInodes;
-  string        name;           // mount point
-  string        special;        // special device name
-  string        fsType;         // type of file system
-  string        mountOptions;
-  string        mountTime;
+  struct DiskPartition {
+    bool          isRemote;
+    bool          isReadOnly;
+    bool          doPrint;
+    bool          isPooledFS;
+    bool          isLoopback;
+    byte          printFlag;
+    ushort        index;
+    uint          st_dev;         // disk device number
+    uint          sp_dev;         // special device number
+    uint          sp_rdev;        // special rdev #
+    real          totalBlocks;
+    real          freeBlocks;
+    real          availBlocks;
+    real          blockSize;
+    real          totalInodes;
+    real          freeInodes;
+    real          availInodes;
+    string        name;           // mount point
+    string        special;        // special device name
+    string        fsType;         // type of file system
+    string        mountOptions;
+    string        mountTime;
 
-  // for .st_dev
-  enum DI_UNKNOWN_DEV = 0xFFFFFFFF;
+    void
+    checkPartSizes () {
+      if (this.freeBlocks < 0.0) {
+        this.freeBlocks = 0.0;
+      }
+      if (this.availBlocks < 0.0) {
+        this.availBlocks = 0.0;
+      }
+      if (this.totalInodes < 0.0) {
+        this.freeInodes = 0.0;
+        this.availInodes = 0.0;
+      }
+    }
 
-  // for .printFlag
-  enum byte
-    DI_PRINT_OK = 0,
-    DI_PRINT_IGNORE = 1,
-    DI_PRINT_BAD = 2,
-    DI_PRINT_OUTOFZONE = 3,
-    DI_PRINT_EXCLUDE = 4,
-    DI_PRINT_FORCE = 5,
-    DI_PRINT_SKIP = 6;
-
-  @property void
-  setPrintFlag (byte pFlag) {
-    printFlag = pFlag;
-  }
-
-  @property void
-  setDoPrint (bool v) {
-    doPrint = v;
-  }
-
-  @property void
-  setPooledFS (bool v) {
-    isPooledFS = v;
-  }
-
-  @property void
-  setRemote (bool v) {
-    isRemote = v;
-  }
-
-  @property void
-  setLoopback (bool v) {
-    isLoopback = v;
-  }
-
-  @property void
-  setSt_dev (uint v) {
-    st_dev = v;
-  }
-
-  @property void
-  setSp_dev (uint v) {
-    sp_dev = v;
-  }
-
-  @property void
-  setSp_rdev (uint v) {
-    sp_rdev = v;
-  }
-
-  void
-  checkPartSizes () {
-    if (this.freeBlocks < 0.0) {
+    void
+    initDiskPartition () {
+      this.totalBlocks = 0.0;
       this.freeBlocks = 0.0;
-    }
-    if (this.availBlocks < 0.0) {
       this.availBlocks = 0.0;
-    }
-    if (this.totalInodes < 0.0) {
+      this.totalInodes = 0.0;
       this.freeInodes = 0.0;
       this.availInodes = 0.0;
     }
-  }
 
-  void
-  initDiskPartition () {
-    this.totalBlocks = 0.0;
-    this.freeBlocks = 0.0;
-    this.availBlocks = 0.0;
-    this.totalInodes = 0.0;
-    this.freeInodes = 0.0;
-    this.availInodes = 0.0;
-  }
+    // for .st_dev
+    enum DI_UNKNOWN_DEV = 0xFFFFFFFF;
 
-}; // struct DiskPartition
-
-
-class DiskPartitions {
-
-private:
-  int       debugLevel;
-  short     indexCount;
-
-  static if (_cdefine__PATH_MOUNTED) {
-    alias _PATH_MOUNTED DI_MOUNT_FILE;
-  } else static if (_cdefine__PATH_MNTTAB) {
-    alias _PATH_MNTTAB DI_MOUNT_FILE;
-  } else static if (_cdefine_MOUNTED) {
-    alias MOUNTED DI_MOUNT_FILE;
-  } else static if (_cdefine_MNTTAB) {
-    alias MNTTAB DI_MOUNT_FILE;
-  } else {
-    enum string DI_MOUNT_FILE = "/etc/mnttab";
-  }
-
-  static if (! _cdefine_MNTTYPE_IGNORE) {
-    enum string MNTTYPE_IGNORE = "ignore";
-  }
-
-  void
-  copyCstring (ref string a, char[] b)
-  {
-    auto l = strlen(b.ptr);
-    a = to!(string)(b[0..l]);
-  }
+    // for .printFlag
+    enum byte
+      DI_PRINT_OK = 0,
+      DI_PRINT_IGNORE = 1,
+      DI_PRINT_BAD = 2,
+      DI_PRINT_OUTOFZONE = 3,
+      DI_PRINT_EXCLUDE = 4,
+      DI_PRINT_FORCE = 5,
+      DI_PRINT_SKIP = 6;
+  }; // struct DiskPartition
 
 public:
 
   DiskPartition[]      diskPartitions;
+  DiskPartition        tot;
 
   this () {}
 
@@ -419,4 +350,142 @@ public:
 
     return;
   }
+
+  void
+  sortPartitions (ref size_t[] sortIndex, string sortType)
+  {
+    int    gap;
+
+    auto count = this.diskPartitions.length;
+    if (count <= 1)
+    {
+      return;
+    }
+
+    gap = 1;
+    while (gap < count)
+    {
+      gap = 3 * gap + 1;
+    }
+
+    for (gap /= 3; gap > 0; gap /= 3)
+    {
+      for (int i = gap; i < count; ++i)
+      {
+        auto tempIndex = sortIndex[i];
+        auto j = i - gap;
+
+        while (j >= 0 &&
+              dpCompare (this.diskPartitions, sortType, sortIndex[j], tempIndex) > 0)
+        {
+          sortIndex[j+gap] = sortIndex[j];
+          j = j - gap;
+        }
+
+        j += gap;
+        if (j != i)
+        {
+          sortIndex[j] = tempIndex;
+        }
+      }  // insertion sort by gap size
+    } // for gap size
+  } // sortPartitions
+
+private:
+  int
+  dpCompare (ref DiskPartitions.DiskPartition[] dps,
+          string sortType, size_t i, size_t j)
+  {
+    int       rc;
+    int       sortOrder;
+
+        /* reset sort order to the default start value */
+    sortOrder = DI_SORT_ASCENDING;
+    rc = 0;
+
+    foreach (char st; sortType) {
+      switch (st) {
+        case DI_SORT_NONE: {
+          break;
+        }
+
+        case DI_SORT_MOUNT: {
+          rc = strcoll (toStringz(dps[i].name), toStringz(dps[j].name));
+          rc *= sortOrder;
+          break;
+        }
+
+        case DI_SORT_REVERSE: {
+          sortOrder *= -1;
+          break;
+        }
+
+        case DI_SORT_SPECIAL: {
+          rc = strcoll (toStringz(dps[i].special), toStringz(dps[j].special));
+          rc *= sortOrder;
+          break;
+        }
+
+        case DI_SORT_TYPE: {
+          rc = strcoll (toStringz(dps[i].fsType), toStringz(dps[j].fsType));
+          rc *= sortOrder;
+          break;
+        }
+
+        case DI_SORT_AVAIL: {
+          auto v = dps[i].availBlocks - dps[j].availBlocks;
+          rc = v < 0.00001 ? 0 : v > 0.0 ? 1 : -1;
+          rc *= sortOrder;
+          break;
+        }
+
+        default: {
+          break;
+        }
+      } /* switch on sort type */
+
+      if (rc != 0) {
+        return rc;
+      }
+    }
+
+    return rc;
+  }
+
+private:
+  int       debugLevel;
+  short     indexCount;
+
+  static if (_cdefine__PATH_MOUNTED) {
+    alias _PATH_MOUNTED DI_MOUNT_FILE;
+  } else static if (_cdefine__PATH_MNTTAB) {
+    alias _PATH_MNTTAB DI_MOUNT_FILE;
+  } else static if (_cdefine_MOUNTED) {
+    alias MOUNTED DI_MOUNT_FILE;
+  } else static if (_cdefine_MNTTAB) {
+    alias MNTTAB DI_MOUNT_FILE;
+  } else {
+    enum string DI_MOUNT_FILE = "/etc/mnttab";
+  }
+
+  static if (! _cdefine_MNTTYPE_IGNORE) {
+    enum string MNTTYPE_IGNORE = "ignore";
+  }
+
+  void
+  copyCstring (ref string a, char[] b)
+  {
+    auto l = strlen (b.ptr);
+    a = to!(string)(b[0..l]);
+  }
+
+  enum char
+    DI_SORT_NONE = 'n',
+    DI_SORT_MOUNT = 'm',
+    DI_SORT_SPECIAL = 's',
+    DI_SORT_AVAIL = 'a',
+    DI_SORT_REVERSE = 'r',
+    DI_SORT_TYPE = 't',
+    DI_SORT_ASCENDING = 1;
+
 }; // class DiskPartitions
