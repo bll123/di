@@ -22,30 +22,30 @@ void main (string[] args)
   initLocale ();
   auto optidx = getDIOptions (args, opts, dispOpts);
 
-  auto dpList = new DiskPartitions (opts.debugLevel);
-  dpList.getEntries ();
-  auto hasPooled = preCheckDiskPartitions (dpList, opts);
+  auto dps = new DiskPartitions (opts.debugLevel);
+  dps.getEntries ();
+  auto hasPooled = preCheckDiskPartitions (dps, opts);
   if (optidx < args.length || opts.includeLoopback == false) {
-    getDiskStatInfo (dpList);
-    hasLoopback = getDiskSpecialInfo (dpList);
+    getDiskStatInfo (dps);
+    hasLoopback = getDiskSpecialInfo (dps);
   }
   if (optidx < args.length) {
-    auto rc = checkFileInfo (dpList, opts, hasPooled, args, optidx);
+    auto rc = checkFileInfo (dps, opts, hasPooled, args, optidx);
   }
-  dpList.getPartitionInfo ();
-  checkDiskPartitions (dpList, opts, hasLoopback);
+  dps.getPartitionInfo ();
+  checkDiskPartitions (dps, opts, hasLoopback);
   if (opts.quotaCheck) {
-    checkDiskQuotas (dpList, opts);
+    checkDiskQuotas (dps, opts);
   }
-  doDisplay (opts, dispOpts, dpList, hasPooled);
+  doDisplay (opts, dispOpts, dps, hasPooled);
 }
 
 bool
-preCheckDiskPartitions (ref DiskPartitions dpList, Options opts)
+preCheckDiskPartitions (ref DiskPartitions dps, Options opts)
 {
   bool      hasPooled;
 
-  foreach (ref dp; dpList.diskPartitions)
+  foreach (ref dp; dps.diskPartitions)
   {
     if (dp.fsType == "zfs" || dp.fsType == "advfs")
     {
@@ -54,23 +54,23 @@ preCheckDiskPartitions (ref DiskPartitions dpList, Options opts)
     }
 
     if (! dp.isRemote && dp.fsType[0..2] == "nfs") {
-      dp.setRemote = true;
+      dp.isRemote = true;
     }
 
     if (opts.localOnly && dp.isRemote)
     {
-      dp.setPrintFlag = dp.DI_PRINT_IGNORE;
+      dp.printFlag = dp.DI_PRINT_IGNORE;
     }
 
     checkIncludeList (dp, opts);
 
-    if (opts.ignoreList.length > 0)
+    if (opts.excludeList.length > 0)
     {
-      if (opts.ignoreList.get (dp.fsType, false) ||
+      if (opts.excludeList.get (dp.fsType, false) ||
           (dp.fsType[0..3] == FUSE_FS &&
-           opts.ignoreList.get (FUSE_FS, false)))
+           opts.excludeList.get (FUSE_FS, false)))
       {
-        dp.setPrintFlag = dp.DI_PRINT_EXCLUDE;
+        dp.printFlag = dp.DI_PRINT_EXCLUDE;
       }
     }
   }
@@ -79,7 +79,7 @@ preCheckDiskPartitions (ref DiskPartitions dpList, Options opts)
 }
 
 void
-checkIncludeList (ref DiskPartition dp, Options opts)
+checkIncludeList (ref DiskPartitions.DiskPartition dp, Options opts)
 {
   if (opts.includeList.length > 0)
   {
@@ -88,33 +88,33 @@ checkIncludeList (ref DiskPartition dp, Options opts)
         opts.includeList.get (dp.fsType, false) ||
         (dp.fsType[0..3] == FUSE_FS &&
          opts.includeList.get (FUSE_FS, false))) {
-      dp.setDoPrint = true;
+      dp.doPrint = true;
     }
     else {
-      dp.setDoPrint = false;
+      dp.doPrint = false;
     }
   }
 }
 
 void
-checkDiskPartitions (ref DiskPartitions dpList, Options opts,
+checkDiskPartitions (ref DiskPartitions dps, Options opts,
         bool hasLoopback)
 {
-  foreach (ref dp; dpList.diskPartitions)
+  foreach (ref dp; dps.diskPartitions)
   {
-    dp.setDoPrint = true;
+    dp.doPrint = true;
 
     if (dp.printFlag == dp.DI_PRINT_EXCLUDE ||
         dp.printFlag == dp.DI_PRINT_BAD ||
         dp.printFlag == dp.DI_PRINT_OUTOFZONE) {
-      dp.setDoPrint = false;
+      dp.doPrint = false;
       /* -a flag does not affect these */
       continue;
     }
 
     if (dp.printFlag == dp.DI_PRINT_IGNORE ||
         dp.printFlag == dp.DI_PRINT_SKIP) {
-      dp.setDoPrint = opts.displayAll;
+      dp.doPrint = opts.displayAll;
       continue;
     }
 
@@ -122,15 +122,15 @@ checkDiskPartitions (ref DiskPartitions dpList, Options opts,
 
     if (dp.printFlag == dp.DI_PRINT_OK) {
       if (dp.totalBlocks <= 0.0) {
-        dp.setPrintFlag = dp.DI_PRINT_IGNORE;
-        dp.setDoPrint = opts.displayAll;
+        dp.printFlag = dp.DI_PRINT_IGNORE;
+        dp.doPrint = opts.displayAll;
       }
     }
 
     if (hasLoopback && opts.includeLoopback == false) {
       if (dp.isLoopback) {
-        dp.setPrintFlag = dp.DI_PRINT_IGNORE;
-        dp.setDoPrint = opts.displayAll;
+        dp.printFlag = dp.DI_PRINT_IGNORE;
+        dp.doPrint = opts.displayAll;
       }
     }
 
@@ -139,11 +139,11 @@ checkDiskPartitions (ref DiskPartitions dpList, Options opts,
 }
 
 void
-getDiskStatInfo (ref DiskPartitions dpList)
+getDiskStatInfo (ref DiskPartitions dps)
 {
   C_ST_stat statBuf;
 
-  foreach (ref dp; dpList.diskPartitions) {
+  foreach (ref dp; dps.diskPartitions) {
     if (dp.printFlag == dp.DI_PRINT_EXCLUDE ||
         dp.printFlag == dp.DI_PRINT_BAD ||
         dp.printFlag == dp.DI_PRINT_OUTOFZONE)
@@ -153,22 +153,22 @@ getDiskStatInfo (ref DiskPartitions dpList)
 
     dp.st_dev = dp.DI_UNKNOWN_DEV;
     if (stat (toStringz (dp.name), &statBuf) == 0) {
-      dp.setSt_dev = cast(uint) statBuf.st_dev;
+      dp.st_dev = cast(uint) statBuf.st_dev;
     }
   }
 }
 
 bool
-getDiskSpecialInfo (ref DiskPartitions dpList)
+getDiskSpecialInfo (ref DiskPartitions dps)
 {
   C_ST_stat statBuf;
   bool      hasLoopback;
 
-  foreach (ref dp; dpList.diskPartitions) {
+  foreach (ref dp; dps.diskPartitions) {
     if (dp.name[0] == '/' &&
         stat (toStringz(dp.special), &statBuf) == 0) {
-      dp.setSp_dev = cast(uint) statBuf.st_dev;
-      dp.setSp_rdev = cast(uint) statBuf.st_rdev;
+      dp.sp_dev = cast(uint) statBuf.st_dev;
+      dp.sp_rdev = cast(uint) statBuf.st_rdev;
         /* Solaris's loopback device is "lofs"            */
         /* linux loopback device is "none"                */
         /* linux has rdev = 0                             */
@@ -178,11 +178,11 @@ getDiskSpecialInfo (ref DiskPartitions dpList)
         /* solaris makes sense.                           */
       if ((dp.fsType == "lofs" && dp.sp_rdev != 0) ||
           dp.fsType == "null" || dp.fsType == "none") {
-        dp.setLoopback = true;
+        dp.isLoopback = true;
         hasLoopback = true;
       } else {
-        dp.setSp_dev = 0;
-        dp.setSp_rdev = 0;
+        dp.sp_dev = 0;
+        dp.sp_rdev = 0;
       }
     }
   }
@@ -192,30 +192,30 @@ getDiskSpecialInfo (ref DiskPartitions dpList)
 
 
 bool
-checkFileInfo (ref DiskPartitions dpList, Options opts,
+checkFileInfo (ref DiskPartitions dps, Options opts,
     bool hasPooled, string[] args, int optidx)
 {
   C_ST_stat statBuf;
 
-  foreach (ref dp; dpList.diskPartitions) {
+  foreach (ref dp; dps.diskPartitions) {
     if (dp.printFlag == dp.DI_PRINT_OK) {
-      dp.setPrintFlag = dp.DI_PRINT_IGNORE;
+      dp.printFlag = dp.DI_PRINT_IGNORE;
     }
   }
 
   if (hasPooled) {
     size_t[]          sortIndex;
 
-    sortIndex.length = dpList.diskPartitions.length;
+    sortIndex.length = dps.diskPartitions.length;
     for (int i = 0; i < sortIndex.length; ++i) {
       sortIndex[i] = i;
     }
-    sortPartitions (dpList.diskPartitions, sortIndex, "s");
+    dps.sortPartitions (sortIndex, "s");
   }
 
   for (auto i = optidx; i < args.length; ++i) {
     auto fd = open (toStringz(args[i]), O_RDONLY | O_NOCTTY);
-    C_TYP_int rc;
+    C_NATIVE_int rc;
     if (fd < 0) {
       rc = stat (toStringz(args[i]), &statBuf);
     } else {
@@ -224,7 +224,7 @@ checkFileInfo (ref DiskPartitions dpList, Options opts,
     }
 
     if (rc == 0) {
-      foreach (ref dp; dpList.diskPartitions) {
+      foreach (ref dp; dps.diskPartitions) {
         if (opts.debugLevel > 5)
         {
           writefln ("check %s against %s: %d %d", args[i], dp.name,
@@ -234,7 +234,7 @@ checkFileInfo (ref DiskPartitions dpList, Options opts,
         if (dp.st_dev != dp.DI_UNKNOWN_DEV &&
             cast(uint) statBuf.st_dev == dp.st_dev &&
             ! dp.isLoopback) {
-          dp.setPrintFlag = dp.DI_PRINT_FORCE;
+          dp.printFlag = dp.DI_PRINT_FORCE;
           break;
         }
       } // for each partition
