@@ -6,12 +6,13 @@ import std.string;
 import std.ascii : isDigit;
 import std.utf;
 import std.conv : to;
-private import std.process : getenv, setenv, unsetenv;
+private import std.process : getenv;
 debug (1) {
   import std.stdio;
 }
 version (unittest) {
   import std.stdio;
+  private import std.process : setenv, unsetenv;
 }
 
 import config;
@@ -19,7 +20,7 @@ import dihelp;
 import digetoptn;
 import dispopts;
 
-private immutable string DI_ALL_FORMAT = "MTS\n\tIO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP";
+private immutable string DI_ALL_FORMAT = "MTS\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP";
 private immutable string DI_POSIX_FORMAT = "SbuvpM";
 private immutable string DI_DEFAULT_SORT = "m";
 
@@ -33,12 +34,12 @@ struct Options {
   bool              displayTotal = false;
   bool              debugHeader = false;
   bool              unknown = false;
-  bool[string]      includeList;
-  bool[string]      ignoreList;
   short             debugLevel = 0;
   string            formatString = DI_DEFAULT_FORMAT;
   string            sortType = DI_DEFAULT_SORT;
   string            zoneDisplay;
+  bool[string]      includeList;
+  bool[string]      excludeList;
 }
 
 int
@@ -205,7 +206,7 @@ processOpts (string[] args, ref Options opts, ref DisplayOpts dispOpts)
     auto delversion = delegate (string arg, string val)
         { dispVersion(); exit (0); };
     auto delx = delegate (string arg, string val)
-        { processIgnoreList (val, opts); };
+        { processExcludeList (val, opts); };
     auto delZ = delegate (string arg, string val)
         { zoneDisplay = "all";  };
 
@@ -338,9 +339,9 @@ string s;
     tbool.test ("-t: displayTotal", true, "-t", displayTotal, true, 2);
     tshort.test ("-w 12: dispOpts.width", true, "-w 12", dispOpts.width, 12, 3);
     tshort.test ("-W 12: dispOpts.inodeWidth", true, "-W 12", dispOpts.width, 12, 3);
-    tbaa.test ("-x nfs: ignoreList", true, "-x nfs", ignoreList, ["nfs":true], 3);
-    tbaa.test ("-x nfs,jfs: ignoreList", true, "-x nfs,jfs", ignoreList, ["nfs":true,"jfs":true], 3);
-    tbaa.test ("-x nfs -x jfs: ignoreList", true, "-x nfs -x jfs", ignoreList, ["nfs":true,"jfs":true], 5);
+    tbaa.test ("-x nfs: excludeList", true, "-x nfs", excludeList, ["nfs":true], 3);
+    tbaa.test ("-x nfs,jfs: excludeList", true, "-x nfs,jfs", excludeList, ["nfs":true,"jfs":true], 3);
+    tbaa.test ("-x nfs -x jfs: excludeList", true, "-x nfs -x jfs", excludeList, ["nfs":true,"jfs":true], 5);
     tstr.test ("-z some: zoneDisplay", true, "-z some", zoneDisplay, "some", 3);
     tstr.test ("-Z: zoneDisplay", true, "-Z", zoneDisplay, "all", 2);
     tshort.test ("-X 4: debugLevel", true, "-X 4", debugLevel, 4, 3);
@@ -402,9 +403,9 @@ processIncludeList (string arg, ref Options opts)
 }
 
 void
-processIgnoreList (string arg, ref Options opts)
+processExcludeList (string arg, ref Options opts)
 {
   foreach (str; split (arg, ",")) {
-    opts.ignoreList[str] = true;
+    opts.excludeList[str] = true;
   }
 }
