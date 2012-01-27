@@ -46,7 +46,7 @@ static if (_cmem_dqblk_dqb_curfiles) {
 }
 
 void
-checkDiskQuotas (ref DiskPartitions dpList, Options opts)
+checkDiskQuotas (ref DiskPartitions dps, Options opts)
 {
   int           i;
   Uid_t         uid;
@@ -61,7 +61,7 @@ checkDiskQuotas (ref DiskPartitions dpList, Options opts)
     gid = getegid ();
   }
 
-  foreach (ref dp; dpList.diskPartitions)
+  foreach (ref dp; dps.diskPartitions)
   {
 //   if (! dp.doPrint) {
 //      continue;
