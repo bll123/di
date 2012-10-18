@@ -112,7 +112,7 @@ void
 convertMountOptions (long flags, diDiskInfo_t *diptr)
 #else
 convertMountOptions (flags, diptr)
-    long          flags;
+    unsigned long  flags;
     diDiskInfo_t   *diptr;
 #endif
 {
