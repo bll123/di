@@ -34,6 +34,8 @@ hdr     malloc.h
 hdr     memory.h
 hdr     mntent.h
 hdr     mnttab.h
+# NetBSD
+hdr     quota.h
 hdr     rpc/rpc.h
 hdr     rpcsvc/rquota.h
 hdr     ssdef.h
@@ -83,6 +85,7 @@ command rpmbuild
 const   O_NOCTTY
 define  MCTL_QUERY
 typ     struct dqblk
+typ     struct quotaval
 typ     struct ufs_dqblk
 typ     fs_disk_quota_t
 typ     gid_t
@@ -121,6 +124,8 @@ lib     memset
 # Look for MCTL_QUERY (see below)
 lib     mntctl
 lib     next_dev
+# quota_open is a new interface from NetBSD
+lib     quota_open -lquota -lrpcsvc
 lib     quotactl
 lib     setlocale  -lintl, -lintl -liconv
 # unknown if -lsun, -lseq are needed (old irix, sequent)
@@ -196,8 +201,9 @@ if AIX_mntctl _sys_vmount && _define_MCTL_QUERY
   set _lib_mntctl 1
 endif
 
-if stdquotas _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
-    _sys_fs_ufs_quota || _sys_quota || _lib_quotactl
+if stdquotas ( _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
+    _sys_fs_ufs_quota || _hdr_quota || _sys_quota ) \
+    && ( _lib_quotactl || _lib_quota_open )
   setint _has_std_quotas 1
 else
   setint _has_std_quotas 0
