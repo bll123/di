@@ -1132,7 +1132,7 @@ di_getDiskEntries (diskInfo, diCount)
         fprintf (stderr, "Unable to do getvfsstat () errno %d\n", errno);
         return -1;
     }
-    bufsize = sizeof (struct statvfs) * count;
+    bufsize = (Size_t) (sizeof (struct statvfs) * count);
     mntbufp = malloc ((Size_t) bufsize);
     memset ((char *) mntbufp, '\0', sizeof (struct statvfs) * (Size_t) count);
     count = getvfsstat (mntbufp, (Size_t) bufsize, ST_NOWAIT);
@@ -1144,7 +1144,7 @@ di_getDiskEntries (diskInfo, diCount)
         fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
         return -1;
     }
-    memset ((char *) *diskInfo, '\0', sizeof (diDiskInfo_t) * count);
+    memset ((char *) *diskInfo, '\0', (Size_t) (sizeof (diDiskInfo_t) * count));
 
     for (idx = 0; idx < count; idx++)
     {
