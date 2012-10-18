@@ -61,6 +61,8 @@ for d in C D; do
         #  Tru64: complains about long long being a new feature.
         #  Tru64: extra ----^ lines
         #  SCO_SV: warning: `/*' within comment
+        #  clang: 'warning: unknown warning option'
+        #  clang: X warnings? generated.
         # D:
         #  FLAGS= (makefile)
         #  --     (makefile)
@@ -77,6 +79,7 @@ for d in C D; do
           grep -v 'cc \-[co]' |
           grep -v 'cc32 \-[co]' |
           grep -v 'cc64 \-[co]' |
+          grep -v 'clang \-[co]' |
           grep -v 'xlc \-[co]' |
           grep -v digetentries.o |
           grep -v '\*\*\* ' |
@@ -97,6 +100,8 @@ for d in C D; do
           grep -v 'warning: .... within comment' |
           grep -v 'Unknown option.*-Wextra.*ignored.' |
           grep -v 'Unknown option.*-Wno-unused-but-set-variable.*ignored' |
+          grep -v 'warning: unknown warning option' |
+          grep -v 'warning.*generated\.' |
           grep -v 'Unknown option.*-Wno-unused-parameter.*ignored' |
           grep -v FLAGS= |
           grep -v -- '--' |
