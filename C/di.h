@@ -301,7 +301,7 @@ extern void di_saveInodeSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_siz
     ! _class_os__Volumes
 extern char *chkMountOptions        _((const char *, const char *));
 #endif
-extern void convertMountOptions     _((long, diDiskInfo_t *));
+extern void convertMountOptions     _((unsigned long, diDiskInfo_t *));
 extern void convertNFSMountOptions  _((long, long, long, diDiskInfo_t *));
 extern void di_testRemoteDisk       _((diDiskInfo_t *));
 
