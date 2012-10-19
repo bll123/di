@@ -580,6 +580,16 @@ getDiskSpecialInfo (diData)
         if (*(dinfo->special) == '/' &&
             stat (dinfo->special, &statBuf) == 0)
         {
+#if _lib_realpath && _define_S_ISLNK && _lib_lstat
+            struct stat tstatBuf;
+
+            lstat (dinfo->special, &tstatBuf);
+            if (S_ISLNK(tstatBuf.st_mode)) {
+              char tspecial [DI_SPEC_NAME_LEN + 1];
+              realpath (dinfo->special, tspecial);
+              strncpy (dinfo->special, tspecial, DI_SPEC_NAME_LEN);
+            }
+#endif
             dinfo->sp_dev = (__ulong) statBuf.st_dev;
             dinfo->sp_rdev = (__ulong) statBuf.st_rdev;
               /* Solaris's loopback device is "lofs"            */
