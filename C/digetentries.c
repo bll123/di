@@ -387,6 +387,13 @@ di_getDiskEntries (diskInfo, diCount)
           }
         }
 
+        if (strcmp (mntEntry->mnt_type, "rootfs") == 0) {
+          diptr->printFlag = DI_PRNT_IGNORE;
+          if (debug > 2) {
+            printf ("mnt: ignore: type 'rootfs': %s\n", diptr->name);
+          }
+        }
+
         if (strcmp (mntEntry->mnt_type, MNTTYPE_IGNORE) == 0)
         {
             diptr->printFlag = DI_PRNT_IGNORE;
@@ -737,7 +744,7 @@ di_getDiskEntries (diskInfo, diCount)
             diptr->isLocal = FALSE;
         }
 # endif
-        convertMountOptions ((long) sp->f_flags, diptr);
+        convertMountOptions ((unsigned long) sp->f_flags, diptr);
 # if _mem_struct_statfs_f_type
 #  if defined (MOUNT_NFS3)
         if (sp->f_type == MOUNT_NFS3)
@@ -1068,7 +1075,7 @@ di_getDiskEntries (diskInfo, diCount)
             diptr->isReadOnly = TRUE;
         }
 # endif
-        convertMountOptions ((long) mntbufp [idx].f_flags, diptr);
+        convertMountOptions ((unsigned long) mntbufp [idx].f_flags, diptr);
         trimChar (diptr->options, ',');
 
         if (debug > 1)
@@ -1132,7 +1139,7 @@ di_getDiskEntries (diskInfo, diCount)
         fprintf (stderr, "Unable to do getvfsstat () errno %d\n", errno);
         return -1;
     }
-    bufsize = (Size_t) (sizeof (struct statvfs) * count);
+    bufsize = sizeof (struct statvfs) * (Size_t) count;
     mntbufp = malloc ((Size_t) bufsize);
     memset ((char *) mntbufp, '\0', sizeof (struct statvfs) * (Size_t) count);
     count = getvfsstat (mntbufp, (Size_t) bufsize, ST_NOWAIT);
@@ -1144,7 +1151,7 @@ di_getDiskEntries (diskInfo, diCount)
         fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
         return -1;
     }
-    memset ((char *) *diskInfo, '\0', (Size_t) (sizeof (diDiskInfo_t) * count));
+    memset ((char *) *diskInfo, '\0', sizeof (diDiskInfo_t) * (Size_t) count);
 
     for (idx = 0; idx < count; idx++)
     {
@@ -1167,7 +1174,7 @@ di_getDiskEntries (diskInfo, diCount)
             diptr->isLocal = FALSE;
         }
 # endif
-        convertMountOptions ((long) sp->f_flag, diptr);
+        convertMountOptions ((unsigned long) sp->f_flag, diptr);
         trimChar (diptr->options, ',');
 
         if (sp->f_frsize == 0 && sp->f_bsize != 0)
@@ -1334,7 +1341,7 @@ di_getDiskEntries (diskInfo, diCount)
         {
             diptr->isReadOnly = FALSE;
         }
-        convertMountOptions ((long) fsdbuf [idx].fd_req.flags, diptr);
+        convertMountOptions ((unsigned long) fsdbuf [idx].fd_req.flags, diptr);
         trimChar (diptr->options, ',');
 
         if (debug > 1)
@@ -1699,7 +1706,7 @@ di_getDiskEntries (diskInfo, diCount)
            diptr->printFlag = DI_PRNT_IGNORE;
         }
 # endif
-        convertMountOptions ((long) fsinfo.flags, diptr);
+        convertMountOptions ((unsigned long) fsinfo.flags, diptr);
         trimChar (diptr->options, ',');
 
         if (debug > 1)
@@ -1787,7 +1794,7 @@ di_getDiskEntries (diskInfo, diCount)
            diptr->printFlag = DI_PRNT_IGNORE;
         }
 # endif
-        convertMountOptions ((long) fsinfo.fi_flags, diptr);
+        convertMountOptions ((unsigned long) fsinfo.fi_flags, diptr);
         trimChar (diptr->options, ',');
 
         if (debug > 1)
