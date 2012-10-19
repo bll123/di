@@ -86,7 +86,7 @@ typedef union {
   struct dqblk      qinfo;
 # endif
 # if _typ_struct_ufs_dqblk
-  struct dqblk      ufsqinfo;
+  struct ufs_dqblk  ufsqinfo;
 # endif
 # if _typ_fs_disk_quota_t
   fs_disk_quota_t   xfsqinfo;
