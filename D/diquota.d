@@ -242,13 +242,13 @@ diquota (diQuota_t *diqinfo, Options opts)
   } /* _sys_fs_ufs_quota */
 
   if (opts.debugLevel > 5) {
-    writefln ("quota: quotactl on %s : rc %d : errno %d", diqinfo.name, rc, getErrno);
+    writefln ("quota: quotactl on %s : rc %d : errno %d", diqinfo.name, rc, errno);
   }
   static if (_has_std_quotas) {
     di_process_quotas ("usr", diqinfo, rc, xfsflag, qiptr, opts);
 
     static if (_cdefine_GRPQUOTA) {
-      if (rc == 0 || getErrno != ESRCH) {
+      if (rc == 0 || errno != ESRCH) {
         static if (_clib_quotactl && _c_arg_1_quotactl == "char *") {
           rc = quotactl (toStringz(diqinfo.name), gcmd,
               cast(int) diqinfo.gid, cast(caddr_t) qiptr);
@@ -376,7 +376,7 @@ diquota_nfs (diQuota_t *diqinfo, Options opts)
         cast(C_TYP_u_long) RQUOTAVERS, toStringz("udp"));
     if (rqclnt == cast(CLIENT *) null) {
       if (opts.debugLevel > 2) {
-        writefln ("quota: nfs: create failed %d", getErrno);
+        writefln ("quota: nfs: create failed %d", errno);
       }
       return;
     }
@@ -589,7 +589,7 @@ di_process_quotas (string tag, diQuota_t *diqinfo,
     }
   } else {
     if (opts.debugLevel > 2) {
-      writefln ("quota: %s %s errno %d", tag, diqinfo.name, getErrno);
+      writefln ("quota: %s %s errno %d", tag, diqinfo.name, errno);
     }
   }
 }
