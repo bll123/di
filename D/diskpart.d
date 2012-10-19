@@ -109,7 +109,7 @@ public:
       }
       if (f == cast(FILE *) null)
       {
-        string s = format ("Unable to open %s errno %d", DI_MOUNT_FILE, getErrno());
+        string s = format ("Unable to open %s errno %d", DI_MOUNT_FILE, errno());
         throw new Exception (s);
       }
       scope (exit) {
@@ -127,6 +127,9 @@ public:
         dp.fsType = to!(typeof(dp.special))(mntEntry.mnt_type);
 
         if (dp.special == "none") {
+          dp.printFlag = dp.DI_PRINT_IGNORE;
+        }
+        if (dp.fsType == "rootfs") {
           dp.printFlag = dp.DI_PRINT_IGNORE;
         }
         if (dp.fsType == MNTTYPE_IGNORE) {
@@ -309,7 +312,7 @@ public:
         {
           if (statvfs (toStringz(dp.name), &statBuf) != 0)
           {
-            string s = format ("statvfs: %s errno %d", dp.name, getErrno());
+            string s = format ("statvfs: %s errno %d", dp.name, errno());
             throw new Exception (s);
           }
 
