@@ -145,7 +145,9 @@ diquota (diqinfo)
 {
   int               rc;
   int               xfsflag;
+#if _has_std_quotas
   qdata_t           qdata;
+#endif
 #if _lib_quota_open
   struct quotahandle    *qh;
   struct quotakey       qkey;
@@ -232,7 +234,7 @@ diquota (diqinfo)
         (int) diqinfo->uid, (caddr_t) &qdata.val);
 #  endif
 # endif
-# if _sys_fs_ufs_quota        /* Solaris */
+# if _has_std_quotas && _sys_fs_ufs_quota        /* Solaris */
   {
     int             fd;
     struct quotctl  qop;
@@ -240,7 +242,7 @@ diquota (diqinfo)
 
     qop.op = Q_GETQUOTA;
     qop.uid = diqinfo->uid;
-    qop.addr = (caddr_t) &qdata.ufsqinfo;
+    qop.addr = (caddr_t) &qdata.qinfo;
     strncpy (tname, diqinfo->name, DI_NAME_LEN);
     strncat (tname, "/quotas", DI_NAME_LEN);
     fd = open (tname, O_RDONLY | O_NOCTTY);
@@ -603,7 +605,7 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
     }
 # endif
 # if _typ_struct_quotaval
-    tsize = qdata->qbval.qv_usage;
+    tsize = qdata->qval.qbval.qv_usage;
 # endif
 # if _mem_struct_dqblk_dqb_curblocks
     tsize = qdata->qinfo.dqb_curblocks;
