@@ -109,7 +109,7 @@ di_saveInodeSizes (diptr, total_nodes, free_nodes, avail_nodes)
 
 void
 #if _proto_stdc
-convertMountOptions (long flags, diDiskInfo_t *diptr)
+convertMountOptions (unsigned long flags, diDiskInfo_t *diptr)
 #else
 convertMountOptions (flags, diptr)
     unsigned long  flags;
