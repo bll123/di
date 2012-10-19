@@ -1,16 +1,18 @@
-di - disk information utility (version 4.31)
+di - disk information utility (version 4.32)
 
 This code is in development.
 It is only included here as an
 example on how to use 'mkconfig'
 with the D language.
 
-2011-11-18: the code will not link without the 
+2012-10-19: gdc not tested.
+            paths are not canonacalized.
+2011-11-18: the code will not link without the
             second set of unittest blocks in options.d.  No idea why.
             Apparently some sort of bug due to ???.
 2012-1-17: Debian gdc-4.6.2-4 : same issue.
 2012-1-26: FreeBSD : loss of precision somewhere and the values
-           for zottas (and hence yobis) gets messed up.  
+           for zottas (and hence yobis) gets messed up.
            Got:         999999999999999983222784
            Instead of: 1000000000000000000000000
            This occurs with gcc-4.2.1 also, so it is a gcc bug on FreeBSD.
@@ -20,6 +22,7 @@ Zones are not working; don't have a D compiler on Solaris.
 CHANGES
 
     4.32                                    [18 Oct 2012]
+        Change getErrno to errno.
         Rearranged diskpart.d class def.
         Cleanup.
 
