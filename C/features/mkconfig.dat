@@ -84,6 +84,7 @@ command msgfmt gmsgfmt
 command rpmbuild
 const   O_NOCTTY
 define  MCTL_QUERY
+define  S_ISLNK
 typ     struct dqblk
 typ     struct quotaval
 typ     struct ufs_dqblk
@@ -117,6 +118,7 @@ lib     gettext -lintl, -lintl -liconv
 lib     getvfsstat
 lib     getzoneid
 lib     hasmntopt
+lib     lstat
 lib     mbrlen
 lib     memcpy
 lib     memset
@@ -127,6 +129,7 @@ lib     next_dev
 # quota_open is a new interface from NetBSD
 lib     quota_open -lquota -lrpcsvc
 lib     quotactl
+lib     realpath
 lib     setlocale  -lintl, -lintl -liconv
 # unknown if -lsun, -lseq are needed (old irix, sequent)
 lib     setmntent -lsun, -lseq
@@ -201,9 +204,8 @@ if AIX_mntctl _sys_vmount && _define_MCTL_QUERY
   set _lib_mntctl 1
 endif
 
-if stdquotas ( _hdr_linux_quota || _hdr_ufs_quota || _hdr_ufs_ufs_quota || \
-    _sys_fs_ufs_quota || _hdr_quota || _sys_quota ) \
-    && ( _lib_quotactl || _lib_quota_open )
+if stdquotas ( _lib_quotactl || _lib_quota_open || \
+    _typ_struct_dqblk || _typ_struct_ufs_dqblk )
   setint _has_std_quotas 1
 else
   setint _has_std_quotas 0
