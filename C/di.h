@@ -266,11 +266,6 @@ typedef struct {
   extern int errno;
 #endif
 
-/* workaround for AIX - mntctl not declared */
-# if _lib_mntctl && _npt_mntctl
-  extern int mntctl _((int, int, char *));
-# endif
-
  /* digetentries.c */
 extern int  di_getDiskEntries       _((diDiskInfo_t **, int *));
  /* digetinfo.c */
