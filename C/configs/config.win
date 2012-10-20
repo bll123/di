@@ -23,6 +23,7 @@
 #define _hdr_fcntl 1
 #define _hdr_fshelp 0
 #define _hdr_gui_window 0
+#define _hdr_jfs_quota 0
 #define _hdr_kernel_fs_info 0
 #define _hdr_limits 1
 #define _hdr_linux_dqblk_xfs 0
@@ -80,6 +81,7 @@
 #define _command_rpmbuild 0
 #define _const_O_NOCTTY 1
 #define _define_MCTL_QUERY 0
+#define _define_QCMD 0
 #define _define_S_ISLNK 1
 #define _typ_struct_dqblk 0
 #define _typ_struct_quotaval 0
