@@ -387,13 +387,6 @@ di_getDiskEntries (diskInfo, diCount)
           }
         }
 
-        if (strcmp (mntEntry->mnt_type, "rootfs") == 0) {
-          diptr->printFlag = DI_PRNT_IGNORE;
-          if (debug > 2) {
-            printf ("mnt: ignore: type 'rootfs': %s\n", diptr->name);
-          }
-        }
-
         if (strcmp (mntEntry->mnt_type, MNTTYPE_IGNORE) == 0)
         {
             diptr->printFlag = DI_PRNT_IGNORE;
