@@ -224,6 +224,7 @@ diquota (diqinfo)
   if (debug > 5) {
     printf ("quota: quotactl on %s (%d %d)\n", diqinfo->name, _quotactl_pos_1, _quotactl_pos_2);
   }
+  /* AIX 7 has quotactl position 1 */
 # if _lib_quotactl && _quotactl_pos_1
   rc = quotactl (diqinfo->name, ucmd,
         (int) diqinfo->uid, (caddr_t) &qdata.val);
@@ -283,8 +284,9 @@ diquota (diqinfo)
     rc = quotactl (diqinfo->name, gcmd,
           (int) diqinfo->gid, (caddr_t) &qdata.val);
 #   endif
-#   if _lib_quotactl && _quotactl_pos_2
-#    if _AIX  /* AIX has linux compatibility routine, but still need name */
+#   if _lib_quotactl && (_quotactl_pos_2 || _AIX)
+#    if _AIX
+      /* AIX has linux compatibility routine, but need name rather than special */
     rc = quotactl (gcmd, diqinfo->name,
             (int) diqinfo->gid, (caddr_t) &qdata.val);
 #    else
