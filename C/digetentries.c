@@ -158,6 +158,11 @@
   extern "C" {
 #endif
 
+/* workaround for AIX - mntctl not declared */
+# if _lib_mntctl && _npt_mntctl
+  extern int mntctl _((int, Size_t, char *));
+# endif
+
 #if (_lib_getmntent || \
     _args_statfs > 0) && \
     ! _lib_getmntinfo && \
@@ -1416,7 +1421,7 @@ di_getDiskEntries (diskInfo, diCount)
             return -1;
         }
 
-        num = mntctl (MCTL_QUERY, (int) vmbufsz, vmbuf);
+        num = mntctl (MCTL_QUERY, vmbufsz, vmbuf);
             /*
              * vmbuf is too small, could happen for
              * following reasons:
