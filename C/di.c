@@ -721,6 +721,14 @@ checkDiskInfo (diData, hasLoop)
 #endif
           }
 
+          if (strcmp (dinfo->fsType, "rootfs") == 0) {
+            dinfo->printFlag = DI_PRNT_IGNORE;
+            dinfo->doPrint = (char) diopts->displayAll;
+            if (debug > 2)
+            {
+              printf ("chk: ignore: rootfs: %s\n", dinfo->name);
+            }
+          }
           if ((_s_fs_size_t) dinfo->totalBlocks <= 0L)
           {
             dinfo->printFlag = DI_PRNT_IGNORE;
