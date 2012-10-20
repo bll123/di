@@ -23,10 +23,11 @@ hdr     errno.h
 hdr     fcntl.h
 hdr     fshelp.h
 hdr     gui/window.h
+hdr     jfs/quota.h
 hdr     kernel/fs_info.h
 hdr     limits.h
 hdr     linux/dqblk_xfs.h
-# aix doesn't declare their own, use the compatibility version
+# aix 5 doesn't declare their own, use the compatibility version
 hdr     linux/quota.h
 hdr     libintl.h
 hdr     locale.h
@@ -84,6 +85,7 @@ command msgfmt gmsgfmt
 command rpmbuild
 const   O_NOCTTY
 define  MCTL_QUERY
+define  QCMD
 define  S_ISLNK
 typ     struct dqblk
 typ     struct quotaval
