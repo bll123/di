@@ -56,9 +56,13 @@
 #if _hdr_linux_dqblk_xfs
 # include <linux/dqblk_xfs.h>
 #endif
-  /* AIX doesn't seem to have quotactl declared.... */
-  /* use their compatibility routine.               */
-#if _hdr_linux_quota && _inc_conflict__sys_quota__hdr_linux_quota
+#if _hdr_jfs_quota
+# include <jfs/quota.h>
+#endif
+  /* AIX 5.1 doesn't seem to have quotactl declared.... */
+  /* use their compatibility routine.                   */
+#if ! _args_quotactl && _hdr_linux_quota && \
+      _inc_conflict__sys_quota__hdr_linux_quota
 # include <linux/quota.h>
 #endif
 #if _hdr_rpc_rpc
@@ -200,14 +204,13 @@ diquota (diqinfo)
 # endif
     ;
   } else {
-# if _has_std_quotas
+# if _define_QCMD
+    ucmd = QCMD (Q_GETQUOTA, USRQUOTA);
+    gcmd = QCMD (Q_GETQUOTA, GRPQUOTA);
+# else
     /* hp-ux doesn't have QCMD */
     ucmd = Q_GETQUOTA;
     gcmd = Q_GETQUOTA;
-# endif
-# ifdef QCMD
-    ucmd = QCMD (Q_GETQUOTA, USRQUOTA);
-    gcmd = QCMD (Q_GETQUOTA, GRPQUOTA);
 # endif
   }
 
@@ -225,8 +228,9 @@ diquota (diqinfo)
   rc = quotactl (diqinfo->name, ucmd,
         (int) diqinfo->uid, (caddr_t) &qdata.val);
 # endif
-# if _lib_quotactl && _quotactl_pos_2
-#  if _AIX  /* AIX has linux compatibility routine, but still need name */
+# if _lib_quotactl && (_quotactl_pos_2 || _AIX)
+#  if _AIX
+  /* AIX has linux compatibility routine, but need name rather than special */
   rc = quotactl (ucmd, diqinfo->name,
         (int) diqinfo->uid, (caddr_t) &qdata.val);
 #  else
