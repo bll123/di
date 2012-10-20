@@ -204,13 +204,15 @@ diquota (diqinfo)
 # endif
     ;
   } else {
-# if _define_QCMD
+# if _has_std_quotas
+#  if _define_QCMD
     ucmd = QCMD (Q_GETQUOTA, USRQUOTA);
     gcmd = QCMD (Q_GETQUOTA, GRPQUOTA);
-# else
+#  else
     /* hp-ux doesn't have QCMD */
     ucmd = Q_GETQUOTA;
     gcmd = Q_GETQUOTA;
+#  endif
 # endif
   }
 
