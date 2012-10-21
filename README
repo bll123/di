@@ -1,4 +1,4 @@
-di - disk information utility (version 4.31)
+di - disk information utility (version 4.32)
 
 CONTENTS
   Description
@@ -22,10 +22,10 @@ INSTALLATION
 
   To build:
     make -e dioptions.dat
-    # Edit dioptions.dat and change it 
-    # to set your preferences.  
+    # Edit dioptions.dat and change it
+    # to set your preferences.
     # Add your CC, CFLAGS and LDFLAGS settings.
-    # This file will not be removed and can be reused 
+    # This file will not be removed and can be reused
     # for the next release.
     make -e
     make -e install
@@ -37,7 +37,7 @@ INSTALLATION
       make -e all-perl
 
   The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
-  variables may be set and exported prior to running make.  This 
+  variables may be set and exported prior to running make.  This
   will override any settings in 'dioptions.dat'.
 
   The LOCALEDIR environment variable defaults to ${prefix}/share/locale.
@@ -79,12 +79,12 @@ INSTALLATION
       env CFLAGS="-z +Z +DD64" LDFLAGS="+DD64" make -e
     64-bit gcc:
       env CC=gcc CFLAGS="-fPIC -mlp64 -D_LABEL_T" \
-          LDFLAGS="-mlp64 -L/usr/lib/hpux64" make -e 
+          LDFLAGS="-mlp64 -L/usr/lib/hpux64" make -e
     32-bit:
       env CFLAGS="-z +Z +DD32" LDFLAGS="+DD32" make -e
     32-bit gcc:
       env CC=gcc CFLAGS="-fPIC -milp32 -D_LABEL_T" \
-          LDFLAGS="-milp32 -L/usr/lib/hpux32" make -e 
+          LDFLAGS="-milp32 -L/usr/lib/hpux32" make -e
     Bundled cc:
       cd C;make hpux-cc
 
@@ -116,7 +116,14 @@ BUGS AND KNOWN ISSUES
           the di program setuid.  Neither recommended.
         - Linux 2.4 - not working
         - HP-UX
-          - quotactl() isn't declared.
+          - quotactl() isn't declared. See above.
+        - NetBSD 6
+          - group quotas can't be fetched by ordinary users (EPERM).
+            If the account is limited by a group quota, it won't be reported.
+        - AIX 7
+          - Unlike AIX 5, AIX 7 gives a permission
+            denied error when a user tries to get their quota.
+            Could make di suid, but that's not a good idea.
 
     Send bug reports along with the output from 'di -A -a -X 5',
     output from your standard df command (as verbose as possible),
@@ -151,25 +158,26 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.31 has been tested on the following platforms:
-        AIX 5.1
+    di 4.32 has been tested on the following platforms:
+        AIX 5.1, 7.1
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5, 6.0
-        Debian 4.0, 5.0, 6.0, 6-kFreeBSD 7.2, 6-kFreeBSD 8.1
+        Debian 4.0, 5.0, 6.0, 6-kFreeBSD 8.1
         DragonflyBSD 2.10.1
         Fedora 7, 12, 13, 14, 16
-        FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1, 8.2
+        FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1, 8.2, 9.0
         Haiku r1a3
+        HP-UX 11.11
+        LinuxMint 11 (32-bit, 64-bit)
         Mandrake 9.2
         Mandriva 2011
-        NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1, 5.1
+        NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1, 5.1, 6.0
         Nexenta 1.0.1_b85, 2.0_b104
         OpenBSD 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0
         OpenSolaris 200805, 200906
         QNX 6.3
         RedHat 7.1, 7.3
         SCO OpenServer 6.0.0
-        Solaris 8, 9, 10 (cc, gcc3, gcc4)
-        Solaris 2.6 (sparc gcc3)
+        Solaris 2.6, 8, 9, 10, 11
         Tru64 5.1B
         ULTRIX 4.5
         UnixWare 7.1.4
@@ -186,6 +194,13 @@ PORTING
 
 CHANGES
 
+    4.32                                    [--]
+        Updated quota code for NetBSD 6.
+        Fixed AIX group quota check.
+        Fixed AIX 7 support.  Unlike AIX 5, AIX 7 gives a permission
+          denied error when a user tries to get their quota.
+        Updated build system to mkconfig-1.21.
+
     4.31                                    [20 Nov 2011]
         Filesystems that would return a 'Permission Denied'
           are not displayed at all, even with -a.
@@ -195,8 +210,8 @@ CHANGES
         Updated build system to mkconfig-1.19.
 
     4.30                                    [8 Oct 2011]
-        Added support for long options.  
-        GNU df compatible long options have been added and 
+        Added support for long options.
+        GNU df compatible long options have been added and
           are processed appropriately.
         Removed program name settings from Makefile and di.c.
         Minor code cleanup.
