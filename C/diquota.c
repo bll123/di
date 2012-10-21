@@ -231,7 +231,7 @@ diquota (diqinfo)
   rc = quotactl (diqinfo->name, ucmd,
         (int) diqinfo->uid, (caddr_t) &qdata.val);
 # endif
-# if _lib_quotactl && (_quotactl_pos_2 || _AIX)
+# if _lib_quotactl && ! _quotactl_pos_1 && (_quotactl_pos_2 || _AIX)
 #  if _AIX
   /* AIX has linux compatibility routine, but need name rather than special */
   rc = quotactl (ucmd, diqinfo->name,
@@ -286,7 +286,7 @@ diquota (diqinfo)
     rc = quotactl (diqinfo->name, gcmd,
           (int) diqinfo->gid, (caddr_t) &qdata.val);
 #   endif
-#   if _lib_quotactl && (_quotactl_pos_2 || _AIX)
+#   if _lib_quotactl && ! _quotactl_pos_1 && (_quotactl_pos_2 || _AIX)
 #    if _AIX
       /* AIX has linux compatibility routine, but need name rather than special */
     rc = quotactl (gcmd, diqinfo->name,
