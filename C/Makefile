@@ -85,7 +85,7 @@ windows:
 	@$(MAKE) ../dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
-	copy /y /b NUL:+config.win config.h
+	copy /y /b NUL:+configs/config.win config.h
 	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
@@ -99,7 +99,7 @@ windows-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	$(CP) -f config.win config.h
+	$(CP) -f configs/config.win config.h
 	@echo '-lintl' > $(MKC_REQLIB)
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
@@ -112,7 +112,7 @@ windows-mingw:
 	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
-	copy /y /b NUL:+config.mingw config.h
+	copy /y /b NUL:+configs/config.mingw config.h
 	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
 		CC=mingw32-gcc LD=mingw32-gcc \
@@ -134,7 +134,7 @@ bsd43-cc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	$(CP) config.bsd43.cc config.h
+	$(CP) configs/config.bsd43.cc config.h
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
@@ -146,7 +146,7 @@ bsd43-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	$(CP) config.bsd43.gcc config.h
+	$(CP) configs/config.bsd43.gcc config.h
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
@@ -158,7 +158,7 @@ ultrix-cc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	$(CP) config.ultrix.cc config.h
+	$(CP) configs/config.ultrix.cc config.h
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
@@ -170,7 +170,7 @@ ultrix-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	$(CP) config.ultrix.gcc config.h
+	$(CP) configs/config.ultrix.gcc config.h
 	@echo '-lintl' > $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
@@ -182,7 +182,7 @@ hpux-cc:
 	@$(MAKE) -e ../dioptions.dat
 	@$(MAKE) CC=/usr/ccs/bin/cc -e di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	$(CP) config.hpux.bcc config.h
+	$(CP) configs/config.hpux.bcc config.h
 	@sleep 1;touch $(MKC_REQLIB)
 	. ./di.env;$(MAKE) -e CC=/usr/ccs/bin/cc \
 		_MKCONFIG_SHELL=$(MKCONFIG_SHELL) di-programs
