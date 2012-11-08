@@ -114,7 +114,7 @@ static int  diCompare           _((const diOptions_t *, const diDiskInfo_t *, un
 static int  findDispSize        _((_print_size_t));
 static Size_t istrlen           _((const char *));
 static void printInfo           _((diDiskInfo_t *, diOptions_t *, diOutput_t *));
-static void printBlocks         _((const diOptions_t *, const diOutput_t *, _fs_size_t, _fs_size_t, int));
+static void printSpace          _((const diOptions_t *, const diOutput_t *, _fs_size_t, int));
 static void processTitles       _((diOptions_t *, diOutput_t *));
 static void printPerc           _((_fs_size_t, _fs_size_t, const char *));
 static void initSizeTable       _((diOptions_t *, diOutput_t *));
@@ -159,7 +159,6 @@ printDiskInfo (diData)
     if (diopts->printTotals)
     {
         di_initDiskInfo (&totals);
-        totals.blockSize = 512;
         strncpy (totals.name, DI_GT("Total"), (Size_t) DI_NAME_LEN);
         totals.printFlag = DI_PRNT_OK;
     }
@@ -240,28 +239,21 @@ printDiskInfo (diData)
             dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
 
                 /* is it a pooled filesystem type? */
-            if (diData->haspooledfs &&
-                (strcmp (dinfo->fsType, "zfs") == 0 ||
-                 strcmp (dinfo->fsType, "advfs") == 0))
-            {
+            if (diData->haspooledfs && di_isPooledFs (dinfo)) {
               ispooled = TRUE;
               if (lastpoollen == 0 ||
                   strncmp (lastpool, dinfo->special, lastpoollen) != 0)
               {
-                char        *ptr;
-
                 strncpy (lastpool, dinfo->special, sizeof (lastpool));
-                ptr = strchr (lastpool, '#');
-                if (ptr != (char *) NULL) {
-                  *ptr = '\0';
-                }
-                ptr = strchr (lastpool, '/');
-                if (ptr != (char *) NULL) {
-                  *ptr = '\0';
-                }
-                lastpoollen = strlen (lastpool);
+                lastpoollen = di_mungePoolName (lastpool);
                 inpool = FALSE;
                 startpool = TRUE;
+                if (strcmp (dinfo->fsType, "null") == 0 &&
+                    strcmp (dinfo->special + strlen (dinfo->special) - 5,
+                            "00000") != 0) {
+                    /* dragonflybsd doesn't have the main pool mounted */
+                  inpool = TRUE;
+                }
               }
             } else {
               inpool = FALSE;
@@ -447,56 +439,53 @@ printInfo (diskInfo, diopts, diout)
         {
           case DI_FMT_BTOT:
           {
-              temp = (_print_size_t) diskInfo->totalBlocks;
+              temp = (_print_size_t) diskInfo->totalSpace;
               valid = TRUE;
               break;
           }
 
           case DI_FMT_BTOT_AVAIL:
           {
-              temp = (_print_size_t) (diskInfo->totalBlocks -
-                      (diskInfo->freeBlocks - diskInfo->availBlocks));
+              temp = (_print_size_t) (diskInfo->totalSpace -
+                      (diskInfo->freeSpace - diskInfo->availSpace));
               valid = TRUE;
               break;
           }
 
           case DI_FMT_BUSED:
           {
-              temp = (_print_size_t) (diskInfo->totalBlocks - diskInfo->freeBlocks);
+              temp = (_print_size_t) (diskInfo->totalSpace - diskInfo->freeSpace);
               valid = TRUE;
               break;
           }
 
           case DI_FMT_BCUSED:
           {
-              temp = (_print_size_t) (diskInfo->totalBlocks - diskInfo->availBlocks);
+              temp = (_print_size_t) (diskInfo->totalSpace - diskInfo->availSpace);
               valid = TRUE;
               break;
           }
 
           case DI_FMT_BFREE:
           {
-              temp = (_print_size_t) diskInfo->freeBlocks;
+              temp = (_print_size_t) diskInfo->freeSpace;
               valid = TRUE;
               break;
           }
 
           case DI_FMT_BAVAIL:
           {
-              temp = (_print_size_t) diskInfo->availBlocks;
+              temp = (_print_size_t) diskInfo->availSpace;
               valid = TRUE;
               break;
           }
         }
 
-        if (valid)
-        {
-          temp *= (_print_size_t) diskInfo->blockSize;
+        if (valid) {
           tidx = findDispSize (temp);
-              /* want largest index */
-          if (tidx > idx)
-          {
-              idx = tidx;
+            /* want largest index */
+          if (tidx > idx) {
+            idx = tidx;
           }
         }
         ++ptr;
@@ -530,70 +519,64 @@ printInfo (diskInfo, diopts, diout)
 
         case DI_FMT_BTOT:
         {
-          printBlocks (diopts, diout,
-              diskInfo->totalBlocks, diskInfo->blockSize, idx);
+          printSpace (diopts, diout, diskInfo->totalSpace, idx);
           break;
         }
 
         case DI_FMT_BTOT_AVAIL:
         {
-          printBlocks (diopts, diout, diskInfo->totalBlocks -
-              (diskInfo->freeBlocks - diskInfo->availBlocks),
-              diskInfo->blockSize, idx);
+          printSpace (diopts, diout, diskInfo->totalSpace -
+              (diskInfo->freeSpace - diskInfo->availSpace), idx);
           break;
         }
 
         case DI_FMT_BUSED:
         {
-          printBlocks (diopts, diout,
-              diskInfo->totalBlocks - diskInfo->freeBlocks,
-              diskInfo->blockSize, idx);
+          printSpace (diopts, diout,
+              diskInfo->totalSpace - diskInfo->freeSpace, idx);
           break;
         }
 
         case DI_FMT_BCUSED:
         {
-          printBlocks (diopts, diout,
-              diskInfo->totalBlocks - diskInfo->availBlocks,
-              diskInfo->blockSize, idx);
+          printSpace (diopts, diout,
+              diskInfo->totalSpace - diskInfo->availSpace, idx);
           break;
         }
 
         case DI_FMT_BFREE:
         {
-          printBlocks (diopts, diout,
-               diskInfo->freeBlocks, diskInfo->blockSize, idx);
+          printSpace (diopts, diout, diskInfo->freeSpace, idx);
           break;
         }
 
         case DI_FMT_BAVAIL:
         {
-          printBlocks (diopts, diout,
-               diskInfo->availBlocks, diskInfo->blockSize, idx);
+          printSpace (diopts, diout, diskInfo->availSpace, idx);
           break;
         }
 
         case DI_FMT_BPERC_NAVAIL:
         {
-          used = diskInfo->totalBlocks - diskInfo->availBlocks;
-          totAvail = diskInfo->totalBlocks;
+          used = diskInfo->totalSpace - diskInfo->availSpace;
+          totAvail = diskInfo->totalSpace;
           printPerc (used, totAvail, percFormat);
           break;
         }
 
         case DI_FMT_BPERC_USED:
         {
-          used = diskInfo->totalBlocks - diskInfo->freeBlocks;
-          totAvail = diskInfo->totalBlocks;
+          used = diskInfo->totalSpace - diskInfo->freeSpace;
+          totAvail = diskInfo->totalSpace;
           printPerc (used, totAvail, percFormat);
           break;
         }
 
         case DI_FMT_BPERC_BSD:
         {
-          used = diskInfo->totalBlocks - diskInfo->freeBlocks;
-          totAvail = diskInfo->totalBlocks -
-                  (diskInfo->freeBlocks - diskInfo->availBlocks);
+          used = diskInfo->totalSpace - diskInfo->freeSpace;
+          totAvail = diskInfo->totalSpace -
+                  (diskInfo->freeSpace - diskInfo->availSpace);
           printPerc (used, totAvail, percFormat);
           break;
         }
@@ -601,8 +584,8 @@ printInfo (diskInfo, diopts, diout)
         case DI_FMT_BPERC_AVAIL:
         {
           _fs_size_t          bfree;
-          bfree = diskInfo->availBlocks;
-          totAvail = diskInfo->totalBlocks;
+          bfree = diskInfo->availSpace;
+          totAvail = diskInfo->totalSpace;
           printPerc (bfree, totAvail, percFormat);
           break;
         }
@@ -610,8 +593,8 @@ printInfo (diskInfo, diopts, diout)
         case DI_FMT_BPERC_FREE:
         {
           _fs_size_t          bfree;
-          bfree = diskInfo->freeBlocks;
-          totAvail = diskInfo->totalBlocks;
+          bfree = diskInfo->freeSpace;
+          totAvail = diskInfo->totalSpace;
           printPerc (bfree, totAvail, percFormat);
           break;
         }
@@ -692,14 +675,13 @@ printInfo (diskInfo, diopts, diout)
 
 static void
 #if _proto_stdc
-printBlocks (const diOptions_t *diopts, const diOutput_t *diout,
-             _fs_size_t blocks, _fs_size_t blockSize, int idx)
+printSpace (const diOptions_t *diopts, const diOutput_t *diout,
+             _fs_size_t usage, int idx)
 #else
-printBlocks (diopts, diout, blocks, blockSize, idx)
+printBlocks (diopts, diout, usage, idx)
     const diOptions_t   *diopts;
     const diOutput_t    *diout;
-    _fs_size_t          blocks;
-    _fs_size_t          blockSize;
+    _fs_size_t          usage;
     int                 idx;
 #endif
 {
@@ -716,7 +698,7 @@ printBlocks (diopts, diout, blocks, blockSize, idx)
 
     if (diopts->dispBlockSize == DI_DISP_HR)
     {
-        temp = (_print_size_t) blocks * (_print_size_t) blockSize;
+        temp = (_print_size_t) usage;
         idx = findDispSize (temp);
     }
 
@@ -735,8 +717,8 @@ printBlocks (diopts, diout, blocks, blockSize, idx)
       }
     }
 
-    mult = (_print_size_t) blockSize / tdbs;
-    printf (format, (_print_size_t) blocks * mult, suffix);
+    mult = 1.0 / tdbs;
+    printf (format, (_print_size_t) usage * mult, suffix);
 }
 
 
@@ -778,36 +760,29 @@ addTotals (diskInfo, totals, inpool)
     int                 inpool;
 #endif
 {
-    _print_size_t       mult;
+  if (debug > 2)
+  {
+    printf ("tot:%s:%s:inp:%d\n",
+        diskInfo->special, diskInfo->name, inpool);
+  }
 
-    mult = (_print_size_t) diskInfo->blockSize / (_print_size_t) totals->blockSize;
-
-    if (debug > 2)
-    {
-        printf ("tot:%s:%s:bs:%lld:mult:%Lf:inp:%d\n",
-                    diskInfo->special, diskInfo->name,
-                    diskInfo->blockSize, mult, inpool);
-    }
-
-    if (inpool)
-    {
-        if (debug > 2) {printf ("  tot:inpool:add total used\n"); }
-        /* if in a pool of disks, add the total used to the totals also */
-        totals->totalBlocks += (_fs_size_t) ((_print_size_t) (diskInfo->totalBlocks -
-                diskInfo->freeBlocks) * mult);
-        totals->totalInodes += diskInfo->totalInodes -
-                diskInfo->freeInodes;
-    }
-    else
-    {
-        if (debug > 2) {printf ("  tot:not inpool:add all totals\n"); }
-        totals->totalBlocks += (_fs_size_t) ((_print_size_t) diskInfo->totalBlocks * mult);
-        totals->freeBlocks += (_fs_size_t) ((_print_size_t) diskInfo->freeBlocks * mult);
-        totals->availBlocks += (_fs_size_t) ((_print_size_t) diskInfo->availBlocks * mult);
-        totals->totalInodes += diskInfo->totalInodes;
-        totals->freeInodes += diskInfo->freeInodes;
-        totals->availInodes += diskInfo->availInodes;
-    }
+  if (inpool)
+  {
+    if (debug > 2) {printf ("  tot:inpool:add total used\n"); }
+    /* if in a pool of disks, add the total used to the totals also */
+    totals->totalSpace += diskInfo->totalSpace + diskInfo->freeSpace;
+    totals->totalInodes += diskInfo->totalInodes - diskInfo->freeInodes;
+  }
+  else
+  {
+    if (debug > 2) {printf ("  tot:not inpool:add all totals\n"); }
+    totals->totalSpace += diskInfo->totalSpace;
+    totals->freeSpace += diskInfo->freeSpace;
+    totals->availSpace += diskInfo->availSpace;
+    totals->totalInodes += diskInfo->totalInodes;
+    totals->freeInodes += diskInfo->freeInodes;
+    totals->availInodes += diskInfo->availInodes;
+  }
 }
 
 /*
@@ -1228,10 +1203,16 @@ diCompare (diopts, data, idx1, idx2)
 
         case DI_SORT_AVAIL:
         {
-            rc = (int) ((d1->availBlocks * d1->blockSize) -
-                    (d2->availBlocks * d2->blockSize));
-            rc *= sortOrder;
-            break;
+          _fs_size_t    temp;
+
+          temp = (d1->availSpace - d2->availSpace);
+          if (temp == 0) {
+            rc = 0;
+          } else {
+            rc = temp > 0 ? 1 : -1;
+          }
+          rc *= sortOrder;
+          break;
         }
       } /* switch on sort type */
 
