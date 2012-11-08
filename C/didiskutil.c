@@ -67,6 +67,7 @@ di_initDiskInfo (diptr)
     diptr->isLocal = TRUE;
     diptr->isReadOnly = FALSE;
     diptr->isLoopback = FALSE;
+    diptr->hasQuotas = FALSE;
 }
 
 void
@@ -83,10 +84,9 @@ di_saveBlockSizes (diptr, block_size, total_blocks, free_blocks, avail_blocks)
     _fs_size_t avail_blocks;
 #endif
 {
-    diptr->blockSize = (_fs_size_t) block_size;
-    diptr->totalBlocks = (_fs_size_t) total_blocks;
-    diptr->freeBlocks = (_fs_size_t) free_blocks;
-    diptr->availBlocks = (_fs_size_t) avail_blocks;
+    diptr->totalSpace = (_fs_size_t) total_blocks * (_fs_size_t) block_size;
+    diptr->freeSpace = (_fs_size_t) free_blocks * (_fs_size_t) block_size;
+    diptr->availSpace = (_fs_size_t) avail_blocks * (_fs_size_t) block_size;
 }
 
 void
@@ -420,13 +420,13 @@ convertNFSMountOptions (flags, wsize, rsize, diptr)
 	! _class_os__Volumes
 
 char *
-# if _proto_stdc
+#if _proto_stdc
 chkMountOptions (const char *mntopts, const char *str)
-# else
+#else
 chkMountOptions (mntopts, str)
     const char          *mntopts;
     const char          *str;
-# endif
+#endif
 {
     char    *ptr;
     char    *tstr;
@@ -454,17 +454,78 @@ chkMountOptions (mntopts, str)
 #endif /* _lib_getmntent */
 
 void
-# if _proto_stdc
+#if _proto_stdc
 di_testRemoteDisk (diDiskInfo_t *diskInfo)
-# else
+#else
 di_testRemoteDisk (diskInfo)
     diDiskInfo_t *diskInfo;
-# endif
+#endif
 {
-    if (strcmp (diskInfo->fsType, "nfs") == 0 ||
-            strcmp (diskInfo->fsType, "nfs3") == 0)
-    {
-        diskInfo->isLocal = FALSE;
+  if (strcmp (diskInfo->fsType, "nfs") == 0 ||
+     strcmp (diskInfo->fsType, "nfs3") == 0)
+  {
+    diskInfo->isLocal = FALSE;
+  }
+}
+
+int
+#if _proto_stdc
+di_isPooledFs (diDiskInfo_t *diskInfo)
+#else
+di_isPooledFs (diskInfo)
+    diDiskInfo_t *diskInfo;
+#endif
+{
+  if (strcmp (diskInfo->fsType, "zfs") == 0 ||
+      strcmp (diskInfo->fsType, "advfs") == 0 ||
+      (strcmp (diskInfo->fsType, "null") == 0 &&
+       strstr (diskInfo->special, "/@@-") != (char *) NULL)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+int
+#if _proto_stdc
+di_isLoopbackFs (diDiskInfo_t *diskInfo)
+#else
+di_isLoopbackFs (diskInfo)
+    diDiskInfo_t *diskInfo;
+#endif
+{
+  if ((strcmp (diskInfo->fsType, "lofs") == 0 && diskInfo->sp_rdev != 0) ||
+      (strcmp (diskInfo->fsType, "null") == 0 &&
+       strstr (diskInfo->special, "/@@-") == (char *) NULL) ||
+      strcmp (diskInfo->fsType, "none") == 0) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+Size_t
+#if _proto_stdc
+di_mungePoolName (char *poolname)
+#else
+di_mungePoolName (poolname)
+  char      *poolname;
+#endif
+{
+  char      *ptr;
+
+  ptr = strchr (poolname, '#');   /* advfs */
+  if (ptr != (char *) NULL) {
+    *ptr = '\0';
+  } else {
+    ptr = strchr (poolname, ':');   /* dragonflybsd */
+    if (ptr != (char *) NULL) {
+      *ptr = '\0';
+    } else {
+      ptr = strchr (poolname, '/');   /* zfs */
+      if (ptr != (char *) NULL) {
+        *ptr = '\0';
+      }
     }
+  }
+  return strlen (poolname);
 }
 
