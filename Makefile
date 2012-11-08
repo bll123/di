@@ -97,16 +97,19 @@ test:
 
 tests.done: $(MKC_DIR)/runtests.sh
 	@echo "## running tests"
-	CC=$(CC) DC=$(DC) $(_MKCONFIG_SHELL) \
+	CC=$(CC) DC="skip" $(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/runtests.sh ./tests.d
 	touch tests.done
 
+
+###
 
 ###
 # installation
 
 .PHONY: install
 install:
+	$(MAKE) all-c
 	$(MAKE) checkinstall
 	. ./C/di.env; $(MAKE) -e FROMDIR=$(FROMDIR) install-prog install-man
 
@@ -133,7 +136,7 @@ install-po: 	build-po
 
 .PHONY: install-prog
 install-prog:
-	$(TEST) -d $(INSTALL_DIR) || $(MKDIR) $(INSTALL_DIR)
+	$(TEST) -d $(INSTALL_DIR) || $(MKDIR) -p $(INSTALL_DIR)
 	$(TEST) -d $(INSTALL_BIN_DIR) || $(MKDIR) $(INSTALL_BIN_DIR)
 	$(CP) -f ./$(FROMDIR)/$(PROG)$(EXE_EXT) $(TARGET)
 	-$(RM) -f $(MTARGET) > /dev/null 2>&1
