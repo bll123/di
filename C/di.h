@@ -77,17 +77,17 @@
 # define DI_TYPE_LEN        65
 #endif
 
-#if ! _lib_memcpy && ! defined (memcpy)
-# if ! _lib_bcopy
-   error No_memcpy/bcopy_available.
+#if ! _lib_memcpy && ! _define_memcpy
+# if ! _lib_bcopy && ! _define_bcopy
+   #error No_memcpy/bcopy_available.
 # else
 #  define memcpy(dst, src, cnt)     (bcopy((src), (dst), (cnt)), dst)
 # endif
 #endif
 
-#if ! _lib_memset && ! defined (memset)
-# if ! _lib_bzero
-   error No_memset/bzero_available.
+#if ! _lib_memset && ! _define_memset
+# if ! _lib_bzero && ! _define_bzero
+   #error No_memset/bzero_available.
 # else
 #  define memset(s,c,n)    (bzero ((s), (n)), s)
 # endif
@@ -140,27 +140,29 @@ typedef unsigned long __ulong;
 typedef struct
 {
     unsigned int    sortIndex [2];
-    _fs_size_t      totalBlocks;
-    _fs_size_t      freeBlocks;
-    _fs_size_t      availBlocks;
-    _fs_size_t      blockSize;
+    _fs_size_t      totalSpace;
+    _fs_size_t      freeSpace;
+    _fs_size_t      availSpace;
     _fs_size_t      totalInodes;
     _fs_size_t      freeInodes;
     _fs_size_t      availInodes;
-    __ulong         st_dev;                      /* disk device number   */
-    __ulong         sp_dev;                      /* special device number*/
-    __ulong         sp_rdev;                     /* special rdev #       */
-    char            doPrint;                     /* do we want to print  */
-                                                 /* this entry?          */
-    char            printFlag;                   /* print flags          */
-    char            isLocal;                     /* is this mount point  */
-                                                 /* local?               */
-    char            isReadOnly;                  /* is this mount point  */
-                                                 /* read-only?           */
-    char            isLoopback;                  /* lofs or none fs type? */
-    char            name [DI_NAME_LEN + 1];         /* mount point          */
-    char            special [DI_SPEC_NAME_LEN + 1]; /* special device name  */
-    char            fsType [DI_TYPE_LEN + 1];       /* type of file system  */
+    __ulong         st_dev;                      /* disk device number       */
+    __ulong         sp_dev;                      /* special device number    */
+    __ulong         sp_rdev;                     /* special rdev #           */
+    char            doPrint;                     /* do we want to print      */
+                                                 /* this entry?              */
+    char            printFlag;                   /* print flags              */
+    char            isLocal;                     /* is this mount point      */
+                                                 /* local?                   */
+    char            isReadOnly;                  /* is this mount point      */
+                                                 /* read-only?               */
+    char            hasQuotas;                   /* has quotas?              */
+                                                 /* only useful if MNT_QUOTA */
+                                                 /* is defined.              */
+    char            isLoopback;                  /* lofs or none fs type?    */
+    char            name [DI_NAME_LEN + 1];         /* mount point           */
+    char            special [DI_SPEC_NAME_LEN + 1]; /* special device name   */
+    char            fsType [DI_TYPE_LEN + 1];       /* type of file system   */
     char            options [DI_OPT_LEN + 1];
     char            mountTime [DI_MNT_TIME_LEN + 1];
 } diDiskInfo_t;
@@ -170,6 +172,7 @@ typedef struct
     char            *special;
     char            *name;
     char            *type;
+    char            hasQuotas;
     Uid_t           uid;
     Gid_t           gid;
     _fs_size_t      blockSize;
@@ -299,6 +302,9 @@ extern char *chkMountOptions        _((const char *, const char *));
 extern void convertMountOptions     _((unsigned long, diDiskInfo_t *));
 extern void convertNFSMountOptions  _((long, long, long, diDiskInfo_t *));
 extern void di_testRemoteDisk       _((diDiskInfo_t *));
+extern int  di_isPooledFs           _((diDiskInfo_t *));
+extern int  di_isLoopbackFs         _((diDiskInfo_t *));
+extern Size_t di_mungePoolName      _((char *));
 
 # if defined (__cplusplus) || defined (c_plusplus)
    }
