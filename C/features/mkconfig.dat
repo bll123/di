@@ -30,6 +30,7 @@ hdr     linux/dqblk_xfs.h
 # aix 5 doesn't declare their own, use the compatibility version
 hdr     linux/quota.h
 hdr     libintl.h
+hdr     libprop/proplib.h
 hdr     locale.h
 hdr     malloc.h
 hdr     memory.h
@@ -76,6 +77,7 @@ sys     statfs.h
 sys     statvfs.h
 sys     time.h
 sys     vfs.h
+sys     vfs_quota.h
 sys     vfstab.h
 sys     vmount.h
 include_conflict time.h sys/time.h
@@ -84,7 +86,12 @@ command msgfmt gmsgfmt
 # rpmbuild used for regression tests
 command rpmbuild
 const   O_NOCTTY
+define  bcopy
+define  bzero
 define  MCTL_QUERY
+define  memcpy
+define  memset
+define  MNT_QUOTA
 define  QCMD
 define  S_ISLNK
 typ     struct dqblk
@@ -128,6 +135,8 @@ lib     memset
 # Look for MCTL_QUERY (see below)
 lib     mntctl
 lib     next_dev
+# dragonflybsd; need this to get the library
+lib     prop_dictionary_create -lprop
 # quota_open is a new interface from NetBSD
 lib     quota_open -lquota -lrpcsvc
 lib     quotactl
@@ -147,6 +156,8 @@ lib     sys_dollar_device_scan
 lib     sys_dollar_getdviw
 lib     sysfs
 lib     textdomain  -lintl, -lintl -liconv
+# dragonflybsd
+lib     vquotactl
 # need this to get the optional library
 lib     xdr_int -lnsl
 lib     zone_getattr
@@ -206,7 +217,7 @@ if AIX_mntctl _sys_vmount && _define_MCTL_QUERY
   set _lib_mntctl 1
 endif
 
-if stdquotas ( _lib_quotactl || _lib_quota_open || \
+if stdquotas ( _lib_quotactl || _lib_quota_open || _lib_vquotactl || \
     _typ_struct_dqblk || _typ_struct_ufs_dqblk )
   setint _has_std_quotas 1
 else
