@@ -41,14 +41,14 @@
  *      f - kbytes free
  *      v - kbytes available
  *      p - percentage not available for use.
- *          (number of blocks not available for use / total disk space)
+ *          (space not available for use / total disk space)
  *             [ (tot - avail) / tot ]
  *      1 - percentage used.
- *          (actual number of blocks used / total disk space)
+ *          (actual space used / total disk space)
  *             [ (tot - free) / tot ]
  *      2 - percentage of user-available space in use (bsd style).
  *          Note that values over 100% are possible.
- *          (actual number of blocks used / disk space available to user)
+ *          (actual space used / disk space available to user)
  *             [ (tot - free) / (tot - (free - avail)) ]
  *      i - total i-nodes (files)
  *      U - used i-nodes
@@ -74,8 +74,8 @@
  *      DF_BLOCK_SIZE:      GNU df block size.
  *
  *  Note that for filesystems that do not have, or systems (SysV.3)
- *  that do not report, available blocks, the number of available blocks is
- *  equal to the number of free blocks.
+ *  that do not report, available space, the amount of available space is
+ *  set to the free space.
  *
  */
 
@@ -209,16 +209,17 @@ main (argc, argv)
     diopts->formatString = DI_DEFAULT_FORMAT;
         /* change default display format here */
     diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
-    diopts->excludeLoopback = FALSE;
     diopts->printTotals = FALSE;
     diopts->printDebugHeader = FALSE;
     diopts->printHeader = TRUE;
     diopts->localOnly = FALSE;
-    diopts->excludeLoopback = FALSE;
+
     /* loopback devices (lofs) should be excluded by default */
+    diopts->excludeLoopback = FALSE;
 #if ! _lib_sys_dollar_device_scan  /* not VMS */
     diopts->excludeLoopback = TRUE;
 #endif
+
     strncpy (diopts->sortType, "m", DI_SORT_MAX); /* default - by mount point*/
     diopts->posix_compat = FALSE;
     diopts->baseDispSize = DI_VAL_1024;
@@ -236,6 +237,8 @@ main (argc, argv)
     diout->maxMntTimeString = 0;
 
     initLocale ();
+
+      /* first argument is defaults */
     optidx = getDIOptions (argc, argv, &diData);
     initZones (&diData);
 
@@ -412,16 +415,13 @@ checkFileInfo (diData, optidx, argc, argv)
                 }
 
                     /* is it a pooled filesystem type? */
-                if (diData->haspooledfs &&
-                    (strcmp (dinfo->fsType, "zfs") == 0 ||
-                     strcmp (dinfo->fsType, "advfs") == 0))
-                {
+                if (diData->haspooledfs && di_isPooledFs (dinfo)) {
                   ispooled = TRUE;
                   if (lastpoollen == 0 ||
                       strncmp (lastpool, dinfo->special, lastpoollen) != 0)
                   {
                     strncpy (lastpool, dinfo->special, sizeof (lastpool));
-                    lastpoollen = strlen (lastpool);
+                    lastpoollen = di_mungePoolName (lastpool);
                     inpool = FALSE;
                   }
 
@@ -596,12 +596,11 @@ getDiskSpecialInfo (diData)
               /* linux loopback device is "none"                */
               /* linux has rdev = 0                             */
               /* DragonFlyBSD's loopback device is "null"       */
+              /*   but not with special = /.../@@-               */
               /* DragonFlyBSD has rdev = -1                     */
               /* solaris is more consistent; rdev != 0 for lofs */
               /* solaris makes sense.                           */
-            if ((strcmp (dinfo->fsType, "lofs") == 0 && dinfo->sp_rdev != 0) ||
-                 strcmp (dinfo->fsType, "null") == 0 ||
-                 strcmp (dinfo->fsType, "none") == 0) {
+            if (di_isLoopbackFs (dinfo)) {
               dinfo->isLoopback = TRUE;
               hasLoop = TRUE;
             }
@@ -684,20 +683,18 @@ checkDiskInfo (diData, hasLoop)
         if (debug > 5)
         {
 #if _siz_long_long >= 8
-            printf ("chk: %s free: %llu\n", dinfo->name,
-                dinfo->freeBlocks);
+            printf ("chk: %s free: %llu\n", dinfo->name, dinfo->freeSpace);
 #else
-            printf ("chk: %s free: %lu\n", dinfo->name,
-                dinfo->freeBlocks);
+            printf ("chk: %s free: %lu\n", dinfo->name, dinfo->freeSpace);
 #endif
         }
-        if ((_s_fs_size_t) dinfo->freeBlocks < 0L)
+        if ((_s_fs_size_t) dinfo->freeSpace < 0L)
         {
-            dinfo->freeBlocks = 0L;
+            dinfo->freeSpace = 0L;
         }
-        if ((_s_fs_size_t) dinfo->availBlocks < 0L)
+        if ((_s_fs_size_t) dinfo->availSpace < 0L)
         {
-            dinfo->availBlocks = 0L;
+            dinfo->availSpace = 0L;
         }
 
         temp = (_fs_size_t) ~ 0;
@@ -713,29 +710,30 @@ checkDiskInfo (diData, hasLoop)
           if (debug > 5)
           {
 #if _siz_long_long >= 8
-              printf ("chk: %s total: %lld\n", dinfo->name,
-                      dinfo->totalBlocks);
+              printf ("chk: %s total: %lld\n", dinfo->name, dinfo->totalSpace);
 #else
-              printf ("chk: %s total: %ld\n", dinfo->name,
-                      dinfo->totalBlocks);
+              printf ("chk: %s total: %ld\n", dinfo->name, dinfo->totalSpace);
 #endif
           }
 
-          if (strcmp (dinfo->fsType, "rootfs") == 0) {
+          if (strcmp (dinfo->fsType, "rootfs") == 0 ||
+              strcmp (dinfo->fsType, "procfs") == 0 ||
+              strcmp (dinfo->fsType, "devfs") == 0 ||
+              strcmp (dinfo->fsType, "devtmpfs") == 0) {
             dinfo->printFlag = DI_PRNT_IGNORE;
             dinfo->doPrint = (char) diopts->displayAll;
-            if (debug > 2)
-            {
-              printf ("chk: ignore: rootfs: %s\n", dinfo->name);
+            if (debug > 2) {
+              printf ("chk: ignore: rootfs/procfs/devfs/devtmpfs: %s\n", dinfo->name);
             }
           }
-          if ((_s_fs_size_t) dinfo->totalBlocks <= 0L)
+
+          if ((_s_fs_size_t) dinfo->totalSpace <= 0L)
           {
             dinfo->printFlag = DI_PRNT_IGNORE;
             dinfo->doPrint = (char) diopts->displayAll;
             if (debug > 2)
             {
-                printf ("chk: ignore: totalBlocks <= 0: %s\n",
+                printf ("chk: ignore: totalSpace <= 0: %s\n",
                         dinfo->name);
             }
           }
@@ -852,45 +850,34 @@ checkDiskQuotas (diData)
 
     diqinfo.special = dinfo->special;
     diqinfo.name = dinfo->name;
+    diqinfo.hasQuotas = dinfo->hasQuotas;
     diqinfo.type = dinfo->fsType;
     diqinfo.uid = uid;
     diqinfo.gid = gid;
-    diqinfo.blockSize = dinfo->blockSize;
     diquota (&diqinfo);
 
     if (debug > 2) {
       printf ("quota: %s limit: %lld\n", dinfo->name, diqinfo.limit);
-      printf ("quota:   tot: %lld\n", dinfo->totalBlocks);
+      printf ("quota:   tot: %lld\n", dinfo->totalSpace);
       printf ("quota: %s used: %lld\n", dinfo->name, diqinfo.used);
-      printf ("quota:   avail: %lld\n", dinfo->availBlocks);
-    }
-
-    /* remap block size if it changed (e.g. nfs) */
-    if (diqinfo.blockSize != dinfo->blockSize) {
-      dinfo->totalBlocks *= dinfo->blockSize;
-      dinfo->freeBlocks *= dinfo->blockSize;
-      dinfo->availBlocks *= dinfo->blockSize;
-      dinfo->blockSize = diqinfo.blockSize;
-      dinfo->totalBlocks /= dinfo->blockSize;
-      dinfo->freeBlocks /= dinfo->blockSize;
-      dinfo->availBlocks /= dinfo->blockSize;
+      printf ("quota:   avail: %lld\n", dinfo->availSpace);
     }
 
     if (diqinfo.limit != 0 &&
-            diqinfo.limit < dinfo->totalBlocks) {
-      dinfo->totalBlocks = diqinfo.limit;
+            diqinfo.limit < dinfo->totalSpace) {
+      dinfo->totalSpace = diqinfo.limit;
       tsize = diqinfo.limit - diqinfo.used;
       if ((_s_fs_size_t) tsize < 0) {
         tsize = 0;
       }
-      if (tsize < dinfo->availBlocks) {
-        dinfo->availBlocks = tsize;
-        dinfo->freeBlocks = tsize;
+      if (tsize < dinfo->availSpace) {
+        dinfo->availSpace = tsize;
+        dinfo->freeSpace = tsize;
         if (debug > 2) {
           printf ("quota: using quota for: total free avail\n");
         }
-      } else if (tsize > dinfo->availBlocks && tsize < dinfo->freeBlocks) {
-        dinfo->freeBlocks = tsize;
+      } else if (tsize > dinfo->availSpace && tsize < dinfo->freeSpace) {
+        dinfo->freeSpace = tsize;
         if (debug > 2) {
           printf ("quota: using quota for: total free\n");
         }
@@ -968,9 +955,7 @@ preCheckDiskInfo (diData)
         checkZone (dinfo, &diData->zoneInfo, diopts->displayAll);
 #endif
 
-        if (strcmp (dinfo->fsType, "zfs") == 0 ||
-            strcmp (dinfo->fsType, "advfs") == 0)
-        {
+        if (di_isPooledFs (dinfo)) {
           diData->haspooledfs = TRUE;
         }
 
