@@ -77,6 +77,7 @@ static dispTable_t dispTable [] =
 
 extern int debug;
 
+static void processStringArgs _((char *, diData_t *, char *));
 static int  processArgs  _((int, const char * const [], diData_t *, char *, Size_t));
 static void parseList           _((iList_t *, char *));
 static void processOptions      _((const char *, char *));
@@ -88,6 +89,51 @@ static void initDisplayTable    _((diOptions_t *));
 # if defined (__cplusplus) || defined (c_plusplus)
    }
 # endif
+
+static void
+#if _proto_stdc
+processStringArgs (char *ptr, diData_t *diData, char *dbsstr)
+#else
+processStringArgs (ptr, diData, dbsstr)
+  char      *ptr;
+  diData_t  *diData;
+  char      *dbsstr
+#endif
+{
+  char        *dptr;
+  char        *tptr;
+  int         nargc;
+  const char  *nargv [DI_MAX_ARGV];
+
+  if (ptr == (char *) NULL || strcmp (ptr, "") == 0) {
+    return;
+  }
+
+  dptr = (char *) NULL;
+  dptr = strdup (ptr);
+  if (dptr == (char *) NULL)
+  {
+      fprintf (stderr, "strdup failed in main() (1).  errno %d\n", errno);
+      exit (1);
+  }
+  if (dptr != (char *) NULL)
+  {
+    tptr = strtok (dptr, DI_ARGV_SEP);
+    nargc = 1;
+    nargv[0] = "";
+    while (tptr != (char *) NULL)
+    {
+        if (nargc >= DI_MAX_ARGV)
+        {
+            break;
+        }
+        nargv[nargc++] = tptr;
+        tptr = strtok ((char *) NULL, DI_ARGV_SEP);
+    }
+    processArgs (nargc, nargv, diData, dbsstr, sizeof (dbsstr) - 1);
+    free ((char *) dptr); /* ### legal here? */
+  }
+}
 
 int
 #if _proto_stdc
@@ -102,7 +148,6 @@ getDIOptions (argc, argv, diData)
   const char *      argvptr;
   char *            ptr;
   char              dbsstr [30];
-  char              *dptr;
   int               optidx;
   diOptions_t       *diopts;
   diOutput_t        *diout;
@@ -112,78 +157,42 @@ getDIOptions (argc, argv, diData)
   strncpy (dbsstr, DI_DEFAULT_DISP_SIZE, sizeof (dbsstr)); /* default */
 
   argvptr = argv [0] + strlen (argv [0]) - 2;
-  if (memcmp (argvptr, "mi", (Size_t) 2) == 0)
-  {
-      diopts->formatString = DI_DEF_MOUNT_FORMAT;
+  if (memcmp (argvptr, "mi", (Size_t) 2) == 0) {
+    diopts->formatString = DI_DEF_MOUNT_FORMAT;
   }
   else    /* don't use DIFMT env var if running mi. */
   {
-      if ((ptr = getenv ("DIFMT")) != (char *) NULL)
-      {
-          diopts->formatString = ptr;
-      }
+    if ((ptr = getenv ("DIFMT")) != (char *) NULL) {
+      diopts->formatString = ptr;
+    }
   }
 
       /* gnu df */
-  if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL)
-  {
-      strncpy (dbsstr, "512", sizeof (dbsstr));
-      diopts->formatString = DI_POSIX_FORMAT;
-      diopts->posix_compat = TRUE;
-      diopts->csv_output = FALSE;
+  if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL) {
+    strncpy (dbsstr, "512", sizeof (dbsstr));
+    diopts->formatString = DI_POSIX_FORMAT;
+    diopts->posix_compat = TRUE;
+    diopts->csv_output = FALSE;
   }
 
       /* bsd df */
-  if ((ptr = getenv ("BLOCKSIZE")) != (char *) NULL)
-  {
-      strncpy (dbsstr, ptr, sizeof (dbsstr));
+  if ((ptr = getenv ("BLOCKSIZE")) != (char *) NULL) {
+    strncpy (dbsstr, ptr, sizeof (dbsstr));
   }
 
       /* gnu df */
-  if ((ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL)
-  {
-      strncpy (dbsstr, ptr, sizeof (dbsstr));
+  if ((ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL) {
+    strncpy (dbsstr, ptr, sizeof (dbsstr));
   }
 
-  dptr = (char *) NULL;
-  if ((ptr = getenv ("DI_ARGS")) != (char *) NULL)
-  {
-    char        *tptr;
-    int         nargc;
-    const char  *nargv [DI_MAX_ARGV];
-
-    dptr = strdup (ptr);
-    if (dptr == (char *) NULL)
-    {
-        fprintf (stderr, "strdup failed in main() (1).  errno %d\n", errno);
-        exit (1);
-    }
-    if (dptr != (char *) NULL)
-    {
-      tptr = strtok (dptr, DI_ARGV_SEP);
-      nargc = 1;
-      nargv[0] = argv[0];
-      while (tptr != (char *) NULL)
-      {
-          if (nargc >= DI_MAX_ARGV)
-          {
-              break;
-          }
-          nargv[nargc++] = tptr;
-          tptr = strtok ((char *) NULL, DI_ARGV_SEP);
-      }
-      processArgs (nargc, nargv, diData, dbsstr, sizeof (dbsstr) - 1);
-      free ((char *) dptr); /* ### legal here? */
-    }
-  }
-
-  optidx = processArgs (argc, argv, diData, dbsstr, sizeof (dbsstr) - 1);
-  if (debug > 0 && (ptr = getenv ("DI_ARGS")) != (char *) NULL)
-  {
+  if ((ptr = getenv ("DI_ARGS")) != (char *) NULL) {
+    if (debug > 0) {
       printf ("# DI_ARGS:%s\n", ptr);
+    }
+    processStringArgs (ptr, diData, dbsstr);
   }
-  if (debug > 0)
-  {
+
+  if (debug > 0) {
     int j;
     printf ("# ARGS:");
     for (j = 0; j < argc; ++j)
@@ -193,6 +202,7 @@ getDIOptions (argc, argv, diData)
     printf ("\n");
     printf ("# blocksize: %s\n", dbsstr);
   }
+  optidx = processArgs (argc, argv, diData, dbsstr, sizeof (dbsstr) - 1);
 
   initDisplayTable (diopts);
   setDispBlockSize (dbsstr, diopts, diout);
