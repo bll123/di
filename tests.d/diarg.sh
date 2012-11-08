@@ -60,6 +60,9 @@ testargs="-A -a --all -bk -bsi -b1024 -b1000 -b512 \
 unset DI_ARGS
 unset DIFMT
 for d in C D; do
+  if [ $d = D -a \( "$DC" = "" -o "$DC" = "skip" \) ]; then
+    continue
+  fi
   lrc=0
   tdir=$_MKCONFIG_RUNTOPDIR/$d
   (
@@ -80,6 +83,9 @@ done
 
 # disk space should be allocated now; rerun
 for d in C D; do
+  if [ $d = D -a \( "$DC" = "" -o "$DC" = "skip" \) ]; then
+    continue
+  fi
   lrc=0
   tdir=$_MKCONFIG_RUNTOPDIR/$d
 

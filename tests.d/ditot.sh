@@ -14,6 +14,9 @@ FORMATS="b B u c f v i U F"
 
 grc=0
 for d in C D; do
+  if [ $d = D -a \( "$DC" = "" -o "$DC" = "skip" \) ]; then
+    continue
+  fi
   tdir=$_MKCONFIG_RUNTOPDIR/$d
   (
     cd $tdir

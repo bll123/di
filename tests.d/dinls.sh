@@ -12,8 +12,10 @@ unset DI_ARGS
 unset DIFMT
 
 set -x
-
 for d in C D; do
+  if [ $d = D -a \( "$DC" = "" -o "$DC" = "skip" \) ]; then
+    continue
+  fi
   tdir=$_MKCONFIG_RUNTOPDIR/$d
   (
     cd $tdir
