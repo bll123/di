@@ -156,9 +156,6 @@ typedef struct
                                                  /* local?                   */
     char            isReadOnly;                  /* is this mount point      */
                                                  /* read-only?               */
-    char            hasQuotas;                   /* has quotas?              */
-                                                 /* only useful if MNT_QUOTA */
-                                                 /* is defined.              */
     char            isLoopback;                  /* lofs or none fs type?    */
     char            name [DI_NAME_LEN + 1];         /* mount point           */
     char            special [DI_SPEC_NAME_LEN + 1]; /* special device name   */
@@ -172,7 +169,6 @@ typedef struct
     char            *special;
     char            *name;
     char            *type;
-    char            hasQuotas;
     Uid_t           uid;
     Gid_t           gid;
     _fs_size_t      blockSize;

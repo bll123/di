@@ -67,7 +67,6 @@ di_initDiskInfo (diptr)
     diptr->isLocal = TRUE;
     diptr->isReadOnly = FALSE;
     diptr->isLoopback = FALSE;
-    diptr->hasQuotas = FALSE;
 }
 
 void
