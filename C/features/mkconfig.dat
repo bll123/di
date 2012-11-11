@@ -217,6 +217,15 @@ if AIX_mntctl _sys_vmount && _define_MCTL_QUERY
   set _lib_mntctl 1
 endif
 
+# dragonflybsd may have vquotactl, but it may not be turned on.
+if DFLYBSD_vquotactl _lib_vquotactl
+  grep DFLYBSD_vquota vfs.quota_enabled=.*1 /boot/loader.conf
+  if DFLYBSD_vquota_chk ! _grep_DFLYBSD_vquota
+    set _lib_vquotactl 0
+    set _lib_prop_dictionary_create 0
+  endif
+endif
+
 if stdquotas ( _lib_quotactl || _lib_quota_open || _lib_vquotactl || \
     _typ_struct_dqblk || _typ_struct_ufs_dqblk )
   setint _has_std_quotas 1
