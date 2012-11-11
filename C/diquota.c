@@ -90,7 +90,7 @@ typedef union {
   struct dqblk      qinfo;
 # endif
 # if _typ_struct_ufs_dqblk
-  struct ufs_dqblk  ufsqinfo;
+  struct ufs_dqblk  qinfo;
 # endif
 # if _typ_fs_disk_quota_t
   fs_disk_quota_t   xfsqinfo;
@@ -116,17 +116,19 @@ typedef union {
 static void di_process_quotas _((char *, diQuota_t *, int, int, qdata_t *));
 #endif
 
-#if _has_std_nfs_quotas && _lib_vquotactl
+#if _has_std_quotas && _lib_vquotactl
 static void vq_updUsage _((struct vqvalentry *, _fs_size_t));
 static void vq_updLimit _((struct vqvalentry *, _fs_size_t));
 static int  vquotactl_send _((char *, char *, prop_dictionary_t, prop_dictionary_t *));
 static int  vquotactl_get _((diQuota_t *, struct vqval *));
 #endif
-#if _has_std_nfs_quotas && _lib_quota_open
+#if _has_std_quotas && _lib_quota_open
 static int quota_open_get _((struct quotahandle *, int, Uid_t, struct qval *));
 #endif
-#if _has_std_nfs_quotas && ! _lib_quota_open && ! _lib_vquotactl
-static int quotactl_get _((diQuota_t *, int, Uid_t, int *));
+#if _has_std_quotas && ! _lib_quota_open && ! _lib_vquotactl
+static int quotactl_get _((diQuota_t *, int, Uid_t, qdata_t *));
+#endif
+#if _has_std_nfs_quotas && ! _lib_quota_open
 static bool_t xdr_quota_get _((XDR *, struct getquota_args *));
 static bool_t xdr_quota_rslt _((XDR *, struct getquota_rslt *));
 static void diquota_nfs _((diQuota_t *));
@@ -336,13 +338,13 @@ quota_open_get (struct quotahandle *qh, int idtype,
 #if _has_std_quotas && ! _lib_quota_open && ! _lib_vquotactl
 static int
 # if _proto_stdc
-quotactl_get (diQuota_t *diqinfo, int cmd, Uid_t id, int *val)
+quotactl_get (diQuota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
 # else
-quotactl_get (diqinfo, cmd, id, val)
+quotactl_get (diqinfo, cmd, id, qdata)
   diQuota_t     *diqinfo;
   int           cmd;
   Uid_t         id;
-  int           *val;
+  qdata_t       *qdata;
 # endif
 {
   int       rc;
@@ -359,17 +361,17 @@ quotactl_get (diqinfo, cmd, id, val)
   }
   /* AIX 7 has quotactl position 1 */
 # if _lib_quotactl && _quotactl_pos_1
-  rc = quotactl (diqinfo->name, cmd, (int) id, (caddr_t) val);
+  rc = quotactl (diqinfo->name, cmd, (int) id, (caddr_t) &(qdata->qinfo));
 # endif
 # if _lib_quotactl && ! _quotactl_pos_1 && (_quotactl_pos_2 || _AIX)
 #  if _AIX
   /* AIX has linux compatibility routine, but need name rather than special */
-  rc = quotactl (cmd, diqinfo->name, (int) id, (caddr_t) val);
+  rc = quotactl (cmd, diqinfo->name, (int) id, (caddr_t) &(qdata->qinfo));
 #  else
-  rc = quotactl (cmd, diqinfo->special, (int) id, (caddr_t) val);
+  rc = quotactl (cmd, diqinfo->special, (int) id, (caddr_t) &(qdata->qinfo));
 #  endif
 # endif
-# if _has_std_quotas && _sys_fs_ufs_quota        /* Solaris */
+# if _has_std_quotas && _sys_fs_ufs_quota && ! _lib_vquotactl /* Solaris */
   {
     int             fd;
     struct quotctl  qop;
@@ -377,7 +379,7 @@ quotactl_get (diqinfo, cmd, id, val)
 
     qop.op = Q_GETQUOTA;
     qop.uid = id;
-    qop.addr = (caddr_t) &qdata.qinfo;
+    qop.addr = (caddr_t) &(qdata->qinfo);
     strncpy (tname, diqinfo->name, DI_NAME_LEN);
     strncat (tname, "/quotas", DI_NAME_LEN);
     fd = open (tname, O_RDONLY | O_NOCTTY);
@@ -392,7 +394,7 @@ quotactl_get (diqinfo, cmd, id, val)
 
   return rc;
 }
-#endif /* ! _lib_quota_open && ! _lib_vquotactl */
+#endif /* ! _lib_quota_open */
 
 void
 #if _proto_stdc
@@ -426,15 +428,6 @@ diquota (diqinfo)
   diqinfo->ilimit = 0;
   diqinfo->iused = 0;
 
-#if _define_MNT_QUOTA
-  if (! diqinfo->hasQuotas) {
-    if (debug > 5) {
-      printf ("quota: MNT_QUOTA chk: no quotas on %s\n", diqinfo->name);
-    }
-    return;
-  }
-#endif
-
 #if _lib_vquotactl
   rc = vquotactl_get (diqinfo, &qdata.vqval);
   qdata.vqval.vqvalptr = &qdata.vqval.uvqval;
@@ -445,7 +438,7 @@ diquota (diqinfo)
   rc = quota_open_get (qh, QUOTA_IDTYPE_USER, diqinfo->uid, &qdata.qval);
 #endif
 
-#if ! _lib_quota_open && ! _lib_vquotactl
+#if ! _lib_quota_open
   if (strncmp (diqinfo->type, "nfs", (Size_t) 3) == 0 &&
       strcmp (diqinfo->type, "nfsd") != 0) {
 # if _has_std_nfs_quotas
@@ -453,7 +446,9 @@ diquota (diqinfo)
 # endif
     return;
   }
+#endif
 
+#if ! _lib_quota_open && ! _lib_vquotactl
   if (strcmp (diqinfo->type, "xfs") == 0) {
 # if _hdr_linux_dqblk_xfs
     ucmd = QCMD (Q_XGETQUOTA, USRQUOTA);
@@ -474,7 +469,7 @@ diquota (diqinfo)
 # endif  /* _has_std_quotas */
   }
 
-  rc = quotactl_get (diqinfo, ucmd, diqinfo->uid, &qdata.val);
+  rc = quotactl_get (diqinfo, ucmd, diqinfo->uid, &qdata);
 #endif /* ! _lib_quota_open && ! _lib_vquotactl */
 
 #if _has_std_quotas
@@ -489,7 +484,7 @@ diquota (diqinfo)
 # if ! _lib_quota_open && ! _lib_vquotactl
 #  ifdef GRPQUOTA
   if (rc == 0 || errno != ESRCH) {
-    rc = quotactl_get (diqinfo, gcmd, diqinfo->gid, &qdata.val);
+    rc = quotactl_get (diqinfo, gcmd, diqinfo->gid, &qdata);
   }
 #  endif /* ifdef GRPQUOTA */
 # endif /* ! _lib_quota_open && ! _lib_vquotactl */
@@ -506,7 +501,7 @@ diquota (diqinfo)
 #endif /* _has_std_quotas */
 }
 
-#if _has_std_nfs_quotas && ! _lib_quota_open && ! _lib_vquotactl
+#if _has_std_nfs_quotas && ! _lib_quota_open
 
 #ifdef RQ_PATHLEN
 # define DI_RQ_PATHLEN  RQ_PATHLEN
@@ -612,7 +607,6 @@ diquota_nfs (diqinfo)
     struct rquota           *rptr;
     int                     quotastat;
     _fs_size_t              tsize;
-    _fs_size_t              tblksize;
 
     if (debug > 5) {
       printf ("quota: diquota_nfs\n");
@@ -674,18 +668,16 @@ diquota_nfs (diqinfo)
         printf ("quota: nfs: rq_active: %d\n", rptr->rq_active);
       }
 
-      tblksize = 512;
-
       diqinfo->limit = (_fs_size_t) rptr->rq_bhardlimit *
-            (_fs_size_t) rptr->rq_bsize / tblksize;
+            (_fs_size_t) rptr->rq_bsize;
       tsize = (_fs_size_t) rptr->rq_bsoftlimit *
-              (_fs_size_t) rptr->rq_bsize / tblksize;
+              (_fs_size_t) rptr->rq_bsize;
       if (tsize != 0 && tsize < diqinfo->limit) {
         diqinfo->limit = tsize;
       }
       if (diqinfo->limit != 0) {
         diqinfo->used = (_fs_size_t) rptr->rq_curblocks *
-              (_fs_size_t) rptr->rq_bsize / tblksize;
+              (_fs_size_t) rptr->rq_bsize;
       }
 
       diqinfo->ilimit = rptr->rq_fhardlimit;
@@ -720,75 +712,87 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
 # endif
 {
   _fs_size_t        quotBlockSize = { DI_QUOT_BLOCK_SIZE };
+  _fs_size_t        spaceBlockSize = { DI_QUOT_BLOCK_SIZE };
   _fs_size_t        tsize;
   _fs_size_t        tlimit;
 
   if (debug > 5) {
     printf ("quota: di_process_quotas\n");
   }
+# if _lib_vquotactl
+  quotBlockSize = 1;
+  spaceBlockSize = 1;
+# endif
+# if _mem_struct_dqblk_dqb_curspace
+  spaceBlockSize = 1;
+# endif
   if (xfsflag) {
     quotBlockSize = 512;
+    spaceBlockSize = 512;
   }
-
-# if _lib_vquotactl || _mem_struct_dqblk_dqb_curspace
-  quotBlockSize = 1;
-# endif
 
   if (rc == 0) {
     tlimit = 0;
-# if _lib_vquotactl
-    tsize = qdata->vqval.vqvalptr->limit;
-# endif
+    if (debug > 1) { printf ("# diquota: blocksize: %lld\n", quotBlockSize); }
+    if (xfsflag) {
 # if _typ_fs_disk_quota_t
-    tsize = qdata->xfsqinfo.d_blk_hardlimit;
+      if (debug > 1) { printf ("# diquota: fs_disk_quota_t\n"); }
+      tsize = qdata->xfsqinfo.d_blk_hardlimit;
+# endif
+      ;
+    } else {
+# if _lib_vquotactl
+      if (debug > 1) { printf ("# diquota: vquotactl\n"); }
+      tsize = qdata->vqval.vqvalptr->limit;
 # endif
 # if _typ_struct_quotaval
-    tsize = qdata->qval.qbval.qv_hardlimit;
+      if (debug > 1) { printf ("# diquota: struct quotaval\n"); }
+      tsize = qdata->qval.qbval.qv_hardlimit;
 # endif
-# if _typ_struct_dqblk
-    tsize = qdata->qinfo.dqb_bhardlimit;
+# if _typ_struct_dqblk && ! _lib_vquotactl
+      if (debug > 1) { printf ("# diquota: struct dqblk\n"); }
+      tsize = qdata->qinfo.dqb_bhardlimit;
 # endif
-# if _typ_struct_ufs_dqblk && ! _lib_vquotactl
-    tsize = qdata->ufsqinfo.dqb_bhardlimit;
-# endif
+    }
     if (debug > 2) {
       printf ("quota: %s %s b hard: %lld\n", tag, diqinfo->name, tsize);
     }
 
     if ((_s_fs_size_t) tsize > 0) {
-      tsize = tsize * quotBlockSize;
+      tsize *= quotBlockSize;
       if (tsize > 0 && (tsize < diqinfo->limit || diqinfo->limit == 0)) {
         if (debug > 2) {
-          printf ("quota: using b hard: %lld\n", tsize);
+          printf ("quota: using b hard: %lld (%lld)\n", tsize, quotBlockSize);
         }
         diqinfo->limit = tsize;
         tlimit = tsize;
       }
     }
 
-# if _lib_vquotactl  /* no soft limit, use hard */
-    tsize = qdata->vqval.vqvalptr->limit;
-# endif
+    if (xfsflag) {
 # if _typ_fs_disk_quota_t
-    tsize = qdata->xfsqinfo.d_blk_softlimit;
+      tsize = qdata->xfsqinfo.d_blk_softlimit;
+# endif
+      ;
+    } else {
+# if _lib_vquotactl  /* no soft limit, use hard */
+      tsize = qdata->vqval.vqvalptr->limit;
 # endif
 # if _typ_struct_quotaval
-    tsize = qdata->qval.qbval.qv_softlimit;
+      tsize = qdata->qval.qbval.qv_softlimit;
 # endif
-# if _typ_struct_dqblk
-    tsize = qdata->qinfo.dqb_bsoftlimit;
+# if _typ_struct_dqblk && ! _lib_vquotactl
+      tsize = qdata->qinfo.dqb_bsoftlimit;
 # endif
-# if _typ_struct_ufs_dqblk && ! _lib_vquotactl
-    tsize = qdata->ufsqinfo.dqb_bsoftlimit;
-# endif
+    }
     if (debug > 2) {
       printf ("quota: %s %s b soft: %lld\n", tag, diqinfo->name, tsize);
     }
     if ((_s_fs_size_t) tsize > 0) {
-      tsize = tsize * quotBlockSize;
+      tsize *= quotBlockSize;
       if (tsize > 0 && (tsize < diqinfo->limit || diqinfo->limit == 0)) {
         if (debug > 2) {
-          printf ("quota: using b soft: %lld\n", tsize);
+          printf ("quota: using b soft: %lld (%lld)\n", tsize, quotBlockSize);
         }
         diqinfo->limit = tsize;
         tlimit = tsize;
@@ -803,22 +807,33 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
       return;
     }
 
-# if _mem_struct_dqblk_dqb_curspace
-    tsize = qdata->qinfo.dqb_curspace;
+    if (debug > 1) { printf ("# diquota: space block size: %lld\n", spaceBlockSize); }
+    if (xfsflag) {
+# if _typ_fs_disk_quota_t
+      if (debug > 1) { printf ("# diquota: fs_disk_quota_t\n"); }
+      tsize = qdata->xfsqinfo.d_bcount;
 # endif
+      ;
+    } else {
 # if _lib_vquotactl
-    tsize = qdata->vqval.vqvalptr->usage;
+      if (debug > 1) { printf ("# diquota: vquotactl\n"); }
+      tsize = qdata->vqval.vqvalptr->usage;
 # endif
 # if _typ_struct_quotaval
-    tsize = qdata->qval.qbval.qv_usage;
+      if (debug > 1) { printf ("# diquota: struct quotaval\n"); }
+      tsize = qdata->qval.qbval.qv_usage;
 # endif
-# if _mem_struct_dqblk_dqb_curblocks
-    tsize = qdata->qinfo.dqb_curblocks;
+# if _mem_struct_dqblk_dqb_curspace
+      if (debug > 1) { printf ("# diquota: dqb_curspace\n"); }
+      tsize = qdata->qinfo.dqb_curspace;
 # endif
-# if _typ_fs_disk_quota_t
-    tsize = qdata->xfsqinfo.d_bcount;
+# if _mem_struct_dqblk_dqb_curblocks && ! _lib_vquotactl
+      if (debug > 1) { printf ("# diquota: dqb_curblocks\n"); }
+      tsize = qdata->qinfo.dqb_curblocks;
 # endif
-    tsize = tsize * quotBlockSize;
+    }
+
+    tsize *= spaceBlockSize;
     if (tsize > diqinfo->used || diqinfo->used == 0) {
       diqinfo->used = tsize;
     }
@@ -829,18 +844,19 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
     }
 
 # if ! _lib_vquotactl   /* no inode limits */
+    if (xfsflag) {
 #  if _typ_fs_disk_quota_t
-    tsize = qdata->xfsqinfo.d_ino_hardlimit;
+      tsize = qdata->xfsqinfo.d_ino_hardlimit;
 #  endif
+      ;
+    } else {
 #  if _typ_struct_quotaval
-    tsize = qdata->qval.qival.qv_hardlimit;
+      tsize = qdata->qval.qival.qv_hardlimit;
 #  endif
-#  if _typ_struct_dqblk
-    tsize = qdata->qinfo.dqb_ihardlimit;
+#  if _typ_struct_dqblk && ! _lib_vquotactl
+      tsize = qdata->qinfo.dqb_ihardlimit;
 #  endif
-#  if _typ_struct_ufs_dqblk && ! _lib_vquotactl
-    tsize = qdata->ufsqinfo.dqb_ihardlimit;
-#  endif
+    }
     if (tsize > 0 && (tsize < diqinfo->ilimit || diqinfo->ilimit == 0)) {
       diqinfo->ilimit = tsize;
       tlimit = tsize;
@@ -849,18 +865,19 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
       printf ("quota: %s %s i hard: %lld\n", tag, diqinfo->name, tsize);
     }
 
+    if (xfsflag) {
 #  if _typ_fs_disk_quota_t
-    tsize = qdata->xfsqinfo.d_ino_softlimit;
+      tsize = qdata->xfsqinfo.d_ino_softlimit;
 #  endif
+      ;
+    } else {
 #  if _typ_struct_quotaval
-    tsize = qdata->qval.qival.qv_softlimit;
+      tsize = qdata->qval.qival.qv_softlimit;
 #  endif
-#  if _typ_struct_dqblk
-    tsize = qdata->qinfo.dqb_isoftlimit;
+#  if _typ_struct_dqblk && ! _lib_vquotactl
+      tsize = qdata->qinfo.dqb_isoftlimit;
 #  endif
-#  if _typ_struct_ufs_dqblk && ! _lib_vquotactl
-    tsize = qdata->ufsqinfo.dqb_isoftlimit;
-#  endif
+    }
     if (tsize > 0 && (tsize < diqinfo->ilimit || diqinfo->ilimit == 0)) {
       diqinfo->ilimit = tsize;
       tlimit = tsize;
@@ -877,15 +894,19 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
       return;
     }
 
+    if (xfsflag) {
 #  if _typ_fs_disk_quota_t
-    tsize = qdata->xfsqinfo.d_icount;
+      tsize = qdata->xfsqinfo.d_icount;
 #  endif
+      ;
+    } else {
 #  if _typ_struct_quotaval
-    tsize = qdata->qval.qival.qv_usage;
+      tsize = qdata->qval.qival.qv_usage;
 #  endif
-#  if _mem_struct_dqblk_dqb_curinodes
-    tsize = qdata->qinfo.dqb_curinodes
+#  if _mem_struct_dqblk_dqb_curinodes && ! _lib_vquotactl
+      tsize = qdata->qinfo.dqb_curinodes;
 #  endif
+    }
     if (tsize > diqinfo->iused || diqinfo->iused == 0) {
       diqinfo->iused = tsize;
     }
