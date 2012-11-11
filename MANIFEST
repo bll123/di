@@ -1,14 +1,15 @@
 C/                      C di source
 C/Makefile                C Makefile
-C/config.bsd43.cc         config.h for BSD43
-C/config.bsd43.gcc        config.h for BSD43
-C/config.hpux.bcc         config.h for HP-UX (bundled cc)
-C/config.mingw            config.h for Windows (MinGW)
-C/config.ultrix.cc        config.h for ULTRIX
-C/config.ultrix.gcc       config.h for ULTRIX
-C/config.vms              config.h for VMS
-C/config.vms.b            alternate config.h for VMS
-C/config.win              config.h for windows
+C/configs/                stand-alone configuration files.
+C/configs/config.bsd43.cc   config.h for BSD43
+C/configs/config.bsd43.gcc  config.h for BSD43
+C/configs/config.hpux.bcc   config.h for HP-UX (bundled cc)
+C/configs/config.mingw      config.h for Windows (MinGW)
+C/configs/config.ultrix.cc  config.h for ULTRIX
+C/configs/config.ultrix.gcc config.h for ULTRIX
+C/configs/config.vms        config.h for VMS
+C/configs/config.vms.b      alternate config.h for VMS
+C/configs/config.win        config.h for windows
 C/di.c                    di source
 C/di.h                    di source
 C/didiskutil.c            di source
