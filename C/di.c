@@ -213,6 +213,7 @@ main (argc, argv)
     diopts->printDebugHeader = FALSE;
     diopts->printHeader = TRUE;
     diopts->localOnly = FALSE;
+    diopts->displayAll = FALSE;
 
     /* loopback devices (lofs) should be excluded by default */
     diopts->excludeLoopback = FALSE;
@@ -718,6 +719,8 @@ checkDiskInfo (diData, hasLoop)
 
           if (strcmp (dinfo->fsType, "rootfs") == 0 ||
               strcmp (dinfo->fsType, "procfs") == 0 ||
+              strcmp (dinfo->fsType, "ptyfs") == 0 ||
+              strcmp (dinfo->fsType, "kernfs") == 0 ||
               strcmp (dinfo->fsType, "devfs") == 0 ||
               strcmp (dinfo->fsType, "devtmpfs") == 0) {
             dinfo->printFlag = DI_PRNT_IGNORE;
@@ -850,7 +853,6 @@ checkDiskQuotas (diData)
 
     diqinfo.special = dinfo->special;
     diqinfo.name = dinfo->name;
-    diqinfo.hasQuotas = dinfo->hasQuotas;
     diqinfo.type = dinfo->fsType;
     diqinfo.uid = uid;
     diqinfo.gid = gid;
