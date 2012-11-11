@@ -260,7 +260,7 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL },
     { "-c",     GETOPTN_BOOL,
         NULL  /*&diopts->csv_output*/,
-        0  /*sizeof(diopts->csv_output)*/,
+        0     /*sizeof(diopts->csv_output)*/,
         NULL },
     { "--csv-output", GETOPTN_ALIAS,
         (void *) "-c",
