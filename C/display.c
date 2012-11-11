@@ -770,7 +770,7 @@ addTotals (diskInfo, totals, inpool)
   {
     if (debug > 2) {printf ("  tot:inpool:add total used\n"); }
     /* if in a pool of disks, add the total used to the totals also */
-    totals->totalSpace += diskInfo->totalSpace + diskInfo->freeSpace;
+    totals->totalSpace += diskInfo->totalSpace - diskInfo->freeSpace;
     totals->totalInodes += diskInfo->totalInodes - diskInfo->freeInodes;
   }
   else
