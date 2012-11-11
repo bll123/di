@@ -7,13 +7,15 @@
 /*
  * A new version of getopt()
  *      Boolean short flags: -a -b  (a, b)
- *      Boolean short flags: -ab    (a, b)
- * or   Boolean long name:   -ab    (ab)
  *      With values:         -c 123 -d=abcdef -ef
  *                              (-c = 123, -d = abcdef, -e = f)
- *      short flags:         -version  (-v = ersion)
- * or   long flags:          -version  (-version)
  *      Long options:        --a --b --c 123 --d=abcdef
+ * LEGACY:
+ *      Boolean short flags: -ab    (a, b)
+ *      short flags:         -version  (-v = ersion)
+ * MODERN:
+ *      Boolean long name:   -ab    (ab)
+ *      long flags:          -version  (-version)
  *
  */
 
@@ -1241,6 +1243,21 @@ main (int argc, const char * const argv[])
        sizeof (opts) / sizeof (getoptn_opt_t), opts);
   if (i != 0 || j != 1) {
     fprintf (stderr, "fail test %d\n");
+    grc = 1;
+  }
+
+  /* test 49 - test boolean initial value */
+  ++testno;
+  i = 0;
+  ac = 2;
+  sprintf (tmp, "test %d", testno);
+  av[0] = tmp;
+  av[1] = "-c";
+  av[2] = NULL;
+  optidx = getoptn (GETOPTN_LEGACY, ac, av,
+       sizeof (opts) / sizeof (getoptn_opt_t), opts);
+  if (i != 0) {
+    fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
 
