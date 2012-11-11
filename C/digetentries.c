@@ -736,12 +736,6 @@ di_getDiskEntries (diskInfo, diCount)
             diptr->isReadOnly = TRUE;
         }
 # endif
-# if _define_MNT_QUOTA
-        if ((sp->f_flags & MNT_QUOTA) == MNT_QUOTA)
-        {
-            diptr->hasQuotas = TRUE;
-        }
-# endif
 # if defined (MNT_LOCAL)
         if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL)
         {
@@ -1170,12 +1164,6 @@ di_getDiskEntries (diskInfo, diCount)
         if ((sp->f_flag & MNT_RDONLY) == MNT_RDONLY)
         {
             diptr->isReadOnly = TRUE;
-        }
-# endif
-# if _define_MNT_QUOTA
-        if ((sp->f_flags & MNT_QUOTA) == MNT_QUOTA)
-        {
-            diptr->hasQuotas = TRUE;
         }
 # endif
 # if defined (MNT_LOCAL)
