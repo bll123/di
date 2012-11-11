@@ -8,7 +8,7 @@
 .\"
 .\" brad.lanam.di_at_gmail.com
 .\"
-.TH di 1 "17 Nov 2011"
+.TH di 1 "7 Nov 2012"
 .SH Name
 di \- disk information
 .SH Synopsis
@@ -46,8 +46,7 @@ If \fIfile\fP is specified, the usage information for the partition on which
 Unless the \-a flag is specified, the following mounted
 filesystems will not
 normally be displayed: filesystems
-with total blocks <= 0; filesystems marked by the operating
-system as "ignore" or "none";
+with total space <= 0;
 loopback filesystems that are duplicates
 of other normally mounted filesystems (filesystem type of 'lofs'
 , 'none', or 'nullfs');
@@ -69,7 +68,7 @@ device names are printed at full width.
 .B \-a
 (compatibility: \fB\-\-all\fP)
 .br
-Prints all mounted devices (normally, those with 0 total blocks are not
+Prints all mounted devices (normally, those with 0 total space are not
 printed \- e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .TP
 .B \-B
@@ -90,7 +89,7 @@ format string specifiers.  Totals are turned off. See also the \-n flag.
 .I display\-size
 (alias: \fB\-\-display\-size\fP)
 .br
-Display the blocks in units specified by \fIdisplay\-size\fP.
+Display the usage in units specified by \fIdisplay\-size\fP.
 Note that if the base block size is SI units of 1000 bytes, the
 display size is calculated using those units.
 \fIdisplay\-size\fP
@@ -444,9 +443,8 @@ location of the di program's locale message files.
 The GNU df POSIXLY_CORRECT, and DF_BLOCK_SIZE and the BSD BLOCKSIZE
 environment variables are honored.
 .SH Note
-For filesystems that do not report available blocks (e.g. System V
-release 3), the number of available blocks is considered to be the
-number of free blocks.
+For filesystems that do not report available space (e.g. System V
+release 3), the number of available space is set to the free space.
 .SH WARNING
 Do not replace your system's \fIdf\fP command with this program.  You
 will in all likelihood break your installation procedures.
