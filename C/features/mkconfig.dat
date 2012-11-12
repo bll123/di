@@ -91,7 +91,6 @@ define  bzero
 define  MCTL_QUERY
 define  memcpy
 define  memset
-define  MNT_QUOTA
 define  QCMD
 define  S_ISLNK
 typ     struct dqblk
