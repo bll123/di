@@ -678,7 +678,7 @@ static void
 printSpace (const diOptions_t *diopts, const diOutput_t *diout,
              _fs_size_t usage, int idx)
 #else
-printBlocks (diopts, diout, usage, idx)
+printSpace (diopts, diout, usage, idx)
     const diOptions_t   *diopts;
     const diOutput_t    *diout;
     _fs_size_t          usage;
