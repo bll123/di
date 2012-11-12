@@ -97,7 +97,7 @@ processStringArgs (char *ptr, diData_t *diData, char *dbsstr)
 processStringArgs (ptr, diData, dbsstr)
   char      *ptr;
   diData_t  *diData;
-  char      *dbsstr
+  char      *dbsstr;
 #endif
 {
   char        *dptr;
