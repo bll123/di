@@ -23,6 +23,7 @@
 #define _hdr_kernel_fs_info 0
 #define _hdr_limits 1
 #define _hdr_libintl 0
+#define _hdr_libprop_proplib 0
 #define _hdr_linux_dqblk_xfs 0
 #define _hdr_linux_quota 0
 #define _hdr_locale 1
@@ -68,6 +69,7 @@
 #define _sys_statvfs 0
 #define _sys_time 1
 #define _sys_vfs 0
+#define _sys_vfs_quota 0
 #define _sys_vfstab 0
 #define _sys_vmount 0
 #define _inc_conflict__hdr_time__sys_time 1
@@ -75,7 +77,11 @@
 #define _command_msgfmt 0
 #define _command_rpmbuild 0
 #define _const_O_NOCTTY 1
+#define _define_bcopy 0
+#define _define_bzero 0
 #define _define_MCTL_QUERY 0
+#define _define_memcpy 0
+#define _define_memset 0
 #define _define_QCMD 0
 #define _define_S_ISLNK 0
 #define _typ_struct_dqblk 0
@@ -114,6 +120,7 @@
 #define _lib_memset 1
 #define _lib_mntctl 0
 #define _lib_next_dev 0
+#define _lib_prop_dictionary_create 0
 #define _lib_quota_open 0
 #define _lib_quotactl 0
 #define _lib_realpath 0
@@ -129,6 +136,7 @@
 #define _lib_sys_dollar_getdviw 1
 #define _lib_sysfs 0
 #define _lib_textdomain 1
+#define _lib_vquotactl 0
 #define _lib_xdr_int 0
 #define _lib_zone_getattr 0
 #define _lib_zone_list 0
