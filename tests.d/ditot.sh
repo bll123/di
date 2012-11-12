@@ -30,10 +30,11 @@ for d in C D; do
     echo ${EN} " ${d}${EC}" >&5
     for format in $FORMATS; do
       echo "Checking format: $format"
-      # have to exclude zfs, otherwise this test won't work.
+      # have to exclude zfs, null (dragonflybsd)
+      # otherwise this test won't work.
       # include the normally excluded to get some data.
       # ctfs,objfs,sharefs have weird used inode counts (U)
-      didata=`${tdir}/di -n -d1 -f $format -t -a -x zfs,ctfs,objfs,sharefs 2>/dev/null `
+      didata=`${tdir}/di -n -d1 -f $format -t -a -x null,zfs,ctfs,objfs,sharefs 2>/dev/null `
       summtot=`(echo "0 ";echo $didata | sed 's/  */ + /g'; echo " - p") | dc`
       if [ $summtot -ne 0 ]; then
         echo ${EN} "*${EC}" >&5
