@@ -85,7 +85,7 @@ windows:
 	@$(MAKE) ../dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
-	copy /y /b NUL:+configs/config.win config.h
+	copy /y /b NUL:+configs\config.win config.h
 	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
@@ -112,7 +112,7 @@ windows-mingw:
 	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
-	copy /y /b NUL:+configs/config.mingw config.h
+	copy /y /b NUL:+configs\config.mingw config.h
 	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
 		CC=mingw32-gcc LD=mingw32-gcc \
