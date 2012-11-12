@@ -352,7 +352,7 @@ quotactl_get (diqinfo, cmd, id, qdata)
 # if defined (__FreeBSD__) && __FreeBSD__ == 5
     /* quotactl on devfs fs panics the system (FreeBSD 5.1) */
   if (strcmp (diqinfo->type, "ufs") != 0) {
-    return;
+    return -4;
   }
 # endif
 
@@ -448,7 +448,7 @@ diquota (diqinfo)
   }
 #endif
 
-#if ! _lib_quota_open && ! _lib_vquotactl
+#if _has_std_quotas && ! _lib_quota_open && ! _lib_vquotactl
   if (strcmp (diqinfo->type, "xfs") == 0) {
 # if _hdr_linux_dqblk_xfs
     ucmd = QCMD (Q_XGETQUOTA, USRQUOTA);
@@ -457,20 +457,18 @@ diquota (diqinfo)
 # endif
     ;
   } else {
-# if _has_std_quotas
-#  if _define_QCMD
+# if _define_QCMD
     ucmd = QCMD (Q_GETQUOTA, USRQUOTA);
     gcmd = QCMD (Q_GETQUOTA, GRPQUOTA);
-#  else
+# else
     /* hp-ux doesn't have QCMD */
     ucmd = Q_GETQUOTA;
     gcmd = Q_GETQUOTA;
-#  endif
-# endif  /* _has_std_quotas */
+# endif
   }
 
   rc = quotactl_get (diqinfo, ucmd, diqinfo->uid, &qdata);
-#endif /* ! _lib_quota_open && ! _lib_vquotactl */
+#endif /* _has_std_quotas && ! _lib_quota_open && ! _lib_vquotactl */
 
 #if _has_std_quotas
   di_process_quotas ("usr", diqinfo, rc, xfsflag, &qdata);
@@ -732,6 +730,7 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
   }
 
   if (rc == 0) {
+    tsize = 0;
     tlimit = 0;
     if (debug > 1) { printf ("# diquota: blocksize: %lld\n", quotBlockSize); }
     if (xfsflag) {
