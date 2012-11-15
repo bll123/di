@@ -1,4 +1,4 @@
-di - disk information utility (version 4.32)
+di - disk information utility (version 4.33)
 
 CONTENTS
   Description
@@ -116,7 +116,7 @@ BUGS AND KNOWN ISSUES
           the di program setuid.  Neither recommended.
         - Linux 2.4 - not working
         - HP-UX
-          - quotactl() isn't declared. See above.
+          - quotactl() isn't declared. See HP-UX section above.
         - NetBSD 6
           - group quotas can't be fetched by ordinary users (EPERM).
             If the account is limited by a group quota, it won't be reported.
@@ -124,6 +124,10 @@ BUGS AND KNOWN ISSUES
           - Unlike AIX 5, AIX 7 gives a permission
             denied error when a user tries to get their quota.
             Could make di suid, but that's not a good idea.
+      - pooled filesystems:
+        - hammer: the usage reported for pseudo-filesystems is the usage
+          for the main pool.  Therefore the total used and size will be wrong.
+        - btrfs: there's no way to identify the pools.
 
     Send bug reports along with the output from 'di -A -a -X 5',
     output from your standard df command (as verbose as possible),
@@ -158,13 +162,14 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.32 has been tested on the following platforms:
-        AIX 5.1, 7.1
+    di 4.33 has been tested on the following platforms:
+        AIX 7.1 (64-bit)
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5, 6.0
         Debian 4.0, 5.0, 6.0, 6-kFreeBSD 8.1
-        DragonflyBSD 2.10.1
+        DragonflyBSD 2.10.1, 3.2.1
         Fedora 7, 12, 13, 14, 16
         FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1, 8.2, 9.0
+        Gentoo 20120710
         Haiku r1a3
         HP-UX 11.11
         LinuxMint 11 (32-bit, 64-bit)
@@ -194,8 +199,25 @@ PORTING
 
 CHANGES
 
-    4.32                                    [--]
-        Updated quota code for NetBSD 6.
+    4.33                                    [15 Nov 2012]
+        Recoded quota handling as information was improperly
+          losing precision.
+        Added support for dragonflybsd's vquotactl().
+        Added support for hammer-pfs (pooled filesystems).
+        Exclude rootfs, devfs, procfs, kernfs, ptyfs and devtmpfs by default.
+        Minor updates to main makefile.
+        Minor directory rearrangement for os-specific config files.
+        Fixed possible case of systems with a memcpy macro and
+           no library function.
+        Make sure D tests are not run.
+        HP-UX bcc seems to support long long after all.  This is on 11.11.
+          Maybe the older versions did not?  No access to 10.20.
+        Updated build system to mkconfig-1.22.
+
+    4.32                                    [21 Oct 2012]
+        Exclude rootfs by default.
+        Canonacalize the special device name.
+        Updated quota code for NetBSD 6 (quota_open() et.al.).
         Fixed AIX group quota check.
         Fixed AIX 7 support.  Unlike AIX 5, AIX 7 gives a permission
           denied error when a user tries to get their quota.
