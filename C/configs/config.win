@@ -82,12 +82,12 @@
 #define _cmd_loc_msgfmt "/usr/bin/msgfmt"
 #define _command_rpmbuild 0
 #define _const_O_NOCTTY 1
-#define _define_QCMD 0
 #define _define_bcopy 0
 #define _define_bzero 0
 #define _define_MCTL_QUERY 0
 #define _define_memcpy 0
 #define _define_memset 0
+#define _define_QCMD 0
 #define _define_S_ISLNK 1
 #define _typ_struct_dqblk 0
 #define _typ_struct_quotaval 0
