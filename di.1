@@ -4,20 +4,20 @@
 .\"
 .\" di.1
 .\"
-.\" Copyright 1994-2011 Brad Lanam  Walnut Creek CA USA
+.\" Copyright 1994-2013 Brad Lanam  Walnut Creek CA USA
 .\"
 .\" brad.lanam.di_at_gmail.com
 .\"
-.TH di 1 "7 Nov 2012"
+.TH di 1 "17 Jan 2013"
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-AacghHklLmnPqtZ] [-B block-size] [-d display-size] [-f format]
+.\" di [-AacghHklLmnPqRtZ] [-B block-size] [-d display-size] [-f format]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x exclude-fstyp-list] [-X debug-level]
 .\" [-z zone-name] [file [...]]
 .B di
-[\fB\-AacghHklLmnPtZ\fP]
+[\fB\-AacghHklLmnPqRtZ\fP]
 [\fB\-B\fP \fIblock\-size\fP]
 [\fB\-d\fP \fIdisplay\-size\fP]
 [\fB\-f\fP \fIformat\fP]
@@ -185,6 +185,11 @@ Ignored.  Use the \-f option.
 .TP
 .B \-q
 Disable quota checks.
+.TP
+.B \-R
+(also: \-\-dont\-resolve\-symlinks)
+.br
+Do not resolve symlinks (for mount points that have a trailing UUID).
 .TP
 .B \-s
 .I sort\-type
