@@ -2,7 +2,7 @@
  * $Id$
  * $Source$
  *
- * Copyright 1994-2011 Brad Lanam, Walnut Creek, CA
+ * Copyright 1994-2013 Brad Lanam, Walnut Creek, CA
  */
 
 #include "config.h"
@@ -274,6 +274,10 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         (void *) "-d",
         0,
         NULL },
+    { "--dont-resolve-symlink",     GETOPTN_ALIAS,
+        (void *) "-R",
+        0,
+        NULL },
     { "-f",     GETOPTN_STRPTR,             /* 10 */
         NULL  /*&diopts->formatString*/,
         0,
@@ -366,6 +370,10 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL  /*&diopts->quota_check*/,
         0  /*sizeof (diopts->quota_check)*/,
         NULL },
+    { "-R",     GETOPTN_BOOL,
+        NULL  /*&diopts->dontResolveSymlink*/,
+        0  /*sizeof (diopts->dontResolveSymlink)*/,
+        NULL },
     { "-s",     GETOPTN_FUNC_VALUE,
         NULL  /*&padata*/,
         0,
@@ -448,16 +456,18 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
   opts[27].valsiz = sizeof (diopts->printHeader);
   opts[32].valptr = (void *) &diopts->quota_check;    /* -q */
   opts[32].valsiz = sizeof (diopts->quota_check);
-  opts[36].valptr = (void *) &diopts->printTotals;    /* -t */
-  opts[36].valsiz = sizeof (diopts->printTotals);
-  opts[41].valptr = (void *) &diout->width;          /* -w */
-  opts[41].valsiz = sizeof (diout->width);
-  opts[42].valptr = (void *) &diout->inodeWidth;     /* -W */
-  opts[42].valsiz = sizeof (diout->inodeWidth);
-  opts[46].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -z */
-  opts[46].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
-  opts[47].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -Z */
+  opts[33].valptr = (void *) &diopts->dontResolveSymlink;    /* -R */
+  opts[33].valsiz = sizeof (diopts->dontResolveSymlink);
+  opts[37].valptr = (void *) &diopts->printTotals;    /* -t */
+  opts[37].valsiz = sizeof (diopts->printTotals);
+  opts[42].valptr = (void *) &diout->width;          /* -w */
+  opts[42].valsiz = sizeof (diout->width);
+  opts[43].valptr = (void *) &diout->inodeWidth;     /* -W */
+  opts[43].valsiz = sizeof (diout->inodeWidth);
+  opts[47].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -z */
   opts[47].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
+  opts[48].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -Z */
+  opts[48].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
 
   for (i = 0; i < (int) (sizeof (dbsids) / sizeof (int)); ++i) {
     opts[dbsids[i]].valptr = (void *) dbsstr;
@@ -867,11 +877,11 @@ setDispBlockSize (ptr, diopts, diout)
     }
   }  /* some oddball block size */
 
-  if (diopts->posix_compat && val == 512)
+  if (diopts->posix_compat && val == DI_VAL_512)
   {
     diout->dispBlockLabel = "512-blocks";
   }
-  if (diopts->posix_compat && val == 1024)
+  if (diopts->posix_compat && val == DI_VAL_1024)
   {
     diout->dispBlockLabel = "1024-blocks";
   }
