@@ -1,7 +1,7 @@
 /*
  * $Id$
  * $Source$
- * Copyright 1994-2011 Brad Lanam, Walnut Creek, CA
+ * Copyright 1994-2013 Brad Lanam, Walnut Creek, CA
  */
 
 #ifndef _INC_DI_H
