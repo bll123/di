@@ -2,7 +2,7 @@
  * $Id$
  * $Source$
  *
- * Copyright 1994-2011 Brad Lanam, Walnut Creek, CA
+ * Copyright 1994-2013 Brad Lanam, Walnut Creek, CA
  */
 
 #include "config.h"
@@ -809,7 +809,7 @@ processTitles (diopts, diout)
     Size_t          wlen;
     Size_t          *wlenptr;
     int             justification;
-    char            *pstr;
+    char            *pstr = { "" };
     char            *fstr;
     Size_t          maxsize;
     char            tformat [30];
