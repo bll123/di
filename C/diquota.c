@@ -2,7 +2,7 @@
  * $Id$
  * $Source$
  *
- * Copyright 2011 Brad Lanam, Walnut Creek, CA
+ * Copyright 2011-2013 Brad Lanam, Walnut Creek, CA
  */
 
 #include "config.h"
@@ -363,8 +363,8 @@ quotactl_get (diqinfo, cmd, id, qdata)
 # if _lib_quotactl && _quotactl_pos_1
   rc = quotactl (diqinfo->name, cmd, (int) id, (caddr_t) &(qdata->qinfo));
 # endif
-# if _lib_quotactl && ! _quotactl_pos_1 && (_quotactl_pos_2 || _AIX)
-#  if _AIX
+# if _lib_quotactl && ! _quotactl_pos_1 && (_quotactl_pos_2 || defined(_AIX))
+#  if defined(_AIX)
   /* AIX has linux compatibility routine, but need name rather than special */
   rc = quotactl (cmd, diqinfo->name, (int) id, (caddr_t) &(qdata->qinfo));
 #  else
@@ -551,7 +551,10 @@ xdr_quota_rslt (xp, rslt)
 # if _mem_struct_getquota_rslt_gqr_status
   rslt->gqr_status = quotastat;
 # else
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wsign-conversion"
   rslt->status = quotastat;
+#  pragma clang diagnostic pop
 # endif
 # if _mem_struct_getquota_rslt_gqr_rquota
   rptr = &rslt->gqr_rquota;
@@ -902,7 +905,7 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
 #  if _typ_struct_quotaval
       tsize = qdata->qval.qival.qv_usage;
 #  endif
-#  if _mem_struct_dqblk_dqb_curinodes && ! _lib_vquotactl
+#  if ! _lib_vquotactl
       tsize = qdata->qinfo.dqb_curinodes;
 #  endif
     }

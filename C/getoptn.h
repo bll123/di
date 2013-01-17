@@ -1,13 +1,13 @@
 /*
  * $Id$
  * $Source$
- * Copyright 2011 Brad Lanam, Walnut Creek, CA
+ * Copyright 2011-2013 Brad Lanam, Walnut Creek, CA
  */
 
 #ifndef __INC_GETOPTN_H_
 #define __INC_GETOPTN_H_
 
-#if TEST_GETOPTN
+#if defined(TEST_GETOPTN)
 # include "gconfig.h"
 #else
 # include "config.h"

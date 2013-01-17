@@ -1,7 +1,7 @@
 /*
  * $Id$
  * $Source$
- * Copyright 2011 Brad Lanam, Walnut Creek, CA
+ * Copyright 2011-2013 Brad Lanam, Walnut Creek, CA
  */
 
 /*
@@ -19,7 +19,7 @@
  *
  */
 
-#if TEST_GETOPTN
+#if defined(TEST_GETOPTN)
 # include "gconfig.h"
 #else
 # include "config.h"
@@ -375,7 +375,7 @@ getoptn (style, argc, argv, optcount, opts)
   return argc;
 }
 
-#if TEST_GETOPTN
+#if defined(TEST_GETOPTN)
 
 #if _hdr_math
 # include <math.h>
