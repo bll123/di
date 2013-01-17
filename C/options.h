@@ -4,6 +4,7 @@
 #include "config.h"
 #include "di.h"
 
+#define DI_VAL_512              512.0
 #define DI_VAL_1000             1000.0
 #define DI_DISP_1000_IDX        0
 #define DI_VAL_1024             1024.0
@@ -18,8 +19,8 @@
 #define DI_ONE_EXA              5
 #define DI_ONE_ZETTA            6
 #define DI_ONE_YOTTA            7
-#define DI_DISP_HR              -20
-#define DI_DISP_HR_2            -21
+#define DI_DISP_HR              -20.0
+#define DI_DISP_HR_2            -21.0
 
 # if defined (__cplusplus) || defined (c_plusplus)
    extern "C" {
