@@ -222,6 +222,7 @@ typedef struct {
     unsigned int    printHeader;
     unsigned int    displayAll;
     unsigned int    localOnly;
+    unsigned int    dontResolveSymlink;
 } diOptions_t;
 
 typedef struct {
