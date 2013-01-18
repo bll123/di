@@ -27,7 +27,9 @@
 #if _hdr_dirent
 # include <dirent.h>
 #endif
-#if _sys_types
+#if _sys_types \
+    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
+# define _DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _sys_param
@@ -57,22 +59,15 @@
 #if _hdr_malloc
 # include <malloc.h>
 #endif
-#if _hdr_time
-# include <time.h>
-#endif
-#if _sys_time && _inc_conflict__hdr_time__sys_time
-# include <sys/time.h>
-#endif
 
-
-#if _hdr_mntent && \
-  ! defined (_DI_INC_MNTENT)        /* Linux, kFreeBSD, HP-UX */
+#if _hdr_mntent \
+  && ! defined (_DI_INC_MNTENT)        /* Linux, kFreeBSD, HP-UX */
 # define _DI_INC_MNTENT 1
 # include <mntent.h>            /* hasmntopt(); _PATH_MNTTAB */
 #endif                          /* HP-UX: set/get/endmntent(); hasmntopt() */
 
-#if _sys_mount && \
-  ! defined (_DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+#if _sys_mount \
+  && ! defined (_DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
 # define _DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>         /* getmntinfo(); struct statfs */
 #endif
@@ -163,14 +158,14 @@
   extern int mntctl _((int, Size_t, char *));
 # endif
 
-#if (_lib_getmntent || \
-    _args_statfs > 0) && \
-    ! _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat && \
-    ! _lib_mntctl && \
-    ! _lib_getmnt && \
-    ! _class_os__Volumes
+#if (_lib_getmntent \
+    || _args_statfs > 0) \
+    && ! _lib_getmntinfo \
+    && ! _lib_getfsstat \
+    && ! _lib_getvfsstat \
+    && ! _lib_mntctl \
+    && ! _lib_getmnt \
+    && ! _class_os__Volumes
 # if defined (_PATH_MOUNTED)
 #  define DI_MOUNT_FILE        _PATH_MOUNTED
 # else
@@ -205,10 +200,10 @@ extern int debug;
 
 /********************************************************/
 
-#if _lib_getmntent && \
-    ! _lib_setmntent && \
-    ! _lib_mntctl && \
-    ! _class_os__Volumes
+#if _lib_getmntent \
+    && ! _lib_setmntent \
+    && ! _lib_mntctl \
+    && ! _class_os__Volumes
 
 #if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
@@ -238,7 +233,6 @@ di_getDiskEntries (diskInfo, diCount)
     FILE            *f;
     int             idx;
     struct mnttab   mntEntry;
-    time_t          mtime;
     char            *devp;   /* local ptr to dev entry */
 
 
@@ -283,8 +277,6 @@ di_getDiskEntries (diskInfo, diCount)
             diptr->isReadOnly = TRUE;
         }
         strncpy (diptr->options, mntEntry.mnt_mntopts, DI_OPT_LEN);
-        mtime = atol (mntEntry.mnt_time);
-        strncpy (diptr->mountTime, ctime (&mtime), DI_MNT_TIME_LEN);
 
             /* get the file system type now... */
         strncpy (diptr->fsType, mntEntry.mnt_fstype, DI_TYPE_LEN);
@@ -321,16 +313,16 @@ checkMountOptions (mntEntry, str)
 
 #endif
 
-#if _lib_getmntent && \
-    _lib_setmntent && \
-    _lib_endmntent && \
-    ! _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat && \
-    ! _lib_mntctl && \
-    ! _lib_GetDriveType && \
-    ! _lib_GetLogicalDriveStrings && \
-    ! _class_os__Volumes
+#if _lib_getmntent \
+    && _lib_setmntent \
+    && _lib_endmntent \
+    && ! _lib_getmntinfo \
+    && ! _lib_getfsstat \
+    && ! _lib_getvfsstat \
+    && ! _lib_mntctl \
+    && ! _lib_GetDriveType \
+    && ! _lib_GetLogicalDriveStrings \
+    && ! _class_os__Volumes
 
 /*
  * di_getDiskEntries
@@ -430,18 +422,18 @@ di_getDiskEntries (diskInfo, diCount)
 #endif /* _lib_getmntent && _lib_setmntent && _lib_endmntent */
 
 /* QNX */
-#if ! _lib_getmntent && \
-    ! _lib_mntctl && \
-    ! _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat && \
-    ! _lib_getmnt && \
-    ! _lib_GetDriveType && \
-    ! _lib_GetLogicalDriveStrings && \
-    ! _lib_fs_stat_dev && \
-    ! _class_os__Volumes && \
-    ! _lib_sys_dollar_device_scan && \
-    defined (__QNX__)
+#if ! _lib_getmntent \
+    && ! _lib_mntctl \
+    && ! _lib_getmntinfo \
+    && ! _lib_getfsstat \
+    && ! _lib_getvfsstat \
+    && ! _lib_getmnt \
+    && ! _lib_GetDriveType \
+    && ! _lib_GetLogicalDriveStrings \
+    && ! _lib_fs_stat_dev \
+    && ! _class_os__Volumes \
+    && ! _lib_sys_dollar_device_scan \
+    && defined (__QNX__)
 
 /*
  * di_getDiskEntries
@@ -579,18 +571,18 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
 #endif /* QNX */
 
 /* if nothing matches, assume a SysV.3 /etc/mnttab or similar */
-#if ! _lib_getmntent && \
-    ! _lib_mntctl && \
-    ! _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat && \
-    ! _lib_getmnt && \
-    ! _lib_GetDriveType && \
-    ! _lib_GetLogicalDriveStrings && \
-    ! _lib_fs_stat_dev && \
-    ! _class_os__Volumes && \
-    ! _lib_sys_dollar_device_scan && \
-    ! defined (__QNX__)
+#if ! _lib_getmntent \
+    && ! _lib_mntctl \
+    && ! _lib_getmntinfo \
+    && ! _lib_getfsstat \
+    && ! _lib_getvfsstat \
+    && ! _lib_getmnt \
+    && ! _lib_GetDriveType \
+    && ! _lib_GetLogicalDriveStrings \
+    && ! _lib_fs_stat_dev \
+    && ! _class_os__Volumes \
+    && ! _lib_sys_dollar_device_scan \
+    && ! defined (__QNX__)
 
 /*
  * di_getDiskEntries
@@ -608,6 +600,7 @@ di_getDiskEntries (diskInfo, diCount)
     int *diCount;
 # endif
 {
+    diDiskInfo_t    *diptr;
     FILE             *f;
     int              idx;
     struct mnttab    mntEntry;
@@ -631,6 +624,7 @@ di_getDiskEntries (diskInfo, diCount)
             ++*diCount;
             *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
                     sizeof (diDiskInfo_t) * *diCount);
+            diptr = *diskInfo + idx;
             di_initDiskInfo (diptr);
 
 # if defined (COHERENT)
@@ -641,9 +635,9 @@ di_getDiskEntries (diskInfo, diCount)
             strncpy (diptr->special, mntEntry.mt_dev, DI_SPEC_NAME_LEN);
             strncpy (diptr->name, mntEntry.mt_filsys, DI_NAME_LEN);
 # endif
-            strncpy (diptr->options, mntEntry.mnt_mntopts, DI_OPT_LEN);
-            strncpy (diptr->mountTime, mntEntry.mnt_time,
-                    DI_MNT_TIME_LEN);
+# if _mem_struct_mnttab_mntopts
+            strncpy (diptr->options, mntEntry.mt_mntopts, DI_OPT_LEN);
+# endif
         }
 
         if (debug > 1)
@@ -664,8 +658,8 @@ di_getDiskEntries (diskInfo, diCount)
  */
 
 
-#if _lib_getfsstat && \
-    ! (_lib_getvfsstat && _args_getvfsstat == 3)
+#if _lib_getfsstat \
+    && ! (_lib_getvfsstat && _args_getvfsstat == 3)
 
 /*
  * di_getDiskEntries
@@ -752,9 +746,9 @@ di_getDiskEntries (diskInfo, diCount)
         }
 #  endif
 # endif
-# if _mem_struct_statfs_mount_info && \
-        defined (MOUNT_NFS) && \
-        (_mem_struct_statfs_f_type || _mem_struct_statfs_f_fstypename)
+# if _mem_struct_statfs_mount_info \
+        && defined (MOUNT_NFS) \
+        && (_mem_struct_statfs_f_type || _mem_struct_statfs_f_fstypename)
 #  if _mem_struct_statfs_f_type
         if (sp->f_type == MOUNT_NFS
 #  endif
@@ -820,9 +814,9 @@ di_getDiskEntries (diskInfo, diCount)
 
 #endif /* _lib_getfsstat */
 
-#if _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat
+#if _lib_getmntinfo \
+    && ! _lib_getfsstat \
+    && ! _lib_getvfsstat
 
 # define DI_UNKNOWN_FSTYPE       "(%.2d)?"
 
@@ -915,8 +909,8 @@ di_getDiskEntries (diskInfo, diCount)
             (_fs_size_t) mntbufp [idx].f_ffree);
 
         fstype = mntbufp [idx].f_type;
-# if ! _sys_fs_types && ! defined (INITMOUNTNAMES) && \
-    ! _mem_struct_statfs_f_fstypename
+# if ! _sys_fs_types && ! defined (INITMOUNTNAMES) \
+    && ! _mem_struct_statfs_f_fstypename
         if ((fstype >= 0) && (fstype <= MOUNT_MAXTYPE))
         {
             switch (fstype)
@@ -1514,9 +1508,6 @@ di_getDiskEntries (diskInfo, diCount)
         strncpy (diptr->options, (char *) vmt2dataptr (vmtp, VMT_ARGS),
                  DI_OPT_LEN);
         trimChar (diptr->options, ',');
-
-        strncpy (diptr->mountTime, ctime ((time_t *) &vmtp->vmt_time),
-                DI_MNT_TIME_LEN);
         bufp += vmtp->vmt_length;
 
         if (debug > 1)
@@ -1532,8 +1523,8 @@ di_getDiskEntries (diskInfo, diCount)
 #endif  /* _lib_mntctl */
 
 
-#if _lib_GetDriveType && \
-    _lib_GetLogicalDriveStrings
+#if _lib_GetDriveType \
+    && _lib_GetLogicalDriveStrings
 
 /*
  * di_getDiskInfo
@@ -1629,8 +1620,8 @@ di_getDiskEntries (diskInfo, diCount)
 
 #endif  /* _lib_GetDiskFreeSpace || _lib_GetDiskFreeSpaceEx */
 
-#if _lib_fs_stat_dev && \
-    _lib_next_dev
+#if _lib_fs_stat_dev \
+    && _lib_next_dev
 
 /*
  * di_getDiskEntries
