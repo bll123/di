@@ -212,11 +212,17 @@ di_getDiskInfo (diskInfo, diCount)
     && ! _lib_getvfsstat \
     && ! _lib_getmnt
 
-# if ! defined (UBSIZE)
-#  if defined (BSIZE)
-#   define UBSIZE            BSIZE
-#  else
-#   define UBSIZE            512
+  /* xenix reports a block size of 1024 bytes, but the blocks reported */
+  /* are based on a 512 byte block size.                               */
+# if defined (M_XENIX)
+#  define UBSIZE            512
+# else
+#  if ! defined (UBSIZE)
+#   if defined (BSIZE)
+#    define UBSIZE            BSIZE
+#   else
+#    define UBSIZE            512
+#   endif
 #  endif
 # endif
 
