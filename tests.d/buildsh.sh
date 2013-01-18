@@ -66,6 +66,7 @@ for d in C D; do
         #  SCO_SV: warning: `/*' within comment
         #  clang: 'warning: unknown warning option'
         #  clang: X warnings? generated.
+        #  many: unrecognized #pragma ignored
         # D:
         #  FLAGS= (makefile)
         #  --     (makefile)
@@ -106,6 +107,7 @@ for d in C D; do
           grep -v 'warning: unknown warning option' |
           grep -v 'warning.*generated\.' |
           grep -v 'Unknown option.*-Wno-unused-parameter.*ignored' |
+          grep -v 'unrecognized #pragma ignored' |
           grep -v FLAGS= |
           grep -v -- '--' |
           cat > make_extra.log
