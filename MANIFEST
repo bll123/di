@@ -10,6 +10,7 @@ C/configs/config.ultrix.gcc config.h for ULTRIX
 C/configs/config.vms        config.h for VMS
 C/configs/config.vms.b      alternate config.h for VMS
 C/configs/config.win        config.h for windows
+C/configs/conf.xenix.cc     config.h for XENIX
 C/di.c                    di source
 C/di.h                    di source
 C/didiskutil.c            di source
