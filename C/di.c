@@ -91,7 +91,9 @@
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
-#if _sys_types
+#if _sys_types \
+    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
+# define _DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _hdr_ctype
@@ -130,8 +132,10 @@
 #if _sys_file
 # include <sys/file.h>
 #endif
-#if _hdr_fcntl          /* O_RDONLY, O_NOCTTY */
-# include <fcntl.h>
+#if _hdr_fcntl \
+    && ! defined (_DI_INC_FCNTL_H)    /* xenix */
+# define _DI_INC_FCNTL_H
+# include <fcntl.h>     /* O_RDONLY, O_NOCTTY */
 #endif
 
 #if defined (__cplusplus) || defined (c_plusplus)
@@ -169,9 +173,9 @@ static void preCheckDiskInfo     _((diData_t *));
 static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
 static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
 static void initLocale          _((void));
-static void initZones           _((diData_t *diData));
-static int  isIgnoreFSType      _((char *fstype));
-static int  checkForUUID        _((char *spec));
+static void initZones           _((diData_t *));
+static int  isIgnoreFSType      _((char *));
+static int  checkForUUID        _((char *));
 
 #if defined (__cplusplus) || defined (c_plusplus)
   }

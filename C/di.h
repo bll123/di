@@ -12,13 +12,17 @@
 /*****************************************************/
 
 #include <stdio.h>
-#if _hdr_fcntl
+#if _hdr_fcntl \
+    && ! defined (_DI_INC_FCNTL_H)  /* xenix */
+# define _DI_INC_FCNTL_H
 # include <fcntl.h>
 #endif
 #if _sys_file
 # include <sys/file.h>
 #endif
-#if _sys_types
+#if _sys_types \
+    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
+# define _DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _hdr_limits
@@ -58,8 +62,8 @@
 #  define DI_TYPE_LEN       FSTYPSZ
 # endif
 #endif
-#if _sys_mount && \
-    ! defined (_DI_INC_SYS_MOUNT)       /* NetBSD */
+#if _sys_mount \
+    && ! defined (_DI_INC_SYS_MOUNT)       /* NetBSD */
 # define _DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>                 /* MFSNAMELEN */
 # if ! defined (DI_TYPE_LEN) && defined (MFSNAMELEN)
@@ -288,12 +292,12 @@ extern _pvoid _realloc               _((_pvoid, Size_t));
 extern void di_initDiskInfo _((diDiskInfo_t *));
 extern void di_saveBlockSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t, _fs_size_t));
 extern void di_saveInodeSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t));
-#if _lib_getmntent && \
-    ! _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat && \
-    ! _lib_mntctl && \
-    ! _class_os__Volumes
+#if _lib_getmntent \
+    && ! _lib_getmntinfo \
+    && ! _lib_getfsstat \
+    && ! _lib_getvfsstat \
+    && ! _lib_mntctl \
+    && ! _class_os__Volumes
 extern char *chkMountOptions        _((const char *, const char *));
 #endif
 extern void convertMountOptions     _((unsigned long, diDiskInfo_t *));

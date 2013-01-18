@@ -9,13 +9,13 @@
 
 #include "config.h"
 
-#if _hdr_mntent && \
-  ! defined (_DI_INC_MNTENT)        /* Linux, kFreeBSD, HP-UX */
+#if _hdr_mntent \
+  && ! defined (_DI_INC_MNTENT)        /* Linux, kFreeBSD, HP-UX */
 # define _DI_INC_MNTENT 1
 # include <mntent.h>                /* MNTOPT_... */
 #endif
-#if _sys_mount && \
-  ! defined (_DI_INC_SYS_MOUNT)     /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+#if _sys_mount \
+  && ! defined (_DI_INC_SYS_MOUNT)     /* FreeBSD, OpenBSD, NetBSD, HP-UX */
 # define _DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>             /* MNT_...; M_... (hp-ux) */
 #endif

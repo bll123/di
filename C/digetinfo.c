@@ -28,7 +28,9 @@
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
-#if _sys_types
+#if _sys_types \
+    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
+# define _DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _sys_param
@@ -44,8 +46,8 @@
 # include <strings.h>
 #endif
 
-#if _sys_mount && \
-  ! defined (_DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+#if _sys_mount \
+  && ! defined (_DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
 # define _DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>         /* statfs(); struct statfs; getfsstat() */
 #endif
@@ -71,9 +73,9 @@
   extern "C" {
 #endif
 
-#if ! _lib_statvfs && \
-	_lib_statfs && \
-	_npt_statfs
+#if ! _lib_statvfs \
+	&& _lib_statfs \
+	&& _npt_statfs
 # if _lib_statfs && _args_statfs == 2
   extern int statfs _((char *, struct statfs *));
 # endif
@@ -93,13 +95,13 @@ extern int debug;
 
 /********************************************************/
 
-#if _lib_statvfs && \
-    ! _lib_fs_stat_dev && \
-    ! _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat && \
-    ! _lib_GetVolumeInformation && \
-	! _class_os__Volumes
+#if _lib_statvfs \
+    && ! _lib_fs_stat_dev \
+    && ! _lib_getmntinfo \
+    && ! _lib_getfsstat \
+    && ! _lib_getvfsstat \
+    && ! _lib_GetVolumeInformation \
+	&& ! _class_os__Volumes
 
 /*
  * di_getDiskInfo
@@ -203,12 +205,12 @@ di_getDiskInfo (diskInfo, diCount)
 
 #endif /* _lib_statvfs */
 
-#if _lib_statfs && _args_statfs == 4 && \
-    ! _lib_statvfs && \
-    ! _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat && \
-    ! _lib_getmnt
+#if _lib_statfs && _args_statfs == 4 \
+    && ! _lib_statvfs \
+    && ! _lib_getmntinfo \
+    && ! _lib_getfsstat \
+    && ! _lib_getvfsstat \
+    && ! _lib_getmnt
 
 # if ! defined (UBSIZE)
 #  if defined (BSIZE)
@@ -306,13 +308,13 @@ di_getDiskInfo (diskInfo, diCount)
 
 #endif /* _args_statfs == 4 */
 
-#if _lib_statfs && (_args_statfs == 2 || _args_statfs == 3) && \
-        ! _lib_statvfs && \
-        ! _lib_getmntinfo && \
-        ! _lib_getfsstat && \
-        ! _lib_getmnt && \
-        ! _lib_GetDiskFreeSpace && \
-        ! _lib_GetDiskFreeSpaceEx
+#if _lib_statfs && (_args_statfs == 2 || _args_statfs == 3) \
+        && ! _lib_statvfs \
+        && ! _lib_getmntinfo \
+        && ! _lib_getfsstat \
+        && ! _lib_getmnt \
+        && ! _lib_GetDiskFreeSpace \
+        && ! _lib_GetDiskFreeSpaceEx
 
 /*
  * di_getDiskInfo

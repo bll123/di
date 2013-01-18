@@ -411,12 +411,12 @@ convertNFSMountOptions (flags, wsize, rsize, diptr)
 }
 
 
-#if _lib_getmntent && \
-    ! _lib_getmntinfo && \
-    ! _lib_getfsstat && \
-    ! _lib_getvfsstat && \
-	! _lib_mntctl && \
-	! _class_os__Volumes
+#if _lib_getmntent \
+    && ! _lib_getmntinfo \
+    && ! _lib_getfsstat \
+    && ! _lib_getvfsstat \
+	&& ! _lib_mntctl \
+	&& ! _class_os__Volumes
 
 char *
 #if _proto_stdc

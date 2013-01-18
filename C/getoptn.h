@@ -13,7 +13,9 @@
 # include "config.h"
 #endif
 
-#if _sys_types
+#if _sys_types \
+    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
+# define _DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 
