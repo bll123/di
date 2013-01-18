@@ -41,11 +41,12 @@ testargs="-A -a --all -bk -bsi -b1024 -b1000 -b512 \
     --block-size=k --block-size=si --block-size=1024 --block-size=1000 \
     --block-size=512 -c --csv-output \
     -d1 -d512 -dk -dm -dg -dt -dp -de -dz -dy -dh -dH -d1024 -d1000 \
+    --dont-resolve-symlink \
     -fmtsMTSObuf13bcvpaBuv2iUFP \
     -fM -fS -fT --format-string=M --format-string=S \
     --format-string=T -g -Ftmpfs -h -H --help --human-readable -itmpfs \
     --inodes -k -l --local -m -n --no-sync -P --portability --print-type \
-    -q -sm -ss -st -srm -srs -srt -t --total --type=tmpfs -v --version \
+    -q -R -sm -ss -st -srm -srs -srt -t --total --type=tmpfs -v --version \
     -w20 -W20 -xtmpfs --exclude-type=tmpfs -X1 -zall -Z \
     -b_k -b_si -b_1024 -b_1000 -b_512 -B_k -B_si -B_1024 \
     -B_1000 -B_512 \
