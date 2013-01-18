@@ -177,6 +177,7 @@
 #define _class_os__Volumes 0
 #define _npt_getenv 1
 #define _npt_getmnt 1
+#define _npt_libquota 0
 #define _npt_mntctl 1
 #define _npt_statfs 1
 #define _dcl_errno 0

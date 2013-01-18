@@ -152,6 +152,7 @@
 #define _memberxdr_rquota_rq_fsoftlimit 1
 #define xdr_rq_curfiles xdr_u_long
 #define _memberxdr_rquota_rq_curfiles 1
+#define _mem_struct_mnttab_mt_mntopts 0
 #define xdr_gqa_uid xdr_int
 #define _memberxdr_getquota_args_gqa_uid 1
 #define _args_getfsstat 0
@@ -175,6 +176,7 @@
 #define _class_os__Volumes 0
 #define _npt_getenv 1
 #define _npt_getmnt 1
+#define _npt_libquota 0
 #define _npt_mntctl 1
 #define _npt_statfs 1
 #define _dcl_errno 0
