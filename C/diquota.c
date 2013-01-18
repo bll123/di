@@ -26,7 +26,9 @@
 #if _hdr_strings
 # include <strings.h>
 #endif
-#if _sys_types
+#if _sys_types \
+    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
+# define _DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _hdr_errno
@@ -67,8 +69,8 @@
 #endif
   /* AIX 5.1 doesn't seem to have quotactl declared.... */
   /* use their compatibility routine.                   */
-#if ! _args_quotactl && _hdr_linux_quota && \
-      _inc_conflict__sys_quota__hdr_linux_quota
+#if ! _args_quotactl && _hdr_linux_quota \
+      && _inc_conflict__sys_quota__hdr_linux_quota
 # include <linux/quota.h>
 #endif
 #if _hdr_rpc_rpc
@@ -83,6 +85,11 @@
 #endif
 
 #if _has_std_quotas
+
+/* workaround for HPUX - quotactl not declared */
+# if _lib_quotactl && _npt_quotactl
+  extern int quotactl _((int, const char *, uid_t, void *));
+# endif
 
 typedef union {
   int               val;
