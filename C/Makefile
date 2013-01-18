@@ -134,7 +134,9 @@ bsd43-cc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
+	sleep 1
 	$(CP) configs/config.bsd43.cc config.h
+	sleep 1
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
@@ -146,7 +148,9 @@ bsd43-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
+	sleep 1
 	$(CP) configs/config.bsd43.gcc config.h
+	sleep 1
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
@@ -158,7 +162,9 @@ ultrix-cc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
+	sleep 1
 	$(CP) configs/config.ultrix.cc config.h
+	sleep 1
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
@@ -170,7 +176,9 @@ ultrix-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
+	sleep 1
 	$(CP) configs/config.ultrix.gcc config.h
+	sleep 1
 	@echo '-lintl' > $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
@@ -182,10 +190,25 @@ hpux-cc:
 	@$(MAKE) -e ../dioptions.dat
 	@$(MAKE) CC=/usr/ccs/bin/cc -e di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
+	sleep 1
 	$(CP) configs/config.hpux.bcc config.h
-	@sleep 1;touch $(MKC_REQLIB)
+	sleep 1;touch $(MKC_REQLIB)
 	. ./di.env;$(MAKE) -e CC=/usr/ccs/bin/cc \
 		_MKCONFIG_SHELL=$(MKCONFIG_SHELL) di-programs
+
+.PHONY: xenix-cc
+xenix-cc:
+	@$(MAKE) ../dioptions.dat
+	@echo ':' > di.env;chmod a+rx di.env
+	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
+	sleep 1
+	$(CP) configs/conf.xenix.cc config.h
+	sleep 1
+	@touch $(MKC_REQLIB)
+	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
+		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -O" \
+		LDFLAGS="-O" di-programs
 
 ###
 # cleaning
