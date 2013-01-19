@@ -912,7 +912,7 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
 #  if _typ_struct_quotaval
       tsize = qdata->qval.qival.qv_usage;
 #  endif
-#  if ! _lib_vquotactl
+#  if ! _lib_quota_open && ! _lib_vquotactl
       tsize = qdata->qinfo.dqb_curinodes;
 #  endif
     }
