@@ -384,7 +384,14 @@ getoptn (style, argc, argv, optcount, opts)
 #endif
 
 static void
-process_opts (const char *arg, char *valptr) {
+#if _proto_stdc
+process_opts (const char *arg, char *valptr)
+#else
+process_opts (arg, valptr)
+    const char  *arg;
+    char        *valptr;
+#endif
+{
   if (strcmp (arg, "-h") == 0) {
     double *v;
     v = (double *) valptr;
@@ -394,7 +401,15 @@ process_opts (const char *arg, char *valptr) {
 }
 
 static void
-process_opts_val (const char *arg, char *valptr, char *value) {
+#if _proto_stdc
+process_opts_val (const char *arg, char *valptr, char *value)
+#else
+process_opts_val (arg, valptr, value)
+    const char      *arg;
+    char            *valptr;
+    char            *value;
+#endif
+{
   if (strcmp (arg, "-g") == 0) {
     double *v;
     v = (double *) valptr;
@@ -404,7 +419,13 @@ process_opts_val (const char *arg, char *valptr, char *value) {
 }
 
 int
+#if _proto_stdc
 main (int argc, const char * const argv[])
+#else
+main (argc, argv)
+    int                 argc;
+    const char * const  argv[];
+#endif
 {
   char      tmp[40];
   char      s[40];
