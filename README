@@ -1,4 +1,4 @@
-di - disk information utility (version 4.33)
+di - disk information utility (version 4.34)
 
 CONTENTS
   Description
@@ -162,13 +162,13 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.33 has been tested on the following platforms:
+    di 4.34 has been tested on the following platforms:
         AIX 7.1 (64-bit)
-        CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5, 6.0
+        CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5, 6.3
         Debian 4.0, 5.0, 6.0, 6-kFreeBSD 8.1
         DragonflyBSD 2.10.1, 3.2.1
         Fedora 7, 12, 13, 14, 16
-        FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1, 8.2, 9.0
+        FreeBSD 4.9, 5.1, 6.0, 7.0, 7.1, 7.2, 8.0, 8.1, 8.2, 9.0, 9.1
         Gentoo 20120710
         Haiku r1a3
         HP-UX 11.11
@@ -182,6 +182,7 @@ PORTING
         QNX 6.3
         RedHat 7.1, 7.3
         SCO OpenServer 6.0.0
+        SCO Xenix
         Solaris 2.6, 8, 9, 10, 11
         Tru64 5.1B
         ULTRIX 4.5
@@ -198,6 +199,15 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+
+    4.34                                    [19 Jan 2013]
+        When a filename is specified on the command line, attempt to choose
+          the best filesystem to display when there are multiple choices.
+        Error check realpath() return value.
+        Only canonicalize device names if it has a trailing uuid.
+        Add -R (--dont-resolve-symlink) option to turn off canonicalization.
+        Clean up code to fix clang warnings.
+        Minor updates to support Xenix.
 
     4.33                                    [15 Nov 2012]
         Recoded quota handling as information was improperly
@@ -707,6 +717,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2011 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2013 Brad Lanam, Walnut Creek, CA, USA
     brad.lanam.di_at_gmail.com
     http://www.gentoo.com/di/
