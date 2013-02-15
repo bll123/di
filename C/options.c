@@ -644,7 +644,7 @@ parseList (list, str)
     ocount = list->count;
     list->count += count;
     ncount = list->count;
-    list->list = (char **) _realloc ((char *) list->list,
+    list->list = (char **) di_realloc ((char *) list->list,
             (Size_t) list->count * sizeof (char *));
     if (list->list == (char **) NULL)
     {

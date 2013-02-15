@@ -287,7 +287,7 @@ extern char *strstr                 _((const char *, const char *));
  /* trimchar.c */
 extern void trimChar                _((char *, int));
  /* realloc.c */
-extern _pvoid _realloc               _((_pvoid, Size_t));
+extern _pvoid di__realloc           _((_pvoid, Size_t));
  /* didiskutil.c */
 extern void di_initDiskInfo _((diDiskInfo_t *));
 extern void di_saveBlockSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t, _fs_size_t));

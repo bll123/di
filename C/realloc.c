@@ -29,9 +29,9 @@
 
 _pvoid
 #if _proto_stdc
-_realloc (_pvoid ptr, Size_t size)
+di_realloc (_pvoid ptr, Size_t size)
 #else
-_realloc (ptr, size)
+di_realloc (ptr, size)
     _pvoid      ptr;
     Size_t      size;
 #endif

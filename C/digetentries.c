@@ -247,7 +247,7 @@ di_getDiskEntries (diskInfo, diCount)
     {
         idx = *diCount;
         ++*diCount;
-        *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+        *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * (Size_t) *diCount);
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
@@ -367,7 +367,7 @@ di_getDiskEntries (diskInfo, diCount)
     {
         idx = *diCount;
         ++*diCount;
-        *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+        *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * (Size_t) *diCount);
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
@@ -550,7 +550,7 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
 
       idx = *diCount;
       ++*diCount;
-      *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+      *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
               sizeof (diDiskInfo_t) * (Size_t) *diCount);
       diptr = *diskInfo + idx;
       di_initDiskInfo (diptr);
@@ -622,7 +622,7 @@ di_getDiskEntries (diskInfo, diCount)
         {
             idx = *diCount;
             ++*diCount;
-            *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+            *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                     sizeof (diDiskInfo_t) * *diCount);
             diptr = *diskInfo + idx;
             di_initDiskInfo (diptr);
@@ -1662,7 +1662,7 @@ di_getDiskEntries (diskInfo, diCount)
 
         idx = *diCount;
         ++*diCount;
-        *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+        *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * *diCount);
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
@@ -1756,7 +1756,7 @@ di_getDiskEntries (diskInfo, diCount)
 
         idx = *diCount;
         ++*diCount;
-        *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+        *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * *diCount);
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
@@ -1949,7 +1949,7 @@ di_getDiskEntries (diskInfo, diCount)
           &devSearchNameDesc, &scanItemList, context) == SS$_NORMAL) {
     idx = *diCount;
     ++*diCount;
-    *diskInfo = (diDiskInfo_t *) _realloc ((char *) *diskInfo,
+    *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
         sizeof (diDiskInfo_t) * (Size_t) *diCount);
     diptr = *diskInfo + idx;
     di_initDiskInfo (diptr);
