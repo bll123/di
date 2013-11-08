@@ -182,6 +182,9 @@ endif
 if quotactl_pos_2 == _c_arg_2_quotactl 'char *'
  setint _quotactl_pos_2 1
 endif
+if quotactl_pos_2 == _c_arg_2_quotactl 'caddr_t'
+ setint _quotactl_pos_2 1
+endif
 args noconst setmntent
 args noconst statfs
 class   os::Volumes -lsyllable

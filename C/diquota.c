@@ -372,10 +372,10 @@ quotactl_get (diqinfo, cmd, id, qdata)
 # endif
 # if _lib_quotactl && ! _quotactl_pos_1 && (_quotactl_pos_2 || defined(_AIX))
 #  if defined(_AIX)
-  /* AIX has linux compatibility routine, but need name rather than special */
+  /* AIX has linux compatibility routine, but needs name rather than special */
   rc = quotactl (cmd, diqinfo->name, (int) id, (caddr_t) &(qdata->qinfo));
 #  else
-  rc = quotactl (cmd, diqinfo->special, (int) id, (caddr_t) &(qdata->qinfo));
+  rc = quotactl (cmd, (_c_arg_2_quotactl) diqinfo->special, (int) id, (caddr_t) &(qdata->qinfo));
 #  endif
 # endif
 # if _has_std_quotas && _sys_fs_ufs_quota && ! _lib_vquotactl /* Solaris */
