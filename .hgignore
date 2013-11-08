@@ -1,0 +1,8 @@
+syntax: glob
+
+Archive
+Info
+Platforms
+mkconfig
+*.tar.gz
+*.zip
