@@ -1,4 +1,4 @@
-di - disk information utility (version 4.34)
+di - disk information utility (version 4.35)
 
 CONTENTS
   Description
@@ -162,7 +162,7 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.34 has been tested on the following platforms:
+    di 4.35 has been tested on the following platforms:
         AIX 7.1 (64-bit)
         CentOS 3.9, 4.8, 5.2, 5.3, 5.4, 5.5, 6.3
         Debian 4.0, 5.0, 6.0, 6-kFreeBSD 8.1
@@ -172,9 +172,11 @@ PORTING
         Gentoo 20120710
         Haiku r1a3
         HP-UX 11.11
+        Irix 6.5 (gcc, 64-bit)
         LinuxMint 11 (32-bit, 64-bit)
         Mandrake 9.2
         Mandriva 2011
+        MirOS 10
         NetBSD 1.6.2, 2.0.2, 3.0.1, 4.0.1, 5.0.1, 5.1, 6.0
         Nexenta 1.0.1_b85, 2.0_b104
         OpenBSD 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.0
@@ -193,12 +195,15 @@ PORTING
     di has been ported to the following systems in the past:
 
         A/UX, AIX, BeOS, BSD, BSDI, Convex, Cray UNICOS, Cray UNICOS/mk,
-        DragonflyBSD, FreeBSD, Haiku, HP/UX, Linux, MacOSX, NetBSD, Next,
-        OpenBSD, OS/2, OSF/1, Pyramid, SCO OpenServer, SCO Unix,
+        DragonflyBSD, FreeBSD, Haiku, HP/UX, Linux, MacOSX, MirOS, NetBSD,
+        Next, OpenBSD, OS/2, OSF/1, Pyramid, SCO OpenServer, SCO Unix,
         Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Syllable,
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+
+    4.35                                    [--]
+        Updates for Irix.
 
     4.34                                    [19 Jan 2013]
         When a filename is specified on the command line, attempt to choose
