@@ -6,3 +6,4 @@ Platforms
 mkconfig
 *.tar.gz
 *.zip
+w.*
