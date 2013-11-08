@@ -7,3 +7,4 @@ mkconfig
 *.tar.gz
 *.zip
 w.*
+dioptions.dat
