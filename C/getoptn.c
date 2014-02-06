@@ -1265,7 +1265,7 @@ main (argc, argv)
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts);
   if (i != 0 || j != 1) {
-    fprintf (stderr, "fail test %d\n");
+    fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
 
