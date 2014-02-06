@@ -515,6 +515,9 @@ checkFileInfo (diData, optidx, argc, argv)
       }
     }
 
+    /* also turn off the -I and -x lists */
+    diData->includeList.count = 0;
+    diData->ignoreList.count = 0;
     return rc;
 }
 
