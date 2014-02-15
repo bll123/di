@@ -154,7 +154,8 @@
 
 #define DI_UNKNOWN_DEV          -1L
 
-int          debug = { 0 };
+extern int debug;
+int debug = { 0 };
 
 #if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
