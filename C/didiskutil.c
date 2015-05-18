@@ -460,8 +460,7 @@ di_testRemoteDisk (diskInfo)
     diDiskInfo_t *diskInfo;
 #endif
 {
-  if (strcmp (diskInfo->fsType, "nfs") == 0 ||
-     strcmp (diskInfo->fsType, "nfs3") == 0)
+  if (strncmp (diskInfo->fsType, "nfs", 3) == 0) 
   {
     diskInfo->isLocal = FALSE;
   }

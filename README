@@ -1,4 +1,4 @@
-di - disk information utility (version 4.35)
+di - disk information utility (version 4.36)
 
 CONTENTS
   Description
@@ -168,7 +168,7 @@ REQUIREMENTS
 
 PORTING
 
-    di 4.35 has been tested on the following platforms:
+    di 4.36 has been tested on the following platforms:
         AIX 7.1 (64-bit)
         CentOS 3.9, 5.2, 5.3, 5.4, 5.5, 6.3
         Debian 4.0, 5.0, 6.0, 6-kFreeBSD 8.1
@@ -205,6 +205,9 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+
+    4.36                                    [--]
+        Updated test for NFS remote filesystems.
 
     4.35                                    [2014-2-15]
         Updates for Irix.
