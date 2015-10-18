@@ -271,7 +271,7 @@ process_opt (info, opt, optinfo)
       return;
     }
     v = (const char **) opt->valptr;
-    *v = ptr;
+    *v = strdup (ptr); /* memory leak (one time) */
   } else if (opt->option_type == GETOPTN_FUNC_BOOL) {
     getoptn_func_bool_t f;
     if (opt->value2 == (void *) NULL) {
