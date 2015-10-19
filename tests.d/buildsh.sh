@@ -68,6 +68,7 @@ for d in C D; do
         #  clang: X warnings? generated.
         #  many: unrecognized #pragma ignored
         #  miros:gcc: someone does not honour COPTS correctly
+        #  gcc:fstack-protector not supported for this target
         # D:
         #  FLAGS= (makefile)
         #  --     (makefile)
@@ -110,6 +111,7 @@ for d in C D; do
           grep -v 'Unknown option.*-Wno-unused-parameter.*ignored' |
           grep -v 'unrecognized #pragma ignored' |
           grep -v 'someone does not honour COPTS correctly' |
+          grep -v 'fstack-protector not supported for this target' |
           grep -v FLAGS= |
           grep -v -- '--' |
           cat > make_extra.log
