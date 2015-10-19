@@ -673,7 +673,6 @@ di_getDiskEntries (diskInfo, diCount)
 #   define MNT_NUMTYPES (sizeof(mnt_names)/sizeof(char *))
 #  endif
 # endif
-# define DI_UNKNOWN_FSTYPE       "(%.2d)?"
 
 int
 # if _proto_stdc
@@ -793,6 +792,7 @@ di_getDiskEntries (diskInfo, diCount)
         sysfs (GETFSTYP, sp->f_type, diptr->fsType);
 #  else
 #   if _dcl_mnt_names && _mem_struct_statfs_f_type
+#    define DI_UNKNOWN_FSTYPE       "(%.2d)?"
         fstype = sp->f_type;
         if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
         {
@@ -817,8 +817,6 @@ di_getDiskEntries (diskInfo, diCount)
 #if _lib_getmntinfo \
     && ! _lib_getfsstat \
     && ! _lib_getvfsstat
-
-# define DI_UNKNOWN_FSTYPE       "(%.2d)?"
 
 /*
  * di_getDiskEntries
@@ -1047,6 +1045,8 @@ di_getDiskEntries (diskInfo, diCount)
 #  if _mem_struct_statfs_f_fstypename
         strncpy (diptr->fsType, mntbufp [idx].f_fstypename, DI_TYPE_LEN);
 #  else
+#   define DI_UNKNOWN_FSTYPE       "(%.2d)?"
+
             /* could use getvfsbytype here... */
         if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
         {

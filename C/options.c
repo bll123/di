@@ -49,7 +49,7 @@ struct pa_tmp {
 typedef struct
 {
     _print_size_t   size;
-    char            *disp[2];
+    const char      *disp[2];
 } dispTable_t;
 
 static dispTable_t dispTable [] =

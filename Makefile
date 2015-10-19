@@ -182,7 +182,7 @@ tar:
 clean:
 	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
 		checkbuild checkperlbuild checkinstall \
-		tests.done > /dev/null 2>&1
+		tests.done *~ > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) clean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null && $(MAKE) clean > /dev/null 2>&1)
 	@-(cd D >/dev/null && $(MAKE) clean > /dev/null 2>&1)
@@ -193,7 +193,7 @@ clean:
 realclean:
 	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
 		checkbuild checkperlbuild checkinstall \
-		tests.done > /dev/null 2>&1
+		tests.done *~ > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) realclean > /dev/null 2>&1)
 	@-(cd mkconfig >/dev/null && $(MAKE) realclean > /dev/null 2>&1)
 	@-(cd D >/dev/null && $(MAKE) realclean > /dev/null 2>&1)

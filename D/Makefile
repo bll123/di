@@ -78,7 +78,7 @@ di.env:	features/env.dat ../dioptions.dat
 clean:
 	@-rm -f di di.exe mi mi.exe \
 		*.o *.obj *.lst *.gcno *.gcda *.gcov \
-		mkconfig.log mkconfig.cache mkc*.vars \
+		mkconfig.log mkconfig.cache mkc*.vars *~ \
 		> /dev/null 2>&1
 
 # leaves:

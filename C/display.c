@@ -87,8 +87,8 @@ typedef struct
     _print_size_t   low;
     _print_size_t   high;
     _print_size_t   dbs;        /* display block size */
-    char            *format;
-    char            *suffix;
+    const char      *format;
+    const char      *suffix;
 } sizeTable_t;
 
 static sizeTable_t sizeTable [] =
@@ -690,7 +690,7 @@ printSpace (diopts, diout, usage, idx)
     _print_size_t   tdbs;
     _print_size_t   mult;
     _print_size_t   temp;
-    char            *suffix;
+    const char      *suffix;
     const char      *format;
 
 
@@ -811,7 +811,7 @@ processTitles (diopts, diout)
     Size_t          wlen;
     Size_t          *wlenptr;
     int             justification;
-    char            *pstr = { "" };
+    const char      *pstr = { "" };
     char            *fstr;
     Size_t          maxsize;
     char            tformat [30];

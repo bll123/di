@@ -237,7 +237,7 @@ typedef struct {
     Size_t       maxSpecialString;
     Size_t       maxTypeString;
     Size_t       width;
-    char         *dispBlockLabel;
+    const char   *dispBlockLabel;
     char         blockFormat [15];
     char         blockFormatNR [15];   /* no radix */
     char         inodeFormat [15];

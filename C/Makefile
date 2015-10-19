@@ -224,7 +224,7 @@ clean:
 		tests.done _tmp_mkconfig tests.d/chksh* \
 		mkconfig.cache mkc*.vars \
 		getoptn_test* gconfig.h getoptn.reqlibs \
-		mkconfig.reqlibs \
+		mkconfig.reqlibs *~ \
 		>/dev/null 2>&1
 
 # leaves:

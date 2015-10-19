@@ -174,13 +174,13 @@ getoption_value (info, opt)
 static int
 #if _proto_stdc
 dooptchecks (getoptn_info_t *info, getoptn_opt_t *opt,
-     getoptn_optinfo_t *optinfo, char *tag, Size_t sz)
+     getoptn_optinfo_t *optinfo, const char *tag, Size_t sz)
 #else
 dooptchecks (info, opt, optinfo, tag, sz)
     getoptn_info_t      *info;
     getoptn_opt_t       *opt;
     getoptn_optinfo_t   *optinfo;
-    char                *tag;
+    const char          *tag;
     Size_t              sz;
 #endif
 {

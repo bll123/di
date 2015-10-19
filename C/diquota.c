@@ -120,7 +120,7 @@ typedef union {
 # endif
 } qdata_t;
 
-static void di_process_quotas _((char *, diQuota_t *, int, int, qdata_t *));
+static void di_process_quotas _((const char *, diQuota_t *, int, int, qdata_t *));
 #endif
 
 #if _has_std_quotas && _lib_vquotactl
@@ -420,8 +420,8 @@ diquota (diqinfo)
   struct quotahandle    *qh;
 #endif
 #if _has_std_quotas && ! _lib_quota_open && ! _lib_vquotactl
-  int               ucmd;
-  int               gcmd;
+  int               ucmd = 0;
+  int               gcmd = 0;
 #endif
 
   if (debug > 5) {
@@ -708,11 +708,11 @@ diquota_nfs (diqinfo)
 #if _has_std_quotas
 static void
 # if _proto_stdc
-di_process_quotas (char *tag, diQuota_t *diqinfo,
+di_process_quotas (const char *tag, diQuota_t *diqinfo,
                   int rc, int xfsflag, qdata_t *qdata)
 # else
 di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
-  char          *tag;
+  const char    *tag;
   diQuota_t     *diqinfo;
   int           rc;
   int           xfsflag;

@@ -1219,7 +1219,7 @@ initLocale ()
   char      *ptr;
 #endif
 #if _enable_nls
-  char      *localeptr;
+  const char      *localeptr;
 #endif
 
 #if _lib_setlocale && defined (LC_ALL)
