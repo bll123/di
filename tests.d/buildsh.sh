@@ -66,7 +66,6 @@ for d in C D; do
         #  SCO_SV: warning: `/*' within comment
         #  clang: 'warning: unknown warning option'
         #  clang: X warnings? generated.
-        #  clang: discards qualifiers
         #  many: unrecognized #pragma ignored
         #  miros:gcc: someone does not honour COPTS correctly
         # D:
@@ -108,7 +107,6 @@ for d in C D; do
           grep -v 'Unknown option.*-Wno-unused-but-set-variable.*ignored' |
           grep -v 'warning: unknown warning option' |
           grep -v 'warning.*generated\.' |
-          grep -v 'discards qualifiers' |
           grep -v 'Unknown option.*-Wno-unused-parameter.*ignored' |
           grep -v 'unrecognized #pragma ignored' |
           grep -v 'someone does not honour COPTS correctly' |

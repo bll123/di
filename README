@@ -209,6 +209,7 @@ CHANGES
     4.37                                    [2015-10-18]
         Fixed a problem when processing the DI_ARGS environment variable.
         Hardened compiler options: reference: http://wiki.debian.org/Hardening
+        Code cleanup to fix compiler warnings.
 
     4.36                                    [2015-5-18]
         Updated test for NFS remote filesystems.
