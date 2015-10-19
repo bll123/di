@@ -133,7 +133,7 @@ processStringArgs (ptr, diData, dbsstr)
         tptr = strtok ((char *) NULL, DI_ARGV_SEP);
     }
     processArgs (nargc, nargv, diData, dbsstr, sizeof (dbsstr) - 1);
-    free ((char *) dptr); /* ### legal here? */
+    free ((char *) dptr);
   }
 }
 
