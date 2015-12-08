@@ -398,11 +398,9 @@ checkFileInfo (diData, optidx, argc, argv)
         for (j = 0; j < diData->count; ++j)
         {
           diDiskInfo_t    *dinfo;
-          int             ispooled;
           int             startpool;
           int             poolmain;
 
-          ispooled = FALSE;
           startpool = FALSE;
           poolmain = FALSE;
 
@@ -410,7 +408,6 @@ checkFileInfo (diData, optidx, argc, argv)
 
               /* is it a pooled filesystem type? */
           if (diData->haspooledfs && di_isPooledFs (dinfo)) {
-            ispooled = TRUE;
             if (lastpoollen == 0 ||
                 strncmp (lastpool, dinfo->special, lastpoollen) != 0)
             {
@@ -1215,22 +1212,19 @@ checkZone (diskInfo, zoneInfo, allFlag)
 static void
 initLocale ()
 {
-#if _enable_nls || (_lib_setlocale && defined (LC_ALL))
-  char      *ptr;
-#endif
 #if _enable_nls
   const char      *localeptr;
 #endif
 
 #if _lib_setlocale && defined (LC_ALL)
-  ptr = setlocale (LC_ALL, "");
+  setlocale (LC_ALL, "");
 #endif
 #if _enable_nls
   if ((localeptr = getenv ("DI_LOCALE_DIR")) == (char *) NULL) {
     localeptr = DI_LOCALE_DIR;
   }
-  ptr = bindtextdomain ("di", localeptr);
-  ptr = textdomain ("di");
+  bindtextdomain ("di", localeptr);
+  textdomain ("di");
 #endif
 }
 

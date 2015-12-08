@@ -215,9 +215,6 @@ printDiskInfo (diData)
     diskInfo = diData->diskInfo;
     if (diopts->printTotals)
     {
-        int                  allocated;
-
-        allocated = FALSE;
         if (diData->haspooledfs && ! diData->totsorted)
         {
           char tempSortType [DI_SORT_MAX + 1];
