@@ -243,6 +243,7 @@ distclean:
 	@$(MAKE) realclean > /dev/null 2>&1
 	@-$(RM) -rf tests.done test_di \
 		_mkconfig_runtests _tmp_mkconfig \
+		*~ *.orig */*.orig \
 		>/dev/null 2>&1
 
 ###

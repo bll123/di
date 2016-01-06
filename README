@@ -206,6 +206,9 @@ PORTING
 
 CHANGES
 
+    4.38                                    [2016-1-6]
+        Honor FreeBSD NO_PIE environment variable.
+
     4.37                                    [2015-10-18]
         Fixed a problem when processing the DI_ARGS environment variable.
         Hardened compiler options: reference: http://wiki.debian.org/Hardening
