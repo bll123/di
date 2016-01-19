@@ -48,6 +48,7 @@ DI_CPPFLAGS = -DDI_LOCALE_DIR=\"$(LOCALEDIR)\"
 MKC_DIR = ../mkconfig
 MKCONFIG_TYPE = sh
 MKC_REQLIB = di.reqlibs
+MKC_TCLREQLIB = di-tcl.reqlibs
 
 ###
 # main
@@ -60,6 +61,9 @@ all:	all-sh
 .PHONY: all-sh
 all-sh:	di.env
 	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=sh di-programs
+
+tcl-sh:	di-sh.env
+	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh tcl-programs
 
 .PHONY: all-perl
 all-perl:	di.env
@@ -74,6 +78,10 @@ test:		tests.done
 di.env:	features/env.dat ../dioptions.dat
 	@-$(RM) -f di.env tests.done
 	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh features/env.dat
+
+di-sh.env:	features/shenv.dat
+	@-$(RM) -f di-sh.env tests.done
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh features/shenv.dat
 
 ###
 # specific builds
@@ -214,12 +222,14 @@ xenix-cc:
 # cleaning
 
 # leaves:
-#   config.h di.reqlibs
-#   ../dioptions.dat, tests.done, test_di, di.env
+#   config.h configtcl.h di.reqlibs
+#   ../dioptions.dat, tests.done, test_di, di.env, di-sh.env
 .PHONY: clean
 clean:
 	@-$(RM) -rf di mi \
 		di.exe mingw-di.exe mi.exe \
+		tcldiskspace.bld diskspace.so diskspace.dylib \
+		diskspace.dll \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig tests.d/chksh* \
 		mkconfig.cache mkc*.vars \
@@ -233,7 +243,8 @@ clean:
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean > /dev/null 2>&1
-	@-$(RM) -rf config.h gconfig.h di.env $(MKC_REQLIB) \
+	@-$(RM) -rf config.h configtcl.h gconfig.h \
+		di.env di-sh.env $(MKC_REQLIB) $(MKC_TCLREQLIB) \
 		>/dev/null 2>&1
 
 # leaves:
@@ -258,6 +269,8 @@ install:	di-programs di.env
 
 .PHONY: di-programs
 di-programs:	di$(EXE_EXT)
+.PHONY: tcl-programs
+tcl-programs:	tcldiskspace.bld
 
 ###
 # configuration file
@@ -279,36 +292,73 @@ config.h:	di.env ../dioptions.dat features/mkconfig.dat
 		$(MKC_DIR)/mkconfig.pl \
 		features/mkconfig.dat; fi
 
+configtcl.h:	di-sh.env ../dioptions.dat features/mkconfig-tcl.dat
+	@-$(RM) -f configtcl.h
+	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
+		. ./di-sh.env;$(_MKCONFIG_SHELL) \
+		$(MKC_DIR)/mkconfig.sh \
+		features/mkconfig-tcl.dat; fi
+	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
+		. ./di-sh.env;perl \
+		$(MKC_DIR)/mkconfig.pl \
+		features/mkconfig-tcl.dat; fi
+
 $(MKC_REQLIB):	di.env config.h
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
 		-o $(MKC_REQLIB) config.h
+
+$(MKC_TCLREQLIB):	di.env configtcl.h
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
+		-o $(MKC_TCLREQLIB) configtcl.h
 
 
 ###
 # executables
 
-OBJECTS = di$(OBJ_EXT) didiskutil$(OBJ_EXT) \
+OBJECTS = dimain$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		diquota$(OBJ_EXT) display$(OBJ_EXT) getoptn$(OBJ_EXT) \
+		diquota$(OBJ_EXT)  display$(OBJ_EXT) getoptn$(OBJ_EXT) \
 		options$(OBJ_EXT) realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT)
 
-di$(EXE_EXT):	$(MKC_REQLIB) $(OBJECTS)
+MAINOBJECTS = di$(OBJ_EXT)
+
+TCLOBJECTS = tcldiskspace$(OBJ_EXT)
+
+di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(OBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
 	$(CC) -o di$(EXE_EXT) \
-		$(LDFLAGS) $(OBJECTS) $(LIBS) \
+		$(LDFLAGS) $(MAINOBJECTS) $(OBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_REQLIB)`
 
-mingw-di$(EXE_EXT):	$(OBJECTS)
+tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB) $(TCLOBJECTS) $(OBJECTS)
+	@echo "*** Using libs: `$(CAT) $(MKC_TCLREQLIB)` `$(CAT) $(MKC_REQLIB)`"
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
+		-sharedlib -e diskspace$(SHLIB_EXT) \
+		$(TCLOBJECTS) $(OBJECTS) $(LIBS) \
+		`$(CAT) $(MKC_TCLREQLIB)` `$(CAT) $(MKC_REQLIB)`
+	touch tcldiskspace.bld
+
+mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(OBJECTS)
 	$(CC) -o mingw-di$(EXE_EXT) \
 		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS)
 
 ###
 # objects
 
-di$(OBJ_EXT):		di.c config.h di.h display.h getoptn.h \
+di$(OBJ_EXT):		di.c config.h di.h dimain.h getoptn.h \
 				options.h version.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(DI_CPPFLAGS) di.c
+
+tcldiskspace$(OBJ_EXT):		tcldiskspace.c config.h di.h \
+				dimain.h getoptn.h \
+				options.h
+	$(CC) -c -DUSE_TCL_STUBS $(CFLAGS) $(CPPFLAGS) \
+		$(DI_CPPFLAGS) tcldiskspace.c
+
+dimain$(OBJ_EXT):	dimain.c config.h di.h dimain.h getoptn.h \
+				options.h
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(DI_CPPFLAGS) dimain.c
 
 digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) digetinfo.c

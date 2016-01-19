@@ -9,7 +9,7 @@
 # endif
 
     /* display.c */
-extern void printDiskInfo       _((diData_t *));
+extern char *printDiskInfo      _((diData_t *));
 extern void sortArray           _((diOptions_t *, diDiskInfo_t *, int, int));
 extern const char *getPrintFlagText _((int));
 

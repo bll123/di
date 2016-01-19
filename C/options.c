@@ -264,11 +264,19 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL  /*&diopts->csv_output*/,
         0     /*sizeof(diopts->csv_output)*/,
         NULL },
+    { "-C",     GETOPTN_BOOL,
+        NULL  /*&diopts->csv_tabs*/,
+        0     /*sizeof(diopts->csv_tabs)*/,
+        NULL },
     { "--csv-output", GETOPTN_ALIAS,
         (void *) "-c",
         0,
         NULL },
-    { "-d",     GETOPTN_STRING,
+    { "--csv-tabs", GETOPTN_ALIAS,
+        (void *) "-C",
+        0,
+        NULL },
+    { "-d",     GETOPTN_STRING,                 /* 10 */
         NULL  /*dbsstr*/,
         0  /*dbsstr_sz*/,
         NULL },
@@ -276,11 +284,11 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         (void *) "-d",
         0,
         NULL },
-    { "--dont-resolve-symlink",     GETOPTN_ALIAS,  /* 10 */
+    { "--dont-resolve-symlink",     GETOPTN_ALIAS,  /* 12 */
         (void *) "-R",
         0,
         NULL },
-    { "-f",     GETOPTN_STRPTR,             /* 11 */
+    { "-f",     GETOPTN_STRPTR,             /* 13 */
         NULL  /*&diopts->formatString*/,
         0,
         NULL },
@@ -296,11 +304,11 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL  /*dbsstr*/,
         0  /*dbsstr_sz*/,
         (void *) "g" },
-    { "-h",     GETOPTN_STRING,            /* 15 */
+    { "-h",     GETOPTN_STRING,            /* 17 */
         NULL  /*dbsstr*/,
         0  /*dbsstr_sz*/,
         (void *) "h" },
-    { "-H",     GETOPTN_STRING,             /* 16 */
+    { "-H",     GETOPTN_STRING,             /* 18 */
         NULL  /*dbsstr*/,
         0  /*dbsstr_sz*/,
         (void *) "H" },
@@ -316,11 +324,11 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL,
         0,
         NULL  /*processOptions*/ },
-    { "-i",     GETOPTN_ALIAS,              /* 20 */
+    { "-i",     GETOPTN_ALIAS,              /* 22 */
         (void *) "-x",
         0,
         NULL },
-    { "-I",     GETOPTN_FUNC_VALUE,         /* 21 */
+    { "-I",     GETOPTN_FUNC_VALUE,         /* 23 */
         NULL  /*&padata*/,
         0,
         NULL  /*processOptionsVal*/ },
@@ -336,11 +344,11 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL  /*&diopts->localOnly*/,
         0  /*sizeof (diopts->localOnly)*/,
         NULL },
-    { "--local",GETOPTN_ALIAS,              /* 25 */
+    { "--local",GETOPTN_ALIAS,              /* 27 */
         (void *) "-l",
         0,
         NULL },
-    { "-L",     GETOPTN_BOOL,               /* 26 */
+    { "-L",     GETOPTN_BOOL,               /* 28 */
         NULL  /*&diopts->excludeLoopback*/,
         0  /*sizeof (diopts->excludeLoopback)*/,
         NULL },
@@ -356,11 +364,11 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL,
         0,
         NULL },
-    { "-P",     GETOPTN_FUNC_BOOL,          /* 30 */
+    { "-P",     GETOPTN_FUNC_BOOL,          /* 32 */
         NULL  /*&padata*/,
         0,
         NULL  /*processOptions*/ },
-    { "--portability",  GETOPTN_ALIAS,      /* 31 */
+    { "--portability",  GETOPTN_ALIAS,      /* 33 */
         (void *) "-P",
         0,
         NULL },
@@ -376,15 +384,15 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL  /*&diopts->dontResolveSymlink*/,
         0  /*sizeof (diopts->dontResolveSymlink)*/,
         NULL },
-    { "-s",     GETOPTN_FUNC_VALUE,         /* 35 */
+    { "-s",     GETOPTN_FUNC_VALUE,         /* 37 */
         NULL  /*&padata*/,
         0,
         NULL  /*processOptionsVal*/ },
-    { "--si",   GETOPTN_FUNC_BOOL,          /* 36 */
+    { "--si",   GETOPTN_FUNC_BOOL,          /* 38 */
         NULL  /*&padata*/,
         0,
         NULL  /*processOptions*/ },
-    { "--sync", GETOPTN_IGNORE,             /* 37 */
+    { "--sync", GETOPTN_IGNORE,             /* 39 */
         NULL,
         0,
         NULL },
@@ -396,15 +404,15 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         (void *) "-t",
         0,
         NULL },
-    { "--type", GETOPTN_ALIAS,              /* 40 */
+    { "--type", GETOPTN_ALIAS,              /* 42 */
         (void *) "-I",
         0,
         NULL },
-    { "-v",     GETOPTN_IGNORE,             /* 41 */
+    { "-v",     GETOPTN_IGNORE,             /* 43 */
         NULL,
         0,
         NULL },
-    { "--version", GETOPTN_FUNC_BOOL,       /* 42 */
+    { "--version", GETOPTN_FUNC_BOOL,       /* 44 */
         NULL,
         0,
         NULL  /*processOptions*/ },
@@ -420,7 +428,7 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL  /*&padata*/,
         0,
         NULL  /*processOptionsVal*/ },
-    { "--exclude-type",     GETOPTN_ALIAS,  /* 46 */
+    { "--exclude-type",     GETOPTN_ALIAS,  /* 48 */
         (void *) "-x",
         0,
         NULL },
@@ -428,7 +436,7 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         NULL  /*&padata*/,
         0,
         NULL  /*processOptionsVal*/ },
-    { "-z",     GETOPTN_STRING,             /* 48 */
+    { "-z",     GETOPTN_STRING,             /* 50 */
         NULL  /*&diData->zoneInfo.zoneDisplay*/,
         0  /*sizeof (diData->zoneInfo.zoneDisplay)*/,
         NULL },
@@ -437,9 +445,9 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         0  /*sizeof (diData->zoneInfo.zoneDisplay)*/,
         (void *) "all" }
   };
-  static int dbsids[] = { 8, 14, 15, 16, 23, 27 };
-  static int paidb[] = { 1, 17, 19, 30, 36, 42, };
-  static int paidv[] = { 3, 21, 35, 45, 47 };
+  static int dbsids[] = { 8, 16, 17, 18, 25, 29 };
+  static int paidb[] = { 1, 19, 21, 32, 38, 44, };
+  static int paidv[] = { 3, 23, 37, 47, 49 };
 
   diopts = &diData->options;
   diout = &diData->output;
@@ -450,27 +458,29 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
   opts[0].valptr = (void *) &diopts->formatString;   /* -A */
   opts[6].valptr = (void *) &diopts->csv_output;     /* -c */
   opts[6].valsiz = sizeof (diopts->csv_output);
-  opts[11].valptr = (void *) &diopts->formatString;  /* -f */
-  opts[24].valptr = (void *) &diopts->localOnly;     /* -l */
-  opts[24].valsiz = sizeof (diopts->localOnly);
-  opts[26].valptr = (void *) &diopts->excludeLoopback; /* -L */
-  opts[26].valsiz = sizeof (diopts->excludeLoopback);
-  opts[28].valptr = (void *) &diopts->printHeader;   /* -n */
-  opts[28].valsiz = sizeof (diopts->printHeader);
-  opts[33].valptr = (void *) &diopts->quota_check;    /* -q */
-  opts[33].valsiz = sizeof (diopts->quota_check);
-  opts[34].valptr = (void *) &diopts->dontResolveSymlink;    /* -R */
-  opts[34].valsiz = sizeof (diopts->dontResolveSymlink);
-  opts[38].valptr = (void *) &diopts->printTotals;    /* -t */
-  opts[38].valsiz = sizeof (diopts->printTotals);
-  opts[43].valptr = (void *) &diout->width;          /* -w */
-  opts[43].valsiz = sizeof (diout->width);
-  opts[44].valptr = (void *) &diout->inodeWidth;     /* -W */
-  opts[44].valsiz = sizeof (diout->inodeWidth);
-  opts[48].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -z */
-  opts[48].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
-  opts[49].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -Z */
-  opts[49].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
+  opts[7].valptr = (void *) &diopts->csv_tabs;     /* -C */
+  opts[7].valsiz = sizeof (diopts->csv_tabs);
+  opts[13].valptr = (void *) &diopts->formatString;  /* -f */
+  opts[26].valptr = (void *) &diopts->localOnly;     /* -l */
+  opts[26].valsiz = sizeof (diopts->localOnly);
+  opts[28].valptr = (void *) &diopts->excludeLoopback; /* -L */
+  opts[28].valsiz = sizeof (diopts->excludeLoopback);
+  opts[30].valptr = (void *) &diopts->printHeader;   /* -n */
+  opts[30].valsiz = sizeof (diopts->printHeader);
+  opts[35].valptr = (void *) &diopts->quota_check;    /* -q */
+  opts[35].valsiz = sizeof (diopts->quota_check);
+  opts[36].valptr = (void *) &diopts->dontResolveSymlink;    /* -R */
+  opts[36].valsiz = sizeof (diopts->dontResolveSymlink);
+  opts[40].valptr = (void *) &diopts->printTotals;    /* -t */
+  opts[40].valsiz = sizeof (diopts->printTotals);
+  opts[45].valptr = (void *) &diout->width;          /* -w */
+  opts[45].valsiz = sizeof (diout->width);
+  opts[46].valptr = (void *) &diout->inodeWidth;     /* -W */
+  opts[46].valsiz = sizeof (diout->inodeWidth);
+  opts[50].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -z */
+  opts[50].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
+  opts[51].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -Z */
+  opts[51].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
 
   for (i = 0; i < (int) (sizeof (dbsids) / sizeof (int)); ++i) {
     opts[dbsids[i]].valptr = (void *) dbsstr;
@@ -494,6 +504,9 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
   optidx = getoptn (GETOPTN_LEGACY, argc, argv,
        sizeof (opts) / sizeof (getoptn_opt_t), opts);
 
+  if (diopts->csv_tabs) {
+    diopts->csv_output = TRUE;
+  }
   if (diopts->csv_output) {
     diopts->printTotals = FALSE;
   }

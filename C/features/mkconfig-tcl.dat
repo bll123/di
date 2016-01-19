@@ -1,0 +1,14 @@
+option-file ../dioptions.dat
+
+loadunit c-main
+
+output  configtcl.h
+
+hdr     tcl.h
+# assuming that tclConfig.sh could be located,
+# some of this information could be pulled from it.
+# linux, freebsd, mac os x
+lib     Tcl_InitStubs -ltclstub8.6, -L/usr/local/lib -ltclstub86, -L/opt/local/lib -ltclstub8.6
+if notTcl_InitStubs ! _lib_Tcl_InitStubs
+ lib     Tcl_PkgRequire -ltcl8.6, -L/usr/local/lib -ltcl86, -L/opt/local/lib -ltcl8.6
+endif

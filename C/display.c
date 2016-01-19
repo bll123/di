@@ -1,7 +1,4 @@
 /*
- * $Id$
- * $Source$
- *
  * Copyright 1994-2013 Brad Lanam, Walnut Creek, CA
  */
 
@@ -115,11 +112,14 @@ static void getMaxFormatLengths _((diData_t *));
 static int  diCompare           _((const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int));
 static int  findDispSize        _((_print_size_t));
 static Size_t istrlen           _((const char *));
-static void printInfo           _((diDiskInfo_t *, diOptions_t *, diOutput_t *));
-static void printSpace          _((const diOptions_t *, const diOutput_t *, _fs_size_t, int));
-static void processTitles       _((diOptions_t *, diOutput_t *));
-static void printPerc           _((_fs_size_t, _fs_size_t, const char *));
+static char *printInfo          _((diDiskInfo_t *, diOptions_t *, diOutput_t *));
+static char *printSpace         _((const diOptions_t *, const diOutput_t *, _fs_size_t, int));
+static char *processTitles      _((diOptions_t *, diOutput_t *));
+static char *printPerc          _((_fs_size_t, _fs_size_t, const char *));
 static void initSizeTable       _((diOptions_t *, diOutput_t *));
+static void appendFormatStr     _((char *, const char *, char **, Size_t *, Size_t *));
+static void appendFormatVal     _((char *, Size_t, char **, Size_t *, Size_t *));
+static void append              _((char *, char **, Size_t *, Size_t *));
 
 #if defined (__cplusplus) || defined (c_plusplus)
   }
@@ -136,7 +136,7 @@ static void initSizeTable       _((diOptions_t *, diOutput_t *));
  *
  */
 
-void
+char *
 #if _proto_stdc
 printDiskInfo (diData_t *diData)
 #else
@@ -152,7 +152,14 @@ printDiskInfo (diData)
     Size_t              lastpoollen = { 0 };
     int                 inpool = { FALSE };
     diOutput_t          *diout;
+    char                *out;
+    Size_t              outlen;
+    Size_t              outcurrlen;
+    char                *tout;
 
+    out = (char *) NULL;
+    outlen = 0;
+    outcurrlen = 0;
     lastpool[0] = '\0';
     diopts = &diData->options;
     diout = &diData->output;
@@ -166,7 +173,11 @@ printDiskInfo (diData)
     }
 
     getMaxFormatLengths (diData);
-    processTitles (diopts, diout);
+    tout = processTitles (diopts, diout);
+    if (diopts->printHeader) {
+      append (tout, &out, &outcurrlen, &outlen);
+    }
+    free (tout);
 
     if (diopts->dispBlockSize == DI_DISP_HR ||
         diopts->dispBlockSize == DI_DISP_HR_2)
@@ -299,13 +310,18 @@ printDiskInfo (diData)
         continue;
       }
 
-      printInfo (dinfo, diopts, diout);
+      tout = printInfo (dinfo, diopts, diout);
+      append (tout, &out, &outcurrlen, &outlen);
+      free (tout);
     }
 
     if (diopts->printTotals)
     {
-      printInfo (&totals, diopts, diout);
+      tout = printInfo (&totals, diopts, diout);
+      append (tout, &out, &outcurrlen, &outlen);
+      free (tout);
     }
+    return out;
 }
 
 /*
@@ -380,6 +396,69 @@ getPrintFlagText (pf)
 }
 
 
+static void
+#if _proto_stdc
+appendFormatStr (char *fmt, const char *val, char **ptr, Size_t *clen, Size_t *len)
+#else
+appendFormatStr (fmt, val, ptr, clen, len)
+  char *fmt;
+  const char *val;
+  char **ptr;
+  Size_t *clen;
+  Size_t *len;
+#endif
+{
+  char          tdata [1024];
+
+  Snprintf1 (tdata, sizeof(tdata), fmt, val);
+  append (tdata, ptr, clen, len);
+}
+
+static void
+#if _proto_stdc
+appendFormatVal (char *fmt, Size_t val, char **ptr, Size_t *clen, Size_t *len)
+#else
+appendFormatVal (fmt, val, ptr, clen, len)
+  char *fmt;
+  Size_t val;
+  char **ptr;
+  Size_t *clen;
+  Size_t *len;
+#endif
+{
+  char          tdata [1024];
+
+  Snprintf1 (tdata, sizeof(tdata), fmt, val);
+  append (tdata, ptr, clen, len);
+}
+
+static void
+#if _proto_stdc
+append (char *val, char **ptr, Size_t *clen, Size_t *len)
+#else
+append (val, ptr, len)
+  char      *val;
+  char      **ptr;
+  Size_t    *clen;
+  Size_t    *len;
+#endif
+{
+  Size_t    vlen;
+  Size_t    bumplen;
+  Size_t    nlen;
+
+  bumplen = 100;
+  vlen = strlen (val);
+  if (*clen + vlen >= *len) {
+    nlen = vlen + *clen + 1;
+    *ptr = realloc (*ptr, nlen);
+    memset (*ptr+*clen, 0, nlen-*clen);
+    *len = nlen;
+  }
+  strcat (*ptr, val);
+  *clen += vlen;
+}
+
 /*
  * printInfo
  *
@@ -388,7 +467,7 @@ getPrintFlagText (pf)
  *
  */
 
-static void
+static char *
 #if _proto_stdc
 printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
 #else
@@ -409,6 +488,15 @@ printInfo (diskInfo, diopts, diout)
     static char         percFormat [15];
     static int          percInit = FALSE;
     int                 first;
+    char                ttext[2];
+    char                *out;
+    char                *tout;
+    Size_t              outlen;
+    Size_t              outcurrlen;
+
+    out = (char *) NULL;
+    outlen = 0;
+    outcurrlen = 0;
 
     first = TRUE;
     if (! percInit) {
@@ -502,7 +590,13 @@ printInfo (diskInfo, diopts, diout)
       }
       if (valid && diopts->csv_output) {
         if (! first) {
-          printf (",");
+          char      *t;
+
+          t = ",";
+          if (diopts->csv_tabs) {
+            t = "	"; /* tab here */
+          }
+          append (t, &out, &outcurrlen, &outlen);
         }
         first = FALSE;
       }
@@ -512,46 +606,52 @@ printInfo (diskInfo, diopts, diout)
         case DI_FMT_MOUNT:
         case DI_FMT_MOUNT_FULL:
         {
-          printf (diout->mountFormat, diskInfo->name);
+          appendFormatStr (diout->mountFormat, diskInfo->name, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BTOT:
         {
-          printSpace (diopts, diout, diskInfo->totalSpace, idx);
+          tout = printSpace (diopts, diout, diskInfo->totalSpace, idx);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BTOT_AVAIL:
         {
-          printSpace (diopts, diout, diskInfo->totalSpace -
+          tout = printSpace (diopts, diout, diskInfo->totalSpace -
               (diskInfo->freeSpace - diskInfo->availSpace), idx);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BUSED:
         {
-          printSpace (diopts, diout,
+          tout = printSpace (diopts, diout,
               diskInfo->totalSpace - diskInfo->freeSpace, idx);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BCUSED:
         {
-          printSpace (diopts, diout,
+          tout = printSpace (diopts, diout,
               diskInfo->totalSpace - diskInfo->availSpace, idx);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BFREE:
         {
-          printSpace (diopts, diout, diskInfo->freeSpace, idx);
+          tout = printSpace (diopts, diout, diskInfo->freeSpace, idx);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BAVAIL:
         {
-          printSpace (diopts, diout, diskInfo->availSpace, idx);
+          tout = printSpace (diopts, diout, diskInfo->availSpace, idx);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -559,7 +659,8 @@ printInfo (diskInfo, diopts, diout)
         {
           used = diskInfo->totalSpace - diskInfo->availSpace;
           totAvail = diskInfo->totalSpace;
-          printPerc (used, totAvail, percFormat);
+          tout = printPerc (used, totAvail, percFormat);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -567,7 +668,8 @@ printInfo (diskInfo, diopts, diout)
         {
           used = diskInfo->totalSpace - diskInfo->freeSpace;
           totAvail = diskInfo->totalSpace;
-          printPerc (used, totAvail, percFormat);
+          tout = printPerc (used, totAvail, percFormat);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -576,7 +678,8 @@ printInfo (diskInfo, diopts, diout)
           used = diskInfo->totalSpace - diskInfo->freeSpace;
           totAvail = diskInfo->totalSpace -
                   (diskInfo->freeSpace - diskInfo->availSpace);
-          printPerc (used, totAvail, percFormat);
+          tout = printPerc (used, totAvail, percFormat);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -585,7 +688,8 @@ printInfo (diskInfo, diopts, diout)
           _fs_size_t          bfree;
           bfree = diskInfo->availSpace;
           totAvail = diskInfo->totalSpace;
-          printPerc (bfree, totAvail, percFormat);
+          tout = printPerc (bfree, totAvail, percFormat);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -594,25 +698,29 @@ printInfo (diskInfo, diopts, diout)
           _fs_size_t          bfree;
           bfree = diskInfo->freeSpace;
           totAvail = diskInfo->totalSpace;
-          printPerc (bfree, totAvail, percFormat);
+          tout = printPerc (bfree, totAvail, percFormat);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_ITOT:
         {
-          printf (diout->inodeFormat, diskInfo->totalInodes);
+          appendFormatVal (diout->inodeFormat, diout->inodeWidth, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_IUSED:
         {
-          printf (diout->inodeFormat, diskInfo->totalInodes - diskInfo->freeInodes);
+          appendFormatVal (diout->inodeFormat,
+              diskInfo->totalInodes - diskInfo->freeInodes,
+              &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_IFREE:
         {
-          printf (diout->inodeFormat, diskInfo->freeInodes);
+          appendFormatVal (diout->inodeFormat, diskInfo->freeInodes,
+              &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -620,32 +728,34 @@ printInfo (diskInfo, diopts, diout)
         {
           used = diskInfo->totalInodes - diskInfo->availInodes;
           totAvail = diskInfo->totalInodes;
-          printPerc (used, totAvail, percFormat);
+          tout = printPerc (used, totAvail, percFormat);
+          append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_SPECIAL:
         case DI_FMT_SPECIAL_FULL:
         {
-          printf (diout->specialFormat, diskInfo->special);
+          appendFormatStr (diout->specialFormat, diskInfo->special,
+              &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_TYPE:
         case DI_FMT_TYPE_FULL:
         {
-          printf (diout->typeFormat, diskInfo->fsType);
+          appendFormatStr (diout->typeFormat, diskInfo->fsType, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_MOUNT_OPTIONS:
         {
-          if (diopts->csv_output) {
-            printf ("\"");
+          if (diopts->csv_output && ! diopts->csv_tabs) {
+            append ("\"", &out, &outcurrlen, &outlen);
           }
-          printf (diout->optFormat, diskInfo->options);
-          if (diopts->csv_output) {
-            printf ("\"");
+          appendFormatStr (diout->optFormat, diskInfo->options, &out, &outcurrlen, &outlen);
+          if (diopts->csv_output && ! diopts->csv_tabs) {
+            append ("\"", &out, &outcurrlen, &outlen);
           }
           break;
         }
@@ -657,7 +767,9 @@ printInfo (diskInfo, diopts, diout)
 
         default:
         {
-          printf ("%c", *ptr);
+          ttext[0] = *ptr;
+          ttext[1] = '\0';
+          append (ttext, &out, &outcurrlen, &outlen);
           break;
         }
       }
@@ -665,14 +777,15 @@ printInfo (diskInfo, diopts, diout)
       ++ptr;
       if (! diopts->csv_output && *ptr && valid)
       {
-        printf (" ");
+        append (" ", &out, &outcurrlen, &outlen);
       }
     }
 
-    printf ("\n");
+    append ("\n", &out, &outcurrlen, &outlen);
+    return out;
 }
 
-static void
+static char *
 #if _proto_stdc
 printSpace (const diOptions_t *diopts, const diOutput_t *diout,
              _fs_size_t usage, int idx)
@@ -689,6 +802,7 @@ printSpace (diopts, diout, usage, idx)
     _print_size_t   temp;
     const char      *suffix;
     const char      *format;
+    static char     tdata [1024];
 
 
     suffix = "";
@@ -717,7 +831,8 @@ printSpace (diopts, diout, usage, idx)
     }
 
     mult = 1.0 / tdbs;
-    printf (format, (_print_size_t) usage * mult, suffix);
+    Snprintf2 (tdata, sizeof(tdata), format, (_print_size_t) usage * mult, suffix);
+    return tdata;
 }
 
 
@@ -794,7 +909,7 @@ addTotals (diskInfo, totals, inpool)
  *
  */
 
-static void
+static char *
 #if _proto_stdc
 processTitles (diOptions_t *diopts, diOutput_t *diout)
 #else
@@ -812,10 +927,15 @@ processTitles (diopts, diout)
     char            *fstr;
     Size_t          maxsize;
     char            tformat [30];
-    char            ttitle [2];
+    char            ttext [2];
     int             first;
+    char            *out;
+    Size_t          outcurrlen;
+    Size_t          outlen;
 
-
+    out = (char *) NULL;
+    outlen = 0;
+    outcurrlen = 0;
     first = TRUE;
     if (diopts->printDebugHeader)
     {
@@ -1033,9 +1153,9 @@ processTitles (diopts, diout)
 
             default:
             {
-              if (diopts->printHeader) {
-                printf ("%c", *ptr);
-              }
+              ttext[0] = *ptr;
+              ttext[1] = '\0';
+              append (ttext, &out, &outcurrlen, &outlen);
               valid = FALSE;
               break;
             }
@@ -1059,24 +1179,31 @@ processTitles (diopts, diout)
           Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
               jstr, (int) tlen, (int) tlen);
 
-          if (diopts->printHeader) {
-            if (diopts->csv_output) {
-              if (! first) {
-                printf (",");
+          if (diopts->csv_output) {
+            if (! first) {
+              if (diopts->csv_tabs) {
+                append ("	", &out, &outcurrlen, &outlen); /* tab here */
+              } else {
+                append (",", &out, &outcurrlen, &outlen);
               }
-              first = FALSE;
             }
-            if (diopts->csv_output) {
-              ttitle[0] = *ptr;
-              ttitle[1] = '\0';
-              printf ("%s", ttitle);
-            } else {
-              printf (tformat, pstr);
-            }
+            first = FALSE;
           }
+          if (diopts->csv_output) {
+            ttext[0] = *ptr;
+            ttext[1] = '\0';
+            append (ttext, &out, &outcurrlen, &outlen);
+          } else {
+            appendFormatStr (tformat, pstr, &out, &outcurrlen, &outlen);
+          }
+
           if (fstr != (char *) NULL) {
             if (diopts->csv_output) {
-              strncpy (tformat, "\"%s\"", sizeof (tformat));
+              if (diopts->csv_tabs) {
+                strncpy (tformat, "%s", sizeof (tformat));
+              } else {
+                strncpy (tformat, "\"%s\"", sizeof (tformat));
+              }
             }
             if (tlen != len) {
               if (! diopts->csv_output) {
@@ -1092,17 +1219,14 @@ processTitles (diopts, diout)
         }
 
         ++ptr;
-        if (diopts->printHeader) {
-          if (! diopts->csv_output && *ptr && valid)
-          {
-              printf (" ");
-          }
+        if (! diopts->csv_output && *ptr && valid)
+        {
+          append (" ", &out, &outcurrlen, &outlen);
         }
     }
 
-    if (diopts->printHeader) {
-      printf ("\n");
-    }
+    append ("\n", &out, &outcurrlen, &outlen);
+    return out;
 }
 
 /*
@@ -1112,7 +1236,7 @@ processTitles (diopts, diout)
  *
  */
 
-static void
+static char *
 #if _proto_stdc
 printPerc (_fs_size_t used, _fs_size_t totAvail, const char *format)
 #else
@@ -1122,19 +1246,19 @@ printPerc (used, totAvail, format)
     const char      *format;
 #endif
 {
-    _print_size_t      perc;
+    _print_size_t   perc;
+    static char     tdata [1024];
 
-
-    if (totAvail > 0L)
-    {
+    if (totAvail > 0L) {
         perc = (_print_size_t) used / (_print_size_t) totAvail;
         perc *= 100.0;
     }
-    else
-    {
+    else {
         perc = 0.0;
     }
-    printf (format, perc);
+
+    Snprintf1 (tdata, sizeof(tdata), format, perc);
+    return tdata;
 }
 
 

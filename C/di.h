@@ -220,6 +220,7 @@ typedef struct {
     unsigned int    posix_compat;
     unsigned int    quota_check;
     unsigned int    csv_output;
+    unsigned int    csv_tabs;
     unsigned int    excludeLoopback;
     unsigned int    printTotals;
     unsigned int    printDebugHeader;

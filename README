@@ -206,8 +206,14 @@ PORTING
 
 CHANGES
 
+    4.39                                    [--]
+        Added a Tcl interface.
+        Fixed CSV header to honor -n flag.
+        Update mkconfig to version 1.27
+
     4.38                                    [2016-1-6]
         Honor FreeBSD NO_PIE environment variable.
+        Update mkconfig to version 1.26
 
     4.37                                    [2015-10-18]
         Fixed a problem when processing the DI_ARGS environment variable.

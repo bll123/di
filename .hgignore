@@ -11,9 +11,15 @@ w.*
 *.log
 C/*.cache
 C/*.vars
+C/*.so
+C/*.dylib
 C/config.h
+C/configtcl.h
 C/di.env
+C/di-sh.env
 C/di.reqlibs
+C/di-tcl.reqlibs
 C/di
+C/tcldiskspace.bld
 *~
 dioptions.dat
