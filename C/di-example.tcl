@@ -10,3 +10,4 @@
 set lfn [file normalize [file join [file dirname [info script]] diskspace.so]]
 load $lfn
 puts [diskspace /]
+puts [diskspace -f SMbuvpT /]

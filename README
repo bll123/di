@@ -3,6 +3,7 @@ di - disk information utility (version 4.36)
 CONTENTS
   Description
   Installation
+  Tcl
   Bugs and Known Issues
   Requirements
   Porting Information
@@ -104,6 +105,19 @@ INSTALLATION
 
     If this is needed on your system, do:
         make installperms
+
+TCL
+
+    To build:
+
+      make tcl-sh
+
+    See C/di-example.tcl
+
+    When running from Tcl, the following option defaults are changed:
+      CSV output set on (-c).
+      CSV tabbed output set on (-C).
+      No headers (-n).
 
 BUGS AND KNOWN ISSUES
     What's Not Tested:
