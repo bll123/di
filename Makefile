@@ -76,6 +76,11 @@ all-c:
 	$(MAKE) checkbuild
 	cd C >/dev/null && $(MAKE) -e all
 
+.PHONY: tcl-sh
+tcl-sh:
+	$(MAKE) checkbuild
+	cd C >/dev/null && $(MAKE) -e tcl-sh
+
 .PHONY: all-d
 all-d:
 	$(MAKE) checkbuild

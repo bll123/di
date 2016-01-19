@@ -199,8 +199,13 @@ printDiskInfo (diData)
       if (diopts->csv_output) {
         Snprintf1 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
             "%%.0%s%%s", DI_Lf);
-        Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
-            "\"%%.1%s%%s\"", DI_Lf);
+        if (diopts->csv_tabs) {
+          Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
+              "%%.1%s%%s", DI_Lf);
+        } else {
+          Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
+              "\"%%.1%s%%s\"", DI_Lf);
+        }
       } else {
         Snprintf2 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
             "%%%d.0%s%%s", (int) diout->width, DI_Lf);
