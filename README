@@ -209,6 +209,7 @@ CHANGES
     4.39                                    [--]
         Added a Tcl interface.
         Fixed CSV header to honor -n flag.
+        Added -C, --csv-tabs to output CSV with tabs.
         Update mkconfig to version 1.27
 
     4.38                                    [2016-1-6]

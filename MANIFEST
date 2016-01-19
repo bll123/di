@@ -11,8 +11,11 @@ C/configs/config.vms        config.h for VMS
 C/configs/config.vms.b      alternate config.h for VMS
 C/configs/config.win        config.h for windows
 C/configs/conf.xenix.cc     config.h for XENIX
+C/di-example.tcl          example tcl script
 C/di.c                    di source
 C/di.h                    di source
+C/dimain.c                di source
+C/dimain.h                di source
 C/didiskutil.c            di source
 C/digetentries.c          di source
 C/digetinfo.c             di source
@@ -22,8 +25,10 @@ C/display.c               di source
 C/display.h               di source
 C/features/               di configuration
 C/features/env.dat          environment configuration
+C/features/shenv.dat        tcl environment configuration
 C/features/getoptn.dat      getoptn test configuration
 C/features/mkconfig.dat     mkconfig configuration
+C/features/mkconfig-tcl.dat additional tcl configuration
 C/getoptn.c               di source
 C/getoptn.h               di source
 C/options.c               di source
@@ -31,6 +36,7 @@ C/options.h               di source
 C/realloc.c               di source
 C/strdup.c                di source
 C/strstr.c                di source
+C/tcldiskspace.c          tcl interface script
 C/tests.d/                regression tests for di
 C/tests.d/buildpl.sh
 C/tests.d/compshpl.sh

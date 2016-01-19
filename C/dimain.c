@@ -150,7 +150,6 @@ dimainproc (argc, argv, tclflag)
     diopts->quota_check = TRUE;
     diopts->csv_output = FALSE;
     diopts->csv_tabs = FALSE;
-    diopts->csv_header = FALSE;
 
     diout = &diData.output;
     diout->width = 8;
