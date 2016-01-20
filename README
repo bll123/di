@@ -56,6 +56,11 @@ INSTALLATION
     Alternative 2 - builds a new config.h file (Cygwin).
       make -e config.h
       make -e
+    Alternative 3 - builds a new config.h file (MSYS)
+      # make sure your PATH is set properly
+      export MAKE=mingw32-make
+      write dioptions.dat # change WINAPI=F to WINAPI=T
+      $MAKE _MKCONFIG_SHELL=bash CC=gcc
 
     You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.
