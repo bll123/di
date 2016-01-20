@@ -153,12 +153,10 @@ diskspaceObjCmd (interp, objc, objv)
     addWideToDict (interp, tempDictObj, "availableinodes", dinfo->availInodes);
     addStringToDict (interp, tempDictObj, "mountoptions", dinfo->options);
     mountKey = Tcl_NewStringObj (dinfo->name, -1);
-    Tcl_IncrRefCount (tempDictObj);
     Tcl_DictObjPut (interp, dictObj, mountKey, tempDictObj);
     dispPtr = strtok (NULL, "\n");
   }
 
-  Tcl_IncrRefCount (dictObj);
   Tcl_SetObjResult(interp, dictObj);
   free (rv);
   cleanup (diDataOut);
@@ -182,8 +180,6 @@ addStringToDict (interp, dict, nm, val)
 
   tempObj1 = Tcl_NewStringObj (nm, -1);
   tempObj2 = Tcl_NewStringObj (val, -1);
-  Tcl_IncrRefCount (tempObj1);
-  Tcl_IncrRefCount (tempObj2);
   Tcl_DictObjPut (interp, dict, tempObj1, tempObj2);
 }
 
@@ -206,8 +202,6 @@ addWideToDict (interp, dict, nm, val)
   wideVal = (Tcl_WideInt) val;
   tempObj1 = Tcl_NewStringObj (nm, -1);
   tempObj2 = Tcl_NewWideIntObj (wideVal);
-  Tcl_IncrRefCount (tempObj1);
-  Tcl_IncrRefCount (tempObj2);
   Tcl_DictObjPut (interp, dict, tempObj1, tempObj2);
 }
 
