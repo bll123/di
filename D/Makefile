@@ -6,10 +6,8 @@
 #  $Id$
 #
 
-SHELL = /bin/sh
 OBJ_EXT = .o
 EXE_EXT =
-MAKE = make
 
 CC = cc
 DC = gdc

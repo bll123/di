@@ -6,8 +6,6 @@
 #  $Id$
 #
 
-SHELL = /bin/sh
-MAKE = make
 FROMDIR = C
 
 ###
@@ -69,17 +67,17 @@ MANPERM = 644
 .PHONY: all
 all:
 	$(MAKE) checkbuild
-	cd C >/dev/null && $(MAKE) -e all
+	cd C >/dev/null && $(MAKE) CC=$(CC) -e all
 
 .PHONY: all-c
 all-c:
 	$(MAKE) checkbuild
-	cd C >/dev/null && $(MAKE) -e all
+	cd C >/dev/null && $(MAKE) CC=$(CC) -e all
 
 .PHONY: tcl-sh
 tcl-sh:
 	$(MAKE) checkbuild
-	cd C >/dev/null && $(MAKE) -e tcl-sh
+	cd C >/dev/null && $(MAKE) CC=$(CC) -e tcl-sh
 
 .PHONY: all-d
 all-d:
@@ -89,7 +87,7 @@ all-d:
 .PHONY: all-perl
 all-perl:
 	$(MAKE) checkperlbuild
-	cd C >/dev/null && $(MAKE) -e all-perl
+	cd C >/dev/null && $(MAKE) CC=$(CC) -e all-perl
 
 .PHONY: windows-gcc
 windows-gcc:
