@@ -60,7 +60,7 @@
 
 int Diskspace_Init _((Tcl_Interp *));
 int diskspaceObjCmd _((ClientData, Tcl_Interp *, int, Tcl_Obj * const []));
-static char *diproc _((int, char **));
+static char *diproc _((int, const char **));
 
 #if defined (__cplusplus) || defined (c_plusplus)
   }
@@ -105,39 +105,34 @@ diskspaceObjCmd (interp, objc, objv)
   Tcl_Obj * const   objv[];
 #endif
 {
-  char              **argv;
+  const char        **argv;
   char              *rv;
-  char              *ptr;
-  int               ptrlen;
+  const char        *ptr;
   int               i;
 
-  if (objc < 2) {
-    Tcl_WrongNumArgs (interp, 1, objv, "[options] partition-name");
-    return TCL_ERROR;
-  }
-  argv = (char **) malloc (sizeof(char *) * objc);
+  /* using malloc here causes tcl to crash */
+  argv = (const char **) ckalloc (sizeof(const char *) * (Size_t) objc);
   for (i = 0; i < objc; ++i) {
-    ptr = Tcl_GetStringFromObj (objv[i], &ptrlen);
-    argv[i] = strdup (ptr);
+    ptr = Tcl_GetString (objv[i]);
+    argv[i] = ptr;
   }
   argv[objc] = NULL;
 
   rv = diproc (objc, argv);
-  for (i = 0; i < objc; ++i) {
-    free (argv[i]);
-  }
-  free (argv);
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(rv, (int) strlen(rv)));
+  ckfree (argv);
+
+  Tcl_SetObjResult(interp, Tcl_NewStringObj(rv, -1));
+  free (rv);
   return TCL_OK;
 }
 
 static char *
 #if _proto_stdc
-diproc (int argc, char **argv)
+diproc (int argc, const char **argv)
 #else
 diproc (argc, argv)
     int argc;
-    char **argv;
+    const char **argv;
 #endif
 {
   char      *disp;
@@ -145,4 +140,3 @@ diproc (argc, argv)
   disp = dimainproc (argc, (const char * const *) argv, 1);
   return disp;
 }
-
