@@ -6,9 +6,7 @@
 #include "configtcl.h"
 #include "di.h"
 #include "dimain.h"
-#include "display.h"
 #include "version.h"
-#include "options.h"
 
 #if _hdr_stdio
 # include <stdio.h>
@@ -60,7 +58,9 @@
 
 int Diskspace_Init _((Tcl_Interp *));
 int diskspaceObjCmd _((ClientData, Tcl_Interp *, int, Tcl_Obj * const []));
-static char *diproc _((int, const char **));
+static void addStringToDict _((Tcl_Interp *, Tcl_Obj *, const char *, const char *));
+static void addWideToDict _((Tcl_Interp *, Tcl_Obj *, const char *, _fs_size_t));
+static char *diproc _((int, const char **, diData_t **));
 
 #if defined (__cplusplus) || defined (c_plusplus)
   }
@@ -109,6 +109,12 @@ diskspaceObjCmd (interp, objc, objv)
   char              *rv;
   const char        *ptr;
   int               i;
+  diData_t          *diDataOut;
+  char              *dispPtr;
+  Tcl_Obj           *dictObj;
+  Tcl_Obj           *tempDictObj;
+  Tcl_Obj           *mountKey;
+  diDiskInfo_t      *diskInfo;
 
   /* using malloc here causes tcl to crash */
   argv = (const char **) ckalloc (sizeof(const char *) * (Size_t) objc);
@@ -118,25 +124,106 @@ diskspaceObjCmd (interp, objc, objv)
   }
   argv[objc] = NULL;
 
-  rv = diproc (objc, argv);
+  rv = diproc (objc, argv, &diDataOut);
   ckfree (argv);
 
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(rv, -1));
+  dictObj = Tcl_NewDictObj ();
+  dispPtr = strtok (rv, "\n");
+
+  diskInfo = diDataOut->diskInfo;
+  for (i = 0; i < diDataOut->count; ++i) {
+    diDiskInfo_t    *dinfo;
+
+    dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
+    if (! dinfo->doPrint) {
+      continue;
+    }
+
+    tempDictObj = Tcl_NewDictObj ();
+    if (dispPtr != (char *) NULL) {
+      addStringToDict (interp, tempDictObj, "display", dispPtr);
+    }
+    addStringToDict (interp, tempDictObj, "device", dinfo->special);
+    addStringToDict (interp, tempDictObj, "fstype", dinfo->fsType);
+    addWideToDict (interp, tempDictObj, "total", dinfo->totalSpace);
+    addWideToDict (interp, tempDictObj, "free", dinfo->freeSpace);
+    addWideToDict (interp, tempDictObj, "available", dinfo->availSpace);
+    addWideToDict (interp, tempDictObj, "totalinodes", dinfo->totalInodes);
+    addWideToDict (interp, tempDictObj, "freeinodes", dinfo->freeInodes);
+    addWideToDict (interp, tempDictObj, "availableinodes", dinfo->availInodes);
+    addStringToDict (interp, tempDictObj, "mountoptions", dinfo->options);
+    mountKey = Tcl_NewStringObj (dinfo->name, -1);
+    Tcl_IncrRefCount (tempDictObj);
+    Tcl_DictObjPut (interp, dictObj, mountKey, tempDictObj);
+    dispPtr = strtok (NULL, "\n");
+  }
+
+  Tcl_IncrRefCount (dictObj);
+  Tcl_SetObjResult(interp, dictObj);
   free (rv);
+  cleanup (diDataOut);
   return TCL_OK;
 }
 
+static void
+#if _proto_stdc
+addStringToDict (Tcl_Interp *interp, Tcl_Obj *dict,
+        const char *nm, const char *val)
+#else
+addStringToDict (interp, dict, nm, val)
+  Tcl_Interp *interp;
+  Tcl_Obj *dict;
+  const char *nm;
+  const char *val;
+#endif
+{
+  Tcl_Obj           *tempObj1;
+  Tcl_Obj           *tempObj2;
+
+  tempObj1 = Tcl_NewStringObj (nm, -1);
+  tempObj2 = Tcl_NewStringObj (val, -1);
+  Tcl_IncrRefCount (tempObj1);
+  Tcl_IncrRefCount (tempObj2);
+  Tcl_DictObjPut (interp, dict, tempObj1, tempObj2);
+}
+
+static void
+#if _proto_stdc
+addWideToDict (Tcl_Interp *interp, Tcl_Obj *dict,
+        const char *nm, _fs_size_t val)
+#else
+addWideToDict (interp, dict, nm, val)
+  Tcl_Interp *interp;
+  Tcl_Obj *dict;
+  const char *nm;
+  _fs_size_t val;
+#endif
+{
+  Tcl_Obj           *tempObj1;
+  Tcl_Obj           *tempObj2;
+  Tcl_WideInt       wideVal;
+
+  wideVal = (Tcl_WideInt) val;
+  tempObj1 = Tcl_NewStringObj (nm, -1);
+  tempObj2 = Tcl_NewWideIntObj (wideVal);
+  Tcl_IncrRefCount (tempObj1);
+  Tcl_IncrRefCount (tempObj2);
+  Tcl_DictObjPut (interp, dict, tempObj1, tempObj2);
+}
+
+
 static char *
 #if _proto_stdc
-diproc (int argc, const char **argv)
+diproc (int argc, const char **argv, diData_t **diDataOut)
 #else
 diproc (argc, argv)
     int argc;
     const char **argv;
+    diData_t   **diDataOut;
 #endif
 {
   char      *disp;
 
-  disp = dimainproc (argc, (const char * const *) argv, 1);
+  disp = dimainproc (argc, (const char * const *) argv, 1, diDataOut);
   return disp;
 }

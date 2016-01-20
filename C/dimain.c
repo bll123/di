@@ -96,12 +96,13 @@ static int  checkForUUID        _((char *));
 
 char *
 #if _proto_stdc
-dimainproc (int argc, const char * const argv [], int tclflag)
+dimainproc (int argc, const char * const argv [], int tclflag, diData_t **diDataOut)
 #else
-dimainproc (argc, argv, tclflag)
+dimainproc (argc, argv, tclflag, diDataOut)
     int         argc;
     const char  * const argv [];
     int         tclflag;
+    diData_t    **diDataOut;
 #endif
 {
     diData_t            diData;
@@ -209,8 +210,7 @@ dimainproc (argc, argv, tclflag)
       checkDiskQuotas (&diData);
     }
     disp = printDiskInfo (&diData);
-
-    cleanup (&diData);
+    *diDataOut = &diData;
     return disp;
 }
 

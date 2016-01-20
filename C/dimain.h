@@ -20,7 +20,7 @@
 #endif
 
  /* dimain.c */
-extern char *dimainproc         _((int, const char * const [], int));
+extern char *dimainproc         _((int, const char * const [], int, diData_t **));
 extern void checkDiskInfo       _((diData_t *, int));
 extern void checkDiskQuotas     _((diData_t *));
 extern int  checkFileInfo       _((diData_t *, int, int, const char *const[]));

@@ -78,6 +78,7 @@
 
 #include "config.h"
 #include "dimain.h"
+#include "di.h"
 
 #if _hdr_stdio
 # include <stdio.h>
@@ -103,9 +104,13 @@ main (argc, argv)
 #endif
 {
   char      *disp;
+  diData_t  *diDataOut;
 
-  disp = dimainproc (argc, argv, 0);
-  fputs (disp, stdout);
+  disp = dimainproc (argc, argv, 0, &diDataOut);
+  if (disp != (char *) NULL) {
+    fputs (disp, stdout);
+  }
+  cleanup (diDataOut);
   return 0;
 }
 

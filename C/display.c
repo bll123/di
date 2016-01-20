@@ -452,6 +452,10 @@ append (val, ptr, len)
   Size_t    bumplen;
   Size_t    nlen;
 
+  if (val == (char *) NULL) {
+    return;
+  }
+
   bumplen = 100;
   vlen = strlen (val);
   if (*clen + vlen >= *len) {
@@ -787,7 +791,9 @@ printInfo (diskInfo, diopts, diout)
       }
     }
 
-    append ("\n", &out, &outcurrlen, &outlen);
+    if (outcurrlen > 0) {
+      append ("\n", &out, &outcurrlen, &outlen);
+    }
     return out;
 }
 
@@ -1231,7 +1237,9 @@ processTitles (diopts, diout)
         }
     }
 
-    append ("\n", &out, &outcurrlen, &outlen);
+    if (outcurrlen > 0) {
+      append ("\n", &out, &outcurrlen, &outlen);
+    }
     return out;
 }
 
