@@ -445,7 +445,7 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
         0  /*sizeof (diData->zoneInfo.zoneDisplay)*/,
         (void *) "all" }
   };
-  static int dbsids[] = { 8, 16, 17, 18, 25, 29 };
+  static int dbsids[] = { 10, 16, 17, 18, 25, 29 };
   static int paidb[] = { 1, 19, 21, 32, 38, 44, };
   static int paidv[] = { 3, 23, 37, 47, 49 };
 

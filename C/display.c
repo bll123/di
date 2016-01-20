@@ -710,7 +710,8 @@ printInfo (diskInfo, diopts, diout)
 
         case DI_FMT_ITOT:
         {
-          appendFormatVal (diout->inodeFormat, diout->inodeWidth, &out, &outcurrlen, &outlen);
+          appendFormatVal (diout->inodeFormat, diskInfo->totalInodes,
+              &out, &outcurrlen, &outlen);
           break;
         }
 
