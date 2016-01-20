@@ -113,7 +113,7 @@
 # define DI_LL "l"
 # define DI_LLu "lu"
 #endif
-#if _siz_long_double >= 8
+#if _siz_long_double >= 8 && _printf_long_double
   typedef long double _print_size_t;
 # define DI_Lf "Lf"
 #else

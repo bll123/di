@@ -214,6 +214,9 @@ member  struct statfs f_type
 member  struct statvfs f_basetype
 size    long long
 size    long double
+if have_long_double ( ( == _siz_long_double 8 ) -o ( == _siz_long_double 16 ) )
+  printf_long_double
+endif
 
 # workaround for AIX
 # mntctl() is not declared
