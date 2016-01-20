@@ -12,6 +12,7 @@ DC = gdc
 
 OBJ_EXT = .o
 EXE_EXT =
+MAKE = make
 
 ###
 # common programs
