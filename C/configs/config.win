@@ -194,6 +194,7 @@
 #define _mem_struct_statvfs_f_basetype 0
 #define _siz_long_long 8
 #define _siz_long_double 12
+#define _printf_long_double 0
 #define _has_std_quotas 0
 #define _has_std_nfs_quotas 0
 #define _use_mcheck 0

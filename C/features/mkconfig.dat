@@ -218,6 +218,8 @@ size    long long
 size    long double
 if have_long_double ( ( == _siz_long_double 8 ) || ( == _siz_long_double 16 ) )
   printf_long_double
+else
+  setint _printf_long_double 0
 endif
 
 # workaround for AIX
@@ -249,11 +251,14 @@ else
   setint _has_std_nfs_quotas 0
 endif
 
-setint _use_mcheck 0
 ifoption MCHECK
   if mcheckexists _hdr_mcheck && _lib_mcheck_pedantic
     setint _use_mcheck 1
+  else
+    setint _use_mcheck 0
   endif
+else
+  setint _use_mcheck 0
 endif
 
 ifnotoption NLS

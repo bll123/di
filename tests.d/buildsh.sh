@@ -56,6 +56,7 @@ for d in C D; do
         # C:
         #  openbsd: malloc.h, always misused, in file included, in function
         #  openbsd: unfortunately, some output is on separate lines.
+        #  openbsd: warning: strcat() is almost always misused, please use strlcat()
         #  solaris: tokens ignored... (dollar sign)
         #  solaris: Function has no return statement : main
         #  freebsd 4.9: from xxx.c:66: (separate line)
@@ -94,6 +95,7 @@ for d in C D; do
           grep -v '^CC=' |
           grep -v '#warning' |
           grep -v 'strcpy.*always misused' |
+          grep -v 'strcat.*always misused' |
           grep -v '^In file included' |
           grep -v ': In function' |
           grep -v 'tokens ignored at end of directive line' |
