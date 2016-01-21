@@ -98,7 +98,7 @@ for d in C D; do
           grep -v ': In function' |
           grep -v 'tokens ignored at end of directive line' |
           grep -v 'Function has no return statement : main' |
-          grep -v '^ *from [^ ]*.c:[0-9]*:,*$' |
+          grep -v '^ *from [^ ]*.[ch]:[0-9]*[:,]?$' |
           grep -v '/usr/include.*function declaration.*a prototype' |
           grep -v '^Target.*is up to date' |
           grep -v '^------' |
