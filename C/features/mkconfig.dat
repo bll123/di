@@ -33,6 +33,7 @@ hdr     libintl.h
 hdr     libprop/proplib.h
 hdr     locale.h
 hdr     malloc.h
+hdr     mcheck.h
 hdr     memory.h
 hdr     mntent.h
 hdr     mnttab.h
@@ -128,6 +129,7 @@ lib     getzoneid
 lib     hasmntopt
 lib     lstat
 lib     mbrlen
+lib     mcheck_pedantic -lmcheck
 lib     memcpy
 lib     memset
 # AIX doesn't declare this :(
@@ -245,6 +247,13 @@ if stdnfsquotas _hdr_rpc_rpc && _hdr_rpcsvc_rquota && _lib_xdr_int && \
   setint _has_std_nfs_quotas 1
 else
   setint _has_std_nfs_quotas 0
+endif
+
+setint _use_mcheck 0
+ifoption MCHECK
+  if mcheckexists _hdr_mcheck && _lib_mcheck_pedantic
+    setint _use_mcheck 1
+  endif
 endif
 
 ifnotoption NLS

@@ -61,6 +61,9 @@
 # define _DI_INC_FCNTL_H
 # include <fcntl.h>     /* O_RDONLY, O_NOCTTY */
 #endif
+#if _use_mcheck
+# include <mcheck.h>
+#endif
 
 #if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {

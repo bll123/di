@@ -91,6 +91,9 @@
 # define _DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+#if _use_mcheck
+# include <mcheck.h>
+#endif
 
 /* end of system specific includes/configurations */
 
@@ -106,11 +109,16 @@ main (argc, argv)
   char      *disp;
   diData_t  *diDataOut;
 
+#if _use_mcheck
+  mcheck_pedantic (NULL);
+  mtrace ();
+#endif
+
   disp = dimainproc (argc, argv, 0, &diDataOut);
   if (disp != (char *) NULL) {
-    fputs (disp, stdout);
+    printf ("%s", disp);
+    free (disp);
   }
   cleanup (diDataOut);
   return 0;
 }
-

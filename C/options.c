@@ -37,6 +37,9 @@
 #if _hdr_libintl
 # include <libintl.h>
 #endif
+#if _use_mcheck
+# include <mcheck.h>
+#endif
 
 struct pa_tmp {
   diData_t        *diData;

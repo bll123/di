@@ -707,7 +707,6 @@ di_getDiskEntries (diskInfo, diCount)
 
     *diCount = count;
     *diskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) * (Size_t) count);
-
     if (*diskInfo == (diDiskInfo_t *) NULL)
     {
         fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
@@ -1450,7 +1449,7 @@ di_getDiskEntries (diskInfo, diCount)
 
         /* <num> vmount structs returned in vmbuf */
     *diCount = num;
-    *diskInfo = (diDiskInfo_t *) calloc (sizeof (diDiskInfo_t),
+    *diskInfo = (diDiskInfo_t *) malloc (sizeof (diDiskInfo_t) *
         (Size_t) *diCount);
     if (*diskInfo == (diDiskInfo_t *) NULL)
     {
@@ -1559,7 +1558,7 @@ di_getDiskEntries (diskInfo, diCount)
     *diCount = rc / BYTES_PER_LOGICAL_DRIVE;
 
     *diskInfo = (diDiskInfo_t *)
-        calloc (sizeof (diDiskInfo_t), (Size_t) *diCount);
+        malloc (sizeof (diDiskInfo_t) * (Size_t) *diCount);
     if (*diskInfo == (diDiskInfo_t *) NULL)
     {
         fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);

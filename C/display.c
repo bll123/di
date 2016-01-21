@@ -34,6 +34,9 @@
 #if _hdr_wchar
 # include <wchar.h>
 #endif
+#if _use_mcheck
+# include <mcheck.h>
+#endif
 
 extern int debug;
 
@@ -118,8 +121,8 @@ static char *processTitles      _((diOptions_t *, diOutput_t *));
 static char *printPerc          _((_fs_size_t, _fs_size_t, const char *));
 static void initSizeTable       _((diOptions_t *, diOutput_t *));
 static void appendFormatStr     _((char *, const char *, char **, Size_t *, Size_t *));
-static void appendFormatVal     _((char *, Size_t, char **, Size_t *, Size_t *));
-static void append              _((char *, char **, Size_t *, Size_t *));
+static void appendFormatVal     _((char *, _fs_size_t, char **, Size_t *, Size_t *));
+static void append              _((const char *, char **, Size_t *, Size_t *));
 
 #if defined (__cplusplus) || defined (c_plusplus)
   }
@@ -421,11 +424,11 @@ appendFormatStr (fmt, val, ptr, clen, len)
 
 static void
 #if _proto_stdc
-appendFormatVal (char *fmt, Size_t val, char **ptr, Size_t *clen, Size_t *len)
+appendFormatVal (char *fmt, _fs_size_t val, char **ptr, Size_t *clen, Size_t *len)
 #else
 appendFormatVal (fmt, val, ptr, clen, len)
   char *fmt;
-  Size_t val;
+  _fs_size_t val;
   char **ptr;
   Size_t *clen;
   Size_t *len;
@@ -439,10 +442,10 @@ appendFormatVal (fmt, val, ptr, clen, len)
 
 static void
 #if _proto_stdc
-append (char *val, char **ptr, Size_t *clen, Size_t *len)
+append (const char *val, char **ptr, Size_t *clen, Size_t *len)
 #else
 append (val, ptr, len)
-  char      *val;
+  const char *val;
   char      **ptr;
   Size_t    *clen;
   Size_t    *len;
@@ -500,6 +503,7 @@ printInfo (diskInfo, diopts, diout)
     char                ttext[2];
     char                *out;
     char                *tout;
+    const char          *t;
     Size_t              outlen;
     Size_t              outcurrlen;
 
@@ -599,8 +603,6 @@ printInfo (diskInfo, diopts, diout)
       }
       if (valid && diopts->csv_output) {
         if (! first) {
-          char      *t;
-
           t = ",";
           if (diopts->csv_tabs) {
             t = "	"; /* tab here */

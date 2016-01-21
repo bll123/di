@@ -29,6 +29,9 @@
 #if _hdr_errno
 # include <errno.h>
 #endif
+#if _use_mcheck
+# include <mcheck.h>
+#endif
 
 
 /********************************************************/
@@ -460,7 +463,7 @@ di_testRemoteDisk (diskInfo)
     diDiskInfo_t *diskInfo;
 #endif
 {
-  if (strncmp (diskInfo->fsType, "nfs", 3) == 0) 
+  if (strncmp (diskInfo->fsType, "nfs", 3) == 0)
   {
     diskInfo->isLocal = FALSE;
   }

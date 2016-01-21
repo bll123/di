@@ -19,6 +19,9 @@
 #if _hdr_malloc
 # include <malloc.h>
 #endif
+#if _use_mcheck
+# include <mcheck.h>
+#endif
 
 /*
  *

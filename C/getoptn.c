@@ -43,6 +43,9 @@
 # define _DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+#if _use_mcheck
+# include <mcheck.h>
+#endif
 
 typedef struct {
     Size_t      optionlen;

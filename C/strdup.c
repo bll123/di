@@ -28,6 +28,9 @@
 # if _hdr_strings
 #  include <strings.h>
 # endif
+#if _use_mcheck
+# include <mcheck.h>
+#endif
 
 char *
 # if _proto_stdc

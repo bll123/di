@@ -37,6 +37,9 @@
 #if _hdr_tcl
 # include <tcl.h>
 #endif
+#if _use_mcheck
+# include <mcheck.h>
+#endif
 
 #if defined (__cplusplus) || defined (c_plusplus)
   extern "C" {
@@ -74,6 +77,9 @@ Diskspace_Init (interp)
   Tcl_Interp *interp;
 #endif
 {
+#if _use_mcheck
+  mcheck_pedantic (NULL);
+#endif
 #ifdef USE_TCL_STUBS
   if (! Tcl_InitStubs (interp, "8.5", 0)) {
     return TCL_ERROR;
