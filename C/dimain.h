@@ -7,9 +7,6 @@
 
 #include "config.h"
 #include "di.h"
-#if _hdr_zone
-# include <zone.h>
-#endif
 
 # if defined (__cplusplus) || defined (c_plusplus)
    extern "C" {
@@ -24,9 +21,6 @@ extern char *dimainproc         _((int, const char * const [], int, diData_t **)
 extern void checkDiskInfo       _((diData_t *, int));
 extern void checkDiskQuotas     _((diData_t *));
 extern int  checkFileInfo       _((diData_t *, int, int, const char *const[]));
-#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
-extern void checkZone           _((diDiskInfo_t *, zoneInfo_t *, unsigned int));
-#endif
 extern void cleanup             _((diData_t *));
 extern int  getDiskSpecialInfo  _((diData_t *, unsigned int));
 extern void getDiskStatInfo     _((diData_t *));
