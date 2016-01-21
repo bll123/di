@@ -185,7 +185,6 @@ dimainproc (argc, argv, tclflag, diDataOut)
 
     if (di_getDiskEntries (&diData.diskInfo, &diData.count) < 0)
     {
-        cleanup (&diData);
         exit (1);
     }
 
@@ -203,7 +202,6 @@ dimainproc (argc, argv, tclflag, diDataOut)
         rc = checkFileInfo (&diData, optidx, argc, argv);
         if (rc < 0)
         {
-            cleanup (&diData);
             exit (1);
         }
     }
@@ -215,44 +213,6 @@ dimainproc (argc, argv, tclflag, diDataOut)
     disp = printDiskInfo (&diData);
     *diDataOut = &diData;
     return disp;
-}
-
-/*
- * cleanup
- *
- * free up allocated memory
- *
- */
-
-extern void
-#if _proto_stdc
-cleanup (diData_t *diData)
-#else
-cleanup (diData)
-    diData_t   *diData;
-#endif
-{
-    if (diData->diskInfo != (diDiskInfo_t *) NULL)
-    {
-        free ((char *) diData->diskInfo);
-    }
-
-    if (diData->ignoreList.count > 0 &&
-        diData->ignoreList.list != (char **) NULL)
-    {
-        free ((char *) diData->ignoreList.list);
-    }
-
-    if (diData->includeList.count > 0 &&
-        diData->includeList.list != (char **) NULL)
-    {
-        free ((char *) diData->includeList.list);
-    }
-
-    if (diData->zoneInfo.zones != (zoneSummary_t *) NULL)
-    {
-        free ((void *) diData->zoneInfo.zones);
-    }
 }
 
 extern int

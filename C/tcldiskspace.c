@@ -164,8 +164,6 @@ diskspaceObjCmd (interp, objc, objv)
   }
 
   Tcl_SetObjResult(interp, dictObj);
-  free (rv);
-  cleanup (diDataOut);
   return TCL_OK;
 }
 

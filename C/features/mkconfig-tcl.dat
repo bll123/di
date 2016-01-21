@@ -8,7 +8,15 @@ hdr     tcl.h
 # assuming that tclConfig.sh could be located,
 # some of this information could be pulled from it.
 # linux, freebsd, mac os x
-lib     Tcl_InitStubs -ltclstub8.6, -L/usr/local/lib -ltclstub86, -L/opt/local/lib -ltclstub8.6, -ltclstub8.5, -L/usr/local/lib -ltclstub85, -L/opt/local/lib -ltclstub8.5
+
+# versioned library names suck
+lib     Tcl_InitStubs -ltclstub8.7, -L/usr/local/lib -ltclstub87, -L/opt/local/lib -ltclstub8.7
+if notTcl_InitStubs87 ! _lib_Tcl_InitStubs
+  lib     Tcl_InitStubs -ltclstub8.6, -L/usr/local/lib -ltclstub86, -L/opt/local/lib -ltclstub8.6
+endif
+if notTcl_InitStubs86 ! _lib_Tcl_InitStubs
+ lib    Tcl_InitStubs -ltclstub8.5, -L/usr/local/lib -ltclstub85, -L/opt/local/lib -ltclstub8.5
+endif
 if notTcl_InitStubs ! _lib_Tcl_InitStubs
  lib     Tcl_PkgRequire -ltcl8.6, -L/usr/local/lib -ltcl86, -L/opt/local/lib -ltcl8.6, -ltcl8.5, -L/usr/local/lib -ltcl85, -L/opt/local/lib -ltcl8.5
 endif

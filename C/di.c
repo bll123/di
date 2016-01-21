@@ -117,8 +117,10 @@ main (argc, argv)
   disp = dimainproc (argc, argv, 0, &diDataOut);
   if (disp != (char *) NULL) {
     fputs (disp, stdout);
-    free (disp);
   }
-  cleanup (diDataOut);
+  /* Mac OS X is getting some weird malloc error...
+   * removing the fputs fixes it...
+   * So just don't free the data, the program's going to exit anyways.
+   */
   return 0;
 }
