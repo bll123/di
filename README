@@ -117,7 +117,7 @@ TCL
 
       make tcl-sh
 
-    See C/tcl-example.tcl
+    See C/tcl-example.tcl for a usage example.
 
     When running from Tcl, the following option defaults are changed:
       CSV output set on (-c).

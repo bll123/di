@@ -28,6 +28,7 @@
 #define _hdr_libprop_proplib 0
 #define _hdr_locale 0
 #define _hdr_malloc 1
+#define _hdr_mcheck 0
 #define _hdr_memory 1
 #define _hdr_mntent 0
 #define _hdr_mnttab 1
@@ -116,6 +117,7 @@
 #define _lib_hasmntopt 0
 #define _lib_lstat 0
 #define _lib_mbrlen 0
+#define _lib_mcheck_pedantic 0
 #define _lib_memcpy 1
 #define _lib_memset 1
 #define _lib_mntctl 0
@@ -202,8 +204,9 @@
 #define _siz_long_long 0
 #define _siz_long_double 0
 #define _has_std_quotas 0
-#define _enable_nls 0
 #define _has_std_nfs_quotas 0
+#define _use_mcheck 0
+#define _enable_nls 0
 #define DI_DEFAULT_FORMAT "smbuvpT"
 #define DI_DEFAULT_DISP_SIZE "H"
 
