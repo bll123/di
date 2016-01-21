@@ -116,7 +116,7 @@ main (argc, argv)
 
   disp = dimainproc (argc, argv, 0, &diDataOut);
   if (disp != (char *) NULL) {
-    printf ("%s", disp);
+    fputs (disp, stdout);
     free (disp);
   }
   cleanup (diDataOut);
