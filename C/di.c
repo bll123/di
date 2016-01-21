@@ -121,12 +121,13 @@ main (argc, argv)
   }
   /*
    * Mac OS X is getting some weird malloc error (10.11.2).
+   * The diDataOut pointer is fine up to before the fputs() call.
    * Removing the fputs fixes it.
-   * So just don't free the data, the program's going to exit anyways.
    * A mcheck on Linux finds no issues.
    * valgrind on Linux finds no issues.
    * So it is probably a Mac OS X bug in their library, as
    * both gcc and clang have the same issue.
+   * So just don't free the data, the program's going to exit anyways.
    */
   /* cleanup (diDataOut); */
   return 0;
