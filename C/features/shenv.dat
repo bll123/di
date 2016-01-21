@@ -50,6 +50,7 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
   addcflag -fstack-protector-all
  endif
 endif
+# versioned directories suck...
 findincludepath tcl.h
 libs
 extension obj
