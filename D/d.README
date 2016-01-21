@@ -2,6 +2,8 @@ di - disk information utility (version 4.32)
 
 This code is out of date and has not been updated to work with
 the latest D compiler.
+This code is out of date and has not been updated to match
+the current version of the C code.
 
 This code is in development.
 It is only included here as an
