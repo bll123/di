@@ -1,4 +1,4 @@
-di - disk information utility (version 4.39)
+di - disk information utility (version 4.40)
 
 CONTENTS
   Description
@@ -239,7 +239,10 @@ PORTING
 
 CHANGES
 
-    4.39                                    [--]
+    4.40                                    [2016-1-22]
+        Updated the Tcl interface to return the 'display' key as a list.
+
+    4.39                                    [2016-1-22]
         Added a Tcl interface.
         Fixed CSV header to honor -n flag.
         Added -C, --csv-tabs to output CSV with tabs.

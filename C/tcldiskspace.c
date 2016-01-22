@@ -61,6 +61,7 @@
 
 int Diskspace_Init _((Tcl_Interp *));
 int diskspaceObjCmd _((ClientData, Tcl_Interp *, int, Tcl_Obj * const []));
+static void addListToDict _((Tcl_Interp *, Tcl_Obj *, const char *, char *));
 static void addStringToDict _((Tcl_Interp *, Tcl_Obj *, const char *, const char *));
 static void addWideToDict _((Tcl_Interp *, Tcl_Obj *, const char *, _fs_size_t));
 static char *diproc _((int, const char **, diData_t **));
@@ -79,6 +80,7 @@ Diskspace_Init (interp)
 {
 #if _use_mcheck
   mcheck_pedantic (NULL);
+  mtrace ();
 #endif
 #ifdef USE_TCL_STUBS
   if (! Tcl_InitStubs (interp, "8.5", 0)) {
@@ -146,9 +148,6 @@ diskspaceObjCmd (interp, objc, objv)
     }
 
     tempDictObj = Tcl_NewDictObj ();
-    if (dispPtr != (char *) NULL) {
-      addStringToDict (interp, tempDictObj, "display", dispPtr);
-    }
     addStringToDict (interp, tempDictObj, "device", dinfo->special);
     addStringToDict (interp, tempDictObj, "fstype", dinfo->fsType);
     addWideToDict (interp, tempDictObj, "total", dinfo->totalSpace);
@@ -158,6 +157,9 @@ diskspaceObjCmd (interp, objc, objv)
     addWideToDict (interp, tempDictObj, "freeinodes", dinfo->freeInodes);
     addWideToDict (interp, tempDictObj, "availableinodes", dinfo->availInodes);
     addStringToDict (interp, tempDictObj, "mountoptions", dinfo->options);
+    if (dispPtr != (char *) NULL) {
+      addListToDict (interp, tempDictObj, "display", dispPtr);
+    }
     mountKey = Tcl_NewStringObj (dinfo->name, -1);
     Tcl_DictObjPut (interp, dictObj, mountKey, tempDictObj);
     dispPtr = strtok (NULL, "\n");
@@ -167,6 +169,35 @@ diskspaceObjCmd (interp, objc, objv)
   free (rv);
   cleanup (diDataOut);
   return TCL_OK;
+}
+
+static void
+#if _proto_stdc
+addListToDict (Tcl_Interp *interp, Tcl_Obj *dict,
+        const char *nm, char *val)
+#else
+addListToDict (interp, dict, nm, val)
+  Tcl_Interp *interp;
+  Tcl_Obj *dict;
+  const char *nm;
+  char *val;
+#endif
+{
+  Tcl_Obj           *tempObj;
+  Tcl_Obj           *tempObj1;
+  Tcl_Obj           *tempObj2;
+  char              *dptr;
+
+  tempObj2 = Tcl_NewListObj (0, NULL);
+  dptr = strtok (val, "	"); /* tab character */
+  while (dptr != (char *) NULL) {
+    tempObj = Tcl_NewStringObj (dptr, -1);
+    Tcl_ListObjAppendElement (interp, tempObj2, tempObj);
+    dptr = strtok (NULL, "	"); /* tab character */
+  }
+
+  tempObj1 = Tcl_NewStringObj (nm, -1);
+  Tcl_DictObjPut (interp, dict, tempObj1, tempObj2);
 }
 
 static void
