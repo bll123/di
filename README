@@ -116,9 +116,15 @@ INSTALLATION
 
 TCL
 
+    The Tcl extension provides access to the di utility via
+    the [diskspace] command.
+
     To build:
 
-      make tcl-sh
+      make -e tcl-sh
+
+      Windows Cygwin:
+        make CC=gcc NO_PIE=yes tcl-sh
 
     See C/tcl-example.tcl for a usage example.
 

@@ -477,7 +477,9 @@ gconfig.h:	di.env features/getoptn.dat
 		features/getoptn.dat; fi
 
 getoptn_test$(OBJ_EXT):	getoptn.c gconfig.h getoptn.h
-	$(CC) -o getoptn_test$(OBJ_EXT) -DTEST_GETOPTN=1 -c getoptn.c
+	$(CC) -o getoptn_test$(OBJ_EXT) \
+		-c $(CFLAGS) $(CPPFLAGS) $(DI_CPPFLAGS) \
+		-DTEST_GETOPTN=1 getoptn.c
 
 getoptn.reqlibs:	di.env gconfig.h
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
