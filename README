@@ -1,4 +1,4 @@
-di - disk information utility (version 4.36)
+di - disk information utility (version 4.39)
 
 CONTENTS
   Description
@@ -115,7 +115,6 @@ INSTALLATION
         make installperms
 
 TCL
-
     The Tcl extension provides access to the di utility via
     the [diskspace] command.
 
@@ -125,6 +124,11 @@ TCL
 
       Windows Cygwin:
         make CC=gcc NO_PIE=yes tcl-sh
+      Windows Msys:
+        # I can't build Tcl with Msys, but the following command
+        # line should work.
+        mingw32-make -e MAKE=mingw32-make \
+          _MKCONFIG_SHELL=bash WINAPI=T NO_PIE=yes CC=gcc tcl-sh
 
     See C/tcl-example.tcl for a usage example.
 
