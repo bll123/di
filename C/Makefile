@@ -114,7 +114,6 @@ windows-gcc:
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-g -O2" di-programs
 
-# This was tested using cygwin
 # Gets an immediate segmentation fault.
 .PHONY: windows-clang
 windows-clang:
