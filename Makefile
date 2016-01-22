@@ -99,6 +99,10 @@ windows-gcc:
 windows-clang:
 	cd C >/dev/null && $(MAKE) -e windows-clang
 
+.PHONY: windows-msys
+windows-msys:
+	cd C >/dev/null && $(MAKE) -e windows-msys
+
 .PHONY: windows-mingw
 windows-mingw:
 	cd C >/dev/null && $(MAKE) -e windows-mingw

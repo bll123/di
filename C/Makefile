@@ -131,7 +131,22 @@ windows-clang:
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-g -O2" di-programs
 
-# This configuration was built using a 63-bit mingw
+.PHONY: windows-msys
+windows-msys:
+	MAKE=mingw32-make
+	cp ../features/dioptions.dat ../dioptions.dat
+	> di.env
+	-rm config.h
+	cp configs/config.mingw config.h
+	> $(MKC_REQLIB)
+	$(MAKE) \
+		MAKE=$(MAKE) \
+		CC=gcc \
+		EXE_EXT=".exe" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -g -O2 \
+		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
+		LDFLAGS="-g -O2" di-programs
+
 .PHONY: windows-mingw
 windows-mingw:
 	MAKE=mingw32-make

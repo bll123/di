@@ -53,12 +53,14 @@ INSTALLATION
     Alternative 1 - uses pre-built config.win or config.mingw
       Cygwin gcc: make -e windows-gcc
         (uses cygwin API)
+      MSys: mingw32-make -e MAKE=mingw32-make windows-msys
+        (uses windows API)
       MinGW: mingw32-make -e MAKE=mingw32-make CC=gcc windows-mingw
         (uses windows API)
     Alternative 2 - builds a new config.h file (Cygwin).
       make -e NO_PIE=yes CC=gcc
       make -e NO_PIE=yes CC=gcc WINAPI=T  # windows API
-    Alternative 3 - builds a new config.h file (MSYS)
+    Alternative 3 - builds a new config.h file (MSys)
       # make sure your PATH is set properly
       mingw32-make -e MAKE=mingw32-make \
         _MKCONFIG_SHELL=bash WINAPI=T NO_PIE=yes CC=gcc
