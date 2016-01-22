@@ -191,32 +191,28 @@
 #define DI_DEFAULT_FORMAT "smbuvpT"
 #define DI_DEFAULT_DISP_SIZE "H"
 
-#if ! _key_void
-# define void int
-#endif
-#if ! _key_void || ! _param_void_star
-  typedef char *_pvoid;
-#else
-  typedef void *_pvoid;
-#endif
-#if ! _key_const
-# define const
-#endif
-
-#ifndef _
-# if _proto_stdc
-#  define _(args) args
-# else
-#  define _(args) ()
+#ifndef __MKC_STANDARD_DEFS
+# define __MKC_STANDARD_DEFS 1
+# if ! _key_void
+#  define void int
 # endif
-#endif
+# if ! _key_void || ! _param_void_star
+   typedef char *_pvoid;
+# else
+   typedef void *_pvoid;
+# endif
+# if ! _key_const
+#  define const
+# endif
 
-
-#if _typ_statvfs_t
-# define Statvfs_t statvfs_t
-#else
-# define Statvfs_t struct statvfs
-#endif
+# ifndef _
+#  if _proto_stdc
+#   define _(args) args
+#  else
+#   define _(args) ()
+#  endif
+# endif
+#endif /* __MKC_STANDARD_DEFS */
 
 #if _typ_size_t
 # define Size_t size_t

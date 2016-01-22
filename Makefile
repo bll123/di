@@ -95,6 +95,14 @@ all-perl:
 windows-gcc:
 	cd C >/dev/null && $(MAKE) -e windows-gcc
 
+.PHONY: windows-clang
+windows-clang:
+	cd C >/dev/null && $(MAKE) -e windows-clang
+
+.PHONY: windows-mingw
+windows-mingw:
+	cd C >/dev/null && $(MAKE) -e windows-mingw
+
 .PHONY: test
 test:
 	cd C >/dev/null && $(MAKE) -e test

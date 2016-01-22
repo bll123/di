@@ -9,7 +9,7 @@ C/configs/config.ultrix.cc  config.h for ULTRIX
 C/configs/config.ultrix.gcc config.h for ULTRIX
 C/configs/config.vms        config.h for VMS
 C/configs/config.vms.b      alternate config.h for VMS
-C/configs/config.win        config.h for windows
+C/configs/config.cygwin.gcc config.h for Windows cygwin-gcc
 C/configs/conf.xenix.cc     config.h for XENIX
 C/tcl-example.tcl         example tcl script
 C/di.c                    di source

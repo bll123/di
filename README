@@ -50,17 +50,18 @@ INSTALLATION
   your system supports internationalization.
 
   Windows installation:
-    Alternative 1 - uses config.win or config.mingw
-      Cygwin gcc: cd C;make -e windows-gcc
-      MinGW: cd C;mingw32-make MAKE=mingw32-make CC=mingw32-gcc windows-mingw
+    Alternative 1 - uses pre-built config.win or config.mingw
+      Cygwin gcc: make -e windows-gcc
+        (uses cygwin API)
+      MinGW: mingw32-make -e MAKE=mingw32-make CC=gcc windows-mingw
+        (uses windows API)
     Alternative 2 - builds a new config.h file (Cygwin).
-      make -e config.h
-      make -e
+      make -e NO_PIE=yes CC=gcc
+      make -e NO_PIE=yes CC=gcc WINAPI=T  # windows API
     Alternative 3 - builds a new config.h file (MSYS)
       # make sure your PATH is set properly
-      export MAKE=mingw32-make
-      write dioptions.dat # change WINAPI=F to WINAPI=T
-      $MAKE _MKCONFIG_SHELL=bash CC=gcc
+      mingw32-make -e MAKE=mingw32-make \
+        _MKCONFIG_SHELL=bash WINAPI=T NO_PIE=yes CC=gcc
 
     You may need to change _lib_GetDiskFreeSpaceEX to 0
     in the config.h file for older windows systems.

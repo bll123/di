@@ -86,13 +86,13 @@ di-sh.env:	features/shenv.dat
 # specific builds
 
 # This was tested using vc++ 5.0. (many years ago)
-# seriously out of date; config.win is incorrect for this build.
+# seriously out of date; config.cygwin.gcc is incorrect for this build.
 .PHONY: windows
 windows:
 	@$(MAKE) ../dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
-	copy /y /b NUL:+configs\config.win config.h
+	copy /y /b NUL:+configs\config.cygwin.gcc config.h
 	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
 		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
@@ -106,7 +106,7 @@ windows-gcc:
 	@$(MAKE) ../dioptions.dat
 	@echo ':' > di.env;chmod a+rx di.env
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	$(CP) -f configs/config.win config.h
+	$(CP) -f configs/config.cygwin.gcc config.h
 	@echo '-lintl' > $(MKC_REQLIB)
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
@@ -114,15 +114,35 @@ windows-gcc:
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-g -O2" di-programs
 
+# This was tested using cygwin
+# Gets an immediate segmentation fault.
+.PHONY: windows-clang
+windows-clang:
+	@$(MAKE) ../dioptions.dat
+	@echo ':' > di.env;chmod a+rx di.env
+	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
+	$(CP) -f configs/config.cygwin.clang config.h
+	@echo '-lintl' > $(MKC_REQLIB)
+	$(MAKE) \
+		CC=clang LD=clang EXE_EXT=".exe" OBJ_EXT=".o" \
+		CFLAGS="$(CFLAGS) -g -O2 \
+		--without-libintl-prefix \
+		--without-libiconv-prefix \
+		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
+		LDFLAGS="-g -O2" di-programs
+
+# This configuration was built using a 63-bit mingw
 .PHONY: windows-mingw
 windows-mingw:
+	MAKE=mingw32-make
 	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
 	copy /y /b NUL:+configs\config.mingw config.h
 	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
-		CC=mingw32-gcc LD=mingw32-gcc \
+		MAKE=$(MAKE) \
+		CC=gcc LD=gcc \
 		EXE_EXT=".exe" OBJ_EXT=".o" \
 		CFLAGS="$(CFLAGS) -g -O2 \
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \

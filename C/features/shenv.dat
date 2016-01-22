@@ -8,8 +8,6 @@ loadunit env-extension
 
 output  di-sh.env
 
-option NO_PIE no
-
 system type
 system rev
 system arch

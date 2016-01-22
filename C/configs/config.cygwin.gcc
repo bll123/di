@@ -1,6 +1,6 @@
-/* Created on: Fri Oct 19 12:40:55 PDT 2012
+/* Created on: Fri Jan 22 10:41:21 PST 2016
     From: ../features/mkconfig.dat
-    Using: mkconfig-1.21 */
+    Using: mkconfig-1.27 */
 
 #ifndef __INC_CONFIG_H
 #define __INC_CONFIG_H 1
@@ -68,7 +68,7 @@
 #define _sys_mntent 0
 #define _sys_mnttab 0
 #define _sys_mount 1
-#define _sys_quota 0
+#define _sys_quota 1
 #define _sys_stat 1
 #define _sys_statfs 1
 #define _sys_statvfs 1
@@ -88,9 +88,9 @@
 #define _define_MCTL_QUERY 0
 #define _define_memcpy 0
 #define _define_memset 0
-#define _define_QCMD 0
+#define _define_QCMD 1
 #define _define_S_ISLNK 1
-#define _typ_struct_dqblk 0
+#define _typ_struct_dqblk 1
 #define _typ_struct_quotaval 0
 #define _typ_struct_ufs_dqblk 0
 #define _typ_fs_disk_quota_t 0
@@ -129,7 +129,7 @@
 #define _lib_next_dev 0
 #define _lib_prop_dictionary_create 0
 #define _lib_quota_open 0
-#define _lib_quotactl 0
+#define _lib_quotactl 1
 #define _lib_realpath 1
 #define _lib_setlocale 1
 #define _lib_setmntent 1
@@ -153,13 +153,17 @@
 #define _memberxdr_rquota_rq_fhardlimit 0
 #define _memberxdr_rquota_rq_fsoftlimit 0
 #define _memberxdr_rquota_rq_curfiles 0
-#define _mem_struct_mnttab_mt_mntopts 0
 #define _memberxdr_getquota_args_gqa_uid 0
 #define _args_getfsstat 0
 #define _args_getvfsstat 0
-#define _args_quotactl 0
+#define _c_arg_1_quotactl int
+#define _c_arg_2_quotactl char *
+#define _c_arg_3_quotactl int
+#define _c_arg_4_quotactl caddr_t
+#define _c_type_quotactl int
+#define _args_quotactl 4
 #define _quotactl_pos_1 0
-#define _quotactl_pos_2 0
+#define _quotactl_pos_2 1
 #define _c_arg_1_setmntent char *
 #define _c_arg_2_setmntent char *
 #define _c_type_setmntent FILE *
@@ -171,18 +175,19 @@
 #define _class_os__Volumes 0
 #define _npt_getenv 0
 #define _npt_getmnt 1
-#define _npt_libquota 0
 #define _npt_mntctl 1
+#define _npt_quotactl 0
 #define _npt_statfs 0
 #define _dcl_errno 1
 #define _dcl_mnt_names 0
-#define _mem_struct_dqblk_dqb_curspace 0
+#define _mem_struct_dqblk_dqb_curspace 1
 #define _mem_struct_dqblk_dqb_curblocks 0
 #define _mem_struct_dqblk_dqb_fhardlimit 0
 #define _mem_struct_dqblk_dqb_fsoftlimit 0
 #define _mem_struct_dqblk_dqb_curfiles 0
 #define _mem_struct_getquota_rslt_gqr_status 0
 #define _mem_struct_getquota_rslt_gqr_rquota 0
+#define _mem_struct_mnttab_mt_mntopts 0
 #define _mem_struct_statfs_f_bsize 1
 #define _mem_struct_statfs_f_fsize 0
 #define _mem_struct_statfs_f_fstyp 0
@@ -193,34 +198,37 @@
 #define _mem_struct_statfs_f_type 1
 #define _mem_struct_statvfs_f_basetype 0
 #define _siz_long_long 8
-#define _siz_long_double 12
-#define _printf_long_double 0
-#define _has_std_quotas 0
+#define _siz_long_double 16
+#define _printf_long_double 1
+#define _has_std_quotas 1
 #define _has_std_nfs_quotas 0
 #define _use_mcheck 0
 #define _enable_nls 1
 #define DI_DEFAULT_FORMAT "smbuvpT"
 #define DI_DEFAULT_DISP_SIZE "H"
 
-#if ! _key_void
-# define void int
-#endif
-#if ! _key_void || ! _param_void_star
-  typedef char *_pvoid;
-#else
-  typedef void *_pvoid;
-#endif
-#if ! _key_const
-# define const
-#endif
-
-#ifndef _
-# if _proto_stdc
-#  define _(args) args
-# else
-#  define _(args) ()
+#ifndef __MKC_STANDARD_DEFS
+# define __MKC_STANDARD_DEFS 1
+# if ! _key_void
+#  define void int
 # endif
-#endif
+# if ! _key_void || ! _param_void_star
+   typedef char *_pvoid;
+# else
+   typedef void *_pvoid;
+# endif
+# if ! _key_const
+#  define const
+# endif
+
+# ifndef _
+#  if _proto_stdc
+#   define _(args) args
+#  else
+#   define _(args) ()
+#  endif
+# endif
+#endif /* __MKC_STANDARD_DEFS */
 
 
 #if _typ_statvfs_t
