@@ -239,10 +239,10 @@ PORTING
 
 CHANGES
 
-    4.41                                    [--]
-        Fixed bug with specifying more than one filesystem on the command line.
+    4.41                                    [2016-1-24]
+        Fixed bug specifying more than one filesystem on the command line.
         Added sort by free space, total space.
-        Updated manual page for missing sort options.
+        Updated manual page: missing, new sort options.
 
     4.40                                    [2016-1-22]
         Updated the Tcl interface to return the 'display' key as a list.
