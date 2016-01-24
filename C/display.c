@@ -72,6 +72,8 @@ extern int debug;
 #define DI_SORT_NONE            'n'
 #define DI_SORT_MOUNT           'm'
 #define DI_SORT_SPECIAL         's'
+#define DI_SORT_TOTAL           'T'
+#define DI_SORT_FREE            'f'
 #define DI_SORT_AVAIL           'a'
 #define DI_SORT_REVERSE         'r'
 #define DI_SORT_TYPE            't'
@@ -1341,10 +1343,30 @@ diCompare (diopts, data, idx1, idx2)
         }
 
         case DI_SORT_AVAIL:
+        case DI_SORT_FREE:
+        case DI_SORT_TOTAL:
         {
           _fs_size_t    temp;
 
-          temp = (d1->availSpace - d2->availSpace);
+          temp = 0;
+          switch (*ptr) {
+            case DI_SORT_AVAIL:
+            {
+              temp = (d1->availSpace - d2->availSpace);
+              break;
+            }
+            case DI_SORT_FREE:
+            {
+              temp = (d1->freeSpace - d2->freeSpace);
+              break;
+            }
+            case DI_SORT_TOTAL:
+            {
+              temp = (d1->totalSpace - d2->totalSpace);
+              break;
+            }
+          }
+
           if (temp == 0) {
             rc = 0;
           } else {
