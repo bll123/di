@@ -279,8 +279,6 @@ checkFileInfo (diData, optidx, argc, argv)
     struct stat         statBuf;
     diOptions_t         *diopts;
     diDiskInfo_t        *diskInfo;
-    int                 foundval = { 0 };
-    diDiskInfo_t        *found_dinfo = { (diDiskInfo_t *) NULL };
 
 
     rc = 0;
@@ -376,6 +374,7 @@ checkFileInfo (diData, optidx, argc, argv)
               ! dinfo->isLoopback)
           {
             int foundnew = 0;
+
             ++foundnew;
             if (dinfo->printFlag == DI_PRNT_OK) {
               ++foundnew;
@@ -383,9 +382,8 @@ checkFileInfo (diData, optidx, argc, argv)
             if (! isIgnoreFSType (dinfo->fsType)) {
               ++foundnew;
             }
-            if (foundnew > foundval) {
-              foundval = foundnew;
-              found_dinfo = dinfo;
+            if (foundnew == 3) {
+              dinfo->printFlag = DI_PRNT_FORCE;
             }
 
             found = TRUE;
@@ -427,15 +425,13 @@ checkFileInfo (diData, optidx, argc, argv)
       }
     } /* for each file specified on command line */
 
-        /* turn everything else off */
+        /* turn everything off */
     for (j = 0; j < diData->count; ++j)
     {
       diDiskInfo_t        *dinfo;
 
       dinfo = &diData->diskInfo[j];
-      if (dinfo == found_dinfo) {
-        dinfo->printFlag = DI_PRNT_FORCE;
-      } else if (dinfo->printFlag == DI_PRNT_OK && ! diopts->displayAll) {
+      if (dinfo->printFlag == DI_PRNT_OK) {
         dinfo->printFlag = DI_PRNT_IGNORE;
       }
     }
