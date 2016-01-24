@@ -203,13 +203,23 @@ Do not resolve symlinks (for mount points that have a trailing UUID).
 Use \fIsort\-type\fP to sort the output.
 The output of \fIdi\fP is normally sorted by mount point.  The following
 sort flags may be used to change the sort order:
-m \- by mount point (default); n \- leave unsorted (as it appears in
-the mount table); s \- by special device name;
-t \- by filesystem type; r \- reverse the sort order.
+\fBm\fP \- by mount point (default);
+\fBn\fP \- leave unsorted (as it appears in
+the mount table);
+\fBs\fP \- by special device name;
+\fBT\fP \- by total space;
+\fBf\fP \- by free space;
+\fBa\fP \- by available space;
+\fBt\fP \- by filesystem type;
+\fBr\fP \- reverse the sort order; This will apply to all sort flags
+following this sort flag.
 .IP
-These sort options may be combined in any order.  e.g.: di \-stsrm \- by
-type, special, reversed mount;
-di \-strsrm \- by type, reversed special, mount.
+These sort options may be combined in any order.  e.g.:
+.RS
+di \-stsrm # by type, special, reversed mount;
+.br
+di \-strsrm # by type, reversed special, mount.
+.RE
 .TP
 .B \-\-si
 An alias for \fB-dH -Bsi\fP.
