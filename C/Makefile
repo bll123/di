@@ -64,6 +64,9 @@ all-sh:	di.env
 tcl-sh:	di-sh.env
 	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh tcl-programs
 
+tcl-perl:	di-sh.env
+	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=perl tcl-programs
+
 perl-sh:	di-sh.env
 	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh perl-programs
 
