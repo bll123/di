@@ -119,7 +119,6 @@ diskspaceObjCmd (interp, objc, objv)
   char              **dispargs;
   int               i;
   diData_t          *diDataOut;
-  char              *dispPtr;
   Tcl_Obj           *dictObj;
   Tcl_Obj           *tempDictObj;
   Tcl_Obj           *mountKey;
@@ -143,18 +142,18 @@ diskspaceObjCmd (interp, objc, objv)
   dispargs = (char **) malloc (sizeof(char *) *
       (Size_t) diDataOut->count);
   if (rv != (char *) NULL) {
-    dispPtr = strtok (rv, "\n");
+    tptr = strtok (rv, "\n");
   } else {
-    dispPtr = (char *) NULL;
+    tptr = (char *) NULL;
   }
   for (i = 0; i < diDataOut->count; ++i) {
     dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
     if (! dinfo->doPrint) {
       continue;
     }
-    dispargs[i] = dispPtr;
+    dispargs[i] = tptr;
     if (rv != (char *) NULL) {
-      dispPtr = strtok (NULL, "\n");
+      tptr = strtok (NULL, "\n");
     }
   }
 
@@ -174,13 +173,16 @@ diskspaceObjCmd (interp, objc, objv)
     addWideToDict (interp, tempDictObj, "freeinodes", dinfo->freeInodes);
     addWideToDict (interp, tempDictObj, "availableinodes", dinfo->availInodes);
     addStringToDict (interp, tempDictObj, "mountoptions", dinfo->options);
-    addListToDict (interp, tempDictObj, "display", dispargs[i]);
+    if (dispargs[i] != (char *) NULL) {
+      addListToDict (interp, tempDictObj, "display", dispargs[i]);
+    }
     mountKey = Tcl_NewStringObj (dinfo->name, -1);
     Tcl_DictObjPut (interp, dictObj, mountKey, tempDictObj);
   }
 
   Tcl_SetObjResult(interp, dictObj);
   free (rv);
+  free (dispargs);
   cleanup (diDataOut);
   return TCL_OK;
 }
