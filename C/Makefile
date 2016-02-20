@@ -67,6 +67,9 @@ tcl-sh:	di-sh.env
 perl-sh:	di-sh.env
 	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh perl-programs
 
+perl-perl:	di-sh.env
+	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=perl perl-programs
+
 .PHONY: all-perl
 all-perl:	di.env
 	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
@@ -272,7 +275,7 @@ clean:
 		getoptn_test* gconfig.h getoptn.reqlibs \
 		mkconfig.reqlibs *~ */*~ \
 		>/dev/null 2>&1
-	@-cd Filesys-di; if [ -f Makefile ]; then $(MAKE) clean; $(RM) Filesys-di-*.tar.gz; fi
+	@-cd Perl; if [ -f Makefile ]; then $(MAKE) clean; $(RM) -f Filesys-di-*.tar.gz; fi
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig, ../dioptions.dat
@@ -293,7 +296,7 @@ distclean:
 		_mkconfig_runtests _tmp_mkconfig \
 		*~ *.orig */*.orig \
 		>/dev/null 2>&1
-	@-cd Filesys-di; if [ -f Makefile ]; then $(MAKE) distclean; $(RM) Filesys-di-*.tar.gz; fi
+	@-cd Perl; if [ -f Makefile ]; then $(MAKE) distclean; $(RM) -f Filesys-di-*.tar.gz; fi
 
 ###
 # installation
@@ -355,7 +358,7 @@ $(MKC_TCLREQLIB):	di.env configtcl.h
 ###
 # executables
 
-OBJECTS = dimain$(OBJ_EXT) didiskutil$(OBJ_EXT) \
+LIBOBJECTS = dimain$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		diquota$(OBJ_EXT)  display$(OBJ_EXT) getoptn$(OBJ_EXT) \
 		options$(OBJ_EXT) realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
@@ -365,36 +368,37 @@ MAINOBJECTS = di$(OBJ_EXT)
 
 TCLOBJECTS = tcldiskspace$(OBJ_EXT)
 
-di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(OBJECTS)
+di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
 	$(CC) -o di$(EXE_EXT) \
-		$(LDFLAGS) $(MAINOBJECTS) $(OBJECTS) $(LIBS) \
+		$(LDFLAGS) $(MAINOBJECTS) $(LIBOBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_REQLIB)`
 
-tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB) $(TCLOBJECTS) $(OBJECTS)
+tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB) $(TCLOBJECTS) \
+		$(LIBOBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_TCLREQLIB)` `$(CAT) $(MKC_REQLIB)`"
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-sharedlib -e diskspace$(SHLIB_EXT) \
-		$(TCLOBJECTS) $(OBJECTS) $(LIBS) \
+		$(TCLOBJECTS) $(LIBOBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_TCLREQLIB)` `$(CAT) $(MKC_REQLIB)`
 	touch tcldiskspace.bld
 
-perlfilesysdi.bld:	$(MKC_REQLIB) $(OBJECTS)
+perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-staticlib -e libdiperl \
-		$(OBJECTS) $(LIBS) \
+		$(LIBOBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_REQLIB)`
 	( \
-	cd Filesys-di ; \
+	cd Perl ; \
 	perl Makefile.PL ; \
 	make dist ; \
 	)
 	touch perlfilesysdi.bld
 
-mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(OBJECTS)
+mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 	$(CC) -o mingw-di$(EXE_EXT) \
-		$(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS)
+		$(CFLAGS) $(LDFLAGS) $(LIBOBJECTS) $(LIBS)
 
 ###
 # objects

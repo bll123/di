@@ -1,6 +1,0 @@
-Revision history for Perl extension Filesys::di.
-
-4.42a  Sat Feb 20 10:13:14 2016
-	- original version; created by h2xs 1.23 with options
-		-A -v 4.42a -b 5.5.3 -n Filesys::di
-

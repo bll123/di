@@ -15,6 +15,18 @@
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
+#if _sys_types \
+    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
+# define _DI_INC_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#if _hdr_string
+# include <string.h>
+#endif
+#if _hdr_strings
+# include <strings.h>
+#endif
+
 
 #define DI_ARGV_SEP             " 	"  /* space, tab */
 #define DI_MAX_ARGV             50
@@ -27,7 +39,8 @@ diproc (pTHX_ char *args) {
   char              *tptr;
   int               i;
   diData_t          *diDataOut;
-  char              *display;
+  char              *dispPtr;
+  char              *rv;
   diDiskInfo_t      *diskInfo;
   HV                *rh;
   HV                *dh;
@@ -50,7 +63,8 @@ diproc (pTHX_ char *args) {
     argv[3] = NULL;
   }
 
-  display = dimainproc (argc, argv, 1, &diDataOut);
+  rv = dimainproc (argc, argv, 1, &diDataOut);
+  dispPtr = strtok (rv, "\n");
 
   rh = (HV *) sv_2mortal ((SV *) newHV());
 
@@ -74,9 +88,11 @@ diproc (pTHX_ char *args) {
     hv_store (dh, "freeinodes",      10, newSVnv (dinfo->freeInodes), 0);
     hv_store (dh, "availableinodes", 15, newSVnv (dinfo->availInodes), 0);
     hv_store (dh, "mountoptions",    12, newSVpv (dinfo->options, 0), 0);
-    hv_store (dh, "display",          7, newSVpv (display, 0), 0);
+/* ### need to parse display and turn it into an array */
+    hv_store (dh, "display",          7, newSVpv (dispPtr, 0), 0);
     hv_store (rh, dinfo->name, (I32) strlen (dinfo->name),
         newRV ((SV *) dh), 0);
+    dispPtr = strtok ((char *) NULL, "\n");
   }
 
   RETVAL = newRV ((SV *) rh);

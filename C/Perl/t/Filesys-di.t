@@ -11,6 +11,8 @@ use warnings;
 use Test;
 BEGIN { plan tests => 1 };
 use Filesys::di;
+my $h = Filesys::di::diskspace ('');
+$h = Filesys::di::diskspace ('-f SMbuvpT');
 ok(1); # If we made it this far, we're ok.
 
 #########################
