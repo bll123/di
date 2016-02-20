@@ -1,0 +1,8 @@
+Changes
+di.xs
+Makefile.PL
+MANIFEST
+ppport.h
+README
+t/Filesys-di.t
+lib/Filesys/di.pm
