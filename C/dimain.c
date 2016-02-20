@@ -102,12 +102,12 @@ static int  checkForUUID        _((char *));
 
 char *
 #if _proto_stdc
-dimainproc (int argc, const char * const argv [], int tclflag, diData_t **diDataOut)
+dimainproc (int argc, const char * const argv [], int intfcflag, diData_t **diDataOut)
 #else
-dimainproc (argc, argv, tclflag, diDataOut)
+dimainproc (argc, argv, intfcflag, diDataOut)
     int         argc;
     const char  * const argv [];
-    int         tclflag;
+    int         intfcflag;
     diData_t    **diDataOut;
 #endif
 {
@@ -167,7 +167,7 @@ dimainproc (argc, argv, tclflag, diDataOut)
     diout->maxOptString = 0;
     diout->maxMntTimeString = 0;
 
-    if (tclflag) {
+    if (intfcflag) {
       diopts->csv_output = TRUE;
       diopts->csv_tabs = TRUE;
       diopts->printHeader = FALSE;
