@@ -17,16 +17,16 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 %EXPORT_TAGS = ( 'all' => [ qw(
-	
+
 ) ] );
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 @EXPORT = qw(
-	
+  diskspace
 );
 
-$VERSION = '4.42';
+$VERSION = '0.01';
 
 bootstrap Filesys::di $VERSION;
 
@@ -38,20 +38,18 @@ __END__
 
 =head1 NAME
 
-Filesys::di - Perl extension for blah blah blah
+Filesys::di - Perl extension for 'di'
 
 =head1 SYNOPSIS
 
   use Filesys::di;
-  blah blah blah
+
+  my $di = Filesys::di::diskspace ('');
+
+  my $di = Filesys::di::diskspace ('-f buvp');
 
 =head1 DESCRIPTION
 
-Stub documentation for Filesys::di, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
-
-Blah blah blah.
 
 =head2 EXPORT
 

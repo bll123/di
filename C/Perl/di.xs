@@ -37,41 +37,57 @@ diproc (pTHX_ char *args) {
   int               argc;
   const char        *argv [DI_MAX_ARGV];
   char              *tptr;
+  char              **dispargs;
   int               i;
   diData_t          *diDataOut;
-  char              *dispPtr;
   char              *rv;
   diDiskInfo_t      *diskInfo;
+  diDiskInfo_t      *dinfo;
   HV                *rh;
   HV                *dh;
   SV                *RETVAL;
 
-  tptr = strtok (args, DI_ARGV_SEP);
   argv[0] = "diskspace";
-  argc = 1;
-  while (tptr != (char *) NULL) {
-    if (argc >= DI_MAX_ARGV) {
-      break;
-    }
-    argv[argc++] = tptr;
-    tptr = strtok ((char *) NULL, DI_ARGV_SEP);
-  }
-  if (tptr == (char *) NULL) {
+  if (args == (char *) NULL || strcmp (args, "") == 0) {
     argc = 3;
     argv[1] = "-f";
     argv[2] = "";
     argv[3] = NULL;
+  } else {
+    tptr = strtok (args, DI_ARGV_SEP);
+    argc = 1;
+    while (tptr != (char *) NULL) {
+      if (argc >= DI_MAX_ARGV) {
+        break;
+      }
+      argv[argc++] = tptr;
+      tptr = strtok ((char *) NULL, DI_ARGV_SEP);
+    }
   }
 
   rv = dimainproc (argc, argv, 1, &diDataOut);
-  dispPtr = strtok (rv, "\n");
+  diskInfo = diDataOut->diskInfo;
+
+  dispargs = (char **) malloc (sizeof(char *) *
+      (Size_t) diDataOut->count);
+  if (rv != (char *) NULL) {
+    tptr = strtok (rv, "\n");
+  } else {
+    tptr = (char *) NULL;
+  }
+  for (i = 0; i < diDataOut->count; ++i) {
+    dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
+    if (! dinfo->doPrint) {
+      continue;
+    }
+    dispargs[i] = tptr;
+    if (rv != (char *) NULL) {
+      tptr = strtok (NULL, "\n");
+    }
+  }
 
   rh = (HV *) sv_2mortal ((SV *) newHV());
-
-  diskInfo = diDataOut->diskInfo;
   for (i = 0; i < diDataOut->count; ++i) {
-    diDiskInfo_t    *dinfo;
-
     dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
     if (! dinfo->doPrint) {
       continue;
@@ -88,14 +104,16 @@ diproc (pTHX_ char *args) {
     hv_store (dh, "freeinodes",      10, newSVnv (dinfo->freeInodes), 0);
     hv_store (dh, "availableinodes", 15, newSVnv (dinfo->availInodes), 0);
     hv_store (dh, "mountoptions",    12, newSVpv (dinfo->options, 0), 0);
-/* ### need to parse display and turn it into an array */
-    hv_store (dh, "display",          7, newSVpv (dispPtr, 0), 0);
+    if (dispargs[i] != (char *) NULL) {
+      hv_store (dh, "display",          7, newSVpv (dispargs[i], 0), 0);
+    }
     hv_store (rh, dinfo->name, (I32) strlen (dinfo->name),
         newRV ((SV *) dh), 0);
-    dispPtr = strtok ((char *) NULL, "\n");
   }
 
   RETVAL = newRV ((SV *) rh);
+  free (rv);
+  free (dispargs);
   cleanup (diDataOut);
   return RETVAL;
 }
