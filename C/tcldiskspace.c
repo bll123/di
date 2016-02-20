@@ -116,6 +116,7 @@ diskspaceObjCmd (interp, objc, objv)
   const char        **argv;
   char              *rv;
   const char        *ptr;
+  char              **dispargs;
   int               i;
   diData_t          *diDataOut;
   char              *dispPtr;
@@ -123,6 +124,8 @@ diskspaceObjCmd (interp, objc, objv)
   Tcl_Obj           *tempDictObj;
   Tcl_Obj           *mountKey;
   diDiskInfo_t      *diskInfo;
+  diDiskInfo_t      *dinfo;
+
 
   /* using malloc here causes tcl to crash */
   argv = (const char **) ckalloc (sizeof(const char *) * (Size_t) objc);
@@ -133,15 +136,29 @@ diskspaceObjCmd (interp, objc, objv)
   argv[objc] = NULL;
 
   rv = diproc (objc, argv, &diDataOut);
+  diskInfo = diDataOut->diskInfo;
   ckfree (argv);
 
   dictObj = Tcl_NewDictObj ();
-  dispPtr = strtok (rv, "\n");
-
-  diskInfo = diDataOut->diskInfo;
+  dispargs = (char **) malloc (sizeof(char *) *
+      (Size_t) diDataOut->count);
+  if (rv != (char *) NULL) {
+    dispPtr = strtok (rv, "\n");
+  } else {
+    dispPtr = (char *) NULL;
+  }
   for (i = 0; i < diDataOut->count; ++i) {
-    diDiskInfo_t    *dinfo;
+    dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
+    if (! dinfo->doPrint) {
+      continue;
+    }
+    dispargs[i] = dispPtr;
+    if (rv != (char *) NULL) {
+      dispPtr = strtok (NULL, "\n");
+    }
+  }
 
+  for (i = 0; i < diDataOut->count; ++i) {
     dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
     if (! dinfo->doPrint) {
       continue;
@@ -157,12 +174,9 @@ diskspaceObjCmd (interp, objc, objv)
     addWideToDict (interp, tempDictObj, "freeinodes", dinfo->freeInodes);
     addWideToDict (interp, tempDictObj, "availableinodes", dinfo->availInodes);
     addStringToDict (interp, tempDictObj, "mountoptions", dinfo->options);
-    if (dispPtr != (char *) NULL) {
-      addListToDict (interp, tempDictObj, "display", dispPtr);
-    }
+    addListToDict (interp, tempDictObj, "display", dispargs[i]);
     mountKey = Tcl_NewStringObj (dinfo->name, -1);
     Tcl_DictObjPut (interp, dictObj, mountKey, tempDictObj);
-    dispPtr = strtok (NULL, "\n");
   }
 
   Tcl_SetObjResult(interp, dictObj);
