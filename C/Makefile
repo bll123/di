@@ -64,6 +64,9 @@ all-sh:	di.env
 tcl-sh:	di-sh.env
 	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh tcl-programs
 
+perl-sh:	di-sh.env
+	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh perl-programs
+
 .PHONY: all-perl
 all-perl:	di.env
 	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
@@ -261,14 +264,15 @@ xenix-cc:
 clean:
 	@-$(RM) -rf di mi \
 		di.exe mingw-di.exe mi.exe \
-		tcldiskspace.bld diskspace.so diskspace.dylib \
-		diskspace.dll \
+		tcldiskspace.bld diskspace.so diskspace.dylib diskspace.dll \
+		perlfilesysdi.bld libdiperl.a \
 		*.o *.obj mkconfig.log \
 		tests.done _tmp_mkconfig tests.d/chksh* \
 		mkconfig.cache mkc*.vars \
 		getoptn_test* gconfig.h getoptn.reqlibs \
 		mkconfig.reqlibs *~ */*~ \
 		>/dev/null 2>&1
+	@-cd Filesys-di; if [ -f Makefile ]; then $(MAKE) clean; $(RM) Filesys-di-*.tar.gz; fi
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig, ../dioptions.dat
@@ -289,6 +293,7 @@ distclean:
 		_mkconfig_runtests _tmp_mkconfig \
 		*~ *.orig */*.orig \
 		>/dev/null 2>&1
+	@-cd Filesys-di; if [ -f Makefile ]; then $(MAKE) distclean; $(RM) Filesys-di-*.tar.gz; fi
 
 ###
 # installation
@@ -304,6 +309,8 @@ install:	di-programs di.env
 di-programs:	di$(EXE_EXT)
 .PHONY: tcl-programs
 tcl-programs:	tcldiskspace.bld
+.PHONY: perl-programs
+perl-programs:	perlfilesysdi.bld
 
 ###
 # configuration file
@@ -371,6 +378,19 @@ tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB) $(TCLOBJECTS) $(OBJECTS)
 		$(TCLOBJECTS) $(OBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_TCLREQLIB)` `$(CAT) $(MKC_REQLIB)`
 	touch tcldiskspace.bld
+
+perlfilesysdi.bld:	$(MKC_REQLIB) $(OBJECTS)
+	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
+		-staticlib -e libdiperl \
+		$(OBJECTS) $(LIBS) \
+		`$(CAT) $(MKC_REQLIB)`
+	( \
+	cd Filesys-di ; \
+	perl Makefile.PL ; \
+	make dist ; \
+	)
+	touch perlfilesysdi.bld
 
 mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(OBJECTS)
 	$(CC) -o mingw-di$(EXE_EXT) \
