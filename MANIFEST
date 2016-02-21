@@ -37,6 +37,20 @@ C/realloc.c               di source
 C/strdup.c                di source
 C/strstr.c                di source
 C/tcldiskspace.c          tcl interface script
+C/Perl/                   perl interface 
+C/Perl/Changes
+C/Perl/README
+C/Perl/ex/
+C/Perl/ex/perl-example.pl
+C/Perl/t/
+C/Perl/t/diskspace.t
+C/Perl/MANIFEST
+C/Perl/di.xs
+C/Perl/Makefile.PL
+C/Perl/lib/
+C/Perl/lib/Filesys/
+C/Perl/lib/Filesys/di.pm
+C/Perl/ppport.h
 C/tests.d/                regression tests for di
 C/tests.d/buildpl.sh
 C/tests.d/compshpl.sh
@@ -47,7 +61,7 @@ C/tests.d/rpmbuild.sh
 C/tests.d/test_order
 C/trimchar.c              di source
 C/version.h               di source
-D/                      D di source
+D/                        D di source
 D/Makefile                D Makefile
 D/d.README                D source README
 D/di.d                    di source
