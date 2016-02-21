@@ -278,7 +278,12 @@ clean:
 		getoptn_test* gconfig.h getoptn.reqlibs \
 		mkconfig.reqlibs *~ */*~ \
 		>/dev/null 2>&1
-	@-cd Perl; if [ -f Makefile ]; then $(MAKE) clean; $(RM) -f Filesys-di-*.tar.gz; fi
+	@-cd Perl; \
+		if [ -f Makefile ]; then \
+		$(MAKE) clean; \
+		$(RM) -f Filesys-di-*.tar.gz; \
+		$(RM) -f Makefile.old; \
+		fi
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig, ../dioptions.dat
@@ -299,7 +304,12 @@ distclean:
 		_mkconfig_runtests _tmp_mkconfig \
 		*~ *.orig */*.orig \
 		>/dev/null 2>&1
-	@-cd Perl; if [ -f Makefile ]; then $(MAKE) distclean; $(RM) -f Filesys-di-*.tar.gz; fi
+	@-cd Perl; \
+		if [ -f Makefile ]; then \
+		$(MAKE) distclean; \
+		$(RM) -f Filesys-di-*.tar.gz; \
+		$(RM) -f Makefile.old; \
+		fi
 
 ###
 # installation

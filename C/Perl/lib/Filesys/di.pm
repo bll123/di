@@ -50,6 +50,7 @@ Filesys::di - Perl extension for 'di'
 
 =head1 DESCRIPTION
 
+See the main 'di' documentation for argument usage.
 
 =head2 EXPORT
 
@@ -69,8 +70,6 @@ Brad Lanam, E<lt>brad.lanam.di@gmail.com<gt>
 
 Copyright 2016 Brad Lanam, Walnut Creek CA
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.18.2 or,
-at your option, any later version of Perl 5 you may have available.
+See the LICENSE file included with the 'di' distribution.
 
 =cut
