@@ -1,4 +1,5 @@
-#use lib '../test-perl/local/lib/perl/5.18.2';
+use lib './blib/lib';
+use lib './blib/arch/auto/Filesys/di';
 use Filesys::di;
 use Data::Dumper;
 

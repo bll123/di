@@ -115,7 +115,7 @@ diskspaceObjCmd (interp, objc, objv)
 {
   const char        **argv;
   char              *rv;
-  const char        *ptr;
+  const char        *tptr;
   char              **dispargs;
   int               i;
   diData_t          *diDataOut;
@@ -129,8 +129,8 @@ diskspaceObjCmd (interp, objc, objv)
   /* using malloc here causes tcl to crash */
   argv = (const char **) ckalloc (sizeof(const char *) * (Size_t) objc);
   for (i = 0; i < objc; ++i) {
-    ptr = Tcl_GetString (objv[i]);
-    argv[i] = ptr;
+    tptr = Tcl_GetString (objv[i]);
+    argv[i] = tptr;
   }
   argv[objc] = NULL;
 

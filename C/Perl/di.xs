@@ -31,6 +31,20 @@
 #define DI_ARGV_SEP             " 	"  /* space, tab */
 #define DI_MAX_ARGV             50
 
+static AV *
+parsedisp (pTHX_ char *val) {
+  AV    *a;
+  char  *dptr;
+
+  a = newAV();
+  dptr = strtok (val, "	"); /* tab character */
+  while (dptr != (char *) NULL) {
+    av_push (a, newSVpv (dptr, 0));
+    dptr = strtok (NULL, "	"); /* tab character */
+  }
+  return a;
+}
+
 static SV *
 diproc (pTHX_ char *args) {
   int               argscount;
@@ -105,7 +119,8 @@ diproc (pTHX_ char *args) {
     hv_store (dh, "availableinodes", 15, newSVnv (dinfo->availInodes), 0);
     hv_store (dh, "mountoptions",    12, newSVpv (dinfo->options, 0), 0);
     if (dispargs[i] != (char *) NULL) {
-      hv_store (dh, "display",          7, newSVpv (dispargs[i], 0), 0);
+      hv_store (dh, "display",          7,
+          newRV ((SV *) parsedisp (aTHX_ dispargs[i])), 0);
     }
     hv_store (rh, dinfo->name, (I32) strlen (dinfo->name),
         newRV ((SV *) dh), 0);

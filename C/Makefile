@@ -64,8 +64,9 @@ all-sh:	di.env
 tcl-sh:	di-sh.env
 	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh tcl-programs
 
-tcl-perl:	di-sh.env
-	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=perl tcl-programs
+# this is not working...need to research
+#tcl-perl:	di-sh.env
+#	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=perl tcl-programs
 
 perl-sh:	di-sh.env
 	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh perl-programs
@@ -405,7 +406,8 @@ perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 	( \
 	cd Perl ; \
 	perl Makefile.PL ; \
-	make dist ; \
+	make ; \
+	make test ; \
 	)
 	touch perlfilesysdi.bld
 
