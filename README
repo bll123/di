@@ -147,8 +147,10 @@ PERL
       Windows Cygwin:
         # I had to install libcrypt-devel for 'crypt.h'.
         # No idea why perl would require that.
+        # perl-perl is faster than perl-sh.
         cd C; make CC=gcc NO_PIE=yes perl-perl
       Windows Msys:
+        # untested; I don't have mingw perl.
         cd C; mingw32-make -e MAKE=mingw32-make \
           _MKCONFIG_SHELL=bash WINAPI=T NO_PIE=yes CC=gcc perl-sh
 

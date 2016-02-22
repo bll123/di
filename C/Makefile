@@ -278,12 +278,12 @@ clean:
 		mkconfig.cache mkc*.vars \
 		getoptn_test* gconfig.h getoptn.reqlibs \
 		mkconfig.reqlibs \
+		Perl/Filesys-di-*.tar.gz \
+		Perl/Makefile.old \
 		>/dev/null 2>&1
 	@-cd Perl; \
 		if [ -f Makefile ]; then \
 		$(MAKE) clean; \
-		$(RM) -f Filesys-di-*.tar.gz; \
-		$(RM) -f Makefile.old; \
 		fi
 	@-find . -name '*~' -print | xargs rm
 
@@ -309,8 +309,6 @@ distclean:
 	@-cd Perl; \
 		if [ -f Makefile ]; then \
 		$(MAKE) distclean; \
-		$(RM) -f Filesys-di-*.tar.gz; \
-		$(RM) -f Makefile.old; \
 		fi
 
 ###
@@ -404,11 +402,11 @@ perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 		-staticlib -e libdiperl \
 		$(LIBOBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_REQLIB)`
-	( \
-	cd Perl ; \
 	# Don't know how to pass additional libs to Makefile.PL
 	# so pass all the information.
-	perl Makefile.PL LIBS="-L.. -ldiperl `$(CAT) $(MKC_REQLIB)`"; \
+	( \
+	cd Perl ; \
+	perl Makefile.PL LIBS="-L.. -ldiperl `$(CAT) ../$(MKC_REQLIB)`" ; \
 	make ; \
 	make test ; \
 	)
