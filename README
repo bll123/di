@@ -257,7 +257,7 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
-    4.42                                    [--]
+    4.42                                    [2016-2-22]
         Fixed a parsing bug in the Tcl interface.
         Added a Perl interface.
 
