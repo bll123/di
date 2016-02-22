@@ -406,7 +406,9 @@ perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 		`$(CAT) $(MKC_REQLIB)`
 	( \
 	cd Perl ; \
-	perl Makefile.PL ; \
+	# Don't know how to pass additional libs to Makefile.PL
+	# so pass all the information.
+	perl Makefile.PL LIBS="-L.. -ldiperl `$(CAT) $(MKC_REQLIB)`"; \
 	make ; \
 	make test ; \
 	)
