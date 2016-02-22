@@ -46,11 +46,24 @@ Filesys::di - Perl extension for 'di'
 
   my $di = Filesys::di::diskspace ('');
 
-  my $di = Filesys::di::diskspace ('-f buvp');
+  my $di = Filesys::di::diskspace ('-d 1 -f buvp');
 
 =head1 DESCRIPTION
 
-See the main 'di' documentation for argument usage.
+Returns a reference to a hash.  The hash keys are the mount points.
+
+Each hash contains the following keys: device (special device name),
+fstype (filesystem type), total, free, available, totalinodes, freeinodes,
+availableinodes, mountoptions.
+
+If a format is specified, the hash will also contain a 'display' key
+pointing to a reference to an array containing the display output from
+the 'di' program.
+
+Perl XS does not seem to have a long long type, so there may
+be a loss of precision in the conversion of long long to double.
+
+See the main 'di' documentation for usage.
 
 =head2 EXPORT
 
@@ -64,7 +77,7 @@ http://gentoo.com/di/
 
 =head1 AUTHOR
 
-Brad Lanam, E<lt>brad.lanam.di@gmail.com<gt>
+Brad Lanam, E<lt>brad.lanam.di@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

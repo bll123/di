@@ -1,6 +1,9 @@
 Filesys-di version 0.01
 ========================
 
+Perl XS does not seem to have a long long type, so there may
+be a loss of precision in the conversion of long long to double.
+
 INSTALLATION
 
 To install this module type the following:

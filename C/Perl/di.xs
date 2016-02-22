@@ -138,7 +138,7 @@ MODULE = Filesys::di		PACKAGE = Filesys::di
 
 SV *
 diskspace (char *args)
-  PROTOTYPE: @
+  PROTOTYPE: $
   CODE:
     RETVAL = diproc (aTHX_ args);
   OUTPUT:
