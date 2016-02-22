@@ -133,31 +133,26 @@ TCL
 
     See C/tcl-example.tcl for a usage example.
 
-    When running from Tcl, the following option defaults are changed:
-      CSV output set on (-c).
-      CSV tabbed output set on (-C).
-      No headers (-n).
-
 PERL
     The Perl extension provides access to the di utility via
     the [Filesys::di::diskspace] command.
 
     To build:
 
+      # perl-perl can be substituted for perl-sh to use the
+      # perl configuration script instead of the shell
+      # configuration scripts.
       cd C; make -e perl-sh; cd Perl; make PREFIX=your-prefix install
 
       Windows Cygwin:
-        cd C; make CC=gcc NO_PIE=yes perl-sh
+        # I had to install libcrypt-devel for 'crypt.h'.
+        # No idea why perl would require that.
+        cd C; make CC=gcc NO_PIE=yes perl-perl
       Windows Msys:
         cd C; mingw32-make -e MAKE=mingw32-make \
           _MKCONFIG_SHELL=bash WINAPI=T NO_PIE=yes CC=gcc perl-sh
 
     See C/Perl/ex/perl-example.pl for a usage example.
-
-    When running from Perl, the following option defaults are changed:
-      CSV output set on (-c).
-      CSV tabbed output set on (-C).
-      No headers (-n).
 
 BUGS AND KNOWN ISSUES
     What's Not Tested:
