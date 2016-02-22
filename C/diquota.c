@@ -356,6 +356,7 @@ quotactl_get (diqinfo, cmd, id, qdata)
 {
   int       rc;
 
+  rc = -4;
 # if defined (__FreeBSD__) && __FreeBSD__ == 5
     /* quotactl on devfs fs panics the system (FreeBSD 5.1) */
   if (strcmp (diqinfo->type, "ufs") != 0) {
