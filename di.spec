@@ -5,8 +5,8 @@ Summary:        'di' is a disk information utility, displaying everything (and m
 
 Group:          System Environment/Base
 License:        zlib/libpng
-URL:            http://www.gentoo.com/di/
-Source0:        http://www.gentoo.com/di/di-%{version}.tar.gz
+URL:            https://gentoo.com/di/
+Source0:        https://gentoo.com/di/di-%{version}.tar.gz
 Source1:        http://www.fossies.org/unix/misc/di-%{version}.tar.gz
 BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
