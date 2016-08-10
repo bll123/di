@@ -15,8 +15,8 @@
 # include <stdlib.h>
 #endif
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _hdr_string
@@ -64,7 +64,7 @@ int diskspaceObjCmd _((ClientData, Tcl_Interp *, int, Tcl_Obj * const []));
 static void addListToDict _((Tcl_Interp *, Tcl_Obj *, const char *, char *));
 static void addStringToDict _((Tcl_Interp *, Tcl_Obj *, const char *, const char *));
 static void addWideToDict _((Tcl_Interp *, Tcl_Obj *, const char *, _fs_size_t));
-static char *diproc _((int, const char **, diData_t **));
+static char *diproc _((int, const char **, diData_t *));
 
 #if defined (__cplusplus) || defined (c_plusplus)
   }
@@ -116,9 +116,10 @@ diskspaceObjCmd (interp, objc, objv)
   const char        **argv;
   char              *rv;
   const char        *tptr;
+  char              *ttptr;
   char              **dispargs;
   int               i;
-  diData_t          *diDataOut;
+  diData_t          diData;
   Tcl_Obj           *dictObj;
   Tcl_Obj           *tempDictObj;
   Tcl_Obj           *mountKey;
@@ -134,30 +135,31 @@ diskspaceObjCmd (interp, objc, objv)
   }
   argv[objc] = NULL;
 
-  rv = diproc (objc, argv, &diDataOut);
-  diskInfo = diDataOut->diskInfo;
-  ckfree (argv);
+  rv = diproc (objc, argv, &diData);
+  diskInfo = diData.diskInfo;
 
   dictObj = Tcl_NewDictObj ();
   dispargs = (char **) malloc (sizeof(char *) *
-      (Size_t) diDataOut->count);
+      (Size_t) diData.count);
   if (rv != (char *) NULL) {
-    tptr = strtok (rv, "\n");
+    ttptr = strtok (rv, "\n");
   } else {
-    tptr = (char *) NULL;
+    ttptr = (char *) NULL;
   }
-  for (i = 0; i < diDataOut->count; ++i) {
+
+  for (i = 0; i < diData.count; ++i) {
     dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
+    dispargs[i] = (char *) NULL;
     if (! dinfo->doPrint) {
       continue;
     }
-    dispargs[i] = tptr;
+    dispargs[i] = ttptr;
     if (rv != (char *) NULL) {
-      tptr = strtok (NULL, "\n");
+      ttptr = strtok (NULL, "\n");
     }
   }
 
-  for (i = 0; i < diDataOut->count; ++i) {
+  for (i = 0; i < diData.count; ++i) {
     dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
     if (! dinfo->doPrint) {
       continue;
@@ -183,7 +185,8 @@ diskspaceObjCmd (interp, objc, objv)
   Tcl_SetObjResult(interp, dictObj);
   free (rv);
   free (dispargs);
-  cleanup (diDataOut);
+  cleanup (&diData);
+  ckfree (argv);
   return TCL_OK;
 }
 
@@ -261,16 +264,16 @@ addWideToDict (interp, dict, nm, val)
 
 static char *
 #if _proto_stdc
-diproc (int argc, const char **argv, diData_t **diDataOut)
+diproc (int argc, const char **argv, diData_t *diData)
 #else
 diproc (argc, argv)
     int argc;
     const char **argv;
-    diData_t   **diDataOut;
+    diData_t   *diData;
 #endif
 {
   char      *disp;
 
-  disp = dimainproc (argc, (const char * const *) argv, 1, diDataOut);
+  disp = dimainproc (argc, (const char * const *) argv, 1, diData);
   return disp;
 }

@@ -18,8 +18,8 @@
 # include <stdlib.h>
 #endif
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _hdr_ctype
@@ -57,14 +57,14 @@ typedef struct
 
 static dispTable_t dispTable [] =
 {
-    { 0.0, { "KBytes", "KBytes" } },
-    { 0.0, { "Megs", "Mebis" } },
-    { 0.0, { "Gigs", "Gibis" } },
-    { 0.0, { "Teras", "Tebis" } },
-    { 0.0, { "Petas", "Pebis" } },
-    { 0.0, { "Exas", "Exbis" } },
-    { 0.0, { "Zettas", "Zebis" } },
-    { 0.0, { "Yottas", "Yobis" } }
+    { (_print_size_t) 0.0, { "KBytes", "KBytes" } },
+    { (_print_size_t) 0.0, { "Megs", "Mebis" } },
+    { (_print_size_t) 0.0, { "Gigs", "Gibis" } },
+    { (_print_size_t) 0.0, { "Teras", "Tebis" } },
+    { (_print_size_t) 0.0, { "Petas", "Pebis" } },
+    { (_print_size_t) 0.0, { "Exas", "Exbis" } },
+    { (_print_size_t) 0.0, { "Zettas", "Zebis" } },
+    { (_print_size_t) 0.0, { "Yottas", "Yobis" } }
 };
 #define DI_DISPTAB_SIZE (sizeof (dispTable) / sizeof (dispTable_t))
 
@@ -544,7 +544,7 @@ processOptions (arg, valptr)
     padata->diopts->posix_compat = TRUE;
     padata->diopts->csv_output = FALSE;
   } else if (strcmp (arg, "--si") == 0) {
-    padata->diopts->baseDispSize = DI_VAL_1000;
+    padata->diopts->baseDispSize = (_print_size_t) DI_VAL_1000;
     padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
     strncpy (padata->dbsstr, "H", padata->dbsstr_sz);
   } else if (strcmp (arg, "--version") == 0) {
@@ -574,22 +574,22 @@ processOptionsVal (arg, valptr, value)
   if (strcmp (arg, "-B") == 0) {
     if (isdigit ((int) (*value)))
     {
-      padata->diopts->baseDispSize = atof (value);
+      padata->diopts->baseDispSize = (_print_size_t) atof (value);
       padata->diopts->baseDispIdx = DI_DISP_1000_IDX; /* unknown, really */
-      if (padata->diopts->baseDispSize == DI_VAL_1024)
+      if (padata->diopts->baseDispSize == (_print_size_t) DI_VAL_1024)
       {
         padata->diopts->baseDispIdx = DI_DISP_1024_IDX;
       }
     }
     else if (strcmp (value, "k") == 0)
     {
-      padata->diopts->baseDispSize = DI_VAL_1024;
+      padata->diopts->baseDispSize = (_print_size_t) DI_VAL_1024;
       padata->diopts->baseDispIdx = DI_DISP_1024_IDX;
     }
     else if (strcmp (value, "d") == 0 ||
         strcmp (value, "si") == 0)
     {
-      padata->diopts->baseDispSize = DI_VAL_1000;
+      padata->diopts->baseDispSize = (_print_size_t) DI_VAL_1000;
       padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
     }
   } else if (strcmp (arg, "-I") == 0) {
@@ -745,11 +745,11 @@ setDispBlockSize (ptr, diopts, diout)
 
   if (isdigit ((int) (*ptr)))
   {
-      val = atof (ptr);
+      val = (_print_size_t) atof (ptr);
   }
   else
   {
-      val = 1.0;
+      val = (_print_size_t) 1.0;
   }
 
   tptr = ptr;
@@ -819,14 +819,14 @@ setDispBlockSize (ptr, diopts, diout)
 
       case 'h':
       {
-          val = DI_DISP_HR;
+          val = (_print_size_t) DI_DISP_HR;
           diout->dispBlockLabel = "Size";
           break;
       }
 
       case 'H':
       {
-          val = DI_DISP_HR_2;
+          val = (_print_size_t) DI_DISP_HR_2;
           diout->dispBlockLabel = "Size";
           break;
       }
@@ -835,7 +835,7 @@ setDispBlockSize (ptr, diopts, diout)
       {
           if (strncmp (ptr, "HUMAN", (Size_t) 5) == 0)
           {
-              val = DI_DISP_HR;
+              val = (_print_size_t) DI_DISP_HR;
           }
           else
           {
@@ -853,12 +853,12 @@ setDispBlockSize (ptr, diopts, diout)
         ++tptr;
         if (*tptr == 'B')
         {
-           diopts->baseDispSize = DI_VAL_1000;
+           diopts->baseDispSize = (_print_size_t) DI_VAL_1000;
            diopts->baseDispIdx = DI_DISP_1000_IDX;
         }
       }
 
-      if (val == 1.0)
+      if (val == (_print_size_t) 1.0)
       {
         diout->dispBlockLabel = dispTable [idx].disp [diopts->baseDispIdx];
       }
@@ -896,11 +896,11 @@ setDispBlockSize (ptr, diopts, diout)
     }
   }  /* some oddball block size */
 
-  if (diopts->posix_compat && val == DI_VAL_512)
+  if (diopts->posix_compat && val == (_print_size_t) DI_VAL_512)
   {
     diout->dispBlockLabel = "512-blocks";
   }
-  if (diopts->posix_compat && val == DI_VAL_1024)
+  if (diopts->posix_compat && val == (_print_size_t) DI_VAL_1024)
   {
     diout->dispBlockLabel = "1024-blocks";
   }

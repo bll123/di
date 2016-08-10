@@ -4,7 +4,12 @@
 #
 # To build the sharedlibrary:
 #   make -e tcl-sh
+# On windows:
+#   make -e WINAPI=T NO_PIE=yes tcl-sh
 #
+
+package require platform
+
 # the load wants the full path, not relative...
 set ext [info sharedlibextension]
 set lfn [file normalize [file join [file dirname [info script]] diskspace$ext]]
@@ -21,4 +26,8 @@ dict for {mount dline} $d {
   puts "$mount: $dline"
 }
 # dictionary is nested with the mount point as the key.
-puts "/ total space: [dict get $d / total]"
+set dir /
+if { [regexp -nocase {^win} [platform::generic]] } {
+  set dir "C:\\"
+}
+puts "$dir total space: [dict get $d $dir total]"

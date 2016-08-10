@@ -39,8 +39,8 @@
 # include <strings.h>
 #endif
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _use_mcheck

@@ -1,5 +1,5 @@
-#ifndef _INC_DISPLAY_H
-#define _INC_DISPLAY_H
+#ifndef DI_INC_DISPLAY_H
+#define DI_INC_DISPLAY_H
 
 #include "config.h"
 #include "di.h"
@@ -17,4 +17,4 @@ extern const char *getPrintFlagText _((int));
    }
 # endif
 
-#endif /* _INC_DISPLAY_H */
+#endif /* DI_INC_DISPLAY_H */

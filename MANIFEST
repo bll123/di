@@ -11,7 +11,7 @@ C/configs/config.vms        config.h for VMS
 C/configs/config.vms.b      alternate config.h for VMS
 C/configs/config.cygwin.gcc config.h for Windows cygwin-gcc
 C/configs/conf.xenix.cc     config.h for XENIX
-C/tcl-example.tcl         example tcl script
+C/di-example.tcl          example tcl script
 C/di.c                    di source
 C/di.h                    di source
 C/dimain.c                di source

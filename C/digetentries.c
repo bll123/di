@@ -28,8 +28,8 @@
 # include <dirent.h>
 #endif
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _sys_param
@@ -61,14 +61,14 @@
 #endif
 
 #if _hdr_mntent \
-  && ! defined (_DI_INC_MNTENT)        /* Linux, kFreeBSD, HP-UX */
-# define _DI_INC_MNTENT 1
+  && ! defined (DI_INC_MNTENT)        /* Linux, kFreeBSD, HP-UX */
+# define DI_INC_MNTENT 1
 # include <mntent.h>            /* hasmntopt(); _PATH_MNTTAB */
 #endif                          /* HP-UX: set/get/endmntent(); hasmntopt() */
 
 #if _sys_mount \
-  && ! defined (_DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
-# define _DI_INC_SYS_MOUNT 1
+  && ! defined (DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+# define DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>         /* getmntinfo(); struct statfs */
 #endif
 #if _sys_fstypes                /* NetBSD */

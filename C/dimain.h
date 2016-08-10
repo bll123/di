@@ -1,5 +1,5 @@
-#ifndef _INC_DIMAIN_H
-#define _INC_DIMAIN_H
+#ifndef DI_INC_DIMAIN_H
+#define DI_INC_DIMAIN_H
 
 /*
  * Copyright 2016 Brad Lanam Walnut Creek CA USA
@@ -17,7 +17,7 @@
 #endif
 
  /* dimain.c */
-extern char *dimainproc         _((int, const char * const [], int, diData_t **));
+extern char *dimainproc         _((int, const char * const [], int, diData_t *));
 extern void checkDiskInfo       _((diData_t *, int));
 extern void checkDiskQuotas     _((diData_t *));
 extern int  checkFileInfo       _((diData_t *, int, int, const char *const[]));
@@ -32,4 +32,4 @@ extern void initZones           _((diData_t *));
    }
 # endif
 
-#endif /* _INC_DIMAIN_H */
+#endif /* DI_INC_DIMAIN_H */

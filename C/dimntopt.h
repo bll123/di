@@ -4,19 +4,19 @@
  * Copyright 2011 Brad Lanam, Walnut Creek, CA
  */
 
-#ifndef __INC_DIMNTOPT_H_
-#define __INC_DIMNTOPT_H_
+#ifndef DI_INC_DIMNTOPT_H_
+#define DI_INC_DIMNTOPT_H_
 
 #include "config.h"
 
 #if _hdr_mntent \
-  && ! defined (_DI_INC_MNTENT)        /* Linux, kFreeBSD, HP-UX */
-# define _DI_INC_MNTENT 1
+  && ! defined (DI_INC_MNTENT)        /* Linux, kFreeBSD, HP-UX */
+# define DI_INC_MNTENT 1
 # include <mntent.h>                /* MNTOPT_... */
 #endif
 #if _sys_mount \
-  && ! defined (_DI_INC_SYS_MOUNT)     /* FreeBSD, OpenBSD, NetBSD, HP-UX */
-# define _DI_INC_SYS_MOUNT 1
+  && ! defined (DI_INC_SYS_MOUNT)     /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+# define DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>             /* MNT_...; M_... (hp-ux) */
 #endif
 #if _sys_mnttab                     /* SCO_SV, UnixWare */
@@ -150,4 +150,4 @@
 # define DI_MNTOPT_DEV "dev="
 #endif
 
-#endif /* __INC_DIMNTOPT_H_ */
+#endif /* DI_INC_DIMNTOPT_H_ */

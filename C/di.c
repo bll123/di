@@ -87,8 +87,8 @@
 # include <stdlib.h>
 #endif
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _use_mcheck
@@ -107,28 +107,18 @@ main (argc, argv)
 #endif
 {
   char      *disp;
-  diData_t  *diDataOut;
+  diData_t  diData;
 
 #if _use_mcheck
   mcheck_pedantic (NULL);
   mtrace ();
 #endif
 
-  disp = dimainproc (argc, argv, 0, &diDataOut);
+  disp = dimainproc (argc, argv, 0, &diData);
   if (disp != (char *) NULL) {
     fputs (disp, stdout);
-    /* free (disp); */
+    free (disp);
   }
-  /*
-   * Mac OS X is getting some weird malloc error (10.11.2).
-   * The diDataOut pointer is fine up to before the fputs() call.
-   * Removing the fputs fixes it.
-   * A mcheck on Linux finds no issues.
-   * valgrind on Linux finds no issues.
-   * So it is probably a Mac OS X bug in their library, as
-   * both gcc and clang have the same issue.
-   * So just don't free the data, the program's going to exit anyways.
-   */
-  /* cleanup (diDataOut); */
+  cleanup (&diData);
   return 0;
 }

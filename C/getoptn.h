@@ -4,8 +4,8 @@
  * Copyright 2011-2013 Brad Lanam, Walnut Creek, CA
  */
 
-#ifndef __INC_GETOPTN_H_
-#define __INC_GETOPTN_H_
+#ifndef DI_INC_GETOPTN_H_
+#define DI_INC_GETOPTN_H_
 
 #if defined(TEST_GETOPTN)
 # include "gconfig.h"
@@ -14,8 +14,8 @@
 #endif
 
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 
@@ -61,4 +61,4 @@ typedef struct {
 extern int getoptn _((int style, int argc, const char * const argv [],
       Size_t optcount, getoptn_opt_t opts []));
 
-#endif /*__INC_GETOPTN_H_ */
+#endif /*DI_INC_GETOPTN_H_ */

@@ -18,8 +18,8 @@
 # include <ctype.h>
 #endif
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _hdr_string
@@ -184,15 +184,16 @@ printDiskInfo (diData)
     }
     free (tout);
 
-    if (diopts->dispBlockSize == DI_DISP_HR ||
-        diopts->dispBlockSize == DI_DISP_HR_2)
+    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
+        diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2)
     {
         --diout->width;
     }
 
-    if (diopts->dispBlockSize != DI_DISP_HR &&
-        diopts->dispBlockSize != DI_DISP_HR_2 &&
-        (diopts->dispBlockSize > 0 && diopts->dispBlockSize <= DI_VAL_1024)) {
+    if (diopts->dispBlockSize != (_print_size_t) DI_DISP_HR &&
+        diopts->dispBlockSize != (_print_size_t) DI_DISP_HR_2 &&
+        (diopts->dispBlockSize > 0 &&
+         diopts->dispBlockSize <= (_print_size_t) DI_VAL_1024)) {
       if (diopts->csv_output) {
         Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
             "%%.0%s%%s", DI_Lf);
@@ -219,8 +220,8 @@ printDiskInfo (diData)
       }
     }
 
-    if (diopts->dispBlockSize == DI_DISP_HR ||
-        diopts->dispBlockSize == DI_DISP_HR_2)
+    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
+        diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2)
     {
         ++diout->width;
     }
@@ -527,8 +528,8 @@ printInfo (diskInfo, diopts, diout)
       percInit = TRUE;
     }
     idx = 0;
-    temp = 0.0;  /* gcc compile warning */
-    if (diopts->dispBlockSize == DI_DISP_HR_2)
+    temp = (_print_size_t) 0.0;  /* gcc compile warning */
+    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2)
     {
       idx = DI_ONE_MEG_SZTAB; /* default */
 
@@ -825,14 +826,14 @@ printSpace (diopts, diout, usage, idx)
     format = diout->blockFormat;
     tdbs = diopts->dispBlockSize;
 
-    if (diopts->dispBlockSize == DI_DISP_HR)
+    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR)
     {
         temp = (_print_size_t) usage;
         idx = findDispSize (temp);
     }
 
-    if (diopts->dispBlockSize == DI_DISP_HR ||
-        diopts->dispBlockSize == DI_DISP_HR_2)
+    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
+        diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2)
     {
       if (idx == -1)
       {
@@ -846,7 +847,7 @@ printSpace (diopts, diout, usage, idx)
       }
     }
 
-    mult = 1.0 / tdbs;
+    mult = (_print_size_t) 1.0 / tdbs;
     Snprintf2 (tdata, sizeof(tdata), format, (_print_size_t) usage * mult, suffix);
     return tdata;
 }
@@ -1269,10 +1270,10 @@ printPerc (used, totAvail, format)
 
     if (totAvail > 0L) {
         perc = (_print_size_t) used / (_print_size_t) totAvail;
-        perc *= 100.0;
+        perc *= (_print_size_t) 100.0;
     }
     else {
-        perc = 0.0;
+        perc = (_print_size_t) 0.0;
     }
 
     Snprintf1 (tdata, sizeof(tdata), format, perc);

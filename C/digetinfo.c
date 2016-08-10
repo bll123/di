@@ -29,8 +29,8 @@
 # include <stdlib.h>
 #endif
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _sys_param
@@ -47,8 +47,8 @@
 #endif
 
 #if _sys_mount \
-  && ! defined (_DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
-# define _DI_INC_SYS_MOUNT 1
+  && ! defined (DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+# define DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>         /* statfs(); struct statfs; getfsstat() */
 #endif
 #if _sys_statvfs                /* Linux, Solaris, FreeBSD, NetBSD, HP-UX */

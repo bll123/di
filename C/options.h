@@ -1,5 +1,5 @@
-#ifndef _INC_OPTIONS_H
-#define _INC_OPTIONS_H
+#ifndef DI_INC_OPTIONS_H
+#define DI_INC_OPTIONS_H
 
 #include "config.h"
 #include "di.h"
@@ -33,4 +33,4 @@ extern int getDIOptions _((int , const char * const [], diData_t *));
 # endif
 
 
-#endif /* _INC_OPTIONS_H */
+#endif /* DI_INC_OPTIONS_H */

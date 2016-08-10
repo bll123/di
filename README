@@ -54,8 +54,6 @@ INSTALLATION
     Alternative 1 - uses pre-built config.win or config.mingw
       Cygwin gcc: make -e windows-gcc
         (uses cygwin API)
-      MSys: mingw32-make -e MAKE=mingw32-make windows-msys
-        (uses windows API)
       MinGW: mingw32-make -e MAKE=mingw32-make CC=gcc windows-mingw
         (uses windows API)
     Alternative 2 - builds a new config.h file (Cygwin).
@@ -126,12 +124,9 @@ TCL
       Windows Cygwin:
         cd C; make CC=gcc NO_PIE=yes tcl-sh
       Windows Msys:
-        # I can't build Tcl with Msys, but the following command
-        # line should work.
-        cd C; mingw32-make -e MAKE=mingw32-make \
-          _MKCONFIG_SHELL=bash WINAPI=T NO_PIE=yes CC=gcc tcl-sh
+        cd C; make WINAPI=T NO_PIE=yes CFLAGS=-m64 tcl-sh
 
-    See C/tcl-example.tcl for a usage example.
+    See C/di-example.tcl for a usage example.
 
 PERL
     The Perl extension provides access to the di utility via
@@ -257,6 +252,11 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+    4.43                                    [2016-8-9]
+        Cleaned up some compiler warnings.
+        Fixed memory allocation problem.
+        Tcl interface fixes
+
     4.42                                    [2016-2-22]
         Fixed a parsing bug in the Tcl interface.
         Added a Perl interface.

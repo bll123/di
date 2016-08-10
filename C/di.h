@@ -4,8 +4,8 @@
  * Copyright 1994-2013 Brad Lanam, Walnut Creek, CA
  */
 
-#ifndef _INC_DI_H
-#define _INC_DI_H
+#ifndef DI_INC_DI_H
+#define DI_INC_DI_H
 
 #include "config.h"
 
@@ -13,16 +13,16 @@
 
 #include <stdio.h>
 #if _hdr_fcntl \
-    && ! defined (_DI_INC_FCNTL_H)  /* xenix */
-# define _DI_INC_FCNTL_H
+    && ! defined (DI_INC_FCNTL_H)  /* xenix */
+# define DI_INC_FCNTL_H
 # include <fcntl.h>
 #endif
 #if _sys_file
 # include <sys/file.h>
 #endif
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _hdr_limits
@@ -63,8 +63,8 @@
 # endif
 #endif
 #if _sys_mount \
-    && ! defined (_DI_INC_SYS_MOUNT)       /* NetBSD */
-# define _DI_INC_SYS_MOUNT 1
+    && ! defined (DI_INC_SYS_MOUNT)       /* NetBSD */
+# define DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>                 /* MFSNAMELEN */
 # if ! defined (DI_TYPE_LEN) && defined (MFSNAMELEN)
 #  define DI_TYPE_LEN       MFSNAMELEN
@@ -368,4 +368,4 @@ typedef struct {
 
 # endif
 
-#endif /* _INC_DI_H */
+#endif /* DI_INC_DI_H */

@@ -16,8 +16,8 @@
 # include <stdlib.h>
 #endif
 #if _sys_types \
-    && ! defined (_DI_INC_SYS_TYPES_H) /* xenix */
-# define _DI_INC_SYS_TYPES_H
+    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+# define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
 #if _hdr_ctype
@@ -57,8 +57,8 @@
 # include <sys/file.h>
 #endif
 #if _hdr_fcntl \
-    && ! defined (_DI_INC_FCNTL_H)    /* xenix */
-# define _DI_INC_FCNTL_H
+    && ! defined (DI_INC_FCNTL_H)    /* xenix */
+# define DI_INC_FCNTL_H
 # include <fcntl.h>     /* O_RDONLY, O_NOCTTY */
 #endif
 #if _use_mcheck
@@ -102,16 +102,15 @@ static int  checkForUUID        _((char *));
 
 char *
 #if _proto_stdc
-dimainproc (int argc, const char * const argv [], int intfcflag, diData_t **diDataOut)
+dimainproc (int argc, const char * const argv [], int intfcflag, diData_t *diData)
 #else
-dimainproc (argc, argv, intfcflag, diDataOut)
+dimainproc (argc, argv, intfcflag, diData)
     int         argc;
     const char  * const argv [];
     int         intfcflag;
-    diData_t    **diDataOut;
+    diData_t    *diData;
 #endif
 {
-    diData_t            diData;
     diOptions_t         *diopts;
     diOutput_t          *diout;
     int                 hasLoop;
@@ -119,24 +118,24 @@ dimainproc (argc, argv, intfcflag, diDataOut)
     char                *disp;
 
         /* initialization */
-    diData.count = 0;
-    diData.haspooledfs = FALSE;
-    diData.disppooledfs = FALSE;
-    diData.totsorted = FALSE;
+    diData->count = 0;
+    diData->haspooledfs = FALSE;
+    diData->disppooledfs = FALSE;
+    diData->totsorted = FALSE;
 
-    diData.diskInfo = (diDiskInfo_t *) NULL;
+    diData->diskInfo = (diDiskInfo_t *) NULL;
 
-    diData.ignoreList.count = 0;
-    diData.ignoreList.list = (char **) NULL;
+    diData->ignoreList.count = 0;
+    diData->ignoreList.list = (char **) NULL;
 
-    diData.includeList.count = 0;
-    diData.includeList.list = (char **) NULL;
+    diData->includeList.count = 0;
+    diData->includeList.list = (char **) NULL;
 
         /* options defaults */
-    diopts = &diData.options;
+    diopts = &diData->options;
     diopts->formatString = DI_DEFAULT_FORMAT;
         /* change default display format here */
-    diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
+    diopts->dispBlockSize = (_print_size_t) (DI_VAL_1024 * DI_VAL_1024);
     diopts->printTotals = FALSE;
     diopts->printDebugHeader = FALSE;
     diopts->printHeader = TRUE;
@@ -152,13 +151,13 @@ dimainproc (argc, argv, intfcflag, diDataOut)
 
     strncpy (diopts->sortType, "m", DI_SORT_MAX); /* default - by mount point*/
     diopts->posix_compat = FALSE;
-    diopts->baseDispSize = DI_VAL_1024;
+    diopts->baseDispSize = (_print_size_t) DI_VAL_1024;
     diopts->baseDispIdx = DI_DISP_1024_IDX;
     diopts->quota_check = TRUE;
     diopts->csv_output = FALSE;
     diopts->csv_tabs = FALSE;
 
-    diout = &diData.output;
+    diout = &diData->output;
     diout->width = 8;
     diout->inodeWidth = 9;
     diout->maxMountString = 0;  /* 15 */
@@ -176,8 +175,8 @@ dimainproc (argc, argv, intfcflag, diDataOut)
     initLocale ();
 
       /* first argument is defaults */
-    optidx = getDIOptions (argc, argv, &diData);
-    initZones (&diData);
+    optidx = getDIOptions (argc, argv, diData);
+    initZones (diData);
 
     if (debug > 0)
     {
@@ -186,37 +185,36 @@ dimainproc (argc, argv, intfcflag, diDataOut)
 
         /* main processing */
 
-    if (di_getDiskEntries (&diData.diskInfo, &diData.count) < 0)
+    if (di_getDiskEntries (&diData->diskInfo, &diData->count) < 0)
     {
-        cleanup (&diData);
+        cleanup (diData);
         exit (1);
     }
 
     hasLoop = FALSE;
-    preCheckDiskInfo (&diData);
+    preCheckDiskInfo (diData);
     if (optidx < argc || diopts->excludeLoopback)
     {
-      getDiskStatInfo (&diData);
-      hasLoop = getDiskSpecialInfo (&diData, diopts->dontResolveSymlink);
+      getDiskStatInfo (diData);
+      hasLoop = getDiskSpecialInfo (diData, diopts->dontResolveSymlink);
     }
     if (optidx < argc)
     {
         int     rc;
 
-        rc = checkFileInfo (&diData, optidx, argc, argv);
+        rc = checkFileInfo (diData, optidx, argc, argv);
         if (rc < 0)
         {
-            cleanup (&diData);
+            cleanup (diData);
             exit (1);
         }
     }
-    di_getDiskInfo (&diData.diskInfo, &diData.count);
-    checkDiskInfo (&diData, hasLoop);
+    di_getDiskInfo (&diData->diskInfo, &diData->count);
+    checkDiskInfo (diData, hasLoop);
     if (diopts->quota_check == TRUE) {
-      checkDiskQuotas (&diData);
+      checkDiskQuotas (diData);
     }
-    disp = printDiskInfo (&diData);
-    *diDataOut = &diData;
+    disp = printDiskInfo (diData);
     return disp;
 }
 
