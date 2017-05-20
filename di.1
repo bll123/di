@@ -471,6 +471,11 @@ df(1), fstab(5), getmnt(2), getmntinfo(2), mnttab(4), mount(1M)
 statfs(2), statvfs(2)
 .SH Bugs
 Send bug reports to: brad.lanam.di_at_gmail.com
+.PP
+Known Issues:
+.PP
+di will probably not process a zettabyte or yottabyte sized filesystem
+properly due to overflow of a long long.
 .SH Website
 https://gentoo.com/di/
 .SH Author
