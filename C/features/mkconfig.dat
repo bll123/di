@@ -89,6 +89,7 @@ command rpmbuild
 const   O_NOCTTY
 define  bcopy
 define  bzero
+define  IOCTL_STORAGE_CHECK_VERIFY2
 define  MCTL_QUERY
 define  memcpy
 define  memset

@@ -1591,13 +1591,24 @@ di_getDiskEntries (diskInfo, diCount)
           strncpy (handleName, "\\\\.\\", MSDOS_BUFFER_SIZE);
           strncat (handleName, p, MSDOS_BUFFER_SIZE);
           handleName[strlen(handleName)-1] = '\0';
+
+# if _define_IOCTL_STORAGE_CHECK_VERIFY2
+          HANDLE hDevice = CreateFile (handleName,
+              FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE,
+              NULL, OPEN_EXISTING, 0, NULL);
+          bSuccess = DeviceIoControl (hDevice,
+              IOCTL_STORAGE_CHECK_VERIFY2,
+              NULL, 0, NULL, 0, &br, (LPOVERLAPPED) NULL);
+# else
           HANDLE hDevice = CreateFile (handleName,
               GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
               NULL, OPEN_EXISTING, 0, NULL);
-
           bSuccess = DeviceIoControl (hDevice,
               IOCTL_STORAGE_CHECK_VERIFY,
               NULL, 0, NULL, 0, &br, (LPOVERLAPPED) NULL);
+# endif
+          CloseHandle (hDevice);
+
           if (! bSuccess)
           {
             diptr->printFlag = DI_PRNT_BAD;
