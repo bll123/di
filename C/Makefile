@@ -61,6 +61,12 @@ all:	all-sh
 all-sh:	di.env
 	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=sh di-programs
 
+.PHONY: all-perl
+all-perl:	di.env
+	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
+
+# tcl interface
+.PHONY: tcl-sh
 tcl-sh:	di-sh.env
 	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh tcl-programs
 
@@ -68,15 +74,14 @@ tcl-sh:	di-sh.env
 #tcl-perl:	di-sh.env
 #	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=perl tcl-programs
 
+# perl interface
+.PHONY: perl-sh
 perl-sh:	di-sh.env
 	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh perl-programs
 
+.PHONY: perl-perl
 perl-perl:	di-sh.env
 	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=perl perl-programs
-
-.PHONY: all-perl
-all-perl:	di.env
-	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
 
 .PHONY: test
 test:		tests.done

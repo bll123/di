@@ -633,11 +633,13 @@ checkDiskInfo (diData, hasLoop)
             printf ("chk: %s free: %lu\n", dinfo->name, dinfo->freeSpace);
 #endif
         }
-        if ((_s_fs_size_t) dinfo->freeSpace < 0L)
+        if ((_s_fs_size_t) dinfo->freeSpace == -1L ||
+            (_s_fs_size_t) dinfo->freeSpace == -2L)
         {
             dinfo->freeSpace = 0L;
         }
-        if ((_s_fs_size_t) dinfo->availSpace < 0L)
+        if ((_s_fs_size_t) dinfo->availSpace == -1L ||
+            (_s_fs_size_t) dinfo->availSpace == -2L)
         {
             dinfo->availSpace = 0L;
         }
@@ -669,7 +671,10 @@ checkDiskInfo (diData, hasLoop)
             }
           }
 
-          if ((_s_fs_size_t) dinfo->totalSpace <= 0L)
+          /* Some systems return a -1 or -2 as an indicator.    */
+          if (dinfo->totalSpace == 0L ||
+              (_s_fs_size_t) dinfo->totalSpace == -1L ||
+              (_s_fs_size_t) dinfo->totalSpace == -2L)
           {
             dinfo->printFlag = DI_PRNT_IGNORE;
             dinfo->doPrint = (char) diopts->displayAll;

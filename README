@@ -1,4 +1,4 @@
-di - disk information utility (version 4.43)
+di - disk information utility (version 4.44)
 
 CONTENTS
   Description
@@ -56,6 +56,7 @@ INSTALLATION
         (uses cygwin API)
       MinGW: mingw32-make -e MAKE=mingw32-make CC=gcc windows-mingw
         (uses windows API)
+      Msys2: make WINAPI=T NO_PIE=yes
     Alternative 2 - builds a new config.h file (Cygwin).
       make -e NO_PIE=yes CC=gcc
       make -e NO_PIE=yes CC=gcc WINAPI=T  # windows API
@@ -252,6 +253,13 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+    4.44                                    [2017-5-23]
+        Fixed check of exabyte sized filesystems.  The signed check now
+          only checks for -1 and -2; there could still be situations
+          where the overflow exactly matches these values.
+        Added faster method for windows check for missing removable
+          filesystems.
+
     4.43                                    [2016-8-9]
         Cleaned up some compiler warnings.
         Fixed memory allocation problem.
@@ -812,4 +820,4 @@ COPYRIGHT
 
     Copyright 1994-2013 Brad Lanam, Walnut Creek, CA, USA
     brad.lanam.di_at_gmail.com
-    http://www.gentoo.com/di/
+    https://gentoo.com/di/
