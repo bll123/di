@@ -9,13 +9,13 @@ hdr     tcl.h
 # some of this information could be pulled from it.
 
 # versioned library names suck
-lib     Tcl_InitStubs -ltclstub8.7, -ltclstub87, -L/usr/local/lib -ltclstub87, -L/opt/local/lib -ltclstub8.7
+lib     Tcl_InitStubs -ltclstub8.7, -ltclstub87, -L$HOME/local/lib -ltclstub8.7, -L/usr/local/lib -ltclstub87, -L/opt/local/lib -ltclstub8.7
 if notTcl_InitStubs87 ! _lib_Tcl_InitStubs
-  lib     Tcl_InitStubs -ltclstub8.6, -ltclstub86, -L/usr/local/lib -ltclstub86, -L/opt/local/lib -ltclstub8.6
+  lib     Tcl_InitStubs -ltclstub8.6, -ltclstub86, -L$HOME/local/lib -ltclstub8.6, -L/usr/local/lib -ltclstub86, -L/opt/local/lib -ltclstub8.6
 endif
 if notTcl_InitStubs86 ! _lib_Tcl_InitStubs
- lib    Tcl_InitStubs -ltclstub8.5, -tclstub85, -L/usr/local/lib -ltclstub85, -L/opt/local/lib -ltclstub8.5
+ lib    Tcl_InitStubs -ltclstub8.5, -tclstub85, -L$HOME/local/lib -ltclstub8.5, -L/usr/local/lib -ltclstub85, -L/opt/local/lib -ltclstub8.5
 endif
 if notTcl_InitStubs ! _lib_Tcl_InitStubs
- lib     Tcl_PkgRequire -ltcl8.6, -ltcl86, -ltcl8.5, -ltcl85, -L/usr/local/lib -ltcl86, -L/opt/local/lib -ltcl8.6
+ lib     Tcl_PkgRequire -ltcl8.6, -ltcl86, -ltcl8.5, -ltcl85, -L$HOME/local/lib -ltcl8.6, -L/usr/local/lib -ltcl86, -L/opt/local/lib -ltcl8.6
 endif
