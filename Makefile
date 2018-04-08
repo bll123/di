@@ -185,9 +185,7 @@ installperms:
 
 .PHONY: tar
 tar:
-	@-rm -f $(MKCONFIGPATH)/*.tar.gz \
-		di-[0-9].[0-9][0-9][a-z].tar.gz > /dev/null 2>&1
-	cd $(MKCONFIGPATH) && $(MAKE) tar
+	@-rm -f di-[0-9].[0-9][0-9][a-z].tar.gz > /dev/null 2>&1
 	./mktar.sh
 
 ###
