@@ -1,8 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id$
-#
-# Copyright 2006-2010 Brad Lanam Walnut Creek, CA USA
+# Copyright 2006-2018 Brad Lanam Walnut Creek, CA USA
 #
 
 # HP-UX doesn't have these installed.

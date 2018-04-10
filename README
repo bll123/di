@@ -1,4 +1,4 @@
-di - disk information utility (version 4.44)
+di - disk information utility (version 4.45)
 
 CONTENTS
   Description
@@ -253,6 +253,9 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+    4.45                                    [2018-4-10]
+        Update mkconfig to version 1.30 to fix modern libintl.h/printf tests.
+
     4.44                                    [2017-5-23]
         Fixed check of exabyte sized filesystems.  The signed check now
           only checks for -1 and -2; there could still be situations

@@ -25,6 +25,13 @@ ISSUES
 
 CHANGES
 
+    1.30                                    [2018-4-10]
+        Repo got completely mucked up.  Restore lost code.
+        C: size: -lintl option for modern libintl.h
+        C: printf_long_double : -lintl option for modern libintl.h
+        Minor code cleanup.
+        Update copyrights.
+
     1.29                                    [2018-4-6]
         Changed .tar.gz creation to not include tests.
 

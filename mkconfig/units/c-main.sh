@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright 2010-2012 Brad Lanam Walnut Creek CA USA
+# Copyright 2010-2018 Brad Lanam Walnut Creek CA USA
 #
 #
 #   The four headers: stdio.h, stdlib.h, sys/types.h, and sys/param.h
@@ -347,9 +347,9 @@ tparamvs (ptr)
 check_printf_long_double () {
   name="_printf_long_double"
 
+  otherlibs="-lintl"
+
   printlabel $name "printf: long double printable"
-  checkcache ${_MKCONFIG_PREFIX} $name
-  if [ $rc -eq 0 ]; then return; fi
 
   code="int main (int argc, char *argv[]) {
 long double a;
@@ -367,7 +367,13 @@ return (1);
 
   _c_chk_run "$name" "$code" all
   rc=$?
+  dlibs=$_retdlibs
+  if [ $rc -eq 0 -a "$dlibs" != "" ]; then
+    cmd="mkc_${_MKCONFIG_PREFIX}_lib_${name}=\"${dlibs}\""
+    eval $cmd
+  fi
   if [ $rc -eq 0 ]; then trc=1; else trc=0; fi
+  otherlibs=""
   setdata ${_MKCONFIG_PREFIX} ${name} ${trc}
   printyesno $name $trc
 }
@@ -441,22 +447,28 @@ check_memberxdr () {
 check_size () {
   shift
   type=$*
+
+  otherlibs="-lintl"
   nm="_siz_${type}"
   dosubst nm ' ' '_'
 
   name=$nm
 
   printlabel $name "sizeof: ${type}"
-  checkcache_val ${_MKCONFIG_PREFIX} $name
-  if [ $rc -eq 0 ]; then return; fi
 
   code="main () { printf(\"%u\", sizeof(${type})); return (0); }"
   _c_chk_run ${name} "${code}" all
   rc=$?
+  dlibs=$_retdlibs
   val=$_retval
   if [ $rc -ne 0 ]; then
     val=0
   fi
+  if [ $rc -eq 0 -a "$dlibs" != "" ]; then
+    cmd="mkc_${_MKCONFIG_PREFIX}_lib_${name}=\"${dlibs}\""
+    eval $cmd
+  fi
+  otherlibs=""
   printyesno_val $name $val
   setdata ${_MKCONFIG_PREFIX} ${name} ${val}
 }
@@ -652,9 +664,8 @@ CPP_EXTERNS_END
 check_lib () {
   func=$2
   shift;shift
-  libs=$*
+  otherlibs=$*
   nm="_lib_${func}"
-  otherlibs=${libs}
 
   name=$nm
 
@@ -720,6 +731,7 @@ CPP_EXTERNS_END
     fi
   fi
 
+  otherlibs=""
   printyesno $name $trc "$tag"
   setdata ${_MKCONFIG_PREFIX} ${name} ${trc}
   return $trc
@@ -728,10 +740,9 @@ CPP_EXTERNS_END
 check_class () {
   class=$2
   shift;shift
-  libs=$*
+  otherlibs=$*
   nm="_class_${class}"
   dosubst nm '/' '_' ':' '_'
-  otherlibs=${libs}
 
   name=$nm
 
@@ -757,6 +768,8 @@ check_class () {
     cmd="mkc_${_MKCONFIG_PREFIX}_lib_${name}=\"${dlibs}\""
     eval $cmd
   fi
+
+  otherlibs=""
   printyesno $name $trc "$tag"
   setdata ${_MKCONFIG_PREFIX} ${name} ${trc}
 }
