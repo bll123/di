@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $Source$
  * Copyright 2011-2013 Brad Lanam, Walnut Creek, CA
  */
 
@@ -450,11 +448,11 @@ main (argc, argv)
   int       i;
   int       j;
   int       k;
+  int       ec;
   int       optidx;
   int       ac;
   const char *av[10];
 
-  int  rc;
   int  grc = 0;
   int  testno = 0;
 
@@ -496,9 +494,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-D";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s, "abc123") != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s, "abc123") != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -511,9 +510,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-b";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 1 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 1 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -526,9 +526,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "--b";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 1 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 1 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -541,9 +542,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "--i=13";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 13 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 13 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -557,9 +559,10 @@ main (argc, argv)
   av[1] = "--i";
   av[2] = "14";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 14 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 14 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -573,9 +576,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-i15";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 15 || j != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 15 || j != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -589,9 +593,10 @@ main (argc, argv)
   av[1] = "-i";
   av[2] = "16";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 16 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 16 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -606,9 +611,10 @@ main (argc, argv)
   av[1] = "-i17";
   av[2] = "5";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || j != 5 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || j != 5 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -621,9 +627,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-i=17";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 17 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 17 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -636,9 +643,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-i7";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 7 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 7 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -652,9 +660,10 @@ main (argc, argv)
   av[1] = "-l";
   av[2] = "19";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (l != 19 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (l != 19 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -669,9 +678,10 @@ main (argc, argv)
   av[1] = "-b";
   av[2] = "-c";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 1 || j != 1 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 1 || j != 1 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -686,9 +696,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-bc";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 1 || j != 1 || k != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 1 || j != 1 || k != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -703,9 +714,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-bc";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || j != 0 || k != 1 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || j != 0 || k != 1 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -718,9 +730,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-s=abc";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s, "abc") != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s, "abc") != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -733,9 +746,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-d=1.2";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (fabs(d - 1.2) > 0.00001 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (fabs(d - 1.2) > 0.00001 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d: %.2g %d\n", testno, d, optidx);
     grc = 1;
   }
@@ -749,9 +763,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-sabcd";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s, "abcd") != 0 || i != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s, "abcd") != 0 || i != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -764,9 +779,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-s=abcde";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s, "abcde") != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s, "abcde") != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -780,9 +796,10 @@ main (argc, argv)
   av[1] = "-s";
   av[2] = "abcdef";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s, "abcdef") != 0 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s, "abcdef") != 0 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -796,9 +813,10 @@ main (argc, argv)
   av[1] = "-sp";
   av[2] = "0123";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (sp, "0123") != 0 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (sp, "0123") != 0 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -811,9 +829,26 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-sp=01234";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (sp, "01234") != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (sp, "01234") != 0 || optidx != 2 || ec != 0) {
+    fprintf (stderr, "fail test %d\n", testno);
+    grc = 1;
+  }
+
+  /* test 22 */
+  ++testno;
+  sp = "";
+  ac = 2;
+  sprintf (tmp, "test %d", testno);
+  av[0] = tmp;
+  av[1] = "-p012345";
+  av[2] = NULL;
+  ec = 0;
+  optidx = getoptn (GETOPTN_LEGACY, ac, av,
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (sp, "012345") != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -824,11 +859,12 @@ main (argc, argv)
   ac = 2;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
-  av[1] = "-p012345";
+  av[1] = "-S";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (sp, "012345") != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (sp, "abc1234") != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -839,31 +875,17 @@ main (argc, argv)
   ac = 2;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
-  av[1] = "-S";
+  av[1] = "-p=0123456";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (sp, "abc1234") != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (sp, "0123456") != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
 
   /* test 25 */
-  ++testno;
-  sp = "";
-  ac = 2;
-  sprintf (tmp, "test %d", testno);
-  av[0] = tmp;
-  av[1] = "-p=0123456";
-  av[2] = NULL;
-  optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (sp, "0123456") != 0 || optidx != 2) {
-    fprintf (stderr, "fail test %d\n", testno);
-    grc = 1;
-  }
-
-  /* test 26 */
   ++testno;
   memset (s, '\0', sizeof (s));
   i = 0;
@@ -872,9 +894,26 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-sabcd";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s, "") != 0 || i != 1 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s, "") != 0 || i != 1 || optidx != 2 || ec != 0) {
+    fprintf (stderr, "fail test %d\n", testno);
+    grc = 1;
+  }
+
+  /* test 26 */
+  ++testno;
+  i = 1;
+  ac = 2;
+  sprintf (tmp, "test %d", testno);
+  av[0] = tmp;
+  av[1] = "-b";
+  av[2] = NULL;
+  ec = 0;
+  optidx = getoptn (GETOPTN_LEGACY, ac, av,
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -885,31 +924,17 @@ main (argc, argv)
   ac = 2;
   sprintf (tmp, "test %d", testno);
   av[0] = tmp;
-  av[1] = "-b";
+  av[1] = "--b";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
 
   /* test 28 */
-  ++testno;
-  i = 1;
-  ac = 2;
-  sprintf (tmp, "test %d", testno);
-  av[0] = tmp;
-  av[1] = "--b";
-  av[2] = NULL;
-  optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || optidx != 2) {
-    fprintf (stderr, "fail test %d\n", testno);
-    grc = 1;
-  }
-
-  /* test 29 */
   ++testno;
   i = 1;
   j = 1;
@@ -919,10 +944,29 @@ main (argc, argv)
   av[1] = "-b";
   av[2] = "-c";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || j != 0 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || j != 0 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
+    grc = 1;
+  }
+
+  /* test 29 */
+  ++testno;
+  i = 1;
+  j = 1;
+  k = 1;
+  ac = 2;
+  sprintf (tmp, "test %d", testno);
+  av[0] = tmp;
+  av[1] = "-bc";
+  av[2] = NULL;
+  ec = 0;
+  optidx = getoptn (GETOPTN_LEGACY, ac, av,
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || j != 0 || k != 1 || optidx != 2 || ec != 0) {
+    fprintf (stderr, "fail test %d / i:%d j:%d k:%d optidx:%d ec:%d\n", testno, i, j, k, optidx, ec);
     grc = 1;
   }
 
@@ -936,31 +980,15 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-bc";
   av[2] = NULL;
-  optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || j != 0 || k != 1 || optidx != 2) {
-    fprintf (stderr, "fail test %d\n", testno);
-    grc = 1;
-  }
-
-  /* test 31 */
-  ++testno;
-  i = 1;
-  j = 1;
-  k = 1;
-  ac = 2;
-  sprintf (tmp, "test %d", testno);
-  av[0] = tmp;
-  av[1] = "-bc";
-  av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 1 || j != 1 || k != 0 || optidx != 2) {
-    fprintf (stderr, "fail test %d\n", testno);
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 1 || j != 1 || k != 0 || optidx != 2 || ec != 0) {
+    fprintf (stderr, "fail test %d / i:%d j:%d k:%d optidx:%d ec:%d\n", testno, i, j, k, optidx, ec);
     grc = 1;
   }
 
-  /* test 32 - empty value  */
+  /* test 31 - empty value  */
   ++testno;
   i = 0;
   j = 0;
@@ -970,10 +998,11 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-i=";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || optidx != 2) {
-    fprintf (stderr, "fail test %d\n", testno);
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || optidx != 2 || ec != 0) {
+    fprintf (stderr, "fail test %d / i:%d optidx:%d ec:%d\n", testno, i, optidx, ec);
     grc = 1;
   }
 
@@ -987,10 +1016,11 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-i";
   av[2] = NULL;
+  ec = 0;
   fprintf (stderr, "** expect argument missing\n");
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || optidx != 2 || ec != 1) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -1006,10 +1036,11 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-f1=7";
   av[2] = NULL;
+  ec = 0;
   fprintf (stderr, "** expect invalid size\n");
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || l != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || l != 0 || optidx != 2 || ec != 1) {
     fprintf (stderr, "fail test %d; %d %ld %d\n", testno, i, l, optidx);
     grc = 1;
   }
@@ -1025,10 +1056,11 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-f2=7";
   av[2] = NULL;
+  ec = 0;
   fprintf (stderr, "** expect invalid size\n");
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || l != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || l != 0 || optidx != 2 || ec != 1) {
     fprintf (stderr, "fail test %d; %d %ld %d\n", testno, i, l, optidx);
     grc = 1;
   }
@@ -1044,10 +1076,11 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-f3=7";
   av[2] = NULL;
+  ec = 0;
   fprintf (stderr, "** expect invalid size\n");
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || l != 0 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || l != 0 || optidx != 2 || ec != 1) {
     fprintf (stderr, "fail test %d; %d %ld %d\n", testno, i, l, optidx);
     grc = 1;
   }
@@ -1065,9 +1098,10 @@ main (argc, argv)
   av[2] = "--";
   av[3] = "abc";
   av[4] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 7 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 7 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -1084,9 +1118,10 @@ main (argc, argv)
   av[1] = "-i=7";
   av[2] = "abc";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 7 || optidx != 2) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 7 || optidx != 2 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -1103,9 +1138,10 @@ main (argc, argv)
   av[1] = "-s";
   av[2] = "-s";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s, "-s") != 0 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s, "-s") != 0 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -1124,9 +1160,10 @@ main (argc, argv)
   av[3] = "-s";
   av[4] = "abc";
   av[5] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s, "abc") != 0 || i != 1 || j != 1 || optidx != 5) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s, "abc") != 0 || i != 1 || j != 1 || optidx != 5 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -1143,9 +1180,10 @@ main (argc, argv)
   av[1] = "-bcs";
   av[2] = "abc";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s, "abc") != 0 || i != 1 || j != 1 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s, "abc") != 0 || i != 1 || j != 1 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -1159,9 +1197,10 @@ main (argc, argv)
   av[1] = "-s2";
   av[2] = "abc";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s2, "abc") != 0 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s2, "abc") != 0 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -1175,9 +1214,10 @@ main (argc, argv)
   av[1] = "-s2";
   av[2] = "abcd";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s2, "abcd") != 0 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s2, "abcd") != 0 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -1191,9 +1231,10 @@ main (argc, argv)
   av[1] = "-s2";
   av[2] = "abcde";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s2, "abcd") != 0 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s2, "abcd") != 0 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d: %s\n", testno, s2);
     grc = 1;
   }
@@ -1207,9 +1248,10 @@ main (argc, argv)
   av[1] = "-s2";
   av[2] = "abcdef";
   av[3] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s2, "abcd") != 0 || optidx != 3) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s2, "abcd") != 0 || optidx != 3 || ec != 0) {
     fprintf (stderr, "fail test %d: %s\n", testno, s2);
     grc = 1;
   }
@@ -1223,10 +1265,11 @@ main (argc, argv)
   av[1] = "-np1";
   av[2] = "abcdef";
   av[3] = NULL;
+  ec = 0;
   fprintf (stderr, "** expect invalid pointer\n");
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s2, "") != 0) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s2, "") != 0 || ec != 1) {
     fprintf (stderr, "fail test %d: %s %d\n", testno, s2, optidx);
     grc = 1;
   }
@@ -1240,10 +1283,11 @@ main (argc, argv)
   av[1] = "-np2";
   av[2] = "abcdef";
   av[3] = NULL;
+  ec = 0;
   fprintf (stderr, "** expect invalid pointer\n");
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s2, "") != 0) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s2, "") != 0 || ec != 1) {
     fprintf (stderr, "fail test %d: %s %d\n", testno, s2, optidx);
     grc = 1;
   }
@@ -1257,10 +1301,11 @@ main (argc, argv)
   av[1] = "-np3";
   av[2] = "abcdef";
   av[3] = NULL;
+  ec = 0;
   fprintf (stderr, "** expect invalid pointer\n");
   optidx = getoptn (GETOPTN_MODERN, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (strcmp (s2, "") != 0) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (strcmp (s2, "") != 0 || ec != 1) {
     fprintf (stderr, "fail test %d: %s %d\n", testno, s2, optidx);
     grc = 1;
   }
@@ -1276,9 +1321,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-z3";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0 || j != 1) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || j != 1 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
@@ -1291,9 +1337,10 @@ main (argc, argv)
   av[0] = tmp;
   av[1] = "-c";
   av[2] = NULL;
+  ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
-  if (i != 0) {
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || ec != 0) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }
