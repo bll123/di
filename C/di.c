@@ -115,7 +115,6 @@ main (argc, argv)
 #endif
 
   disp = dimainproc (argc, argv, 0, &diData);
-printf ("exitflag: %d\n", diData.options.exitFlag);
   if (diData.options.exitFlag == DI_EXIT_FAIL) {
     exit (2);
   }
