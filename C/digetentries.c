@@ -249,6 +249,10 @@ di_getDiskEntries (diskInfo, diCount)
         ++*diCount;
         *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * (Size_t) *diCount);
+        if (*diskInfo == (diDiskInfo_t *) NULL) {
+          fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+          return -1;
+        }
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
 
@@ -369,6 +373,10 @@ di_getDiskEntries (diskInfo, diCount)
         ++*diCount;
         *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * (Size_t) *diCount);
+        if (*diskInfo == (diDiskInfo_t *) NULL) {
+          fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+          return -1;
+        }
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
 
@@ -552,6 +560,10 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
       ++*diCount;
       *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
               sizeof (diDiskInfo_t) * (Size_t) *diCount);
+      if (*diskInfo == (diDiskInfo_t *) NULL) {
+        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+        return -1;
+      }
       diptr = *diskInfo + idx;
       di_initDiskInfo (diptr);
 
@@ -624,6 +636,10 @@ di_getDiskEntries (diskInfo, diCount)
             ++*diCount;
             *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                     sizeof (diDiskInfo_t) * *diCount);
+            if (*diskInfo == (diDiskInfo_t *) NULL) {
+              fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+              return -1;
+            }
             diptr = *diskInfo + idx;
             di_initDiskInfo (diptr);
 
@@ -702,6 +718,10 @@ di_getDiskEntries (diskInfo, diCount)
     }
     bufsize = (_c_arg_2_getfsstat) (sizeof (struct statfs) * (Size_t) count);
     mntbufp = malloc ((Size_t) bufsize);
+    if (mntbufp == (struct statfs *) NULL) {
+      fprintf (stderr, "malloc failed for mntbufp. errno %d\n", errno);
+      return -1;
+    }
     memset ((char *) mntbufp, '\0', sizeof (struct statfs) * (Size_t) count);
     count = getfsstat (mntbufp, bufsize, MNT_NOWAIT);
 
@@ -1132,6 +1152,10 @@ di_getDiskEntries (diskInfo, diCount)
     }
     bufsize = sizeof (struct statvfs) * (Size_t) count;
     mntbufp = malloc ((Size_t) bufsize);
+    if (mntbufp == (struct statvfs *) NULL) {
+      fprintf (stderr, "malloc failed for mntbufp. errno %d\n", errno);
+      return -1;
+    }
     memset ((char *) mntbufp, '\0', sizeof (struct statvfs) * (Size_t) count);
     count = getvfsstat (mntbufp, (Size_t) bufsize, ST_NOWAIT);
 
@@ -1674,6 +1698,10 @@ di_getDiskEntries (diskInfo, diCount)
         ++*diCount;
         *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * *diCount);
+        if (*diskInfo == (diDiskInfo_t *) NULL) {
+          fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+          return -1;
+        }
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
 
@@ -1768,6 +1796,10 @@ di_getDiskEntries (diskInfo, diCount)
         ++*diCount;
         *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
                 sizeof (diDiskInfo_t) * *diCount);
+        if (*diskInfo == (diDiskInfo_t *) NULL) {
+          fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+          return -1;
+        }
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
         stat = vols->GetMountPoint (i, &mpString);
@@ -1939,12 +1971,34 @@ di_getDiskEntries (diskInfo, diCount)
 
   memset (&scanItemList, 0, sizeof(VMS_ITMLST));
   itemList = malloc (sizeof(VMS_ITMLST) * (devInfoListCount));
+  if (itemList == (VMS_ITMLST *) NULL) {
+    fprintf (stderr, "malloc failed for itemList. errno %d\n", errno);
+    return -1;
+  }
   memset (itemList, 0, sizeof(VMS_ITMLST) * (devInfoListCount));
   returnBuffers = (char **) malloc (sizeof (char *) * devInfoListCount);
+  if (returnBuffers == (char **) NULL) {
+    fprintf (stderr, "malloc failed for returnBuffers. errno %d\n", errno);
+    free ((char *) itemList);
+    return -1;
+  }
   returnLengths = malloc (sizeof(short) * devInfoListCount);
+  if (returnLengths == (short *) NULL) {
+    fprintf (stderr, "malloc failed for returnLengths. errno %d\n", errno);
+    free ((char *) itemList);
+    free ((char *) returnBuffers);
+    return -1;
+  }
 
   for (i = 0; i < devInfoListCount; i++) {
     returnBuffers[i] = malloc (devInfoList[i].bufferLen + 1);
+    if (returnBuffers[i] == (char *) NULL) {
+      fprintf (stderr, "malloc failed for returnBuffers[i]. errno %d\n", errno);
+      free ((char *) itemList);
+      free ((char *) returnBuffers);
+      free ((char *) returnLengths);
+      return -1;
+    }
     memset (returnBuffers[i], 0, devInfoList[i].bufferLen + 1);
     init_itemlist (&itemList[i], devInfoList[i].bufferLen,
           devInfoList[i].syscallValue, returnBuffers[i],
@@ -1961,6 +2015,10 @@ di_getDiskEntries (diskInfo, diCount)
     ++*diCount;
     *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
         sizeof (diDiskInfo_t) * (Size_t) *diCount);
+    if (*diskInfo == (di_DiskInfo_t *) NULL)
+      fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+      return -1;
+    }
     diptr = *diskInfo + idx;
     di_initDiskInfo (diptr);
 

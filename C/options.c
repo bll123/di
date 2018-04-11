@@ -82,14 +82,15 @@ static dispTable_t dispTable [] =
 
 extern int debug;
 
-static void processStringArgs _((char *, diData_t *, char *));
-static int  processArgs  _((int, const char * const [], diData_t *, char *, Size_t));
-static void parseList           _((iList_t *, char *));
+static void processStringArgs   _((char *, diData_t *, char *));
+static int  processArgs         _((int, const char * const [], diData_t *, char *, Size_t));
+static int  parseList           _((iList_t *, char *));
 static void processOptions      _((const char *, char *));
 static void processOptionsVal   _((const char *, char *, char *));
 static void usage               _((void));
 static void setDispBlockSize    _((char *, diOptions_t *, diOutput_t *));
 static void initDisplayTable    _((diOptions_t *));
+static void setExitFlag         _((diOptions_t *, unsigned int));
 
 # if defined (__cplusplus) || defined (c_plusplus)
    }
@@ -109,17 +110,21 @@ processStringArgs (ptr, diData, dbsstr)
   char        *tptr;
   int         nargc;
   const char  *nargv [DI_MAX_ARGV];
+  diOptions_t *diopts;
 
   if (ptr == (char *) NULL || strcmp (ptr, "") == 0) {
     return;
   }
+
+  diopts = &diData->options;
 
   dptr = (char *) NULL;
   dptr = strdup (ptr);
   if (dptr == (char *) NULL)
   {
       fprintf (stderr, "strdup failed in main() (1).  errno %d\n", errno);
-      exit (1);
+      setExitFlag (diopts, DI_EXIT_FAIL);
+      return;
   }
   if (dptr != (char *) NULL)
   {
@@ -154,12 +159,14 @@ getDIOptions (argc, argv, diData)
   char *            ptr;
   char              dbsstr [30];
   int               optidx;
+  int               ec;
   diOptions_t       *diopts;
   diOutput_t        *diout;
 
   diopts = &diData->options;
   diout = &diData->output;
   strncpy (dbsstr, DI_DEFAULT_DISP_SIZE, sizeof (dbsstr)); /* default */
+  ec = 0;
 
   argvptr = argv [0] + strlen (argv [0]) - 2;
   if (memcmp (argvptr, "mi", (Size_t) 2) == 0) {
@@ -207,7 +214,8 @@ getDIOptions (argc, argv, diData)
     printf ("\n");
     printf ("# blocksize: %s\n", dbsstr);
   }
-  optidx = processArgs (argc, argv, diData, dbsstr, sizeof (dbsstr) - 1);
+  optidx = processArgs (argc, argv, diData, dbsstr,
+      sizeof (dbsstr) - 1);
 
   initDisplayTable (diopts);
   setDispBlockSize (dbsstr, diopts, diout);
@@ -233,6 +241,7 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
 {
   int           i;
   int           optidx;
+  int           errorCount;
   diOptions_t   *diopts;
   diOutput_t    *diout;
   struct pa_tmp padata;
@@ -492,10 +501,21 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
   for (i = 0; i < (int) (sizeof (paidb) / sizeof (int)); ++i) {
     opts[paidb[i]].valptr = (void *) &padata;
     opts[paidb[i]].value2 = (void *) processOptions;
+    if (diopts->exitFlag != DI_EXIT_NORM) {
+      break;
+    }
   }
   for (i = 0; i < (int) (sizeof (paidv) / sizeof (int)); ++i) {
     opts[paidv[i]].valptr = (void *) &padata;
     opts[paidv[i]].value2 = (void *) processOptionsVal;
+    if (diopts->exitFlag != DI_EXIT_NORM) {
+      break;
+    }
+  }
+
+  optidx = -1;
+  if (diopts->exitFlag != DI_EXIT_NORM) {
+    return optidx;
   }
 
   padata.diData = diData;
@@ -505,7 +525,11 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
   padata.dbsstr_sz = dbsstr_sz;
 
   optidx = getoptn (GETOPTN_LEGACY, argc, argv,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts);
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &errorCount);
+  diopts->errorCount += errorCount;
+  if (diopts->errorCount > 0) {
+    setExitFlag (diopts, DI_EXIT_WARN);
+  }
 
   if (diopts->csv_tabs) {
     diopts->csv_output = TRUE;
@@ -534,7 +558,7 @@ processOptions (arg, valptr)
     strncpy (padata->diData->zoneInfo.zoneDisplay, "all", MAXPATHLEN);
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     usage();
-    exit (0);
+    setExitFlag (padata->diopts, DI_EXIT_OK);
   } else if (strcmp (arg, "-P") == 0) {
     if (strcmp (padata->dbsstr, "k") != 0) /* don't override -k option */
     {
@@ -549,7 +573,7 @@ processOptions (arg, valptr)
     strncpy (padata->dbsstr, "H", padata->dbsstr_sz);
   } else if (strcmp (arg, "--version") == 0) {
     printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
-    exit (0);
+    setExitFlag (padata->diopts, DI_EXIT_OK);
   } else {
     fprintf (stderr, "di_panic: bad option setup\n");
   }
@@ -568,6 +592,7 @@ processOptionsVal (arg, valptr, value)
 #endif
 {
   struct pa_tmp     *padata;
+  int               rc;
 
   padata = (struct pa_tmp *) valptr;
 
@@ -593,7 +618,11 @@ processOptionsVal (arg, valptr, value)
       padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
     }
   } else if (strcmp (arg, "-I") == 0) {
-    parseList (&padata->diData->includeList, value);
+    rc = parseList (&padata->diData->includeList, value);
+    if (rc != 0) {
+      setExitFlag (padata->diopts, DI_EXIT_FAIL);
+      return;
+    }
   } else if (strcmp (arg, "-s") == 0) {
     strncpy (padata->diopts->sortType, value,
         sizeof (padata->diopts->sortType));
@@ -624,7 +653,7 @@ processOptionsVal (arg, valptr, value)
   return;
 }
 
-static void
+static int
 #if _proto_stdc
 parseList (iList_t *list, char *str)
 #else
@@ -645,8 +674,8 @@ parseList (list, str)
     dstr = strdup (str);
     if (dstr == (char *) NULL)
     {
-        fprintf (stderr, "strdup failed in parseList() (1).  errno %d\n", errno);
-        exit (1);
+      fprintf (stderr, "strdup failed in parseList() (1).  errno %d\n", errno);
+      return 1;
     }
 
     ptr = strtok (dstr, DI_LIST_SEP);
@@ -664,8 +693,8 @@ parseList (list, str)
             (Size_t) list->count * sizeof (char *));
     if (list->list == (char **) NULL)
     {
-        fprintf (stderr, "malloc failed in parseList() (2).  errno %d\n", errno);
-        exit (1);
+      fprintf (stderr, "malloc failed in parseList() (2).  errno %d\n", errno);
+      return 1;
     }
 
     ptr = dstr;
@@ -675,9 +704,8 @@ parseList (list, str)
         lptr = (char *) malloc ((Size_t) len + 1);
         if (lptr == (char *) NULL)
         {
-            fprintf (stderr, "malloc failed in parseList() (3).  errno %d\n",
-                    errno);
-            exit (1);
+          fprintf (stderr, "malloc failed in parseList() (3).  errno %d\n", errno);
+          return 1;
         }
         strncpy (lptr, ptr, (Size_t) len);
         lptr[len] = '\0';
@@ -686,6 +714,7 @@ parseList (list, str)
     }
 
     free ((char *) dstr);
+    return 0;
 }
 
 
@@ -928,3 +957,16 @@ initDisplayTable (diopts)
   }
 }
 
+static void
+#if _proto_stdc
+setExitFlag (diOptions_t *diopts, unsigned int exitFlag)
+#else
+setExitFlag (diopts, exitFlag)
+  diOptions_t   *diopts;
+  unsigned int  exitFlag;
+#endif
+{
+  if (exitFlag > diopts->exitFlag) {
+    diopts->exitFlag = exitFlag;
+  }
+}

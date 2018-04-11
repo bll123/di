@@ -35,6 +35,7 @@
 # include <malloc.h>
 #endif
 #if _hdr_tcl
+# define USE_TCL_STUBS
 # include <tcl.h>
 #endif
 #if _use_mcheck
@@ -82,15 +83,9 @@ Diskspace_Init (interp)
   mcheck_pedantic (NULL);
   mtrace ();
 #endif
-#ifdef USE_TCL_STUBS
   if (! Tcl_InitStubs (interp, "8.5", 0)) {
     return TCL_ERROR;
   }
-#else
-  if (! Tcl_PkgRequire (interp, "Tcl", "8.5", 0)) {
-    return TCL_ERROR;
-  }
-#endif
   Tcl_CreateObjCommand (interp, "diskspace", diskspaceObjCmd,
       (ClientData) NULL, NULL);
   Tcl_PkgProvide (interp, "diskspace", DI_VERSION);
@@ -128,7 +123,8 @@ diskspaceObjCmd (interp, objc, objv)
 
 
   /* using malloc here causes tcl to crash */
-  argv = (const char **) ckalloc (sizeof(const char *) * (Size_t) objc);
+  /* rather weird, as this is my value, not Tcl's */
+  argv = (const char **) ckalloc (sizeof(const char *) * (Size_t) (objc + 1));
   for (i = 0; i < objc; ++i) {
     tptr = Tcl_GetString (objv[i]);
     argv[i] = tptr;
@@ -136,6 +132,22 @@ diskspaceObjCmd (interp, objc, objv)
   argv[objc] = NULL;
 
   rv = diproc (objc, argv, &diData);
+  if (diData.options.exitFlag == DI_EXIT_FAIL) {
+    Tcl_SetObjResult(interp, Tcl_NewStringObj("malloc failure", -1));
+    Tcl_SetErrorCode(interp, "diskspace", NULL);
+    ckfree (argv);
+    return TCL_ERROR;
+  }
+  if (diData.options.exitFlag == DI_EXIT_WARN) {
+    Tcl_SetObjResult(interp, Tcl_NewStringObj("invalid arguments", -1));
+    Tcl_SetErrorCode(interp, "diskspace", NULL);
+    ckfree (argv);
+    return TCL_ERROR;
+  }
+  if (diData.options.exitFlag == DI_EXIT_OK) {
+    ckfree (argv);
+    return TCL_OK;
+  }
   diskInfo = diData.diskInfo;
 
   dictObj = Tcl_NewDictObj ();
@@ -183,7 +195,9 @@ diskspaceObjCmd (interp, objc, objv)
   }
 
   Tcl_SetObjResult(interp, dictObj);
-  free (rv);
+  if (rv != (char *) NULL) {
+    free (rv);
+  }
   free (dispargs);
   cleanup (&diData);
   ckfree (argv);

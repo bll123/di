@@ -431,7 +431,7 @@ di$(OBJ_EXT):		di.c config.h di.h dimain.h getoptn.h \
 tcldiskspace$(OBJ_EXT):		tcldiskspace.c config.h di.h \
 				dimain.h getoptn.h \
 				options.h
-	$(CC) -c -DUSE_TCL_STUBS $(CFLAGS) $(CPPFLAGS) \
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) \
 		$(DI_CPPFLAGS) tcldiskspace.c
 
 dimain$(OBJ_EXT):	dimain.c config.h di.h dimain.h getoptn.h \

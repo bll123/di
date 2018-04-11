@@ -17,6 +17,7 @@ C/di-tcl.reqlibs
 C/*.dylib
 C/*.so
 C/tcldiskspace.bld
+C/TODO
 C/*.vars
 dioptions.dat
 Info

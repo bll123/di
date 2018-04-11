@@ -115,6 +115,16 @@ main (argc, argv)
 #endif
 
   disp = dimainproc (argc, argv, 0, &diData);
+printf ("exitflag: %d\n", diData.options.exitFlag);
+  if (diData.options.exitFlag == DI_EXIT_FAIL) {
+    exit (2);
+  }
+  if (diData.options.exitFlag == DI_EXIT_WARN) {
+    exit (1);
+  }
+  if (diData.options.exitFlag == DI_EXIT_OK) {
+    exit (0);
+  }
   if (disp != (char *) NULL) {
     fputs (disp, stdout);
     free (disp);

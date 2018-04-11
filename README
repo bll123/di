@@ -253,6 +253,12 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+    4.46                                    [--]
+        Tcl: Fix bad allocation.
+        Tcl: Raise errors rather than exiting.
+        Exit program when incorrect options are specified.
+        Update mkconfig to version 1.31.
+
     4.45                                    [2018-4-10]
         Update mkconfig to version 1.30 to fix modern libintl.h/printf tests.
 

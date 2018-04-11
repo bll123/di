@@ -211,6 +211,12 @@ typedef struct {
 
 #define DI_SORT_MAX             10
 
+/* order from best to worst */
+#define DI_EXIT_NORM      0
+#define DI_EXIT_OK        1
+#define DI_EXIT_WARN      2
+#define DI_EXIT_FAIL      3
+
 typedef struct {
     const char      *formatString;
     _print_size_t   dispBlockSize;
@@ -228,6 +234,8 @@ typedef struct {
     unsigned int    displayAll;
     unsigned int    localOnly;
     unsigned int    dontResolveSymlink;
+    unsigned int    exitFlag;
+    int             errorCount;
 } diOptions_t;
 
 typedef struct {

@@ -5,17 +5,18 @@ loadunit c-main
 output  configtcl.h
 
 hdr     tcl.h
+
 # assuming that tclConfig.sh could be located,
 # some of this information could be pulled from it.
 
 # versioned library names suck
-lib     Tcl_InitStubs -ltclstub8.7, -ltclstub87, -L$HOME/local/lib -ltclstub8.7, -L/usr/local/lib -ltclstub87, -L/opt/local/lib -ltclstub8.7
+lib     Tcl_InitStubs -DUSE_TCL_STUBS -L$HOME/local/lib -ltclstub8.8, -DUSE_TCL_STUBS -L$HOME/local/lib -ltclstub88, -DUSE_TCL_STUBS -ltclstub8.8, -DUSE_TCL_STUBS -ltclstub88, -DUSE_TCL_STUBS -L/usr/local/lib -ltclstub8.8, -DUSE_TCL_STUBS -L/usr/local/lib -ltclstub88, -DUSE_TCL_STUBS -L/opt/local/lib -ltclstub8.8, -DUSE_TCL_STUBS -L/opt/local/lib -ltclstub88
+if notTcl_InitStubs88 ! _lib_Tcl_InitStubs
+  lib     Tcl_InitStubs -DUSE_TCL_STUBS -L$HOME/local/lib -ltclstub8.7, -DUSE_TCL_STUBS -L$HOME/local/lib -ltclstub87, -DUSE_TCL_STUBS -ltclstub8.7, -DUSE_TCL_STUBS -ltclstub87, -DUSE_TCL_STUBS -L/usr/local/lib -ltclstub8.7, -DUSE_TCL_STUBS -L/usr/local/lib -ltclstub87, -DUSE_TCL_STUBS -L/opt/local/lib -ltclstub8.7, -DUSE_TCL_STUBS -L/opt/local/lib -ltclstub87
+endif
 if notTcl_InitStubs87 ! _lib_Tcl_InitStubs
-  lib     Tcl_InitStubs -ltclstub8.6, -ltclstub86, -L$HOME/local/lib -ltclstub8.6, -L/usr/local/lib -ltclstub86, -L/opt/local/lib -ltclstub8.6
+  lib     Tcl_InitStubs -DUSE_TCL_STUBS -L$HOME/local/lib -ltclstub8.6, -DUSE_TCL_STUBS -L$HOME/local/lib -ltclstub86, -DUSE_TCL_STUBS -ltclstub8.6, -DUSE_TCL_STUBS -ltclstub86, -DUSE_TCL_STUBS -L/usr/local/lib -ltclstub8.6, -DUSE_TCL_STUBS -L/usr/local/lib -ltclstub86, -DUSE_TCL_STUBS -L/opt/local/lib -ltclstub8.6, -DUSE_TCL_STUBS -L/opt/local/lib -ltclstub86
 endif
 if notTcl_InitStubs86 ! _lib_Tcl_InitStubs
- lib    Tcl_InitStubs -ltclstub8.5, -tclstub85, -L$HOME/local/lib -ltclstub8.5, -L/usr/local/lib -ltclstub85, -L/opt/local/lib -ltclstub8.5
-endif
-if notTcl_InitStubs ! _lib_Tcl_InitStubs
- lib     Tcl_PkgRequire -ltcl8.6, -ltcl86, -ltcl8.5, -ltcl85, -L$HOME/local/lib -ltcl8.6, -L/usr/local/lib -ltcl86, -L/opt/local/lib -ltcl8.6
+  lib     Tcl_InitStubs -DUSE_TCL_STUBS -L$HOME/local/lib -ltclstub8.5, -DUSE_TCL_STUBS -L/usr/local/lib -ltclstub85, -DUSE_TCL_STUBS -ltclstub8.5, -DUSE_TCL_STUBS -ltclstub85, -DUSE_TCL_STUBS -L/opt/local/lib -ltclstub8.5
 endif

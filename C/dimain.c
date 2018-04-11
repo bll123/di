@@ -84,9 +84,9 @@
 extern int debug;
 int debug = { 0 };
 
-# if defined (__cplusplus) || defined (c_plusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
    extern "C" {
-# endif
+#endif
 
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
 static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, unsigned int));
@@ -94,11 +94,13 @@ static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, unsigned int));
 static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
 static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
 static int  isIgnoreFSType      _((char *));
+#if _lib_realpath && _define_S_ISLNK && _lib_lstat
 static int  checkForUUID        _((char *));
+#endif
 
-# if defined (__cplusplus) || defined (c_plusplus)
+#if defined (__cplusplus) || defined (c_plusplus)
    }
-# endif
+#endif
 
 char *
 #if _proto_stdc
@@ -118,6 +120,8 @@ dimainproc (argc, argv, intfcflag, diData)
     char                *disp;
 
         /* initialization */
+    disp = (char *) NULL;
+
     diData->count = 0;
     diData->haspooledfs = FALSE;
     diData->disppooledfs = FALSE;
@@ -156,6 +160,8 @@ dimainproc (argc, argv, intfcflag, diData)
     diopts->quota_check = TRUE;
     diopts->csv_output = FALSE;
     diopts->csv_tabs = FALSE;
+    diopts->exitFlag = DI_EXIT_NORM;
+    diopts->errorCount = 0;
 
     diout = &diData->output;
     diout->width = 8;
@@ -176,7 +182,13 @@ dimainproc (argc, argv, intfcflag, diData)
 
       /* first argument is defaults */
     optidx = getDIOptions (argc, argv, diData);
+    if (diData->options.exitFlag != DI_EXIT_NORM) {
+      return disp;
+    }
     initZones (diData);
+    if (diData->options.exitFlag != DI_EXIT_NORM) {
+      return disp;
+    }
 
     if (debug > 0)
     {
@@ -188,7 +200,7 @@ dimainproc (argc, argv, intfcflag, diData)
     if (di_getDiskEntries (&diData->diskInfo, &diData->count) < 0)
     {
         cleanup (diData);
-        exit (1);
+        return disp;
     }
 
     hasLoop = FALSE;
@@ -206,7 +218,8 @@ dimainproc (argc, argv, intfcflag, diData)
         if (rc < 0)
         {
             cleanup (diData);
-            exit (1);
+            diData->options.exitFlag = DI_EXIT_WARN;
+            return disp;
         }
     }
     di_getDiskInfo (&diData->diskInfo, &diData->count);
@@ -1190,7 +1203,8 @@ initZones (diData)
         if (zids == (zoneid_t *) NULL)
         {
           fprintf (stderr, "malloc failed in main() (1).  errno %d\n", errno);
-          exit (1);
+          diData->options.exitFlag = DI_EXIT_FAIL;
+          return;
         }
         zone_list (zids, &zi->zoneCount);
         zi->zones = malloc (sizeof (zoneSummary_t) *
@@ -1198,7 +1212,8 @@ initZones (diData)
         if (zi->zones == (zoneSummary_t *) NULL)
         {
           fprintf (stderr, "malloc failed in main() (2).  errno %d\n", errno);
-          exit (1);
+          diData->options.exitFlag = DI_EXIT_FAIL;
+          return;
         }
       }
     }
@@ -1265,13 +1280,14 @@ isIgnoreFSType (fstype)
   return FALSE;
 }
 
+#if _lib_realpath && _define_S_ISLNK && _lib_lstat
 static int
-#if _proto_stdc
+# if _proto_stdc
 checkForUUID (char *spec)
-#else
+# else
 checkForUUID (spec)
   char      *spec;
-#endif
+# endif
 {
 /*
  *  /dev/mapper/luks-828fc648-9f30-43d8-a0b1-f7196a2edb66
@@ -1297,3 +1313,4 @@ checkForUUID (spec)
   }
   return FALSE;
 }
+#endif /* have _lib_realpath, etc. */

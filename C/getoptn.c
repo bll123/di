@@ -199,7 +199,7 @@ dooptchecks (info, opt, optinfo, tag, sz)
   return 0;
 }
 
-static void
+static int
 #if _proto_stdc
 process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinfo)
 #else
@@ -222,56 +222,56 @@ process_opt (info, opt, optinfo)
     ptr = getoption_value (info, opt);
     if (ptr == (char *) NULL) {
       fprintf (stderr, "%s: %s argument missing\n", info->argv[0], info->arg);
-      return;
+      return 1;
     }
   }
 
   if (opt->option_type == GETOPTN_BOOL) {
     int       *v;
     if (dooptchecks (info, opt, optinfo, "bool", sizeof(int)) != 0) {
-      return;
+      return 1;
     }
     v = (int *) opt->valptr;
     *v = 1 - *v;  /* flip it */
   } else if (opt->option_type == GETOPTN_INT) {
     int       *v;
     if (dooptchecks (info, opt, optinfo, "int", sizeof(int)) != 0) {
-      return;
+      return 1;
     }
     v = (int *) opt->valptr;
     *v = atoi (ptr);
   } else if (opt->option_type == GETOPTN_LONG) {
     long      *v;
     if (dooptchecks (info, opt, optinfo, "long", sizeof(long)) != 0) {
-      return;
+      return 1;
     }
     v = (long *) opt->valptr;
     *v = atol (ptr);
   } else if (opt->option_type == GETOPTN_SIZET) {
     Size_t  *v;
     if (dooptchecks (info, opt, optinfo, "Size_t", sizeof(Size_t)) != 0) {
-      return;
+      return 1;
     }
     v = (Size_t *) opt->valptr;
     *v = (Size_t) atol (ptr);
   } else if (opt->option_type == GETOPTN_DOUBLE) {
     double     *v;
     if (dooptchecks (info, opt, optinfo, "double", sizeof(double)) != 0) {
-      return;
+      return 1;
     }
     v = (double *) opt->valptr;
     *v = atof (ptr);
   } else if (opt->option_type == GETOPTN_STRING) {
     char      *v;
     if (dooptchecks (info, opt, optinfo, "string", 0) != 0) {
-      return;
+      return 1;
     }
     v = (char *) opt->valptr;
     strncpy (v, ptr, opt->valsiz - 1);
   } else if (opt->option_type == GETOPTN_STRPTR) {
     const char **v;
     if (dooptchecks (info, opt, optinfo, "strptr", 0) != 0) {
-      return;
+      return 1;
     }
     v = (const char **) opt->valptr;
     *v = strdup (ptr); /* memory leak (one time) */
@@ -279,7 +279,7 @@ process_opt (info, opt, optinfo)
     getoptn_func_bool_t f;
     if (opt->value2 == (void *) NULL) {
       fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv[0], "func_bool", optinfo->idx);
-      return;
+      return 1;
     }
     f = (getoptn_func_bool_t) opt->value2;
     (f)(opt->option, opt->valptr);
@@ -287,7 +287,7 @@ process_opt (info, opt, optinfo)
     getoptn_func_value_t f;
     if (opt->value2 == (void *) NULL) {
       fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv[0], "func_val", optinfo->idx);
-      return;
+      return 1;
     }
     f = (getoptn_func_value_t) opt->value2;
     (f)(opt->option, opt->valptr, ptr);
@@ -296,24 +296,29 @@ process_opt (info, opt, optinfo)
     info->offset = 0;
     fprintf (stderr, "%s: unknown option type %d\n",
          info->argv[0], opt->option_type);
+    return 1;
   }
+
+  return 0;
 }
 
 
 int
 #if _proto_stdc
-getoptn (int style, int argc, const char * const argv [], Size_t optcount,
-         getoptn_opt_t opts [])
+getoptn (int style, int argc, const char * const argv [],
+         Size_t optcount, getoptn_opt_t opts [], int *errorCount)
 #else
-getoptn (style, argc, argv, optcount, opts)
+getoptn (style, argc, argv, optcount, opts, errorCount)
     int         style;
     int         argc;
     const char * const argv [];
     Size_t      optcount;
     getoptn_opt_t opts [];
+    int         *errorCount;
 #endif
 {
   int               i;
+  int               rc;
   const char        *arg;
   getoptn_opt_t     *opt;
   getoptn_info_t    info;
@@ -324,6 +329,8 @@ getoptn (style, argc, argv, optcount, opts)
   info.optcount = optcount;
   info.opts = opts;
   info.optinfo = (getoptn_optinfo_t *) NULL;
+
+  *errorCount = 0;
 
   if (optcount > 0) {
     info.optinfo = (getoptn_optinfo_t *)
@@ -365,12 +372,16 @@ getoptn (style, argc, argv, optcount, opts)
       if (i == GETOPTN_NOTFOUND) {
         if (info.reprocess == FALSE) {
           fprintf (stderr, "%s: unknown option %s\n", argv[0], arg);
+          ++*errorCount;
         }
         continue;
       }
 
       opt = &opts[i];
-      process_opt (&info, opt, &info.optinfo[i]);
+      rc = process_opt (&info, opt, &info.optinfo[i]);
+      if (rc) {
+        ++*errorCount;
+      }
     } while (info.reprocess);
   }
 
