@@ -221,6 +221,7 @@ PORTING
         Irix 6.5 (gcc, 64-bit)
         SCO OpenServer 6.0.0
         MX Linux 7.1
+        Solaris 9 (sparc)
         Solaris 11 (x86)
         Tru64 5.1B
         UnixWare 7.1.4

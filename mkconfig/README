@@ -1,4 +1,4 @@
-mkconfig - configuration tool (version 1.29)
+mkconfig - configuration tool (version 1.31)
 
 Simply copy the entire directory structure as a sub-directory
 in your application software.  Remove the man/ and examples/
@@ -27,6 +27,7 @@ CHANGES
 
     1.31                                    [2018-4-11]
         env-cc: update findincludepath to search more common paths.
+        Remove Makefile and MANIFEST from standard distribution.
 
     1.30                                    [2018-4-10]
         Repo got completely mucked up.  Restore lost code.
