@@ -1,7 +1,7 @@
 #
 #  di makefile - C
 #
-#  Copyright 2001-2011 Brad Lanam Walnut Creek CA, USA
+#  Copyright 2001-2018 Brad Lanam Walnut Creek CA, USA
 #
 
 CC = cc

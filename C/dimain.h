@@ -2,7 +2,7 @@
 #define DI_INC_DIMAIN_H
 
 /*
- * Copyright 2016 Brad Lanam Walnut Creek CA USA
+ * Copyright 2016-2018 Brad Lanam Walnut Creek CA USA
  */
 
 #include "config.h"

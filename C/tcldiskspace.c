@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Brad Lanam, Walnut Creek, CA
+ * Copyright 2016-2018 Brad Lanam, Walnut Creek, CA
  */
 
 #include "config.h"

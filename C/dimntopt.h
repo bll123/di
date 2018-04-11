@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Brad Lanam, Walnut Creek, CA
+ * Copyright 2011-2018 Brad Lanam, Walnut Creek, CA
  */
 
 #ifndef DI_INC_DIMNTOPT_H_

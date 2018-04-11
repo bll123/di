@@ -1,5 +1,5 @@
 /*
- * Copyright 1994-2013 Brad Lanam, Walnut Creek, CA
+ * Copyright 1994-2018 Brad Lanam, Walnut Creek, CA
  */
 
 #ifndef DI_INC_DI_H
