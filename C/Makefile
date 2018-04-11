@@ -3,8 +3,6 @@
 #
 #  Copyright 2001-2011 Brad Lanam Walnut Creek CA, USA
 #
-#  $Id$
-#
 
 CC = cc
 # for tests.done

@@ -1,4 +1,4 @@
-di - disk information utility (version 4.45)
+di - disk information utility (version 4.46)
 
 CONTENTS
   Description
@@ -125,7 +125,7 @@ TCL
       Windows Cygwin:
         cd C; make CC=gcc NO_PIE=yes tcl-sh
       Windows Msys:
-        cd C; make WINAPI=T NO_PIE=yes CFLAGS=-m64 tcl-sh
+        cd C; make WINAPI=T NO_PIE=yes tcl-sh
 
     See C/di-example.tcl for a usage example.
 
@@ -216,6 +216,16 @@ REQUIREMENTS
 
 PORTING
 
+    di 4.46 has been tested on the following platforms:
+        AIX 7.1 (64-bit)
+        Irix 6.5 (gcc, 64-bit)
+        SCO OpenServer 6.0.0
+        MX Linux 7.1
+        Solaris 11 (x86)
+        Tru64 5.1B
+        UnixWare 7.1.4
+        Windows - Msys2
+
     di 4.35 has been tested on the following platforms:
         AIX 7.1 (64-bit)
         CentOS 3.9, 5.2, 5.3, 5.4, 5.5, 6.3
@@ -253,11 +263,12 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
-    4.46                                    [--]
+    4.46                                    [2018-4-11]
         Tcl: Fix bad allocation.
         Tcl: Raise errors rather than exiting.
         Exit program when incorrect options are specified.
         Update mkconfig to version 1.31.
+        Add missing mkconfig/runtests.sh.
 
     4.45                                    [2018-4-10]
         Update mkconfig to version 1.30 to fix modern libintl.h/printf tests.

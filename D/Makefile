@@ -3,8 +3,6 @@
 #
 #  Copyright 2011 Brad Lanam Walnut Creek CA, USA
 #
-#  $Id$
-#
 
 OBJ_EXT = .o
 EXE_EXT =

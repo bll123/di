@@ -1,4 +1,4 @@
-# $Id$
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: di $Revision$\n"

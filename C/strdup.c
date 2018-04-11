@@ -1,6 +1,4 @@
 /*
- * $Id$
- * $Source$
  * Copyright 1994-2010 Brad Lanam, Walnut Creek, CA
  */
 

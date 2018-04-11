@@ -1,8 +1,4 @@
 // written in the D programming language
-/*
-$Id$
-$Source$
-*/
 
 module digetoptn;
 
