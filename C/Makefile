@@ -37,7 +37,8 @@ LOCALEDIR = $(prefix)/share/locale
 ###
 # additional flags/libraries
 #
-DI_CPPFLAGS = -DDI_LOCALE_DIR=\"$(LOCALEDIR)\"
+DI_SHARED = 
+DI_CFLAGS = -DDI_LOCALE_DIR=\\\"$(LOCALEDIR)\\\"
 
 ###
 # mkconfig variables
@@ -46,6 +47,8 @@ MKC_DIR = ../mkconfig
 MKCONFIG_TYPE = sh
 MKC_REQLIB = di.reqlibs
 MKC_TCLREQLIB = di-tcl.reqlibs
+MKC_ECHO = 
+#MKC_ECHO = -e
 
 ###
 # main
@@ -280,15 +283,15 @@ clean:
 		tests.done _tmp_mkconfig tests.d/chksh* \
 		mkconfig.cache mkc*.vars \
 		getoptn_test* gconfig.h getoptn.reqlibs \
-		mkconfig.reqlibs \
+		mkconfig.reqlibs mkc_compile.log \
 		Perl/Filesys-di-*.tar.gz \
 		Perl/Makefile.old \
-		>/dev/null 2>&1
+		>/dev/null 2>&1; exit 0
 	@-cd Perl; \
 		if [ -f Makefile ]; then \
 		$(MAKE) clean; \
 		fi
-	@-find . -name '*~' -print | xargs rm
+	@-find . -name '*~' -print | xargs rm > /dev/null 2>&1; exit 0
 
 # leaves:
 #   _mkconfig_runtests, _tmp_mkconfig, ../dioptions.dat
@@ -298,7 +301,7 @@ realclean:
 	@$(MAKE) clean > /dev/null 2>&1
 	@-$(RM) -rf config.h configtcl.h gconfig.h \
 		di.env di-sh.env $(MKC_REQLIB) $(MKC_TCLREQLIB) \
-		>/dev/null 2>&1
+		>/dev/null 2>&1; exit 0
 
 # leaves:
 #   ../dioptions.dat
@@ -308,7 +311,7 @@ distclean:
 	@-$(RM) -rf tests.done test_di \
 		_mkconfig_runtests _tmp_mkconfig \
 		*~ *.orig */*.orig \
-		>/dev/null 2>&1
+		>/dev/null 2>&1; exit 0
 	@-cd Perl; \
 		if [ -f Makefile ]; then \
 		$(MAKE) distclean; \
@@ -318,8 +321,9 @@ distclean:
 # installation
 
 .PHONY: install
-install:	di-programs di.env
-	. ./di.env;cd ..;$(MAKE) -e prefix=$(prefix) LOCALEDIR=$(LOCALEDIR) FROMDIR=C install
+install:	di.env di-programs
+	. ./di.env;cd ..;$(MAKE) -e prefix=$(prefix) \
+		LOCALEDIR=$(LOCALEDIR) FROMDIR=C install
 
 ###
 # programs
@@ -363,11 +367,11 @@ configtcl.h:	di-sh.env ../dioptions.dat features/mkconfig-tcl.dat
 		features/mkconfig-tcl.dat; fi
 
 $(MKC_REQLIB):	di.env config.h
-	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
 		-o $(MKC_REQLIB) config.h
 
 $(MKC_TCLREQLIB):	di.env configtcl.h
-	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
 		-o $(MKC_TCLREQLIB) configtcl.h
 
 
@@ -385,24 +389,27 @@ MAINOBJECTS = di$(OBJ_EXT)
 TCLOBJECTS = tcldiskspace$(OBJ_EXT)
 
 di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
-	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
-	$(CC) -o di$(EXE_EXT) \
-		$(LDFLAGS) $(MAINOBJECTS) $(LIBOBJECTS) $(LIBS) \
-		`$(CAT) $(MKC_REQLIB)`
+	@. ./di.env; _ENVFILE=di.env \
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec $(MKC_ECHO) \
+		-r $(MKC_REQLIB) -o di$(EXE_EXT) \
+		$(MAINOBJECTS) $(LIBOBJECTS)
+	
+tcldiskspaceobjs:	$(TCLOBJECTS) $(LIBOBJECTS)
 
-tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB) $(TCLOBJECTS) \
-		$(LIBOBJECTS)
-	@echo "*** Using libs: `$(CAT) $(MKC_TCLREQLIB)` `$(CAT) $(MKC_REQLIB)`"
-	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
-		-sharedlib -e diskspace$(SHLIB_EXT) \
-		$(TCLOBJECTS) $(LIBOBJECTS) $(LIBS) \
-		`$(CAT) $(MKC_TCLREQLIB)` `$(CAT) $(MKC_REQLIB)`
-	touch tcldiskspace.bld
+tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB)
+	@$(MAKE) DI_SHARED=-shared tcldiskspaceobjs
+	@. ./di-sh.env; _ENVFILE=di-sh.env; \
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -shared $(MKC_ECHO) \
+		-lib -o diskspace$(SHLIB_EXT) \
+		-r $(MKC_REQLIB) -r $(MKC_TCLREQLIB) \
+		$(TCLOBJECTS) $(LIBOBJECTS) $(LIBS)
+	@touch tcldiskspace.bld
 
 perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
-	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
-		-staticlib -e libdiperl \
+	@. ./di-sh.env; _ENVFILE=di-sh.env; \
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -staticlib $(MKC_ECHO) \
+		-o libdiperl$(SHLIB_EXT) \
 		$(LIBOBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_REQLIB)`
 	# Don't know how to pass additional libs to Makefile.PL
@@ -422,52 +429,41 @@ mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 ###
 # objects
 
+.c$(OBJ_EXT):
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile $(MKC_ECHO) \
+		$(DI_SHARED) $(DI_CFLAGS) $<
+
 di$(OBJ_EXT):		di.c config.h di.h dimain.h getoptn.h \
 				options.h version.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(DI_CPPFLAGS) di.c
 
 tcldiskspace$(OBJ_EXT):		tcldiskspace.c config.h di.h \
 				dimain.h getoptn.h \
 				options.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) \
-		$(DI_CPPFLAGS) tcldiskspace.c
 
 dimain$(OBJ_EXT):	dimain.c config.h di.h dimain.h getoptn.h \
 				options.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(DI_CPPFLAGS) dimain.c
 
 digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) digetinfo.c
 
 didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimntopt.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) didiskutil.c
 
 digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) digetentries.c
 
 diquota$(OBJ_EXT):	diquota.c config.h di.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) diquota.c
 
 display$(OBJ_EXT):	display.c config.h di.h display.h options.h version.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) display.c
 
 getoptn$(OBJ_EXT):	getoptn.c config.h getoptn.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) getoptn.c
 
 options$(OBJ_EXT):	options.c config.h di.h options.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) options.c
 
 realloc$(OBJ_EXT):	realloc.c config.h di.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) realloc.c
 
 strdup$(OBJ_EXT):	strdup.c config.h di.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) strdup.c
 
 strstr$(OBJ_EXT):	strstr.c config.h di.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) strstr.c
 
 trimchar$(OBJ_EXT):	trimchar.c config.h di.h
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) trimchar.c
 
 ###
 # regression testing
@@ -520,15 +516,17 @@ gconfig.h:	di.env features/getoptn.dat
 		features/getoptn.dat; fi
 
 getoptn_test$(OBJ_EXT):	getoptn.c gconfig.h getoptn.h
-	$(CC) -o getoptn_test$(OBJ_EXT) \
-		-c $(CFLAGS) $(CPPFLAGS) $(DI_CPPFLAGS) \
-		-DTEST_GETOPTN=1 getoptn.c
+	@. ./di.env;$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile \
+		-DTEST_GETOPTN=1 \
+		-o getoptn_test$(OBJ_EXT) getoptn.c
 
 getoptn.reqlibs:	di.env gconfig.h
-	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
+	@. ./di.env;$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
 		-o getoptn.reqlibs gconfig.h
 
 getoptn_test.exe:	getoptn_test$(OBJ_EXT) getoptn.reqlibs
-	$(CC) -o getoptn_test.exe $(LDFLAGS) getoptn_test$(OBJ_EXT) \
+	@. ./di.env;$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec \
+		$(MKC_ECHO) -o getoptn_test.exe $(LDFLAGS) \
+		getoptn_test$(OBJ_EXT) \
 		`$(CAT) getoptn.reqlibs`
 

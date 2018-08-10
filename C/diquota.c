@@ -815,6 +815,7 @@ di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
     }
 
     if (debug > 1) { printf ("# diquota: space block size: %lld\n", spaceBlockSize); }
+    tlimit = 0;
     if (xfsflag) {
 # if _typ_fs_disk_quota_t
       if (debug > 1) { printf ("# diquota: fs_disk_quota_t\n"); }

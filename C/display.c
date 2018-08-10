@@ -265,7 +265,7 @@ printDiskInfo (diData)
               if (lastpoollen == 0 ||
                   strncmp (lastpool, dinfo->special, lastpoollen) != 0)
               {
-                strncpy (lastpool, dinfo->special, sizeof (lastpool));
+                strncpy (lastpool, dinfo->special, DI_SPEC_NAME_LEN);
                 lastpoollen = di_mungePoolName (lastpool);
                 inpool = FALSE;
                 startpool = TRUE;
@@ -979,7 +979,7 @@ processTitles (diopts, diout)
                 wlenptr = &diout->maxMountString;
                 pstr = "Mount";
                 fstr = diout->mountFormat;
-                maxsize = sizeof (diout->mountFormat);
+                maxsize = sizeof (diout->mountFormat) - 1;
                 break;
             }
 
@@ -991,7 +991,7 @@ processTitles (diopts, diout)
                 }
                 wlenptr = &diout->maxMountString;
                 fstr = diout->mountFormat;
-                maxsize = sizeof (diout->mountFormat);
+                maxsize = sizeof (diout->mountFormat) - 1;
                 if (diopts->posix_compat)
                 {
                     pstr = "Mounted On";
@@ -1079,7 +1079,7 @@ processTitles (diopts, diout)
                 wlen = diout->inodeWidth;
                 wlenptr = &diout->inodeWidth;
                 fstr = diout->inodeLabelFormat;
-                maxsize = sizeof (diout->inodeLabelFormat);
+                maxsize = sizeof (diout->inodeLabelFormat) - 1;
                 pstr = "Inodes";
                 break;
             }
@@ -1090,7 +1090,7 @@ processTitles (diopts, diout)
                 wlen = diout->inodeWidth;
                 wlenptr = &diout->inodeWidth;
                 fstr = diout->inodeLabelFormat;
-                maxsize = sizeof (diout->inodeLabelFormat);
+                maxsize = sizeof (diout->inodeLabelFormat) - 1;
                 pstr = "IUsed";
                 break;
             }
@@ -1101,7 +1101,7 @@ processTitles (diopts, diout)
                 wlen = diout->inodeWidth;
                 wlenptr = &diout->inodeWidth;
                 fstr = diout->inodeLabelFormat;
-                maxsize = sizeof (diout->inodeLabelFormat);
+                maxsize = sizeof (diout->inodeLabelFormat) - 1;
                 pstr = "IFree";
                 break;
             }
@@ -1118,7 +1118,7 @@ processTitles (diopts, diout)
                 wlen = 18;
                 wlenptr = &diout->maxSpecialString;
                 fstr = diout->specialFormat;
-                maxsize = sizeof (diout->specialFormat);
+                maxsize = sizeof (diout->specialFormat) - 1;
                 pstr = "Filesystem";
                 break;
             }
@@ -1128,7 +1128,7 @@ processTitles (diopts, diout)
                 wlen = diout->maxSpecialString;
                 wlenptr = &diout->maxSpecialString;
                 fstr = diout->specialFormat;
-                maxsize = sizeof (diout->specialFormat);
+                maxsize = sizeof (diout->specialFormat) - 1;
                 pstr = "Filesystem";
                 break;
             }
@@ -1138,7 +1138,7 @@ processTitles (diopts, diout)
                 wlen = 7;
                 wlenptr = &diout->maxTypeString;
                 fstr = diout->typeFormat;
-                maxsize = sizeof (diout->typeFormat);
+                maxsize = sizeof (diout->typeFormat) - 1;
                 pstr = "fsType";
                 break;
             }
@@ -1148,7 +1148,7 @@ processTitles (diopts, diout)
                 wlen = diout->maxTypeString;
                 wlenptr = &diout->maxTypeString;
                 fstr = diout->typeFormat;
-                maxsize = sizeof (diout->typeFormat);
+                maxsize = sizeof (diout->typeFormat) - 1;
                 pstr = "fs Type";
                 break;
             }
@@ -1158,7 +1158,7 @@ processTitles (diopts, diout)
                 wlen = diout->maxOptString;
                 wlenptr = &diout->maxOptString;
                 fstr = diout->optFormat;
-                maxsize = sizeof (diout->optFormat);
+                maxsize = sizeof (diout->optFormat) - 1;
                 pstr = "Options";
                 break;
             }
@@ -1228,6 +1228,7 @@ processTitles (diopts, diout)
                     jstr, (int) len, (int) len);
               }
             }
+            /* copy the format string to whereever fstr is pointing */
             strncpy (fstr, tformat, maxsize);
           }
           if (wlenptr != (Size_t *) NULL) {
@@ -1347,32 +1348,30 @@ diCompare (diopts, data, idx1, idx2)
         case DI_SORT_FREE:
         case DI_SORT_TOTAL:
         {
-          _fs_size_t    temp;
+          int   temp;
 
           temp = 0;
           switch (*ptr) {
             case DI_SORT_AVAIL:
             {
-              temp = (d1->availSpace - d2->availSpace);
+              temp = d1->availSpace == d2->availSpace ? 0 :
+                  d1->availSpace < d2->availSpace ? -1 : 1;
               break;
             }
             case DI_SORT_FREE:
             {
-              temp = (d1->freeSpace - d2->freeSpace);
+              temp = d1->freeSpace == d2->freeSpace ? 0 :
+                  d1->freeSpace < d2->freeSpace ? -1 : 1;
               break;
             }
             case DI_SORT_TOTAL:
             {
-              temp = (d1->totalSpace - d2->totalSpace);
+              temp = d1->totalSpace == d2->totalSpace ? 0 :
+                  d1->totalSpace < d2->totalSpace ? -1 : 1;
               break;
             }
           }
 
-          if (temp == 0) {
-            rc = 0;
-          } else {
-            rc = temp > 0 ? 1 : -1;
-          }
           rc *= sortOrder;
           break;
         }

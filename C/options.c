@@ -186,12 +186,12 @@ getDIOptions (argc, argv, diData)
 
       /* bsd df */
   if ((ptr = getenv ("BLOCKSIZE")) != (char *) NULL) {
-    strncpy (dbsstr, ptr, sizeof (dbsstr));
+    strncpy (dbsstr, ptr, sizeof (dbsstr)-1);
   }
 
       /* gnu df */
   if ((ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL) {
-    strncpy (dbsstr, ptr, sizeof (dbsstr));
+    strncpy (dbsstr, ptr, sizeof (dbsstr)-1);
   }
 
   if ((ptr = getenv ("DI_ARGS")) != (char *) NULL) {
@@ -621,8 +621,7 @@ processOptionsVal (arg, valptr, value)
       return;
     }
   } else if (strcmp (arg, "-s") == 0) {
-    strncpy (padata->diopts->sortType, value,
-        sizeof (padata->diopts->sortType));
+    strncpy (padata->diopts->sortType, value, DI_SORT_MAX);
       /* for backwards compatibility                       */
       /* reverse by itself - change to reverse mount point */
     if (strcmp (padata->diopts->sortType, "r") == 0)
@@ -702,6 +701,7 @@ parseList (list, str)
         if (lptr == (char *) NULL)
         {
           fprintf (stderr, "malloc failed in parseList() (3).  errno %d\n", errno);
+          free ((char *) dstr);
           return 1;
         }
         strncpy (lptr, ptr, (Size_t) len);

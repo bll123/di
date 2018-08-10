@@ -19,12 +19,14 @@ cflags
 ldflags
 # needed for tcl build
 addcflag -fPIC
+
 # standard flags
 addcflag -Wextra
 addcflag -Wno-unused-but-set-variable
 addcflag -Wno-unused-parameter
 addcflag -Wno-float-equal
 addcflag -Wno-shift-sign-overflow
+
 # gcc hardening
 # reference: wiki.debian.org/Hardening
 addcflag -Wformat
@@ -54,16 +56,22 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
   addldflag -fstack-protector-all
  endif
 endif
-# versioned directories suck...
-findincludepath tcl.h
-libs
-extension obj
-extension exe
-cmd_msgfmt
 
+libs
 shcflags
 shldflags
 sharednameflag
 shareexeclinkflag
 sharerunpathflag
+
+findconfig tclConfig
+if Have_tclConfig == config_tclConfig Y
+ addconfig TCL_STUB_LIB_SPEC ldflags_libs_application
+ addconfig TCL_INCLUDE_SPEC cflags_include
+endif
+
+extension obj
+extension exe
+cmd_msgfmt
+
 extension shlib

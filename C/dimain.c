@@ -347,7 +347,7 @@ checkFileInfo (diData, optidx, argc, argv)
             if (lastpoollen == 0 ||
                 strncmp (lastpool, dinfo->special, lastpoollen) != 0)
             {
-              strncpy (lastpool, dinfo->special, sizeof (lastpool));
+              strncpy (lastpool, dinfo->special, DI_SPEC_NAME_LEN);
               lastpoollen = di_mungePoolName (lastpool);
               inpool = FALSE;
             }
@@ -433,6 +433,9 @@ checkFileInfo (diData, optidx, argc, argv)
           perror ("");
         }
         rc = -1;
+      }
+      if (fd >= 0) {
+        close (fd);
       }
     } /* for each file specified on command line */
 
@@ -529,6 +532,7 @@ getDiskSpecialInfo (diData, dontResolveSymlink)
     for (i = 0; i < diData->count; ++i)
     {
         diDiskInfo_t        *dinfo;
+        int                 rc;
 
         dinfo = &diData->diskInfo [i];
            /* check for initial slash; otherwise we can pick up normal files */
@@ -539,8 +543,8 @@ getDiskSpecialInfo (diData, dontResolveSymlink)
             if (! dontResolveSymlink && checkForUUID (dinfo->special)) {
               struct stat tstatBuf;
 
-              lstat (dinfo->special, &tstatBuf);
-              if (S_ISLNK(tstatBuf.st_mode)) {
+              rc = lstat (dinfo->special, &tstatBuf);
+              if (rc == 0 && S_ISLNK(tstatBuf.st_mode)) {
                 char tspecial [DI_SPEC_NAME_LEN + 1];
                 if (realpath (dinfo->special, tspecial) != (char *) NULL) {
                   strncpy (dinfo->special, tspecial, DI_SPEC_NAME_LEN);
