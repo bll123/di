@@ -690,6 +690,7 @@ parseList (list, str)
     if (list->list == (char **) NULL)
     {
       fprintf (stderr, "malloc failed in parseList() (2).  errno %d\n", errno);
+      free ((char *) dstr);
       return 1;
     }
 
