@@ -53,7 +53,7 @@ diproc (pTHX_ char *args) {
   char              *tptr;
   char              **dispargs;
   int               i;
-  diData_t          *diDataOut;
+  diData_t          diDataOut;
   char              *rv;
   diDiskInfo_t      *diskInfo;
   diDiskInfo_t      *dinfo;
@@ -80,16 +80,15 @@ diproc (pTHX_ char *args) {
   }
 
   rv = dimainproc (argc, argv, 1, &diDataOut);
-  diskInfo = diDataOut->diskInfo;
+  diskInfo = diDataOut.diskInfo;
 
-  dispargs = (char **) malloc (sizeof(char *) *
-      (Size_t) diDataOut->count);
+  dispargs = (char **) malloc (sizeof(char *) * (Size_t) diDataOut.count);
   if (rv != (char *) NULL) {
     tptr = strtok (rv, "\n");
   } else {
     tptr = (char *) NULL;
   }
-  for (i = 0; i < diDataOut->count; ++i) {
+  for (i = 0; i < diDataOut.count; ++i) {
     dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
     if (! dinfo->doPrint) {
       continue;
@@ -101,7 +100,7 @@ diproc (pTHX_ char *args) {
   }
 
   rh = (HV *) sv_2mortal ((SV *) newHV());
-  for (i = 0; i < diDataOut->count; ++i) {
+  for (i = 0; i < diDataOut.count; ++i) {
     dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
     if (! dinfo->doPrint) {
       continue;
@@ -129,7 +128,7 @@ diproc (pTHX_ char *args) {
   RETVAL = newRV ((SV *) rh);
   free (rv);
   free (dispargs);
-  cleanup (diDataOut);
+  cleanup (&diDataOut);
   return RETVAL;
 }
 

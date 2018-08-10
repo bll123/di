@@ -399,7 +399,7 @@ tcldiskspaceobjs:	$(TCLOBJECTS) $(LIBOBJECTS)
 tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB)
 	@$(MAKE) DI_SHARED=-shared tcldiskspaceobjs
 	@. ./di-sh.env; _ENVFILE=di-sh.env; \
-	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -shared $(MKC_ECHO) \
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -shared $(MKC_ECHO) \
 		-lib -o diskspace$(SHLIB_EXT) \
 		-r $(MKC_REQLIB) -r $(MKC_TCLREQLIB) \
 		$(TCLOBJECTS) $(LIBOBJECTS) $(LIBS)
@@ -409,8 +409,7 @@ perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
 	@. ./di-sh.env; _ENVFILE=di-sh.env; \
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -staticlib $(MKC_ECHO) \
-		-o libdiperl$(SHLIB_EXT) \
-		$(LIBOBJECTS) $(LIBS) \
+		-o libdiperl.a $(LIBOBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_REQLIB)`
 	# Don't know how to pass additional libs to Makefile.PL
 	# so pass all the information.
@@ -420,7 +419,7 @@ perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 	make ; \
 	make test ; \
 	)
-	touch perlfilesysdi.bld
+	@touch perlfilesysdi.bld
 
 mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 	$(CC) -o mingw-di$(EXE_EXT) \
