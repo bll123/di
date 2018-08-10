@@ -2,28 +2,28 @@
 
 . $_MKCONFIG_DIR/bin/testfuncs.sh
 
-maindodisplay $1 rpmbuild
-maindoquery $1 $_MKC_ONCE
-
 getsname $0
 dosetup $@
+
+maindodisplay $1 rpmbuild
+maindoquery $1 $_MKC_ONCE
 
 . $_MKCONFIG_DIR/bin/shellfuncs.sh
 locatecmd locrpmbuild rpmbuild
 
 if [ "${locrpmbuild}" = "" ];then
-  echo ${EN} " skipped${EC}" >&5
+  putsnonl " skipped" >&5
   exit 0
 fi
 
 rvers=`rpmbuild --version | tr -cd '0-9' | sed 's/^\(...\).*/\1/'`
 if [ $rvers -lt 470 ]; then
-  echo ${EN} " old version skipped${EC}" >&5
+  putsnonl " old version skipped" >&5
   exit 0
 fi
 
 march=`rpmbuild --showrc | grep '^build arch' | sed 's/.*: *//'`
-echo "## Machine Architecture: ${march}"
+puts "## Machine Architecture: ${march}"
 
 cd ${_MKCONFIG_RUNTOPDIR}
 

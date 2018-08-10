@@ -43,7 +43,7 @@ for d in C D; do
       fi
     fi
 
-    echo ${EN} " ${d}${EC}" >&5
+    putsnonl " ${d}" >&5
     ${MAKE:-make} ${TMAKEFLAGS} realclean
     ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} all > make.log 2>&1
     rc=$?
@@ -120,7 +120,7 @@ for d in C D; do
           cat > make_extra.log
         extra=`cat make_extra.log | wc -l | sed -e 's/^ *//'`
         if [ $extra -ne 0 ]; then
-          echo "## extra output"
+          puts "## extra output"
           grc=1
         fi
       fi # not Haiku

@@ -1,6 +1,7 @@
 #!/bin/sh
 
 . $_MKCONFIG_DIR/bin/testfuncs.sh
+. $_MKCONFIG_DIR/bin/shellfuncs.sh
 
 maindodisplay $1 'check environment in make'
 maindoquery $1 $_MKC_ONCE
@@ -11,7 +12,7 @@ dosetup $@
 cd ${_MKCONFIG_RUNTOPDIR}
 rc=$?
 if [ $rc -ne 0 ]; then
-  echo "ERROR: Unable to cd to ${_MKCONFIG_RUNTOPDIR}"
+  puts "ERROR: Unable to cd to ${_MKCONFIG_RUNTOPDIR}"
   exit $rc
 fi
 
@@ -34,7 +35,7 @@ fi
 cd ${_MKCONFIG_TSTRUNTMPDIR}
 rc=$?
 if [ $rc -ne 0 ]; then
-  echo "ERROR: Unable to cd to ${_MKCONFIG_TSTRUNTMPDIR}"
+  puts "ERROR: Unable to cd to ${_MKCONFIG_TSTRUNTMPDIR}"
   exit $rc
 fi
 
@@ -43,9 +44,9 @@ ${_MKCONFIG_SYSREV}
 ${_MKCONFIG_SYSARCH}
 ${CC}
 ${_MKCONFIG_USING_GCC}
-${CFLAGS}
-${LDFLAGS}
-${LIBS}
+${CFLAGS_OPTIMIZE}
+${CFLAGS_COMPILER}
+${LDFLAGS_COMPILER}
 ${OBJ_EXT}
 ${EXE_EXT}
 ${XMSGFMT}" |

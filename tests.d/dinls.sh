@@ -28,7 +28,7 @@ for d in C D; do
     fi
   )
   if [ -x ${tdir}/di ]; then
-    echo ${EN} " ${d}${EC}" >&5
+    putsnonl " ${d}" >&5
     if [ $d = C ]; then
       grep '^#define _enable_nls 1' ${tdir}/config.h
       hasnls=$?
@@ -39,7 +39,7 @@ for d in C D; do
     fi
 
     if [ ${hasnls} -ne 0 ];then
-      echo ${EN} " skipped${EC}" >&5
+      putsnonl " skipped" >&5
       exit 0
     fi
 
@@ -72,12 +72,12 @@ for d in C D; do
 
     # cannot depend on german or spanish being installed...
     if [ $grc -ne 0 ]; then
-      echo ${EN} " de/es not installed?${EC}" >&5
+      putsnonl " de/es not installed?" >&5
       grc=0
     fi
   else
     if [ $d = C ]; then
-      echo "## no di executable found for dir $d"
+      puts "## no di executable found for dir $d"
       grc=1
     fi
   fi

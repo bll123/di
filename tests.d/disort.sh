@@ -41,76 +41,76 @@ for d in C D; do
     fi
   )
   if [ -x $tdir/di ]; then
-    echo ${EN} " ${d}${EC}" >&5
-    echo "## regular sort first, then di sort"
-    echo "by special"
+    putsnonl " ${d}" >&5
+    puts "## regular sort first, then di sort"
+    puts "by special"
     ${tdir}/di -n -a -f S | sort > s1
     ${tdir}/di -n -a -f S -ss > s2
     dotest
 
-    echo "by special reverse"
+    puts "by special reverse"
     ${tdir}/di -n -a -f S | sort -r > s1
     ${tdir}/di -n -a -f S -srs > s2
     dotest
 
-    echo "by special w/total"
+    puts "by special w/total"
     ${tdir}/di -n -a -f S | sort -t'~' > s1
     ${tdir}/di -n -a -f S -ss -t | sed '$d' > s2
     dotest
 
-    echo "by special and mount w/total"
+    puts "by special and mount w/total"
     ${tdir}/di -n -a -f 'S~M' | sort -t'~' > s1
     ${tdir}/di -n -a -f 'S~M' -ssm -t | sed '$d' > s2
     dotest
 
-    echo "by mount"
+    puts "by mount"
     ${tdir}/di -n -a -f M | sort -t'~' > s1
     ${tdir}/di -n -a -f M -sm > s2
     dotest
 
-    echo "by mount reverse"
+    puts "by mount reverse"
     ${tdir}/di -n -a -f M | sort -r > s1
     ${tdir}/di -n -a -f M -srm > s2
     dotest
 
-    echo "by mount w/total"
+    puts "by mount w/total"
     ${tdir}/di -n -a -f M | sort -t'~' > s1
     ${tdir}/di -n -a -f M -sm -t | sed '$d' > s2
     dotest
 
-    echo "by mount and special w/total"
+    puts "by mount and special w/total"
     ${tdir}/di -n -a -f 'M~S' | sort -t'~' > s1
     ${tdir}/di -n -a -f 'M~S' -sms -t | sed '$d' > s2
     dotest
 
-    echo "by type"
+    puts "by type"
     ${tdir}/di -n -a -f T | sort > s1
     ${tdir}/di -n -a -f T -st > s2
     dotest
 
-    echo "by type reverse"
+    puts "by type reverse"
     ${tdir}/di -n -a -f T | sort -r > s1
     ${tdir}/di -n -a -f T -srt > s2
     dotest
 
-    echo "by type w/total"
+    puts "by type w/total"
     ${tdir}/di -n -a -f T | sort -t'~' > s1
     ${tdir}/di -n -a -f T -st -t | sed '$d' > s2
     dotest
 
-    echo "by type and special and mount w/total"
+    puts "by type and special and mount w/total"
     ${tdir}/di -n -a -f 'T~S~M' | sort -t'~' > s1
     ${tdir}/di -n -a -f 'T~S~M' -stsm -t | sed '$d' > s2
     dotest
 
     sort -k1 > /dev/null < /dev/null
     if [ $? = 0 ]; then
-      echo "by type and special and mount reversed 2 and 3"
+      puts "by type and special and mount reversed 2 and 3"
       ${tdir}/di -n -a -f 'T~S~M' | sort -t'~' -k1,1 -k2,2r -k3,3r > s1
       ${tdir}/di -n -a -f 'T~S~M' -strsm > s2
       dotest
 
-      echo "by type and special and mount reversed 2 "
+      puts "by type and special and mount reversed 2 "
       ${tdir}/di -n -a -f 'T~S~M' | sort -t'~' -k1,1 -k2,2r -k3,3 > s1
       ${tdir}/di -n -a -f 'T~S~M' -strsrm > s2
       dotest
@@ -118,12 +118,12 @@ for d in C D; do
 
     rm -f s1 s2
     if [ $grc -ne 0 ]; then
-      echo ${EN} "*${EC}" >&5
+      putsnonl "*" >&5
     fi
   else
     if [ $d = C ]; then
-      echo "## no di executable found for dir $d"
-      echo ${EN} "*${EC}" >&5
+      puts "## no di executable found for dir $d"
+      putsnonl "*" >&5
       grc=1
     fi
   fi

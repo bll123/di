@@ -18,11 +18,11 @@ testArgument () {
   rc=$?
   if [ $rc -ne 0 ]; then lrc=$rc; fi
   if [ "$o" != "" ]; then
-    echo "## $cmd failed with output:"
-    echo $o
+    puts "## $cmd failed with output:"
+    puts $o
     lrc=1
   else
-    echo "## $cmd ok"
+    puts "## $cmd ok"
   fi
   case $a in
     "-d"*)
@@ -93,7 +93,7 @@ for d in C D; do
   tdir=$_MKCONFIG_RUNTOPDIR/$d
 
   if [ -x ${tdir}/di ]; then
-    echo ${EN} " ${d}${EC}" >&5
+    putsnonl " ${d}" >&5
     # most all unix
     ${tdir}/di -n -f M / 2>/dev/null | grep '^/[ ]*$' > /dev/null 2>&1
     rc=$?
@@ -113,7 +113,7 @@ for d in C D; do
       fi
     fi
     lrc=$rc
-    echo "## di -n -f M / : $rc"
+    puts "## di -n -f M / : $rc"
 
     for a in $testargs; do
       testArgument
@@ -135,12 +135,12 @@ for d in C D; do
     done
 
     if [ $lrc -ne 0 ]; then
-      echo ${EN} "*${EC}" >&5
+      putsnonl "*" >&5
       grc=1
     fi
   else
     if [ $d = C ]; then
-      echo "## no di executable found for dir $d"
+      puts "## no di executable found for dir $d"
       grc=1
     fi
   fi

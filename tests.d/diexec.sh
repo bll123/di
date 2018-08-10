@@ -24,23 +24,23 @@ for d in C D; do
     fi
   )
   if [ -x ${tdir}/di ]; then
-    echo ${EN} " ${d}${EC}" >&5
+    putsnonl " ${d}" >&5
     ${tdir}/di
     grc=$?
     if [ $grc -ne 0 ]; then
-      echo ${EN} "*${EC}" >&5
+      putsnonl "*" >&5
     else
       # look for invalid floating point numbers
       ${tdir}/di -n | egrep '(inf|nan)'
       rc=$?
       if [ $rc -eq 0 ]; then
-        echo ${EN} "*${EC}" >&5
+        putsnonl "*" >&5
         grc=1
       fi
     fi
   else
     if [ $d = C ]; then
-      echo "## no di executable found for dir $d"
+      puts "## no di executable found for dir $d"
       grc=1
     fi
   fi

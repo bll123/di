@@ -22,7 +22,7 @@ for d in C D; do
     fi
   )
   if [ -x ${tdir}/di ]; then
-    echo ${EN} " ${d}${EC}" >&5
+    putsnonl " ${d}" >&5
     cd ${tdir}
     grc=0
 
@@ -42,11 +42,11 @@ for d in C D; do
     rc=$?
     if [ $rc -ne 0 ]; then grc=$rc; fi
     if [ $grc -ne 0 ]; then
-      echo ${EN} "*${EC}" >&5
+      putsnonl "*" >&5
     fi
   else
     if [ $d = C ]; then
-      echo "## no di executable found for dir $d"
+      puts "## no di executable found for dir $d"
       grc=1
     fi
   fi

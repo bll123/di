@@ -27,9 +27,9 @@ for d in C D; do
     fi
   )
   if [ -x ${tdir}/di ]; then
-    echo ${EN} " ${d}${EC}" >&5
+    putsnonl " ${d}" >&5
     for format in $FORMATS; do
-      echo "Checking format: $format"
+      puts "Checking format: $format"
       # have to exclude zfs, null (dragonflybsd)
       # otherwise this test won't work.
       # include the normally excluded to get some data.
@@ -37,14 +37,14 @@ for d in C D; do
       didata=`${tdir}/di -n -d1 -f $format -t -a -x null,zfs,ctfs,objfs,sharefs 2>/dev/null `
       summtot=`(echo "0 ";echo $didata | sed 's/  */ + /g'; echo " - p") | dc`
       if [ $summtot -ne 0 ]; then
-        echo ${EN} "*${EC}" >&5
-        echo "## format: $format failed"
+        putsnonl "*" >&5
+        puts "## format: $format failed"
         grc=1
       fi
     done
   else
     if [ $d = C ]; then
-      echo "## no di executable found for dir $d"
+      puts "## no di executable found for dir $d"
       grc=1
     fi
   fi
