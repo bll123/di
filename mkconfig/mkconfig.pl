@@ -1285,7 +1285,7 @@ _HERE_
     my $rc = _chk_run ($name, $code, \$val, $r_clist, $r_config, {});
     if ($rc == 0)
     {
-        $val =~ s/\r//o;
+        $val =~ s/\r//gos;
         $r_config->{$name} = $val;
     }
     printyesno_val $name, $r_config->{$name};
