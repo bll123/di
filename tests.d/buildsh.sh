@@ -64,6 +64,7 @@ for d in C D; do
         #  AIX: extra msg from make: Target <target> is up to date
         #  Tru64: complains about long long being a new feature.
         #  Tru64: extra ----^ lines
+        #  Tru64:(null command) - not sure where that's coming from
         #  SCO_SV:
         #  SCO_SV: warning: `/*' within comment
         #  clang: 'warning: unknown warning option'
@@ -116,6 +117,7 @@ for d in C D; do
           grep -v 'someone does not honour COPTS correctly' |
           grep -v 'fstack-protector not supported for this target' |
           grep -v FLAGS= |
+          grep -v '(null command)' |
           grep -v -- '--' |
           cat > make_extra.log
         extra=`cat make_extra.log | wc -l | sed -e 's/^ *//'`
