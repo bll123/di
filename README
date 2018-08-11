@@ -1,4 +1,4 @@
-di - disk information utility (version 4.46)
+di - disk information utility (version 4.47)
 
 Website: https://gentoo.com/di/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
@@ -267,6 +267,12 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+    4.47                                    [--]
+        Fixed bugs located by scan.coverity.com.  This should fix a
+          numeric sort bug.
+        Update mkconfig to version 2.0.0
+        Get perl build working again.
+
     4.46                                    [2018-4-11]
         Tcl: Fix bad allocation.
         Tcl: Raise errors rather than exiting.
