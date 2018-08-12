@@ -228,6 +228,7 @@ distclean:
 dioptions.dat:	features/dioptions.dat
 	@$(CP) features/dioptions.dat dioptions.dat
 	@$(CHMOD) u+w dioptions.dat
+	@touch dioptions.dat # to get mod date current
 
 ###
 # pre-checks

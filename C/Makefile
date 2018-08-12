@@ -366,11 +366,11 @@ configtcl.h:	di-sh.env ../dioptions.dat features/mkconfig-tcl.dat
 		$(MKC_DIR)/mkconfig.pl \
 		features/mkconfig-tcl.dat; fi
 
-$(MKC_REQLIB):	di.env config.h
+$(MKC_REQLIB):	config.h
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
 		-o $(MKC_REQLIB) config.h
 
-$(MKC_TCLREQLIB):	di.env configtcl.h
+$(MKC_TCLREQLIB):	configtcl.h
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
 		-o $(MKC_TCLREQLIB) configtcl.h
 
@@ -389,17 +389,13 @@ MAINOBJECTS = di$(OBJ_EXT)
 TCLOBJECTS = tcldiskspace$(OBJ_EXT)
 
 di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
-	@. ./di.env; _ENVFILE=di.env \
-	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec $(MKC_ECHO) \
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec $(MKC_ECHO) \
 		-r $(MKC_REQLIB) -o di$(EXE_EXT) \
 		$(MAINOBJECTS) $(LIBOBJECTS)
 	
-tcldiskspaceobjs:	$(TCLOBJECTS) $(LIBOBJECTS)
-
-tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB)
-	@$(MAKE) DI_SHARED=-shared tcldiskspaceobjs
-	@. ./di-sh.env; _ENVFILE=di-sh.env; \
-	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -shared $(MKC_ECHO) \
+tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB) \
+		$(TCLOBJECTS) $(LIBOBJECTS)
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -shared $(MKC_ECHO) \
 		-lib -o diskspace$(SHLIB_EXT) \
 		-r $(MKC_REQLIB) -r $(MKC_TCLREQLIB) \
 		$(TCLOBJECTS) $(LIBOBJECTS) $(LIBS)
@@ -407,8 +403,7 @@ tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB)
 
 perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
-	@. ./di-sh.env; _ENVFILE=di-sh.env; \
-	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -staticlib $(MKC_ECHO) \
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -staticlib $(MKC_ECHO) \
 		-o libdiperl.a $(LIBOBJECTS) $(LIBS) \
 		`$(CAT) $(MKC_REQLIB)`
 	# Don't know how to pass additional libs to Makefile.PL
@@ -506,12 +501,12 @@ rtest-env:
 gconfig.h:	di.env features/getoptn.dat
 	@-$(RM) -f gconfig.h
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
-		. ./di.env;$(_MKCONFIG_SHELL) \
-		$(MKC_DIR)/mkconfig.sh \
+		. ./di.env; \
+		$(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh \
 		features/getoptn.dat; fi
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
-		. ./di.env;perl \
-		$(MKC_DIR)/mkconfig.pl \
+		. ./di.env; \
+		perl $(MKC_DIR)/mkconfig.pl \
 		features/getoptn.dat; fi
 
 getoptn_test$(OBJ_EXT):	getoptn.c gconfig.h getoptn.h
