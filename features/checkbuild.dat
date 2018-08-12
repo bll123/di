@@ -9,6 +9,7 @@ command mkdir
 command rm
 command sed
 command sort
+command touch
 command tr
 command uname
 command wc
@@ -17,7 +18,8 @@ setint build_commands 0
 if build_cmds _command_awk && _command_cat && _command_date && \
     _command_egrep && _command_grep && _command_mkdir && \
     _command_rm && _command_sed && \
-    _command_sort && _command_tr && _command_uname && _command_wc
+    _command_sort && _command_touch && \
+    _command_tr && _command_uname && _command_wc
   setint build_commands 1
 endif
 
