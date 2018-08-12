@@ -43,24 +43,18 @@ dosubst () {
   eval $cmd;
 }
 
-test_printf () {
-  shhasprintf=0
-  (eval 'printf %s hello >/dev/null') 2>/dev/null
-  rc=$?
-  if [ $rc -eq 0 ]; then
-    shhasprintf=1
-    eval 'putsnonl () { printf %s "$*"; }'
-    eval 'puts () { printf "%s\n" "$*"; }'
-  else
-    _tEN='-n'
-    _tEC=''
-    if [ "`echo -n test`" = "-n test" ]; then
-      _tEN=''
-      _tEC='\c'
-    fi
-    eval 'putsnonl () { echo ${_tEN} "$*"${_tEC}; }'
-    eval 'puts () { echo "$*"; }'
+test_echo () {
+  # It was suggested to use printf().
+  # printf does not quite work the same in the Tru64 shell.
+  # Of course no one uses that any more...
+  _tEN='-n'
+  _tEC=''
+  if [ "`echo -n test`" = "-n test" ]; then
+    _tEN=''
+    _tEC='\c'
   fi
+  eval 'putsnonl () { echo ${_tEN} "$*"${_tEC}; }'
+  eval 'puts () { echo "$*"; }'
 }
 
 test_append () {
@@ -137,7 +131,7 @@ test_lower () {
 }
 
 testshcapability () {
-  test_printf
+  test_echo
   test_append
   test_readraw
   test_math
