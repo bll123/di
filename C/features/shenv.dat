@@ -58,8 +58,8 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
 endif
 
 libs
-shcflags
-shldflags
+cflags_shared
+ldflags_shared
 sharednameflag
 shareexeclinkflag
 sharerunpathflag
