@@ -114,8 +114,7 @@ windows:
 	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
 		MAKE=nmake CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
-		CFLAGS="$(CFLAGS) -nologo -O2 \
-		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
+		DI_CFLAGS="$(DI_CFLAGS) -nologo -O2" \
 		LDFLAGS="-nologo -O2" di-programs
 
 # This was tested using cygwin
@@ -128,24 +127,7 @@ windows-gcc:
 	@echo '-lintl' > $(MKC_REQLIB)
 	$(MAKE) \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -g -O2 \
-		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
-		LDFLAGS="-g -O2" di-programs
-
-# Gets an immediate segmentation fault.
-.PHONY: windows-clang
-windows-clang:
-	@$(MAKE) ../dioptions.dat
-	@echo ':' > di.env;chmod a+rx di.env
-	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	$(CP) -f configs/config.cygwin.clang config.h
-	@echo '-lintl' > $(MKC_REQLIB)
-	$(MAKE) \
-		CC=clang LD=clang EXE_EXT=".exe" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -g -O2 \
-		--without-libintl-prefix \
-		--without-libiconv-prefix \
-		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
 		LDFLAGS="-g -O2" di-programs
 
 .PHONY: windows-msys
@@ -160,8 +142,7 @@ windows-msys:
 		MAKE=$(MAKE) \
 		CC=gcc \
 		EXE_EXT=".exe" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -g -O2 \
-		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2 \
 		LDFLAGS="-g -O2" di-programs
 
 .PHONY: windows-mingw
@@ -176,8 +157,7 @@ windows-mingw:
 		MAKE=$(MAKE) \
 		CC=gcc LD=gcc \
 		EXE_EXT=".exe" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -g -O2 \
-		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2 \
 		LDFLAGS="-g -O2" mingw-di.exe
 
 .PHONY: os2-gcc
@@ -185,7 +165,7 @@ os2-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	$(MAKE) MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -g -O2 \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2 \
 		LDFLAGS="-g -O2 -Zexe" di.exe
 
 .PHONY: bsd43-cc
@@ -199,7 +179,7 @@ bsd43-cc:
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -O" \
+		DI_CFLAGS="$(DI_CFLAGS) -O" \
 		LDFLAGS="-O" di-programs
 
 .PHONY: bsd43-gcc
@@ -213,7 +193,7 @@ bsd43-gcc:
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -O2" \
+		DI_CFLAGS="$(DI_CFLAGS) -O2" \
 		LDFLAGS="-O2" di-programs
 
 .PHONY: ultrix-cc
@@ -227,7 +207,7 @@ ultrix-cc:
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -O" \
+		DI_CFLAGS="$(DI_CFLAGS) -O" \
 		LDFLAGS="-O" di-programs
 
 .PHONY: ultrix-gcc
@@ -241,7 +221,7 @@ ultrix-gcc:
 	@echo '-lintl' > $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -O2" \
+		DI_CFLAGS="$(DI_CFLAGS) -O2" \
 		LDFLAGS="-O2" di-programs
 
 .PHONY: hpux-cc
@@ -266,7 +246,7 @@ xenix-cc:
 	@touch $(MKC_REQLIB)
 	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
 		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -O" \
+		DI_CFLAGS="$(DI_CFLAGS) -O" \
 		LDFLAGS="-O" di-programs
 
 ###
@@ -424,7 +404,7 @@ perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 
 mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 	$(CC) -o mingw-di$(EXE_EXT) \
-		$(CFLAGS) $(LDFLAGS) $(LIBOBJECTS) $(LIBS)
+		$(DI_CFLAGS) $(LDFLAGS) $(LIBOBJECTS) $(LIBS)
 
 ###
 # objects

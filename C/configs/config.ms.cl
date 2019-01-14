@@ -204,7 +204,7 @@
 #define _has_std_nfs_quotas 0
 #define _use_mcheck 0
 #define _enable_nls 0
-#define DI_DEFAULT_FORMAT "smbuvpT"
+#define DI_DEFAULT_FORMAT "MbuvpT"
 #define DI_DEFAULT_DISP_SIZE "H"
 
 #ifndef __MKC_STANDARD_DEFS
