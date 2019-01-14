@@ -101,17 +101,19 @@ di-sh.env:	features/shenv.dat
 ###
 # specific builds
 
-# This was tested using vc++ 5.0. (many years ago)
-# seriously out of date; config.cygwin.gcc is incorrect for this build.
+# This was tested using vc
+# Use: 
+#     nmake MAKE=nmake windows
+#
 .PHONY: windows
 windows:
 	@$(MAKE) ../dioptions.dat
 	copy /y NUL: di.env
 	-del config.h
-	copy /y /b NUL:+configs\config.cygwin.gcc config.h
+	copy /y /b NUL:+configs\config.ms.cl config.h
 	copy /y NUL: $(MKC_REQLIB)
 	$(MAKE) \
-		CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
+		MAKE=nmake CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
 		CFLAGS="$(CFLAGS) -nologo -O2 \
 		-DDEFAULT_FORMAT=\\\"MbuvpT\\\"" \
 		LDFLAGS="-nologo -O2" di-programs
@@ -393,6 +395,10 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
 		-r $(MKC_REQLIB) -o di$(EXE_EXT) \
 		$(MAINOBJECTS) $(LIBOBJECTS)
 	
+# for ms cl
+#di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
+#	$(LD) -Fedi$(EXE_EXT) $(MAINOBJECTS) $(LIBOBJECTS)
+	
 tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB) \
 		$(TCLOBJECTS) $(LIBOBJECTS)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -shared $(MKC_ECHO) \
@@ -426,6 +432,10 @@ mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 .c$(OBJ_EXT):
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile $(MKC_ECHO) \
 		$(DI_SHARED) $(DI_CFLAGS) $<
+
+# for ms cl
+#.c$(OBJ_EXT):
+#	$(CC) -c $(DI_SHARED) $(DI_CFLAGS) $<
 
 di$(OBJ_EXT):		di.c config.h di.h dimain.h getoptn.h \
 				options.h version.h

@@ -256,6 +256,10 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+    4.48                                    [--]
+        Update mkconfig to version 2.1.0
+        Add configs/config.ms.cl (visual studio definitions).
+
     4.47                                    [2018-8-12]
         Fixed bugs located by scan.coverity.com.
           This should fix a numeric sort bug.
