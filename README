@@ -1,4 +1,4 @@
-di - disk information utility (version 4.47)
+di - disk information utility (version 4.47.1)
 
 Website: https://gentoo.com/di/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
@@ -256,8 +256,8 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
-    4.48                                    [--]
-        Update mkconfig to version 2.1.0
+    4.47.1                                  [2019-6-25]
+        Update mkconfig to version 2.1.1 (fixes build on 32-bit).
         Add configs/config.ms.cl (visual studio definitions).
 
     4.47                                    [2018-8-12]
