@@ -4,13 +4,11 @@
 #  Copyright 2001-2018 Brad Lanam Walnut Creek CA, USA
 #
 
-CC = cc
 # for tests.done
 DC = gdc
 
 OBJ_EXT = .o
 EXE_EXT =
-MAKE = make
 
 ###
 # common programs
@@ -487,6 +485,11 @@ rtest-env:
 	@echo "$(OBJ_EXT)"
 	@echo "$(EXE_EXT)"
 	@echo "$(XMSGFMT)"
+
+.PHONY: test-env
+test-env:
+	@echo "cc: $(CC)"
+	@echo "make: $(MAKE)"
 
 gconfig.h:	di.env features/getoptn.dat
 	@-$(RM) -f gconfig.h

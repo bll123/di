@@ -5,7 +5,6 @@
 #
 
 SHELL = /bin/sh
-MAKE = make
 FROMDIR = C
 
 ###
