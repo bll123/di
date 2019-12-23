@@ -657,9 +657,9 @@ diquota_nfs (diqinfo)
     }
 
 # if _mem_struct_getquota_rslt_gqr_status
-    quotastat = result.gqr_status;
+    quotastat = (int) result.gqr_status;
 # else
-    quotastat = result.status;
+    quotastat = (int) result.status;
 # endif
     if (quotastat == 1) {
 # if _mem_struct_getquota_rslt_gqr_rquota

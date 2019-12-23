@@ -298,7 +298,7 @@ checkFileInfo (diData, optidx, argc, argv)
     diskInfo = diData->diskInfo;
     if (diData->haspooledfs && ! diData->totsorted)
     {
-      char tempSortType [DI_SORT_MAX + 1];
+      char tempSortType [DI_SORT_MAX + 2];
 
       strncpy (tempSortType, diopts->sortType, DI_SORT_MAX);
       strncpy (diopts->sortType, "s", DI_SORT_MAX);
@@ -532,7 +532,6 @@ getDiskSpecialInfo (diData, dontResolveSymlink)
     for (i = 0; i < diData->count; ++i)
     {
         diDiskInfo_t        *dinfo;
-        int                 rc;
 
         dinfo = &diData->diskInfo [i];
            /* check for initial slash; otherwise we can pick up normal files */
@@ -540,6 +539,8 @@ getDiskSpecialInfo (diData, dontResolveSymlink)
             stat (dinfo->special, &statBuf) == 0)
         {
 #if _lib_realpath && _define_S_ISLNK && _lib_lstat
+            int                 rc;
+
             if (! dontResolveSymlink && checkForUUID (dinfo->special)) {
               struct stat tstatBuf;
 
