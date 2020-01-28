@@ -35,7 +35,7 @@ LOCALEDIR = $(prefix)/share/locale
 ###
 # additional flags/libraries
 #
-DI_SHARED = 
+DI_SHARED =
 DI_CFLAGS = -DDI_LOCALE_DIR=\\\"$(LOCALEDIR)\\\"
 
 ###
@@ -45,7 +45,7 @@ MKC_DIR = ../mkconfig
 MKCONFIG_TYPE = sh
 MKC_REQLIB = di.reqlibs
 MKC_TCLREQLIB = di-tcl.reqlibs
-MKC_ECHO = 
+MKC_ECHO =
 #MKC_ECHO = -e
 
 ###
@@ -100,7 +100,7 @@ di-sh.env:	features/shenv.dat
 # specific builds
 
 # This was tested using vc
-# Use: 
+# Use:
 #     nmake MAKE=nmake windows
 #
 .PHONY: windows
@@ -140,7 +140,7 @@ windows-msys:
 		MAKE=$(MAKE) \
 		CC=gcc \
 		EXE_EXT=".exe" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -g -O2 \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
 		LDFLAGS="-g -O2" di-programs
 
 .PHONY: windows-mingw
@@ -155,7 +155,7 @@ windows-mingw:
 		MAKE=$(MAKE) \
 		CC=gcc LD=gcc \
 		EXE_EXT=".exe" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -g -O2 \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
 		LDFLAGS="-g -O2" mingw-di.exe
 
 .PHONY: os2-gcc
@@ -163,7 +163,7 @@ os2-gcc:
 	@echo ':' > di.env;chmod a+rx di.env
 	$(MAKE) MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -g -O2 \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
 		LDFLAGS="-g -O2 -Zexe" di.exe
 
 .PHONY: bsd43-cc
@@ -372,11 +372,11 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec $(MKC_ECHO) \
 		-r $(MKC_REQLIB) -o di$(EXE_EXT) \
 		$(MAINOBJECTS) $(LIBOBJECTS)
-	
+
 # for ms cl
 #di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 #	$(LD) -Fedi$(EXE_EXT) $(MAINOBJECTS) $(LIBOBJECTS)
-	
+
 tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB) \
 		$(TCLOBJECTS) $(LIBOBJECTS)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -shared $(MKC_ECHO) \
