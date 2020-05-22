@@ -79,7 +79,7 @@ D/options.d               di source
 LICENSE                 License
 MANIFEST                This file
 Makefile                Top Level Makefile
-README                  Read This
+README.txt              Read This
 di.1                    di Manual Page
 di.spec                 rpmspec file
 features/

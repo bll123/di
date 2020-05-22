@@ -1,0 +1,856 @@
+di - disk information utility (version 4.47.3)
+
+Website: https://gentoo.com/di/
+SourceForge: https://sourceforge.net/projects/diskinfo-di/
+
+CONTENTS
+  Description
+  Installation
+  Tcl
+  Perl
+  Bugs and Known Issues
+  Requirements
+  Porting Information
+  Changes
+  Acknowledgements
+  Copyright
+
+DESCRIPTION
+
+  'di' is a disk information utility, displaying everything
+  (and more) that your 'df' command does. It features the
+  ability to display your disk usage in whatever format you
+  prefer. It is designed to be highly portable. Great for
+  heterogenous networks.
+
+INSTALLATION
+
+  To build:
+    make -e dioptions.dat
+    # Edit dioptions.dat and change it
+    # to set your preferences.
+    # Add your CC, CFLAGS and LDFLAGS settings.
+    # This file will not be removed and can be reused
+    # for the next release.
+    make -e
+    make -e install
+  Example to change compiler and prefix:
+    CC=gcc prefix=/opt/bin make -e
+
+  If you don't have a bourne shell compatible shell,
+  Try building with perl:
+      make -e all-perl
+
+  The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
+  variables may be set and exported prior to running make.  This
+  will override any settings in 'dioptions.dat'.
+
+  The LOCALEDIR environment variable defaults to ${prefix}/share/locale.
+  The installation uses the INSTALL_DIR (default ${prefix}),
+  INSTALL_BIN_DIR ($INSTALL_DIR/bin), and INST_LOCALEDIR
+  ($INSTALL_DIR/share/locale) environment variables for installation.
+
+  The internationalization files are automatically built and installed if
+  your system supports internationalization.
+
+  Windows installation:
+    Alternative 1 - uses pre-built config.win or config.mingw
+      Cygwin gcc: make -e windows-gcc
+        (uses cygwin API)
+      MinGW: mingw32-make -e MAKE=mingw32-make CC=gcc windows-mingw
+        (uses windows API)
+      Msys2: make WINAPI=T NO_PIE=yes
+    Alternative 2 - builds a new config.h file (Cygwin).
+      make -e NO_PIE=yes CC=gcc
+      make -e NO_PIE=yes CC=gcc WINAPI=T  # windows API
+    Alternative 3 - builds a new config.h file (MSys)
+      # make sure your PATH is set properly
+      make -e _MKCONFIG_SHELL=bash WINAPI=T NO_PIE=yes CC=gcc
+
+    You may need to change _lib_GetDiskFreeSpaceEX to 0
+    in the config.h file for older windows systems.
+
+  HP-UX:
+    Some versions of gcc on HP-UX break the include files.
+    If you see:    header: rpc/rpc.h ... no
+    try: env CC=gcc CFLAGS="-D_LABEL_T" make -e
+
+    On some HP-UX systems, quotactl isn't declared.
+    If you want quota support, make sure config.h has:
+      #define _lib_quotactl 1
+      #define _args_quotactl 4
+      #define _c_arg_1__quotactl int
+      #define _c_arg_2__quotactl char *
+      #define _c_arg_3__quotactl int
+      #define _c_arg_4__quotactl caddr_t
+      #define _quotactl_pos_1 0
+      #define _quotactl_pos_2 1
+
+    64-bit:
+      env CFLAGS="-z +Z +DD64" LDFLAGS="+DD64" make -e
+    64-bit gcc:
+      env CC=gcc CFLAGS="-fPIC -mlp64 -D_LABEL_T" \
+          LDFLAGS="-mlp64 -L/usr/lib/hpux64" make -e
+    32-bit:
+      env CFLAGS="-z +Z +DD32" LDFLAGS="+DD32" make -e
+    32-bit gcc:
+      env CC=gcc CFLAGS="-fPIC -milp32 -D_LABEL_T" \
+          LDFLAGS="-milp32 -L/usr/lib/hpux32" make -e
+    Bundled cc:
+      cd C;make hpux-cc
+
+  Tru64:
+    export BIN_SH=svr4 beforehand.
+
+  DragonFlyBSD:
+    If quotas are not turned on in the kernel (/boot/loader.conf),
+    the vquotactl interface will not be configured into di.  The
+    default build available from DragonFly dports does not have
+    the vquotactl interface turned on.
+
+  Installation Permissions:
+    Some old systems (Sys V variants) only allow root to read the
+    mount table.  In SysV.4 and Solaris, the mount command would
+    reset the permissions to be root readable only (fixed in Solaris 7).
+
+    If this is needed on your system, do:
+        make installperms
+
+TCL
+    The Tcl extension provides access to the di utility via
+    the [diskspace] command.
+
+    To build:
+
+      cd C; make -e tcl-sh
+
+      Windows Cygwin:
+        cd C; make CC=gcc NO_PIE=yes tcl-sh
+      Windows Msys:
+        cd C; make WINAPI=T NO_PIE=yes tcl-sh
+
+    See C/di-example.tcl for a usage example.
+
+PERL
+    The Perl extension provides access to the di utility via
+    the [Filesys::di::diskspace] command.
+
+    To build:
+
+      # perl-perl can be substituted for perl-sh to use the
+      # perl configuration script instead of the shell
+      # configuration scripts.
+      cd C; make -e perl-sh; cd Perl; make PREFIX=your-prefix install
+
+      Windows Cygwin:
+        # I had to install libcrypt-devel for 'crypt.h'.
+        # No idea why perl would require that.
+        # perl-perl is faster than perl-sh.
+        cd C; make CC=gcc NO_PIE=yes perl-perl
+      Windows Msys:
+        # untested; I don't have mingw perl.
+        cd C; make -e WINAPI=T NO_PIE=yes CC=gcc perl-sh
+
+    See C/Perl/ex/perl-example.pl for a usage example.
+
+BUGS AND KNOWN ISSUES
+    What's Not Tested:
+      - pooled filesystems on Tru64.
+        - I have access to a Tru64 system w/quotas, but there's
+          only one filesystem per pool.
+      - quotas:
+        - MacOSX
+          - No access to users with quotas.
+      - MS VC++ has not been tested in a *very* long while.
+      - A/UX, Cray, UNICOS, Next, Pyramid, SCO Unix, Sequent
+        have not been tested in a *very* long while.
+    Known Issues
+      - quotas:
+        - Solaris ufs requires the quotas file to be readable, or make
+          the di program setuid.  Neither recommended.
+        - Linux 2.4 - not working
+        - HP-UX
+          - quotactl() isn't declared. See HP-UX section above.
+        - NetBSD 6
+          - group quotas can't be fetched by ordinary users (EPERM).
+            If the account is limited by a group quota, it won't be reported.
+        - AIX 7
+          - Unlike AIX 5, AIX 7 gives a permission
+            denied error when a user tries to get their quota.
+            Could make di suid, but that's not a good idea.
+      - pooled filesystems:
+        - hammer: the usage reported for pseudo-filesystems is the usage
+          for the main pool.  Therefore the total used and size will be wrong.
+        - btrfs: there's no way to identify the pools.
+      - cygwin with clang does not work.
+      - the pre-configured builds have not been tested in a while.
+
+    Send bug reports along with the output from 'di -A -a -X 5',
+    output from your standard df command (as verbose as possible),
+    mkconfig.log, mkconfig_env.log, di.env, and config.h to:
+
+        brad.lanam.di_at_gmail.com
+
+    If the 'config.h' doesn't get set up correctly, please let me know.
+    E-mail me the incorrect (and corrected if possible) config.h file,
+    and any other information as appropriate.
+
+REQUIREMENTS
+
+    bourne/ksh/bash shell
+    C compiler
+    awk (mawk/nawk/gawk)
+    make
+        cat chmod ln mkdir mv rm sed test
+    mkconfig.sh:
+        a bourne compatible shell that supports shell functions,
+          standard output from 'set'.
+        cat egrep expr grep rm sed sort test
+    mkconfig.pl:
+        cat perl rm
+    mksetopt.sh:
+        mv rm sed test
+    NLS:
+        msgfmt sed
+
+    runtests.sh (not a requirement for building or installing):
+        ar cat cp dc diff env expr egrep mv rm sed sort test tr
+
+PORTING
+
+    di 4.47 has been tested on the following platforms:
+      Linux
+        RedHat 7.3 (gcc)
+        CentOS 3.9 (gcc)
+        Fedora 7 (gcc)
+        Fedora 27 (gcc)
+        MX Linux 17.1 (gcc, clang)
+      BSD
+        DragonflyBSD 4.4 (gcc)
+        FreeBSD 7.0 (cc)
+        FreeBSD 11.0 (clang)
+        NetBSD 1.62 (cc)
+        NetBSD 2.0 (cc)
+        NetBSD 7.0.1 (gcc)
+        OpenBSD 4.4 (gcc)
+      Windows
+        Msys2 (gcc)
+        Cygwin (gcc)
+      Other
+        AIX 7.1 (gcc)
+        Mac OS X 10.12.6 (clang)
+        QNX 6.5 (cc)
+        SCO SV 6.0.0 (cc)
+        Solaris 11/x86 (cc12.3)
+        Solaris 10/sparc (cc12.3)
+        Solaris 9/x86 (gcc3)
+        Tru64 5.1B (cc)
+        UnixWare 7.1.4 (cc)
+
+    di has been ported to the following systems in the past:
+
+        A/UX, AIX, BeOS, BSD, BSDI, Convex, Cray UNICOS, Cray UNICOS/mk,
+        DragonflyBSD, FreeBSD, Haiku, HP/UX, Linux, MacOSX, MirOS, NetBSD,
+        Next, OpenBSD, OS/2, OSF/1, Pyramid, SCO OpenServer, SCO Unix,
+        Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Syllable,
+        System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
+
+CHANGES
+    4.47.4                                  [--]
+        Minor makefile cleanup.
+        Updated mkconfig to version 2.2.
+
+    4.47.3                                  [2019-12-23]
+        Fixed missing link flags for clang.
+
+    4.47.2                                  [2019-10-30]
+        Minor makefile cleanup.
+
+    4.47.1                                  [2019-6-25]
+        Update mkconfig to version 2.1.1 (fixes build on 32-bit).
+        Add configs/config.ms.cl (visual studio definitions).
+
+    4.47                                    [2018-8-12]
+        Fixed bugs located by scan.coverity.com.
+          This should fix a numeric sort bug.
+        Update mkconfig to version 2.0.0 and make changes to support it.
+        Get perl extension build working again.
+
+    4.46                                    [2018-4-11]
+        Tcl: Fix bad allocation.
+        Tcl: Raise errors rather than exiting.
+        Exit program when incorrect options are specified.
+        Update mkconfig to version 1.31.
+        Add missing mkconfig/runtests.sh.
+
+    4.45                                    [2018-4-10]
+        Update mkconfig to version 1.30 to fix modern libintl.h/printf tests.
+
+    4.44                                    [2017-5-23]
+        Fixed check of exabyte sized filesystems.  The signed check now
+          only checks for -1 and -2; there could still be situations
+          where the overflow exactly matches these values.
+        Added faster method for windows check for missing removable
+          filesystems.
+
+    4.43                                    [2016-8-9]
+        Cleaned up some compiler warnings.
+        Fixed memory allocation problem.
+        Tcl interface fixes
+
+    4.42                                    [2016-2-22]
+        Fixed a parsing bug in the Tcl interface.
+        Added a Perl interface.
+
+    4.41                                    [2016-1-24]
+        Fixed bug specifying more than one filesystem on the command line.
+        Added sort by free space, total space.
+        Updated manual page: missing, new sort options.
+
+    4.40                                    [2016-1-22]
+        Updated the Tcl interface to return the 'display' key as a list.
+
+    4.39                                    [2016-1-22]
+        Added a Tcl interface.
+        Fixed CSV header to honor -n flag.
+        Added -C, --csv-tabs to output CSV with tabs.
+        Fixes for mingw (build, long double can't be printf'd).
+        Update mkconfig to version 1.27
+
+    4.38                                    [2016-1-6]
+        Honor FreeBSD NO_PIE environment variable.
+        Update mkconfig to version 1.26
+
+    4.37                                    [2015-10-18]
+        Fixed a problem when processing the DI_ARGS environment variable.
+        Hardened compiler options: reference: http://wiki.debian.org/Hardening
+        Code cleanup to fix compiler warnings.
+
+    4.36                                    [2015-5-18]
+        Updated test for NFS remote filesystems.
+
+    4.35                                    [2014-2-15]
+        Updates for Irix.
+        Fixed a bug when -I/-x were specified in addition to a filespec.
+        Updated build system to mkconfig-1.24
+
+    4.34                                    [2013-1-19]
+        When a filename is specified on the command line, attempt to choose
+          the best filesystem to display when there are multiple choices.
+        Error check realpath() return value.
+        Only canonicalize device names if it has a trailing uuid.
+        Add -R (--dont-resolve-symlink) option to turn off canonicalization.
+        Clean up code to fix clang warnings.
+        Minor updates to support Xenix.
+
+    4.33                                    [2012-11-15]
+        Recoded quota handling as information was improperly
+          losing precision.
+        Added support for dragonflybsd's vquotactl().
+        Added support for hammer-pfs (pooled filesystems).
+        Exclude rootfs, devfs, procfs, kernfs, ptyfs and devtmpfs by default.
+        Minor updates to main makefile.
+        Minor directory rearrangement for os-specific config files.
+        Fixed possible case of systems with a memcpy macro and
+           no library function.
+        Make sure D tests are not run.
+        HP-UX bcc seems to support long long after all.  This is on 11.11.
+          Maybe the older versions did not?  No access to 10.20.
+        Updated build system to mkconfig-1.22.
+
+    4.32                                    [2012-10-21]
+        Exclude rootfs by default.
+        Canonacalize the special device name.
+        Updated quota code for NetBSD 6 (quota_open() et.al.).
+        Fixed AIX group quota check.
+        Fixed AIX 7 support.  Unlike AIX 5, AIX 7 gives a permission
+          denied error when a user tries to get their quota.
+        Updated build system to mkconfig-1.21.
+
+    4.31                                    [2011-11-20]
+        Filesystems that would return a 'Permission Denied'
+          are not displayed at all, even with -a.
+        Fixed totals with pooled filesystems (when main pool not mounted).
+        Fixed a very rare divide by 0 condition.
+        Code cleanup.
+        Updated build system to mkconfig-1.19.
+
+    4.30                                    [2011-10-8]
+        Added support for long options.
+        GNU df compatible long options have been added and
+          are processed appropriately.
+        Removed program name settings from Makefile and di.c.
+        Minor code cleanup.
+        Added hp-ux bundled cc static target.
+        Updated build system to mkconfig-1.18.
+
+    4.29                                    [2011-9-30]
+        Added the -c option to output in CSV format
+           (request by H.Merijn Brand).
+        Fixed bB format titles.
+        Added checks to make sure required programs for
+           build/install are present.
+        Various fixes for HP-UX, ULTRIX, SCO OpenServer, UnixWare.
+        Added pre-generated config.h files for ULTRIX.
+        Updated build system to mkconfig-1.17.
+
+    4.28                                    [2011-9-11]
+        Fixed compiler warnings for 64-bit.
+        Added support for DragonFlyBSD.
+        Updated build system to mkconfig-1.15
+          (Solaris 2.6 fixes; pdksh allowed)
+
+    4.27                                    [2010-12-29]
+        Rearranged directory structure.
+        Added support for long double to hold zettas and yottas.
+        Added support for the windows digital mars c compiler.
+        Added a fix for windows removable drives.
+        Rewrote snprintf macros as they didn't work on MacOSX.
+        Fixed quotactl argument for systems w/o QCMD macro.
+        Check for type of structure members and call the correct xdr
+          function.
+        Many minor fixes for compiler warnings.
+        Fixed Makefiles to redirect 'cd' output (CDPATH).
+        Updated build system to mkconfig 1.11.
+
+    4.26                                    [2010-7-25]
+        Fix FreeBSD 5 panic when trying to get quotas on devfs.
+        Updated build system to mkconfig-1.10.
+
+    4.25                                    [2010-7-4]
+        Added support for quotas.
+        Fix for Tru64 advfs pools.
+        Fixed loopback filesystem (lofs/none) exclusion; enabled for
+            all systems.
+        Added an optional DI_LOCALE_DIR environment variable to
+            point to the locale directory where di's messages
+            are installed.
+        Changed the sort to use strcoll() rather than strcmp().
+        Updated build system to mkconfig-1.6.
+        Removed turnoffwinapi.sh, hasnls.sh & turnoffnls.sh and updated
+            to use new build system tools.
+        Added dioptions.dat to control options.
+        More fixes for totals in a pooled/non-pooled mix when pooled
+            filesystems are not displayed.
+
+    4.24                                    [2010-5-14]
+        Added spanish translation (David Sastre).
+        Update some column widths to help support spanish.
+        Check mbrlen() return code.
+        Fix turnoffnls.sh (broken during rewrite).
+        Add missing defines in static configurations.
+        Added turnoffwinapi.sh for cygwin.
+
+    4.23                                    [2010-5-10]
+        Fix internationalized strings to line up properly.
+        Changed default block size output to -dH (scaled format 2).
+        Brought up to date for AIX, Tru64.
+        Added support for MinGW on Windows.
+        Added support for QNX.
+        Solaris 8 x86 w/gcc3 currently fails.
+
+    4.22                                    [2010-5-2]
+        Updated to use mkconfig 1.3.  Fixes problem
+          with linking in unneeded libraries.
+        Replaced hasnls program with a shell script.
+
+    4.21                                    [2010-4-11]
+        Fixed features/turnoffnls.sh.
+        Makefile cleanup (Mike Frysinger).
+
+    4.20                                    [2010-3-7]
+        Added VMS.
+        Fixed totals for pooled filesystems, again
+          (incorrect sort, skipped fs, pooled fs on command line).
+        Remove initial build script and use new mkconfig.
+        Rewrite makefile.
+        Moved mkconfig to its own package.
+        Move regression tests into tests.d directory.
+        Minor updates to manual page.
+
+    4.19                                    [2010-2-1]
+        Fix totals to add up when using small block sizes.
+        Fix totals for mixed pooled and non-pooled filesystems.
+        Add fix for automounted directories:
+          https://bugzilla.redhat.com/show_bug.cgi?id=497830 (df)
+        Builds on BSD 4.3.
+        Changed format of config.h file.
+        Code cleanup.
+
+    4.18                                    [2009-11-29]
+        Code cleanup.
+
+        The default configuration method has been changed to
+        use a shell script.  The perl configuration script is
+        still available (./Build -mkpl).
+
+    4.17                                    [2009-11-22]
+        Totals have been changed to add up whatever filesystems
+        are displayed.  This is more intuitive for the user.
+        It is up to the user to exclude read-only filesystems
+        (cdfs, iso9660), memory-based filesystems (memfs, mfs, tmpfs)
+        and user filesystems (fuse*).  Excluding the 'fuse' type will
+        exclude all fuse* filesystems.
+
+        As before, only the main pool of a pooled filesystem is totaled.
+
+        The build now works on unixware (getmntent is in libgen).
+        The build now works on syllable.
+
+        The default configuration method has been changed to
+        use the perl script.  Removed iffe, as it doesn't support
+        class testing.
+
+    4.16                                    [2009-9-20]
+        Fixed a nested macro issue on Mac OS X 10.6.
+        Fixed bugs with filename arguments.
+
+    4.15                                    [2009-9-17]
+        Fixed filename argument w/non-printing filesystem.
+        Build now works on Haiku.
+
+    4.14                                    [2009-9-10]
+        Code cleanup.
+        Change size labels to match SI standards (1024 vs 1000).
+        Build now works on Debian GNU-kFreeBSD.
+
+    4.13                                    [2008-5-25]
+        Fixed totals to correctly account for pooled filesystems.
+
+    4.12                                    [19 Jan 2008]
+        Change of e-mail addresses.
+
+    4.11                                    [29 May 2007]
+        Fixed minor bug for 'di -sn -t' introduced in 4.10.
+        Code cleanup -- move global variables into local structures.
+        Recoded sorting, added sort by filesystem type.
+
+    4.10                                    [24 Feb 2007]
+        Handle pooled filesystems so that the total space
+        doesn't get added more than once.
+        Compaq Tru64 advfs is untested.
+
+    4.9                                     [2 Nov 2006]
+        Fixed an uninitialized variable used for Solaris zones.
+        Minor fixes to mkconfig.pl.
+
+    4.8                                     [5 Oct 2006]
+        Linux's statvfs() is not POSIX compliant and does not
+        use f_frsize.  The correct value is returned in f_bsize.
+        Since there's no way to tell which type of statvfs() is
+        in use, we have to hard-code the logic for linux.
+        This sucks.
+
+        More minor improvements to mkconfig.pl.
+
+        Add logic to find the correct msgfmt program to use.
+
+    4.7                                     [23 Sep 2006]
+        Changed the operation of the -a, -x and -I flags
+        so that it is possible to specify -a and still exclude
+        filesystems from the list.
+        Added the -L flag to not check for duplicate filesystems.
+
+    4.6                                     [3 Sep 2006]
+        Improve mkconfig.pl configuration to be more robust,
+        find needed libraries.  Improve mkconfig.pl portability.
+
+    4.5                                     [29 Mar 2006]
+        Fix uninitialized variable.
+        Fix manual page formatting.
+
+    4.4                                     [21 Nov 2005]
+        Add zone support for Solaris (-z).
+        Update mkconfig.pl for compatibility w/perl 5.005.
+
+    4.3                                     [29 Oct 2005]
+        Change -P option and POSIXLY_CORRECT environment
+            variable to display POSIX standard output.
+        Add 'a' and '3' format options to display %avail
+            and %free space (request by Bill Poser).
+        Add check and routine to use getvfsstat() for NetBSD 3.x.
+        Add processing of DI_ARGS environment variable.
+
+    4.2                                     [12 Oct 2005]
+        Added -nonls argument to 'Build' to turn off all NLS.
+        Add +DAportable for HP-UX 10.x.
+        Add -qmaxmem=-1 for AIX.
+        Fix compile warning in dilib.c for AIX.
+        Improve tests for libintl.sl for HP-UX.
+            Check /usr/local for libintl.sl also.
+        Version number was inadverdently left as 4.1.
+
+    4.1                                     [6 Aug 2005]
+        Created a perl script as an alternative to iffe
+            to create the config.h file.
+        Internationalization configuration now works for Cygwin,
+            FreeBSD, NetBSD and HP/UX.
+
+    4.0                                     [26 Jul 2005]
+        Metadist is no longer supported; Only the iffe configuration
+            method is now available.
+        Removed -h help flag, changed it to be scaled alternative 1
+            display to match other 'df' programs.
+        Alias -x to -i to match other 'df' programs. -x will be preferred.
+            Old -x (debug) changed to -X.
+        POSIX -dp flag was broken.  Removed.  Added -P option.
+        Alias -F to -I for compatibility.
+        Updates to manual page.
+        Internationalization files are now automatically installed if the
+            NLS routines are detected.
+
+    3.11                                    [11 mar 2004]
+        Fixed bug: checking mount options to see if partition
+        was read-only (bsd style get/set/endmntent).
+
+    3.10                                    [26 feb 2004]
+        Added German .po file (Many thanks to Hartmut Haase).
+        Added -64 to Build for 64 bit binaries.
+        Added missing internationalization calls in di.c.
+
+    3.9                                     [25 may 2003]
+        Fixed bug with uninitialized 'dbsstr' variable.
+        iffe: upgraded to 2002-03-06.
+            Don't need to include stdio.h in most di.iffe tests.
+            lib test fixed for cygwin.
+
+    3.8                                     [12 jan 2003]
+        Rewrote block size display processing.  It did not match the
+        *BSD implementation of the BLOCKSIZE environment variable.
+        Latest metaconfig (Configure)
+        Add -k alias for -dk.
+
+    3.7                                     [4 sep 2002]
+        Check for initial '/' character in special device name
+        before doing stat().   Otherwise we pick up normal files.
+        Update iffe.
+        Add exa, zetta, yotta support (-de, -dz, -dy).
+        Add support for 1000 byte base block size (and others) (-b option).
+        Add alternative scaled format (-dH, -H).
+
+    3.6                                     [30 jul 2002]
+        Change to use mntctl() in preference to set/get/endmntent()
+            for AIX.
+        AIX: fix to display hostname in special device name for
+            remote mounts.
+        README updated for cygwin Configure/configure problem.
+        Workaround in di.h for cygwin/Configure getopt() problem.
+        Converted all strcpy() to strncpy().
+
+    3.5                                     [17 jul 2002]
+        Change 'memfs' to 'mfs' for memory file system (FreeBSD).
+            Not added to totals.
+        Added License.
+        Update to use snprintf if available.
+        Update 'Configure' to match 'iffe' build as closely as possible.
+        Fix C code to compile w/non-ansi compiler (HP-UX bundled).
+        Many configuration fixes (hp-ux, aix, et.al.).
+
+    3.4                                     [20 apr 2002]
+        Fix bugs in include/ignore list generation.
+        Rewrite ignore/include lists to allow multiple command line
+            specification of ignore/include lists.
+        Change so -f overrides DIFMT environment variable.
+        Fix bugs in -s command line option.  Make more friendly.
+        Add -H (-dh) scaled display format.
+        nfs mounts are always remote.
+
+    3.3                                     [1 apr 2002]
+        Bug fixes for AIX, HP/UX installation.
+
+    3.2                                     [27 feb 2002]
+        Add internationalization code.
+        Update windows code.
+        cleanup.
+
+    3.1                                     [15 nov 2001]
+        Bug fixes for SunOS 4.
+
+    3.0                                     [7 aug 2001]
+        Added getfsstat() for Compaq Tru-64 (and FreeBSD, etc.) systems.
+        Compaq Tru-64 code cleaned up.
+        Thanks to Compaq for their test drive program!
+        More cleanup.  Added iffe configuration.
+
+    2.4                                     [12 feb 2001]
+        Fixed so di doesn't statfs() the disks it doesn't need to.
+        Removed fs basetype stuff.
+        Split out disk routines into separate module.  Lots of cleanup.
+        Totals: fix to take into account block size of partition.
+        Totals: ignore read-only, partitions not normally printed.
+        Totals: ignore memory filesystems (tmpfs, memfs).
+
+    2.3                                     [24 feb 2000]
+        Modified hints for solaris to do 64 bit compilation.
+        Removed extra libc setting for linux.
+        Added support for BeOS.  This required ansi function headers.
+
+    2.2                                     [24 dec 1999]
+        Hints for dec_osf added.
+        Changed HAS_GETMNTINFOFSIZE to be preferred over
+        HAS_GETMNTINFOBSIZE; modified bsdos hints appropriately.
+        Look for <sys/fs_types.h> include file.
+
+    2.1                                     [24 dec 1999]
+        Added +DAportable for HP-UX.
+        Hints for openbsd added.
+        Made installperm as separate target in makefile.
+        Modified duplicate checking slightly.
+        Changed MNT_NOWAIT to MNT_WAIT.  This will work better
+        on FreeBSD.  Hopefully will work w/nfs mounts.
+
+    2.0                                     [15 apr 1999]
+        Now uses dist 3.0PL70 for configuration.
+        Duplicate filesystems (automounted) are not displayed.
+        This probably does not work for Digital's advfs.
+
+    1.24                                    [never released]
+        Added Windows w/gcc.
+        The Solaris 2.6 statvfs() bug has a patch out for it.
+        Patch #105572-05 (?).
+
+    1.23                                    [6 jul 1998]
+        Improved Windows.
+
+    1.22                                    [1 jul 1998]
+        Added Windows.  Don't know the routines to get the number
+        of file slots or the file system type (FAT12/16/32).
+        Changed default to display megabytes.
+
+    1.21                                    [8 sep 1997]
+        Fixed AIX typo.
+        Linux 2.x
+
+    1.20
+        Added Solaris large file system support.  Note that
+        ver 2.6 Beta_Update has a bug in the statvfs() routine,
+        and the non-root available disk space is improperly
+        reported.
+
+    1.19                                    [4 feb 1996]
+        Added mount time, mount options.  Link di to the mi command.
+
+    1.18                                    [21 aug 1995]
+        Fixed some ignore/include list problems.  Fixed local mount
+        flag for OSF/1.
+
+    1.17                                    [10 aug 1995]
+        Changed block values from unsigned long to doubles so that we
+        can display using different block sizes (-d flag).
+        Added -l flag for local filesystems only.
+
+    1.16                                    [8 aug 1995]
+        Added A/UX  [ blemoine@-NOSPAM-atheist.tamu.edu (Brett G. Lemoine) ]
+        Added convex [ "Schilperoort J.W." <J.W.Schilperoort@-NOSPAM-research.ptt.nl> ]
+
+    1.15                                    [1 aug 1995]
+    	Fixed bsdi 1.x and bsdi 2.x.  Fragments weren't supported.
+    	Fixed FreeBSD 1.x and 2.x; same problem.
+        Changed sco_sl makefile entry.
+
+    1.14                                    [22 jul 1995]
+        Fixed problem with display widths in conjunction with
+        ignore/include lists.
+
+    1.13                                    [17 mar 1995]
+        changed default length of filesystem type field to 7.
+        new debug 'all' format.
+        check for 0 fragment size; replace w/block size if we have it.
+
+    1.12                                    [28 jan 1995]
+        sco nfs 'nothing' fix.
+        freebsd 2.x; better freebsd filesystem types.
+
+    1.11                                    [3 dec 1994]
+        bsdi
+
+    1.10                                    [24 nov 1994]
+        added freebsd.
+
+    1.9                                     [30 aug 1994]
+        makefile fixes.
+
+    1.8                                     [28 may 1994]
+        removed mount option junk.
+        added AIX.
+
+    1.7                                     [2 may 1994]
+        cleaned up sgi in the makefile.
+        changed linux to be w/o need_statfs_defs.
+        solaris cdrom returning all sorts of negative values.
+        T format option.
+        mount options.
+        SunOs filesystem type info.
+
+    1.6                                     [never released]
+        ultrix bug fixes.
+        add dynix to makefile.
+
+    1.5                                     [26 mar 1994]
+        sun had f_bfree instead of f_bavail!
+        xenix, linux, sco
+        -w, -W, -B.
+        fixed width for -f M, -f S.
+        usage.
+        Allow other characters in format string.
+        1.51 (local, pat@rwing)
+            SunOS *does* support filesystem type info.  Its all in the
+            mntent structure, but requires a small bit of work (see source).
+
+    1.4                                     [4 mar 1994]
+        -f B
+        bcopy.
+        solaris cdrom reports -2 for free blocks.
+
+    1.3                                     [3 mar 1994]
+        Command line specification of filenames.
+        sort output.
+        osf/1, ultrix.
+        -F, -f M, -F S.
+
+    1.2                                     [2 mar 1994]
+        # of inodes can be -1L
+        return code for getDiskInfo shouldn't be checked.
+        name of mount point must be maxpathlen.
+        error conditions.
+        pyramid.
+
+    1.1                                     [27 feb 1994]
+        initial release
+
+ACKNOWLEDGEMENTS
+
+    And for their comments/source/manual pages and/or bug fixes, thanks!
+
+        jjb@NOSPAM-jagware.bcc.com (J.J.Bailey)
+        vogelke@NOSPAM-c-17igp.wpafb.af.mil (Contr Karl Vogel) [pyramid]
+        costales@NOSPAM-ICSI.Berkeley.EDU (Bryan Costales)
+        Mark Neale <mark@NOSPAM-edscom.demon.co.uk>
+        Pat Myrto <pat@NOSPAM-rwing.uucp> [sunOS filesystem type stuff]
+        henrikar@NOSPAM-utctu1.ct.utwente.nl (Henri Karrenbeld) [sgi]
+        Peter Bray <Peter.Bray@NOSPAM-serg.cse.unsw.edu.au>
+        gsipe@NOSPAM-pyramid.com (George M. Sipe) [manual page]
+        Jeffrey Mogul <mogul@NOSPAM-pa.dec.com>
+            [ultrix, osf/1, manual page, new format options]
+        thomas@NOSPAM-idx.kodak.com (Th. Bullinger) [help usage]
+        Seth Theriault <seth@NOSPAM-connact.com> [next, tru64]
+        steve@NOSPAM-nshore.org (Stephen J. Walick) [SCO]
+        Gerald Rinske <gerald@NOSPAM-D012F291.mch.sni.de> [sgi]
+        Mike Grupenhoff <kashmir@NOSPAM-snare.dorm.umd.edu> [linux]
+        R.K.Lloyd@NOSPAM-csc.liv.ac.uk [hpux]
+        "William Gibbs" <bill@NOSPAM-wgc386.MV.COM> [xenix]
+        Randy Thompson <randyt@NOSPAM-sequent.com> [sequent]
+        eriko@NOSPAM-risc.austin.ibm.com (O'Shaughnessy Erik) [aix]
+        Bill Davidsen <davidsen@NOSPAM-tmr.com>
+            [linux, SCO, etc., new format options]
+        fredex@NOSPAM-fcshome.stoneham.ma.us (fred smith) [coherent 4.2.05]
+        bag@NOSPAM-clipper.cs.kiev.ua (Andrey Blochintsev) [bsdi]
+        ginsbach@NOSPAM-spacestar.net (Brian Ginsbach) [netbsd, irix, unicos]
+
+        et. al.
+
+COPYRIGHT
+
+    Copyright 1994-2018 Brad Lanam, Walnut Creek, CA, USA
+    brad.lanam.di_at_gmail.com
+    https://gentoo.com/di/
