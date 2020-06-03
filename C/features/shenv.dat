@@ -32,7 +32,6 @@ addcflag -Wno-shift-sign-overflow
 addcflag -Wformat
 addcflag -Wformat-security
 addcflag -Werror=format-security
-addcflag -D_FORTIFY_SOURCE=2
 
 # these confuse other compilers...make them GCC only
 # solaris will not link w/-fstack-protector, so it
@@ -43,6 +42,9 @@ if UsingGNU_LD ( == _MKCONFIG_USING_GNU_LD Y ) && ( == _MKCONFIG_USING_GCC Y )
   addcflag -fstack-protector-all
   addldflag -fstack-protector-strong
   addldflag -fstack-protector-all
+  addcflag -D_FORTIFY_SOURCE=2
+ else
+  addcflag -D_FORTIFY_SOURCE=0
  endif
 endif
 

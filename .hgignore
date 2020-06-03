@@ -5,6 +5,7 @@ syntax: glob
 *.o
 *.tar.gz
 *.zip
+tcl-diskspace/binaries/
 Archive
 C/*.cache
 C/config.h
