@@ -10,6 +10,6 @@ zip=tcl-diskspace-${ver}
 test -d $top && rm -rf $top
 cp -r binaries $top
 cp pkgIndex.tcl README.txt $top
-test -f ${top}.zip && rm -f ${top}.zip
+test -f ${zip}.zip && rm -f ${zip}.zip
 zip -rq ${zip}.zip ${top}
 rm -rf $top
