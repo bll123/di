@@ -255,6 +255,10 @@ xenix-cc:
 #   ../dioptions.dat, tests.done, test_di, di.env, di-sh.env
 .PHONY: clean
 clean:
+	@-cd Perl; \
+		if [ -f Makefile ]; then \
+		$(MAKE) clean; \
+		fi
 	@-$(RM) -rf di mi \
 		di.exe mingw-di.exe mi.exe \
 		tcldiskspace.bld diskspace.so diskspace.dylib diskspace.dll \
@@ -267,10 +271,6 @@ clean:
 		Perl/Filesys-di-*.tar.gz \
 		Perl/Makefile.old \
 		>/dev/null 2>&1; exit 0
-	@-cd Perl; \
-		if [ -f Makefile ]; then \
-		$(MAKE) clean; \
-		fi
 	@-find . -name '*~' -print | xargs rm > /dev/null 2>&1; exit 0
 
 # leaves:
@@ -278,7 +278,7 @@ clean:
 #   tests.done, test_di
 .PHONY: realclean
 realclean:
-	@$(MAKE) clean > /dev/null 2>&1
+	@$(MAKE) clean >/dev/null 2>&1
 	@-$(RM) -rf config.h configtcl.h gconfig.h \
 		di.env di-sh.env $(MKC_REQLIB) $(MKC_TCLREQLIB) \
 		>/dev/null 2>&1; exit 0
@@ -287,15 +287,15 @@ realclean:
 #   ../dioptions.dat
 .PHONY: distclean
 distclean:
-	@$(MAKE) realclean > /dev/null 2>&1
-	@-$(RM) -rf tests.done test_di \
-		_mkconfig_runtests _tmp_mkconfig \
-		*~ *.orig */*.orig \
-		>/dev/null 2>&1; exit 0
 	@-cd Perl; \
 		if [ -f Makefile ]; then \
 		$(MAKE) distclean; \
 		fi
+	@$(MAKE) realclean >/dev/null 2>&1
+	@-$(RM) -rf tests.done test_di \
+		_mkconfig_runtests _tmp_mkconfig \
+		*~ *.orig */*.orig \
+		>/dev/null 2>&1; exit 0
 
 ###
 # installation
