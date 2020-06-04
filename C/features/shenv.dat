@@ -15,6 +15,7 @@ cc
 using_gcc
 using_gnu_ld
 using_clang
+using_cplusplus
 cflags
 ldflags
 # needed for tcl build
@@ -56,6 +57,9 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
   addcflag -fstack-protector-all
   addldflag -fstack-protector-strong
   addldflag -fstack-protector-all
+  addcflag -D_FORTIFY_SOURCE=2
+ else
+  addcflag -D_FORTIFY_SOURCE=0
  endif
 endif
 
