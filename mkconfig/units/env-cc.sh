@@ -103,6 +103,21 @@ check_cc () {
   fi
 }
 
+check_using_cplusplus () {
+  usingcplusplus="N"
+
+  printlabel _MKCONFIG_USING_CPLUSPLUS "Using c++"
+
+  case ${CC} in
+      *g++*|*clang++*|*c++*)
+          usingcplusplus="Y"
+          ;;
+  esac
+
+  printyesno_val _MKCONFIG_USING_CPLUSPLUS "${usingcplusplus}"
+  setdata ${_MKCONFIG_PREFIX} _MKCONFIG_USING_CPLUSPLUS "${usingcplusplus}"
+}
+
 check_using_gcc () {
   usinggcc="N"
 
@@ -422,10 +437,21 @@ check_ldflags () {
   _read_option LDFLAGS_DEBUG ""
   if [ "z$LDFLAGS_DEBUG" != z ]; then
     ldflags_debug="$LDFLAGS_DEBUG"
+  else
+    _read_option CFLAGS_DEBUG ""
+    if [ "z$CFLAGS_DEBUG" != z ]; then
+      ldflags_debug="$CFLAGS_DEBUG"
+    fi
   fi
+
   _read_option LDFLAGS_OPTIMIZE ""
   if [ "z$LDFLAGS_OPTIMIZE" != z ]; then
     ldflags_optimize="$LDFLAGS_OPTIMIZE"
+  else
+    _read_option CFLAGS_OPTIMIZE ""
+    if [ "z$CFLAGS_OPTIMIZE" != z ]; then
+      ldflags_optimize="$CFLAGS_OPTIMIZE"
+    fi
   fi
 
   puts "ldflags_debug:${ldflags_debug}" >&9
@@ -541,43 +567,43 @@ check_shldflags () {
 }
 
 check_ldflags_shared () {
-  printlabel LDFLAGS_SHARED "shared library ldflags"
+  printlabel LDFLAGS_SHARED_LIBLINK "shared library ldflags"
 
   if [ "$_MKCONFIG_USING_GCC" != Y ]; then
     case ${_MKCONFIG_SYSTYPE} in
       AIX)
-        doappend ldflags_shared " -G"
+        doappend ldflags_shared_liblink " -G"
         ;;
       HP-UX)
-        doappend ldflags_shared " -b"
+        doappend ldflags_shared_liblink " -b"
         ;;
       IRIX*)
         # "-shared"
-        doappend ldflags_shared " -shared"
+        doappend ldflags_shared_liblink " -shared"
         ;;
       OSF1)
-        doappend ldflags_shared " -msym -no_archive"
+        doappend ldflags_shared_liblink " -msym -no_archive"
         ;;
       SCO_SV)
-        doappend ldflags_shared " -G"
+        doappend ldflags_shared_liblink " -G"
         ;;
       SunOS)
-        doappend ldflags_shared " -G"
+        doappend ldflags_shared_liblink " -G"
         ;;
       UnixWare)
-        doappend ldflags_shared " -G"
+        doappend ldflags_shared_liblink " -G"
         ;;
       *)
-        doappend ldflags_shared " -shared"
+        doappend ldflags_shared_liblink " -shared"
         ;;
     esac
   else
-    doappend ldflags_shared " -shared"
+    doappend ldflags_shared_liblink " -shared"
   fi
 
   case ${_MKCONFIG_SYSTYPE} in
     Darwin)
-      doappend ldflags_shared " -dynamiclib"
+      doappend ldflags_shared_liblink " -dynamiclib"
       ;;
   esac
 
@@ -585,10 +611,10 @@ check_ldflags_shared () {
   if [ "z$LDFLAGS_SHARED" != z ]; then
     ldflags_shared_user="${LDFLAGS_SHARED}"
   fi
-  printyesno_val LDFLAGS_SHARED "$ldflags_shared $ldflags_shared_user"
+  printyesno_val LDFLAGS_SHARED "$ldflags_shared_liblink $ldflags_shared_user"
 
   _setflags \
-      ldflags_shared LDFLAGS_SHARED ldflags_shared_user LDFLAGS_SHARED_USER
+      ldflags_shared_liblink LDFLAGS_SHARED_LIBLINK ldflags_shared_user LDFLAGS_SHARED_USER
 }
 
 check_sharednameflag () {
