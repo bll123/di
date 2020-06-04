@@ -106,6 +106,8 @@ windows-mingw:
 
 .PHONY: test
 test:
+	$(MAKE) checkbuild
+	$(MAKE) checkinstall
 	cd C >/dev/null && $(MAKE) -e test
 	$(MAKE) -e tests.done
 
@@ -194,7 +196,8 @@ tar:
 clean:
 	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
 		checkbuild checkperlbuild checkinstall \
-		tests.done > /dev/null 2>&1; exit 0
+		tests.done \
+		tests.d/test_order.tmp > /dev/null 2>&1; exit 0
 	@-find . -name '*~' -print | xargs rm >/dev/null 2>&1; exit 0
 	@-(cd C >/dev/null && $(MAKE) clean > /dev/null 2>&1); exit 0
 	@-(cd D >/dev/null && $(MAKE) clean > /dev/null 2>&1); exit 0

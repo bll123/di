@@ -270,7 +270,7 @@ clean:
 		mkconfig.reqlibs mkc_compile.log \
 		Perl/Filesys-di-*.tar.gz \
 		Perl/Makefile.old \
-		>/dev/null 2>&1; exit 0
+		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
 	@-find . -name '*~' -print | xargs rm > /dev/null 2>&1; exit 0
 
 # leaves:
