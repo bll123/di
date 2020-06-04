@@ -1,7 +1,6 @@
 output none
 
 command awk nawk mawk gawk
-command bc
 command cat
 command date
 command egrep
@@ -16,7 +15,7 @@ command uname
 command wc
 
 setint build_commands 0
-if build_cmds _command_awk -a _command_bc -a _command_cat -a _command_date -a \
+if build_cmds _command_awk -a _command_cat -a _command_date -a \
     _command_egrep -a _command_grep -a _command_mkdir -a \
     _command_rm -a _command_sed -a \
     _command_sort -a _command_touch -a \

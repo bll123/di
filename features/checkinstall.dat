@@ -10,8 +10,8 @@ command rm
 command sed
 
 setint install_commands 0
-if install_cmds _command_chmod && _command_cp && _command_grep && \
-    _command_ln && _command_mkdir && _command_mv && _command_rm && \
+if install_cmds _command_chmod -a _command_cp -a _command_grep -a \
+    _command_ln -a _command_mkdir -a _command_mv -a _command_rm -a \
     _command_sed
   setint install_commands 1
 endif
