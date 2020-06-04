@@ -1,4 +1,4 @@
-di - disk information utility (version 4.47.3)
+di - disk information utility (version 4.48)
 
 Website: https://gentoo.com/di/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
@@ -256,9 +256,11 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
-    4.47.4                                  [--]
-        Minor makefile cleanup.
-        Updated mkconfig to version 2.2.
+    4.48                                    [2020-6-3]
+        disable spurious compiler warnings.
+        Various build fixes.
+        make test no longer fails if perl is not present.
+        Updated mkconfig to version 2.3.
 
     4.47.3                                  [2019-12-23]
         Fixed missing link flags for clang.

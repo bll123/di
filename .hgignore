@@ -27,3 +27,4 @@ Test/*
 w.*
 Web/*
 mkconfig.link
+mkconfig.old
