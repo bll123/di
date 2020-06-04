@@ -330,8 +330,8 @@ chkshell () {
       # reject older versions of yash
       # I do not know in what version the quoting/backquoting issues
       # got fixed.
-      rc=`"$YASH_VERSION < 2.48" | bc -l`
-      if [ $rc -eq 0 ]; then
+      rc=`echo "$YASH_VERSION < 2.48" | bc -l`
+      if [ $rc -eq 1 ]; then
         chkmsg="${chkmsg}
   older versions of yash are not supported"
         grc=1
