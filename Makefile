@@ -206,9 +206,7 @@ clean:
 #  _tmp_mkconfig/, _mkconfig_runtests/
 .PHONY: realclean
 realclean:
-	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
-		checkbuild checkperlbuild checkinstall \
-		tests.done *~ */*~ */*/*~ > /dev/null 2>&1; exit 0
+	@-$(MAKE) clean > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) realclean > /dev/null 2>&1); exit 0
 	@-(cd D >/dev/null && $(MAKE) realclean > /dev/null 2>&1); exit 0
 
@@ -216,6 +214,7 @@ realclean:
 #   dioptions.dat
 .PHONY: distclean
 distclean:
+	@-$(MAKE) realclean > /dev/null 2>&1
 	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
 		_mkconfig_runtests checkbuild checkperlbuild checkinstall \
 		tests.done _tmp_mkconfig *~ */*~ \
