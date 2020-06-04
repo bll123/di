@@ -558,7 +558,7 @@ xdr_quota_rslt (xp, rslt)
 # else
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wsign-conversion"
-  rslt->status = quotastat;
+  rslt->status = (gqr_status) quotastat;
 #  pragma clang diagnostic pop
 # endif
 # if _mem_struct_getquota_rslt_gqr_rquota

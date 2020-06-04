@@ -289,7 +289,7 @@ extern char *strdup                 _((const char *));
 # endif
  /* strstr.c */
 # if ! _lib_strstr
-extern char *strstr                 _((const char *, const char *));
+extern char *strstr           _((const char *, const char *));
 # endif
  /* trimchar.c */
 extern void trimChar                _((char *, int));

@@ -1,6 +1,6 @@
 #ifndef DI_INC_VERSION_H
 #define DI_INC_VERSION_H
 
-# define DI_VERSION "4.47.4"
+# define DI_VERSION "4.48"
 
 #endif

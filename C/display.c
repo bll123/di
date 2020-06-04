@@ -466,7 +466,7 @@ append (val, ptr, len)
   vlen = strlen (val);
   if (*clen + vlen >= *len) {
     nlen = vlen + *clen + 1;
-    *ptr = realloc (*ptr, nlen);
+    *ptr = (char *) realloc (*ptr, nlen);
     memset (*ptr+*clen, 0, nlen-*clen);
     *len = nlen;
   }
