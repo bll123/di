@@ -15,10 +15,10 @@ command tr
 command uname
 
 setint build_commands 0
-if build_cmds _command_awk && _command_cat && _command_egrep && \
-    _command_grep && _command_mkdir && _command_perl && \
-    _command_pwd && _command_rm && _command_sed && \
-    _command_sort && _command_tr && _command_uname
+if build_cmds _command_awk -a _command_cat -a _command_egrep -a \
+    _command_grep -a _command_mkdir -a _command_perl -a \
+    _command_pwd -a _command_rm -a _command_sed -a \
+    _command_sort -a _command_tr -a _command_uname
   setint build_commands 1
 endif
 

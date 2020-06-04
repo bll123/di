@@ -1,6 +1,7 @@
 output none
 
 command awk nawk mawk gawk
+command bc
 command cat
 command date
 command egrep
@@ -15,18 +16,18 @@ command uname
 command wc
 
 setint build_commands 0
-if build_cmds _command_awk && _command_cat && _command_date && \
-    _command_egrep && _command_grep && _command_mkdir && \
-    _command_rm && _command_sed && \
-    _command_sort && _command_touch && \
-    _command_tr && _command_uname && _command_wc
+if build_cmds _command_awk -a _command_bc -a _command_cat -a _command_date -a \
+    _command_egrep -a _command_grep -a _command_mkdir -a \
+    _command_rm -a _command_sed -a \
+    _command_sort -a _command_touch -a \
+    _command_tr -a _command_uname -a _command_wc
   setint build_commands 1
 endif
 
 if chk_build_cmds ! _setint_build_commands
  echo
  echo ** ERROR: The build requires the following commands:
- echo **   awk, cat, egrep, grep, mkdir, rm, sed, sort, tr and wc
+ echo **   awk, bc, cat, egrep, grep, mkdir, rm, sed, sort, tr and wc
  echo
  exit
 endif
