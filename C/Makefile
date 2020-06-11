@@ -411,8 +411,8 @@ perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 	( \
 	cd Perl ; \
 	perl Makefile.PL LIBS="-L.. -ldiperl `$(CAT) ../$(MKC_REQLIB)`" ; \
-	make ; \
-	make test ; \
+	$(MAKE) ; \
+	$(MAKE) test ; \
 	)
 	@touch perlfilesysdi.bld
 
