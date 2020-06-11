@@ -280,7 +280,7 @@ clean:
 		*.o *.obj $(MKC_FILES)/mkconfig.log \
 		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
 		$(MKC_FILES)/mkconfig.cache mkc*.vars \
-		getoptn_test* gconfig.h $(MKC_FILES)/getoptn.reqlibs \
+		getoptn_test* gconfig.h getoptn.reqlibs \
 		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
 		Perl/Filesys-di-*.tar.gz \
 		Perl/Makefile.old \
@@ -508,7 +508,7 @@ test-env:
 	@echo "cc: $(CC)"
 	@echo "make: $(MAKE)"
 
-gconfig.h:	$(MKC_ENV) features/getoptn.dat
+gconfig.h:	$(MKC_ENV) mkc_config/di-getoptn.mkc
 	@-$(RM) -f gconfig.h
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./$(MKC_ENV); \

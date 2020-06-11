@@ -216,7 +216,8 @@ realclean:
 distclean:
 	@-$(MAKE) realclean > /dev/null 2>&1
 	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
-		_mkconfig_runtests checkbuild checkperlbuild checkinstall \
+		mkc_files _mkconfig_runtests \
+		checkbuild checkperlbuild checkinstall \
 		tests.done _tmp_mkconfig *~ */*~ \
 		*/*/*~ *.orig > /dev/null 2>&1; exit 0
 	@-(cd C >/dev/null && $(MAKE) distclean > /dev/null 2>&1); exit 0

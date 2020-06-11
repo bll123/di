@@ -258,6 +258,7 @@ PORTING
 CHANGES
     4.48.0.1                                --
         Update di.spec.
+        Update mkconfig to version 2.4.
 
     4.48                                    [2020-6-3]
         disable spurious compiler warnings.
