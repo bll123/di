@@ -317,7 +317,7 @@ check_addcflag () {
   printlabel CFLAGS_APPLICATION "Add C flag: ${flag}"
 
   puts "#include <stdio.h>
-main () { return 0; }" > t.c
+int main () { return 0; }" > t.c
   puts "# test ${flag}" >&9
   # need to set w/all cflags; gcc doesn't always error out otherwise
   TMPF=t$$.txt
@@ -351,7 +351,7 @@ check_addldflag () {
   setldflags
   setlibs
   puts "#include <stdio.h>
-main () { return 0; }" > t.c
+int main () { return 0; }" > t.c
   puts "# test ${flag}" >&9
   # need to set w/all cflags/ldflags; gcc doesn't always error out otherwise
   TMPF=t$$.txt
@@ -804,4 +804,14 @@ check_findpc () {
     printyesno_val $name no
     setdata ${_MKCONFIG_PREFIX} pc_${cfile} N
   fi
+}
+
+check_standard_cc () {
+  check_cc
+  check_using_gcc
+  check_using_gnu_ld
+  check_using_clang
+  check_using_cplusplus
+  check_cflags
+  check_ldflags
 }
