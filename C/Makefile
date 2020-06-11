@@ -4,6 +4,19 @@
 #  Copyright 2001-2018 Brad Lanam Walnut Creek CA, USA
 #
 
+MKC_PREFIX = di
+MKC_CONFDIR = mkc_config
+MKC_FILES = mkc_files
+MKC_OUTPUT = config.h
+MKC_ENV = $(MKC_PREFIX).env
+MKC_ENV_SHR = $(MKC_PREFIX)-shared.env
+
+MKC_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX).mkc
+MKC_ENV_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX)-env.mkc
+MKC_ENV_SHR_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX)-env-shared.mkc
+MKC_CONF_TCL = $(MKC_CONFDIR)/$(MKC_PREFIX)-tcl.mkc
+MKC_CONF_GETOPTN = $(MKC_CONFDIR)/$(MKC_PREFIX)-getoptn.mkc
+
 # for tests.done
 DC = gdc
 
@@ -57,30 +70,30 @@ MKC_ECHO =
 all:	all-sh
 
 .PHONY: all-sh
-all-sh:	di.env
-	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=sh di-programs
+all-sh:	$(MKC_ENV)
+	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=sh di-programs
 
 .PHONY: all-perl
-all-perl:	di.env
-	. ./di.env;$(MAKE) -e MKCONFIG_TYPE=perl di-programs
+all-perl:	$(MKC_ENV)
+	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=perl di-programs
 
 # tcl interface
 .PHONY: tcl-sh
-tcl-sh:	di-sh.env
-	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh tcl-programs
+tcl-sh:	$(MKC_ENV_SHR)
+	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=sh tcl-programs
 
 # this is not working...need to research
-#tcl-perl:	di-sh.env
-#	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=perl tcl-programs
+#tcl-perl:	$(MKC_ENV_SHR)
+#	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=perl tcl-programs
 
 # perl interface
 .PHONY: perl-sh
-perl-sh:	di-sh.env
-	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=sh perl-programs
+perl-sh:	$(MKC_ENV_SHR)
+	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=sh perl-programs
 
 .PHONY: perl-perl
-perl-perl:	di-sh.env
-	. ./di-sh.env;$(MAKE) -e MKCONFIG_TYPE=perl perl-programs
+perl-perl:	$(MKC_ENV_SHR)
+	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=perl perl-programs
 
 .PHONY: test
 test:		tests.done
@@ -88,13 +101,14 @@ test:		tests.done
 ###
 # environment
 
-di.env:	features/env.dat ../dioptions.dat
-	@-$(RM) -f di.env tests.done
-	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh features/env.dat
+$(MKC_ENV):	$(MKC_ENV_CONF) ../dioptions.dat
+	@-$(RM) -f $(MKC_ENV) tests.done
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
 
-di-sh.env:	features/shenv.dat
-	@-$(RM) -f di-sh.env tests.done
-	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh features/shenv.dat
+$(MKC_ENV_SHR):	$(MKC_ENV_SHR_CONF)
+	@-$(RM) -f $(MKC_ENV_SHR) tests.done
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh \
+		$(MKC_ENV_SHR_CONF)
 
 ###
 # specific builds
@@ -106,7 +120,7 @@ di-sh.env:	features/shenv.dat
 .PHONY: windows
 windows:
 	@$(MAKE) ../dioptions.dat
-	copy /y NUL: di.env
+	copy /y NUL: $(MKC_ENV)
 	-del config.h
 	copy /y /b NUL:+configs\config.ms.cl config.h
 	copy /y NUL: $(MKC_REQLIB)
@@ -119,7 +133,7 @@ windows:
 .PHONY: windows-gcc
 windows-gcc:
 	@$(MAKE) ../dioptions.dat
-	@echo ':' > di.env;chmod a+rx di.env
+	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	$(CP) -f configs/config.cygwin.gcc config.h
 	@echo '-lintl' > $(MKC_REQLIB)
@@ -132,7 +146,7 @@ windows-gcc:
 windows-msys:
 	MAKE=mingw32-make
 	cp ../features/dioptions.dat ../dioptions.dat
-	> di.env
+	> $(MKC_ENV)
 	-rm config.h
 	cp configs/config.mingw config.h
 	> $(MKC_REQLIB)
@@ -147,7 +161,7 @@ windows-msys:
 windows-mingw:
 	MAKE=mingw32-make
 	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
-	copy /y NUL: di.env
+	copy /y NUL: $(MKC_ENV)
 	-del config.h
 	copy /y /b NUL:+configs\config.mingw config.h
 	copy /y NUL: $(MKC_REQLIB)
@@ -160,7 +174,7 @@ windows-mingw:
 
 .PHONY: os2-gcc
 os2-gcc:
-	@echo ':' > di.env;chmod a+rx di.env
+	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	$(MAKE) MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
@@ -169,7 +183,7 @@ os2-gcc:
 .PHONY: bsd43-cc
 bsd43-cc:
 	@$(MAKE) ../dioptions.dat
-	@echo ':' > di.env;chmod a+rx di.env
+	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	sleep 1
 	$(CP) configs/config.bsd43.cc config.h
@@ -183,7 +197,7 @@ bsd43-cc:
 .PHONY: bsd43-gcc
 bsd43-gcc:
 	@$(MAKE) ../dioptions.dat
-	@echo ':' > di.env;chmod a+rx di.env
+	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	sleep 1
 	$(CP) configs/config.bsd43.gcc config.h
@@ -197,7 +211,7 @@ bsd43-gcc:
 .PHONY: ultrix-cc
 ultrix-cc:
 	@$(MAKE) ../dioptions.dat
-	@echo ':' > di.env;chmod a+rx di.env
+	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	sleep 1
 	$(CP) configs/config.ultrix.cc config.h
@@ -211,7 +225,7 @@ ultrix-cc:
 .PHONY: ultrix-gcc
 ultrix-gcc:
 	@$(MAKE) ../dioptions.dat
-	@echo ':' > di.env;chmod a+rx di.env
+	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	sleep 1
 	$(CP) configs/config.ultrix.gcc config.h
@@ -225,18 +239,18 @@ ultrix-gcc:
 .PHONY: hpux-cc
 hpux-cc:
 	@$(MAKE) -e ../dioptions.dat
-	@$(MAKE) CC=/usr/ccs/bin/cc -e di.env
+	@$(MAKE) CC=/usr/ccs/bin/cc -e $(MKC_ENV)
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	sleep 1
 	$(CP) configs/config.hpux.bcc config.h
 	sleep 1;touch $(MKC_REQLIB)
-	. ./di.env;$(MAKE) -e CC=/usr/ccs/bin/cc \
+	. ./$(MKC_ENV);$(MAKE) -e CC=/usr/ccs/bin/cc \
 		_MKCONFIG_SHELL=$(MKCONFIG_SHELL) di-programs
 
 .PHONY: xenix-cc
 xenix-cc:
 	@$(MAKE) ../dioptions.dat
-	@echo ':' > di.env;chmod a+rx di.env
+	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	sleep 1
 	$(CP) configs/conf.xenix.cc config.h
@@ -252,7 +266,7 @@ xenix-cc:
 
 # leaves:
 #   config.h configtcl.h di.reqlibs
-#   ../dioptions.dat, tests.done, test_di, di.env, di-sh.env
+#   ../dioptions.dat, tests.done, test_di, $(MKC_ENV), $(MKC_ENV_SHR)
 .PHONY: clean
 clean:
 	@-cd Perl; \
@@ -263,24 +277,24 @@ clean:
 		di.exe mingw-di.exe mi.exe \
 		tcldiskspace.bld diskspace.so diskspace.dylib diskspace.dll \
 		perlfilesysdi.bld libdiperl.a \
-		*.o *.obj mkconfig.log \
-		tests.done _tmp_mkconfig tests.d/chksh* \
-		mkconfig.cache mkc*.vars \
-		getoptn_test* gconfig.h getoptn.reqlibs \
-		mkconfig.reqlibs mkc_compile.log \
+		*.o *.obj $(MKC_FILES)/mkconfig.log \
+		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
+		$(MKC_FILES)/mkconfig.cache mkc*.vars \
+		getoptn_test* gconfig.h $(MKC_FILES)/getoptn.reqlibs \
+		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
 		Perl/Filesys-di-*.tar.gz \
 		Perl/Makefile.old \
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
 	@-find . -name '*~' -print | xargs rm > /dev/null 2>&1; exit 0
 
 # leaves:
-#   _mkconfig_runtests, _tmp_mkconfig, ../dioptions.dat
+#   _mkconfig_runtests, mkc_files, ../dioptions.dat
 #   tests.done, test_di
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean >/dev/null 2>&1
 	@-$(RM) -rf config.h configtcl.h gconfig.h \
-		di.env di-sh.env $(MKC_REQLIB) $(MKC_TCLREQLIB) \
+		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) $(MKC_TCLREQLIB) \
 		>/dev/null 2>&1; exit 0
 
 # leaves:
@@ -293,7 +307,8 @@ distclean:
 		fi
 	@$(MAKE) realclean >/dev/null 2>&1
 	@-$(RM) -rf tests.done test_di \
-		_mkconfig_runtests _tmp_mkconfig \
+		_mkconfig_runtests \
+		$(MKC_FILES) \
 		*~ *.orig */*.orig \
 		>/dev/null 2>&1; exit 0
 
@@ -301,8 +316,8 @@ distclean:
 # installation
 
 .PHONY: install
-install:	di.env di-programs
-	. ./di.env;cd ..;$(MAKE) -e prefix=$(prefix) \
+install:	$(MKC_ENV) di-programs
+	. ./$(MKC_ENV);cd ..;$(MAKE) -e prefix=$(prefix) \
 		LOCALEDIR=$(LOCALEDIR) FROMDIR=C install
 
 ###
@@ -321,30 +336,30 @@ perl-programs:	perlfilesysdi.bld
 ../dioptions.dat:	../features/dioptions.dat
 	cd ../;$(MAKE) dioptions.dat
 
-config.h:	di.env ../dioptions.dat features/mkconfig.dat
+config.h:	$(MKC_ENV) ../dioptions.dat $(MKC_CONF)
 	@-$(RM) -f config.h tests.done
 	@if [ "$(DI_NO_NLS)" != "" ]; then \
 		echo "*** User requested no NLS"; \
 		$(MKC_DIR)/mkc.sh -setopt -o ../dioptions.dat NLS F; fi
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
-		. ./di.env;$(_MKCONFIG_SHELL) \
+		. ./$(MKC_ENV);$(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/mkconfig.sh \
-		features/mkconfig.dat; fi
+		$(MKC_CONF); fi
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
-		. ./di.env;perl \
+		. ./$(MKC_ENV);perl \
 		$(MKC_DIR)/mkconfig.pl \
-		features/mkconfig.dat; fi
+		$(MKC_CONF); fi
 
-configtcl.h:	di-sh.env ../dioptions.dat features/mkconfig-tcl.dat
+configtcl.h:	$(MKC_ENV_SHR) ../dioptions.dat $(MKC_CONF_TCL)
 	@-$(RM) -f configtcl.h
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
-		. ./di-sh.env;$(_MKCONFIG_SHELL) \
+		. ./$(MKC_ENV_SHR);$(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/mkconfig.sh \
-		features/mkconfig-tcl.dat; fi
+		$(MKC_CONF_TCL); fi
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
-		. ./di-sh.env;perl \
+		. ./$(MKC_ENV_SHR);perl \
 		$(MKC_DIR)/mkconfig.pl \
-		features/mkconfig-tcl.dat; fi
+		$(MKC_CONF_TCL); fi
 
 $(MKC_REQLIB):	config.h
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
@@ -369,7 +384,8 @@ MAINOBJECTS = di$(OBJ_EXT)
 TCLOBJECTS = tcldiskspace$(OBJ_EXT)
 
 di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
-	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec $(MKC_ECHO) \
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
+		-link -exec $(MKC_ECHO) \
 		-r $(MKC_REQLIB) -o di$(EXE_EXT) \
 		$(MAINOBJECTS) $(LIBOBJECTS)
 
@@ -466,6 +482,7 @@ testrpmbuild:
 	$(MKDIR) -p ./rpmbuild/SOURCES
 	$(MKDIR) -p ./rpmbuild/BUILD
 	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
+	$(LN) -f ./rpmbuild/SOURCES/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES/download
 	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba ../di.spec
 	$(TEST) -f ./rpmbuild/RPMS/$(MARCH)/di-$(DI_VERSION)-1.$(MARCH).rpm || exit 1
 	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
@@ -491,29 +508,28 @@ test-env:
 	@echo "cc: $(CC)"
 	@echo "make: $(MAKE)"
 
-gconfig.h:	di.env features/getoptn.dat
+gconfig.h:	$(MKC_ENV) features/getoptn.dat
 	@-$(RM) -f gconfig.h
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
-		. ./di.env; \
+		. ./$(MKC_ENV); \
 		$(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh \
-		features/getoptn.dat; fi
+		$(MKC_CONF_GETOPTN); fi
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
-		. ./di.env; \
+		. ./$(MKC_ENV); \
 		perl $(MKC_DIR)/mkconfig.pl \
-		features/getoptn.dat; fi
+		$(MKC_CONF_GETOPTN); fi
 
 getoptn_test$(OBJ_EXT):	getoptn.c gconfig.h getoptn.h
-	@. ./di.env;$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile \
+	@. ./$(MKC_ENV);$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile \
 		-DTEST_GETOPTN=1 \
 		-o getoptn_test$(OBJ_EXT) getoptn.c
 
-getoptn.reqlibs:	di.env gconfig.h
-	@. ./di.env;$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
+getoptn.reqlibs:	$(MKC_ENV) gconfig.h
+	@. ./$(MKC_ENV);$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
 		-o getoptn.reqlibs gconfig.h
 
 getoptn_test.exe:	getoptn_test$(OBJ_EXT) getoptn.reqlibs
-	@. ./di.env;$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec \
-		$(MKC_ECHO) -o getoptn_test.exe $(LDFLAGS) \
-		getoptn_test$(OBJ_EXT) \
-		`$(CAT) getoptn.reqlibs`
-
+	@. ./$(MKC_ENV);$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec \
+		$(MKC_ECHO) -r getoptn.reqlibs \
+		-o getoptn_test.exe $(LDFLAGS) \
+		getoptn_test$(OBJ_EXT)

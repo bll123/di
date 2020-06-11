@@ -23,12 +23,12 @@ C/dimntopt.h              di source
 C/diquota.c               di source
 C/display.c               di source
 C/display.h               di source
-C/features/               di configuration
-C/features/env.dat          environment configuration
-C/features/shenv.dat        tcl environment configuration
-C/features/getoptn.dat      getoptn test configuration
-C/features/mkconfig.dat     mkconfig configuration
-C/features/mkconfig-tcl.dat additional tcl configuration
+C/mkc_config/             di configuration
+C/mkc_config/di-env.mkc   environment configuration
+C/mkc_config/di-env-shared.mkc  tcl environment configuration
+C/mkc_config/di-getoptn.mkc  getoptn test configuration
+C/mkc_config/di.mkc       mkconfig configuration
+C/mkc_config/di-tcl.mkc   additional tcl configuration
 C/getoptn.c               di source
 C/getoptn.h               di source
 C/options.c               di source

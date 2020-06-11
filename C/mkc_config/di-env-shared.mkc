@@ -6,7 +6,7 @@ loadunit env-cc
 loadunit env-msgfmt
 loadunit env-extension
 
-output  di-sh.env
+output  di-shared.env
 
 system type
 system rev

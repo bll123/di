@@ -256,6 +256,9 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+    4.48.0.1                                --
+        Update di.spec.
+
     4.48                                    [2020-6-3]
         disable spurious compiler warnings.
         Various build fixes.

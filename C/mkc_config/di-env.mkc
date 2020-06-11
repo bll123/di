@@ -18,6 +18,7 @@ using_clang
 using_cplusplus
 cflags
 ldflags
+addcflag -fno-common
 addcflag -Wextra
 addcflag -Wno-unused-but-set-variable
 addcflag -Wno-unused-parameter
