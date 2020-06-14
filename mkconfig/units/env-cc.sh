@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Copyright 2001-2018 Brad Lanam, Walnut Creek, California USA
+# Copyright 2020 Brad Lanam Pleasant Hill CA
 #
 
 #
@@ -124,11 +125,11 @@ check_using_gcc () {
   printlabel _MKCONFIG_USING_GCC "Using gcc/g++"
 
   # check for gcc...
-  ${CC} -v 2>&1 | grep 'gcc version' > /dev/null 2>&1
+  ${CC} -v 2>&1 | grep 'gcc version' >/dev/null 2>&1
   rc=$?
   if [ $rc -eq 0 ]; then
-      puts "found gcc" >&9
-      usinggcc="Y"
+    puts "found gcc" >&9
+    usinggcc="Y"
   fi
 
   case ${CC} in
@@ -170,7 +171,8 @@ check_using_gnu_ld () {
   printlabel _MKCONFIG_USING_GNU_LD "Using gnu ld"
 
   # check for gnu ld...
-  ld -v 2>&1 | grep 'GNU ld' > /dev/null 2>&1
+  # dragonfly bsd 5.8.1 gcc8 reports 'GNU gold' rather than 'GNU ld'.
+  ld -v 2>&1 | grep 'GNU' > /dev/null 2>&1
   rc=$?
   if [ $rc -eq 0 ]; then
       puts "found gnu ld" >&9
@@ -518,7 +520,8 @@ check_cflags_shared () {
   if [ "$_MKCONFIG_USING_GCC" != Y ]; then
     case ${_MKCONFIG_SYSTYPE} in
       CYGWIN*|MSYS*|MINGW*)
-        doappend cflags_shared " -fPIC"
+        # apparently, clang does not need this any more.
+        doappend cflags_shared ""
         ;;
       Darwin)
         doappend cflags_shared " -fno-common"
@@ -574,6 +577,9 @@ check_ldflags_shared () {
       AIX)
         doappend ldflags_shared_liblink " -G"
         ;;
+      Darwin)
+        doappend ldflags_shared_liblink " -dynamiclib"
+        ;;
       HP-UX)
         doappend ldflags_shared_liblink " -b"
         ;;
@@ -582,7 +588,7 @@ check_ldflags_shared () {
         doappend ldflags_shared_liblink " -shared"
         ;;
       OSF1)
-        doappend ldflags_shared_liblink " -msym -no_archive"
+        doappend ldflags_shared_liblink " -msym -no_archive -shared"
         ;;
       SCO_SV)
         doappend ldflags_shared_liblink " -G"
@@ -600,12 +606,6 @@ check_ldflags_shared () {
   else
     doappend ldflags_shared_liblink " -shared"
   fi
-
-  case ${_MKCONFIG_SYSTYPE} in
-    Darwin)
-      doappend ldflags_shared_liblink " -dynamiclib"
-      ;;
-  esac
 
   _read_option LDFLAGS_SHARED ""
   if [ "z$LDFLAGS_SHARED" != z ]; then
@@ -638,6 +638,9 @@ check_sharednameflag () {
       SunOS)
         SHLDNAMEFLAG="-Wl,-h "
         ;;
+      *)
+        SHLDNAMEFLAG=""
+        ;;
     esac
   fi
 
@@ -648,31 +651,29 @@ check_sharednameflag () {
 check_shareexeclinkflag () {
   printlabel LDFLAGS_EXEC_LINK "shared executable link flag "
 
-  LDFLAGS_EXEC_LINK="-Bdynamic "
-  if [ "$_MKCONFIG_USING_GCC" != Y ]; then
+  LDFLAGS_EXEC_LINK="-Bdynamic"
+  if [ "$_MKCONFIG_USING_GNU_LD" != Y ]; then
     case ${_MKCONFIG_SYSTYPE} in
       AIX)
-        LDFLAGS_EXEC_LINK="-brtl -bdynamic "
-        ;;
-      Darwin)
-        LDFLAGS_EXEC_LINK=
+        LDFLAGS_EXEC_LINK="-brtl -bdynamic"
         ;;
       HP-UX)
-        LDFLAGS_EXEC_LINK="+Z"
+        LDFLAGS_EXEC_LINK=""
         ;;
       OSF1)
-        LDFLAGS_EXEC_LINK="-msym -no_archive "
-        ;;
-      SCO_SV)
-        LDFLAGS_EXEC_LINK=
+        LDFLAGS_EXEC_LINK=""
         ;;
       SunOS)
         # -Bdynamic
         ;;
-      UnixWare)
-        LDFLAGS_EXEC_LINK=
+      *)
+        LDFLAGS_EXEC_LINK=""
         ;;
     esac
+    if [ "$_MKCONFIG_USING_GCC" = Y ]; then
+      LDFLAGS_EXEC_LINK=`echo "$LDFLAGS_EXEC_LINK" |
+          sed -e 's/^-/-Wl,-/' -e 's/^\+/-Wl,+/' -e 's/  */ -Wl,/g'`
+    fi
   fi
 
   printyesno_val LDFLAGS_EXEC_LINK "$LDFLAGS_EXEC_LINK"
@@ -685,31 +686,34 @@ check_sharerunpathflag () {
   LDFLAGS_RUNPATH="-Wl,-rpath="
   if [ "$_MKCONFIG_USING_GNU_LD" != Y ]; then
     case ${_MKCONFIG_SYSTYPE} in
-      AIX)
-        LDFLAGS_RUNPATH=
-        ;;
-      Darwin)
-        LDFLAGS_RUNPATH=
-        ;;
       HP-UX)
-        LDFLAGS_RUNPATH="-Wl,+b "
+        LDFLAGS_RUNPATH="+b "
         ;;
       IRIX*)
-        LDFLAGS_RUNPATH="-Wl,-rpath "
+        LDFLAGS_RUNPATH="-rpath "
         ;;
       OSF1)
         LDFLAGS_RUNPATH="-rpath "
         ;;
       SCO_SV)
-        LDFLAGS_RUNPATH="-Wl,-R "
+        LDFLAGS_RUNPATH="-R "
         ;;
       SunOS)
-        LDFLAGS_RUNPATH="-Wl,-R"
+        LDFLAGS_RUNPATH="-R"
         ;;
       UnixWare)
-        LDFLAGS_RUNPATH="-Wl,-R "
+        LDFLAGS_RUNPATH="-R "
+        ;;
+      *)
+        LDFLAGS_RUNPATH=""
         ;;
     esac
+    if [ "$_MKCONFIG_USING_GCC" = Y ]; then
+      # the trailing space will be converted to ' -Wl,' and
+      # the library runpath will be appended by mkcl.sh
+      LDFLAGS_RUNPATH=`echo "$LDFLAGS_RUNPATH" |
+          sed -e 's/^-/-Wl,-/' -e 's/^\+/-Wl,+/' -e 's/  */ -Wl,/g'`
+    fi
   fi
 
   printyesno_val LDFLAGS_RUNPATH "$LDFLAGS_RUNPATH"

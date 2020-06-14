@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Copyright 2011-2018 Brad Lanam Walnut Creek, CA, USA
+# Copyright 2020 Brad Lanam Pleasant Hill CA
 #
 
 maindodisplay () {
@@ -176,6 +177,7 @@ testcleanup () {
     for x in out.h out.d testouth.c opts test.env c.env \
 	mkc_files \
 	$@; do
+      # test -e is not supported by older shells.
       test -f ${x} && mv ${x} ${x}${stag}
       test -d ${x} && mv ${x} ${x}${stag}
     done

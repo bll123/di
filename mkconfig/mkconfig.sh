@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Copyright 2009-2018 Brad Lanam Walnut Creek, CA USA
+# Copyright 2020 Brad Lanam Pleasant Hill CA
 #
 
 #
@@ -1027,19 +1028,7 @@ puts "has upper: ${shhasupper}" >&9
 puts "has lower: ${shhaslower}" >&9
 puts "read raw req: ${shreqreadraw}" >&9
 
-locatecmd awkcmd awk
-locatecmd nawkcmd nawk
-locatecmd gawkcmd gawk
-locatecmd mawkcmd mawk
-if [ "$nawkcmd" != "" ]; then
-  awkcmd=$nawkcmd
-fi
-if [ "$mawkcmd" != "" ]; then
-  awkcmd=$mawkcmd
-fi
-if [ "$gawkcmd" != "" ]; then
-  awkcmd=$gawkcmd
-fi
+locateawkcmd
 puts "awk: $awkcmd" >&9
 
 puts "$0 ($shell) using $configfile"

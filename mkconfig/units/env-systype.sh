@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Copyright 2010-2018 Brad Lanam Walnut Creek, CA USA
+# Copyright 2020 Brad Lanam Pleasant Hill CA
 #
 
 #
@@ -142,7 +143,7 @@ check_system () {
 }
 
 check_standard_system () {
-  check_system type
-  check_system  rev
-  check_system arch
+  check_system system type
+  check_system system rev
+  check_system system arch
 }
