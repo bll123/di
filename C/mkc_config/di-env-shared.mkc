@@ -8,16 +8,8 @@ loadunit env-extension
 
 output  di-shared.env
 
-system type
-system rev
-system arch
-cc
-using_gcc
-using_gnu_ld
-using_clang
-using_cplusplus
-cflags
-ldflags
+standard_system
+standard_cc
 # needed for tcl build
 addcflag -fPIC
 
@@ -70,11 +62,9 @@ sharednameflag
 shareexeclinkflag
 sharerunpathflag
 
-findconfig tclConfig
-if Have_tclConfig == config_tclConfig Y
- addconfig TCL_STUB_LIB_SPEC ldflags_libs_application
- addconfig TCL_INCLUDE_SPEC cflags_include
-endif
+addldflag -Wl,--as-needed
+pkg cflags tcl
+pkg libs tcl
 
 extension obj
 extension exe
