@@ -1,6 +1,6 @@
-di - disk information utility (version 4.48.0.2)
+di - disk information utility (version 4.48.0.1)
 
-Website: https://gentoo.com/di/
+Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
 
 CONTENTS
@@ -256,12 +256,9 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
-    4.48.0.2                                2020-9-25
-        Update mkconfig to version 2.6.
-
-    4.48.0.1                                2020-7
+    4.48.0.1                                2021-1-30
         Update di.spec.
-        Update mkconfig to version 2.4.
+        Update mkconfig to version 2.6.3.
 
     4.48                                    [2020-6-3]
         disable spurious compiler warnings.
@@ -860,6 +857,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2018 Brad Lanam, Walnut Creek, CA, USA
+    Copyright 1994-2021 Brad Lanam, Pleasant Hill, CA, USA
     brad.lanam.di_at_gmail.com
-    https://gentoo.com/di/
+    https://diskinfo-di.sourceforge.io

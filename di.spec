@@ -7,8 +7,7 @@ Group:          System Environment/Base
 License:        zlib/libpng
 URL:            https://gentoo.com/di/
 Source0:        https://sourceforge.net/projects/diskinfo-di/files/di-%{version}.tar.gz/download
-Source1:        https://gentoo.com/di/di-%{version}.tar.gz
-Source2:        http://www.fossies.org/unix/misc/di-%{version}.tar.gz
+Source1:        http://www.fossies.org/unix/misc/di-%{version}.tar.gz
 BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 # Build requires: cat cp grep ln msgfmt mv rm sed sort test uname tr wc

@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+<head>
+    <title>di - Disk Information Utility</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <meta name="Description" content="di - disk space utility">
+    <meta name="Keywords" content="di, disk, diskinfo, disk info,
+        df, utility, partition, command line, cli, percentage used,
+        total disk space, total disk usage, filesystems, file system,
+        disk information, disk space, disk usage, quota, disk quota,
+        disk partition, disk utility, filesystem type, csv output,
+        linux, freebsd, bsd, aix, hpux, hp-ux, tru64, netbsd,
+        dragonflybsd, solaris, nexenta, opensolaris, macos x, macos,
+        zfs, jfs, xfs, ufs, reiserfs, ext3, ext4, hfs">
+</head>
+<body>
+  <h1 align=center>
+      di - Disk Information Utility
+  </h1>
+  <hr>
+  <p><b>Current Version: #VERSION#</b></p>
+  <p>'di' is a disk information utility, displaying everything (and
+  more) that your 'df' command does. It features the ability to display
+  your disk usage in whatever format you prefer. It also
+  checks the user and group quotas, so that the user
+  sees the space available for their use, not the system wide
+  disk space.</p>
+  <p>It is designed to be portable across many platforms.
+  Great for heterogenous networks.</p>
+  <p>'di' now includes a Tcl interface and a Perl interface.</p>
+  <a href="di.html">di Manual Page</a></p>
+  <hr>
+  <p>Submit bugs to <a
+      href="https://sourceforge.net/p/diskinfo-di/tickets/">Sourceforge di Tickets</a></p>
+  <hr>
+  <p><a href="https://sourceforge.net/projects/diskinfo-di/">di SourceForge project page</a></p>
+  <p><a
+    href="https://scan.coverity.com/projects/di">
+    <img alt="Coverity Scan Build Status"
+    src="https://scan.coverity.com/projects/16375/badge.svg"/>
+    </a></p>
+  <big><p><b>Downloading di:</b></p></big>
+  <p>Source: <a href="https://sourceforge.net/projects/diskinfo-di/files/latest/download">di version #VERSION#</a> (sourceforge.net)</p>
+  <p><b>Ports:</b></p>
+  <p>di is readily available for the following distributions:</p>
+  <dl>
+  <dd>BSD:
+    <a href="https://www.freebsd.org/">FreeBSD</a>
+    <a href="https://netbsd.org/">NetBSD</a>
+  </dd>
+  <dd>Linux:
+    <a href="https://www.archlinux.org/">Arch</a>
+    <a href="https://www.debian.org/">Debian</a>
+    <a href="https://www.crux.nu/">CRUX</a>
+    <a href="https://www.gentoo.org/">Gentoo</a>
+    <a href="https://linuxmint.com/">Linux Mint</a>
+    <a href="https://www.pld-linux.org/">PLD</a>
+    <a href="https://www.ubuntu.com/">Ubuntu</a>
+  </dd>
+  </dl>
+  <p>AIX: <a href="https://www.perzl.org/aix/index.php?n=Main.Di">https://www.perzl.org/aix/index.php?n=Main.Di</a></p>
+  <p>HP-UX Software Depots: <a href="https://hpux.connect.org.uk/hppd/hpux/Sysadmin/di-4.48/">https://hpux.connect.org.uk/hppd/hpux/Sysadmin/di-4.48/</a></p>
+  <p>HP-UX Software Depots (no NLS): <a href="https://mirrors.develooper.com/hpux/downloads.html">https://mirrors.develooper.com/hpux/downloads.html</a></p>
+  <p>Linux Packages Search (pkgs.org) (Arch, CentOS, Debian, OpenSUSE, Slackware, Ubuntu): <a href="https://pkgs.org/download/di">https://pkgs.org/download/di</a></p>
+  <p>Linux Search (rpmfind.net) (RedHat): <a href="https://rpmfind.net/linux/rpm2html/search.php?query=di&submit=Search+...&system=&arch=">rpmfind.net</a></p>
+  <p>Linux: Slackware (slackbuilds.org): <a href="https://slackbuilds.org/repository/13.37/system/di/">slackbuilds.org</a></p>
+  <p>MacOS X: <a href="https://www.macports.org/">Available through macports.org</a>  <a href="https://formulae.brew.sh/formula/di">Available via Homebrew</a></p>
+  <p>Solaris: <a href="https://www.opencsw.org/packages/di/">https://www.opencsw.org/packages/di/</a></p>
+  <hr>
+  <p><img src="di-ss.png"></p>
+  <hr>
+  <p>I can always use access to older / less common operating systems
+  to test on.
+  If you can supply secure-shell access to a standard shell account
+  for occasional access, let me know (brad.lanam.di_at_gmail.com).
+  </p>
+  <p>di 4.47 has been tested on the following platforms:</p>
+  <p>
+  AIX 7.1 (gcc)
+  <br>
+  CentOS 3.9 (gcc)
+  <br>
+  DragonflyBSD 4.4 (gcc)
+  <br>
+  Fedora 27 (gcc)
+  <br>
+  Fedora 7 (gcc)
+  <br>
+  FreeBSD 11.0 (clang)
+  <br>
+  FreeBSD 7.0 (cc)
+  <br>
+  Mac OS X 10.12.6 (clang)
+  <br>
+  MX Linux 17.1 (gcc, clang)
+  <br>
+  NetBSD 1.62 (cc)
+  <br>
+  NetBSD 2.0 (cc)
+  <br>
+  NetBSD 7.0.1 (gcc)
+  <br>
+  OpenBSD 4.4 (gcc)
+  <br>
+  QNX 6.5 (cc)
+  <br>
+  RedHat 7.3 (gcc)
+  <br>
+  SCO SV 6.0.0 (cc)
+  <br>
+  Solaris 10/sparc (cc12.3)
+  <br>
+  Solaris 11/x86 (cc12.3)
+  <br>
+  Solaris 9/x86 (gcc3)
+  <br>
+  Tru64 5.1B (cc)
+  <br>
+  UnixWare 7.1.4 (cc)
+  <br>
+  Windows Cygwin (gcc)
+  <br>
+  Windows Msys2 (gcc)
+  </p>
+  <p>di has been ported to the following systems in the past:</p>
+  <p>
+  A/UX, AIX, BeOS, BSD, BSDI, Convex, Cray UNICOS, Cray UNICOS/mk,
+  DragonflyBSD, FreeBSD, Haiku, HP/UX, Linux, MacOSX, MirOS, NetBSD, Next,
+  OpenBSD, OS/2, OSF/1, Pyramid, QNX, SCO OpenServer, SCO Unix,
+  Sequent Dynix and PT/x, SGI Irix, Solaris, SunOS, Syllable, System V.3,
+  System V.4, Tru64, Ultrix, UnixWare, VMS, Windows, Xenix
+  </p>
+  <hr>
+  <b>di License</b>
+  <p>Copyright 1994-2021 Brad Lanam, Walnut Creek, CA, USA</p>
+  <p>This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.</p>
+  <p>Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:</p>
+  <p>1. The origin of this software must not be misrepresented; you must not
+  claim that you wrote the original software. If you use this software
+  in a product, an acknowledgment in the product documentation would be
+  appreciated but is not required.</p>
+  <p>2. Altered source versions must be plainly marked as such, and must
+  not be misrepresented as being the original software.</p>
+  <p>3. This notice may not be removed or altered from any source
+  distribution.</p>
+  <hr>
+  <b>Articles:</b>
+  <p>HP-UX/USR. November 1995. [1.18]</p>
+  <p><img src="hpux-di118.png" width="806" height="472"></p>
+  <p><a href="https://nnc3.com/mags/LM18/LJ/096/5747.html">
+  Linux Journal.  April 2002.</a> [~3.4]</p>
+  <p>Linux Village (Hungarian) [PDF]. September 2002. [~3.7]</p>
+  <p><a href="https://www.linux-community.de/Internal/Artikel/Print-Artikel/LinuxUser/2004/01/Zu-Befehl-df-du/(printView)/true">
+  Linux Community (was Linux User) (German).  January 2004.</a> [~3.9] (<a href="https://www.linux-user.de/ausgabe/2004/01/078-zubefehl/index.html">parent</a>)</p>
+  <p>Debian Administration.  May 2005. [~3.11]</p>
+  <p>InfoLinux (Indonesian) [PDF].  Nov 2006. [4.7]</p>
+  <p><a href="https://www.linux-community.de/Internal/Artikel/Print-Artikel/LinuxUser/2004/01/Zu-Befehl-df-du/(printView)/true">
+  Linux Community (was Linux User) (German).  May 2007.</a> [4.10] (<a href="https://www.linux-community.de/Internal/Artikel/Print-Artikel/LinuxUser/2007/05/Neue-Software">parent</a>)</p>
+  <p><a href="https://www.linuxpromagazine.com/content/download/68885/545465/version/1/file/050-050_charly.pdf">Linux Pro Magazine [PDF].  Feb 2013.</a> [4.34] (<a href="https://www.linuxpromagazine.com/Issues/2013/147/Charly-s-Column-Di/(language)/eng-US">parent</a>)</p>
+  <p><a href="https://www.linux-community.de/Internal/Artikel/Print-Artikel/LinuxUser/2014/04/Aktuelle-Software-im-Kurztest">
+  Linux Community (German).  April 2014</a> [4.35]</p>
+  <p><a href="https://www.centos.bz/2017/09/di-%e6%af%94-df-%e6%9b%b4%e6%9c%89%e7%94%a8%e7%9a%84%e7%a3%81%e7%9b%98%e4%bf%a1%e6%81%af%e5%b7%a5%e5%85%b7/">
+  Linux运维日志 (Chinese).  September 2017</a> [4.30]</p>
+  <p><a href="https://www.raspberry-pi-geek.de/Magazin/2018/08/Aktuelle-Software-im-Kurztest">
+  Raspberry PI Geek (German).  August 2018</a> [4.46]</p>
+  <hr>
+  <b>Kudos for di:</b>
+  <p>Nice program. (JJB 1994)</p>
+  <p>Cool program. (CKV 1994) </p>
+  <p>Nice package. (MN 1994) </p>
+  <p>I just grabbed di from news and it looks great, ...
+  Thanks for starting what will be one of the great sysadmin
+  tools (PB 1994)</p>
+  <p>Thanks for a great tool! (T 1994)</p>
+  <p>If I may add my $.02 to your efforts (which I find rather exceptional,
+  IMHO)... (SJW 1994)</p>
+  <p>BTW, nice program.  Thanks for writing it. (MG 1994) </p>
+  <p>Thank you thank you thank you for the code,...
+  Again, many thanks for posting the code. (BH 1994)</p>
+  <p>Great Utility!
+  I love being able to specify the format of the output via commandline.
+  Again, thanks for a great toy! (PK 1994)</p>
+  <p>Many thanks for your efforts!! (JK 1994)</p>
+  <p>Thanks very much for your efforts on di. (JC 1994)</p>
+  <p>First of all you wrote an excellent utility....(KM 1994)</p>
+  <p>It's great to have a Sun-like df again.  Thanks! (JQ 1994)</p>
+  <p>(By the way, I
+  stopped using 'df', since I installed 'di'. I like it.) (KH 1994)</p>
+  <p>'di' looks nice and will see much use here at 'liedus'. (RCP 1994)</p>
+  <p>Thanks for a new tool. ...  Thanks again for a nifty file (BP 1994)</p>
+  <p>Thanks for this neat tool (RTB 1994)</p>
+  <p>Great tool! (PPK 1994)</p>
+  <p>Thanks for maintaining diskinfo! I find it *very* useful
+  since I administer many different platforms. (EER 1995)</p>
+  <p>Thanks for the di command. It looks really useful....
+  Thanks again for the very useful program. (DD 1995)</p>
+  <p>Neat program, compiled first time, no errors, and it works great.
+  (SR 1995)</p>
+  <p>Hi! I use your "di" program. It is great! Now I can have consistent
+  reports of disk usage no matter what platform I am on. I use it on
+  HP-UX, SunOS, IRIX, Ultrix, so far. Thanks a lot.</p>
+  <p>Great tool.  We find it far more functional than even GNU df.
+  Keep up the good work..</p>
+  <p>...thanks for writing and maintaining di. Its a really nice
+  alternative to df, its what df largely should be. (GB 2011)</p>
+  <p>nice utility, thanks! (PM 2011)</p>
+  <p>Thanks for this nice tool, much better than df. (SH 2011)</p>
+</body>
+</html>
