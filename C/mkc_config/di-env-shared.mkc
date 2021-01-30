@@ -65,6 +65,12 @@ sharerunpathflag
 addldflag -Wl,--as-needed
 pkg include tcl
 pkg libs tcl
+# windows does not include the pkg-config files.
+if not_have_pkg_libs_tcl ! _pkg_libs_tcl
+  findconfig tclConfig
+  addconfig TCL_STUB_LIB_SPEC ldflags_libs_application
+  addconfig TCL_INCLUDE_SPEC cflags_application
+endif
 
 extension obj
 extension exe
