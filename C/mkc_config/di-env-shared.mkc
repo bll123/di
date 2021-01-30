@@ -63,7 +63,7 @@ shareexeclinkflag
 sharerunpathflag
 
 addldflag -Wl,--as-needed
-pkg cflags tcl
+pkg include tcl
 pkg libs tcl
 
 extension obj
