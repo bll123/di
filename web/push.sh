@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # requirements: sshpass
 #
@@ -32,10 +32,18 @@ read -s SSHPASS
 echo ""
 export SSHPASS
 
+ver=$(grep DI_VERSION ../C/version.h | sed -e 's/"$//' -e 's/.*"//')
+
+fn=$(basename ../di-${ver}.tar.gz)
 sshpass -e rsync -e "$ssh" -aS \
-fn=$(basename ../di*.gz)
-rsync -v -e "$ssh" ../$fn ../README.txt \
+    ../$fn ../README.txt \
     ${remuser}@${server}:${wwwpath}
+
+fn=../tcl-diskspace/tcl-diskspace-${ver}.zip
+if [[ -f $fn ]]; then
+  sshpass -e rsync -v -e "$ssh" $fn \
+      ${remuser}@${server}:${wwwpath}
+fi
 
 unset SSHPASS
 exit 0
