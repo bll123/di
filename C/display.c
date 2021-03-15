@@ -249,7 +249,7 @@ printDiskInfo (diData)
       if (diopts->csv_output || diopts->json_output) {
         Snprintf1 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
             "%%.0%s%%s", DI_Lf);
-        if (diopts->csv_tabs) {
+        if (diopts->csv_tabs || diopts->json_output) {
           Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
               "%%.1%s%%s", DI_Lf);
         } else {
