@@ -162,6 +162,7 @@ dimainproc (argc, argv, intfcflag, diData)
     diopts->csv_tabs = FALSE;
     diopts->exitFlag = DI_EXIT_NORM;
     diopts->errorCount = 0;
+    diopts->json_output = FALSE;
 
     diout = &diData->output;
     diout->width = 8;

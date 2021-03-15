@@ -69,6 +69,43 @@ extern int debug;
 #define DI_FMT_MOUNT_TIME      'I'
 #define DI_FMT_MOUNT_OPTIONS   'O'
 
+typedef struct
+{
+  const char    fmtChar;
+  const char    *displayName;
+  const char    *posixName;
+  const char    *jsonName;
+} formatNames_t;
+
+static formatNames_t formatNames [] =
+{
+  DI_FMT_MOUNT,             "Mount", NULL, "mount",
+  DI_FMT_MOUNT_FULL,        "Mount", "Mounted On", "mount",
+  DI_FMT_SPECIAL,           "Filesystem", NULL, "filesystem",
+  DI_FMT_SPECIAL_FULL,      "Filesystem", NULL, "filesystem",
+  DI_FMT_TYPE,              "fsType", NULL, "fstype",
+  DI_FMT_TYPE_FULL,         "fs Type", NULL, "fstype",
+  DI_FMT_BTOT,              NULL, NULL, "size",
+  DI_FMT_BTOT_AVAIL,        NULL, NULL, "size",
+  DI_FMT_BUSED,             "Used", NULL, "used",
+  DI_FMT_BCUSED,            "Used", NULL, "used",
+  DI_FMT_BFREE,             "Free", NULL, "free",
+  DI_FMT_BAVAIL,            "Avail", "Available", "available",
+  DI_FMT_BPERC_NAVAIL,      "%Used", "Capacity", "percused",
+  DI_FMT_BPERC_USED,        "%Used", "Capacity", "percused",
+  DI_FMT_BPERC_BSD,         "%Used", "Capacity", "percused",
+  DI_FMT_BPERC_AVAIL,       "%Free", NULL, "percfree",
+  DI_FMT_BPERC_FREE,        "%Free", NULL, "percfree",
+  DI_FMT_ITOT,              "Inodes", NULL, "inodes",
+  DI_FMT_IUSED,             "IUsed", NULL, "inodesused",
+  DI_FMT_IFREE,             "IFree", NULL, "inodesfree",
+  DI_FMT_IPERC,             "%IUsed", NULL, "percinodesused",
+  DI_FMT_MOUNT_TIME,        "Mount Time", NULL, "mounttime",
+  DI_FMT_MOUNT_OPTIONS,     "Options", NULL, "options"
+};
+#define DI_FORMATNAMES_SIZE (sizeof (formatNames) / sizeof (formatNames_t))
+
+
 #define DI_SORT_NONE            'n'
 #define DI_SORT_MOUNT           'm'
 #define DI_SORT_SPECIAL         's'
@@ -161,7 +198,10 @@ printDiskInfo (diData)
     Size_t              outlen;
     Size_t              outcurrlen;
     char                *tout;
+    int                 first;
 
+
+    first = TRUE;
     out = (char *) NULL;
     outlen = 0;
     outcurrlen = 0;
@@ -183,6 +223,10 @@ printDiskInfo (diData)
       append (tout, &out, &outcurrlen, &outlen);
     }
     free (tout);
+    if (diopts->json_output) {
+      tout = "{\n  \"partitions\" : [\n";
+      append (tout, &out, &outcurrlen, &outlen);
+    }
 
     if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
         diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2)
@@ -194,7 +238,7 @@ printDiskInfo (diData)
         diopts->dispBlockSize != (_print_size_t) DI_DISP_HR_2 &&
         (diopts->dispBlockSize > 0 &&
          diopts->dispBlockSize <= (_print_size_t) DI_VAL_1024)) {
-      if (diopts->csv_output) {
+      if (diopts->csv_output || diopts->json_output) {
         Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
             "%%.0%s%%s", DI_Lf);
       } else {
@@ -202,7 +246,7 @@ printDiskInfo (diData)
             "%%%d.0%s%%s", (int) diout->width, DI_Lf);
       }
     } else {
-      if (diopts->csv_output) {
+      if (diopts->csv_output || diopts->json_output) {
         Snprintf1 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
             "%%.0%s%%s", DI_Lf);
         if (diopts->csv_tabs) {
@@ -226,7 +270,7 @@ printDiskInfo (diData)
         ++diout->width;
     }
 
-    if (diopts->csv_output) {
+    if (diopts->csv_output || diopts->json_output) {
       Snprintf1 (diout->inodeFormat, sizeof (diout->inodeFormat),
           "%%%s", DI_LLu);
     } else {
@@ -321,9 +365,18 @@ printDiskInfo (diData)
         continue;
       }
 
+      if (! first && diopts->json_output) {
+        append (",\n", &out, &outcurrlen, &outlen);
+      }
+      first = FALSE;
+
       tout = printInfo (dinfo, diopts, diout);
       append (tout, &out, &outcurrlen, &outlen);
       free (tout);
+    }
+
+    if (diopts->json_output) {
+      append ("\n", &out, &outcurrlen, &outlen);
     }
 
     if (diopts->printTotals)
@@ -332,6 +385,12 @@ printDiskInfo (diData)
       append (tout, &out, &outcurrlen, &outlen);
       free (tout);
     }
+
+    if (diopts->json_output) {
+      tout = "  ]\n}\n";
+      append (tout, &out, &outcurrlen, &outlen);
+    }
+
     return out;
 }
 
@@ -509,14 +568,22 @@ printInfo (diskInfo, diopts, diout)
     const char          *t;
     Size_t              outlen;
     Size_t              outcurrlen;
+    int                 i;
 
     out = (char *) NULL;
     outlen = 0;
     outcurrlen = 0;
 
+    if (diopts->json_output) {
+      t = "    {\n";
+      append (t, &out, &outcurrlen, &outlen);
+    }
+
     first = TRUE;
     if (! percInit) {
-      if (diopts->csv_output) {
+      if (diopts->json_output) {
+        Snprintf1 (percFormat, sizeof(percFormat), "%%.0%s", DI_Lf);
+      } else if (diopts->csv_output) {
         Snprintf1 (percFormat, sizeof(percFormat), "%%.0%s%%%%", DI_Lf);
       } else {
         if (diopts->posix_compat) {
@@ -604,15 +671,33 @@ printInfo (diskInfo, diopts, diout)
       if (*ptr == DI_FMT_MOUNT_TIME && diout->maxMntTimeString == 0) {
         valid = FALSE;
       }
-      if (valid && diopts->csv_output) {
+
+      if (valid && (diopts->csv_output || diopts->json_output)) {
         if (! first) {
           t = ",";
           if (diopts->csv_tabs) {
             t = "	"; /* tab here */
           }
+          if (diopts->json_output) {
+            t = ",\n";
+          }
           append (t, &out, &outcurrlen, &outlen);
         }
         first = FALSE;
+      }
+
+      if (valid && diopts->json_output) {
+        for (i = 0; i < DI_FORMATNAMES_SIZE; ++i) {
+          if (*ptr == formatNames[i].fmtChar) {
+            t = "      \"";
+            append (t, &out, &outcurrlen, &outlen);
+            t = formatNames[i].jsonName;
+            append (t, &out, &outcurrlen, &outlen);
+            t = "\" : ";
+            append (t, &out, &outcurrlen, &outlen);
+            break;
+          }
+        }
       }
 
       switch (*ptr)
@@ -765,11 +850,13 @@ printInfo (diskInfo, diopts, diout)
 
         case DI_FMT_MOUNT_OPTIONS:
         {
-          if (diopts->csv_output && ! diopts->csv_tabs) {
+          if ((diopts->csv_output || diopts->json_output) &&
+              ! diopts->csv_tabs) {
             append ("\"", &out, &outcurrlen, &outlen);
           }
           appendFormatStr (diout->optFormat, diskInfo->options, &out, &outcurrlen, &outlen);
-          if (diopts->csv_output && ! diopts->csv_tabs) {
+          if ((diopts->csv_output || diopts->json_output) &&
+              ! diopts->csv_tabs) {
             append ("\"", &out, &outcurrlen, &outlen);
           }
           break;
@@ -790,13 +877,16 @@ printInfo (diskInfo, diopts, diout)
       }
 
       ++ptr;
-      if (! diopts->csv_output && *ptr && valid)
+      if (! diopts->csv_output && ! diopts->json_output && *ptr && valid)
       {
         append (" ", &out, &outcurrlen, &outlen);
       }
     }
 
-    if (outcurrlen > 0) {
+    if (diopts->json_output) {
+      append ("\n    }", &out, &outcurrlen, &outlen);
+    }
+    if (! diopts->json_output && outcurrlen > 0) {
       append ("\n", &out, &outcurrlen, &outlen);
     }
     return out;
@@ -949,6 +1039,8 @@ processTitles (diopts, diout)
     char            *out;
     Size_t          outcurrlen;
     Size_t          outlen;
+    int             i;
+
 
     out = (char *) NULL;
     outlen = 0;
@@ -964,283 +1056,265 @@ processTitles (diopts, diout)
 
     while (*ptr)
     {
-        valid = TRUE;
-        wlen = 0;
-        wlenptr = (Size_t *) NULL;
-        fstr = (char *) NULL;
-        maxsize = 0;
-        justification = DI_JUST_LEFT;
+      valid = TRUE;
+      wlen = 0;
+      wlenptr = (Size_t *) NULL;
+      fstr = (char *) NULL;
+      maxsize = 0;
+      justification = DI_JUST_LEFT;
 
-        switch (*ptr)
-        {
-            case DI_FMT_MOUNT:
-            {
-                wlen = 15;
-                wlenptr = &diout->maxMountString;
-                pstr = "Mount";
-                fstr = diout->mountFormat;
-                maxsize = sizeof (diout->mountFormat) - 1;
-                break;
-            }
-
-            case DI_FMT_MOUNT_FULL:
-            {
-                wlen = diout->maxMountString;
-                if (wlen <= 0) {
-                  wlen = 7;
-                }
-                wlenptr = &diout->maxMountString;
-                fstr = diout->mountFormat;
-                maxsize = sizeof (diout->mountFormat) - 1;
-                if (diopts->posix_compat)
-                {
-                    pstr = "Mounted On";
-                }
-                else
-                {
-                    pstr = "Mount";
-                }
-                break;
-            }
-
-            case DI_FMT_BTOT:
-            case DI_FMT_BTOT_AVAIL:
-            {
-                wlen = diout->width;
-                wlenptr = &diout->width;
-                justification = DI_JUST_RIGHT;
-                pstr = diout->dispBlockLabel;
-                break;
-            }
-
-            case DI_FMT_BUSED:
-            case DI_FMT_BCUSED:
-            {
-                wlen = diout->width;
-                wlenptr = &diout->width;
-                justification = DI_JUST_RIGHT;
-                pstr = "Used";
-                break;
-            }
-
-            case DI_FMT_BFREE:
-            {
-                wlen = diout->width;
-                wlenptr = &diout->width;
-                justification = DI_JUST_RIGHT;
-                pstr = "Free";
-                break;
-            }
-
-            case DI_FMT_BAVAIL:
-            {
-                wlen = diout->width;
-                wlenptr = &diout->width;
-                justification = DI_JUST_RIGHT;
-                if (diopts->posix_compat)
-                {
-                    pstr = "Available";
-                }
-                else
-                {
-                    pstr = "Avail";
-                }
-                break;
-            }
-
-            case DI_FMT_BPERC_NAVAIL:
-            case DI_FMT_BPERC_USED:
-            case DI_FMT_BPERC_BSD:
-            {
-                if (diopts->posix_compat)
-                {
-                    wlen = 9;
-                    pstr = "Capacity";
-                }
-                else
-                {
-                    wlen = 6;
-                    pstr = "%Used";
-                }
-                break;
-            }
-
-            case DI_FMT_BPERC_AVAIL:
-            case DI_FMT_BPERC_FREE:
-            {
-                wlen = 5;
-                pstr = "%Free";
-                break;
-            }
-
-            case DI_FMT_ITOT:
-            {
-                justification = DI_JUST_RIGHT;
-                wlen = diout->inodeWidth;
-                wlenptr = &diout->inodeWidth;
-                fstr = diout->inodeLabelFormat;
-                maxsize = sizeof (diout->inodeLabelFormat) - 1;
-                pstr = "Inodes";
-                break;
-            }
-
-            case DI_FMT_IUSED:
-            {
-                justification = DI_JUST_RIGHT;
-                wlen = diout->inodeWidth;
-                wlenptr = &diout->inodeWidth;
-                fstr = diout->inodeLabelFormat;
-                maxsize = sizeof (diout->inodeLabelFormat) - 1;
-                pstr = "IUsed";
-                break;
-            }
-
-            case DI_FMT_IFREE:
-            {
-                justification = DI_JUST_RIGHT;
-                wlen = diout->inodeWidth;
-                wlenptr = &diout->inodeWidth;
-                fstr = diout->inodeLabelFormat;
-                maxsize = sizeof (diout->inodeLabelFormat) - 1;
-                pstr = "IFree";
-                break;
-            }
-
-            case DI_FMT_IPERC:
-            {
-                wlen = 6;
-                pstr = "%IUsed";
-                break;
-            }
-
-            case DI_FMT_SPECIAL:
-            {
-                wlen = 18;
-                wlenptr = &diout->maxSpecialString;
-                fstr = diout->specialFormat;
-                maxsize = sizeof (diout->specialFormat) - 1;
-                pstr = "Filesystem";
-                break;
-            }
-
-            case DI_FMT_SPECIAL_FULL:
-            {
-                wlen = diout->maxSpecialString;
-                wlenptr = &diout->maxSpecialString;
-                fstr = diout->specialFormat;
-                maxsize = sizeof (diout->specialFormat) - 1;
-                pstr = "Filesystem";
-                break;
-            }
-
-            case DI_FMT_TYPE:
-            {
-                wlen = 7;
-                wlenptr = &diout->maxTypeString;
-                fstr = diout->typeFormat;
-                maxsize = sizeof (diout->typeFormat) - 1;
-                pstr = "fsType";
-                break;
-            }
-
-            case DI_FMT_TYPE_FULL:
-            {
-                wlen = diout->maxTypeString;
-                wlenptr = &diout->maxTypeString;
-                fstr = diout->typeFormat;
-                maxsize = sizeof (diout->typeFormat) - 1;
-                pstr = "fs Type";
-                break;
-            }
-
-            case DI_FMT_MOUNT_OPTIONS:
-            {
-                wlen = diout->maxOptString;
-                wlenptr = &diout->maxOptString;
-                fstr = diout->optFormat;
-                maxsize = sizeof (diout->optFormat) - 1;
-                pstr = "Options";
-                break;
-            }
-
-            case DI_FMT_MOUNT_TIME:
-            {
-                break;
-            }
-
-            default:
-            {
-              ttext[0] = *ptr;
-              ttext[1] = '\0';
-              append (ttext, &out, &outcurrlen, &outlen);
-              valid = FALSE;
-              break;
-            }
-        }
-
-        if (wlen > 0) {
-          Size_t     ilen;
-          Size_t     olen;
-          Size_t     len;
-          Size_t     tlen;
-          const char *jstr;
-
-          pstr = DI_GT (pstr);
-          olen = (Size_t) strlen (pstr);
-          ilen = (Size_t) istrlen (pstr);
-          wlen = ilen > wlen ? ilen : wlen;
-          len = wlen;
-          tlen = len + olen - ilen;  /* for the title only */
-
-          jstr = justification == DI_JUST_LEFT ? "-" : "";
-          Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
-              jstr, (int) tlen, (int) tlen);
-
-          if (diopts->csv_output) {
-            if (! first) {
-              if (diopts->csv_tabs) {
-                append ("	", &out, &outcurrlen, &outlen); /* tab here */
-              } else {
-                append (",", &out, &outcurrlen, &outlen);
-              }
-            }
-            first = FALSE;
+      for (i = 0; i < DI_FORMATNAMES_SIZE; ++i) {
+        if (*ptr == formatNames[i].fmtChar) {
+          pstr = formatNames[i].displayName;
+          if (diopts->posix_compat && formatNames[i].posixName != NULL) {
+            pstr = formatNames[i].posixName;
           }
-          if (diopts->csv_output) {
+          if (pstr == NULL) {
+            pstr = diout->dispBlockLabel;
+          }
+          break;
+        }
+      }
+
+      switch (*ptr)
+      {
+          case DI_FMT_MOUNT:
+          {
+              wlen = 15;
+              wlenptr = &diout->maxMountString;
+              fstr = diout->mountFormat;
+              maxsize = sizeof (diout->mountFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_MOUNT_FULL:
+          {
+              wlen = diout->maxMountString;
+              if (wlen <= 0) {
+                wlen = 7;
+              }
+              wlenptr = &diout->maxMountString;
+              fstr = diout->mountFormat;
+              maxsize = sizeof (diout->mountFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_BTOT:
+          case DI_FMT_BTOT_AVAIL:
+          {
+              wlen = diout->width;
+              wlenptr = &diout->width;
+              justification = DI_JUST_RIGHT;
+              break;
+          }
+
+          case DI_FMT_BUSED:
+          case DI_FMT_BCUSED:
+          {
+              wlen = diout->width;
+              wlenptr = &diout->width;
+              justification = DI_JUST_RIGHT;
+              break;
+          }
+
+          case DI_FMT_BFREE:
+          {
+              wlen = diout->width;
+              wlenptr = &diout->width;
+              justification = DI_JUST_RIGHT;
+              break;
+          }
+
+          case DI_FMT_BAVAIL:
+          {
+              wlen = diout->width;
+              wlenptr = &diout->width;
+              justification = DI_JUST_RIGHT;
+              break;
+          }
+
+          case DI_FMT_BPERC_NAVAIL:
+          case DI_FMT_BPERC_USED:
+          case DI_FMT_BPERC_BSD:
+          {
+              if (diopts->posix_compat)
+              {
+                  wlen = 9;
+              }
+              else
+              {
+                  wlen = 6;
+              }
+              break;
+          }
+
+          case DI_FMT_BPERC_AVAIL:
+          case DI_FMT_BPERC_FREE:
+          {
+              wlen = 5;
+              break;
+          }
+
+          case DI_FMT_ITOT:
+          {
+              justification = DI_JUST_RIGHT;
+              wlen = diout->inodeWidth;
+              wlenptr = &diout->inodeWidth;
+              fstr = diout->inodeLabelFormat;
+              maxsize = sizeof (diout->inodeLabelFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_IUSED:
+          {
+              justification = DI_JUST_RIGHT;
+              wlen = diout->inodeWidth;
+              wlenptr = &diout->inodeWidth;
+              fstr = diout->inodeLabelFormat;
+              maxsize = sizeof (diout->inodeLabelFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_IFREE:
+          {
+              justification = DI_JUST_RIGHT;
+              wlen = diout->inodeWidth;
+              wlenptr = &diout->inodeWidth;
+              fstr = diout->inodeLabelFormat;
+              maxsize = sizeof (diout->inodeLabelFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_IPERC:
+          {
+              wlen = 6;
+              break;
+          }
+
+          case DI_FMT_SPECIAL:
+          {
+              wlen = 18;
+              wlenptr = &diout->maxSpecialString;
+              fstr = diout->specialFormat;
+              maxsize = sizeof (diout->specialFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_SPECIAL_FULL:
+          {
+              wlen = diout->maxSpecialString;
+              wlenptr = &diout->maxSpecialString;
+              fstr = diout->specialFormat;
+              maxsize = sizeof (diout->specialFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_TYPE:
+          {
+              wlen = 7;
+              wlenptr = &diout->maxTypeString;
+              fstr = diout->typeFormat;
+              maxsize = sizeof (diout->typeFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_TYPE_FULL:
+          {
+              wlen = diout->maxTypeString;
+              wlenptr = &diout->maxTypeString;
+              fstr = diout->typeFormat;
+              maxsize = sizeof (diout->typeFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_MOUNT_OPTIONS:
+          {
+              wlen = diout->maxOptString;
+              wlenptr = &diout->maxOptString;
+              fstr = diout->optFormat;
+              maxsize = sizeof (diout->optFormat) - 1;
+              break;
+          }
+
+          case DI_FMT_MOUNT_TIME:
+          {
+              break;
+          }
+
+          default:
+          {
             ttext[0] = *ptr;
             ttext[1] = '\0';
             append (ttext, &out, &outcurrlen, &outlen);
-          } else {
-            appendFormatStr (tformat, pstr, &out, &outcurrlen, &outlen);
+            valid = FALSE;
+            break;
           }
+      }
 
-          if (fstr != (char *) NULL) {
-            if (diopts->csv_output) {
-              if (diopts->csv_tabs) {
-                strncpy (tformat, "%s", sizeof (tformat));
-              } else {
-                strncpy (tformat, "\"%s\"", sizeof (tformat));
-              }
+      if (wlen > 0) {
+        Size_t     ilen;
+        Size_t     olen;
+        Size_t     len;
+        Size_t     tlen;
+        const char *jstr;
+
+        pstr = DI_GT (pstr);
+        olen = (Size_t) strlen (pstr);
+        ilen = (Size_t) istrlen (pstr);
+        wlen = ilen > wlen ? ilen : wlen;
+        len = wlen;
+        tlen = len + olen - ilen;  /* for the title only */
+
+        jstr = justification == DI_JUST_LEFT ? "-" : "";
+        Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
+            jstr, (int) tlen, (int) tlen);
+
+        if (diopts->csv_output) {
+          if (! first) {
+            if (diopts->csv_tabs) {
+              append ("	", &out, &outcurrlen, &outlen); /* tab here */
+            } else {
+              append (",", &out, &outcurrlen, &outlen);
             }
-            if (tlen != len) {
-              if (! diopts->csv_output) {
-                Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
-                    jstr, (int) len, (int) len);
-              }
-            }
-            /* copy the format string to whereever fstr is pointing */
-            strncpy (fstr, tformat, maxsize);
           }
-          if (wlenptr != (Size_t *) NULL) {
-            *wlenptr = wlen;
-          }
+          first = FALSE;
+        }
+          /* title handling */
+        if (diopts->csv_output) {
+          ttext[0] = *ptr;
+          ttext[1] = '\0';
+          append (ttext, &out, &outcurrlen, &outlen);
+        } else {
+          appendFormatStr (tformat, pstr, &out, &outcurrlen, &outlen);
         }
 
-        ++ptr;
-        if (! diopts->csv_output && *ptr && valid)
-        {
-          append (" ", &out, &outcurrlen, &outlen);
+        if (fstr != (char *) NULL) {
+          if (diopts->csv_output || diopts->json_output) {
+            if (diopts->csv_tabs) {
+              strncpy (tformat, "%s", sizeof (tformat));
+            } else {
+              strncpy (tformat, "\"%s\"", sizeof (tformat));
+            }
+          }
+          if (tlen != len) {
+            if (! diopts->csv_output) {
+              Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
+                  jstr, (int) len, (int) len);
+            }
+          }
+          /* copy the format string to whereever fstr is pointing */
+          strncpy (fstr, tformat, maxsize);
         }
+        if (wlenptr != (Size_t *) NULL) {
+          *wlenptr = wlen;
+        }
+      }
+
+      ++ptr;
+      if (! diopts->csv_output && *ptr && valid)
+      {
+        append (" ", &out, &outcurrlen, &outlen);
+      }
     }
 
     if (outcurrlen > 0) {

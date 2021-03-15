@@ -9,12 +9,12 @@
 .SH Name
 di \- disk information
 .SH Synopsis
-.\" di [-AacghHklLmnPqRtZ] [-B block-size] [-d display-size] [-f format]
+.\" di [-AacghHjklLmnPqRtZ] [-B block-size] [-d display-size] [-f format]
 .\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
 .\" [-W inode-width] [-x exclude-fstyp-list] [-X debug-level]
 .\" [-z zone-name] [file [...]]
 .B di
-[\fB\-AacghHklLmnPqRtZ\fP]
+[\fB\-AacghHjklLmnPqRtZ\fP]
 [\fB\-B\fP \fIblock\-size\fP]
 [\fB\-d\fP \fIdisplay\-size\fP]
 [\fB\-f\fP \fIformat\fP]
@@ -44,7 +44,8 @@ with total space <= 0;
 loopback filesystems that are duplicates
 of other normally mounted filesystems (filesystem type of 'lofs'
 , 'none', or 'nullfs');
-loopback filesystems that are part of a zone (Solaris).
+loopback filesystems that are part of a zone (Solaris);
+filesystems for which the system's ignore flag is set.
 .PP
 Filesystems that the user does not have permissions to access will
 not be displayed at all.
@@ -149,6 +150,14 @@ e.g. \-I nfs,tmpfs or \-I nfs \-I tmpfs.
 .B \-\-inodes
 Ignored.  Use the \-f option.
 .TP
+.B \-j
+(alias: \fB\-\-json\-output\fP)
+.br
+The data is output as an array of json objects.
+Totals are turned off.  Use of format specifiers that specify
+the same field will result in invalid json output
+(e.g. \fBp\fP, \fB1\fP, \fB2\fP)
+.TP
 .B \-k
 (alias for: \fB\-dk\fP)
 .br
@@ -187,7 +196,7 @@ Ignored.  Use the \-f option.
 Disable quota checks.
 .TP
 .B \-R
-(also: \-\-dont\-resolve\-symlinks)
+(alias: \-\-dont\-resolve\-symlinks)
 .br
 Do not resolve symlinks (for mount points that have a trailing UUID).
 .TP
@@ -226,6 +235,8 @@ Ignored.
 .br
 Print a totals line below the list of file systems.
 Pooled filesystems (zfs, advfs) have only the main pool added to the total.
+Pooled filesystems that do not have pool information available (btrfs,
+apfs) will not total up correctly.
 It is up to the user
 to exclude (using the \-x option) read\-only filesystems (cdfs, iso9660),
 swap-based (memfs, mfs, tmpfs) filesystems and user (fuse*)

@@ -226,6 +226,7 @@ typedef struct {
     unsigned int    csv_output;
     unsigned int    csv_tabs;
     unsigned int    excludeLoopback;
+    unsigned int    json_output;
     unsigned int    printTotals;
     unsigned int    printDebugHeader;
     unsigned int    printHeader;
