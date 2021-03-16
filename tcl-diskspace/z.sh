@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ver=4.48.0.1
+ver=$(grep DI_VERSION ../C/version.h | sed -e 's/"$//' -e 's/.*"//')
 echo "version $ver"
 
 rm -f *~ > /dev/null 2>&1
