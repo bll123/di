@@ -35,9 +35,9 @@ export SSHPASS
 ver=$(grep DI_VERSION ../C/version.h | sed -e 's/"$//' -e 's/.*"//')
 
 fn=$(basename ../di-${ver}.tar.gz)
-#sshpass -e rsync -e "$ssh" -aS \
-#    ../$fn ../README.txt \
-#    ${remuser}@${server}:${wwwpath}
+sshpass -e rsync -e "$ssh" -aS \
+    ../$fn ../README.txt \
+    ${remuser}@${server}:${wwwpath}
 
 fn=../tcl-diskspace/tcl-diskspace-${ver}.zip
 if [[ -f $fn ]]; then
