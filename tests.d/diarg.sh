@@ -45,7 +45,9 @@ testargs="-A -a --all -bk -bsi -b1024 -b1000 -b512 \
     -fmtsMTSObuf13bcvpaBuv2iUFP \
     -fM -fS -fT --format-string=M --format-string=S \
     --format-string=T -g -Ftmpfs -h -H --help --human-readable -itmpfs \
-    --inodes -k -l --local -m -n --no-sync -P --portability --print-type \
+    --inodes \
+    -j --json-output \
+    -k -l --local -m -n --no-sync -P --portability --print-type \
     -q -R \
     -sm -ss -st -srm -srs -srt -t -sa -sra -sT -srT -sf -srf \
     --total --type=tmpfs -v --version \

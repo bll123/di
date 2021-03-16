@@ -79,29 +79,29 @@ typedef struct
 
 static formatNames_t formatNames [] =
 {
-  DI_FMT_MOUNT,             "Mount", NULL, "mount",
-  DI_FMT_MOUNT_FULL,        "Mount", "Mounted On", "mount",
-  DI_FMT_SPECIAL,           "Filesystem", NULL, "filesystem",
-  DI_FMT_SPECIAL_FULL,      "Filesystem", NULL, "filesystem",
-  DI_FMT_TYPE,              "fsType", NULL, "fstype",
-  DI_FMT_TYPE_FULL,         "fs Type", NULL, "fstype",
-  DI_FMT_BTOT,              NULL, NULL, "size",
-  DI_FMT_BTOT_AVAIL,        NULL, NULL, "size",
-  DI_FMT_BUSED,             "Used", NULL, "used",
-  DI_FMT_BCUSED,            "Used", NULL, "used",
-  DI_FMT_BFREE,             "Free", NULL, "free",
-  DI_FMT_BAVAIL,            "Avail", "Available", "available",
-  DI_FMT_BPERC_NAVAIL,      "%Used", "Capacity", "percused",
-  DI_FMT_BPERC_USED,        "%Used", "Capacity", "percused",
-  DI_FMT_BPERC_BSD,         "%Used", "Capacity", "percused",
-  DI_FMT_BPERC_AVAIL,       "%Free", NULL, "percfree",
-  DI_FMT_BPERC_FREE,        "%Free", NULL, "percfree",
-  DI_FMT_ITOT,              "Inodes", NULL, "inodes",
-  DI_FMT_IUSED,             "IUsed", NULL, "inodesused",
-  DI_FMT_IFREE,             "IFree", NULL, "inodesfree",
-  DI_FMT_IPERC,             "%IUsed", NULL, "percinodesused",
-  DI_FMT_MOUNT_TIME,        "Mount Time", NULL, "mounttime",
-  DI_FMT_MOUNT_OPTIONS,     "Options", NULL, "options"
+  { DI_FMT_MOUNT,             "Mount", NULL, "mount" },
+  { DI_FMT_MOUNT_FULL,        "Mount", "Mounted On", "mount" },
+  { DI_FMT_SPECIAL,           "Filesystem", NULL, "filesystem" },
+  { DI_FMT_SPECIAL_FULL,      "Filesystem", NULL, "filesystem" },
+  { DI_FMT_TYPE,              "fsType", NULL, "fstype" },
+  { DI_FMT_TYPE_FULL,         "fs Type", NULL, "fstype" },
+  { DI_FMT_BTOT,              NULL, NULL, "size" },
+  { DI_FMT_BTOT_AVAIL,        NULL, NULL, "size" },
+  { DI_FMT_BUSED,             "Used", NULL, "used" },
+  { DI_FMT_BCUSED,            "Used", NULL, "used" },
+  { DI_FMT_BFREE,             "Free", NULL, "free" },
+  { DI_FMT_BAVAIL,            "Avail", "Available", "available" },
+  { DI_FMT_BPERC_NAVAIL,      "%Used", "Capacity", "percused" },
+  { DI_FMT_BPERC_USED,        "%Used", "Capacity", "percused" },
+  { DI_FMT_BPERC_BSD,         "%Used", "Capacity", "percused" },
+  { DI_FMT_BPERC_AVAIL,       "%Free", NULL, "percfree" },
+  { DI_FMT_BPERC_FREE,        "%Free", NULL, "percfree" },
+  { DI_FMT_ITOT,              "Inodes", NULL, "inodes" },
+  { DI_FMT_IUSED,             "IUsed", NULL, "inodesused" },
+  { DI_FMT_IFREE,             "IFree", NULL, "inodesfree" },
+  { DI_FMT_IPERC,             "%IUsed", NULL, "percinodesused" },
+  { DI_FMT_MOUNT_TIME,        "Mount Time", NULL, "mounttime" },
+  { DI_FMT_MOUNT_OPTIONS,     "Options", NULL, "options" }
 };
 #define DI_FORMATNAMES_SIZE (sizeof (formatNames) / sizeof (formatNames_t))
 
@@ -687,7 +687,7 @@ printInfo (diskInfo, diopts, diout)
       }
 
       if (valid && diopts->json_output) {
-        for (i = 0; i < DI_FORMATNAMES_SIZE; ++i) {
+        for (i = 0; i < (int) DI_FORMATNAMES_SIZE; ++i) {
           if (*ptr == formatNames[i].fmtChar) {
             t = "      \"";
             append (t, &out, &outcurrlen, &outlen);
@@ -850,15 +850,7 @@ printInfo (diskInfo, diopts, diout)
 
         case DI_FMT_MOUNT_OPTIONS:
         {
-          if ((diopts->csv_output || diopts->json_output) &&
-              ! diopts->csv_tabs) {
-            append ("\"", &out, &outcurrlen, &outlen);
-          }
           appendFormatStr (diout->optFormat, diskInfo->options, &out, &outcurrlen, &outlen);
-          if ((diopts->csv_output || diopts->json_output) &&
-              ! diopts->csv_tabs) {
-            append ("\"", &out, &outcurrlen, &outlen);
-          }
           break;
         }
 
@@ -1063,7 +1055,7 @@ processTitles (diopts, diout)
       maxsize = 0;
       justification = DI_JUST_LEFT;
 
-      for (i = 0; i < DI_FORMATNAMES_SIZE; ++i) {
+      for (i = 0; i < (int) DI_FORMATNAMES_SIZE; ++i) {
         if (*ptr == formatNames[i].fmtChar) {
           pstr = formatNames[i].displayName;
           if (diopts->posix_compat && formatNames[i].posixName != NULL) {
