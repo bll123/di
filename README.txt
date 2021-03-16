@@ -1,4 +1,4 @@
-di - disk information utility (version 4.48.0.1)
+di - disk information utility (version 4.49)
 
 Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
@@ -256,91 +256,95 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+    4.49                                    2021-3-16
+        Added the -j (--json-output) option to output json data.
+        Internal code cleanup.
+
     4.48.0.1                                2021-1-30
         Update di.spec.
         Update mkconfig to version 2.6.3.
 
-    4.48                                    [2020-6-3]
+    4.48                                    2020-6-3
         disable spurious compiler warnings.
         Various build fixes.
         make test no longer fails if perl is not present.
         Updated mkconfig to version 2.3.
 
-    4.47.3                                  [2019-12-23]
+    4.47.3                                  2019-12-23
         Fixed missing link flags for clang.
 
-    4.47.2                                  [2019-10-30]
+    4.47.2                                  2019-10-30
         Minor makefile cleanup.
 
-    4.47.1                                  [2019-6-25]
+    4.47.1                                  2019-6-25
         Update mkconfig to version 2.1.1 (fixes build on 32-bit).
         Add configs/config.ms.cl (visual studio definitions).
 
-    4.47                                    [2018-8-12]
+    4.47                                    2018-8-12
         Fixed bugs located by scan.coverity.com.
           This should fix a numeric sort bug.
         Update mkconfig to version 2.0.0 and make changes to support it.
         Get perl extension build working again.
 
-    4.46                                    [2018-4-11]
+    4.46                                    2018-4-11
         Tcl: Fix bad allocation.
         Tcl: Raise errors rather than exiting.
         Exit program when incorrect options are specified.
         Update mkconfig to version 1.31.
         Add missing mkconfig/runtests.sh.
 
-    4.45                                    [2018-4-10]
+    4.45                                    2018-4-10
         Update mkconfig to version 1.30 to fix modern libintl.h/printf tests.
 
-    4.44                                    [2017-5-23]
+    4.44                                    2017-5-23
         Fixed check of exabyte sized filesystems.  The signed check now
           only checks for -1 and -2; there could still be situations
           where the overflow exactly matches these values.
         Added faster method for windows check for missing removable
           filesystems.
 
-    4.43                                    [2016-8-9]
+    4.43                                    2016-8-9
         Cleaned up some compiler warnings.
         Fixed memory allocation problem.
         Tcl interface fixes
 
-    4.42                                    [2016-2-22]
+    4.42                                    2016-2-22
         Fixed a parsing bug in the Tcl interface.
         Added a Perl interface.
 
-    4.41                                    [2016-1-24]
+    4.41                                    2016-1-24
         Fixed bug specifying more than one filesystem on the command line.
         Added sort by free space, total space.
         Updated manual page: missing, new sort options.
 
-    4.40                                    [2016-1-22]
+    4.40                                    2016-1-22
         Updated the Tcl interface to return the 'display' key as a list.
 
-    4.39                                    [2016-1-22]
+    4.39                                    2016-1-22
         Added a Tcl interface.
         Fixed CSV header to honor -n flag.
         Added -C, --csv-tabs to output CSV with tabs.
         Fixes for mingw (build, long double can't be printf'd).
         Update mkconfig to version 1.27
 
-    4.38                                    [2016-1-6]
+    4.38                                    2016-1-6
         Honor FreeBSD NO_PIE environment variable.
         Update mkconfig to version 1.26
 
-    4.37                                    [2015-10-18]
+    4.37                                    2015-10-18
         Fixed a problem when processing the DI_ARGS environment variable.
         Hardened compiler options: reference: http://wiki.debian.org/Hardening
         Code cleanup to fix compiler warnings.
 
-    4.36                                    [2015-5-18]
+    4.36                                    2015-5-18
         Updated test for NFS remote filesystems.
 
-    4.35                                    [2014-2-15]
+    4.35                                    2014-2-15
         Updates for Irix.
         Fixed a bug when -I/-x were specified in addition to a filespec.
         Updated build system to mkconfig-1.24
 
-    4.34                                    [2013-1-19]
+    4.34                                    2013-1-19
         When a filename is specified on the command line, attempt to choose
           the best filesystem to display when there are multiple choices.
         Error check realpath() return value.
@@ -349,7 +353,7 @@ CHANGES
         Clean up code to fix clang warnings.
         Minor updates to support Xenix.
 
-    4.33                                    [2012-11-15]
+    4.33                                    2012-11-15
         Recoded quota handling as information was improperly
           losing precision.
         Added support for dragonflybsd's vquotactl().
@@ -364,7 +368,7 @@ CHANGES
           Maybe the older versions did not?  No access to 10.20.
         Updated build system to mkconfig-1.22.
 
-    4.32                                    [2012-10-21]
+    4.32                                    2012-10-21
         Exclude rootfs by default.
         Canonacalize the special device name.
         Updated quota code for NetBSD 6 (quota_open() et.al.).
@@ -373,7 +377,7 @@ CHANGES
           denied error when a user tries to get their quota.
         Updated build system to mkconfig-1.21.
 
-    4.31                                    [2011-11-20]
+    4.31                                    2011-11-20
         Filesystems that would return a 'Permission Denied'
           are not displayed at all, even with -a.
         Fixed totals with pooled filesystems (when main pool not mounted).
@@ -381,7 +385,7 @@ CHANGES
         Code cleanup.
         Updated build system to mkconfig-1.19.
 
-    4.30                                    [2011-10-8]
+    4.30                                    2011-10-8
         Added support for long options.
         GNU df compatible long options have been added and
           are processed appropriately.
@@ -390,7 +394,7 @@ CHANGES
         Added hp-ux bundled cc static target.
         Updated build system to mkconfig-1.18.
 
-    4.29                                    [2011-9-30]
+    4.29                                    2011-9-30
         Added the -c option to output in CSV format
            (request by H.Merijn Brand).
         Fixed bB format titles.
@@ -400,13 +404,13 @@ CHANGES
         Added pre-generated config.h files for ULTRIX.
         Updated build system to mkconfig-1.17.
 
-    4.28                                    [2011-9-11]
+    4.28                                    2011-9-11
         Fixed compiler warnings for 64-bit.
         Added support for DragonFlyBSD.
         Updated build system to mkconfig-1.15
           (Solaris 2.6 fixes; pdksh allowed)
 
-    4.27                                    [2010-12-29]
+    4.27                                    2010-12-29
         Rearranged directory structure.
         Added support for long double to hold zettas and yottas.
         Added support for the windows digital mars c compiler.
@@ -419,11 +423,11 @@ CHANGES
         Fixed Makefiles to redirect 'cd' output (CDPATH).
         Updated build system to mkconfig 1.11.
 
-    4.26                                    [2010-7-25]
+    4.26                                    2010-7-25
         Fix FreeBSD 5 panic when trying to get quotas on devfs.
         Updated build system to mkconfig-1.10.
 
-    4.25                                    [2010-7-4]
+    4.25                                    2010-7-4
         Added support for quotas.
         Fix for Tru64 advfs pools.
         Fixed loopback filesystem (lofs/none) exclusion; enabled for
@@ -439,7 +443,7 @@ CHANGES
         More fixes for totals in a pooled/non-pooled mix when pooled
             filesystems are not displayed.
 
-    4.24                                    [2010-5-14]
+    4.24                                    2010-5-14
         Added spanish translation (David Sastre).
         Update some column widths to help support spanish.
         Check mbrlen() return code.
@@ -447,7 +451,7 @@ CHANGES
         Add missing defines in static configurations.
         Added turnoffwinapi.sh for cygwin.
 
-    4.23                                    [2010-5-10]
+    4.23                                    2010-5-10
         Fix internationalized strings to line up properly.
         Changed default block size output to -dH (scaled format 2).
         Brought up to date for AIX, Tru64.
@@ -455,16 +459,16 @@ CHANGES
         Added support for QNX.
         Solaris 8 x86 w/gcc3 currently fails.
 
-    4.22                                    [2010-5-2]
+    4.22                                    2010-5-2
         Updated to use mkconfig 1.3.  Fixes problem
           with linking in unneeded libraries.
         Replaced hasnls program with a shell script.
 
-    4.21                                    [2010-4-11]
+    4.21                                    2010-4-11
         Fixed features/turnoffnls.sh.
         Makefile cleanup (Mike Frysinger).
 
-    4.20                                    [2010-3-7]
+    4.20                                    2010-3-7
         Added VMS.
         Fixed totals for pooled filesystems, again
           (incorrect sort, skipped fs, pooled fs on command line).
@@ -474,7 +478,7 @@ CHANGES
         Move regression tests into tests.d directory.
         Minor updates to manual page.
 
-    4.19                                    [2010-2-1]
+    4.19                                    2010-2-1
         Fix totals to add up when using small block sizes.
         Fix totals for mixed pooled and non-pooled filesystems.
         Add fix for automounted directories:
@@ -483,14 +487,14 @@ CHANGES
         Changed format of config.h file.
         Code cleanup.
 
-    4.18                                    [2009-11-29]
+    4.18                                    2009-11-29
         Code cleanup.
 
         The default configuration method has been changed to
         use a shell script.  The perl configuration script is
         still available (./Build -mkpl).
 
-    4.17                                    [2009-11-22]
+    4.17                                    2009-11-22
         Totals have been changed to add up whatever filesystems
         are displayed.  This is more intuitive for the user.
         It is up to the user to exclude read-only filesystems
@@ -507,40 +511,40 @@ CHANGES
         use the perl script.  Removed iffe, as it doesn't support
         class testing.
 
-    4.16                                    [2009-9-20]
+    4.16                                    2009-9-20
         Fixed a nested macro issue on Mac OS X 10.6.
         Fixed bugs with filename arguments.
 
-    4.15                                    [2009-9-17]
+    4.15                                    2009-9-17
         Fixed filename argument w/non-printing filesystem.
         Build now works on Haiku.
 
-    4.14                                    [2009-9-10]
+    4.14                                    2009-9-10
         Code cleanup.
         Change size labels to match SI standards (1024 vs 1000).
         Build now works on Debian GNU-kFreeBSD.
 
-    4.13                                    [2008-5-25]
+    4.13                                    2008-5-25
         Fixed totals to correctly account for pooled filesystems.
 
-    4.12                                    [19 Jan 2008]
+    4.12                                    19 Jan 2008
         Change of e-mail addresses.
 
-    4.11                                    [29 May 2007]
+    4.11                                    29 May 2007
         Fixed minor bug for 'di -sn -t' introduced in 4.10.
         Code cleanup -- move global variables into local structures.
         Recoded sorting, added sort by filesystem type.
 
-    4.10                                    [24 Feb 2007]
+    4.10                                    24 Feb 2007
         Handle pooled filesystems so that the total space
         doesn't get added more than once.
         Compaq Tru64 advfs is untested.
 
-    4.9                                     [2 Nov 2006]
+    4.9                                     2 Nov 2006
         Fixed an uninitialized variable used for Solaris zones.
         Minor fixes to mkconfig.pl.
 
-    4.8                                     [5 Oct 2006]
+    4.8                                     5 Oct 2006
         Linux's statvfs() is not POSIX compliant and does not
         use f_frsize.  The correct value is returned in f_bsize.
         Since there's no way to tell which type of statvfs() is
@@ -551,7 +555,7 @@ CHANGES
 
         Add logic to find the correct msgfmt program to use.
 
-    4.7                                     [23 Sep 2006]
+    4.7                                     23 Sep 2006
         Changed the operation of the -a, -x and -I flags
         so that it is possible to specify -a and still exclude
         filesystems from the list.
