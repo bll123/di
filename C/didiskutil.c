@@ -12,9 +12,6 @@
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
-#if _hdr_ctype
-# include <ctype.h>
-#endif
 #if _hdr_string
 # include <string.h>
 #endif
@@ -497,7 +494,7 @@ di_isLoopbackFs (diskInfo)
 #endif
 {
   if ((strcmp (diskInfo->fsType, "lofs") == 0 && diskInfo->sp_rdev != 0) ||
-      (strcmp (diskInfo->fsType, "null") == 0 &&
+      (strcmp (diskInfo->fsType, "nullfs") == 0 &&
        strstr (diskInfo->special, "/@@-") == (char *) NULL) ||
       strcmp (diskInfo->fsType, "none") == 0) {
     return TRUE;
@@ -524,7 +521,7 @@ di_mungePoolName (poolname)
       *ptr = '\0';
     } else {
       if (strncmp (poolname, "/dev/disk", 9) == 0) {
-        /* apfs uses the standard /dev/diskNsN format */
+        /* apfs uses a standard /dev/diskNsN format */
         ptr = strchr (poolname, 's');
         if (ptr != (char *) NULL) {
           ++ptr;
