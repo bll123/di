@@ -327,14 +327,10 @@ printDiskInfo (diData)
               inpool = FALSE;
             }
 
-            if (dinfo->doPrint)
-            {
+            if (dinfo->doPrint) {
               addTotals (dinfo, &totals, inpool);
-            }
-            else
-            {
-              if (debug > 2)
-              {
+            } else {
+              if (debug > 2) {
                 printf ("tot:%s:%s:skip\n", dinfo->special, dinfo->name);
               }
             }

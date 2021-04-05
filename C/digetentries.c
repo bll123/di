@@ -1738,9 +1738,6 @@ di_getDiskEntries (diskInfo, diCount)
         {
             printf ("mnt:%s - %s\n", diptr->name, diptr->special);
             printf ("dev:%d fs:%s\n", dev, diptr->fsType);
-        }
-        if (debug > 1)
-        {
             printf ("%s: %s\n", diptr->name, diptr->fsType);
             printf ("\tblocks: tot:%ld free:%ld\n",
                     fsinfo.total_blocks, fsinfo.free_blocks);
@@ -1830,9 +1827,6 @@ di_getDiskEntries (diskInfo, diCount)
         {
             printf ("mnt:%s - %s\n", diptr->name, diptr->special);
             printf ("dev:%d fs:%s\n", fsinfo.fi_dev, diptr->fsType);
-        }
-        if (debug > 1)
-        {
             printf ("mount_args: %s\n", fsinfo.fi_mount_args);
             printf ("%s: %s\n", diptr->name, diptr->fsType);
             printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",

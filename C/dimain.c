@@ -366,17 +366,14 @@ checkFileInfo (diData, optidx, argc, argv)
             inpool = FALSE;
           }
 
-          if (poolmain)
-          {
+          if (poolmain) {
             saveIdx = j;
           }
 
-          if (found && inpool)
-          {
+          if (found && inpool) {
             dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
             dinfo->printFlag = DI_PRNT_SKIP;
-            if (debug > 2)
-            {
+            if (debug > 2) {
               printf ("  inpool B: also process %s %s\n",
                       dinfo->special, dinfo->name);
             }
@@ -397,22 +394,22 @@ checkFileInfo (diData, optidx, argc, argv)
             }
             if (foundnew == 3) {
               dinfo->printFlag = DI_PRNT_FORCE;
+              found = TRUE;
             }
 
-            found = TRUE;
-            if (debug > 2)
-            {
+            if (debug > 2) {
               printf ("file %s specified: found device %ld : %d (%s %s)\n",
                       argv[i], dinfo->st_dev, foundnew,
                       dinfo->special, dinfo->name);
             }
-            if (inpool)
-            {
+
+            if (inpool) {
               int   k;
-              for (k = saveIdx; k < j; ++k)
-              {
+              for (k = saveIdx; k < j; ++k) {
                 dinfo = &(diskInfo [diskInfo [k].sortIndex[DI_TOT_SORT_IDX]]);
-                dinfo->printFlag = DI_PRNT_SKIP;
+                if (dinfo->printFlag != DI_PRNT_FORCE) {
+                  dinfo->printFlag = DI_PRNT_SKIP;
+                }
                 if (debug > 2)
                 {
                   printf ("  inpool A: also process %s %s\n",
