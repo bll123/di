@@ -8,6 +8,9 @@ maindoquery $1 $_MKC_ONCE
 getsname $0
 dosetup $@
 
+. $_MKCONFIG_DIR/bin/shellfuncs.sh
+testshcapability
+
 unset DI_ARGS
 unset DIFMT
 FORMATS="b B u c f v i U F"

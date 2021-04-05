@@ -8,6 +8,9 @@ maindoquery $1 $_MKC_ONCE
 getsname $0
 dosetup $@
 
+. $_MKCONFIG_DIR/bin/shellfuncs.sh
+testshcapability
+
 testArgument () {
   as=$a
   a=`echo $a | sed 's/_/ /g'`
@@ -49,8 +52,8 @@ testargs="-A -a --all -bk -bsi -b1024 -b1000 -b512 \
     -j --json-output \
     -k -l --local -m -n --no-sync -P --portability --print-type \
     -q -R \
-    -sm -ss -st -srm -srs -srt -t -sa -sra -sT -srT -sf -srf \
-    --total --type=tmpfs -v --version \
+    -sm -ss -st -srm -srs -srt -sa -sra -sT -srT -sf -srf \
+    -t --total --type=tmpfs -v --version \
     -w20 -W20 -xtmpfs --exclude-type=tmpfs -X1 -zall -Z \
     -b_k -b_si -b_1024 -b_1000 -b_512 -B_k -B_si -B_1024 \
     -B_1000 -B_512 \
