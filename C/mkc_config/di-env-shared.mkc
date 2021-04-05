@@ -17,8 +17,14 @@ addcflag -fPIC
 addcflag -Wextra
 addcflag -Wno-unused-but-set-variable
 addcflag -Wno-unused-parameter
+addcflag -Wno-unknown-pragmas
 addcflag -Wno-float-equal
 addcflag -Wno-shift-sign-overflow
+addcflag -Wno-stringop-overflow
+addcflag -Wno-stringop-truncation
+
+# turn off mac os warning
+addcflag -Wno-poison-system-directories
 
 # gcc hardening
 # reference: wiki.debian.org/Hardening

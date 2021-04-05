@@ -19,6 +19,10 @@ addcflag -Wno-float-equal
 addcflag -Wno-shift-sign-overflow
 addcflag -Wno-stringop-overflow
 addcflag -Wno-stringop-truncation
+
+# turn off mac os warning
+addcflag -Wno-poison-system-directories
+
 # gcc hardening
 # reference: wiki.debian.org/Hardening
 addcflag -Wformat

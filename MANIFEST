@@ -76,6 +76,7 @@ D/features/               di configuration
 D/features/env.dat          environment configuration
 D/features/mkconfig.dat     mkconfig configuration
 D/options.d               di source
+ChangeLog.txt		Change Log
 LICENSE                 License
 MANIFEST                This file
 Makefile                Top Level Makefile
