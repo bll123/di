@@ -43,9 +43,12 @@ normally be displayed: filesystems
 with total space <= 0;
 loopback filesystems that are duplicates
 of other normally mounted filesystems (filesystem type of 'lofs'
-, 'none', or 'nullfs');
+, 'none', or 'null');
 loopback filesystems that are part of a zone (Solaris);
-filesystems for which the system's ignore flag is set.
+filesystems for which the system's ignore flag is set;
+filesystems that have a device name of 'tmpfs', 'cgroup' or 'swap';
+filesystems that have a device name starting with
+'com.apple.TimeMachine.'.
 .PP
 Filesystems that the user does not have permissions to access will
 not be displayed at all.
@@ -57,7 +60,7 @@ control the output of
 \fIdi\fP and \fImi\fP:
 .TP
 .B \-A
-Print all fields (used for debugging).  Mount points and special
+Print all fields (used for debugging).  Mount points and
 device names are printed at full width.
 .TP
 .B \-a
@@ -209,7 +212,7 @@ sort flags may be used to change the sort order:
 \fBm\fP \- by mount point (default);
 \fBn\fP \- leave unsorted (as it appears in
 the mount table);
-\fBs\fP \- by special device name;
+\fBs\fP \- by device name;
 \fBT\fP \- by total space;
 \fBf\fP \- by free space;
 \fBa\fP \- by available space;
@@ -219,9 +222,9 @@ following this sort flag.
 .IP
 These sort options may be combined in any order.  e.g.:
 .RS
-di \-stsrm # by type, special, reversed mount;
+di \-stsrm # by type, device name, reversed mount;
 .br
-di \-strsrm # by type, reversed special, mount.
+di \-strsrm # by type, reversed device-name, mount.
 .RE
 .TP
 .B \-\-si
@@ -302,10 +305,10 @@ is formatted to the maximum width necessary for the longest mount
 point name.
 .TP
 .B s
-Print the file system name (special device or remote mount point).
+Print the file system name (device name or remote mount point).
 .TP
 .B S
-Print the file system name (special device or remote mount point),
+Print the file system name (device name or remote mount point),
 at full length.
 The file system name
 is formatted to the maximum width necessary for the longest file system
@@ -337,7 +340,8 @@ Print the number of megabytes in use on the file system
 .TP
 .B c
 Print the number of megabytes not available for use by normal users
-(total \- available).
+(total \- available).  Note that this calculation does work correctly
+the 'apfs' filesystem.
 .TP
 .B Free
 .TP

@@ -199,6 +199,7 @@ printDiskInfo (diData)
     Size_t              outcurrlen;
     char                *tout;
     int                 first;
+    int                 ishr;
 
 
     first = TRUE;
@@ -234,8 +235,10 @@ printDiskInfo (diData)
         --diout->width;
     }
 
-    if (diopts->dispBlockSize != (_print_size_t) DI_DISP_HR &&
-        diopts->dispBlockSize != (_print_size_t) DI_DISP_HR_2 &&
+    ishr = diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
+      diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2;
+
+    if (! ishr &&
         (diopts->dispBlockSize > 0 &&
          diopts->dispBlockSize <= (_print_size_t) DI_VAL_1024)) {
       if (diopts->csv_output || diopts->json_output) {
@@ -249,7 +252,7 @@ printDiskInfo (diData)
       if (diopts->csv_output || diopts->json_output) {
         Snprintf1 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
             "%%.0%s%%s", DI_Lf);
-        if (diopts->csv_tabs || diopts->json_output) {
+        if (! ishr) {
           Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
               "%%.1%s%%s", DI_Lf);
         } else {
@@ -861,9 +864,11 @@ printInfo (diskInfo, diopts, diout)
 
         default:
         {
-          ttext[0] = *ptr;
-          ttext[1] = '\0';
-          append (ttext, &out, &outcurrlen, &outlen);
+          if (! diopts->json_output) {
+            ttext[0] = *ptr;
+            ttext[1] = '\0';
+            append (ttext, &out, &outcurrlen, &outlen);
+          }
           break;
         }
       }
@@ -979,12 +984,37 @@ addTotals (diskInfo, totals, inpool)
         diskInfo->special, diskInfo->name, inpool);
   }
 
+  /*
+   * zfs:
+   *   The total is the space used + the space free.
+   *   Free space is the space available in the pool.
+   *   Available space is the space available in the pool.
+   *   Thus: total - free = used.
+   *   -- To get the real total, add the total for the pool
+   *      and all used space for all inpool filesystems.
+   *
+   * apfs:
+   *   The total is the total space.
+   *   Free space is the space available + space used.
+   *      (or total space - space used).
+   *   Available space is the space available in the pool.
+   *   Thus: total - free = used.
+   *
+   * advfs:
+   *   Unknown.
+   */
+
   if (inpool)
   {
-    if (debug > 2) {printf ("  tot:inpool:add total used\n"); }
-    /* if in a pool of disks, add the total used to the totals also */
-    totals->totalSpace += diskInfo->totalSpace - diskInfo->freeSpace;
-    totals->totalInodes += diskInfo->totalInodes - diskInfo->freeInodes;
+    if (debug > 2) {printf ("  tot:inpool:\n"); }
+    if (strcmp (diskInfo->fsType, "zfs") == 0) {
+      /* zfs: if in a pool of disks, add the total used to the totals also */
+      totals->totalSpace += diskInfo->totalSpace - diskInfo->freeSpace;
+      totals->totalInodes += diskInfo->totalInodes - diskInfo->freeInodes;
+    }
+    if (strcmp (diskInfo->fsType, "apfs") == 0) {
+      totals->freeSpace -= diskInfo->totalSpace - diskInfo->freeSpace;
+    }
   }
   else
   {
@@ -1235,9 +1265,11 @@ processTitles (diopts, diout)
 
           default:
           {
-            ttext[0] = *ptr;
-            ttext[1] = '\0';
-            append (ttext, &out, &outcurrlen, &outlen);
+            if (! diopts->json_output) {
+              ttext[0] = *ptr;
+              ttext[1] = '\0';
+              append (ttext, &out, &outcurrlen, &outlen);
+            }
             valid = FALSE;
             break;
           }

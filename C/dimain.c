@@ -94,6 +94,7 @@ static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, unsigned int));
 static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
 static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
 static int  isIgnoreFSType      _((char *));
+static int  isIgnoreSpecial     _((char *));
 #if _lib_realpath && _define_S_ISLNK && _lib_lstat
 static int  checkForUUID        _((char *));
 #endif
@@ -686,7 +687,14 @@ checkDiskInfo (diData, hasLoop)
             dinfo->printFlag = DI_PRNT_IGNORE;
             dinfo->doPrint = (char) diopts->displayAll;
             if (debug > 2) {
-              printf ("chk: ignore: rootfs/procfs/devfs/devtmpfs: %s\n", dinfo->name);
+              printf ("chk: ignore-fs: %s\n", dinfo->name);
+            }
+          }
+          if (isIgnoreSpecial (dinfo->special)) {
+            dinfo->printFlag = DI_PRNT_IGNORE;
+            dinfo->doPrint = (char) diopts->displayAll;
+            if (debug > 2) {
+              printf ("chk: ignore-special: %s\n", dinfo->special);
             }
           }
 
@@ -1265,6 +1273,27 @@ initZones (diData)
         diData->zoneInfo.zoneDisplay, diData->zoneInfo.globalIdx);
   }
 #endif
+}
+
+static int
+#if _proto_stdc
+isIgnoreSpecial (char *special)
+#else
+isIgnoreSpecial (special)
+  char      *special;
+#endif
+{
+  static char   *appletimemachine = "com.apple.TimeMachine.";
+
+  /* solaris: swap */
+  /* linux: cgroup, tmpfs */
+  if (strncmp (special, appletimemachine, strlen(appletimemachine)) == 0 ||
+      strcmp (special, "tmpfs") == 0 ||
+      strcmp (special, "cgroup") == 0 ||
+      strcmp (special, "swap") == 0) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 static int

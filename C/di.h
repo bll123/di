@@ -246,15 +246,15 @@ typedef struct {
     Size_t       maxTypeString;
     Size_t       width;
     const char   *dispBlockLabel;
-    char         blockFormat [15];
-    char         blockFormatNR [15];   /* no radix */
-    char         inodeFormat [15];
-    char         inodeLabelFormat [15];
-    char         mountFormat [10];
-    char         mTimeFormat [15];
-    char         optFormat [15];
-    char         specialFormat [15];
-    char         typeFormat [10];
+    char         blockFormat [25];
+    char         blockFormatNR [25];   /* no radix */
+    char         inodeFormat [25];
+    char         inodeLabelFormat [25];
+    char         mountFormat [25];
+    char         mTimeFormat [25];
+    char         optFormat [25];
+    char         specialFormat [25];
+    char         typeFormat [25];
 } diOutput_t;
 
 typedef struct {

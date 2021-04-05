@@ -12,6 +12,9 @@
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
+#if _hdr_ctype
+# include <ctype.h>
+#endif
 #if _hdr_string
 # include <string.h>
 #endif
@@ -477,6 +480,7 @@ di_isPooledFs (diskInfo)
 {
   if (strcmp (diskInfo->fsType, "zfs") == 0 ||
       strcmp (diskInfo->fsType, "advfs") == 0 ||
+      strcmp (diskInfo->fsType, "apfs") == 0 ||
       (strcmp (diskInfo->fsType, "null") == 0 &&
        strstr (diskInfo->special, "/@@-") != (char *) NULL)) {
     return TRUE;
@@ -519,9 +523,23 @@ di_mungePoolName (poolname)
     if (ptr != (char *) NULL) {
       *ptr = '\0';
     } else {
-      ptr = strchr (poolname, '/');   /* zfs */
-      if (ptr != (char *) NULL) {
-        *ptr = '\0';
+      if (strncmp (poolname, "/dev/disk", 9) == 0) {
+        /* apfs uses the standard /dev/diskNsN format */
+        ptr = strchr (poolname, 's');
+        if (ptr != (char *) NULL) {
+          ++ptr;
+          if (ptr != (char *) NULL) {
+            ptr = strchr (ptr, 's');
+            if (ptr != (char *) NULL) {
+              *ptr = '\0';
+            }
+          }
+        }
+      } else {
+        ptr = strchr (poolname, '/');   /* zfs */
+        if (ptr != (char *) NULL) {
+          *ptr = '\0';
+        }
       }
     }
   }

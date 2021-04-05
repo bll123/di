@@ -34,7 +34,13 @@ echo ""
 export SSHPASS
 
 
-ver=$(grep DI_VERSION ../C/version.h | sed -e 's/"$//' -e 's/.*"//')
+tver=$(grep DI_VERSION ../C/version.h | sed -e 's/"$//' -e 's/.*"//')
+echo -n "Version [$tver]: "
+read ver
+if [[ $ver == "" ]]; then
+  ver=$tver
+fi
+
 if [[ $ver != "" ]] ; then
   cp -pf index.html rindex.html
   sed -i -e "s/#VERSION#/${ver}/g" index.html

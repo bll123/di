@@ -256,6 +256,16 @@ PORTING
         System V.3, System V.4, Tru64, ULTRIX, UnixWare, VMS, Windows, Xenix
 
 CHANGES
+    4.50                                    --
+        JSON: Exclude extraneous format characters from the json output.
+        JSON: Fix quoting around human-readable values.
+        Totals: Support APFS filesystem.
+        Mac OS: Put time machine filesystems on the ignore list.
+        Linux: Put filesytems using 'tmpfs' or 'cgroup' as the
+          device name on the ignore list.
+        Solaris: Put filesystems using 'swap' as the device
+          name on the ignore list.
+
     4.49                                    2021-3-16
         Added the -j (--json-output) option to output json data.
         Internal code cleanup.
