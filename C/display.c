@@ -999,6 +999,8 @@ addTotals (diskInfo, totals, inpool)
    *      /dev/disk1s1      partition 1
    *      /dev/disk1s2      partition 2
    *      /dev/disk1s3      partition 3
+   *   The first disk is used as the root of the pool, even though it
+   *     is not the container.
    *   The total is the total space.
    *   Free space is the space available + space used.
    *      (or total space - space used).
