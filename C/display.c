@@ -994,26 +994,49 @@ addTotals (diskInfo, totals, inpool)
    *      and all used space for all inpool filesystems.
    *
    * apfs:
+   *   An easy hierarchy:
+   *      /dev/disk1        the container, is not mounted.
+   *      /dev/disk1s1      partition 1
+   *      /dev/disk1s2      partition 2
+   *      /dev/disk1s3      partition 3
    *   The total is the total space.
    *   Free space is the space available + space used.
    *      (or total space - space used).
    *   Available space is the space available in the pool.
    *   Thus: total - free = used.
+   *   -- To get (totals - free) to work for the totals, subtract
+   *      all free space returned by in-pool filesystems.
+   *
+   * hammer, hammer2:
+   *    Typically, a null mount is used such as:
+   *      /dev/serno/SERIAL.s1a   /build              hammer
+   *      /build/usr              /usr                null
+   *      /build/usr.local        /usr/local          null
+   *    There are also pfs mounts:
+   *      /dev/ad1s1a@LOCAL       /d1     hammer2
+   *      /dev/ad1s1a@d1.a        /d1/a   hammer2
+   *    Or
+   *      /dev/serno/SERIAL.s1a         /mnt        hammer2
+   *      /dev/serno/SERIAL.s1a@mnt.usr /mnt/usr    hammer2
+   *    Or
+   *      @build                  /build            hammer2
+   *      @build.var              /build/var        null
+   *  Difficult to process, as the naming is not consistent.
+   *  Not implemented.
    *
    * advfs:
-   *   Unknown.
+   *   Unknown.  Assume the same as zfs.
    */
 
   if (inpool)
   {
     if (debug > 2) {printf ("  tot:inpool:\n"); }
-    if (strcmp (diskInfo->fsType, "zfs") == 0) {
-      /* zfs: if in a pool of disks, add the total used to the totals also */
-      totals->totalSpace += diskInfo->totalSpace - diskInfo->freeSpace;
-      totals->totalInodes += diskInfo->totalInodes - diskInfo->freeInodes;
-    }
     if (strcmp (diskInfo->fsType, "apfs") == 0) {
       totals->freeSpace -= diskInfo->totalSpace - diskInfo->freeSpace;
+    } else {
+      /* zfs, old hammer, advfs */
+      totals->totalSpace += diskInfo->totalSpace - diskInfo->freeSpace;
+      totals->totalInodes += diskInfo->totalInodes - diskInfo->freeInodes;
     }
   }
   else
