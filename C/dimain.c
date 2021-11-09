@@ -427,7 +427,7 @@ checkFileInfo (diData, optidx, argc, argv)
       } /* if stat ok */
       else
       {
-        if (errno != EACCES) {
+        if (errno != EACCES && errno != EPERM) {
           fprintf (stderr, "stat: %s ", argv[i]);
           perror ("");
         }
@@ -499,7 +499,7 @@ getDiskStatInfo (diData)
         }
         else
         {
-          if (errno != EACCES) {
+          if (errno != EACCES && errno != EPERM) {
             fprintf (stderr, "stat: %s ", dinfo->name);
             perror ("");
           }

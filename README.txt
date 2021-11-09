@@ -1,4 +1,4 @@
-di - disk information utility (version 4.50)
+di - disk information utility (version 4.51)
 
 Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/

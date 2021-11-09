@@ -1,4 +1,7 @@
 CHANGES
+    4.51                                    2021-11-8
+        Handle EPERM errors.
+
     4.50                                    2021-4-5
         JSON: Exclude extraneous format characters from the json output.
         JSON: Fix quoting around human-readable values.
