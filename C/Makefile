@@ -316,7 +316,8 @@ distclean:
 # installation
 
 .PHONY: install
-install:	$(MKC_ENV) di-programs
+install:
+	$(MAKE) all
 	. ./$(MKC_ENV);cd ..;$(MAKE) -e prefix=$(prefix) \
 		LOCALEDIR=$(LOCALEDIR) FROMDIR=C install
 
