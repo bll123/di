@@ -9,9 +9,9 @@
 # endif
 
     /* display.c */
-extern char *printDiskInfo      _((diData_t *));
-extern void sortArray           _((diOptions_t *, diDiskInfo_t *, int, int));
-extern const char *getPrintFlagText _((int));
+extern char *printDiskInfo      (diData_t *);
+extern void sortArray           (diOptions_t *, diDiskInfo_t *, int, int);
+extern const char *getPrintFlagText (int);
 
 # if defined (__cplusplus) || defined (c_plusplus)
    }

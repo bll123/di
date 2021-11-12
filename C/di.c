@@ -98,13 +98,7 @@
 /* end of system specific includes/configurations */
 
 int
-#if _proto_stdc
 main (int argc, const char * argv [])
-#else
-main (argc, argv)
-    int         argc;
-    const char  * argv [];
-#endif
 {
   char      *disp;
   diData_t  diData;

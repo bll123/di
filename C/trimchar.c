@@ -19,13 +19,7 @@
 #endif
 
 void
-#if _proto_stdc
 trimChar (char *str, int ch)
-#else
-trimChar (str, ch)
-    char         *str;
-    int          ch;
-#endif
 {
   int     len;
 

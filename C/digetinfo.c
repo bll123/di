@@ -111,13 +111,7 @@ extern int debug;
 # define DI_GETDISKINFO_DEF 1
 
 void
-# if _proto_stdc
 di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskInfo (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     int             i;
@@ -235,13 +229,7 @@ di_getDiskInfo (diskInfo, diCount)
 # define DI_GETDISKINFO_DEF 1
 
 void
-# if _proto_stdc
 di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskInfo (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     int             i;
@@ -330,13 +318,7 @@ di_getDiskInfo (diskInfo, diCount)
 # define DI_GETDISKINFO_DEF 1
 
 void
-# if _proto_stdc
 di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskInfo (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     int             i;
@@ -405,13 +387,7 @@ di_getDiskInfo (diskInfo, diCount)
 # define MSDOS_BUFFER_SIZE          256
 
 void
-# if _proto_stdc
 di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskInfo (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t         *diptr;
     int                 i;
@@ -536,13 +512,7 @@ di_getDiskInfo (diskInfo, diCount)
 
 #if ! defined (DI_GETDISKINFO_DEF)
 void
-#  if _proto_stdc
 di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
-#  else
-di_getDiskInfo (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-#  endif
 {
     if (debug > 0) { printf ("# getDiskInfo: empty\n"); }
     return;

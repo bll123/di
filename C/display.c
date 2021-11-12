@@ -179,12 +179,7 @@ static void append              _((const char *, char **, Size_t *, Size_t *));
  */
 
 char *
-#if _proto_stdc
 printDiskInfo (diData_t *diData)
-#else
-printDiskInfo (diData)
-    diData_t        *diData;
-#endif
 {
     int                 i;
     diOptions_t         *diopts;
@@ -398,15 +393,7 @@ printDiskInfo (diData)
  *
  */
 void
-#if _proto_stdc
 sortArray (diOptions_t *diopts, diDiskInfo_t *data, int count, int sidx)
-#else
-sortArray (diopts, data, count, sidx)
-    diOptions_t     *diopts;
-    diDiskInfo_t    *data;
-    int             count;
-    int             sidx;
-#endif
 {
   unsigned int  tempIndex;
   int           gap;
@@ -448,12 +435,7 @@ sortArray (diopts, data, count, sidx)
 
 /* for debugging */
 const char *
-#if _proto_stdc
 getPrintFlagText (int pf)
-#else
-getPrintFlagText (pf)
-    int pf;
-#endif
 {
     return pf == DI_PRNT_OK ? "ok" :
         pf == DI_PRNT_BAD ? "bad" :
@@ -466,16 +448,7 @@ getPrintFlagText (pf)
 
 
 static void
-#if _proto_stdc
 appendFormatStr (char *fmt, const char *val, char **ptr, Size_t *clen, Size_t *len)
-#else
-appendFormatStr (fmt, val, ptr, clen, len)
-  char *fmt;
-  const char *val;
-  char **ptr;
-  Size_t *clen;
-  Size_t *len;
-#endif
 {
   char          tdata [1024];
 
@@ -484,16 +457,7 @@ appendFormatStr (fmt, val, ptr, clen, len)
 }
 
 static void
-#if _proto_stdc
 appendFormatVal (char *fmt, _fs_size_t val, char **ptr, Size_t *clen, Size_t *len)
-#else
-appendFormatVal (fmt, val, ptr, clen, len)
-  char *fmt;
-  _fs_size_t val;
-  char **ptr;
-  Size_t *clen;
-  Size_t *len;
-#endif
 {
   char          tdata [1024];
 
@@ -502,15 +466,7 @@ appendFormatVal (fmt, val, ptr, clen, len)
 }
 
 static void
-#if _proto_stdc
 append (const char *val, char **ptr, Size_t *clen, Size_t *len)
-#else
-append (val, ptr, len)
-  const char *val;
-  char      **ptr;
-  Size_t    *clen;
-  Size_t    *len;
-#endif
 {
   Size_t    vlen;
   Size_t    bumplen;
@@ -541,14 +497,7 @@ append (val, ptr, len)
  */
 
 static char *
-#if _proto_stdc
 printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
-#else
-printInfo (diskInfo, diopts, diout)
-    diDiskInfo_t        *diskInfo;
-    diOptions_t         *diopts;
-    diOutput_t          *diout;
-#endif
 {
     _fs_size_t          used;
     _fs_size_t          totAvail;
@@ -886,16 +835,8 @@ printInfo (diskInfo, diopts, diout)
 }
 
 static char *
-#if _proto_stdc
 printSpace (const diOptions_t *diopts, const diOutput_t *diout,
              _fs_size_t usage, int idx)
-#else
-printSpace (diopts, diout, usage, idx)
-    const diOptions_t   *diopts;
-    const diOutput_t    *diout;
-    _fs_size_t          usage;
-    int                 idx;
-#endif
 {
     _print_size_t   tdbs;
     _print_size_t   mult;
@@ -937,12 +878,7 @@ printSpace (diopts, diout, usage, idx)
 
 
 static int
-#if _proto_stdc
 findDispSize (_print_size_t siz)
-#else
-findDispSize (siz)
-    _print_size_t      siz;
-#endif
 {
     int         i;
 
@@ -965,14 +901,7 @@ findDispSize (siz)
  */
 
 static void
-#if _proto_stdc
 addTotals (const diDiskInfo_t *diskInfo, diDiskInfo_t *totals, int inpool)
-#else
-addTotals (diskInfo, totals, inpool)
-    const diDiskInfo_t  *diskInfo;
-    diDiskInfo_t        *totals;
-    int                 inpool;
-#endif
 {
   if (debug > 2)
   {
@@ -1060,13 +989,7 @@ addTotals (diskInfo, totals, inpool)
  */
 
 static char *
-#if _proto_stdc
 processTitles (diOptions_t *diopts, diOutput_t *diout)
-#else
-processTitles (diopts, diout)
-    diOptions_t   *diopts;
-    diOutput_t    *diout;
-#endif
 {
     const char      *ptr;
     int             valid;
@@ -1376,14 +1299,7 @@ processTitles (diopts, diout)
  */
 
 static char *
-#if _proto_stdc
 printPerc (_fs_size_t used, _fs_size_t totAvail, const char *format)
-#else
-printPerc (used, totAvail, format)
-    _fs_size_t      used;
-    _fs_size_t      totAvail;
-    const char      *format;
-#endif
 {
     _print_size_t   perc;
     static char     tdata [1024];
@@ -1402,16 +1318,8 @@ printPerc (used, totAvail, format)
 
 
 static int
-#if _proto_stdc
 diCompare (const diOptions_t *diopts, const diDiskInfo_t *data,
            unsigned int idx1, unsigned int idx2)
-#else
-diCompare (diopts, data, idx1, idx2)
-    const diOptions_t     *diopts;
-    const diDiskInfo_t    *data;
-    unsigned int    idx1;
-    unsigned int    idx2;
-#endif
 {
     int             rc;
     int             sortOrder;
@@ -1508,12 +1416,7 @@ diCompare (diopts, data, idx1, idx2)
 }
 
 static void
-#if _proto_stdc
 getMaxFormatLengths (diData_t *diData)
-#else
-getMaxFormatLengths (diData)
-    diData_t            *diData;
-#endif
 {
     int             i;
     unsigned int    len;
@@ -1570,12 +1473,7 @@ getMaxFormatLengths (diData)
 }
 
 static Size_t
-#if _proto_stdc
 istrlen (const char *str)
-#else
-istrlen (str)
-    const char *str;
-#endif
 {
   Size_t            len;
 #if _lib_mbrlen && _enable_nls
@@ -1604,13 +1502,7 @@ istrlen (str)
 }
 
 static void
-#if _proto_stdc
 initSizeTable (diOptions_t *diopts, diOutput_t *diout)
-#else
-initSizeTable (diopts, diout)
-  diOptions_t *diopts;
-  diOutput_t *diout;
-#endif
 {
   int       i;
 

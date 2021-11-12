@@ -26,7 +26,7 @@
    extern "C" {
 # endif
 
-extern int getDIOptions _((int , const char * const [], diData_t *));
+extern int getDIOptions (int , const char * const [], diData_t *);
 
 # if defined (__cplusplus) || defined (c_plusplus)
    }

@@ -279,41 +279,41 @@ typedef struct {
 #endif
 
  /* digetentries.c */
-extern int  di_getDiskEntries       _((diDiskInfo_t **, int *));
+extern int  di_getDiskEntries       (diDiskInfo_t **, int *);
  /* digetinfo.c */
-extern void di_getDiskInfo          _((diDiskInfo_t **, int *));
+extern void di_getDiskInfo          (diDiskInfo_t **, int *);
  /* diquota.c */
-extern void diquota                 _((diQuota_t *));
+extern void diquota                 (diQuota_t *);
  /* strdup.c */
 # if ! _lib_strdup
-extern char *strdup                 _((const char *));
+extern char *strdup                 (const char *);
 # endif
  /* strstr.c */
 # if ! _lib_strstr
-extern char *strstr           _((const char *, const char *));
+extern char *strstr           (const char *, const char *);
 # endif
  /* trimchar.c */
-extern void trimChar                _((char *, int));
+extern void trimChar                (char *, int);
  /* realloc.c */
-extern _pvoid di_realloc            _((_pvoid, Size_t));
+extern _pvoid di_realloc            (_pvoid, Size_t);
  /* didiskutil.c */
-extern void di_initDiskInfo _((diDiskInfo_t *));
-extern void di_saveBlockSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t, _fs_size_t));
-extern void di_saveInodeSizes _((diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t));
+extern void di_initDiskInfo (diDiskInfo_t *);
+extern void di_saveBlockSizes (diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t, _fs_size_t);
+extern void di_saveInodeSizes (diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t);
 #if _lib_getmntent \
     && ! _lib_getmntinfo \
     && ! _lib_getfsstat \
     && ! _lib_getvfsstat \
     && ! _lib_mntctl \
     && ! _class_os__Volumes
-extern char *chkMountOptions        _((const char *, const char *));
+extern char *chkMountOptions        (const char *, const char *);
 #endif
-extern void convertMountOptions     _((unsigned long, diDiskInfo_t *));
-extern void convertNFSMountOptions  _((long, long, long, diDiskInfo_t *));
-extern void di_testRemoteDisk       _((diDiskInfo_t *));
-extern int  di_isPooledFs           _((diDiskInfo_t *));
-extern int  di_isLoopbackFs         _((diDiskInfo_t *));
-extern Size_t di_mungePoolName      _((char *));
+extern void convertMountOptions     (unsigned long, diDiskInfo_t *);
+extern void convertNFSMountOptions  (long, long, long, diDiskInfo_t *);
+extern void di_testRemoteDisk       (diDiskInfo_t *);
+extern int  di_isPooledFs           (diDiskInfo_t *);
+extern int  di_isLoopbackFs         (diDiskInfo_t *);
+extern Size_t di_mungePoolName      (char *);
 
 # if defined (__cplusplus) || defined (c_plusplus)
    }

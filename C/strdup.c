@@ -31,12 +31,7 @@
 #endif
 
 char *
-# if _proto_stdc
 strdup (const char *ptr)
-# else
-strdup (ptr)
-    const char        *ptr;
-# endif
 {
   Size_t        len;
   char          *nptr;

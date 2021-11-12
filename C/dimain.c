@@ -104,15 +104,7 @@ static int  checkForUUID        _((char *));
 #endif
 
 char *
-#if _proto_stdc
 dimainproc (int argc, const char * const argv [], int intfcflag, diData_t *diData)
-#else
-dimainproc (argc, argv, intfcflag, diData)
-    int         argc;
-    const char  * const argv [];
-    int         intfcflag;
-    diData_t    *diData;
-#endif
 {
     diOptions_t         *diopts;
     diOutput_t          *diout;
@@ -241,12 +233,7 @@ dimainproc (argc, argv, intfcflag, diData)
  */
 
 extern void
-#if _proto_stdc
 cleanup (diData_t *diData)
-#else
-cleanup (diData)
-    diData_t   *diData;
-#endif
 {
     if (diData->diskInfo != (diDiskInfo_t *) NULL)
     {
@@ -272,19 +259,11 @@ cleanup (diData)
 }
 
 extern int
-#if _proto_stdc
 checkFileInfo (
     diData_t *diData,
     int optidx,
     int argc,
     const char * const argv [])
-#else
-checkFileInfo (diData, optidx, argc, argv)
-    diData_t            *diData;
-    int                 optidx;
-    int                 argc;
-    const char          * const argv [];
-#endif
 {
     int                 rc;
     int                 i;
@@ -464,12 +443,7 @@ checkFileInfo (diData, optidx, argc, argv)
  */
 
 extern void
-#if _proto_stdc
 getDiskStatInfo (diData_t *diData)
-#else
-getDiskStatInfo (diData)
-    diData_t            *diData;
-#endif
 {
     int         i;
     struct stat statBuf;
@@ -515,13 +489,7 @@ getDiskStatInfo (diData)
  */
 
 extern int
-#if _proto_stdc
 getDiskSpecialInfo (diData_t *diData, unsigned int dontResolveSymlink)
-#else
-getDiskSpecialInfo (diData, dontResolveSymlink)
-    diData_t     *diData;
-    unsigned int dontResolveSymlink;
-#endif
 {
     int         i;
     struct stat statBuf;
@@ -591,13 +559,7 @@ getDiskSpecialInfo (diData, dontResolveSymlink)
  */
 
 extern void
-#if _proto_stdc
 checkDiskInfo (diData_t *diData, int hasLoop)
-#else
-checkDiskInfo (diData, hasLoop)
-    diData_t    *diData;
-    int         hasLoop;
-#endif
 {
     int             i;
     int             j;
@@ -790,12 +752,7 @@ checkDiskInfo (diData, hasLoop)
 }
 
 extern void
-#if _proto_stdc
 checkDiskQuotas (diData_t *diData)
-#else
-checkDiskQuotas (diData)
-    diData_t            *diData;
-#endif
 {
   int           i;
   Uid_t         uid;
@@ -896,12 +853,7 @@ checkDiskQuotas (diData)
  */
 
 extern void
-#if _proto_stdc
 preCheckDiskInfo (diData_t *diData)
-#else
-preCheckDiskInfo (diData)
-    diData_t            *diData;
-#endif
 {
     int             i;
     diOptions_t     *diopts;
@@ -959,13 +911,7 @@ preCheckDiskInfo (diData)
 }
 
 static void
-#if _proto_stdc
 checkIgnoreList (diDiskInfo_t *diskInfo, iList_t *ignoreList)
-#else
-checkIgnoreList (diskInfo, ignoreList)
-    diDiskInfo_t     *diskInfo;
-    iList_t           *ignoreList;
-#endif
 {
     char            *ptr;
     int             i;
@@ -999,13 +945,7 @@ checkIgnoreList (diskInfo, ignoreList)
 }
 
 static void
-#if _proto_stdc
 checkIncludeList (diDiskInfo_t *diskInfo, iList_t *includeList)
-#else
-checkIncludeList (diskInfo, includeList)
-    diDiskInfo_t     *diskInfo;
-    iList_t           *includeList;
-#endif
 {
     char            *ptr;
     int             i;
@@ -1051,14 +991,7 @@ checkIncludeList (diskInfo, includeList)
 
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
 static void
-# if _proto_stdc
 checkZone (diDiskInfo_t *diskInfo, zoneInfo_t *zoneInfo, unsigned int allFlag)
-# else
-checkZone (diskInfo, zoneInfo, allFlag)
-    diDiskInfo_t *diskInfo;
-    zoneInfo_t   *zoneInfo;
-    unsigned int allFlag;
-# endif
 {
     int         i;
     int         idx = { -1 };
@@ -1160,11 +1093,7 @@ checkZone (diskInfo, zoneInfo, allFlag)
 #endif
 
 extern void
-#if _proto_stdc
 initLocale (void)
-#else
-initLocale ()
-#endif
 {
 #if _enable_nls
   const char      *localeptr;
@@ -1183,12 +1112,7 @@ initLocale ()
 }
 
 extern void
-#if _proto_stdc
 initZones (diData_t *diData)
-#else
-initZones (diData)
-  diData_t      *diData;
-#endif
 {
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
   diData->zoneInfo.uid = geteuid ();
@@ -1273,12 +1197,7 @@ initZones (diData)
 }
 
 static int
-#if _proto_stdc
 isIgnoreSpecial (char *special)
-#else
-isIgnoreSpecial (special)
-  char      *special;
-#endif
 {
   static char   *appletimemachine = "com.apple.TimeMachine.";
 
@@ -1294,12 +1213,7 @@ isIgnoreSpecial (special)
 }
 
 static int
-#if _proto_stdc
 isIgnoreFSType (char *fstype)
-#else
-isIgnoreFSType (fstype)
-  char      *fstype;
-#endif
 {
   if (strcmp (fstype, "rootfs") == 0 ||
       strcmp (fstype, "procfs") == 0 ||
@@ -1314,12 +1228,7 @@ isIgnoreFSType (fstype)
 
 #if _lib_realpath && _define_S_ISLNK && _lib_lstat
 static int
-# if _proto_stdc
 checkForUUID (char *spec)
-# else
-checkForUUID (spec)
-  char      *spec;
-# endif
 {
 /*
  *  /dev/mapper/luks-828fc648-9f30-43d8-a0b1-f7196a2edb66

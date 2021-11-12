@@ -94,14 +94,7 @@ static void setExitFlag         _((diOptions_t *, unsigned int));
 # endif
 
 static void
-#if _proto_stdc
 processStringArgs (char *ptr, diData_t *diData, char *dbsstr)
-#else
-processStringArgs (ptr, diData, dbsstr)
-  char      *ptr;
-  diData_t  *diData;
-  char      *dbsstr;
-#endif
 {
   char        *dptr;
   char        *tptr;
@@ -143,14 +136,7 @@ processStringArgs (ptr, diData, dbsstr)
 }
 
 int
-#if _proto_stdc
 getDIOptions (int argc, const char * const argv[], diData_t *diData)
-#else
-getDIOptions (argc, argv, diData)
-  int           argc;
-  const char    * const argv[];
-  diData_t      *diData;
-#endif
 {
   const char *      argvptr;
   char *            ptr;
@@ -222,20 +208,11 @@ getDIOptions (argc, argv, diData)
 }
 
 static int
-#if _proto_stdc
 processArgs (int argc,
              const char * const argv [],
              diData_t *diData,
              char *dbsstr,
              Size_t dbsstr_sz)
-#else
-processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
-    int             argc;
-    const char      * const argv [];
-    diData_t        *diData;
-    char            *dbsstr;
-    Size_t          dbsstr_sz;
-#endif
 {
   int           i;
   int           optidx;
@@ -643,13 +620,7 @@ processArgs (argc, argv, diData, dbsstr, dbsstr_sz)
 }
 
 static void
-#if _proto_stdc
 processOptions (const char *arg, char *valptr)
-#else
-processOptions (arg, valptr)
-    const char *arg;
-    char *valptr;
-#endif
 {
   struct pa_tmp     *padata;
 
@@ -683,14 +654,7 @@ processOptions (arg, valptr)
 }
 
 static void
-#if _proto_stdc
 processOptionsVal (const char *arg, char *valptr, char *value)
-#else
-processOptionsVal (arg, valptr, value)
-    const char  *arg;
-    char        *valptr;
-    char        *value;
-#endif
 {
   struct pa_tmp     *padata;
   int               rc;
@@ -754,13 +718,7 @@ processOptionsVal (arg, valptr, value)
 }
 
 static int
-#if _proto_stdc
 parseList (iList_t *list, char *str)
-#else
-parseList (list, str)
-    iList_t       *list;
-    char        *str;
-#endif
 {
     char        *dstr;
     char        *ptr;
@@ -825,11 +783,7 @@ parseList (list, str)
  */
 
 static void
-#if _proto_stdc
 usage (void)
-#else
-usage ()
-#endif
 {
     printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
             /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
@@ -859,14 +813,7 @@ usage ()
 }
 
 static void
-#if _proto_stdc
 setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
-#else
-setDispBlockSize (ptr, diopts, diout)
-    char            *ptr;
-    diOptions_t     *diopts;
-    diOutput_t      *diout;
-#endif
 {
   unsigned int    len;
   _print_size_t   val;
@@ -1041,12 +988,7 @@ setDispBlockSize (ptr, diopts, diout)
 
 
 static void
-#if _proto_stdc
 initDisplayTable (diOptions_t *diopts)
-#else
-initDisplayTable (diopts)
-  diOptions_t *diopts;
-#endif
 {
   int       i;
 
@@ -1060,13 +1002,7 @@ initDisplayTable (diopts)
 }
 
 static void
-#if _proto_stdc
 setExitFlag (diOptions_t *diopts, unsigned int exitFlag)
-#else
-setExitFlag (diopts, exitFlag)
-  diOptions_t   *diopts;
-  unsigned int  exitFlag;
-#endif
 {
   if (exitFlag > diopts->exitFlag) {
     diopts->exitFlag = exitFlag;

@@ -341,15 +341,7 @@ quota_open_get (struct quotahandle *qh, int idtype,
 
 #if _has_std_quotas && ! _lib_quota_open && ! _lib_vquotactl
 static int
-# if _proto_stdc
 quotactl_get (diQuota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
-# else
-quotactl_get (diqinfo, cmd, id, qdata)
-  diQuota_t     *diqinfo;
-  int           cmd;
-  Uid_t         id;
-  qdata_t       *qdata;
-# endif
 {
   int       rc;
 
@@ -402,12 +394,7 @@ quotactl_get (diqinfo, cmd, id, qdata)
 #endif /* ! _lib_quota_open */
 
 void
-#if _proto_stdc
 diquota (diQuota_t *diqinfo)
-#else
-diquota (diqinfo)
-  diQuota_t     *diqinfo;
-#endif
 {
   int               rc;
   int               xfsflag;
@@ -513,13 +500,7 @@ diquota (diqinfo)
 #endif
 
 static bool_t
-# if _proto_stdc
 xdr_quota_get (XDR *xp, struct getquota_args *args)
-# else
-xdr_quota_get (xp, args)
-  XDR                   *xp;
-  struct getquota_args  *args;
-# endif
 {
   if (debug > 5) {
     printf ("quota: xdr_quota_get\n");
@@ -535,13 +516,7 @@ xdr_quota_get (xp, args)
 }
 
 static bool_t
-# if _proto_stdc
 xdr_quota_rslt (XDR *xp, struct getquota_rslt *rslt)
-# else
-xdr_quota_rslt (xp, rslt)
-  XDR                   *xp;
-  struct getquota_rslt  *rslt;
-# endif
 {
   int           quotastat;
   struct rquota *rptr;
@@ -595,12 +570,7 @@ xdr_quota_rslt (xp, rslt)
 }
 
 static void
-# if _proto_stdc
 diquota_nfs (diQuota_t *diqinfo)
-# else
-diquota_nfs (diqinfo)
-  diQuota_t     *diqinfo;
-# endif
 {
     CLIENT                  *rqclnt;
     enum clnt_stat          clnt_stat;
@@ -705,17 +675,8 @@ diquota_nfs (diqinfo)
 
 #if _has_std_quotas
 static void
-# if _proto_stdc
 di_process_quotas (const char *tag, diQuota_t *diqinfo,
                   int rc, int xfsflag, qdata_t *qdata)
-# else
-di_process_quotas (tag, diqinfo, rc, xfsflag, qdata)
-  const char    *tag;
-  diQuota_t     *diqinfo;
-  int           rc;
-  int           xfsflag;
-  qdata_t       *qdata;
-# endif
 {
   _fs_size_t        quotBlockSize = { DI_QUOT_BLOCK_SIZE };
   _fs_size_t        spaceBlockSize = { DI_QUOT_BLOCK_SIZE };

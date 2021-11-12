@@ -71,15 +71,7 @@ typedef void (*getoptn_func_bool_t) _((const char *option, void *valptr));
 typedef void (*getoptn_func_value_t) _((const char *option, void *valptr, const char *value));
 
 static int
-#if _proto_stdc
 find_option (getoptn_info_t *info, const char *arg, const char *oarg, Size_t *argidx)
-#else
-find_option (info, arg, oarg, argidx)
-    getoptn_info_t  *info;
-    const char      *arg;
-    const char      *oarg;
-    Size_t          *argidx;
-#endif
 {
   int       i;
   Size_t    junk;
@@ -143,13 +135,7 @@ find_option (info, arg, oarg, argidx)
 }
 
 static const char *
-#if _proto_stdc
 getoption_value (getoptn_info_t *info, getoptn_opt_t *opt)
-#else
-getoption_value (info, opt)
-    getoptn_info_t      *info;
-    getoptn_opt_t       *opt;
-#endif
 {
   const char    *ptr;
 
@@ -173,17 +159,8 @@ getoption_value (info, opt)
 }
 
 static int
-#if _proto_stdc
 dooptchecks (getoptn_info_t *info, getoptn_opt_t *opt,
      getoptn_optinfo_t *optinfo, const char *tag, Size_t sz)
-#else
-dooptchecks (info, opt, optinfo, tag, sz)
-    getoptn_info_t      *info;
-    getoptn_opt_t       *opt;
-    getoptn_optinfo_t   *optinfo;
-    const char          *tag;
-    Size_t              sz;
-#endif
 {
   if (sz != 0 && opt->valsiz != sz) {
     fprintf (stderr, "%s: %s: invalid size (line %d)\n", info->argv[0], tag, optinfo->idx);
@@ -198,14 +175,7 @@ dooptchecks (info, opt, optinfo, tag, sz)
 }
 
 static int
-#if _proto_stdc
 process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinfo)
-#else
-process_opt (info, opt, optinfo)
-    getoptn_info_t  *info;
-    getoptn_opt_t   *opt;
-    getoptn_optinfo_t *optinfo;
-#endif
 {
   const char    *ptr;
 
@@ -302,18 +272,8 @@ process_opt (info, opt, optinfo)
 
 
 int
-#if _proto_stdc
 getoptn (int style, int argc, const char * const argv [],
          Size_t optcount, getoptn_opt_t opts [], int *errorCount)
-#else
-getoptn (style, argc, argv, optcount, opts, errorCount)
-    int         style;
-    int         argc;
-    const char * const argv [];
-    Size_t      optcount;
-    getoptn_opt_t opts [];
-    int         *errorCount;
-#endif
 {
   int               i;
   int               rc;
@@ -396,13 +356,7 @@ getoptn (style, argc, argv, optcount, opts, errorCount)
 #endif
 
 static void
-#if _proto_stdc
 process_opts (const char *arg, char *valptr)
-#else
-process_opts (arg, valptr)
-    const char  *arg;
-    char        *valptr;
-#endif
 {
   if (strcmp (arg, "-h") == 0) {
     double *v;
@@ -413,14 +367,7 @@ process_opts (arg, valptr)
 }
 
 static void
-#if _proto_stdc
 process_opts_val (const char *arg, char *valptr, char *value)
-#else
-process_opts_val (arg, valptr, value)
-    const char      *arg;
-    char            *valptr;
-    char            *value;
-#endif
 {
   if (strcmp (arg, "-g") == 0) {
     double *v;
@@ -431,13 +378,7 @@ process_opts_val (arg, valptr, value)
 }
 
 int
-#if _proto_stdc
 main (int argc, const char * const argv[])
-#else
-main (argc, argv)
-    int                 argc;
-    const char * const  argv[];
-#endif
 {
   char      tmp[40];
   char      s[40];

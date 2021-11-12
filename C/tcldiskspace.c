@@ -72,12 +72,7 @@ static char *diproc _((int, const char **, diData_t *));
 #endif
 
 int
-#if _proto_stdc
 Diskspace_Init (Tcl_Interp *interp)
-#else
-Diskspace_Init (interp)
-  Tcl_Interp *interp;
-#endif
 {
 #if _use_mcheck
   mcheck_pedantic (NULL);
@@ -93,20 +88,12 @@ Diskspace_Init (interp)
 }
 
 int
-#if _proto_stdc
 diskspaceObjCmd (
   ClientData cd,
   Tcl_Interp *interp,
   int objc,
   Tcl_Obj * const objv[]
   )
-#else
-diskspaceObjCmd (interp, objc, objv)
-  ClientData        cd;
-  Tcl_Interp        *interp;
-  int               objc;
-  Tcl_Obj * const   objv[];
-#endif
 {
   const char        **argv;
   char              *rv;
@@ -205,16 +192,8 @@ diskspaceObjCmd (interp, objc, objv)
 }
 
 static void
-#if _proto_stdc
 addListToDict (Tcl_Interp *interp, Tcl_Obj *dict,
         const char *nm, char *val)
-#else
-addListToDict (interp, dict, nm, val)
-  Tcl_Interp *interp;
-  Tcl_Obj *dict;
-  const char *nm;
-  char *val;
-#endif
 {
   Tcl_Obj           *tempObj;
   Tcl_Obj           *tempObj1;
@@ -234,16 +213,8 @@ addListToDict (interp, dict, nm, val)
 }
 
 static void
-#if _proto_stdc
 addStringToDict (Tcl_Interp *interp, Tcl_Obj *dict,
         const char *nm, const char *val)
-#else
-addStringToDict (interp, dict, nm, val)
-  Tcl_Interp *interp;
-  Tcl_Obj *dict;
-  const char *nm;
-  const char *val;
-#endif
 {
   Tcl_Obj           *tempObj1;
   Tcl_Obj           *tempObj2;
@@ -254,16 +225,8 @@ addStringToDict (interp, dict, nm, val)
 }
 
 static void
-#if _proto_stdc
 addWideToDict (Tcl_Interp *interp, Tcl_Obj *dict,
         const char *nm, _fs_size_t val)
-#else
-addWideToDict (interp, dict, nm, val)
-  Tcl_Interp *interp;
-  Tcl_Obj *dict;
-  const char *nm;
-  _fs_size_t val;
-#endif
 {
   Tcl_Obj           *tempObj1;
   Tcl_Obj           *tempObj2;
@@ -277,14 +240,7 @@ addWideToDict (interp, dict, nm, val)
 
 
 static char *
-#if _proto_stdc
 diproc (int argc, const char **argv, diData_t *diData)
-#else
-diproc (argc, argv)
-    int argc;
-    const char **argv;
-    diData_t   *diData;
-#endif
 {
   char      *disp;
 

@@ -22,13 +22,7 @@
 # endif
 
 char *
-# if _proto_stdc
 strstr (const char *buff, const char *srch)
-# else
-strstr (buff, srch)
-  const char *buff;
-  const char *srch;
-# endif
 {
   Size_t    len;
   char *    p;

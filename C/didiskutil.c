@@ -56,12 +56,7 @@
 */
 
 void
-#if _proto_stdc
 di_initDiskInfo (diDiskInfo_t *diptr)
-#else
-di_initDiskInfo (diptr)
-    diDiskInfo_t        *diptr;
-#endif
 {
     memset ((char *) diptr, '\0', sizeof (diDiskInfo_t));
     diptr->printFlag = DI_PRNT_OK;
@@ -71,18 +66,9 @@ di_initDiskInfo (diptr)
 }
 
 void
-#if _proto_stdc
 di_saveBlockSizes (diDiskInfo_t *diptr, _fs_size_t block_size,
         _fs_size_t total_blocks, _fs_size_t free_blocks,
         _fs_size_t avail_blocks)
-#else
-di_saveBlockSizes (diptr, block_size, total_blocks, free_blocks, avail_blocks)
-    diDiskInfo_t *diptr;
-    _fs_size_t block_size;
-    _fs_size_t total_blocks;
-    _fs_size_t free_blocks;
-    _fs_size_t avail_blocks;
-#endif
 {
     diptr->totalSpace = (_fs_size_t) total_blocks * (_fs_size_t) block_size;
     diptr->freeSpace = (_fs_size_t) free_blocks * (_fs_size_t) block_size;
@@ -90,17 +76,9 @@ di_saveBlockSizes (diptr, block_size, total_blocks, free_blocks, avail_blocks)
 }
 
 void
-#if _proto_stdc
 di_saveInodeSizes (diDiskInfo_t *diptr,
         _fs_size_t total_nodes, _fs_size_t free_nodes,
         _fs_size_t avail_nodes)
-#else
-di_saveInodeSizes (diptr, total_nodes, free_nodes, avail_nodes)
-    diDiskInfo_t *diptr;
-    _fs_size_t total_nodes;
-    _fs_size_t free_nodes;
-    _fs_size_t avail_nodes;
-#endif
 {
     diptr->totalInodes = total_nodes;
     diptr->freeInodes = free_nodes;
@@ -108,13 +86,7 @@ di_saveInodeSizes (diptr, total_nodes, free_nodes, avail_nodes)
 }
 
 void
-#if _proto_stdc
 convertMountOptions (unsigned long flags, diDiskInfo_t *diptr)
-#else
-convertMountOptions (flags, diptr)
-    unsigned long  flags;
-    diDiskInfo_t   *diptr;
-#endif
 {
 #if defined (MNT_RDONLY)
     if ((flags & MNT_RDONLY) == MNT_RDONLY)
@@ -356,15 +328,7 @@ convertMountOptions (flags, diptr)
 }
 
 void
-#if _proto_stdc
 convertNFSMountOptions (long flags, long wsize, long rsize, diDiskInfo_t *diptr)
-#else
-convertNFSMountOptions (flags, wsize, rsize, diptr)
-    long          flags;
-    long          wsize;
-    long          rsize;
-    diDiskInfo_t   *diptr;
-#endif
 {
 #if defined (NFSMNT_SOFT)
     if ((flags & NFSMNT_SOFT) != NFSMNT_SOFT)
@@ -420,13 +384,7 @@ convertNFSMountOptions (flags, wsize, rsize, diptr)
 	&& ! _class_os__Volumes
 
 char *
-#if _proto_stdc
 chkMountOptions (const char *mntopts, const char *str)
-#else
-chkMountOptions (mntopts, str)
-    const char          *mntopts;
-    const char          *str;
-#endif
 {
     char    *ptr;
     char    *tstr;
@@ -454,12 +412,7 @@ chkMountOptions (mntopts, str)
 #endif /* _lib_getmntent */
 
 void
-#if _proto_stdc
 di_testRemoteDisk (diDiskInfo_t *diskInfo)
-#else
-di_testRemoteDisk (diskInfo)
-    diDiskInfo_t *diskInfo;
-#endif
 {
   if (strncmp (diskInfo->fsType, "nfs", 3) == 0)
   {
@@ -468,12 +421,7 @@ di_testRemoteDisk (diskInfo)
 }
 
 int
-#if _proto_stdc
 di_isPooledFs (diDiskInfo_t *diskInfo)
-#else
-di_isPooledFs (diskInfo)
-    diDiskInfo_t *diskInfo;
-#endif
 {
   if (strcmp (diskInfo->fsType, "zfs") == 0 ||
       strcmp (diskInfo->fsType, "advfs") == 0 ||
@@ -486,12 +434,7 @@ di_isPooledFs (diskInfo)
 }
 
 int
-#if _proto_stdc
 di_isLoopbackFs (diDiskInfo_t *diskInfo)
-#else
-di_isLoopbackFs (diskInfo)
-    diDiskInfo_t *diskInfo;
-#endif
 {
   if ((strcmp (diskInfo->fsType, "lofs") == 0 && diskInfo->sp_rdev != 0) ||
       (strcmp (diskInfo->fsType, "nullfs") == 0 &&
@@ -503,12 +446,7 @@ di_isLoopbackFs (diskInfo)
 }
 
 Size_t
-#if _proto_stdc
 di_mungePoolName (char *poolname)
-#else
-di_mungePoolName (poolname)
-  char      *poolname;
-#endif
 {
   char      *ptr;
 

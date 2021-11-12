@@ -219,13 +219,7 @@ static char *checkMountOptions      _((struct mnttab *, char *));
  */
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     FILE            *f;
@@ -298,13 +292,7 @@ di_getDiskEntries (diskInfo, diCount)
 }
 
 static char *
-# if _proto_stdc
 checkMountOptions (struct mnttab *mntEntry, char *str)
-# else
-checkMountOptions (mntEntry, str)
-    struct mnttab *mntEntry;
-    char          *str;
-# endif
 {
 # if _lib_hasmntopt
     return hasmntopt (mntEntry, str);
@@ -338,13 +326,7 @@ checkMountOptions (mntEntry, str)
 #endif
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t    *diptr;
     FILE            *f;
@@ -454,27 +436,14 @@ di_getDiskEntries (diskInfo, diCount)
  */
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     if (debug > 0) { printf ("# getDiskEntries: QNX\n"); }
     return di_getQNXDiskEntries ("/proc/mount", diskInfo, diCount);
 }
 
 static int
-# if _proto_stdc
 di_getQNXDiskEntries (char *ipath, diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getQNXDiskEntries (ipath, diskInfo, diCount)
-    char *ipath;
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t    *diptr;
     int             idx;
@@ -602,13 +571,7 @@ di_getQNXDiskEntries (ipath, diskInfo, diCount)
  */
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t    *diptr;
     FILE             *f;
@@ -689,13 +652,7 @@ di_getDiskEntries (diskInfo, diCount)
 # endif
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     int             count;
@@ -852,13 +809,7 @@ di_getDiskEntries (diskInfo, diCount)
 # endif
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     int             count;
@@ -1126,13 +1077,7 @@ di_getDiskEntries (diskInfo, diCount)
  */
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     int             count;
@@ -1255,13 +1200,7 @@ di_getDiskEntries (diskInfo, diCount)
  */
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     int             count;
@@ -1405,13 +1344,7 @@ static char *AIX_fsType [NUM_AIX_FSTYPES] =
 #define DI_RETRY_COUNT         5
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     int             num;        /* number of vmount structs returned    */
@@ -1558,13 +1491,7 @@ di_getDiskEntries (diskInfo, diCount)
 # define BYTES_PER_LOGICAL_DRIVE    4
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     int             i;
@@ -1663,13 +1590,7 @@ di_getDiskEntries (diskInfo, diCount)
  */
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t     *diptr;
     status_t        stat;
@@ -1760,13 +1681,7 @@ di_getDiskEntries (diskInfo, diCount)
  */
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
     diDiskInfo_t    *diptr;
     int             idx;
@@ -1914,13 +1829,7 @@ genericID_t devInfoList[] =
 
 
 int
-# if _proto_stdc
 di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-# else
-di_getDiskEntries (diskInfo, diCount)
-    diDiskInfo_t **diskInfo;
-    int *diCount;
-# endif
 {
   diDiskInfo_t    *diptr;
   int             idx;

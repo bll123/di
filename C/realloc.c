@@ -29,13 +29,7 @@
  */
 
 _pvoid
-#if _proto_stdc
 di_realloc (_pvoid ptr, Size_t size)
-#else
-di_realloc (ptr, size)
-    _pvoid      ptr;
-    Size_t      size;
-#endif
 {
     if (ptr == (_pvoid) NULL)
     {
