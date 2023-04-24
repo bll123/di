@@ -79,7 +79,7 @@ static dispTable_t dispTable [] =
 
 extern int debug;
 
-static void processStringArgs   _((char *, diData_t *, char *));
+static void processStringArgs   _((const char *, char *, diData_t *, char *));
 static int  processArgs         _((int, const char * const [], diData_t *, char *, Size_t));
 static int  parseList           _((iList_t *, char *));
 static void processOptions      _((const char *, char *));
@@ -94,7 +94,8 @@ static void setExitFlag         _((diOptions_t *, unsigned int));
 # endif
 
 static void
-processStringArgs (char *ptr, diData_t *diData, char *dbsstr)
+processStringArgs (const char *progname, char *ptr, diData_t *diData,
+    char *dbsstr)
 {
   char        *dptr;
   char        *tptr;
@@ -110,27 +111,33 @@ processStringArgs (char *ptr, diData_t *diData, char *dbsstr)
 
   dptr = (char *) NULL;
   dptr = strdup (ptr);
-  if (dptr == (char *) NULL)
-  {
-      fprintf (stderr, "strdup failed in main() (1).  errno %d\n", errno);
-      setExitFlag (diopts, DI_EXIT_FAIL);
-      return;
+  if (dptr == (char *) NULL) {
+    fprintf (stderr, "strdup failed in main() (1).  errno %d\n", errno);
+    setExitFlag (diopts, DI_EXIT_FAIL);
+    return;
   }
-  if (dptr != (char *) NULL)
-  {
+  if (dptr != (char *) NULL) {
+    int optidx;
+
     tptr = strtok (dptr, DI_ARGV_SEP);
     nargc = 1;
-    nargv[0] = "";
-    while (tptr != (char *) NULL)
-    {
-        if (nargc >= DI_MAX_ARGV)
-        {
-            break;
-        }
-        nargv[nargc++] = tptr;
-        tptr = strtok ((char *) NULL, DI_ARGV_SEP);
+    nargv[0] = progname;
+    while (tptr != (char *) NULL) {
+      if (nargc >= DI_MAX_ARGV) {
+        break;
+      }
+      nargv[nargc++] = tptr;
+      tptr = strtok ((char *) NULL, DI_ARGV_SEP);
     }
-    processArgs (nargc, nargv, diData, dbsstr, sizeof (dbsstr) - 1);
+    optidx = processArgs (nargc, nargv, diData, dbsstr, sizeof (dbsstr) - 1);
+    if (optidx < nargc) {
+      fprintf (stderr, "%s: unknown data found in DI_ARGS: %s\n",
+          progname, nargv [optidx]);
+      diopts->errorCount += 1;
+      if (diopts->errorCount > 0) {
+        setExitFlag (diopts, DI_EXIT_WARN);
+      }
+    }
     free ((char *) dptr);
   }
 }
@@ -182,24 +189,40 @@ getDIOptions (int argc, const char * const argv[], diData_t *diData)
   }
 
   if ((ptr = getenv ("DI_ARGS")) != (char *) NULL) {
-    if (debug > 0) {
-      printf ("# DI_ARGS:%s\n", ptr);
-    }
-    processStringArgs (ptr, diData, dbsstr);
+    processStringArgs (argv [0], ptr, diData, dbsstr);
   }
+
+  optidx = processArgs (argc, argv, diData, dbsstr, sizeof (dbsstr) - 1);
 
   if (debug > 0) {
     int j;
+
     printf ("# ARGS:");
-    for (j = 0; j < argc; ++j)
-    {
+    for (j = 0; j < argc; ++j) {
       printf (" %s", argv[j]);
     }
     printf ("\n");
     printf ("# blocksize: %s\n", dbsstr);
+
+    if (memcmp (argvptr, "mi", (Size_t) 2) != 0) {
+      if ((ptr = getenv ("DIFMT")) != (char *) NULL) {
+        printf ("# DIFMT:%s\n", ptr);
+      }
+    }
+
+    if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL) {
+      printf ("# POSIXLY_CORRECT:%s\n", ptr);
+    }
+    if ((ptr = getenv ("BLOCKSIZE")) != (char *) NULL) {
+      printf ("# BLOCKSIZE:%s\n", ptr);
+    }
+    if ((ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL) {
+      printf ("# DF_BLOCK_SIZE:%s\n", ptr);
+    }
+    if ((ptr = getenv ("DI_ARGS")) != (char *) NULL) {
+      printf ("# DI_ARGS:%s\n", ptr);
+    }
   }
-  optidx = processArgs (argc, argv, diData, dbsstr,
-      sizeof (dbsstr) - 1);
 
   initDisplayTable (diopts);
   setDispBlockSize (dbsstr, diopts, diout);
@@ -632,8 +655,8 @@ processOptions (const char *arg, char *valptr)
     usage();
     setExitFlag (padata->diopts, DI_EXIT_OK);
   } else if (strcmp (arg, "-P") == 0) {
-    if (strcmp (padata->dbsstr, "k") != 0) /* don't override -k option */
-    {
+    /* don't override -k option */
+    if (strcmp (padata->dbsstr, "k") != 0) {
       strncpy (padata->dbsstr, "512", padata->dbsstr_sz);
     }
     padata->diopts->formatString = DI_POSIX_FORMAT;
@@ -662,23 +685,18 @@ processOptionsVal (const char *arg, char *valptr, char *value)
   padata = (struct pa_tmp *) valptr;
 
   if (strcmp (arg, "-B") == 0) {
-    if (isdigit ((int) (*value)))
-    {
+    if (isdigit ((int) (*value))) {
       padata->diopts->baseDispSize = (_print_size_t) atof (value);
       padata->diopts->baseDispIdx = DI_DISP_1000_IDX; /* unknown, really */
       if (padata->diopts->baseDispSize == (_print_size_t) DI_VAL_1024)
       {
         padata->diopts->baseDispIdx = DI_DISP_1024_IDX;
       }
-    }
-    else if (strcmp (value, "k") == 0)
-    {
+    } else if (strcmp (value, "k") == 0) {
       padata->diopts->baseDispSize = (_print_size_t) DI_VAL_1024;
       padata->diopts->baseDispIdx = DI_DISP_1024_IDX;
     }
-    else if (strcmp (value, "d") == 0 ||
-        strcmp (value, "si") == 0)
-    {
+    else if (strcmp (value, "d") == 0 || strcmp (value, "si") == 0) {
       padata->diopts->baseDispSize = (_print_size_t) DI_VAL_1000;
       padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
     }
@@ -692,13 +710,11 @@ processOptionsVal (const char *arg, char *valptr, char *value)
     strncpy (padata->diopts->sortType, value, DI_SORT_MAX);
       /* for backwards compatibility                       */
       /* reverse by itself - change to reverse mount point */
-    if (strcmp (padata->diopts->sortType, "r") == 0)
-    {
+    if (strcmp (padata->diopts->sortType, "r") == 0) {
         strncpy (padata->diopts->sortType, "rm", DI_SORT_MAX);
     }
         /* add some sense to the sort order */
-    if (strcmp (padata->diopts->sortType, "t") == 0)
-    {
+    if (strcmp (padata->diopts->sortType, "t") == 0) {
         strncpy (padata->diopts->sortType, "tm", DI_SORT_MAX);
     }
   } else if (strcmp (arg, "-x") == 0) {
@@ -720,61 +736,57 @@ processOptionsVal (const char *arg, char *valptr, char *value)
 static int
 parseList (iList_t *list, char *str)
 {
-    char        *dstr;
-    char        *ptr;
-    char        *lptr;
-    int         count;
-    int         ocount;
-    int         ncount;
-    int         i;
-    unsigned int len;
+  char        *dstr;
+  char        *ptr;
+  char        *lptr;
+  int         count;
+  int         ocount;
+  int         ncount;
+  int         i;
+  unsigned int len;
 
-    dstr = strdup (str);
-    if (dstr == (char *) NULL)
-    {
-      fprintf (stderr, "strdup failed in parseList() (1).  errno %d\n", errno);
-      return 1;
-    }
+  dstr = strdup (str);
+  if (dstr == (char *) NULL)
+  {
+    fprintf (stderr, "strdup failed in parseList() (1).  errno %d\n", errno);
+    return 1;
+  }
 
-    ptr = strtok (dstr, DI_LIST_SEP);
-    count = 0;
-    while (ptr != (char *) NULL)
-    {
-        ++count;
-        ptr = strtok ((char *) NULL, DI_LIST_SEP);
-    }
+  ptr = strtok (dstr, DI_LIST_SEP);
+  count = 0;
+  while (ptr != (char *) NULL) {
+    ++count;
+    ptr = strtok ((char *) NULL, DI_LIST_SEP);
+  }
 
-    ocount = list->count;
-    list->count += count;
-    ncount = list->count;
-    list->list = (char **) di_realloc ((char *) list->list,
-            (Size_t) list->count * sizeof (char *));
-    if (list->list == (char **) NULL)
-    {
-      fprintf (stderr, "malloc failed in parseList() (2).  errno %d\n", errno);
+  ocount = list->count;
+  list->count += count;
+  ncount = list->count;
+  list->list = (char **) di_realloc ((char *) list->list,
+      (Size_t) list->count * sizeof (char *));
+  if (list->list == (char **) NULL) {
+    fprintf (stderr, "malloc failed in parseList() (2).  errno %d\n", errno);
+    free ((char *) dstr);
+    return 1;
+  }
+
+  ptr = dstr;
+  for (i = ocount; i < ncount; ++i) {
+    len = (unsigned int) strlen (ptr);
+    lptr = (char *) malloc ((Size_t) len + 1);
+    if (lptr == (char *) NULL) {
+      fprintf (stderr, "malloc failed in parseList() (3).  errno %d\n", errno);
       free ((char *) dstr);
       return 1;
     }
+    strncpy (lptr, ptr, (Size_t) len);
+    lptr[len] = '\0';
+    list->list [i] = lptr;
+    ptr += len + 1;
+  }
 
-    ptr = dstr;
-    for (i = ocount; i < ncount; ++i)
-    {
-        len = (unsigned int) strlen (ptr);
-        lptr = (char *) malloc ((Size_t) len + 1);
-        if (lptr == (char *) NULL)
-        {
-          fprintf (stderr, "malloc failed in parseList() (3).  errno %d\n", errno);
-          free ((char *) dstr);
-          return 1;
-        }
-        strncpy (lptr, ptr, (Size_t) len);
-        lptr[len] = '\0';
-        list->list [i] = lptr;
-        ptr += len + 1;
-    }
-
-    free ((char *) dstr);
-    return 0;
+  free ((char *) dstr);
+  return 0;
 }
 
 
@@ -785,31 +797,31 @@ parseList (iList_t *list, char *str)
 static void
 usage (void)
 {
-    printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
-            /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
-    printf (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
-    printf (DI_GT("       [-I include-fstyp-list] [file [...]]\n"));
-    printf (DI_GT("   -a   : print all mounted devices\n"));
-    printf (DI_GT("   -d x : size to print blocks in (512 - POSIX, k - kbytes,\n"));
-    printf (DI_GT("          m - megabytes, g - gigabytes, t - terabytes, h - human readable).\n"));
-    printf (DI_GT("   -f x : use format string <x>\n"));
-    printf (DI_GT("   -I x : include only file system types in <x>\n"));
-    printf (DI_GT("   -x x : exclude file system types in <x>\n"));
-    printf (DI_GT("   -l   : display local filesystems only\n"));
-    printf (DI_GT("   -n   : don't print header\n"));
-    printf (DI_GT("   -t   : print totals\n"));
-    printf (DI_GT(" Format string values:\n"));
-    printf (DI_GT("    m - mount point                     M - mount point, full length\n"));
-    printf (DI_GT("    b - total kbytes                    B - kbytes available for use\n"));
-    printf (DI_GT("    u - used kbytes                     c - calculated kbytes in use\n"));
-    printf (DI_GT("    f - kbytes free                     v - kbytes available\n"));
-    printf (DI_GT("    p - percentage not avail. for use   1 - percentage used\n"));
-    printf (DI_GT("    2 - percentage of user-available space in use.\n"));
-    printf (DI_GT("    i - total file slots (i-nodes)      U - used file slots\n"));
-    printf (DI_GT("    F - free file slots                 P - percentage file slots used\n"));
-    printf (DI_GT("    s - filesystem name                 S - filesystem name, full length\n"));
-    printf (DI_GT("    t - disk partition type             T - partition type, full length\n"));
-    printf (DI_GT("See manual page for more options.\n"));
+  printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
+          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
+  printf (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
+  printf (DI_GT("       [-I include-fstyp-list] [file [...]]\n"));
+  printf (DI_GT("   -a   : print all mounted devices\n"));
+  printf (DI_GT("   -d x : size to print blocks in (512 - POSIX, k - kbytes,\n"));
+  printf (DI_GT("          m - megabytes, g - gigabytes, t - terabytes, h - human readable).\n"));
+  printf (DI_GT("   -f x : use format string <x>\n"));
+  printf (DI_GT("   -I x : include only file system types in <x>\n"));
+  printf (DI_GT("   -x x : exclude file system types in <x>\n"));
+  printf (DI_GT("   -l   : display local filesystems only\n"));
+  printf (DI_GT("   -n   : don't print header\n"));
+  printf (DI_GT("   -t   : print totals\n"));
+  printf (DI_GT(" Format string values:\n"));
+  printf (DI_GT("    m - mount point                     M - mount point, full length\n"));
+  printf (DI_GT("    b - total kbytes                    B - kbytes available for use\n"));
+  printf (DI_GT("    u - used kbytes                     c - calculated kbytes in use\n"));
+  printf (DI_GT("    f - kbytes free                     v - kbytes available\n"));
+  printf (DI_GT("    p - percentage not avail. for use   1 - percentage used\n"));
+  printf (DI_GT("    2 - percentage of user-available space in use.\n"));
+  printf (DI_GT("    i - total file slots (i-nodes)      U - used file slots\n"));
+  printf (DI_GT("    F - free file slots                 P - percentage file slots used\n"));
+  printf (DI_GT("    s - filesystem name                 S - filesystem name, full length\n"));
+  printf (DI_GT("    t - disk partition type             T - partition type, full length\n"));
+  printf (DI_GT("See manual page for more options.\n"));
 }
 
 static void
@@ -821,127 +833,103 @@ setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
   static char     tempbl [15];
   char            ttempbl [15];
 
-  if (isdigit ((int) (*ptr)))
-  {
-      val = (_print_size_t) atof (ptr);
-  }
-  else
-  {
-      val = (_print_size_t) 1.0;
+  if (isdigit ((int) (*ptr))) {
+    val = (_print_size_t) atof (ptr);
+  } else {
+    val = (_print_size_t) 1.0;
   }
 
   tptr = ptr;
   len = (unsigned int) strlen (ptr);
-  if (! isdigit ((int) *tptr))
-  {
+  if (! isdigit ((int) *tptr)) {
     int             idx;
 
     idx = -1;
-    switch (*tptr)
-    {
+    switch (*tptr) {
       case 'k':
-      case 'K':
-      {
-          idx = DI_ONE_K;
-          break;
+      case 'K': {
+        idx = DI_ONE_K;
+        break;
       }
 
       case 'm':
-      case 'M':
-      {
-          idx = DI_ONE_MEG;
-          break;
+      case 'M': {
+        idx = DI_ONE_MEG;
+        break;
       }
 
       case 'g':
-      case 'G':
-      {
-          idx = DI_ONE_GIG;
-          break;
+      case 'G': {
+        idx = DI_ONE_GIG;
+        break;
       }
 
       case 't':
-      case 'T':
-      {
-          idx = DI_ONE_TERA;
-          break;
+      case 'T': {
+        idx = DI_ONE_TERA;
+        break;
       }
 
       case 'p':
-      case 'P':
-      {
-          idx = DI_ONE_PETA;
-          break;
+      case 'P': {
+        idx = DI_ONE_PETA;
+        break;
       }
 
       case 'e':
-      case 'E':
-      {
-          idx = DI_ONE_EXA;
-          break;
+      case 'E': {
+        idx = DI_ONE_EXA;
+        break;
       }
 
       case 'z':
-      case 'Z':
-      {
-          idx = DI_ONE_ZETTA;
-          break;
+      case 'Z': {
+        idx = DI_ONE_ZETTA;
+        break;
       }
 
       case 'y':
-      case 'Y':
-      {
-          idx = DI_ONE_YOTTA;
-          break;
+      case 'Y': {
+        idx = DI_ONE_YOTTA;
+        break;
       }
 
-      case 'h':
-      {
+      case 'h': {
+        val = (_print_size_t) DI_DISP_HR;
+        diout->dispBlockLabel = "Size";
+        break;
+      }
+
+      case 'H': {
+        val = (_print_size_t) DI_DISP_HR_2;
+        diout->dispBlockLabel = "Size";
+        break;
+      }
+
+      default: {
+        if (strncmp (ptr, "HUMAN", (Size_t) 5) == 0) {
           val = (_print_size_t) DI_DISP_HR;
-          diout->dispBlockLabel = "Size";
-          break;
-      }
-
-      case 'H':
-      {
-          val = (_print_size_t) DI_DISP_HR_2;
-          diout->dispBlockLabel = "Size";
-          break;
-      }
-
-      default:
-      {
-          if (strncmp (ptr, "HUMAN", (Size_t) 5) == 0)
-          {
-              val = (_print_size_t) DI_DISP_HR;
-          }
-          else
-          {
-              /* some unknown string value */
-            idx = DI_ONE_MEG;
-          }
-          break;
+        } else {
+          /* some unknown string value */
+          idx = DI_ONE_MEG;
+        }
+        break;
       }
     }
 
-    if (idx >= 0)
-    {
-      if (len > 1)
-      {
+    if (idx >= 0) {
+      if (len > 1) {
         ++tptr;
-        if (*tptr == 'B')
-        {
+        if (*tptr == 'B') {
            diopts->baseDispSize = (_print_size_t) DI_VAL_1000;
            diopts->baseDispIdx = DI_DISP_1000_IDX;
         }
       }
 
-      if (val == (_print_size_t) 1.0)
-      {
+      if (val == (_print_size_t) 1.0) {
         diout->dispBlockLabel = dispTable [idx].disp [diopts->baseDispIdx];
       }
-      else
-      {
+      else {
         Snprintf1 (ttempbl, sizeof (tempbl), "%%.0%s %%s", DI_Lf);
         Snprintf2 (tempbl, sizeof (tempbl), ttempbl,
             val, DI_GT (dispTable [idx].disp [diopts->baseDispIdx]));
@@ -949,37 +937,30 @@ setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
       }
       val *= dispTable [idx].size;
     } /* known size multiplier */
-  }
-  else
-  {
+  } else {
     int         i;
     int         ok;
 
     ok = 0;
-    for (i = 0; i < (int) DI_DISPTAB_SIZE; ++i)
-    {
-      if (val == dispTable [i].size)
-      {
+    for (i = 0; i < (int) DI_DISPTAB_SIZE; ++i) {
+      if (val == dispTable [i].size) {
         diout->dispBlockLabel = dispTable [i].disp [diopts->baseDispIdx];
         ok = 1;
         break;
       }
     }
 
-    if (ok == 0)
-    {
+    if (ok == 0) {
       Snprintf1 (ttempbl, sizeof (ttempbl), "%%.0%sb", DI_Lf);
       Snprintf1 (tempbl, sizeof (tempbl), ttempbl, val);
       diout->dispBlockLabel = tempbl;
     }
   }  /* some oddball block size */
 
-  if (diopts->posix_compat && val == (_print_size_t) DI_VAL_512)
-  {
+  if (diopts->posix_compat && val == (_print_size_t) DI_VAL_512) {
     diout->dispBlockLabel = "512-blocks";
   }
-  if (diopts->posix_compat && val == (_print_size_t) DI_VAL_1024)
-  {
+  if (diopts->posix_compat && val == (_print_size_t) DI_VAL_1024) {
     diout->dispBlockLabel = "1024-blocks";
   }
 
@@ -994,8 +975,7 @@ initDisplayTable (diOptions_t *diopts)
 
       /* initialize dispTable array */
   dispTable [0].size = diopts->baseDispSize;
-  for (i = 1; i < (int) DI_DISPTAB_SIZE; ++i)
-  {
+  for (i = 1; i < (int) DI_DISPTAB_SIZE; ++i) {
     dispTable [i].size = dispTable [i - 1].size *
         diopts->baseDispSize;
   }

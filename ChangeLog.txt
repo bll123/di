@@ -6,6 +6,8 @@ CHANGES
         Remove support for K&R compilers and ancient systems.
         Mac OS: apfs filesystems with a mount point starting with /System/
           are ignored by default.
+        Fix debug output for env vars.
+        DI_ARGS: print error and exit when encountering unknown data.
 
     4.51                                    2021-11-8
         Handle permission denied errors.
