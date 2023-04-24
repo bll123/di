@@ -34,18 +34,18 @@ INSTALLATION
     make -e
     make -e install
   Example to change compiler and prefix:
-    CC=gcc PREFIX=/opt/bin make -e
+    CC=gcc prefix=/opt/bin make -e
 
   If you don't have a bourne shell compatible shell,
   Try building with perl:
       make -e all-perl
 
-  The CC, CFLAGS, CPPFLAGS, PREFIX, LDFLAGS, and LIBS environment
+  The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.  This
   will override any settings in 'dioptions.dat'.
 
-  The LOCALEDIR environment variable defaults to ${PREFIX}/share/locale.
-  The installation uses the INSTALL_DIR (default ${PREFIX}),
+  The LOCALEDIR environment variable defaults to ${prefix}/share/locale.
+  The installation uses the INSTALL_DIR (default ${prefix}),
   INSTALL_BIN_DIR ($INSTALL_DIR/bin), and INST_LOCALEDIR
   ($INSTALL_DIR/share/locale) environment variables for installation.
 
@@ -258,35 +258,33 @@ ACKNOWLEDGEMENTS
 
     And for their comments/source/manual pages and/or bug fixes, thanks!
 
-        jjb@NOSPAM-jagware.bcc.com (J.J.Bailey)
-        vogelke@NOSPAM-c-17igp.wpafb.af.mil (Contr Karl Vogel) [pyramid]
-        costales@NOSPAM-ICSI.Berkeley.EDU (Bryan Costales)
-        Mark Neale <mark@NOSPAM-edscom.demon.co.uk>
-        Pat Myrto <pat@NOSPAM-rwing.uucp> [sunOS filesystem type stuff]
-        henrikar@NOSPAM-utctu1.ct.utwente.nl (Henri Karrenbeld) [sgi]
-        Peter Bray <Peter.Bray@NOSPAM-serg.cse.unsw.edu.au>
-        gsipe@NOSPAM-pyramid.com (George M. Sipe) [manual page]
-        Jeffrey Mogul <mogul@NOSPAM-pa.dec.com>
-            [ultrix, osf/1, manual page, new format options]
-        thomas@NOSPAM-idx.kodak.com (Th. Bullinger) [help usage]
-        Seth Theriault <seth@NOSPAM-connact.com> [next, tru64]
-        steve@NOSPAM-nshore.org (Stephen J. Walick) [SCO]
-        Gerald Rinske <gerald@NOSPAM-D012F291.mch.sni.de> [sgi]
-        Mike Grupenhoff <kashmir@NOSPAM-snare.dorm.umd.edu> [linux]
-        R.K.Lloyd@NOSPAM-csc.liv.ac.uk [hpux]
-        "William Gibbs" <bill@NOSPAM-wgc386.MV.COM> [xenix]
-        Randy Thompson <randyt@NOSPAM-sequent.com> [sequent]
-        eriko@NOSPAM-risc.austin.ibm.com (O'Shaughnessy Erik) [aix]
-        Bill Davidsen <davidsen@NOSPAM-tmr.com>
-            [linux, SCO, etc., new format options]
-        fredex@NOSPAM-fcshome.stoneham.ma.us (fred smith) [coherent 4.2.05]
-        bag@NOSPAM-clipper.cs.kiev.ua (Andrey Blochintsev) [bsdi]
-        ginsbach@NOSPAM-spacestar.net (Brian Ginsbach) [netbsd, irix, unicos]
+        J.J.Bailey
+        Karl Vogel [pyramid]
+        Bryan Costales
+        Mark Neale
+        Pat Myrto [sunOS filesystem type stuff]
+        Henri Karrenbeld [sgi]
+        Peter Bray
+        George M. Sipe [manual page]
+        Jeffrey Mogul [ultrix, osf/1, manual page, new format options]
+        Th. Bullinger [help usage]
+        Seth Theriault [next, tru64]
+        Stephen J. Walick [SCO]
+        Gerald Rinske [sgi]
+        Mike Grupenhoff [linux]
+        R.K.Lloyd [hpux]
+        William Gibbs [xenix]
+        Randy Thompson [sequent]
+        Erik O'Shaughnessy [aix]
+        Bill Davidsen [linux, SCO, etc., new format options]
+        Fred Smith [coherent 4.2.05]
+        Andrey Blochintsev [bsdi]
+        Brian Ginsbach [netbsd, irix, unicos]
 
         et. al.
 
 COPYRIGHT
 
-    Copyright 1994-2021 Brad Lanam, Pleasant Hill, CA, USA
+    Copyright 1994-2023 Brad Lanam, Pleasant Hill, CA, USA
     brad.lanam.di_at_gmail.com
     https://diskinfo-di.sourceforge.io

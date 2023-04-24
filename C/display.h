@@ -1,6 +1,10 @@
 #ifndef DI_INC_DISPLAY_H
 #define DI_INC_DISPLAY_H
 
+/*
+ * Copyright 2023 Brad Lanam, Pleasant Hill, CA
+ */
+
 #include "config.h"
 #include "di.h"
 

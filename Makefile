@@ -2,6 +2,7 @@
 #  di makefile - top level
 #
 #  Copyright 2001-2011 Brad Lanam Walnut Creek CA, USA
+#  Copyright 2023 Brad Lanam Pleasant Hill CA, USA
 #
 
 SHELL = /bin/sh
@@ -33,15 +34,15 @@ MKC_DIR = ./mkconfig
 ###
 # installation options
 #
-prefix ?= /usr/local
-PREFIX ?= $(prefix)
+prefix = /usr/local
+PREFIX = $(prefix)
 PROG = di
 MPROG = mi
 #
-BINDIR ?= $(PREFIX)/bin
-DATADIR ?= $(PREFIX)/share
-MANDIR ?= $(DATADIR)/man
-LOCALEDIR ?= $(DATADIR)/locale
+BINDIR = $(PREFIX)/bin
+DATADIR = $(PREFIX)/share
+MANDIR = $(DATADIR)/man
+LOCALEDIR = $(DATADIR)/locale
 INST_DIR = $(DESTDIR)$(PREFIX)
 INST_BINDIR = $(DESTDIR)$(BINDIR)
 INST_DATADIR = $(DESTDIR)$(DATADIR)
@@ -243,3 +244,11 @@ checkinstall:	features/checkinstall.dat
 		$(MKCONFIGPATH)/mkconfig.sh features/checkinstall.dat
 	touch checkinstall
 
+
+.PHONY: envcheck
+envcheck:
+	echo "prefix $(prefix)"
+	echo "PREFIX $(PREFIX)"
+	echo "BINDIR $(BINDIR)"
+	echo "DATADIR $(DATADIR)"
+	echo "LOCALEDIR $(LOCALEDIR)"

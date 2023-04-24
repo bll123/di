@@ -1,9 +1,10 @@
-/*
- * Copyright 2011-2018 Brad Lanam, Walnut Creek, CA
- */
-
 #ifndef DI_INC_GETOPTN_H_
 #define DI_INC_GETOPTN_H_
+
+/*
+ * Copyright 2011-2018 Brad Lanam, Walnut Creek, CA
+ * Copyright 2023 Brad Lanam, Pleasant Hill, CA
+ */
 
 #if defined(TEST_GETOPTN)
 # include "gconfig.h"

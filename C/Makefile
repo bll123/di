@@ -2,6 +2,7 @@
 #  di makefile - C
 #
 #  Copyright 2001-2018 Brad Lanam Walnut Creek CA, USA
+#  Copyright 2023 Brad Lanam, Pleasant Hill, CA
 #
 
 MKC_PREFIX = di
@@ -42,12 +43,12 @@ TEST = test
 ###
 # installation options
 #
-prefix ?= /usr/local
-PREFIX ?= $(prefix)
-BINDIR ?= $(PREFIX)/bin
-DATADIR ?= $(PREFIX)/share
-MANDIR ?= $(DATADIR)/man
-LOCALEDIR ?= $(DATADIR)/locale
+prefix = /usr/local
+PREFIX = $(prefix)
+BINDIR = $(PREFIX)/bin
+DATADIR = $(PREFIX)/share
+MANDIR = $(DATADIR)/man
+LOCALEDIR = $(DATADIR)/locale
 
 ###
 # additional flags/libraries

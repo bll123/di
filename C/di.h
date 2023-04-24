@@ -1,9 +1,10 @@
-/*
- * Copyright 1994-2018 Brad Lanam, Walnut Creek, CA
- */
-
 #ifndef DI_INC_DI_H
 #define DI_INC_DI_H
+
+/*
+ * Copyright 1994-2018 Brad Lanam, Walnut Creek, CA
+ * Copyright 2023 Brad Lanam, Pleasant Hill, CA
+ */
 
 #include "config.h"
 
