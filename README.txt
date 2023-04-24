@@ -34,18 +34,18 @@ INSTALLATION
     make -e
     make -e install
   Example to change compiler and prefix:
-    CC=gcc prefix=/opt/bin make -e
+    CC=gcc PREFIX=/opt/bin make -e
 
   If you don't have a bourne shell compatible shell,
   Try building with perl:
       make -e all-perl
 
-  The CC, CFLAGS, CPPFLAGS, prefix, LDFLAGS, and LIBS environment
+  The CC, CFLAGS, CPPFLAGS, PREFIX, LDFLAGS, and LIBS environment
   variables may be set and exported prior to running make.  This
   will override any settings in 'dioptions.dat'.
 
-  The LOCALEDIR environment variable defaults to ${prefix}/share/locale.
-  The installation uses the INSTALL_DIR (default ${prefix}),
+  The LOCALEDIR environment variable defaults to ${PREFIX}/share/locale.
+  The installation uses the INSTALL_DIR (default ${PREFIX}),
   INSTALL_BIN_DIR ($INSTALL_DIR/bin), and INST_LOCALEDIR
   ($INSTALL_DIR/share/locale) environment variables for installation.
 

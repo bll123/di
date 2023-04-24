@@ -351,4 +351,12 @@ include
 # define strcoll strcmp
 #endif
 
+# ifndef _
+#  if _proto_stdc
+#   define _(args) args
+#  else
+#   define _(args) ()
+#  endif
+# endif
+
 endinclude

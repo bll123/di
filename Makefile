@@ -33,16 +33,22 @@ MKC_DIR = ./mkconfig
 ###
 # installation options
 #
-prefix = /usr/local
-LOCALEDIR = $(prefix)/share/locale
+prefix ?= /usr/local
+PREFIX ?= $(prefix)
 PROG = di
 MPROG = mi
 #
-INSTALL_DIR = $(prefix)
-INSTALL_BIN_DIR = $(INSTALL_DIR)/bin
-INST_LOCALEDIR = $(INSTALL_DIR)/share/locale
-TARGET = $(INSTALL_BIN_DIR)/$(PROG)$(EXE_EXT)
-MTARGET = $(INSTALL_BIN_DIR)/$(MPROG)$(EXE_EXT)
+BINDIR ?= $(PREFIX)/bin
+DATADIR ?= $(PREFIX)/share
+MANDIR ?= $(DATADIR)/man
+LOCALEDIR ?= $(DATADIR)/locale
+INST_DIR = $(DESTDIR)$(PREFIX)
+INST_BINDIR = $(DESTDIR)$(BINDIR)
+INST_DATADIR = $(DESTDIR)$(DATADIR)
+INST_MANDIR = $(DESTDIR)$(MANDIR)
+INST_LOCALEDIR = $(DESTDIR)$(LOCALEDIR)
+DITARGET = $(INST_BINDIR)/$(PROG)$(EXE_EXT)
+MTARGET = $(INST_BINDIR)/$(MPROG)$(EXE_EXT)
 
 # if you need permissions other than the default,
 # edit these, and do a "make installperm".
@@ -55,8 +61,7 @@ INSTPERM = 4111   # install suid if your system has a mount table only root
 #
 # simple man page installation
 #
-DI_MANINSTDIR = $(INSTALL_DIR)/share/man
-DI_MANDIR = $(DI_MANINSTDIR)/man1
+DI_MANDIR = $(INST_MANDIR)/man1
 MAN_TARGET = $(PROG).1
 MANPERM = 644
 
@@ -77,11 +82,6 @@ all-c:
 tcl-sh:
 	$(MAKE) checkbuild
 	cd C >/dev/null && $(MAKE) CC=$(CC) -e tcl-sh
-
-.PHONY: all-d
-all-d:
-	$(MAKE) checkbuild
-	cd D >/dev/null && $(MAKE) -e all
 
 .PHONY: all-perl
 all-perl:
@@ -152,32 +152,28 @@ install-po: 	build-po
 
 .PHONY: install-prog
 install-prog:
-	$(TEST) -d $(INSTALL_DIR) || $(MKDIR) -p $(INSTALL_DIR)
-	$(TEST) -d $(INSTALL_BIN_DIR) || $(MKDIR) $(INSTALL_BIN_DIR)
-	$(CP) -f ./$(FROMDIR)/$(PROG)$(EXE_EXT) $(TARGET)
+	$(TEST) -d $(INST_DIR) || $(MKDIR) -p $(INST_DIR)
+	$(TEST) -d $(INST_BINDIR) || $(MKDIR) $(INST_BINDIR)
+	$(CP) -f ./$(FROMDIR)/$(PROG)$(EXE_EXT) $(DITARGET)
 	-$(RM) -f $(MTARGET) > /dev/null 2>&1
-	-$(LN) -s $(PROG)$(EXE_EXT) $(MTARGET)
+	-$(LN) -s $(DITARGET) $(MTARGET)
 	@-test -f $(FROMDIR)/config.h && \
 		grep '^#define _enable_nls 1' $(FROMDIR)/config.h >/dev/null 2>&1 && \
-		(. ./$(FROMDIR)/di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
-		install-po)
-	@-test -f $(FROMDIR)/config.d && \
-		grep '^enum int _enable_nls = 1;' $(FROMDIR)/config.d >/dev/null 2>&1 && \
-		(. ./$(FROMDIR)/di.env; $(MAKE) -e INST_LOCALEDIR="$(INST_LOCALEDIR)" \
+		(. ./$(FROMDIR)/di.env; $(MAKE) -e LOCALEDIR="$(LOCALEDIR)" \
 		install-po)
 
 .PHONY: install-man
 install-man:
-	-$(TEST) -d $(DI_MANINSTDIR) || $(MKDIR) -p $(DI_MANINSTDIR)
+	-$(TEST) -d $(INST_MANDIR) || $(MKDIR) -p $(INST_MANDIR)
 	-$(TEST) -d $(DI_MANDIR) || $(MKDIR) -p $(DI_MANDIR)
 	$(CP) -f di.1 $(DI_MANDIR)/$(MAN_TARGET)
 	$(CHMOD) $(MANPERM) $(DI_MANDIR)/$(MAN_TARGET)
 
 .PHONY: installperms
 installperms:
-	$(CHOWN) $(USER) $(TARGET)
-	$(CHGRP) $(GROUP) $(TARGET)
-	$(CHMOD) $(INSTPERM) $(TARGET)
+	$(CHOWN) $(USER) $(DITARGET)
+	$(CHGRP) $(GROUP) $(DITARGET)
+	$(CHMOD) $(INSTPERM) $(DITARGET)
 
 ###
 # packaging
@@ -200,7 +196,6 @@ clean:
 		tests.d/test_order.tmp > /dev/null 2>&1; exit 0
 	@-find . -name '*~' -print | xargs rm >/dev/null 2>&1; exit 0
 	@-(cd C >/dev/null && $(MAKE) clean > /dev/null 2>&1); exit 0
-	@-(cd D >/dev/null && $(MAKE) clean > /dev/null 2>&1); exit 0
 
 # Leaves:
 #  _tmp_mkconfig/, _mkconfig_runtests/
@@ -208,7 +203,6 @@ clean:
 realclean:
 	@-$(MAKE) clean > /dev/null 2>&1
 	@-(cd C >/dev/null && $(MAKE) realclean > /dev/null 2>&1); exit 0
-	@-(cd D >/dev/null && $(MAKE) realclean > /dev/null 2>&1); exit 0
 
 # leaves:
 #   dioptions.dat
@@ -221,7 +215,6 @@ distclean:
 		tests.done _tmp_mkconfig *~ */*~ \
 		*/*/*~ *.orig > /dev/null 2>&1; exit 0
 	@-(cd C >/dev/null && $(MAKE) distclean > /dev/null 2>&1); exit 0
-	@-(cd D >/dev/null && $(MAKE) distclean > /dev/null 2>&1); exit 0
 
 
 ###

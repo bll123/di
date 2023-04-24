@@ -1,6 +1,14 @@
 CHANGES
+
+    4.52                                    --
+        Makefile cleanup.  Remove D Language targets.
+        Makefile cleanup.
+        Remove support for K&R compilers and ancient systems.
+        Mac OS: apfs filesystems with a mount point starting with /System/
+          are ignored by default.
+
     4.51                                    2021-11-8
-        Handle EPERM errors.
+        Handle permission denied errors.
 
     4.50                                    2021-4-5
         JSON: Exclude extraneous format characters from the json output.

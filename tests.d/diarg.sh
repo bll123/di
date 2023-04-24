@@ -103,17 +103,22 @@ for d in C D; do
     ${tdir}/di -n -f M / 2>/dev/null | grep '^/[ ]*$' > /dev/null 2>&1
     rc=$?
     if [ $rc -ne 0 ]; then
-      # cygwin
-      ${tdir}/di -n -f M / 2>/dev/null | grep '/usr/bin$' > /dev/null 2>&1
+      # mac os
+      ${tdir}/di -n -f M / 2>/dev/null | grep '^/System/Volumes/Data$' > /dev/null 2>&1
       rc=$?
       if [ $rc -ne 0 ]; then
         # cygwin
-        ${tdir}/di -n -f M / 2>/dev/null | grep '^C:\\[ ]*$' > /dev/null 2>&1
+        ${tdir}/di -n -f M / 2>/dev/null | grep '/usr/bin$' > /dev/null 2>&1
         rc=$?
         if [ $rc -ne 0 ]; then
-          # other machines w/odd setup
-          ${tdir}/di -n -f M /boot 2>/dev/null | grep '^/boot[ ]*$' > /dev/null 2>&1
+          # cygwin
+          ${tdir}/di -n -f M / 2>/dev/null | grep '^C:\\[ ]*$' > /dev/null 2>&1
           rc=$?
+          if [ $rc -ne 0 ]; then
+            # other machines w/odd setup
+            ${tdir}/di -n -f M /boot 2>/dev/null | grep '^/boot[ ]*$' > /dev/null 2>&1
+            rc=$?
+          fi
         fi
       fi
     fi

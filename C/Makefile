@@ -42,8 +42,12 @@ TEST = test
 ###
 # installation options
 #
-prefix = /usr/local
-LOCALEDIR = $(prefix)/share/locale
+prefix ?= /usr/local
+PREFIX ?= $(prefix)
+BINDIR ?= $(PREFIX)/bin
+DATADIR ?= $(PREFIX)/share
+MANDIR ?= $(DATADIR)/man
+LOCALEDIR ?= $(DATADIR)/locale
 
 ###
 # additional flags/libraries
@@ -180,87 +184,6 @@ os2-gcc:
 		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
 		LDFLAGS="-g -O2 -Zexe" di.exe
 
-.PHONY: bsd43-cc
-bsd43-cc:
-	@$(MAKE) ../dioptions.dat
-	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
-	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	sleep 1
-	$(CP) configs/config.bsd43.cc config.h
-	sleep 1
-	@touch $(MKC_REQLIB)
-	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
-		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -O" \
-		LDFLAGS="-O" di-programs
-
-.PHONY: bsd43-gcc
-bsd43-gcc:
-	@$(MAKE) ../dioptions.dat
-	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
-	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	sleep 1
-	$(CP) configs/config.bsd43.gcc config.h
-	sleep 1
-	@touch $(MKC_REQLIB)
-	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
-		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -O2" \
-		LDFLAGS="-O2" di-programs
-
-.PHONY: ultrix-cc
-ultrix-cc:
-	@$(MAKE) ../dioptions.dat
-	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
-	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	sleep 1
-	$(CP) configs/config.ultrix.cc config.h
-	sleep 1
-	@touch $(MKC_REQLIB)
-	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
-		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -O" \
-		LDFLAGS="-O" di-programs
-
-.PHONY: ultrix-gcc
-ultrix-gcc:
-	@$(MAKE) ../dioptions.dat
-	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
-	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	sleep 1
-	$(CP) configs/config.ultrix.gcc config.h
-	sleep 1
-	@echo '-lintl' > $(MKC_REQLIB)
-	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
-		CC=gcc LD=gcc EXE_EXT="" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -O2" \
-		LDFLAGS="-O2" di-programs
-
-.PHONY: hpux-cc
-hpux-cc:
-	@$(MAKE) -e ../dioptions.dat
-	@$(MAKE) CC=/usr/ccs/bin/cc -e $(MKC_ENV)
-	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	sleep 1
-	$(CP) configs/config.hpux.bcc config.h
-	sleep 1;touch $(MKC_REQLIB)
-	. ./$(MKC_ENV);$(MAKE) -e CC=/usr/ccs/bin/cc \
-		_MKCONFIG_SHELL=$(MKCONFIG_SHELL) di-programs
-
-.PHONY: xenix-cc
-xenix-cc:
-	@$(MAKE) ../dioptions.dat
-	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
-	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	sleep 1
-	$(CP) configs/conf.xenix.cc config.h
-	sleep 1
-	@touch $(MKC_REQLIB)
-	$(MAKE) _MKCONFIG_SHELL=$(MKCONFIG_SHELL) \
-		CC=cc LD=cc EXE_EXT="" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -O" \
-		LDFLAGS="-O" di-programs
-
 ###
 # cleaning
 
@@ -318,7 +241,7 @@ distclean:
 .PHONY: install
 install:
 	$(MAKE) all
-	. ./$(MKC_ENV);cd ..;$(MAKE) -e prefix=$(prefix) \
+	. ./$(MKC_ENV);cd ..;$(MAKE) -e PREFIX=$(PREFIX) \
 		LOCALEDIR=$(LOCALEDIR) FROMDIR=C install
 
 ###

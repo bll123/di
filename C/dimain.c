@@ -93,10 +93,11 @@ static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, unsigned int));
 #endif
 static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
 static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
-static int  isIgnoreFSType      _((char *));
-static int  isIgnoreSpecial     _((char *));
+static int  isIgnoreFSType      _((const char *));
+static int  isIgnoreSpecial     _((const char *));
+static int  isIgnoreFS          _((const char *, const char *));
 #if _lib_realpath && _define_S_ISLNK && _lib_lstat
-static int  checkForUUID        _((char *));
+static int  checkForUUID        _((const char *));
 #endif
 
 #if defined (__cplusplus) || defined (c_plusplus)
@@ -646,7 +647,7 @@ checkDiskInfo (diData_t *diData, int hasLoop)
             dinfo->printFlag = DI_PRNT_IGNORE;
             dinfo->doPrint = (char) diopts->displayAll;
             if (debug > 2) {
-              printf ("chk: ignore-fs: %s\n", dinfo->name);
+              printf ("chk: ignore-fstype: %s\n", dinfo->fsType);
             }
           }
           if (isIgnoreSpecial (dinfo->special)) {
@@ -654,6 +655,13 @@ checkDiskInfo (diData_t *diData, int hasLoop)
             dinfo->doPrint = (char) diopts->displayAll;
             if (debug > 2) {
               printf ("chk: ignore-special: %s\n", dinfo->special);
+            }
+          }
+          if (isIgnoreFS (dinfo->fsType, dinfo->name)) {
+            dinfo->printFlag = DI_PRNT_IGNORE;
+            dinfo->doPrint = (char) diopts->displayAll;
+            if (debug > 2) {
+              printf ("chk: ignore-fs: %s\n", dinfo->name);
             }
           }
 
@@ -1197,7 +1205,7 @@ initZones (diData_t *diData)
 }
 
 static int
-isIgnoreSpecial (char *special)
+isIgnoreSpecial (const char *special)
 {
   static char   *appletimemachine = "com.apple.TimeMachine.";
 
@@ -1213,7 +1221,19 @@ isIgnoreSpecial (char *special)
 }
 
 static int
-isIgnoreFSType (char *fstype)
+isIgnoreFS (const char *fstype, const char *name)
+{
+  static char   *applesystem = "/System/";
+
+  if (strcmp (fstype, "apfs") == 0 &&
+       strncmp (name, applesystem, strlen(applesystem)) == 0) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+static int
+isIgnoreFSType (const char *fstype)
 {
   if (strcmp (fstype, "rootfs") == 0 ||
       strcmp (fstype, "procfs") == 0 ||
@@ -1228,7 +1248,7 @@ isIgnoreFSType (char *fstype)
 
 #if _lib_realpath && _define_S_ISLNK && _lib_lstat
 static int
-checkForUUID (char *spec)
+checkForUUID (const char *spec)
 {
 /*
  *  /dev/mapper/luks-828fc648-9f30-43d8-a0b1-f7196a2edb66
