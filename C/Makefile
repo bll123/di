@@ -15,7 +15,6 @@ MKC_ENV_SHR = $(MKC_PREFIX)-shared.env
 MKC_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX).mkc
 MKC_ENV_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX)-env.mkc
 MKC_ENV_SHR_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX)-env-shared.mkc
-MKC_CONF_TCL = $(MKC_CONFDIR)/$(MKC_PREFIX)-tcl.mkc
 MKC_CONF_GETOPTN = $(MKC_CONFDIR)/$(MKC_PREFIX)-getoptn.mkc
 
 # for tests.done
@@ -62,7 +61,6 @@ DI_CFLAGS = -DDI_LOCALE_DIR=\\\"$(LOCALEDIR)\\\"
 MKC_DIR = ../mkconfig
 MKCONFIG_TYPE = sh
 MKC_REQLIB = di.reqlibs
-MKC_TCLREQLIB = di-tcl.reqlibs
 MKC_ECHO =
 #MKC_ECHO = -e
 
@@ -81,15 +79,6 @@ all-sh:	$(MKC_ENV)
 .PHONY: all-perl
 all-perl:	$(MKC_ENV)
 	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=perl di-programs
-
-# tcl interface
-.PHONY: tcl-sh
-tcl-sh:	$(MKC_ENV_SHR)
-	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=sh tcl-programs
-
-# this is not working...need to research
-#tcl-perl:	$(MKC_ENV_SHR)
-#	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=perl tcl-programs
 
 # perl interface
 .PHONY: perl-sh
@@ -189,7 +178,7 @@ os2-gcc:
 # cleaning
 
 # leaves:
-#   config.h configtcl.h di.reqlibs
+#   config.h di.reqlibs
 #   ../dioptions.dat, tests.done, test_di, $(MKC_ENV), $(MKC_ENV_SHR)
 .PHONY: clean
 clean:
@@ -199,7 +188,7 @@ clean:
 		fi
 	@-$(RM) -rf di mi \
 		di.exe mingw-di.exe mi.exe \
-		tcldiskspace.bld diskspace.so diskspace.dylib diskspace.dll \
+		diskspace.so diskspace.dylib diskspace.dll \
 		perlfilesysdi.bld libdiperl.a \
 		*.o *.obj $(MKC_FILES)/mkconfig.log \
 		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
@@ -217,8 +206,8 @@ clean:
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean >/dev/null 2>&1
-	@-$(RM) -rf config.h configtcl.h gconfig.h \
-		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) $(MKC_TCLREQLIB) \
+	@-$(RM) -rf config.h gconfig.h \
+		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) \
 		>/dev/null 2>&1; exit 0
 
 # leaves:
@@ -250,8 +239,6 @@ install:
 
 .PHONY: di-programs
 di-programs:	di$(EXE_EXT)
-.PHONY: tcl-programs
-tcl-programs:	tcldiskspace.bld
 .PHONY: perl-programs
 perl-programs:	perlfilesysdi.bld
 
@@ -275,25 +262,9 @@ config.h:	$(MKC_ENV) ../dioptions.dat $(MKC_CONF)
 		$(MKC_DIR)/mkconfig.pl \
 		$(MKC_CONF); fi
 
-configtcl.h:	$(MKC_ENV_SHR) ../dioptions.dat $(MKC_CONF_TCL)
-	@-$(RM) -f configtcl.h
-	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
-		. ./$(MKC_ENV_SHR);$(_MKCONFIG_SHELL) \
-		$(MKC_DIR)/mkconfig.sh \
-		$(MKC_CONF_TCL); fi
-	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
-		. ./$(MKC_ENV_SHR);perl \
-		$(MKC_DIR)/mkconfig.pl \
-		$(MKC_CONF_TCL); fi
-
 $(MKC_REQLIB):	config.h
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
 		-o $(MKC_REQLIB) config.h
-
-$(MKC_TCLREQLIB):	configtcl.h
-	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
-		-o $(MKC_TCLREQLIB) configtcl.h
-
 
 ###
 # executables
@@ -306,8 +277,6 @@ LIBOBJECTS = dimain$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 
 MAINOBJECTS = di$(OBJ_EXT)
 
-TCLOBJECTS = tcldiskspace$(OBJ_EXT)
-
 di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
@@ -317,14 +286,6 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
 # for ms cl
 #di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 #	$(LD) -Fedi$(EXE_EXT) $(MAINOBJECTS) $(LIBOBJECTS)
-
-tcldiskspace.bld:	$(MKC_REQLIB) $(MKC_TCLREQLIB) \
-		$(TCLOBJECTS) $(LIBOBJECTS)
-	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -shared $(MKC_ECHO) \
-		-lib -o diskspace$(SHLIB_EXT) \
-		-r $(MKC_REQLIB) -r $(MKC_TCLREQLIB) \
-		$(TCLOBJECTS) $(LIBOBJECTS) $(LIBS)
-	@touch tcldiskspace.bld
 
 perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
 	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
@@ -358,10 +319,6 @@ mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 
 di$(OBJ_EXT):		di.c config.h di.h dimain.h getoptn.h \
 				options.h version.h
-
-tcldiskspace$(OBJ_EXT):		tcldiskspace.c config.h di.h \
-				dimain.h getoptn.h \
-				options.h
 
 dimain$(OBJ_EXT):	dimain.c config.h di.h dimain.h getoptn.h \
 				options.h

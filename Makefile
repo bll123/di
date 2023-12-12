@@ -79,11 +79,6 @@ all-c:
 	$(MAKE) checkbuild
 	cd C >/dev/null && $(MAKE) CC=$(CC) -e all
 
-.PHONY: tcl-sh
-tcl-sh:
-	$(MAKE) checkbuild
-	cd C >/dev/null && $(MAKE) CC=$(CC) -e tcl-sh
-
 .PHONY: all-perl
 all-perl:
 	$(MAKE) checkperlbuild
