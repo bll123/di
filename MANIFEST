@@ -31,7 +31,7 @@ C/realloc.c               di source
 C/strdup.c                di source
 C/strstr.c                di source
 C/tcldiskspace.c          tcl interface script
-C/Perl/                   perl interface 
+C/Perl/                   perl interface
 C/Perl/Changes
 C/Perl/README
 C/Perl/ex/
@@ -55,21 +55,6 @@ C/tests.d/rpmbuild.sh
 C/tests.d/test_order
 C/trimchar.c              di source
 C/version.h               di source
-D/                        D di source
-D/Makefile                D Makefile
-D/d.README                D source README
-D/di.d                    di source
-D/digetoptn.d             di source
-D/dihelp.d                di source
-D/dilocale.d              di source
-D/diquota.d               di source
-D/diskpart.d              di source
-D/display.d               di source
-D/dispopts.d              di source
-D/features/               di configuration
-D/features/env.dat          environment configuration
-D/features/mkconfig.dat     mkconfig configuration
-D/options.d               di source
 ChangeLog.txt		Change Log
 LICENSE                 License
 MANIFEST                This file

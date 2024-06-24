@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Copyright 2010-2018 Brad Lanam Walnut Creek CA USA
-# Copyright 2020 Brad Lanam Pleasant Hill CA
+# Copyright 2020-2024 Brad Lanam Pleasant Hill CA
 #
 #
 #   The four headers: stdio.h, stdlib.h, sys/types.h, and sys/param.h
@@ -753,12 +753,12 @@ check_lib () {
     code="
 CPP_EXTERNS_BEG
 #undef $rfunc
-typedef char (*_TEST_fun_)();
-char $rfunc();
-_TEST_fun_ f = $rfunc;
+typedef void (*_TEST_fun_)(void);
+void $rfunc(void);
+_TEST_fun_ f = (void *) $rfunc;
 CPP_EXTERNS_END
 int main () {
-if (f == $rfunc) { return 0; }
+if ((void *) f == (void *) $rfunc) { return 0; }
 return 1;
 }
 "
@@ -766,11 +766,11 @@ return 1;
     hinc=all
     code="
 CPP_EXTERNS_BEG
-typedef char (*_TEST_fun_)();
-_TEST_fun_ f = $rfunc;
+typedef void (*_TEST_fun_)(void);
+_TEST_fun_ f = (void *) $rfunc;
 CPP_EXTERNS_END
 int main () {
-f(); if (f == $rfunc) { return 0; }
+f(); if ((void *) f == (void *) $rfunc) { return 0; }
 return 1;
 }
 "
@@ -796,12 +796,12 @@ return 1;
       code="
 CPP_EXTERNS_BEG
 #undef $rfunc
-typedef char (*_TEST_fun_)();
+typedef void (*_TEST_fun_)(void);
 char $rfunc();
-_TEST_fun_ f = $rfunc;
+_TEST_fun_ f = (void *) $rfunc;
 CPP_EXTERNS_END
 int main () {
-if (f == $rfunc) { return 0; }
+if ((void *) f == (void *) $rfunc) { return 0; }
 return 1;
 }
 "
@@ -816,11 +816,11 @@ where the lib does not exist and the link works!
 On modern systems, this simply isn't necessary.
 */
 extern int ${func}();
-typedef char (*_TEST_fun_)();
-_TEST_fun_ f = $rfunc;
+typedef void (*_TEST_fun_)(void);
+_TEST_fun_ f = (void *) $rfunc;
 CPP_EXTERNS_END
 int main () {
-f(); if (f == $rfunc) { return 0; }
+f(); if ((void *) f == (void *) $rfunc) { return 0; }
 return 1;
 }
 "

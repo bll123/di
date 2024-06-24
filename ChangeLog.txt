@@ -1,6 +1,10 @@
 CHANGES
 
-    4.52                                    --
+    4.53                                    2024-6-23
+        Fixed library check for modern compilers.
+        Removed old D language stuff.
+
+    4.52                                    2023-4-24
         Makefile cleanup.  Remove D Language targets.
         Makefile cleanup.
         Remove support for K&R compilers and ancient systems.
