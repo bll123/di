@@ -11,8 +11,17 @@ dosetup $@
 perl -v > /dev/null 2>&1
 rc=$?
 if [ $rc -ne 0 ] ; then
-  exit 166
+  # perl is not available
+  exit 0
 fi
+
+# c-plus-plus fails to compare
+# (because the arg parsing for quotactl fails)
+case $CC in
+  *++)
+    exit 0
+    ;;
+esac
 
 cd $_MKCONFIG_RUNTOPDIR
 grc=0

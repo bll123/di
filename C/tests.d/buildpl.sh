@@ -11,7 +11,8 @@ dosetup $@
 perl -v > /dev/null 2>&1
 rc=$?
 if [ $rc -ne 0 ] ; then
-  exit 166
+  # perl is not available
+  exit 0
 fi
 
 cd $_MKCONFIG_RUNTOPDIR

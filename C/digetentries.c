@@ -149,13 +149,15 @@
 /********************************************************/
 
 #if defined (__cplusplus) || defined (c_plusplus)
-  extern "C" {
+extern "C" {
 #endif
-
 /* workaround for AIX - mntctl not declared */
 # if _lib_mntctl && _npt_mntctl
   extern int mntctl _((int, Size_t, char *));
 # endif
+#if defined (__cplusplus) || defined (c_plusplus)
+}
+#endif
 
 #if (_lib_getmntent \
     || _args_statfs > 0) \
@@ -191,11 +193,8 @@
 #if defined (__QNX__)
 static int di_getQNXDiskEntries _((char *ipath, diDiskInfo_t **diskInfo, int *diCount));
 #endif
-extern int debug;
 
-#if defined (__cplusplus) || defined (c_plusplus)
-  }
-#endif
+extern int debug;
 
 /********************************************************/
 
@@ -204,13 +203,7 @@ extern int debug;
     && ! _lib_mntctl \
     && ! _class_os__Volumes
 
-#if defined (__cplusplus) || defined (c_plusplus)
-  extern "C" {
-#endif
 static char *checkMountOptions      _((struct mnttab *, char *));
-#if defined (__cplusplus) || defined (c_plusplus)
-  }
-#endif
 
 /*
  * di_getDiskEntries

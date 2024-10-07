@@ -3,7 +3,7 @@
 
 /*
  * Copyright 2011-2018 Brad Lanam, Walnut Creek, CA
- * Copyright 2023 Brad Lanam, Pleasant Hill, CA
+ * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
  */
 
 #include "config.h"
@@ -33,6 +33,10 @@
 #if _hdr_mnttab                     /* SysV.3 */
 # include <mnttab.h>
 #endif
+
+# if defined (__cplusplus) || defined (c_plusplus)
+extern "C" {
+# endif
 
 /********************************************************/
 
@@ -148,5 +152,9 @@
 #else
 # define DI_MNTOPT_DEV "dev="
 #endif
+
+# if defined (__cplusplus) || defined (c_plusplus)
+}
+# endif
 
 #endif /* DI_INC_DIMNTOPT_H_ */

@@ -74,10 +74,6 @@ static dispTable_t dispTable [] =
 #define DI_DEF_MOUNT_FORMAT     "MST\n\tO"
 #define DI_ALL_FORMAT           "MTS\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 
-# if defined (__cplusplus) || defined (c_plusplus)
-   extern "C" {
-# endif
-
 extern int debug;
 
 static void processStringArgs   _((const char *, char *, diData_t *, char *));
@@ -89,10 +85,6 @@ static void usage               _((void));
 static void setDispBlockSize    _((char *, diOptions_t *, diOutput_t *));
 static void initDisplayTable    _((diOptions_t *));
 static void setExitFlag         _((diOptions_t *, unsigned int));
-
-# if defined (__cplusplus) || defined (c_plusplus)
-   }
-# endif
 
 static void
 processStringArgs (const char *progname, char *ptr, diData_t *diData,

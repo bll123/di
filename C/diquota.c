@@ -78,15 +78,17 @@
 # include <rpcsvc/rquota.h>
 #endif
 
-#if defined (__cplusplus) || defined (c_plusplus)
-  extern "C" {
-#endif
-
 #if _has_std_quotas
 
 /* workaround for HPUX - quotactl not declared */
 # if _lib_quotactl && _npt_quotactl
+#  if defined (__cplusplus) || defined (c_plusplus)
+    extern "C" {
+#  endif
   extern int quotactl _((int, const char *, uid_t, void *));
+#  if defined (__cplusplus) || defined (c_plusplus)
+    }
+#  endif
 # endif
 
 typedef union {
@@ -140,10 +142,6 @@ static void diquota_nfs _((diQuota_t *));
 #endif
 
 extern int debug;
-
-#if defined (__cplusplus) || defined (c_plusplus)
-  }
-#endif
 
 #ifdef BLOCK_SIZE           /* linux */
 # define DI_QUOT_BLOCK_SIZE BLOCK_SIZE

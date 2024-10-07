@@ -19,9 +19,14 @@ addcflag -Wno-float-equal
 addcflag -Wno-shift-sign-overflow
 addcflag -Wno-stringop-overflow
 addcflag -Wno-stringop-truncation
+addcflag -Wunreachable-code
 
 # turn off mac os warning
 addcflag -Wno-poison-system-directories
+
+if UsingGNU_LD == _MKCONFIG_USING_GNU_LD Y && == _MKCONFIG_USING_CPLUSPLUS Y
+ addcflag -fpermissive
+endif
 
 # gcc hardening
 # reference: wiki.debian.org/Hardening

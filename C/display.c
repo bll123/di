@@ -146,10 +146,6 @@ static sizeTable_t sizeTable [] =
 };
 #define DI_SIZETAB_SIZE (sizeof (sizeTable) / sizeof (sizeTable_t))
 
-#if defined (__cplusplus) || defined (c_plusplus)
-  extern "C" {
-#endif
-
 static void addTotals           _((const diDiskInfo_t *, diDiskInfo_t *, int));
 static void getMaxFormatLengths _((diData_t *));
 static int  diCompare           _((const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int));
@@ -163,10 +159,6 @@ static void initSizeTable       _((diOptions_t *, diOutput_t *));
 static void appendFormatStr     _((char *, const char *, char **, Size_t *, Size_t *));
 static void appendFormatVal     _((char *, _fs_size_t, char **, Size_t *, Size_t *));
 static void append              _((const char *, char **, Size_t *, Size_t *));
-
-#if defined (__cplusplus) || defined (c_plusplus)
-  }
-#endif
 
 /*
  * printDiskInfo
@@ -221,8 +213,8 @@ printDiskInfo (diData_t *diData)
     }
     free (tout);
     if (diopts->json_output) {
-      tout = "{\n  \"partitions\" : [\n";
-      append (tout, &out, &outcurrlen, &outlen);
+      const char *tjson = "{\n  \"partitions\" : [\n";
+      append (tjson, &out, &outcurrlen, &outlen);
     }
 
     if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
@@ -382,8 +374,8 @@ printDiskInfo (diData_t *diData)
     }
 
     if (diopts->json_output) {
-      tout = "  ]\n}\n";
-      append (tout, &out, &outcurrlen, &outlen);
+      const char *tjson = "  ]\n}\n";
+      append (tjson, &out, &outcurrlen, &outlen);
     }
 
     return out;
@@ -398,8 +390,8 @@ sortArray (diOptions_t *diopts, diDiskInfo_t *data, int count, int sidx)
 {
   unsigned int  tempIndex;
   int           gap;
-  register int  j;
-  register int  i;
+  int           j;
+  int           i;
 
   if (count <= 1)
   {

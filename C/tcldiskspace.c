@@ -44,7 +44,7 @@
 #endif
 
 #if defined (__cplusplus) || defined (c_plusplus)
-  extern "C" {
+extern "C" {
 #endif
 
 #if _npt_getenv
@@ -52,14 +52,10 @@
 #endif
 
 #if defined (__cplusplus) || defined (c_plusplus)
-  }
+}
 #endif
 
 /* end of system specific includes/configurations */
-
-#if defined (__cplusplus) || defined (c_plusplus)
-  extern "C" {
-#endif
 
 int Diskspace_Init _((Tcl_Interp *));
 int diskspaceObjCmd _((ClientData, Tcl_Interp *, int, Tcl_Obj * const []));
@@ -67,10 +63,6 @@ static void addListToDict _((Tcl_Interp *, Tcl_Obj *, const char *, char *));
 static void addStringToDict _((Tcl_Interp *, Tcl_Obj *, const char *, const char *));
 static void addWideToDict _((Tcl_Interp *, Tcl_Obj *, const char *, _fs_size_t));
 static char *diproc _((int, const char **, diData_t *));
-
-#if defined (__cplusplus) || defined (c_plusplus)
-  }
-#endif
 
 int
 Diskspace_Init (Tcl_Interp *interp)

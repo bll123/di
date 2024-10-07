@@ -67,15 +67,13 @@
 #endif
 
 #if defined (__cplusplus) || defined (c_plusplus)
-  extern "C" {
+extern "C" {
 #endif
-
 #if _npt_getenv
   extern char *getenv _((const char *));
 #endif
-
 #if defined (__cplusplus) || defined (c_plusplus)
-  }
+}
 #endif
 
 /* end of system specific includes/configurations */
@@ -84,10 +82,6 @@
 
 extern int debug;
 int debug = { 0 };
-
-#if defined (__cplusplus) || defined (c_plusplus)
-   extern "C" {
-#endif
 
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
 static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, unsigned int));
@@ -99,10 +93,6 @@ static int  isIgnoreSpecial     _((const char *));
 static int  isIgnoreFS          _((const char *, const char *));
 #if _lib_realpath && _define_S_ISLNK && _lib_lstat
 static int  checkForUUID        _((const char *));
-#endif
-
-#if defined (__cplusplus) || defined (c_plusplus)
-   }
 #endif
 
 char *
@@ -1208,7 +1198,7 @@ initZones (diData_t *diData)
 static int
 isIgnoreSpecial (const char *special)
 {
-  static char   *appletimemachine = "com.apple.TimeMachine.";
+  static const char   *appletimemachine = "com.apple.TimeMachine.";
 
   /* solaris: swap */
   /* linux: cgroup, tmpfs */
@@ -1224,7 +1214,7 @@ isIgnoreSpecial (const char *special)
 static int
 isIgnoreFS (const char *fstype, const char *name)
 {
-  static char   *applesystem = "/System/";
+  static const char   *applesystem = "/System/";
 
   if (strcmp (fstype, "apfs") == 0 &&
        strncmp (name, applesystem, strlen(applesystem)) == 0) {

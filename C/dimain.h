@@ -3,14 +3,14 @@
 
 /*
  * Copyright 2016-2018 Brad Lanam Walnut Creek CA USA
- * Copyright 2023 Brad Lanam, Pleasant Hill, CA
+ * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
  */
 
 #include "config.h"
 #include "di.h"
 
 # if defined (__cplusplus) || defined (c_plusplus)
-   extern "C" {
+extern "C" {
 # endif
 
 #if ! _dcl_errno
@@ -30,7 +30,7 @@ extern void initLocale          (void);
 extern void initZones           (diData_t *);
 
 # if defined (__cplusplus) || defined (c_plusplus)
-   }
+}
 # endif
 
 #endif /* DI_INC_DIMAIN_H */

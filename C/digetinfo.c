@@ -69,7 +69,7 @@
 /********************************************************/
 
 #if defined (__cplusplus) || defined (c_plusplus)
-  extern "C" {
+extern "C" {
 #endif
 
 #if ! _lib_statvfs \
@@ -86,11 +86,11 @@
 # endif
 #endif
 
-extern int debug;
-
 #if defined (__cplusplus) || defined (c_plusplus)
-  }
+}
 #endif
+
+extern int debug;
 
 /********************************************************/
 

@@ -3,7 +3,7 @@
 
 /*
  * Copyright 2011-2018 Brad Lanam, Walnut Creek, CA
- * Copyright 2023 Brad Lanam, Pleasant Hill, CA
+ * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
  */
 
 #if defined(TEST_GETOPTN)
@@ -17,6 +17,10 @@
 # define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+
+# if defined (__cplusplus) || defined (c_plusplus)
+extern "C" {
+# endif
 
 #if ! defined (TRUE)
 # define TRUE             1
@@ -59,5 +63,9 @@ typedef struct {
 
 extern int getoptn (int style, int argc, const char * const argv [],
       Size_t optcount, getoptn_opt_t opts [], int *errorCount);
+
+# if defined (__cplusplus) || defined (c_plusplus)
+}
+# endif
 
 #endif /*DI_INC_GETOPTN_H_ */

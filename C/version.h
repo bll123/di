@@ -5,6 +5,6 @@
  * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
  */
 
-# define DI_VERSION "4.53"
+# define DI_VERSION "4.54"
 
 #endif

@@ -3,7 +3,7 @@
 
 /*
  * Copyright 1994-2018 Brad Lanam, Walnut Creek, CA
- * Copyright 2023 Brad Lanam, Pleasant Hill, CA
+ * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
  */
 
 #include "config.h"
@@ -95,6 +95,10 @@
 #  define memset(s,c,n)    (bzero ((s), (n)), s)
 # endif
 #endif
+
+# if defined (__cplusplus) || defined (c_plusplus)
+extern "C" {
+# endif
 
 #define DI_NAME_LEN            MAXPATHLEN
 #define DI_SPEC_NAME_LEN       MAXPATHLEN
@@ -271,10 +275,6 @@ typedef struct {
     zoneInfo_t      zoneInfo;
 } diData_t;
 
-# if defined (__cplusplus) || defined (c_plusplus)
-   extern "C" {
-# endif
-
 #if ! _dcl_errno
   extern int errno;
 #endif
@@ -315,10 +315,6 @@ extern void di_testRemoteDisk       (diDiskInfo_t *);
 extern int  di_isPooledFs           (diDiskInfo_t *);
 extern int  di_isLoopbackFs         (diDiskInfo_t *);
 extern Size_t di_mungePoolName      (char *);
-
-# if defined (__cplusplus) || defined (c_plusplus)
-   }
-# endif
 
      /* macro for gettext() */
 #ifndef DI_GT
@@ -374,6 +370,10 @@ typedef struct {
     (ile)->buffer = (bufaddr); \
     (ile)->retlen = (retlen_addr) ;}
 
+# endif
+
+# if defined (__cplusplus) || defined (c_plusplus)
+}
 # endif
 
 #endif /* DI_INC_DI_H */
