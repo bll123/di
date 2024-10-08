@@ -1,5 +1,12 @@
 CHANGES
 
+    4.54.0.1                                2024-10-8
+        Missing entry in change log.
+
+    4.54                                    2024-10-7
+        C++ (Haiku) now checks for -fpermissive flag.
+        Cleaned up for C++.
+
     4.53                                    2024-6-23
         Fixed library check for modern compilers.
         Removed old D language stuff.
