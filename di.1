@@ -42,13 +42,13 @@ filesystems will not
 normally be displayed: filesystems
 with total space <= 0;
 loopback filesystems that are duplicates
-of other normally mounted filesystems (filesystem type of 'lofs'
-, 'none', or 'nullfs');
+of other normally mounted filesystems
+(filesystem type of \[aq]lofs\[aq], \[aq]none\[aq], or \[aq]nullfs\[aq]);
 loopback filesystems that are part of a zone (Solaris);
 filesystems for which the system's ignore flag is set;
-filesystems that have a device name of 'tmpfs', 'cgroup' or 'swap';
+filesystems that have a device name of \[aq]tmpfs\[aq], \[aq]cgroup\[aq] or \[aq]swap\[aq];
 filesystems that have a device name starting with
-'com.apple.TimeMachine.'.
+\[aq]/System/\[aq] or \[aq]com.apple.TimeMachine.\[aq] (both MacOS).
 .PP
 Filesystems that the user does not have permissions to access will
 not be displayed at all.
@@ -145,7 +145,7 @@ Display partition sizes in scaled alternative 2 format.
 .br
 Include \fIonly\fP the file system types listed in \fIinclude\-fstyp\-list\fP.
 The list is a comma separated list of file system types.
-Multiple \-I options may be specified.  If the 'fuse' filesystem type
+Multiple \-I options may be specified.  If the \[aq]fuse\[aq] filesystem type
 is specified, all fuse* filesystems will be included.
 .br
 e.g. \-I nfs,tmpfs or \-I nfs \-I tmpfs.
@@ -243,7 +243,7 @@ apfs) will not total up correctly.
 It is up to the user
 to exclude (using the \-x option) read\-only filesystems (cdfs, iso9660),
 swap-based (memfs, mfs, tmpfs) filesystems and user (fuse*)
-filesystems.  Excluding the 'fuse' filesystem will exclude all
+filesystems.  Excluding the \[aq]fuse\[aq] filesystem will exclude all
 fuse* filesystems.
 .TP
 .B \-w
@@ -269,7 +269,7 @@ Set the print width for inode values.  Default is seven.
 .br
 Exclude the file system types listed in \fIexclude\-fstyp\-list\fP.
 The list is a comma separated list of file system types.
-Multiple \-x options may be specified.  If the 'fuse' filesystem
+Multiple \-x options may be specified.  If the \[aq]fuse\[aq] filesystem
 type is excluded, all fuse* filesystems will be excluded.
 e.g. \-x nfs,tmpfs or \-x nfs \-x tmpfs.
 .TP
@@ -341,7 +341,7 @@ Print the number of megabytes in use on the file system
 .B c
 Print the number of megabytes not available for use by normal users
 (total \- available).  Note that this calculation does work correctly
-the 'apfs' filesystem.
+the \[aq]apfs\[aq] filesystem.
 .TP
 .B Free
 .TP
@@ -408,14 +408,14 @@ The default format string for \fIdi\fP is \fBsmbuvpT\fP.
 The default format string for \fImi\fP is \fBMSTIO\fP.
 .PP
 The format string may also contain any other character not listed
-above.  The character will be printed as is.  e.g. di \-f 'mbuvp|iUFP'
-will print the character '|' between the disk usage and the file slot
+above.  The character will be printed as is.  e.g. di \-f \[aq]mbuvp|iUFP\[aq]
+will print the character \[aq]|\[aq] between the disk usage and the file slot
 usage.  The command sequence:
 .RS
 .br
-di \-f 'mbuvp
+di \-f \[aq]mbuvp
 .br
-miUFP'
+miUFP\[aq]
 .br
 .RE
 will print two lines of data for each filesystem.
@@ -491,6 +491,6 @@ properly due to overflow of a long long.
 .SH Website
 https://diskinfo-di.sourceforge.io/
 .SH Author
-This program is Copyright 1994-2021 by Brad Lanam.
+This program is Copyright 1994-2024 by Brad Lanam.
 .PP
 Brad Lanam, Pleasant Hill, CA (brad.lanam.di @ gmail.com)

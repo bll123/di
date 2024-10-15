@@ -1,7 +1,8 @@
 CHANGES
 
-    4.54.0.1                                2024-10-8
-        Missing entry in change log.
+    4.54.0.1                                2024-10-15
+        Fix single quotes in the manual page.
+        Missing 4.54 entry in change log.
 
     4.54                                    2024-10-7
         C++ (Haiku) now checks for -fpermissive flag.

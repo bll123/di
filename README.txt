@@ -285,6 +285,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2023 Brad Lanam, Pleasant Hill, CA, USA
+    Copyright 1994-2024 Brad Lanam, Pleasant Hill, CA, USA
     brad.lanam.di_at_gmail.com
     https://diskinfo-di.sourceforge.io
