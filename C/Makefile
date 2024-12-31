@@ -5,6 +5,11 @@
 #  Copyright 2023 Brad Lanam, Pleasant Hill, CA
 #
 
+# cmake
+BUILDDIR = build
+# DI_USE_MATH = NONE
+
+# mkconfig
 MKC_PREFIX = di
 MKC_CONFDIR = mkc_config
 MKC_FILES = mkc_files
@@ -63,6 +68,92 @@ MKCONFIG_TYPE = sh
 MKC_REQLIB = di.reqlibs
 MKC_ECHO =
 #MKC_ECHO = -e
+
+###
+# cmake
+
+.PHONY: all
+all: cmake
+
+# parallel doesn't seem to work under msys2
+# cmake doesn't seem to support parallel under *BSD
+.PHONY: cmake
+cmake:
+	@case $$(uname -s) in \
+	  CYGWIN*) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-windows; \
+	    $(MAKE) build; \
+            ;; \
+	  MINGW*) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-windows; \
+	    $(MAKE) build; \
+            ;; \
+	  BSD*) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-unix; \
+	    $(MAKE) build; \
+            ;; \
+	  *) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-unix; \
+	    pmode=--parallel $(MAKE) build; \
+            ;; \
+	esac
+
+.PHONY: cmakeclang
+cmakeclang:
+	case $$(uname -s) in \
+	  BSD*) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-unix; \
+	    $(MAKE) build; \
+            ;; \
+	  MINGW*) \
+	    COMP=/ucrt64/bin/clang.exe \
+	    $(MAKE) cmake-windows; \
+	    $(MAKE) build; \
+            ;; \
+	  *) \
+	    $(MAKE) cmake-unix; \
+	    pmode=--parallel $(MAKE) build; \
+            ;; \
+	esac
+
+# internal use
+.PHONY: cmake-unix
+cmake-unix:
+	@if [ "$(PREFIX)" = "" ]; then echo "No prefix set"; exit 1; fi
+	cmake \
+		-DCMAKE_C_COMPILER=$(COMP) \
+		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
+		-DDI_LOCALE_DIR:STATIC=$(LOCALEDIR) \
+		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
+		-S . -B $(BUILDDIR) -Werror=deprecated
+
+# internal use
+.PHONY: cmake-windows
+cmake-windows:
+	@if [ "$(PREFIX)" = "" ]; then echo "No prefix set"; exit 1; fi
+	cmake \
+		-DCMAKE_C_COMPILER=$(COMP) \
+		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
+		-DDI_LOCALE_DIR:STATIC=$(LOCALEDIR) \
+		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
+		-G "MSYS Makefiles" \
+		-S . -B $(BUILDDIR) -Werror=deprecated
+
+# cmake on windows installs extra unneeded crap
+# --parallel does not work correctly on msys2
+# --parallel also seems to not work on *BSD
+.PHONY: build
+build:
+	cmake --build $(BUILDDIR) $(pmode)
+
+.PHONY: install
+install:
+	cmake --install $(BUILDDIR)
 
 ###
 # main
@@ -186,7 +277,7 @@ clean:
 		if [ -f Makefile ]; then \
 		$(MAKE) clean; \
 		fi
-	@-$(RM) -rf di mi \
+	@-$(RM) -f w ww di mi \
 		di.exe mingw-di.exe mi.exe \
 		diskspace.so diskspace.dylib diskspace.dll \
 		perlfilesysdi.bld libdiperl.a \
@@ -198,7 +289,7 @@ clean:
 		Perl/Filesys-di-*.tar.gz \
 		Perl/Makefile.old \
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
-	@-find . -name '*~' -print | xargs rm > /dev/null 2>&1; exit 0
+	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 
 # leaves:
 #   _mkconfig_runtests, mkc_files, ../dioptions.dat
@@ -223,6 +314,7 @@ distclean:
 		_mkconfig_runtests \
 		$(MKC_FILES) \
 		*~ *.orig */*.orig \
+		build \
 		>/dev/null 2>&1; exit 0
 
 ###

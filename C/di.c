@@ -78,8 +78,6 @@
  */
 
 #include "config.h"
-#include "dimain.h"
-#include "di.h"
 
 #if _hdr_stdio
 # include <stdio.h>
@@ -92,9 +90,9 @@
 # define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
-#if _use_mcheck
-# include <mcheck.h>
-#endif
+
+#include "dimain.h"
+#include "di.h"
 
 /* end of system specific includes/configurations */
 
@@ -103,11 +101,6 @@ main (int argc, const char * argv [])
 {
   char      *disp;
   diData_t  diData;
-
-#if _use_mcheck
-  mcheck_pedantic (NULL);
-  mtrace ();
-#endif
 
   disp = dimainproc (argc, argv, 0, &diData);
   if (diData.options.exitFlag == DI_EXIT_FAIL) {

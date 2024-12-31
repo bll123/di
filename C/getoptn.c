@@ -18,18 +18,16 @@
  *
  */
 
-#if defined(TEST_GETOPTN)
-# include "gconfig.h"
-#else
-# include "config.h"
-#endif
-#include "getoptn.h"
+#include "config.h"
 
 #if _hdr_stdio
 # include <stdio.h>
 #endif
 #if _hdr_stdlib
 # include <stdlib.h>
+#endif
+#if _hdr_stdbool
+# include <stdbool.h>
 #endif
 #if _hdr_string
 # include <string.h>
@@ -42,9 +40,8 @@
 # define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
-#if _use_mcheck
-# include <mcheck.h>
-#endif
+
+#include "getoptn.h"
 
 typedef struct {
     Size_t      optionlen;
@@ -68,8 +65,8 @@ typedef struct {
     Size_t              offset;     /* reprocessing offset                  */
 } getoptn_info_t;
 
-typedef void (*getoptn_func_bool_t) _((const char *option, void *valptr));
-typedef void (*getoptn_func_value_t) _((const char *option, void *valptr, const char *value));
+typedef void (*getoptn_func_bool_t) (const char *option, void *valptr);
+typedef void (*getoptn_func_value_t) (const char *option, void *valptr, const char *value);
 
 static int
 find_option (getoptn_info_t *info, const char *arg, const char *oarg, Size_t *argidx)
@@ -84,7 +81,7 @@ find_option (getoptn_info_t *info, const char *arg, const char *oarg, Size_t *ar
     }
     if (strncmp (arg + info->offset, info->opts[i].option + info->reprocess,
              info->optinfo[i].optionlen - info->reprocess) == 0) {
-      info->hasvalue = FALSE;
+      info->hasvalue = false;
         /* info->argidx == 0 indicates top level of recursion */
       if (info->argidx == 0) {
         info->optionlen = info->optinfo[i].optionlen;
@@ -93,28 +90,28 @@ find_option (getoptn_info_t *info, const char *arg, const char *oarg, Size_t *ar
       if (info->style == GETOPTN_LEGACY) {
         if (info->arglen - info->offset > info->optionlen - info->reprocess) {
           if (info->opts[i].option_type == GETOPTN_BOOL) {
-            info->reprocess = TRUE;
+            info->reprocess = true;
             if (info->offset == 0) {
               ++info->offset;
             }
             ++info->offset;
             if (info->offset >= info->arglen) {
               info->offset = 0;
-              info->reprocess = FALSE;
+              info->reprocess = false;
             }
           } else {
-            info->hasvalue = TRUE;
+            info->hasvalue = true;
           }
         } else {
           info->offset = 0;
-          info->reprocess = FALSE;
+          info->reprocess = false;
         }
       }
 
       if (info->style == GETOPTN_MODERN) {
         if (info->arglen > info->optionlen) {
           if (info->arg[info->optionlen] == '=') {
-            info->hasvalue = TRUE;
+            info->hasvalue = true;
           } else {
             continue;  /* partial match */
           }
@@ -130,7 +127,7 @@ find_option (getoptn_info_t *info, const char *arg, const char *oarg, Size_t *ar
     }
   }
 
-  info->reprocess = FALSE;
+  info->reprocess = false;
   info->offset = 0;
   return GETOPTN_NOTFOUND;
 }
@@ -261,7 +258,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
     f = (getoptn_func_value_t) opt->value2;
     (f)(opt->option, opt->valptr, ptr);
   } else {
-    info->reprocess = FALSE;
+    info->reprocess = false;
     info->offset = 0;
     fprintf (stderr, "%s: unknown option type %d\n",
          info->argv[0], opt->option_type);
@@ -320,7 +317,7 @@ getoptn (int style, int argc, const char * const argv [],
     info.argidx = 0;
     info.arg = arg;
     info.arglen = strlen (arg);
-    info.reprocess = FALSE;
+    info.reprocess = false;
     info.offset = 0;
 
     do {
@@ -329,7 +326,7 @@ getoptn (int style, int argc, const char * const argv [],
         continue;
       }
       if (i == GETOPTN_NOTFOUND) {
-        if (info.reprocess == FALSE) {
+        if (info.reprocess == false) {
           fprintf (stderr, "%s: unknown option %s\n", argv[0], arg);
           ++*errorCount;
         }

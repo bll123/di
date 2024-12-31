@@ -18,8 +18,6 @@
 /********************************************************/
 
 #include "config.h"
-#include "di.h"
-#include "dimntopt.h"
 
 #if _hdr_stdio
 # include <stdio.h>
@@ -66,6 +64,9 @@
 # include <windows.h>       /* GetDiskFreeSpace(); GetVolumeInformation() */
 #endif
 
+#include "di.h"
+#include "dimntopt.h"
+
 /********************************************************/
 
 #if defined (__cplusplus) || defined (c_plusplus)
@@ -76,13 +77,13 @@ extern "C" {
 	&& _lib_statfs \
 	&& _npt_statfs
 # if _lib_statfs && _args_statfs == 2
-  extern int statfs _((char *, struct statfs *));
+  extern int statfs (char *, struct statfs *);
 # endif
 # if _lib_statfs && _args_statfs == 3
-  extern int statfs _((char *, struct statfs *, int));
+  extern int statfs (char *, struct statfs *, int);
 # endif
 # if _lib_statfs && _args_statfs == 4
-  extern int statfs _((char *, struct statfs *, int, int));
+  extern int statfs (char *, struct statfs *, int, int);
 # endif
 #endif
 
@@ -99,8 +100,7 @@ extern int debug;
     && ! _lib_getmntinfo \
     && ! _lib_getfsstat \
     && ! _lib_getvfsstat \
-    && ! _lib_GetVolumeInformation \
-	&& ! _class_os__Volumes
+    && ! _lib_GetVolumeInformation
 
 /*
  * di_getDiskInfo
@@ -127,33 +127,26 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
             diptr->printFlag == DI_PRNT_SKIP ||
             diptr->printFlag == DI_PRNT_FORCE)
         {
-            _fs_size_t      tblocksz;
-            if (statvfs (diptr->name, &statBuf) == 0)
-            {
-                    /* data general DG/UX 5.4R3.00 sometime returns 0   */
-                    /* in the fragment size field.                      */
-                if (statBuf.f_frsize == 0 && statBuf.f_bsize != 0)
-                {
-                    tblocksz = statBuf.f_bsize;
-                }
-                else
-                {
-                    tblocksz = statBuf.f_frsize;
-                }
+            uint64_t    tblocksz;
+
+            if (statvfs (diptr->name, &statBuf) == 0) {
+              /* data general DG/UX 5.4R3.00 sometime returns 0   */
+              /* in the fragment size field.                      */
+              if (statBuf.f_frsize == 0 && statBuf.f_bsize != 0) {
+                tblocksz = statBuf.f_bsize;
+              } else {
+                tblocksz = statBuf.f_frsize;
+              }
 /* Linux! statvfs() returns values in f_bsize rather f_frsize.  Bleah.  */
 /* Non-POSIX!  Linux manual pages are incorrect.                        */
 #  if linux
                 tblocksz = statBuf.f_bsize;
 #  endif /* linux */
 
-                di_saveBlockSizes (diptr, tblocksz,
-                    (_fs_size_t) statBuf.f_blocks,
-                    (_fs_size_t) statBuf.f_bfree,
-                    (_fs_size_t) statBuf.f_bavail);
-                di_saveInodeSizes (diptr,
-                    (_fs_size_t) statBuf.f_files,
-                    (_fs_size_t) statBuf.f_ffree,
-                    (_fs_size_t) statBuf.f_favail);
+                di_saveBlockSizes (diptr, tblocksz, statBuf.f_blocks,
+                    statBuf.f_bfree, statBuf.f_bavail);
+                di_saveInodeSizes (diptr, statBuf.f_files,
+                    statBuf.f_ffree, statBuf.f_favail);
 # if _mem_struct_statvfs_f_basetype
                 if (! *diptr->fsType) {
                   strncpy (diptr->fsType, statBuf.f_basetype, DI_TYPE_LEN);
@@ -244,30 +237,26 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
             diptr->printFlag == DI_PRNT_SKIP ||
             diptr->printFlag == DI_PRNT_FORCE)
         {
-            _fs_size_t      tblocksz;
+            dinum_t      tblocksz;
 
             if (statfs (diptr->name, &statBuf, sizeof (statBuf), 0) == 0)
             {
 # if _mem_struct_statfs_f_frsize
                 if (statBuf.f_frsize == 0 && statBuf.f_bsize != 0)
                 {
-                    tblocksz = (_fs_size_t) statBuf.f_bsize;
+                    tblocksz = (dinum_t) statBuf.f_bsize;
                 }
                 else
                 {
-                    tblocksz = (_fs_size_t) statBuf.f_frsize;
+                    tblocksz = (dinum_t) statBuf.f_frsize;
                 }
 # else
                 tblocksz = UBSIZE;
 # endif
-                di_saveBlockSizes (diptr, tblocksz,
-                    (_fs_size_t) statBuf.f_blocks,
-                    (_fs_size_t) statBuf.f_bfree,
-                    (_fs_size_t) statBuf.f_bfree);
-                di_saveInodeSizes (diptr,
-                    (_fs_size_t) statBuf.f_files,
-                    (_fs_size_t) statBuf.f_ffree,
-                    (_fs_size_t) statBuf.f_ffree);
+                di_saveBlockSizes (diptr, tblocksz, statBuf.f_blocks,
+                    statBuf.f_bfree, statBuf.f_bfree);
+                di_saveInodeSizes (diptr, statBuf.f_files,
+                    statBuf.f_ffree, statBuf.f_ffree);
 # if _lib_sysfs && _mem_struct_statfs_f_fstyp
                 sysfs (GETFSTYP, statBuf.f_fstyp, diptr->fsType);
 # endif
@@ -335,14 +324,10 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
         {
             if (statfs (diptr->name, &statBuf) == 0)
             {
-                di_saveBlockSizes (diptr, (_fs_size_t) statBuf.f_bsize,
-                    (_fs_size_t) statBuf.f_blocks,
-                    (_fs_size_t) statBuf.f_bfree,
-                    (_fs_size_t) statBuf.f_bavail);
-                di_saveInodeSizes (diptr,
-                    (_fs_size_t) statBuf.f_files,
-                    (_fs_size_t) statBuf.f_ffree,
-                    (_fs_size_t) statBuf.f_ffree);
+                di_saveBlockSizes (diptr, statBuf.f_bsize, statBuf.f_blocks,
+                    statBuf.f_bfree, statBuf.f_bavail);
+                di_saveInodeSizes (diptr, statBuf.f_files,
+                    statBuf.f_ffree, statBuf.f_ffree);
 
 # if _lib_sysfs && _mem_struct_statfs_f_fstyp
                 sysfs (GETFSTYP, statBuf.f_fstyp, diptr->fsType);
@@ -432,14 +417,9 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
                         (PULARGE_INTEGER) &bytesFree);
                 if (rc > 0)
                 {
-                    di_saveBlockSizes (diptr, (_fs_size_t) 1,
-                        (_fs_size_t) bytesTotal,
-                        (_fs_size_t) bytesFree,
-                        (_fs_size_t) bytesAvail);
-                    di_saveInodeSizes (diptr,
-                        (_fs_size_t) 0,
-                        (_fs_size_t) 0,
-                        (_fs_size_t) 0);
+                    di_saveBlockSizes (diptr, 1, bytesTotal,
+                        bytesFree, bytesAvail);
+                    di_saveInodeSizes (diptr, 0, 0, 0);
                 }
                 else
                 {
@@ -475,14 +455,9 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
                 if (rc > 0)
                 {
                     di_saveBlockSizes (diptr,
-                        (_fs_size_t) (sectorspercluster * bytespersector),
-                        (_fs_size_t) totalclusters,
-                        (_fs_size_t) freeclusters,
-                        (_fs_size_t) freeclusters);
-                    di_saveInodeSizes (diptr,
-                        (_fs_size_t) 0,
-                        (_fs_size_t) 0,
-                        (_fs_size_t) 0);
+                        (sectorspercluster * bytespersector),
+                        totalclusters, freeclusters, freeclusters);
+                    di_saveInodeSizes (diptr, 0, 0, 0);
                 }
                 else
                 {

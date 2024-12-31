@@ -1,16 +1,22 @@
-#ifndef DI_INC_DI_H
-#define DI_INC_DI_H
-
 /*
  * Copyright 1994-2018 Brad Lanam, Walnut Creek, CA
  * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
  */
+
+#ifndef DI_INC_DI_H
+#define DI_INC_DI_H
 
 #include "config.h"
 
 /*****************************************************/
 
 #include <stdio.h>
+#if _hdr_stddef
+# include <stddef.h>
+#endif
+#if _hdr_stdint
+# include <stdint.h>
+#endif
 #if _hdr_fcntl \
     && ! defined (DI_INC_FCNTL_H)  /* xenix */
 # define DI_INC_FCNTL_H
@@ -96,6 +102,8 @@
 # endif
 #endif
 
+#include "dimath.h"
+
 # if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
 # endif
@@ -104,34 +112,18 @@ extern "C" {
 #define DI_SPEC_NAME_LEN       MAXPATHLEN
 #define DI_OPT_LEN             MAXPATHLEN
 #define DI_MNT_TIME_LEN        24
-
-#if _siz_long_long >= 4
-  typedef unsigned long long _fs_size_t;
-  typedef long long _s_fs_size_t;
-# define DI_LL "ll"
-# define DI_LLu "llu"
-#else
-  typedef unsigned long _fs_size_t;
-  typedef long _s_fs_size_t;
-# define DI_LL "l"
-# define DI_LLu "lu"
+#ifndef DI_DEFAULT_DISP_SIZE
+# define DI_DEFAULT_DISP_SIZE "H"
 #endif
-#if _siz_long_double >= 8 && _printf_long_double
-  typedef long double _print_size_t;
-# define DI_Lf "Lf"
-#else
-  typedef double _print_size_t;
-# define DI_Lf "f"
+#ifndef DI_DEFAULT_FORMAT
+# define DI_DEFAULT_FORMAT "smbuvpT"
+#endif
+#ifndef DI_LOCALE_DIR
+/* temporary */
+# define DI_LOCALE_DIR "/usr/share/di/locale"
 #endif
 
 typedef unsigned long __ulong;
-
-#if ! defined (TRUE)
-# define TRUE             1
-#endif
-#if ! defined (FALSE)
-# define FALSE            0
-#endif
 
 #define DI_PRNT_IGNORE      0
 #define DI_PRNT_OK          1
@@ -147,12 +139,12 @@ typedef unsigned long __ulong;
 typedef struct
 {
     unsigned int    sortIndex [2];
-    _fs_size_t      totalSpace;
-    _fs_size_t      freeSpace;
-    _fs_size_t      availSpace;
-    _fs_size_t      totalInodes;
-    _fs_size_t      freeInodes;
-    _fs_size_t      availInodes;
+    dinum_t      total_space;
+    dinum_t      free_space;
+    dinum_t      avail_space;
+    dinum_t      total_inodes;
+    dinum_t      free_inodes;
+    dinum_t      avail_inodes;
     __ulong         st_dev;                      /* disk device number       */
     __ulong         sp_dev;                      /* special device number    */
     __ulong         sp_rdev;                     /* special rdev #           */
@@ -178,11 +170,11 @@ typedef struct
     char            *type;
     Uid_t           uid;
     Gid_t           gid;
-    _fs_size_t      blockSize;
-    _fs_size_t      limit;
-    _fs_size_t      used;
-    _fs_size_t      ilimit;
-    _fs_size_t      iused;
+    dinum_t      block_size;
+    dinum_t      limit;
+    dinum_t      used;
+    dinum_t      ilimit;
+    dinum_t      iused;
 } diQuota_t;
 
 typedef struct
@@ -222,8 +214,8 @@ typedef struct {
 
 typedef struct {
     const char      *formatString;
-    _print_size_t   dispBlockSize;
-    _print_size_t   baseDispSize;
+    int             dispBlockSize;
+    unsigned int    baseDispSize;
     unsigned int    baseDispIdx;
     char            sortType [DI_SORT_MAX + 1];
     unsigned int    posix_compat;
@@ -279,34 +271,40 @@ typedef struct {
   extern int errno;
 #endif
 
- /* digetentries.c */
+/* digetentries.c */
 extern int  di_getDiskEntries       (diDiskInfo_t **, int *);
- /* digetinfo.c */
+
+/* digetinfo.c */
 extern void di_getDiskInfo          (diDiskInfo_t **, int *);
- /* diquota.c */
+
+/* diquota.c */
 extern void diquota                 (diQuota_t *);
- /* strdup.c */
+
+/* strdup.c */
 # if ! _lib_strdup
 extern char *strdup                 (const char *);
 # endif
- /* strstr.c */
+
+/* strstr.c */
 # if ! _lib_strstr
 extern char *strstr           (const char *, const char *);
 # endif
- /* trimchar.c */
+
+/* trimchar.c */
 extern void trimChar                (char *, int);
- /* realloc.c */
-extern _pvoid di_realloc            (_pvoid, Size_t);
- /* didiskutil.c */
+
+/* realloc.c */
+extern void * di_realloc            (void *, Size_t);
+
+/* didiskutil.c */
 extern void di_initDiskInfo (diDiskInfo_t *);
-extern void di_saveBlockSizes (diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t, _fs_size_t);
-extern void di_saveInodeSizes (diDiskInfo_t *, _fs_size_t, _fs_size_t, _fs_size_t);
+extern void di_saveBlockSizes (diDiskInfo_t *, uint64_t, uint64_t, uint64_t, uint64_t);
+extern void di_saveInodeSizes (diDiskInfo_t *, uint64_t, uint64_t, uint64_t);
 #if _lib_getmntent \
     && ! _lib_getmntinfo \
     && ! _lib_getfsstat \
     && ! _lib_getvfsstat \
-    && ! _lib_mntctl \
-    && ! _class_os__Volumes
+    && ! _lib_mntctl
 extern char *chkMountOptions        (const char *, const char *);
 #endif
 extern void convertMountOptions     (unsigned long, diDiskInfo_t *);
@@ -316,7 +314,7 @@ extern int  di_isPooledFs           (diDiskInfo_t *);
 extern int  di_isLoopbackFs         (diDiskInfo_t *);
 extern Size_t di_mungePoolName      (char *);
 
-     /* macro for gettext() */
+/* macro for gettext() */
 #ifndef DI_GT
 # if _enable_nls
 #  define DI_GT(args) gettext(args)
@@ -324,53 +322,6 @@ extern Size_t di_mungePoolName      (char *);
 #  define DI_GT(args) (args)
 # endif
 #endif
-
-# if _lib_sys_dollar_device_scan && _lib_sys_dollar_getdviw
-
-/* Thanks to Craig Berry's VMS::Device for the VMS code. */
-
-typedef struct {
-  short   buflen;          /* Length of output buffer */
-  short   itmcode;         /* Item code */
-  void    *buffer;         /* Buffer address */
-  void    *retlen;         /* Return length address */
-} VMS_ITMLST;
-
-# define DVI_IS_STRING 1
-# define DVI_IS_LONGWORD 2
-# define DVI_IS_QUADWORD 3
-# define DVI_IS_WORD 4
-# define DVI_IS_BYTE 5
-# define DVI_IS_VMSDATE 6
-# define DVI_IS_BITMAP 7  /* Each bit in the return value indicates something */
-# define DVI_IS_ENUM 8    /* Each returned value has a name, and we ought to */
-                          /* return the name instead of the value */
-# define DVI_IS_ODD 9     /* A catchall */
-
-
-# define DVI_IS_INPUT (1<<0)
-# define DVI_IS_OUTPUT (1<<1)
-# define DVI_ENT(a, b, c) {#a, DVI$_##a, b, c, DVI_IS_OUTPUT}
-
-typedef struct {
-  char *name;         /* Pointer to the item name */
-  int  syscallValue;  /* Value to use in the getDVI item list */
-  int  bufferLen;     /* Length the return va buf needs to be. (no nul */
-                      /* terminators, so must be careful with the return */
-                      /* values. */
-  int  returnType;    /* Type of data the item returns */
-  int  inOut;         /* Is this an input or an output item? */
-} genericID_t ;
-
-/* Macro to fill in a 'traditional' item-list entry */
-# define init_itemlist(ile, length, code, bufaddr, retlen_addr) \
-{ \
-    (ile)->buflen = (length); \
-    (ile)->itmcode = (code); \
-    (ile)->buffer = (bufaddr); \
-    (ile)->retlen = (retlen_addr) ;}
-
-# endif
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }

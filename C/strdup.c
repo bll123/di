@@ -7,8 +7,6 @@
 
 #if ! _lib_strdup
 
-# include "di.h"
-
 #if _hdr_stdio
 #  include <stdio.h>
 #endif
@@ -27,9 +25,8 @@
 # if _hdr_strings
 #  include <strings.h>
 # endif
-#if _use_mcheck
-# include <mcheck.h>
-#endif
+
+# include "di.h"
 
 char *
 strdup (const char *ptr)
@@ -37,13 +34,12 @@ strdup (const char *ptr)
   Size_t        len;
   char          *nptr;
 
-  if (ptr == (char *) NULL)
-  {
-    return (char *) NULL;
+  if (ptr == NULL) {
+    return NULL;
   }
 
   len = strlen (ptr);
-  nptr = (char *) malloc (len + 1);
+  nptr = malloc (len + 1);
   strncpy (nptr, ptr, len);
   return nptr;
 }

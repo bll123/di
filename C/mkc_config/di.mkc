@@ -12,11 +12,7 @@ output  config.h
 standard
 
 hdr     ctype.h
-hdr     dcdef.h
-hdr     descrip.h
 hdr     dirent.h
-hdr     dvidef.h
-hdr     dvsdef.h
 hdr     errno.h
 hdr     fcntl.h
 hdr     fshelp.h
@@ -31,7 +27,6 @@ hdr     libintl.h
 hdr     libprop/proplib.h
 hdr     locale.h
 hdr     malloc.h
-hdr     mcheck.h
 hdr     memory.h
 hdr     mntent.h
 hdr     mnttab.h
@@ -39,8 +34,9 @@ hdr     mnttab.h
 hdr     quota.h
 hdr     rpc/rpc.h
 hdr     rpcsvc/rquota.h
-hdr     ssdef.h
-hdr     starlet.h
+hdr     stdbool.h
+hdr     stddef.h
+hdr     stdint.h
 hdr     storage/Directory.h
 hdr     storage/Entry.h
 hdr     storage/Path.h
@@ -128,7 +124,6 @@ lib     getzoneid
 lib     hasmntopt
 lib     lstat
 lib     mbrlen
-lib     mcheck_pedantic -lmcheck
 lib     memcpy
 lib     memset
 # AIX doesn't declare this :(
@@ -150,10 +145,6 @@ lib     statvfs
 lib     strcoll
 lib     strdup
 lib     strstr
-# VMS
-lib     sys_dollar_device_scan
-# VMS
-lib     sys_dollar_getdviw
 lib     sysfs
 lib     textdomain  -lintl, -lintl -liconv
 # dragonflybsd
@@ -188,7 +179,6 @@ if quotactl_pos_2 == _c_arg_2_quotactl 'caddr_t'
 endif
 args noconst setmntent
 args noconst statfs
-class   os::Volumes -lsyllable
 npt     getenv
 npt     getmnt
 npt     mntctl
@@ -248,16 +238,6 @@ if stdnfsquotas _hdr_rpc_rpc && _hdr_rpcsvc_rquota && _lib_xdr_int && \
   setint _has_std_nfs_quotas 1
 else
   setint _has_std_nfs_quotas 0
-endif
-
-ifoption MCHECK
-  if mcheckexists _hdr_mcheck && _lib_mcheck_pedantic
-    setint _use_mcheck 1
-  else
-    setint _use_mcheck 0
-  endif
-else
-  setint _use_mcheck 0
 endif
 
 ifnotoption NLS

@@ -14,14 +14,15 @@
 /********************************************************/
 
 #include "config.h"
-#include "di.h"
-#include "dimntopt.h"
 
 #if _hdr_stdio
 # include <stdio.h>
 #endif
 #if _hdr_stdlib
 # include <stdlib.h>
+#endif
+#if _hdr_stdbool
+# include <stdbool.h>
 #endif
 #if _hdr_dirent
 # include <dirent.h>
@@ -126,25 +127,9 @@
 #if _hdr_util_string                /* Syllable */
 # include <util/string.h>           /* os::String - to get mount name */
 #endif
-#if _hdr_starlet                    /* VMS */
-# include <starlet.h>
-#endif
-#if _hdr_descrip                    /* VMS */
-# include <descrip.h>
-#endif
-#if _hdr_dcdef                      /* VMS */
-# include <dcdef.h>
-#endif
-#if _hdr_dvsdef                     /* VMS */
-# include <dvsdef.h>
-#endif
-#if _hdr_ssdef                      /* VMS */
-# include <ssdef.h>
-#endif
-#if _hdr_dvidef                     /* VMS */
-# include <dvidef.h>
-#endif
 
+#include "di.h"
+#include "dimntopt.h"
 
 /********************************************************/
 
@@ -153,7 +138,7 @@ extern "C" {
 #endif
 /* workaround for AIX - mntctl not declared */
 # if _lib_mntctl && _npt_mntctl
-  extern int mntctl _((int, Size_t, char *));
+  extern int mntctl (int, Size_t, char *);
 # endif
 #if defined (__cplusplus) || defined (c_plusplus)
 }
@@ -165,8 +150,7 @@ extern "C" {
     && ! _lib_getfsstat \
     && ! _lib_getvfsstat \
     && ! _lib_mntctl \
-    && ! _lib_getmnt \
-    && ! _class_os__Volumes
+    && ! _lib_getmnt
 # if defined (_PATH_MOUNTED)
 #  define DI_MOUNT_FILE        _PATH_MOUNTED
 # else
@@ -191,7 +175,7 @@ extern "C" {
 #endif
 
 #if defined (__QNX__)
-static int di_getQNXDiskEntries _((char *ipath, diDiskInfo_t **diskInfo, int *diCount));
+static int di_getQNXDiskEntries (char *ipath, diDiskInfo_t **diskInfo, int *diCount);
 #endif
 
 extern int debug;
@@ -200,10 +184,9 @@ extern int debug;
 
 #if _lib_getmntent \
     && ! _lib_setmntent \
-    && ! _lib_mntctl \
-    && ! _class_os__Volumes
+    && ! _lib_mntctl
 
-static char *checkMountOptions      _((struct mnttab *, char *));
+static char *checkMountOptions      (struct mnttab *, char *);
 
 /*
  * di_getDiskEntries
@@ -264,7 +247,7 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
         }
         if (checkMountOptions (&mntEntry, DI_MNTOPT_RO) != (char *) NULL)
         {
-            diptr->isReadOnly = TRUE;
+            diptr->isReadOnly = true;
         }
         strncpy (diptr->options, mntEntry.mnt_mntopts, DI_OPT_LEN);
 
@@ -305,8 +288,7 @@ checkMountOptions (struct mnttab *mntEntry, char *str)
     && ! _lib_getvfsstat \
     && ! _lib_mntctl \
     && ! _lib_GetDriveType \
-    && ! _lib_GetLogicalDriveStrings \
-    && ! _class_os__Volumes
+    && ! _lib_GetLogicalDriveStrings
 
 /*
  * di_getDiskEntries
@@ -386,7 +368,7 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
         }
         if (chkMountOptions (mntEntry->mnt_opts, DI_MNTOPT_RO) != (char *) NULL)
         {
-            diptr->isReadOnly = TRUE;
+            diptr->isReadOnly = true;
         }
         strncpy (diptr->options, mntEntry->mnt_opts, (Size_t) DI_OPT_LEN);
 
@@ -413,8 +395,6 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
     && ! _lib_GetDriveType \
     && ! _lib_GetLogicalDriveStrings \
     && ! _lib_fs_stat_dev \
-    && ! _class_os__Volumes \
-    && ! _lib_sys_dollar_device_scan \
     && defined (__QNX__)
 
 /*
@@ -553,8 +533,6 @@ di_getQNXDiskEntries (char *ipath, diDiskInfo_t **diskInfo, int *diCount)
     && ! _lib_GetDriveType \
     && ! _lib_GetLogicalDriveStrings \
     && ! _lib_fs_stat_dev \
-    && ! _class_os__Volumes \
-    && ! _lib_sys_dollar_device_scan \
     && ! defined (__QNX__)
 
 /*
@@ -685,7 +663,7 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        _fs_size_t          tblocksz;
+        dinum_t          tblocksz;
 
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
@@ -694,13 +672,13 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 # if defined (MNT_RDONLY)
         if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY)
         {
-            diptr->isReadOnly = TRUE;
+            diptr->isReadOnly = true;
         }
 # endif
 # if defined (MNT_LOCAL)
         if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL)
         {
-            diptr->isLocal = FALSE;
+            diptr->isLocal = false;
         }
 # endif
         convertMountOptions ((unsigned long) sp->f_flags, diptr);
@@ -740,19 +718,14 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
         strncpy (diptr->special, sp->f_mntfromname, (Size_t) DI_SPEC_NAME_LEN);
         strncpy (diptr->name, sp->f_mntonname, (Size_t) DI_NAME_LEN);
 # if _mem_struct_statfs_f_fsize
-        tblocksz = (_fs_size_t) sp->f_fsize;
+        tblocksz = (dinum_t) sp->f_fsize;
 # endif
 # if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
-        tblocksz = (_fs_size_t) sp->f_bsize;
+        tblocksz = (dinum_t) sp->f_bsize;
 # endif
-        di_saveBlockSizes (diptr, tblocksz,
-            (_fs_size_t) sp->f_blocks,
-            (_fs_size_t) sp->f_bfree,
-            (_fs_size_t) sp->f_bavail);
-        di_saveInodeSizes (diptr,
-            (_fs_size_t) sp->f_files,
-            (_fs_size_t) sp->f_ffree,
-            (_fs_size_t) sp->f_ffree);
+        di_saveBlockSizes (diptr, tblocksz, sp->f_blocks,
+            sp->f_bfree, sp->f_bavail);
+        di_saveInodeSizes (diptr, sp->f_files, sp->f_ffree, sp->f_ffree);
 # if _mem_struct_statfs_f_fstypename
         strncpy (diptr->fsType, sp->f_fstypename, (Size_t) DI_TYPE_LEN);
 # else
@@ -836,14 +809,14 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        _fs_size_t      tblocksz;
+        dinum_t      tblocksz;
 
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
 # if defined (MNT_LOCAL)
         if ((mntbufp [idx].f_flags & MNT_LOCAL) != MNT_LOCAL)
         {
-            diptr->isLocal = FALSE;
+            diptr->isLocal = false;
         }
 # endif
 
@@ -851,22 +824,18 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
                 DI_SPEC_NAME_LEN);
         strncpy (diptr->name, mntbufp [idx].f_mntonname, DI_NAME_LEN);
 
-        tblocksz = (_fs_size_t) 1024;
+        tblocksz = (dinum_t) 1024;
 
 # if _mem_struct_statfs_f_fsize /* OSF 1.x */
-        tblocksz = (_fs_size_t) mntbufp [idx].f_fsize;
+        tblocksz = (dinum_t) mntbufp [idx].f_fsize;
 # endif
 # if _mem_struct_statfs_f_bsize /* OSF 2.x */
-        tblocksz = (_fs_size_t) mntbufp [idx].f_bsize;
+        tblocksz = (dinum_t) mntbufp [idx].f_bsize;
 # endif
-        di_saveBlockSizes (diptr, tblocksz,
-            (_fs_size_t) mntbufp [idx].f_blocks,
-            (_fs_size_t) mntbufp [idx].f_bfree,
-            (_fs_size_t) mntbufp [idx].f_bavail);
-        di_saveInodeSizes (diptr,
-            (_fs_size_t) mntbufp [idx].f_files,
-            (_fs_size_t) mntbufp [idx].f_ffree,
-            (_fs_size_t) mntbufp [idx].f_ffree);
+        di_saveBlockSizes (diptr, tblocksz, mntbufp [idx].f_blocks,
+            mntbufp [idx].f_bfree, mntbufp [idx].f_bavail);
+        di_saveInodeSizes (diptr, mntbufp [idx].f_files,
+            mntbufp [idx].f_ffree, mntbufp [idx].f_ffree);
 
         fstype = mntbufp [idx].f_type;
 # if ! _sys_fs_types && ! defined (INITMOUNTNAMES) \
@@ -1022,11 +991,11 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 #  endif
 # endif /* else has sys/fs_types.h */
 
-        diptr->isReadOnly = FALSE;
+        diptr->isReadOnly = false;
 # if defined (MNT_RDONLY)
         if ((mntbufp [idx].f_flags & MNT_RDONLY) == MNT_RDONLY)
         {
-            diptr->isReadOnly = TRUE;
+            diptr->isReadOnly = true;
         }
 # endif
         convertMountOptions ((unsigned long) mntbufp [idx].f_flags, diptr);
@@ -1107,7 +1076,7 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        _fs_size_t      tblocksz;
+        dinum_t      tblocksz;
 
         diptr = *diskInfo + idx;
         di_initDiskInfo (diptr);
@@ -1117,13 +1086,13 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 # if defined (MNT_RDONLY)
         if ((sp->f_flag & MNT_RDONLY) == MNT_RDONLY)
         {
-            diptr->isReadOnly = TRUE;
+            diptr->isReadOnly = true;
         }
 # endif
 # if defined (MNT_LOCAL)
         if ((sp->f_flag & MNT_LOCAL) != MNT_LOCAL)
         {
-            diptr->isLocal = FALSE;
+            diptr->isLocal = false;
         }
 # endif
         convertMountOptions ((unsigned long) sp->f_flag, diptr);
@@ -1131,21 +1100,17 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 
         if (sp->f_frsize == 0 && sp->f_bsize != 0)
         {
-            tblocksz = (_fs_size_t) sp->f_bsize;
+            tblocksz = (dinum_t) sp->f_bsize;
         }
         else
         {
-            tblocksz = (_fs_size_t) sp->f_frsize;
+            tblocksz = (dinum_t) sp->f_frsize;
         }
 
-        di_saveBlockSizes (diptr, tblocksz,
-            (_fs_size_t) sp->f_blocks,
-            (_fs_size_t) sp->f_bfree,
-            (_fs_size_t) sp->f_bavail);
-        di_saveInodeSizes (diptr,
-            (_fs_size_t) sp->f_files,
-            (_fs_size_t) sp->f_ffree,
-            (_fs_size_t) sp->f_ffree);
+        di_saveBlockSizes (diptr, tblocksz, sp->f_blocks,
+            sp->f_bfree, sp->f_bavail);
+        di_saveInodeSizes (diptr, sp->f_files,
+            sp->f_ffree, sp->f_ffree);
 
         strncpy (diptr->special, sp->f_mntfromname, DI_SPEC_NAME_LEN);
         strncpy (diptr->name, sp->f_mntonname, DI_NAME_LEN);
@@ -1179,7 +1144,7 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 #if _lib_getmnt
 
 # if _npt_getmnt
-  int getmnt _((int *, struct fs_data *, int, int, char *));
+  int getmnt (int *, struct fs_data *, int, int, char *);
 # endif
 
 /*
@@ -1243,21 +1208,17 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 
         if ((fsdbuf [idx].fd_req.flags & MNT_LOCAL) != MNT_LOCAL)
         {
-            diptr->isLocal = FALSE;
+            diptr->isLocal = false;
         }
 
         strncpy (diptr->special, fsdbuf [idx].fd_devname, DI_SPEC_NAME_LEN);
         strncpy (diptr->name, fsdbuf [idx].fd_path, DI_NAME_LEN);
 
-            /* ULTRIX keeps these fields in units of 1K byte */
-        di_saveBlockSizes (diptr, (_fs_size_t) 1024,
-            (_fs_size_t) fsdbuf [idx].fd_btot,
-            (_fs_size_t) fsdbuf [idx].fd_bfree,
-            (_fs_size_t) fsdbuf [idx].fd_bfreen);
-        di_saveInodeSizes (diptr,
-            (_fs_size_t) fsdbuf [idx].fd_gtot,
-            (_fs_size_t) fsdbuf [idx].fd_gfree,
-            (_fs_size_t) fsdbuf [idx].fd_gfree);
+        /* ULTRIX keeps these fields in units of 1K byte */
+        di_saveBlockSizes (diptr, 1024, fsdbuf [idx].fd_btot,
+            fsdbuf [idx].fd_bfree, fsdbuf [idx].fd_bfreen);
+        di_saveInodeSizes (diptr, fsdbuf [idx].fd_gtot,
+            fsdbuf [idx].fd_gfree, fsdbuf [idx].fd_gfree);
 
         fstype = fsdbuf [idx].fd_fstype;
         if (fstype == GT_UNKWN)
@@ -1281,11 +1242,11 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 
         if ((fsdbuf [idx].fd_req.flags & MNT_RDONLY) == MNT_RDONLY)
         {
-            diptr->isReadOnly = TRUE;
+            diptr->isReadOnly = true;
         }
         else
         {
-            diptr->isReadOnly = FALSE;
+            diptr->isReadOnly = false;
         }
         convertMountOptions ((unsigned long) fsdbuf [idx].fd_req.flags, diptr);
         trimChar (diptr->options, ',');
@@ -1416,15 +1377,15 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
         vmtp = (struct vmount *) bufp;
         if ((vmtp->vmt_flags & MNT_REMOTE) == MNT_REMOTE)
         {
-            diptr->isLocal = FALSE;
+            diptr->isLocal = false;
         }
         if ((vmtp->vmt_flags & MNT_RDONLY) == MNT_RDONLY)
         {
-            diptr->isReadOnly = TRUE;
+            diptr->isReadOnly = true;
         }
 
         *diptr->special = '\0';
-        if (diptr->isLocal == FALSE)
+        if (diptr->isLocal == false)
         {
             strncpy (diptr->special,
                     (char *) vmt2dataptr (vmtp, VMT_HOSTNAME),
@@ -1564,7 +1525,7 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 
         if (rc != DRIVE_REMOTE)
         {
-            diptr->isLocal = TRUE;
+            diptr->isLocal = true;
         }
     } /* for each mounted drive */
 
@@ -1627,17 +1588,14 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
         strncpy (diptr->name, path.Path(), DI_NAME_LEN);
         strncpy (diptr->special, fsinfo.device_name, DI_SPEC_NAME_LEN);
         strncpy (diptr->fsType, fsinfo.fsh_name, DI_TYPE_LEN);
-        di_saveBlockSizes (diptr, (_fs_size_t) fsinfo.block_size,
-            (_fs_size_t) fsinfo.total_blocks,
-            (_fs_size_t) fsinfo.free_blocks,
-            (_fs_size_t) fsinfo.free_blocks);
-        di_saveInodeSizes (diptr, (_fs_size_t) fsinfo.total_nodes,
-            (_fs_size_t) fsinfo.free_nodes,
-            (_fs_size_t) fsinfo.free_nodes);
+        di_saveBlockSizes (diptr, fsinfo.block_size,
+            fsinfo.total_blocks, fsinfo.free_blocks, fsinfo.free_blocks);
+        di_saveInodeSizes (diptr, fsinfo.total_nodes,
+            fsinfo.free_nodes, fsinfo.free_nodes);
 # if defined (MNT_RDONLY)
         if ((fsinfo.flags & MNT_RDONLY) == MNT_RDONLY)
         {
-           diptr->isReadOnly = TRUE;
+           diptr->isReadOnly = true;
         }
 # endif
 # if defined (MNT_PERSISTENT)
@@ -1665,483 +1623,5 @@ di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
 
 #endif
 
-#if _class_os__Volumes
-
-/*
- * di_getDiskEntries
- *
- * For Syllable.
- *
- */
-
-int
-di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-{
-    diDiskInfo_t    *diptr;
-    int             idx;
-    Uint_t          i;
-    status_t        stat;
-    uint32          count;
-    fs_info         fsinfo;
-    os::Volumes     *vols;
-    os::String      mpString;
-
-    if (debug > 0) { printf ("# getDiskEntries: os::Volumes\n"); }
-    vols = new os::Volumes;
-    count = vols->GetMountPointCount ();
-    for (i = 0; i < count; ++i)
-    {
-        if ((stat = vols->GetFSInfo (i, &fsinfo)) != 0)
-        {
-           break;
-        }
-
-        idx = *diCount;
-        ++*diCount;
-        *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
-                sizeof (diDiskInfo_t) * *diCount);
-        if (*diskInfo == (diDiskInfo_t *) NULL) {
-          fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-          return -1;
-        }
-        diptr = *diskInfo + idx;
-        di_initDiskInfo (diptr);
-        stat = vols->GetMountPoint (i, &mpString);
-        strncpy (diptr->name, mpString.c_str(), DI_NAME_LEN);
-        strncpy (diptr->special, fsinfo.fi_device_path, DI_SPEC_NAME_LEN);
-        strncpy (diptr->fsType, fsinfo.fi_driver_name, DI_TYPE_LEN);
-        di_saveBlockSizes (diptr, (_fs_size_t) fsinfo.fi_block_size,
-            (_fs_size_t) fsinfo.fi_total_blocks,
-            (_fs_size_t) fsinfo.fi_free_blocks,
-            (_fs_size_t) fsinfo.fi_free_user_blocks);
-        di_saveInodeSizes (diptr, (_fs_size_t) fsinfo.fi_total_inodes,
-            (_fs_size_t) fsinfo.fi_free_inodes,
-            (_fs_size_t) fsinfo.fi_free_inodes);
-# if defined (MNT_RDONLY)
-        if ((fsinfo.fi_flags & MNT_RDONLY) == MNT_RDONLY)
-        {
-           diptr->isReadOnly = TRUE;
-        }
-# endif
-# if defined (MNT_PERSISTENT)
-        if ((fsinfo.fi_flags & MNT_PERSISTENT) != MNT_PERSISTENT)
-        {
-           diptr->printFlag = DI_PRNT_IGNORE;
-        }
-# endif
-        convertMountOptions ((unsigned long) fsinfo.fi_flags, diptr);
-        trimChar (diptr->options, ',');
-
-        if (debug > 1)
-        {
-            printf ("mnt:%s - %s\n", diptr->name, diptr->special);
-            printf ("dev:%d fs:%s\n", fsinfo.fi_dev, diptr->fsType);
-            printf ("mount_args: %s\n", fsinfo.fi_mount_args);
-            printf ("%s: %s\n", diptr->name, diptr->fsType);
-            printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
-                    (long int) fsinfo.fi_total_blocks,
-                    (long int) fsinfo.fi_free_blocks,
-                    (long int) fsinfo.fi_free_user_blocks);
-            printf ("\tinodes: tot:%ld free:%ld\n",
-                    (long int) fsinfo.fi_total_inodes,
-                    (long int) fsinfo.fi_free_inodes);
-        }
-    }
-    return 0;
-}
-
-#endif
-
-/*
- * VMS
- */
-
-#if _lib_sys_dollar_device_scan && _lib_sys_dollar_getdviw
-
-/* Thanks to Craig Berry's VMS::Device for the VMS code. */
-
-char *monthNames[12] = {
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
-  "Oct", "Nov", "Dec" };
-
-genericID_t devInfoList[] =
-{
-#ifdef DVI$_DISPLAY_DEVNAM
-  DVI_ENT(DISPLAY_DEVNAM, 256, DVI_IS_STRING),
-#endif
-#ifdef DVI$_DEVBUFSIZ
-  DVI_ENT(DEVBUFSIZ, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_MAXBLOCK
-  DVI_ENT(MAXBLOCK, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_FREEBLOCKS
-  DVI_ENT(FREEBLOCKS, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_MAXFILES
-  DVI_ENT(MAXFILES, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_REMOTE_DEVICE
-  DVI_ENT(REMOTE_DEVICE, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_VOLNAM
-  DVI_ENT(VOLNAM, 12, DVI_IS_STRING),
-#endif
-#ifdef DVI$_AVL
-  DVI_ENT(AVL, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_MNT
-  DVI_ENT(MNT, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SHR
-  DVI_ENT(SHR, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_ODS2_SUBSET0
-  DVI_ENT(ODS2_SUBSET0, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_ODS5
-  DVI_ENT(ODS5, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_NET
-  DVI_ENT(NET, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_DEVICE_TYPE_NAME
-  DVI_ENT(DEVICE_TYPE_NAME, 64, DVI_IS_STRING),
-#endif
-#ifdef DVI$_SHDW_MASTER
-  DVI_ENT(SHDW_MASTER, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SHDW_MEMBER
-  DVI_ENT(SHDW_MEMBER, 4, DVI_IS_LONGWORD),
-#endif
-#ifdef DVI$_SHDW_MASTER_NAME
-  DVI_ENT(SHDW_MASTER_NAME, 64, DVI_IS_STRING),
-#endif
-  {NULL, 0, 0, 0}
-};
-#define devInfoListCount ((sizeof(devInfoList)/sizeof (genericID_t)) - 1)
-
-
-int
-di_getDiskEntries (diDiskInfo_t **diskInfo, int *diCount)
-{
-  diDiskInfo_t    *diptr;
-  int             idx;
-  unsigned short  devNameLen;
-  unsigned short  devReturnLen;
-  unsigned int    deviceClass;
-  char            context[8] = {0,0,0,0,0,0,0,0};
-  struct dsc$descriptor_s devNameDesc;
-  struct dsc$descriptor_s devSearchNameDesc;
-  VMS_ITMLST      scanItemList;
-  VMS_ITMLST      *itemList;
-  unsigned short  *returnLengths;
-  char            **returnBuffers;
-  long            *tempLong;
-  char            returnedDevName [65];
-  unsigned short  returnedTime[7];
-  char            displayTime[100];
-  int             i;
-  int             status;
-# ifdef __ALPHA
-  __int64         *tempLongLong;
-# endif
-  _fs_size_t      freeBlocks;
-  _fs_size_t      totBlocks;
-  _fs_size_t      maxFiles;
-  _fs_size_t      tblocksz;
-
-
-  if (debug > 0) { printf ("# getDiskEntries: sys$device_scan/sys$getdviw\n"); }
-
-  devNameDesc.dsc$a_pointer = returnedDevName;
-  devNameDesc.dsc$w_length = 64;
-  devNameDesc.dsc$b_dtype = DSC$K_DTYPE_T;
-  devNameDesc.dsc$b_class = DSC$K_CLASS_S;
-
-  devSearchNameDesc.dsc$a_pointer = "*";
-  devSearchNameDesc.dsc$w_length = 1;
-  devSearchNameDesc.dsc$b_dtype = DSC$K_DTYPE_T;
-  devSearchNameDesc.dsc$b_class = DSC$K_CLASS_S;
-
-  memset (&scanItemList, 0, sizeof(VMS_ITMLST));
-  itemList = malloc (sizeof(VMS_ITMLST) * (devInfoListCount));
-  if (itemList == (VMS_ITMLST *) NULL) {
-    fprintf (stderr, "malloc failed for itemList. errno %d\n", errno);
-    return -1;
-  }
-  memset (itemList, 0, sizeof(VMS_ITMLST) * (devInfoListCount));
-  returnBuffers = (char **) malloc (sizeof (char *) * devInfoListCount);
-  if (returnBuffers == (char **) NULL) {
-    fprintf (stderr, "malloc failed for returnBuffers. errno %d\n", errno);
-    free ((char *) itemList);
-    return -1;
-  }
-  returnLengths = malloc (sizeof(short) * devInfoListCount);
-  if (returnLengths == (short *) NULL) {
-    fprintf (stderr, "malloc failed for returnLengths. errno %d\n", errno);
-    free ((char *) itemList);
-    free ((char *) returnBuffers);
-    return -1;
-  }
-
-  for (i = 0; i < devInfoListCount; i++) {
-    returnBuffers[i] = malloc (devInfoList[i].bufferLen + 1);
-    if (returnBuffers[i] == (char *) NULL) {
-      fprintf (stderr, "malloc failed for returnBuffers[i]. errno %d\n", errno);
-      free ((char *) itemList);
-      free ((char *) returnBuffers);
-      free ((char *) returnLengths);
-      return -1;
-    }
-    memset (returnBuffers[i], 0, devInfoList[i].bufferLen + 1);
-    init_itemlist (&itemList[i], devInfoList[i].bufferLen,
-          devInfoList[i].syscallValue, returnBuffers[i],
-          &returnLengths[i]);
-  }
-
-  deviceClass = DC$_DISK;
-  init_itemlist (&scanItemList, sizeof(deviceClass),
-     DVS$_DEVCLASS, &deviceClass, NULL);
-
-  while (sys$device_scan (&devNameDesc, &devReturnLen,
-          &devSearchNameDesc, &scanItemList, context) == SS$_NORMAL) {
-    idx = *diCount;
-    ++*diCount;
-    *diskInfo = (diDiskInfo_t *) di_realloc ((char *) *diskInfo,
-        sizeof (diDiskInfo_t) * (Size_t) *diCount);
-    if (*diskInfo == (di_DiskInfo_t *) NULL)
-      fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-      return -1;
-    }
-    diptr = *diskInfo + idx;
-    di_initDiskInfo (diptr);
-
-    returnedDevName [devReturnLen] = '\0';
-
-    if (debug > 4)
-    {
-      printf ("%s\n", returnedDevName);
-    }
-
-    devNameDesc.dsc$a_pointer = returnedDevName;
-    devNameDesc.dsc$w_length = devReturnLen;
-    devNameDesc.dsc$b_dtype = DSC$K_DTYPE_T;
-    devNameDesc.dsc$b_class = DSC$K_CLASS_S;
-
-    strncpy (diptr->fsType, "ODS-2", DI_TYPE_LEN);
-    /* _$9$LDA2: */
-    if (strlen (returnedDevName) > 4 && returnedDevName[4] == 'L')
-    {
-      strncpy (diptr->fsType, "LD", DI_TYPE_LEN);
-    }
-
-    status = sys$getdviw(0, 0, &devNameDesc, itemList,
-            NULL, NULL, NULL, NULL);
-    if (status == SS$_NORMAL) {
-      for (i = 0; i < devInfoListCount; i++) {
-        switch (devInfoList[i].returnType) {
-          case DVI_IS_STRING:
-            if (debug > 4)
-            {
-              printf ("  string:");
-              printf ("%s:", devInfoList[i].name);
-              printf ("%*s:\n", (int) returnLengths[i],
-                      (char *) returnBuffers[i]);
-            }
-            if (strcmp (devInfoList[i].name, "DISPLAY_DEVNAM") == 0)
-            {
-                strncpy (diptr->special, returnBuffers[i], returnLengths[i]);
-                diptr->special[returnLengths[i]] = '\0';
-            }
-            if (strcmp (devInfoList[i].name, "VOLNAM") == 0)
-            {
-                strncpy (diptr->name, returnBuffers[i], returnLengths[i]);
-                diptr->name[returnLengths[i]] = '\0';
-            }
-            if (strcmp (devInfoList[i].name, "DEVICE_TYPE_NAME") == 0)
-            {
-              returnBuffers[i][returnLengths[i]] = '\0';
-              strncat (diptr->options, "dev=",
-                  DI_OPT_LEN - strlen (diptr->options) - 1);
-              strncat (diptr->options, returnBuffers[i],
-                  DI_OPT_LEN - strlen (diptr->options) - 1);
-              strncat (diptr->options, ",",
-                  DI_OPT_LEN - strlen (diptr->options) - 1);
-            }
-            if (strcmp (devInfoList[i].name, "SHDW_MASTER_NAME") == 0)
-            {
-              if (returnLengths[i] > 0) {
-                returnBuffers[i][returnLengths[i]] = '\0';
-                strncat (diptr->options, returnBuffers[i],
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-                strncat (diptr->options, "),",
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-              }
-            }
-            break;
-          case DVI_IS_VMSDATE:
-            sys$numtim (returnedTime, returnBuffers[i]);
-            sprintf (displayTime, "%02hi-%s-%hi %02hi:%02hi:%02hi.%02hi",
-                    returnedTime[2], monthNames[returnedTime[1] - 1],
-                    returnedTime[0], returnedTime[3], returnedTime[4],
-                    returnedTime[5], returnedTime[6]);
-            if (debug > 4)
-            {
-              printf ("  date:");
-              printf ("%s:", devInfoList[i].name);
-              printf ("%s:\n", displayTime);
-            }
-            break;
-          case DVI_IS_ENUM:
-            tempLong = (long *) returnBuffers[i];
-            if (debug > 4)
-            {
-              printf ("  enum:");
-              printf ("%s:", devInfoList[i].name);
-              printf ("%ld:\n", *tempLong);
-            }
-            break;
-          case DVI_IS_BITMAP:
-          case DVI_IS_LONGWORD:
-            tempLong = (long *) returnBuffers[i];
-            if (debug > 4)
-            {
-              printf ("  long:");
-              printf ("%s:", devInfoList[i].name);
-              printf ("%ld:\n", *tempLong);
-            }
-            if (strcmp (devInfoList[i].name, "MAXBLOCK") == 0)
-            {
-                totBlocks = *tempLong;
-            }
-            if (strcmp (devInfoList[i].name, "FREEBLOCKS") == 0)
-            {
-                freeBlocks = *tempLong;
-            }
-            if (strcmp (devInfoList[i].name, "MAXFILES") == 0)
-            {
-                maxFiles = *tempLong;
-            }
-            if (strcmp (devInfoList[i].name, "REMOTE_DEVICE") == 0)
-            {
-                if (*tempLong == 1L)
-                {
-                    diptr->isLocal = FALSE;
-                }
-            }
-            if (strcmp (devInfoList[i].name, "NET") == 0)
-            {
-                if (*tempLong == 1L)
-                {
-                    diptr->isLocal = FALSE;
-                }
-            }
-            if (strcmp (devInfoList[i].name, "DEVBUFSIZ") == 0)
-            {
-                tblocksz = *tempLong;
-            }
-            if (strcmp (devInfoList[i].name, "AVL") == 0)
-            {
-              if (*tempLong == 0L)
-              {
-                diptr->printFlag = DI_PRNT_IGNORE;
-                strncat (diptr->options, "Offline,",
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-              }
-              if (*tempLong == 1L)
-              {
-                strncat (diptr->options, "Online,",
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-              }
-            }
-            if (strcmp (devInfoList[i].name, "MNT") == 0)
-            {
-              if (*tempLong == 1L)
-              {
-                strncat (diptr->options, "Mounted,",
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-              }
-              else
-              {
-                diptr->printFlag = DI_PRNT_IGNORE;
-              }
-            }
-            if (strcmp (devInfoList[i].name, "SHR") == 0)
-            {
-              if (*tempLong == 1L)
-              {
-                strncat (diptr->options, "Shareable,",
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-              }
-            }
-            if (strcmp (devInfoList[i].name, "SHDW_MASTER") == 0)
-            {
-              if (*tempLong == 1L)
-              {
-                strncat (diptr->options, "Shadow Master,",
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-              }
-            }
-            if (strcmp (devInfoList[i].name, "SHDW_MEMBER") == 0)
-            {
-              if (*tempLong == 1L)
-              {
-                strncat (diptr->options, "Shadow Member(",
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-              }
-            }
-            if (strcmp (devInfoList[i].name, "ODS2_SUBSET0") == 0)
-            {
-              if (*tempLong == 1L)
-              {
-                strncpy (diptr->fsType, "ODS-2/0", DI_TYPE_LEN);
-              }
-            }
-            if (strcmp (devInfoList[i].name, "ODS5") == 0)
-            {
-              if (*tempLong == 1L)
-              {
-                strncpy (diptr->fsType, "ODS-5", DI_TYPE_LEN);
-              }
-            }
-            break;
-# ifdef __ALPHA
-          case DVI_IS_QUADWORD:
-            tempLongLong = (__int64 *) returnBuffers[i];
-            if (debug > 4)
-            {
-              printf ("  quad:");
-              printf ("%s:", devInfoList[i].name);
-              printf ("%llu:\n", (long long) *tempLongLong);
-            }
-            break;
-# endif
-          }
-      }
-    } else {
-      /* fail */
-      ;
-    }
-
-    di_saveBlockSizes (diptr, tblocksz, totBlocks, freeBlocks, freeBlocks);
-    di_saveInodeSizes (diptr, maxFiles, 0, 0);
-
-    /* reset this so there's room during the next syscall */
-    devNameDesc.dsc$w_length = 64;
-    trimChar (diptr->options, ',');
-  } /* while there are entries */
-
-  for (i = 0; i < devInfoListCount; i++) {
-    free (returnBuffers[i]);
-  }
-  free (returnBuffers);
-  free (returnLengths);
-  free (itemList);
-
-  return 0;
-}
-
-#endif
 
 

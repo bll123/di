@@ -4,17 +4,21 @@
  */
 
 #include "config.h"
-#include "di.h"
-#include "dimain.h"
-#include "display.h"
-#include "version.h"
-#include "options.h"
 
 #if _hdr_stdio
 # include <stdio.h>
 #endif
+#if _hdr_stddef
+# include <stddef.h>
+#endif
+#if _hdr_stdbool
+# include <stdbool.h>
+#endif
 #if _hdr_stdlib
 # include <stdlib.h>
+#endif
+#if _hdr_stdbool
+# include <stdbool.h>
 #endif
 #if _sys_types \
     && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
@@ -62,15 +66,20 @@
 # define DI_INC_FCNTL_H
 # include <fcntl.h>     /* O_RDONLY, O_NOCTTY */
 #endif
-#if _use_mcheck
-# include <mcheck.h>
-#endif
+
+
+#include "di.h"
+#include "dimain.h"
+#include "display.h"
+#include "version.h"
+#include "options.h"
 
 #if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
 #endif
+
 #if _npt_getenv
-  extern char *getenv _((const char *));
+  extern char *getenv (const char *);
 #endif
 #if defined (__cplusplus) || defined (c_plusplus)
 }
@@ -84,15 +93,15 @@ extern int debug;
 int debug = { 0 };
 
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
-static void checkZone           _((diDiskInfo_t *, zoneInfo_t *, unsigned int));
+static void checkZone           (diDiskInfo_t *, zoneInfo_t *, unsigned int);
 #endif
-static void checkIgnoreList     _((diDiskInfo_t *, iList_t *));
-static void checkIncludeList    _((diDiskInfo_t *, iList_t *));
-static int  isIgnoreFSType      _((const char *));
-static int  isIgnoreSpecial     _((const char *));
-static int  isIgnoreFS          _((const char *, const char *));
+static void checkIgnoreList     (diDiskInfo_t *, iList_t *);
+static void checkIncludeList    (diDiskInfo_t *, iList_t *);
+static int  isIgnoreFSType      (const char *);
+static int  isIgnoreSpecial     (const char *);
+static int  isIgnoreFS          (const char *, const char *);
 #if _lib_realpath && _define_S_ISLNK && _lib_lstat
-static int  checkForUUID        _((const char *));
+static int  checkForUUID        (const char *);
 #endif
 
 char *
@@ -108,9 +117,9 @@ dimainproc (int argc, const char * const argv [], int intfcflag, diData_t *diDat
     disp = (char *) NULL;
 
     diData->count = 0;
-    diData->haspooledfs = FALSE;
-    diData->disppooledfs = FALSE;
-    diData->totsorted = FALSE;
+    diData->haspooledfs = false;
+    diData->disppooledfs = false;
+    diData->totsorted = false;
 
     diData->diskInfo = (diDiskInfo_t *) NULL;
 
@@ -120,34 +129,30 @@ dimainproc (int argc, const char * const argv [], int intfcflag, diData_t *diDat
     diData->includeList.count = 0;
     diData->includeList.list = (char **) NULL;
 
-        /* options defaults */
+    /* options defaults */
     diopts = &diData->options;
     diopts->formatString = DI_DEFAULT_FORMAT;
-        /* change default display format here */
-    diopts->dispBlockSize = (_print_size_t) (DI_VAL_1024 * DI_VAL_1024);
-    diopts->printTotals = FALSE;
-    diopts->printDebugHeader = FALSE;
-    diopts->printHeader = TRUE;
-    diopts->localOnly = FALSE;
-    diopts->displayAll = FALSE;
-    diopts->dontResolveSymlink = FALSE;
 
-    /* loopback devices (lofs) should be excluded by default */
-    diopts->excludeLoopback = FALSE;
-#if ! _lib_sys_dollar_device_scan  /* not VMS */
-    diopts->excludeLoopback = TRUE;
-#endif
+    /* change default display format here */
+    diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
+    diopts->printTotals = false;
+    diopts->printDebugHeader = false;
+    diopts->printHeader = true;
+    diopts->localOnly = false;
+    diopts->displayAll = false;
+    diopts->dontResolveSymlink = false;
+    diopts->excludeLoopback = true;
 
     strncpy (diopts->sortType, "m", DI_SORT_MAX); /* default - by mount point*/
-    diopts->posix_compat = FALSE;
-    diopts->baseDispSize = (_print_size_t) DI_VAL_1024;
+    diopts->posix_compat = false;
+    diopts->baseDispSize = DI_VAL_1024;
     diopts->baseDispIdx = DI_DISP_1024_IDX;
-    diopts->quota_check = TRUE;
-    diopts->csv_output = FALSE;
-    diopts->csv_tabs = FALSE;
+    diopts->quota_check = true;
+    diopts->csv_output = false;
+    diopts->csv_tabs = false;
     diopts->exitFlag = DI_EXIT_NORM;
     diopts->errorCount = 0;
-    diopts->json_output = FALSE;
+    diopts->json_output = false;
 
     diout = &diData->output;
     diout->width = 8;
@@ -159,9 +164,9 @@ dimainproc (int argc, const char * const argv [], int intfcflag, diData_t *diDat
     diout->maxMntTimeString = 0;
 
     if (intfcflag) {
-      diopts->csv_output = TRUE;
-      diopts->csv_tabs = TRUE;
-      diopts->printHeader = FALSE;
+      diopts->csv_output = true;
+      diopts->csv_tabs = true;
+      diopts->printHeader = false;
     }
 
     initLocale ();
@@ -176,45 +181,41 @@ dimainproc (int argc, const char * const argv [], int intfcflag, diData_t *diDat
       return disp;
     }
 
-    if (debug > 0)
-    {
-        printf ("di version %s\n", DI_VERSION);
+    if (debug > 0) {
+      printf ("di version %s\n", DI_VERSION);
     }
 
-        /* main processing */
+    /* main processing */
 
-    if (di_getDiskEntries (&diData->diskInfo, &diData->count) < 0)
-    {
-        cleanup (diData);
-        return disp;
+    if (di_getDiskEntries (&diData->diskInfo, &diData->count) < 0) {
+      cleanup (diData);
+      return disp;
     }
 
-    hasLoop = FALSE;
+    hasLoop = false;
     preCheckDiskInfo (diData);
-    if (optidx < argc || diopts->excludeLoopback)
-    {
+    if (optidx < argc || diopts->excludeLoopback) {
       getDiskStatInfo (diData);
       hasLoop = getDiskSpecialInfo (diData, diopts->dontResolveSymlink);
     }
-    if (optidx < argc)
-    {
-        int     rc;
+    if (optidx < argc) {
+      int     rc;
 
-        rc = checkFileInfo (diData, optidx, argc, argv);
-        if (rc < 0)
-        {
-            cleanup (diData);
-            diData->options.exitFlag = DI_EXIT_WARN;
-            return disp;
-        }
+      rc = checkFileInfo (diData, optidx, argc, argv);
+      if (rc < 0) {
+        cleanup (diData);
+        diData->options.exitFlag = DI_EXIT_WARN;
+        return disp;
+      }
     }
     di_getDiskInfo (&diData->diskInfo, &diData->count);
     checkDiskInfo (diData, hasLoop);
-    if (diopts->quota_check == TRUE) {
+    if (diopts->quota_check == true) {
       checkDiskQuotas (diData);
     }
-    disp = printDiskInfo (diData);
-    return disp;
+//    disp = printDiskInfo (diData);
+//    return disp;
+  return "dbg\n";
 }
 
 /*
@@ -277,7 +278,7 @@ checkFileInfo (
       strncpy (diopts->sortType, "s", DI_SORT_MAX);
       sortArray (diopts, diskInfo, diData->count, DI_TOT_SORT_IDX);
       strncpy (diopts->sortType, tempSortType, DI_SORT_MAX);
-      diData->totsorted = TRUE;
+      diData->totsorted = true;
     }
 
     for (i = optidx; i < argc; ++i)
@@ -298,8 +299,8 @@ checkFileInfo (
       if (src == 0)
       {
         int             saveIdx;
-        int             found = { FALSE };
-        int             inpool = { FALSE };
+        int             found = { false };
+        int             inpool = { false };
         Size_t          lastpoollen = { 0 };
         char            lastpool [DI_SPEC_NAME_LEN + 1];
 
@@ -310,8 +311,8 @@ checkFileInfo (
           int             startpool;
           int             poolmain;
 
-          startpool = FALSE;
-          poolmain = FALSE;
+          startpool = false;
+          poolmain = false;
 
           dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
 
@@ -322,19 +323,19 @@ checkFileInfo (
             {
               strncpy (lastpool, dinfo->special, DI_SPEC_NAME_LEN);
               lastpoollen = di_mungePoolName (lastpool);
-              inpool = FALSE;
+              inpool = false;
             }
 
             if (strncmp (lastpool, dinfo->special, lastpoollen) == 0)
             {
-              startpool = TRUE;
-              if (inpool == FALSE)
+              startpool = true;
+              if (inpool == false)
               {
-                poolmain = TRUE;
+                poolmain = true;
               }
             }
           } else {
-            inpool = FALSE;
+            inpool = false;
           }
 
           if (poolmain) {
@@ -365,7 +366,7 @@ checkFileInfo (
             }
             if (foundnew == 3) {
               dinfo->printFlag = DI_PRNT_FORCE;
-              found = TRUE;
+              found = true;
             }
 
             if (debug > 2) {
@@ -392,7 +393,7 @@ checkFileInfo (
 
           if (startpool)
           {
-            inpool = TRUE;
+            inpool = true;
           }
         }
       } /* if stat ok */
@@ -487,7 +488,7 @@ getDiskSpecialInfo (diData_t *diData, unsigned int dontResolveSymlink)
     struct stat statBuf;
     int         hasLoop;
 
-    hasLoop = FALSE;
+    hasLoop = false;
     for (i = 0; i < diData->count; ++i)
     {
         diDiskInfo_t        *dinfo;
@@ -523,8 +524,8 @@ getDiskSpecialInfo (diData_t *diData, unsigned int dontResolveSymlink)
               /* solaris is more consistent; rdev != 0 for lofs */
               /* solaris makes sense.                           */
             if (di_isLoopbackFs (dinfo)) {
-              dinfo->isLoopback = TRUE;
-              hasLoop = TRUE;
+              dinfo->isLoopback = true;
+              hasLoop = true;
             }
             if (debug > 2)
             {
@@ -555,38 +556,31 @@ checkDiskInfo (diData_t *diData, int hasLoop)
 {
     int             i;
     int             j;
-    _fs_size_t      temp;
     diOptions_t     *diopts;
-
 
     diopts = &diData->options;
 
-    for (i = 0; i < diData->count; ++i)
-    {
+    for (i = 0; i < diData->count; ++i) {
         diDiskInfo_t        *dinfo;
 
         dinfo = &diData->diskInfo[i];
-        dinfo->doPrint = TRUE;
+        dinfo->doPrint = true;
           /* these are never printed... */
         if (dinfo->printFlag == DI_PRNT_EXCLUDE ||
             dinfo->printFlag == DI_PRNT_BAD ||
-            dinfo->printFlag == DI_PRNT_OUTOFZONE)
-        {
-            if (debug > 2)
-            {
+            dinfo->printFlag == DI_PRNT_OUTOFZONE) {
+            if (debug > 2) {
                 printf ("chk: skipping(%s):%s\n",
                     getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
             }
-            dinfo->doPrint = FALSE;
+            dinfo->doPrint = false;
             continue;
         }
 
           /* need to check against include list */
         if (dinfo->printFlag == DI_PRNT_IGNORE ||
-            dinfo->printFlag == DI_PRNT_SKIP)
-        {
-          if (debug > 2)
-          {
+            dinfo->printFlag == DI_PRNT_SKIP) {
+          if (debug > 2) {
               printf ("chk: skipping(%s):%s\n",
                   getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
           }
@@ -596,42 +590,41 @@ checkDiskInfo (diData_t *diData, int hasLoop)
             /* Solaris reports a cdrom as having no free blocks,   */
             /* no available.  Their df doesn't always work right!  */
             /* -1 is returned.                                     */
-        if (debug > 5)
-        {
-#if _siz_long_long >= 8
-            printf ("chk: %s free: %llu\n", dinfo->name, dinfo->freeSpace);
-#else
-            printf ("chk: %s free: %lu\n", dinfo->name, dinfo->freeSpace);
-#endif
+        if (debug > 5) {
+          char  tbuff [100];
+
+          dinum_str (&dinfo->free_space, tbuff, sizeof (tbuff));
+          printf ("chk: %s free: %s\n", dinfo->name, tbuff);
         }
-        if ((_s_fs_size_t) dinfo->freeSpace == -1L ||
-            (_s_fs_size_t) dinfo->freeSpace == -2L)
-        {
-            dinfo->freeSpace = 0L;
+        if (dinum_cmp_s (&dinfo->free_space, -1) == 0 ||
+            dinum_cmp_s (&dinfo->free_space, -2) == 0) {
+          dinum_set_u (&dinfo->free_space, 0);
         }
-        if ((_s_fs_size_t) dinfo->availSpace == -1L ||
-            (_s_fs_size_t) dinfo->availSpace == -2L)
-        {
-            dinfo->availSpace = 0L;
+        if (dinum_cmp_s (&dinfo->avail_space, -1) == 0 ||
+            dinum_cmp_s (&dinfo->avail_space, -2) == 0) {
+          dinum_set_u (&dinfo->avail_space, 0);
         }
 
-        temp = (_fs_size_t) ~ 0;
-        if (dinfo->totalInodes == temp)
         {
-            dinfo->totalInodes = 0;
-            dinfo->freeInodes = 0;
-            dinfo->availInodes = 0;
+          dinum_t      temp;
+
+          dinum_init (&temp);
+
+          dinum_set_u (&temp, ~0);
+          if (dinum_cmp (&dinfo->total_inodes, &temp) == 0) {
+            dinum_set_u (&dinfo->total_inodes, 0);
+            dinum_set_u (&dinfo->free_inodes, 0);
+            dinum_set_u (&dinfo->avail_inodes, 0);
+          }
+          dinum_clear (&temp);
         }
 
-        if (dinfo->printFlag == DI_PRNT_OK)
-        {
-          if (debug > 5)
-          {
-#if _siz_long_long >= 8
-              printf ("chk: %s total: %lld\n", dinfo->name, dinfo->totalSpace);
-#else
-              printf ("chk: %s total: %ld\n", dinfo->name, dinfo->totalSpace);
-#endif
+        if (dinfo->printFlag == DI_PRNT_OK) {
+          if (debug > 5) {
+            char    tbuff [100];
+
+            dinum_str (&dinfo->total_space, tbuff, sizeof (tbuff));
+            printf ("chk: %s total: %s\n", dinfo->name, tbuff);
           }
 
           if (isIgnoreFSType (dinfo->fsType)) {
@@ -657,16 +650,14 @@ checkDiskInfo (diData_t *diData, int hasLoop)
           }
 
           /* Some systems return a -1 or -2 as an indicator.    */
-          if (dinfo->totalSpace == 0L ||
-              (_s_fs_size_t) dinfo->totalSpace == -1L ||
-              (_s_fs_size_t) dinfo->totalSpace == -2L)
-          {
+          if (dinum_cmp (&dinfo->total_space, 0) == 0 ||
+              dinum_cmp_s (&dinfo->total_space, -1) == 0 ||
+              dinum_cmp_s (&dinfo->total_space, -2L) == 0) {
             dinfo->printFlag = DI_PRNT_IGNORE;
             dinfo->doPrint = (char) diopts->displayAll;
-            if (debug > 2)
-            {
-                printf ("chk: ignore: totalSpace <= 0: %s\n",
-                        dinfo->name);
+            if (debug > 2) {
+              printf ("chk: ignore: total_space <= 0: %s\n",
+                  dinfo->name);
             }
           }
       }
@@ -675,18 +666,14 @@ checkDiskInfo (diData_t *diData, int hasLoop)
       checkIncludeList (dinfo, &diData->includeList);
     } /* for all disks */
 
-    if (hasLoop && diopts->excludeLoopback)
-    {
+    if (hasLoop && diopts->excludeLoopback) {
           /* this loop sets duplicate entries to be ignored. */
-      for (i = 0; i < diData->count; ++i)
-      {
+      for (i = 0; i < diData->count; ++i) {
         diDiskInfo_t        *dinfo;
 
         dinfo = &diData->diskInfo[i];
-        if (dinfo->printFlag != DI_PRNT_OK)
-        {
-          if (debug > 2)
-          {
+        if (dinfo->printFlag != DI_PRNT_OK) {
+          if (debug > 2) {
               printf ("dup: chk: skipping(%s):%s\n",
                   getPrintFlagText ((int) dinfo->printFlag), dinfo->name);
           }
@@ -694,22 +681,19 @@ checkDiskInfo (diData_t *diData, int hasLoop)
         }
 
           /* don't need to bother checking real partitions  */
-        if (dinfo->sp_dev != 0 && dinfo->isLoopback)
-        {
+        if (dinfo->sp_dev != 0 && dinfo->isLoopback) {
           __ulong         sp_dev;
           __ulong         sp_rdev;
 
           sp_dev = dinfo->sp_dev;
           sp_rdev = dinfo->sp_rdev;
 
-          if (debug > 2)
-          {
+          if (debug > 2) {
               printf ("dup: chk: i: %s dev: %ld rdev: %ld\n",
                   dinfo->name, sp_dev, sp_rdev);
           }
 
-          for (j = 0; j < diData->count; ++j)
-          {
+          for (j = 0; j < diData->count; ++j) {
             diDiskInfo_t        *dinfob;
 
             if (i == j) {
@@ -757,7 +741,6 @@ checkDiskQuotas (diData_t *diData)
   Uid_t         uid;
   Gid_t         gid;
   diQuota_t     diqinfo;
-  _fs_size_t    tsize;
 
   uid = 0;
   gid = 0;
@@ -783,27 +766,37 @@ checkDiskQuotas (diData_t *diData)
     diquota (&diqinfo);
 
     if (debug > 2) {
-      printf ("quota: %s limit: %lld\n", dinfo->name, diqinfo.limit);
-      printf ("quota:   tot: %lld\n", dinfo->totalSpace);
-      printf ("quota: %s used: %lld\n", dinfo->name, diqinfo.used);
-      printf ("quota:   avail: %lld\n", dinfo->availSpace);
+      char    tbuff [100];
+      dinum_str (&diqinfo.limit, tbuff, sizeof (tbuff));
+      printf ("quota: %s limit: %s\n", dinfo->name, tbuff);
+      dinum_str (&dinfo->total_space, tbuff, sizeof (tbuff));
+      printf ("quota:   tot: %s\n", tbuff);
+      dinum_str (&diqinfo.used, tbuff, sizeof (tbuff));
+      printf ("quota: %s used: %s\n", dinfo->name, tbuff);
+      dinum_str (&dinfo->avail_space, tbuff, sizeof (tbuff));
+      printf ("quota:   avail: %s\n", tbuff);
     }
 
-    if (diqinfo.limit != 0 &&
-            diqinfo.limit < dinfo->totalSpace) {
-      dinfo->totalSpace = diqinfo.limit;
-      tsize = diqinfo.limit - diqinfo.used;
-      if ((_s_fs_size_t) tsize < 0) {
-        tsize = 0;
+    if (dinum_cmp_s (&diqinfo.limit, 0) != 0 &&
+        dinum_cmp (&diqinfo.limit, &dinfo->total_space) < 0) {
+      dinum_t     tsize;
+
+      dinum_init (&tsize);
+      dinum_set (&dinfo->total_space, &diqinfo.limit);
+      dinum_set (&tsize, &diqinfo.limit);
+      dinum_sub (&tsize, &diqinfo.used);
+      if (dinum_cmp_s (&tsize, 0) < 0) {
+        dinum_set_s (&tsize, 0);
       }
-      if (tsize < dinfo->availSpace) {
-        dinfo->availSpace = tsize;
-        dinfo->freeSpace = tsize;
+      if (dinum_cmp (&tsize, &dinfo->avail_space) < 0) {
+        dinum_set (&dinfo->avail_space, &tsize);
+        dinum_set (&dinfo->free_space, &tsize);
         if (debug > 2) {
           printf ("quota: using quota for: total free avail\n");
         }
-      } else if (tsize > dinfo->availSpace && tsize < dinfo->freeSpace) {
-        dinfo->freeSpace = tsize;
+      } else if (dinum_cmp (&tsize, &dinfo->avail_space) > 0 &&
+          dinum_cmp (&tsize, &dinfo->free_space) < 0) {
+        dinum_set (&dinfo->free_space, &tsize);
         if (debug > 2) {
           printf ("quota: using quota for: total free\n");
         }
@@ -812,23 +805,29 @@ checkDiskQuotas (diData_t *diData)
           printf ("quota: using quota for: total\n");
         }
       }
+      dinum_clear (&tsize);
     }
 
-    if (diqinfo.ilimit != 0 &&
-            diqinfo.ilimit < dinfo->totalInodes) {
-      dinfo->totalInodes = diqinfo.ilimit;
-      tsize = diqinfo.ilimit - diqinfo.iused;
-      if ((_s_fs_size_t) tsize < 0) {
-        tsize = 0;
+    if (dinum_cmp_s (&diqinfo.ilimit, 0) != 0 &&
+          dinum_cmp (&diqinfo.ilimit, &dinfo->total_inodes) < 0) {
+      dinum_t   tsize;
+
+      dinum_init (&tsize);
+      dinum_set (&dinfo->total_inodes, &diqinfo.ilimit);
+      dinum_set (&tsize, &diqinfo.ilimit);
+      dinum_sub (&tsize, &diqinfo.iused);
+      if (dinum_cmp_s (&tsize, 0) < 0) {
+        dinum_set_u (&tsize, 0);
       }
-      if (tsize < dinfo->availInodes) {
-        dinfo->availInodes = tsize;
-        dinfo->freeInodes = tsize;
+      if (dinum_cmp (&tsize, &dinfo->avail_inodes) < 0) {
+        dinum_set (&dinfo->avail_inodes, &tsize);
+        dinum_set (&dinfo->free_inodes, &tsize);
         if (debug > 2) {
           printf ("quota: using quota for inodes: total free avail\n");
         }
-      } else if (tsize > dinfo->availInodes && tsize < dinfo->freeInodes) {
-        dinfo->freeInodes = tsize;
+      } else if (dinum_cmp (&tsize, &dinfo->avail_inodes) > 0 &&
+          dinum_cmp (&tsize, &dinfo->free_inodes) < 0) {
+        dinum_set (&dinfo->free_inodes, &tsize);
         if (debug > 2) {
           printf ("quota: using quota for inodes: total free\n");
         }
@@ -858,7 +857,7 @@ preCheckDiskInfo (diData_t *diData)
     diOptions_t     *diopts;
     int             hasLoop;
 
-    hasLoop = FALSE;
+    hasLoop = false;
     diopts = &diData->options;
     for (i = 0; i < diData->count; ++i)
     {
@@ -877,7 +876,7 @@ preCheckDiskInfo (diData_t *diData)
 #endif
 
         if (di_isPooledFs (dinfo)) {
-          diData->haspooledfs = TRUE;
+          diData->haspooledfs = true;
         }
 
         if (dinfo->printFlag == DI_PRNT_OK)
@@ -887,7 +886,7 @@ preCheckDiskInfo (diData_t *diData)
           {
             di_testRemoteDisk (dinfo);
 
-            if (dinfo->isLocal == FALSE && diopts->localOnly)
+            if (dinfo->isLocal == false && diopts->localOnly)
             {
                 dinfo->printFlag = DI_PRNT_IGNORE;
                 if (debug > 2)
@@ -931,7 +930,7 @@ checkIgnoreList (diDiskInfo_t *diskInfo, iList_t *ignoreList)
              strncmp ("fuse", diskInfo->fsType, (Size_t) 4) == 0))
         {
             diskInfo->printFlag = DI_PRNT_EXCLUDE;
-            diskInfo->doPrint = FALSE;
+            diskInfo->doPrint = false;
             if (debug > 2)
             {
                 printf ("chkign: ignore: fstype %s match: %s\n", ptr,
@@ -966,7 +965,7 @@ checkIncludeList (diDiskInfo_t *diskInfo, iList_t *includeList)
              strncmp ("fuse", diskInfo->fsType, (Size_t) 4) == 0))
         {
             diskInfo->printFlag = DI_PRNT_OK;
-            diskInfo->doPrint = TRUE;
+            diskInfo->doPrint = true;
             if (debug > 2)
             {
                 printf ("chkinc:include:fstype %s match: %s\n", ptr,
@@ -977,7 +976,7 @@ checkIncludeList (diDiskInfo_t *diskInfo, iList_t *includeList)
         else
         {
             diskInfo->printFlag = DI_PRNT_EXCLUDE;
-            diskInfo->doPrint = FALSE;
+            diskInfo->doPrint = false;
             if (debug > 2)
             {
                 printf ("chkinc:!include:fstype %s no match: %s\n", ptr,
@@ -1206,9 +1205,9 @@ isIgnoreSpecial (const char *special)
       strcmp (special, "tmpfs") == 0 ||
       strcmp (special, "cgroup") == 0 ||
       strcmp (special, "swap") == 0) {
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 
 static int
@@ -1218,9 +1217,9 @@ isIgnoreFS (const char *fstype, const char *name)
 
   if (strcmp (fstype, "apfs") == 0 &&
        strncmp (name, applesystem, strlen(applesystem)) == 0) {
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 
 static int
@@ -1232,9 +1231,9 @@ isIgnoreFSType (const char *fstype)
       strcmp (fstype, "kernfs") == 0 ||
       strcmp (fstype, "devfs") == 0 ||
       strcmp (fstype, "devtmpfs") == 0) {
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 
 #if _lib_realpath && _define_S_ISLNK && _lib_lstat
@@ -1260,9 +1259,9 @@ checkForUUID (const char *spec)
         *(spec + offset + 18) == '-' &&
         *(spec + offset + 23) == '-' &&
         strspn (spec + offset, "-1234567890abcdef") == 36) {
-      return TRUE;
+      return true;
     }
   }
-  return FALSE;
+  return false;
 }
 #endif /* have _lib_realpath, etc. */

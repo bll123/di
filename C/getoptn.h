@@ -6,12 +6,11 @@
  * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
  */
 
-#if defined(TEST_GETOPTN)
-# include "gconfig.h"
-#else
-# include "config.h"
-#endif
+#include "config.h"
 
+#if _hdr_stddef
+# include <stddef.h>
+#endif
 #if _sys_types \
     && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
 # define DI_INC_SYS_TYPES_H
@@ -21,13 +20,6 @@
 # if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
 # endif
-
-#if ! defined (TRUE)
-# define TRUE             1
-#endif
-#if ! defined (FALSE)
-# define FALSE            0
-#endif
 
 #define GETOPTN_NOTFOUND -1
 

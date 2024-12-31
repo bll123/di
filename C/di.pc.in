@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+
+Name: libdi
+Description: Disk Information Library
+Version: @LIBMP4TAG_BUILD_VERS@
+URL: https://sourceforge.net/project/di/
+Libs: -L${libdir} -ldi
+Cflags: -I${includedir}

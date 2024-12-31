@@ -4,7 +4,6 @@
  */
 
 #include "config.h"
-#include "di.h"
 
 #if _hdr_stdio
 # include <stdio.h>
@@ -18,29 +17,25 @@
 #if _hdr_malloc
 # include <malloc.h>
 #endif
-#if _use_mcheck
-# include <mcheck.h>
-#endif
+
+#include "di.h"
 
 /*
  *
  * portable realloc
- * some variants don't accept a null pointer for initial allocation.
+ * some very old variants don't accept a null pointer for initial allocation.
  *
  */
 
-_pvoid
-di_realloc (_pvoid ptr, Size_t size)
+void *
+di_realloc (void * ptr, Size_t size)
 {
-    if (ptr == (_pvoid) NULL)
-    {
-        ptr = (_pvoid) malloc (size);
-    }
-    else
-    {
-        ptr = (_pvoid) realloc (ptr, size);
-    }
+  if (ptr == NULL) {
+    ptr = malloc (size);
+  } else {
+    ptr = realloc (ptr, size);
+  }
 
-    return ptr;
+  return ptr;
 }
 

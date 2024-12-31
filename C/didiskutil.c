@@ -4,14 +4,15 @@
  */
 
 #include "config.h"
-#include "di.h"
-#include "dimntopt.h"
 
 #if _hdr_stdio
 # include <stdio.h>
 #endif
 #if _hdr_stdlib
 # include <stdlib.h>
+#endif
+#if _hdr_stdbool
+# include <stdbool.h>
 #endif
 #if _hdr_string
 # include <string.h>
@@ -28,10 +29,10 @@
 #if _hdr_errno
 # include <errno.h>
 #endif
-#if _use_mcheck
-# include <mcheck.h>
-#endif
 
+#include "di.h"
+#include "dimath.h"
+#include "dimntopt.h"
 
 /********************************************************/
 /*
@@ -61,29 +62,27 @@ di_initDiskInfo (diDiskInfo_t *diptr)
 {
     memset ((char *) diptr, '\0', sizeof (diDiskInfo_t));
     diptr->printFlag = DI_PRNT_OK;
-    diptr->isLocal = TRUE;
-    diptr->isReadOnly = FALSE;
-    diptr->isLoopback = FALSE;
+    diptr->isLocal = true;
+    diptr->isReadOnly = false;
+    diptr->isLoopback = false;
 }
 
 void
-di_saveBlockSizes (diDiskInfo_t *diptr, _fs_size_t block_size,
-        _fs_size_t total_blocks, _fs_size_t free_blocks,
-        _fs_size_t avail_blocks)
+di_saveBlockSizes (diDiskInfo_t *diptr, uint64_t block_size,
+    uint64_t total_blocks, uint64_t free_blocks, uint64_t avail_blocks)
 {
-    diptr->totalSpace = (_fs_size_t) total_blocks * (_fs_size_t) block_size;
-    diptr->freeSpace = (_fs_size_t) free_blocks * (_fs_size_t) block_size;
-    diptr->availSpace = (_fs_size_t) avail_blocks * (_fs_size_t) block_size;
+  dinum_mul_uu (&diptr->total_space, total_blocks, block_size);
+  dinum_mul_uu (&diptr->free_space, free_blocks, block_size);
+  dinum_mul_uu (&diptr->avail_space, avail_blocks, block_size);
 }
 
 void
-di_saveInodeSizes (diDiskInfo_t *diptr,
-        _fs_size_t total_nodes, _fs_size_t free_nodes,
-        _fs_size_t avail_nodes)
+di_saveInodeSizes (diDiskInfo_t *diptr, uint64_t total_nodes,
+    uint64_t free_nodes, uint64_t avail_nodes)
 {
-    diptr->totalInodes = total_nodes;
-    diptr->freeInodes = free_nodes;
-    diptr->availInodes = avail_nodes;
+  dinum_set_u (&diptr->total_inodes, total_nodes);
+  dinum_set_u (&diptr->free_inodes, free_nodes);
+  dinum_set_u (&diptr->avail_inodes, avail_nodes);
 }
 
 void
@@ -417,7 +416,7 @@ di_testRemoteDisk (diDiskInfo_t *diskInfo)
 {
   if (strncmp (diskInfo->fsType, "nfs", 3) == 0)
   {
-    diskInfo->isLocal = FALSE;
+    diskInfo->isLocal = false;
   }
 }
 
@@ -429,9 +428,9 @@ di_isPooledFs (diDiskInfo_t *diskInfo)
       strcmp (diskInfo->fsType, "apfs") == 0 ||
       (strcmp (diskInfo->fsType, "null") == 0 &&
        strstr (diskInfo->special, "/@@-") != (char *) NULL)) {
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 
 int
@@ -441,9 +440,9 @@ di_isLoopbackFs (diDiskInfo_t *diskInfo)
       (strcmp (diskInfo->fsType, "nullfs") == 0 &&
        strstr (diskInfo->special, "/@@-") == (char *) NULL) ||
       strcmp (diskInfo->fsType, "none") == 0) {
-    return TRUE;
+    return true;
   }
-  return FALSE;
+  return false;
 }
 
 Size_t

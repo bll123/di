@@ -7,8 +7,6 @@
 
 #if ! _lib_strstr
 
-# include "di.h"
-
 #if _hdr_stdio
 #  include <stdio.h>
 #endif
@@ -22,20 +20,22 @@
 #  include <strings.h>
 # endif
 
+# include "di.h"
+
 char *
 strstr (const char *buff, const char *srch)
 {
   Size_t    len;
   char *    p;
 
-  p = (char *) buff;
-  if (srch == (char *) NULL) { return p; }
+  p = buff;
+  if (srch == NULL) {
+    return p;
+  }
 
   len = strlen (srch);
-  for (; (p = strchr (p, *srch)) != (char *) NULL; p++)
-  {
-    if (strncmp (p, srch, len) == 0)
-    {
+  for (; (p = strchr (p, *srch)) != NULL; p++) {
+    if (strncmp (p, srch, len) == 0) {
       return (p);
     }
   }

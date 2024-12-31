@@ -4,16 +4,15 @@
  */
 
 #include "config.h"
-#include "di.h"
-#include "display.h"
-#include "options.h"
-#include "version.h"
 
 #if _hdr_stdio
 # include <stdio.h>
 #endif
 #if _hdr_stdlib
 # include <stdlib.h>
+#endif
+#if _hdr_stdbool
+# include <stdbool.h>
 #endif
 #if _hdr_ctype
 # include <ctype.h>
@@ -35,9 +34,11 @@
 #if _hdr_wchar
 # include <wchar.h>
 #endif
-#if _use_mcheck
-# include <mcheck.h>
-#endif
+
+#include "di.h"
+#include "display.h"
+#include "options.h"
+#include "version.h"
 
 extern int debug;
 
@@ -117,48 +118,42 @@ static formatNames_t formatNames [] =
 #define DI_SORT_TYPE            't'
 #define DI_SORT_ASCENDING       1
 
-#define DI_PERC_FMT             " %%3.0%s%%%% "
-#define DI_POSIX_PERC_FMT       "    %%3.0%s%%%% "
+#define DI_PERC_FMT             " %%3.0" PRIu64 "%%%% "
+#define DI_POSIX_PERC_FMT       "    %%3.0" PRIu64 "%%%% "
 #define DI_JUST_LEFT            0
 #define DI_JUST_RIGHT           1
 
 typedef struct
 {
-    _print_size_t   low;
-    _print_size_t   high;
-    _print_size_t   dbs;        /* display block size */
-    const char      *format;
-    const char      *suffix;
+  dinum_t         low;
+  dinum_t         high;
+  dinum_t         dbs;        /* display block size */
+  const char      *format;
+  const char      *suffix;
 } sizeTable_t;
 
-static sizeTable_t sizeTable [] =
-{
-    { 0, 0, 1, (char *) NULL, " " },
-    { 0, 0, 0, (char *) NULL, "K" },
 #define DI_ONE_MEG_SZTAB   2
-    { 0, 0, 0, (char *) NULL, "M" },
-    { 0, 0, 0, (char *) NULL, "G" },
-    { 0, 0, 0, (char *) NULL, "T" },
-    { 0, 0, 0, (char *) NULL, "P" },
-    { 0, 0, 0, (char *) NULL, "E" },
-    { 0, 0, 0, (char *) NULL, "Z" },
-    { 0, 0, 0, (char *) NULL, "Y" }
+const char *sztabsuffix [] = {
+  " ", "K", "M", "G", "T", "P", "E", "Z", "Y",
 };
-#define DI_SIZETAB_SIZE (sizeof (sizeTable) / sizeof (sizeTable_t))
 
-static void addTotals           _((const diDiskInfo_t *, diDiskInfo_t *, int));
-static void getMaxFormatLengths _((diData_t *));
-static int  diCompare           _((const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int));
-static int  findDispSize        _((_print_size_t));
-static Size_t istrlen           _((const char *));
-static char *printInfo          _((diDiskInfo_t *, diOptions_t *, diOutput_t *));
-static char *printSpace         _((const diOptions_t *, const diOutput_t *, _fs_size_t, int));
-static char *processTitles      _((diOptions_t *, diOutput_t *));
-static char *printPerc          _((_fs_size_t, _fs_size_t, const char *));
-static void initSizeTable       _((diOptions_t *, diOutput_t *));
-static void appendFormatStr     _((char *, const char *, char **, Size_t *, Size_t *));
-static void appendFormatVal     _((char *, _fs_size_t, char **, Size_t *, Size_t *));
-static void append              _((const char *, char **, Size_t *, Size_t *));
+#define DI_SIZETAB_SIZE (sizeof (sztabsuffix) / sizeof (const char *))
+
+static sizeTable_t sizeTable [DI_SIZETAB_SIZE];
+
+static void addTotals           (const diDiskInfo_t *, diDiskInfo_t *, int);
+static void getMaxFormatLengths (diData_t *);
+static int  diCompare           (const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int);
+static int  findDispSize        (dinum_t *);
+static Size_t istrlen           (const char *);
+static char *printInfo          (diDiskInfo_t *, diOptions_t *, diOutput_t *);
+static char *printSpace         (const diOptions_t *, const diOutput_t *, dinum_t *, int);
+static char *processTitles      (diOptions_t *, diOutput_t *);
+static char *printPerc          (dinum_t *, dinum_t *, const char *);
+static void initSizeTable       (diOptions_t *, diOutput_t *);
+static void appendFormatStr     (char *, const char *, char **, Size_t *, Size_t *);
+static void appendFormatVal     (char *, dinum_t *, char **, Size_t *, Size_t *);
+static void append              (const char *, char **, Size_t *, Size_t *);
 
 /*
  * printDiskInfo
@@ -174,13 +169,14 @@ static void append              _((const char *, char **, Size_t *, Size_t *));
 char *
 printDiskInfo (diData_t *diData)
 {
+#if 0
     int                 i;
     diOptions_t         *diopts;
     diDiskInfo_t        *diskInfo;
     diDiskInfo_t        totals;
     char                lastpool [DI_SPEC_NAME_LEN + 1];
     Size_t              lastpoollen = { 0 };
-    int                 inpool = { FALSE };
+    int                 inpool = { false };
     diOutput_t          *diout;
     char                *out;
     Size_t              outlen;
@@ -190,7 +186,7 @@ printDiskInfo (diData_t *diData)
     int                 ishr;
 
 
-    first = TRUE;
+    first = true;
     out = (char *) NULL;
     outlen = 0;
     outcurrlen = 0;
@@ -217,56 +213,56 @@ printDiskInfo (diData_t *diData)
       append (tjson, &out, &outcurrlen, &outlen);
     }
 
-    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
-        diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2)
+    if (diopts->dispBlockSize == DI_DISP_HR ||
+        diopts->dispBlockSize == DI_DISP_HR_2)
     {
         --diout->width;
     }
 
-    ishr = diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
-      diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2;
+    ishr = diopts->dispBlockSize == DI_DISP_HR ||
+      diopts->dispBlockSize == DI_DISP_HR_2;
 
     if (! ishr &&
         (diopts->dispBlockSize > 0 &&
-         diopts->dispBlockSize <= (_print_size_t) DI_VAL_1024)) {
+         diopts->dispBlockSize <= DI_VAL_1024)) {
       if (diopts->csv_output || diopts->json_output) {
         Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
-            "%%.0%s%%s", DI_Lf);
+            "%%" PRIu64);
       } else {
         Snprintf2 (diout->blockFormat, sizeof (diout->blockFormat),
-            "%%%d.0%s%%s", (int) diout->width, DI_Lf);
+            "%%%d" PRIu64, (int) diout->width);
       }
     } else {
       if (diopts->csv_output || diopts->json_output) {
         Snprintf1 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
-            "%%.0%s%%s", DI_Lf);
+            "%%" PRIu64);
         if (! ishr) {
           Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
-              "%%.1%s%%s", DI_Lf);
+              "%%.1" PRIu64);
         } else {
           Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
-              "\"%%.1%s%%s\"", DI_Lf);
+              "\"%%.1" PRIu64 "\"");
         }
       } else {
         Snprintf2 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
-            "%%%d.0%s%%s", (int) diout->width, DI_Lf);
+            "%%%d" PRIu64, (int) diout->width);
         Snprintf2 (diout->blockFormat, sizeof (diout->blockFormat),
-            "%%%d.1%s%%s", (int) diout->width, DI_Lf);
+            "%%%d.1" PRIu64, (int) diout->width);
       }
     }
 
-    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
-        diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2)
+    if (diopts->dispBlockSize == DI_DISP_HR ||
+        diopts->dispBlockSize == DI_DISP_HR_2)
     {
         ++diout->width;
     }
 
     if (diopts->csv_output || diopts->json_output) {
       Snprintf1 (diout->inodeFormat, sizeof (diout->inodeFormat),
-          "%%%s", DI_LLu);
+          "%%%s", PRIu64);
     } else {
       Snprintf2 (diout->inodeFormat, sizeof (diout->inodeFormat),
-          "%%%d%s", (int) diout->inodeWidth, DI_LLu);
+          "%%%d%s", (int) diout->inodeWidth, PRIu64);
     }
 
     diskInfo = diData->diskInfo;
@@ -281,7 +277,7 @@ printDiskInfo (diData_t *diData)
           strncpy (diopts->sortType, "s", DI_SORT_MAX);
           sortArray (diopts, diskInfo, diData->count, DI_TOT_SORT_IDX);
           strncpy (diopts->sortType, tempSortType, DI_SORT_MAX);
-          diData->totsorted = TRUE;
+          diData->totsorted = true;
         }
 
         for (i = 0; i < diData->count; ++i)
@@ -290,29 +286,29 @@ printDiskInfo (diData_t *diData)
             int             ispooled;
             int             startpool;
 
-            ispooled = FALSE;
-            startpool = FALSE;
+            ispooled = false;
+            startpool = false;
             dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
 
                 /* is it a pooled filesystem type? */
             if (diData->haspooledfs && di_isPooledFs (dinfo)) {
-              ispooled = TRUE;
+              ispooled = true;
               if (lastpoollen == 0 ||
                   strncmp (lastpool, dinfo->special, lastpoollen) != 0)
               {
                 strncpy (lastpool, dinfo->special, DI_SPEC_NAME_LEN);
                 lastpoollen = di_mungePoolName (lastpool);
-                inpool = FALSE;
-                startpool = TRUE;
+                inpool = false;
+                startpool = true;
                 if (strcmp (dinfo->fsType, "null") == 0 &&
                     strcmp (dinfo->special + strlen (dinfo->special) - 5,
                             "00000") != 0) {
                     /* dragonflybsd doesn't have the main pool mounted */
-                  inpool = TRUE;
+                  inpool = true;
                 }
               }
             } else {
-              inpool = FALSE;
+              inpool = false;
             }
 
             if (dinfo->doPrint) {
@@ -325,7 +321,7 @@ printDiskInfo (diData_t *diData)
 
             if (startpool)
             {
-              inpool = TRUE;
+              inpool = true;
             }
         } /* for each entry */
     } /* if the totals are to be printed */
@@ -355,7 +351,7 @@ printDiskInfo (diData_t *diData)
       if (! first && diopts->json_output) {
         append (",\n", &out, &outcurrlen, &outlen);
       }
-      first = FALSE;
+      first = false;
 
       tout = printInfo (dinfo, diopts, diout);
       append (tout, &out, &outcurrlen, &outlen);
@@ -379,6 +375,8 @@ printDiskInfo (diData_t *diData)
     }
 
     return out;
+#endif
+  return strdup ("dbg\n");
 }
 
 /*
@@ -430,37 +428,42 @@ sortArray (diOptions_t *diopts, diDiskInfo_t *data, int count, int sidx)
 const char *
 getPrintFlagText (int pf)
 {
-    return pf == DI_PRNT_OK ? "ok" :
-        pf == DI_PRNT_BAD ? "bad" :
-        pf == DI_PRNT_IGNORE ? "ignore" :
-        pf == DI_PRNT_EXCLUDE ? "exclude" :
-        pf == DI_PRNT_OUTOFZONE ? "outofzone" :
-        pf == DI_PRNT_FORCE ? "force" :
-        pf == DI_PRNT_SKIP ? "skip" : "unknown";
+  return pf == DI_PRNT_OK ? "ok" :
+      pf == DI_PRNT_BAD ? "bad" :
+      pf == DI_PRNT_IGNORE ? "ignore" :
+      pf == DI_PRNT_EXCLUDE ? "exclude" :
+      pf == DI_PRNT_OUTOFZONE ? "outofzone" :
+      pf == DI_PRNT_FORCE ? "force" :
+      pf == DI_PRNT_SKIP ? "skip" : "unknown";
 }
 
 
 static void
 appendFormatStr (char *fmt, const char *val, char **ptr, Size_t *clen, Size_t *len)
 {
+#if 0
   char          tdata [1024];
 
   Snprintf1 (tdata, sizeof(tdata), fmt, val);
   append (tdata, ptr, clen, len);
+#endif
 }
 
 static void
-appendFormatVal (char *fmt, _fs_size_t val, char **ptr, Size_t *clen, Size_t *len)
+appendFormatVal (char *fmt, dinum_t *val, char **ptr, Size_t *clen, Size_t *len)
 {
+#if 0
   char          tdata [1024];
 
   Snprintf1 (tdata, sizeof(tdata), fmt, val);
   append (tdata, ptr, clen, len);
+#endif
 }
 
 static void
 append (const char *val, char **ptr, Size_t *clen, Size_t *len)
 {
+#if 0
   Size_t    vlen;
   Size_t    bumplen;
   Size_t    nlen;
@@ -479,6 +482,7 @@ append (const char *val, char **ptr, Size_t *clen, Size_t *len)
   }
   strcat (*ptr, val);
   *clen += vlen;
+#endif
 }
 
 /*
@@ -492,16 +496,17 @@ append (const char *val, char **ptr, Size_t *clen, Size_t *len)
 static char *
 printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
 {
-    _fs_size_t          used;
-    _fs_size_t          totAvail;
+#if 0
+    dinum_t          used;
+    dinum_t          totAvail;
     const char          *ptr;
     char                tfmt[2];
     int                 valid;
-    _print_size_t       temp;
+    dinum_t             temp;
     int                 idx;
     int                 tidx;
     static char         percFormat [15];
-    static int          percInit = FALSE;
+    static int          percInit = false;
     int                 first;
     char                ttext[2];
     char                *out;
@@ -510,6 +515,10 @@ printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
     Size_t              outlen;
     Size_t              outcurrlen;
     int                 i;
+
+    dinum_init (&used);
+    dinum_init (&totAvail);
+    dinum_init (&temp);
 
     out = (char *) NULL;
     outlen = 0;
@@ -520,80 +529,83 @@ printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
       append (t, &out, &outcurrlen, &outlen);
     }
 
-    first = TRUE;
+    first = true;
     if (! percInit) {
       if (diopts->json_output) {
-        Snprintf1 (percFormat, sizeof(percFormat), "%%.0%s", DI_Lf);
+        Snprintf1 (percFormat, sizeof(percFormat), "%%" PRIu64);
       } else if (diopts->csv_output) {
-        Snprintf1 (percFormat, sizeof(percFormat), "%%.0%s%%%%", DI_Lf);
+        Snprintf1 (percFormat, sizeof(percFormat), "%%" PRIu64 "%%%%");
       } else {
         if (diopts->posix_compat) {
-          Snprintf1 (percFormat, sizeof(percFormat), DI_POSIX_PERC_FMT, DI_Lf);
+          Snprintf1 (percFormat, sizeof(percFormat), DI_POSIX_PERC_FMT);
         } else {
-          Snprintf1 (percFormat, sizeof(percFormat), DI_PERC_FMT, DI_Lf);
+          Snprintf1 (percFormat, sizeof(percFormat), DI_PERC_FMT);
         }
       }
-      percInit = TRUE;
+      percInit = true;
     }
     idx = 0;
-    temp = (_print_size_t) 0.0;  /* gcc compile warning */
-    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2)
+    dinum_set_u (&temp, 0);
+    if (diopts->dispBlockSize == DI_DISP_HR_2)
     {
       idx = DI_ONE_MEG_SZTAB; /* default */
 
       ptr = diopts->formatString;
       while (*ptr)
       {
-        valid = FALSE;
+        valid = false;
 
         switch (*ptr)
         {
           case DI_FMT_BTOT:
           {
-              temp = (_print_size_t) diskInfo->totalSpace;
-              valid = TRUE;
+              dinum_set (&temp, &diskInfo->total_space);
+              valid = true;
               break;
           }
 
           case DI_FMT_BTOT_AVAIL:
           {
-              temp = (_print_size_t) (diskInfo->totalSpace -
-                      (diskInfo->freeSpace - diskInfo->availSpace));
-              valid = TRUE;
+              dinum_set (&temp, &diskInfo->total_space);
+              dinum_sub (&temp, &diskInfo->free_space);
+              dinum_sub (&temp, &diskInfo->avail_space);
+              valid = true;
               break;
           }
 
           case DI_FMT_BUSED:
           {
-              temp = (_print_size_t) (diskInfo->totalSpace - diskInfo->freeSpace);
-              valid = TRUE;
+              dinum_set (&temp, &diskInfo->total_space);
+              dinum_sub (&temp, &diskInfo->free_space);
+              valid = true;
               break;
           }
 
           case DI_FMT_BCUSED:
           {
-              temp = (_print_size_t) (diskInfo->totalSpace - diskInfo->availSpace);
-              valid = TRUE;
+              dinum_set (&temp, &diskInfo->total_space);
+              dinum_set (&temp, &diskInfo->avail_space);
+              valid = true;
               break;
           }
 
           case DI_FMT_BFREE:
           {
-              temp = (_print_size_t) diskInfo->freeSpace;
-              valid = TRUE;
+              dinum_set (&temp, &diskInfo->free_space);
+              valid = true;
               break;
           }
 
           case DI_FMT_BAVAIL:
           {
-              temp = (_print_size_t) diskInfo->availSpace;
-              valid = TRUE;
+              dinum_set (&temp, &diskInfo->avail_space);
+              valid = true;
               break;
           }
         }
 
         if (valid) {
-          tidx = findDispSize (temp);
+          tidx = findDispSize (&temp);
             /* want largest index */
           if (tidx > idx) {
             idx = tidx;
@@ -608,9 +620,9 @@ printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
     {
       tfmt[0] = *ptr;
       tfmt[1] = '\0';
-      valid = strstr (DI_FMT_VALID_CHARS, tfmt) == NULL ? FALSE : TRUE;
+      valid = strstr (DI_FMT_VALID_CHARS, tfmt) == NULL ? false : true;
       if (*ptr == DI_FMT_MOUNT_TIME && diout->maxMntTimeString == 0) {
-        valid = FALSE;
+        valid = false;
       }
 
       if (valid && (diopts->csv_output || diopts->json_output)) {
@@ -624,7 +636,7 @@ printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
           }
           append (t, &out, &outcurrlen, &outlen);
         }
-        first = FALSE;
+        first = false;
       }
 
       if (valid && diopts->json_output) {
@@ -652,124 +664,164 @@ printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
 
         case DI_FMT_BTOT:
         {
-          tout = printSpace (diopts, diout, diskInfo->totalSpace, idx);
+          tout = printSpace (diopts, diout, &diskInfo->total_space, idx);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BTOT_AVAIL:
         {
-          tout = printSpace (diopts, diout, diskInfo->totalSpace -
-              (diskInfo->freeSpace - diskInfo->availSpace), idx);
+          dinum_t   tot;
+          dinum_t   tval;
+
+          dinum_init (&tot);
+          dinum_init (&tval);
+          dinum_set (&tot, &diskInfo->total_space);
+          dinum_set (&tval, &diskInfo->free_space);
+          dinum_sub (&tval, &diskInfo->avail_space);
+          dinum_sub (&tot, &tval);
+          tout = printSpace (diopts, diout, &tot, idx);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BUSED:
         {
-          tout = printSpace (diopts, diout,
-              diskInfo->totalSpace - diskInfo->freeSpace, idx);
+          dinum_t   tval;
+
+          dinum_init (&tval);
+          dinum_set (&tval, &diskInfo->total_space);
+          dinum_sub (&tval, &diskInfo->free_space);
+          tout = printSpace (diopts, diout, &tval, idx);
           append (tout, &out, &outcurrlen, &outlen);
+          dinum_clear (&tval);
           break;
         }
 
         case DI_FMT_BCUSED:
         {
-          tout = printSpace (diopts, diout,
-              diskInfo->totalSpace - diskInfo->availSpace, idx);
+          dinum_t   tval;
+
+          dinum_init (&tval);
+          dinum_set (&tval, &diskInfo->total_space);
+          dinum_sub (&tval, &diskInfo->avail_space);
+          tout = printSpace (diopts, diout, &tval, idx);
           append (tout, &out, &outcurrlen, &outlen);
+          dinum_clear (&tval);
           break;
         }
 
         case DI_FMT_BFREE:
         {
-          tout = printSpace (diopts, diout, diskInfo->freeSpace, idx);
+          tout = printSpace (diopts, diout, &diskInfo->free_space, idx);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BAVAIL:
         {
-          tout = printSpace (diopts, diout, diskInfo->availSpace, idx);
+          tout = printSpace (diopts, diout, &diskInfo->avail_space, idx);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BPERC_NAVAIL:
         {
-          used = diskInfo->totalSpace - diskInfo->availSpace;
-          totAvail = diskInfo->totalSpace;
-          tout = printPerc (used, totAvail, percFormat);
+          dinum_set (&used, &diskInfo->total_space);
+          dinum_sub (&used, &diskInfo->avail_space);
+          dinum_set (&totAvail, &diskInfo->total_space);
+          tout = printPerc (&used, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BPERC_USED:
         {
-          used = diskInfo->totalSpace - diskInfo->freeSpace;
-          totAvail = diskInfo->totalSpace;
-          tout = printPerc (used, totAvail, percFormat);
+          dinum_set (&used, &diskInfo->total_space);
+          dinum_sub (&used, &diskInfo->free_space);
+          dinum_set (&totAvail, &diskInfo->total_space);
+          tout = printPerc (&used, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BPERC_BSD:
         {
-          used = diskInfo->totalSpace - diskInfo->freeSpace;
-          totAvail = diskInfo->totalSpace -
-                  (diskInfo->freeSpace - diskInfo->availSpace);
-          tout = printPerc (used, totAvail, percFormat);
+          dinum_t     tval;
+
+          dinum_init (&tval);;
+          dinum_set (&used, &diskInfo->total_space);
+          dinum_sub (&used, &diskInfo->free_space);
+          dinum_set (&totAvail, &diskInfo->total_space);
+          dinum_set (&tval, &diskInfo->free_space);
+          dinum_sub (&tval, &diskInfo->avail_space);
+          dinum_sub (&totAvail, &tval);
+          tout = printPerc (&used, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
+          dinum_clear (&tval);
           break;
         }
 
         case DI_FMT_BPERC_AVAIL:
         {
-          _fs_size_t          bfree;
-          bfree = diskInfo->availSpace;
-          totAvail = diskInfo->totalSpace;
-          tout = printPerc (bfree, totAvail, percFormat);
+          dinum_t     bfree;
+
+          dinum_init (&bfree);
+          dinum_set (&bfree, &diskInfo->avail_space);
+          dinum_set (&totAvail, &diskInfo->total_space);
+          tout = printPerc (&bfree, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
+          dinum_clear (&bfree);
           break;
         }
 
         case DI_FMT_BPERC_FREE:
         {
-          _fs_size_t          bfree;
-          bfree = diskInfo->freeSpace;
-          totAvail = diskInfo->totalSpace;
-          tout = printPerc (bfree, totAvail, percFormat);
+          dinum_t     bfree;
+
+          dinum_init (&bfree);
+          dinum_set (&bfree, &diskInfo->free_space);
+          dinum_set (&totAvail, &diskInfo->total_space);
+          tout = printPerc (&bfree, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
+
           break;
         }
 
         case DI_FMT_ITOT:
         {
-          appendFormatVal (diout->inodeFormat, diskInfo->totalInodes,
+          appendFormatVal (diout->inodeFormat, &diskInfo->total_inodes,
               &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_IUSED:
         {
-          appendFormatVal (diout->inodeFormat,
-              diskInfo->totalInodes - diskInfo->freeInodes,
+          dinum_t     tval;
+
+          dinum_init (&tval);
+          dinum_set (&tval, &diskInfo->total_inodes);
+          dinum_sub (&tval, &diskInfo->free_inodes);
+          appendFormatVal (diout->inodeFormat, &tval,
               &out, &outcurrlen, &outlen);
+          dinum_clear (&tval);
           break;
         }
 
         case DI_FMT_IFREE:
         {
-          appendFormatVal (diout->inodeFormat, diskInfo->freeInodes,
+          appendFormatVal (diout->inodeFormat, &diskInfo->free_inodes,
               &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_IPERC:
         {
-          used = diskInfo->totalInodes - diskInfo->availInodes;
-          totAvail = diskInfo->totalInodes;
-          tout = printPerc (used, totAvail, percFormat);
+          dinum_init (&used);
+          dinum_set (&used, &diskInfo->total_inodes);
+          dinum_sub (&used, &diskInfo->avail_inodes);
+          dinum_set (&totAvail, &diskInfo->total_inodes);
+          tout = printPerc (&used, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
@@ -824,66 +876,68 @@ printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
     if (! diopts->json_output && outcurrlen > 0) {
       append ("\n", &out, &outcurrlen, &outlen);
     }
-    return out;
+
+  dinum_clear (&temp);
+  dinum_clear (&used);
+  dinum_clear (&totAvail);
+  return out;
+#endif
+  return (strdup ("dbg\n"));
 }
 
 static char *
 printSpace (const diOptions_t *diopts, const diOutput_t *diout,
-             _fs_size_t usage, int idx)
+             dinum_t *usage, int idx)
 {
-    _print_size_t   tdbs;
-    _print_size_t   mult;
-    _print_size_t   temp;
+    static char     tdata [1024];
+#if 0
+    dinum_t         tdbs;
+    double          mult;
+    dinum_t         temp;
     const char      *suffix;
     const char      *format;
-    static char     tdata [1024];
 
 
     suffix = "";
     format = diout->blockFormat;
-    tdbs = diopts->dispBlockSize;
+    dinum_set_u (&tdbs, diopts->dispBlockSize);
 
-    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR)
-    {
-        temp = (_print_size_t) usage;
-        idx = findDispSize (temp);
+    if (diopts->dispBlockSize == DI_DISP_HR) {
+      dinum_set (&temp, usage);
+      idx = findDispSize (&temp);
     }
 
-    if (diopts->dispBlockSize == (_print_size_t) DI_DISP_HR ||
-        diopts->dispBlockSize == (_print_size_t) DI_DISP_HR_2)
-    {
-      if (idx == -1)
-      {
-        tdbs = sizeTable [DI_ONE_MEG].dbs;
-      }
-      else
-      {
-        tdbs = sizeTable [idx].dbs;
+    if (diopts->dispBlockSize == DI_DISP_HR ||
+        diopts->dispBlockSize == DI_DISP_HR_2) {
+      if (idx == -1) {
+        dinum_set (&tdbs, &sizeTable [DI_ONE_MEG].dbs);
+      } else {
+        dinum_set (&tdbs, &sizeTable [idx].dbs);
         format = sizeTable [idx].format;
         suffix = sizeTable [idx].suffix;
       }
     }
 
-    mult = (_print_size_t) 1.0 / tdbs;
-    Snprintf2 (tdata, sizeof(tdata), format, (_print_size_t) usage * mult, suffix);
+//    mult = 1.0 / tdbs;
+//    Snprintf2 (tdata, sizeof(tdata), format, usage * mult, suffix);
+    return tdata;
+#endif
+*tdata = '\0';
     return tdata;
 }
 
 
 static int
-findDispSize (_print_size_t siz)
+findDispSize (dinum_t *siz)
 {
-    int         i;
-
-    for (i = 0; i < (int) DI_SIZETAB_SIZE; ++i)
-    {
-        if (siz >= sizeTable [i].low && siz < sizeTable [i].high)
-        {
-            return i;
-        }
+  for (int i = 0; i < (int) DI_SIZETAB_SIZE; ++i) {
+    if (dinum_cmp (siz, &sizeTable [i].low) >= 0 &&
+        dinum_cmp (siz, &sizeTable [i].high) < 0) {
+      return i;
     }
+  }
 
-    return -1;
+  return -1;
 }
 
 /*
@@ -952,22 +1006,36 @@ addTotals (const diDiskInfo_t *diskInfo, diDiskInfo_t *totals, int inpool)
   {
     if (debug > 2) {printf ("  tot:inpool:\n"); }
     if (strcmp (diskInfo->fsType, "apfs") == 0) {
-      totals->freeSpace -= diskInfo->totalSpace - diskInfo->freeSpace;
+      dinum_t   tval;
+
+      dinum_init (&tval);
+      dinum_set (&tval, &diskInfo->total_space);
+      dinum_sub (&tval, &diskInfo->free_space);
+      dinum_sub (&totals->free_space, &tval);
+      dinum_clear (&tval);
     } else {
       /* zfs, old hammer, advfs */
-      totals->totalSpace += diskInfo->totalSpace - diskInfo->freeSpace;
-      totals->totalInodes += diskInfo->totalInodes - diskInfo->freeInodes;
+      dinum_t   tval;
+
+      dinum_init (&tval);
+      dinum_set (&tval, &diskInfo->total_space);
+      dinum_sub (&tval, &diskInfo->free_space);
+      dinum_add (&totals->total_space, &tval);
+      dinum_set (&tval, &diskInfo->total_inodes);
+      dinum_sub (&tval, &diskInfo->free_inodes);
+      dinum_add (&totals->total_inodes, &tval);
+      dinum_clear (&tval);
     }
   }
   else
   {
     if (debug > 2) {printf ("  tot:not inpool:add all totals\n"); }
-    totals->totalSpace += diskInfo->totalSpace;
-    totals->freeSpace += diskInfo->freeSpace;
-    totals->availSpace += diskInfo->availSpace;
-    totals->totalInodes += diskInfo->totalInodes;
-    totals->freeInodes += diskInfo->freeInodes;
-    totals->availInodes += diskInfo->availInodes;
+    dinum_add (&totals->total_space, &diskInfo->total_space);
+    dinum_add (&totals->free_space, &diskInfo->free_space);
+    dinum_add (&totals->avail_space, &diskInfo->avail_space);
+    dinum_add (&totals->total_inodes, &diskInfo->total_inodes);
+    dinum_add (&totals->free_inodes, &diskInfo->free_inodes);
+    dinum_add (&totals->avail_inodes, &diskInfo->avail_inodes);
   }
 }
 
@@ -984,6 +1052,7 @@ addTotals (const diDiskInfo_t *diskInfo, diDiskInfo_t *totals, int inpool)
 static char *
 processTitles (diOptions_t *diopts, diOutput_t *diout)
 {
+#if 0
     const char      *ptr;
     int             valid;
     Size_t          wlen;
@@ -1004,7 +1073,7 @@ processTitles (diOptions_t *diopts, diOutput_t *diout)
     out = (char *) NULL;
     outlen = 0;
     outcurrlen = 0;
-    first = TRUE;
+    first = true;
     if (diopts->printDebugHeader)
     {
         printf (DI_GT("di version %s    Default Format: %s\n"),
@@ -1015,7 +1084,7 @@ processTitles (diOptions_t *diopts, diOutput_t *diout)
 
     while (*ptr)
     {
-      valid = TRUE;
+      valid = true;
       wlen = 0;
       wlenptr = (Size_t *) NULL;
       fstr = (char *) NULL;
@@ -1207,7 +1276,7 @@ processTitles (diOptions_t *diopts, diOutput_t *diout)
               ttext[1] = '\0';
               append (ttext, &out, &outcurrlen, &outlen);
             }
-            valid = FALSE;
+            valid = false;
             break;
           }
       }
@@ -1238,7 +1307,7 @@ processTitles (diOptions_t *diopts, diOutput_t *diout)
               append (",", &out, &outcurrlen, &outlen);
             }
           }
-          first = FALSE;
+          first = false;
         }
           /* title handling */
         if (diopts->csv_output) {
@@ -1282,6 +1351,8 @@ processTitles (diOptions_t *diopts, diOutput_t *diout)
       append ("\n", &out, &outcurrlen, &outlen);
     }
     return out;
+#endif
+    return strdup ("dbg-out\n");
 }
 
 /*
@@ -1292,21 +1363,23 @@ processTitles (diOptions_t *diopts, diOutput_t *diout)
  */
 
 static char *
-printPerc (_fs_size_t used, _fs_size_t totAvail, const char *format)
+printPerc (dinum_t *used, dinum_t *totAvail, const char *format)
 {
-    _print_size_t   perc;
-    static char     tdata [1024];
+  static char   tdata [1024];
+#if 0
+  double        perc;
 
-    if (totAvail > 0L) {
-        perc = (_print_size_t) used / (_print_size_t) totAvail;
-        perc *= (_print_size_t) 100.0;
-    }
-    else {
-        perc = (_print_size_t) 0.0;
-    }
+  if (dinum_cmp_s (&totAvail, 0) > 0) {
+    perc = used / (_print_size_t) totAvail;
+    perc *= 100.0;
+  } else {
+    perc = 0.0;
+  }
 
-    Snprintf1 (tdata, sizeof(tdata), format, perc);
-    return tdata;
+  Snprintf1 (tdata, sizeof(tdata), format, perc);
+#endif
+*tdata = '\0';
+  return tdata;
 }
 
 
@@ -1374,20 +1447,17 @@ diCompare (const diOptions_t *diopts, const diDiskInfo_t *data,
           switch (*ptr) {
             case DI_SORT_AVAIL:
             {
-              temp = d1->availSpace == d2->availSpace ? 0 :
-                  d1->availSpace < d2->availSpace ? -1 : 1;
+              temp = dinum_cmp (&d1->avail_space, &d2->avail_space);
               break;
             }
             case DI_SORT_FREE:
             {
-              temp = d1->freeSpace == d2->freeSpace ? 0 :
-                  d1->freeSpace < d2->freeSpace ? -1 : 1;
+              temp = dinum_cmp (&d1->free_space, &d2->free_space);
               break;
             }
             case DI_SORT_TOTAL:
             {
-              temp = d1->totalSpace == d2->totalSpace ? 0 :
-                  d1->totalSpace < d2->totalSpace ? -1 : 1;
+              temp = dinum_cmp (&d1->total_space, &d2->total_space);
               break;
             }
           }
@@ -1411,6 +1481,7 @@ diCompare (const diOptions_t *diopts, const diDiskInfo_t *data,
 static void
 getMaxFormatLengths (diData_t *diData)
 {
+#if 0
     int             i;
     unsigned int    len;
     diOutput_t      *diout;
@@ -1429,7 +1500,7 @@ getMaxFormatLengths (diData_t *diData)
                 (strcmp (dinfo->fsType, "zfs") == 0 ||
                  strcmp (dinfo->fsType, "advfs") == 0))
             {
-              diData->disppooledfs = TRUE;
+              diData->disppooledfs = true;
             }
 
             len = (unsigned int) strlen (dinfo->name);
@@ -1463,6 +1534,7 @@ getMaxFormatLengths (diData_t *diData)
             }
         } /* if we are printing this item */
     } /* for all disks */
+#endif
 }
 
 static Size_t
@@ -1497,22 +1569,35 @@ istrlen (const char *str)
 static void
 initSizeTable (diOptions_t *diopts, diOutput_t *diout)
 {
-  int       i;
+  for (size_t i = 0; i < DI_SIZETAB_SIZE; ++i) {
+    dinum_init (&sizeTable [i].high);
+    dinum_init (&sizeTable [i].low);
+    dinum_init (&sizeTable [i].dbs);
+  }
 
-      /* initialize display size tables */
+  /* initialize display size tables */
+
+  dinum_set_u (&sizeTable [0].low, 0);
+  dinum_set_u (&sizeTable [0].high, diopts->baseDispSize);
+  dinum_set_u (&sizeTable [0].dbs, 1);
   sizeTable [0].format = diout->blockFormatNR;
-  sizeTable [1].format = diout->blockFormat;
+  sizeTable [0].suffix = sztabsuffix [0];
 
-  sizeTable [0].high = diopts->baseDispSize;
-  sizeTable [1].low = diopts->baseDispSize;
-  sizeTable [1].high = diopts->baseDispSize * diopts->baseDispSize;
-  sizeTable [1].dbs = diopts->baseDispSize;
-  for (i = 2; i < (int) DI_SIZETAB_SIZE; ++i)
-  {
-      sizeTable [i].format = diout->blockFormat;
-      sizeTable [i].low = sizeTable [i - 1].low * diopts->baseDispSize;
-      sizeTable [i].high = sizeTable [i - 1].high * diopts->baseDispSize;
-      sizeTable [i].dbs = sizeTable [i - 1].dbs * diopts->baseDispSize;
+  dinum_set_u (&sizeTable [1].low, diopts->baseDispSize);
+  dinum_set_u (&sizeTable [1].high, diopts->baseDispSize * diopts->baseDispSize);
+  dinum_set_u (&sizeTable [1].dbs, diopts->baseDispSize);
+  sizeTable [1].format = diout->blockFormat;
+  sizeTable [1].suffix = sztabsuffix [1];
+
+  for (size_t i = 2; i < (int) DI_SIZETAB_SIZE; ++i) {
+    sizeTable [i].format = diout->blockFormat;
+    sizeTable [i].suffix = sztabsuffix [i];
+    dinum_set (&sizeTable [i].low, &sizeTable [i - 1].low);
+    dinum_mul_u (&sizeTable [i].low, diopts->baseDispSize);
+    dinum_set (&sizeTable [i].high, &sizeTable [i - 1].high);
+    dinum_mul_u (&sizeTable [i].high, diopts->baseDispSize);
+    dinum_set (&sizeTable [i].dbs, &sizeTable [i - 1].dbs);
+    dinum_mul_u (&sizeTable [i].dbs, diopts->baseDispSize);
   }
 }
 

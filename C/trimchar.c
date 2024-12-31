@@ -4,7 +4,6 @@
  */
 
 #include "config.h"
-#include "di.h"
 
 #if _hdr_stdio
 # include <stdio.h>
@@ -18,6 +17,8 @@
 #if _hdr_strings
 # include <strings.h>
 #endif
+
+#include "di.h"
 
 void
 trimChar (char *str, int ch)

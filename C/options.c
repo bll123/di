@@ -4,16 +4,15 @@
  */
 
 #include "config.h"
-#include "di.h"
-#include "getoptn.h"
-#include "options.h"
-#include "version.h"
 
 #if _hdr_stdio
 # include <stdio.h>
 #endif
 #if _hdr_stdlib
 # include <stdlib.h>
+#endif
+#if _hdr_stdbool
+# include <stdbool.h>
 #endif
 #if _sys_types \
     && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
@@ -35,9 +34,11 @@
 #if _hdr_libintl
 # include <libintl.h>
 #endif
-#if _use_mcheck
-# include <mcheck.h>
-#endif
+
+#include "di.h"
+#include "getoptn.h"
+#include "options.h"
+#include "version.h"
 
 struct pa_tmp {
   diData_t        *diData;
@@ -49,20 +50,20 @@ struct pa_tmp {
 
 typedef struct
 {
-    _print_size_t   size;
-    const char      *disp[2];
+  int64_t         size;
+  const char      *disp[2];
 } dispTable_t;
 
 static dispTable_t dispTable [] =
 {
-    { (_print_size_t) 0.0, { "KBytes", "KBytes" } },
-    { (_print_size_t) 0.0, { "Megs", "Mebis" } },
-    { (_print_size_t) 0.0, { "Gigs", "Gibis" } },
-    { (_print_size_t) 0.0, { "Teras", "Tebis" } },
-    { (_print_size_t) 0.0, { "Petas", "Pebis" } },
-    { (_print_size_t) 0.0, { "Exas", "Exbis" } },
-    { (_print_size_t) 0.0, { "Zettas", "Zebis" } },
-    { (_print_size_t) 0.0, { "Yottas", "Yobis" } }
+    { 0, { "KBytes", "KBytes" } },
+    { 0, { "Megs", "Mebis" } },
+    { 0, { "Gigs", "Gibis" } },
+    { 0, { "Teras", "Tebis" } },
+    { 0, { "Petas", "Pebis" } },
+    { 0, { "Exas", "Exbis" } },
+    { 0, { "Zettas", "Zebis" } },
+    { 0, { "Yottas", "Yobis" } }
 };
 #define DI_DISPTAB_SIZE (sizeof (dispTable) / sizeof (dispTable_t))
 
@@ -76,15 +77,15 @@ static dispTable_t dispTable [] =
 
 extern int debug;
 
-static void processStringArgs   _((const char *, char *, diData_t *, char *));
-static int  processArgs         _((int, const char * const [], diData_t *, char *, Size_t));
-static int  parseList           _((iList_t *, char *));
-static void processOptions      _((const char *, char *));
-static void processOptionsVal   _((const char *, char *, char *));
-static void usage               _((void));
-static void setDispBlockSize    _((char *, diOptions_t *, diOutput_t *));
-static void initDisplayTable    _((diOptions_t *));
-static void setExitFlag         _((diOptions_t *, unsigned int));
+static void processStringArgs   (const char *, char *, diData_t *, char *);
+static int  processArgs         (int, const char * const [], diData_t *, char *, Size_t);
+static int  parseList           (iList_t *, char *);
+static void processOptions      (const char *, char *);
+static void processOptionsVal   (const char *, char *, char *);
+static void usage               (void);
+static void setDispBlockSize    (char *, diOptions_t *, diOutput_t *);
+static void initDisplayTable    (diOptions_t *);
+static void setExitFlag         (diOptions_t *, unsigned int);
 
 static void
 processStringArgs (const char *progname, char *ptr, diData_t *diData,
@@ -166,9 +167,9 @@ getDIOptions (int argc, const char * const argv[], diData_t *diData)
   if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL) {
     strncpy (dbsstr, "512", sizeof (dbsstr));
     diopts->formatString = DI_POSIX_FORMAT;
-    diopts->posix_compat = TRUE;
-    diopts->csv_output = FALSE;
-    diopts->json_output = FALSE;
+    diopts->posix_compat = true;
+    diopts->csv_output = false;
+    diopts->json_output = false;
   }
 
       /* bsd df */
@@ -623,13 +624,13 @@ processArgs (int argc,
   }
 
   if (diopts->csv_tabs) {
-    diopts->csv_output = TRUE;
+    diopts->csv_output = true;
   }
   if (diopts->csv_output || diopts->json_output) {
-    diopts->printTotals = FALSE;
+    diopts->printTotals = false;
   }
   if (diopts->json_output) {
-    diopts->printHeader = FALSE;
+    diopts->printHeader = false;
   }
 
   return optidx;
@@ -642,7 +643,7 @@ processOptions (const char *arg, char *valptr)
 
   padata = (struct pa_tmp *) valptr;
   if (strcmp (arg, "-a") == 0) {
-    padata->diopts->displayAll = TRUE;
+    padata->diopts->displayAll = true;
     strncpy (padata->diData->zoneInfo.zoneDisplay, "all", MAXPATHLEN);
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     usage();
@@ -653,10 +654,10 @@ processOptions (const char *arg, char *valptr)
       strncpy (padata->dbsstr, "512", padata->dbsstr_sz);
     }
     padata->diopts->formatString = DI_POSIX_FORMAT;
-    padata->diopts->posix_compat = TRUE;
-    padata->diopts->csv_output = FALSE;
+    padata->diopts->posix_compat = true;
+    padata->diopts->csv_output = false;
   } else if (strcmp (arg, "--si") == 0) {
-    padata->diopts->baseDispSize = (_print_size_t) DI_VAL_1000;
+    padata->diopts->baseDispSize = DI_VAL_1000;
     padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
     strncpy (padata->dbsstr, "H", padata->dbsstr_sz);
   } else if (strcmp (arg, "--version") == 0) {
@@ -679,18 +680,18 @@ processOptionsVal (const char *arg, char *valptr, char *value)
 
   if (strcmp (arg, "-B") == 0) {
     if (isdigit ((int) (*value))) {
-      padata->diopts->baseDispSize = (_print_size_t) atof (value);
+      padata->diopts->baseDispSize = atof (value);
       padata->diopts->baseDispIdx = DI_DISP_1000_IDX; /* unknown, really */
-      if (padata->diopts->baseDispSize == (_print_size_t) DI_VAL_1024)
+      if (padata->diopts->baseDispSize == DI_VAL_1024)
       {
         padata->diopts->baseDispIdx = DI_DISP_1024_IDX;
       }
     } else if (strcmp (value, "k") == 0) {
-      padata->diopts->baseDispSize = (_print_size_t) DI_VAL_1024;
+      padata->diopts->baseDispSize = DI_VAL_1024;
       padata->diopts->baseDispIdx = DI_DISP_1024_IDX;
     }
     else if (strcmp (value, "d") == 0 || strcmp (value, "si") == 0) {
-      padata->diopts->baseDispSize = (_print_size_t) DI_VAL_1000;
+      padata->diopts->baseDispSize = DI_VAL_1000;
       padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
     }
   } else if (strcmp (arg, "-I") == 0) {
@@ -714,9 +715,9 @@ processOptionsVal (const char *arg, char *valptr, char *value)
     parseList (&padata->diData->ignoreList, value);
   } else if (strcmp (arg, "-X") == 0) {
     debug = atoi (value);
-    padata->diopts->printDebugHeader = TRUE;
-    padata->diopts->printTotals = TRUE;
-    padata->diopts->printHeader = TRUE;
+    padata->diopts->printDebugHeader = true;
+    padata->diopts->printTotals = true;
+    padata->diopts->printHeader = true;
     padata->diout->width = 10;
     padata->diout->inodeWidth = 10;
   } else {
@@ -821,15 +822,15 @@ static void
 setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
 {
   unsigned int    len;
-  _print_size_t   val;
+  int64_t         val;
   char            *tptr;
   static char     tempbl [15];
   char            ttempbl [15];
 
   if (isdigit ((int) (*ptr))) {
-    val = (_print_size_t) atof (ptr);
+    val = atol (ptr);
   } else {
-    val = (_print_size_t) 1.0;
+    val = 1;
   }
 
   tptr = ptr;
@@ -888,20 +889,20 @@ setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
       }
 
       case 'h': {
-        val = (_print_size_t) DI_DISP_HR;
+        val = DI_DISP_HR;
         diout->dispBlockLabel = "Size";
         break;
       }
 
       case 'H': {
-        val = (_print_size_t) DI_DISP_HR_2;
+        val = DI_DISP_HR_2;
         diout->dispBlockLabel = "Size";
         break;
       }
 
       default: {
         if (strncmp (ptr, "HUMAN", (Size_t) 5) == 0) {
-          val = (_print_size_t) DI_DISP_HR;
+          val = DI_DISP_HR;
         } else {
           /* some unknown string value */
           idx = DI_ONE_MEG;
@@ -914,16 +915,15 @@ setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
       if (len > 1) {
         ++tptr;
         if (*tptr == 'B') {
-           diopts->baseDispSize = (_print_size_t) DI_VAL_1000;
+           diopts->baseDispSize = DI_VAL_1000;
            diopts->baseDispIdx = DI_DISP_1000_IDX;
         }
       }
 
-      if (val == (_print_size_t) 1.0) {
+      if (val == 1) {
         diout->dispBlockLabel = dispTable [idx].disp [diopts->baseDispIdx];
-      }
-      else {
-        Snprintf1 (ttempbl, sizeof (tempbl), "%%.0%s %%s", DI_Lf);
+      } else {
+        Snprintf1 (ttempbl, sizeof (tempbl), "%%.0f");
         Snprintf2 (tempbl, sizeof (tempbl), ttempbl,
             val, DI_GT (dispTable [idx].disp [diopts->baseDispIdx]));
         diout->dispBlockLabel = tempbl;
@@ -944,16 +944,16 @@ setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
     }
 
     if (ok == 0) {
-      Snprintf1 (ttempbl, sizeof (ttempbl), "%%.0%sb", DI_Lf);
+      Snprintf1 (ttempbl, sizeof (ttempbl), "%%.0fb");
       Snprintf1 (tempbl, sizeof (tempbl), ttempbl, val);
       diout->dispBlockLabel = tempbl;
     }
   }  /* some oddball block size */
 
-  if (diopts->posix_compat && val == (_print_size_t) DI_VAL_512) {
+  if (diopts->posix_compat && val == DI_VAL_512) {
     diout->dispBlockLabel = "512-blocks";
   }
-  if (diopts->posix_compat && val == (_print_size_t) DI_VAL_1024) {
+  if (diopts->posix_compat && val == DI_VAL_1024) {
     diout->dispBlockLabel = "1024-blocks";
   }
 
