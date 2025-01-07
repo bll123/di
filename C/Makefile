@@ -7,7 +7,9 @@
 
 # cmake
 BUILDDIR = build
-# DI_USE_MATH = NONE
+# DI_USE_MATH = DI_GMP
+# DI_USE_MATH = DI_TOMMATH
+# DI_USE_MATH = DI_UINT64
 
 # mkconfig
 MKC_PREFIX = di
@@ -361,7 +363,7 @@ $(MKC_REQLIB):	config.h
 ###
 # executables
 
-LIBOBJECTS = dimain$(OBJ_EXT) didiskutil$(OBJ_EXT) \
+LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		diquota$(OBJ_EXT)  display$(OBJ_EXT) getoptn$(OBJ_EXT) \
 		options$(OBJ_EXT) realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
@@ -409,10 +411,10 @@ mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 #.c$(OBJ_EXT):
 #	$(CC) -c $(DI_SHARED) $(DI_CFLAGS) $<
 
-di$(OBJ_EXT):		di.c config.h di.h dimain.h getoptn.h \
+di$(OBJ_EXT):		di.c config.h di.h dilib.h getoptn.h \
 				options.h version.h
 
-dimain$(OBJ_EXT):	dimain.c config.h di.h dimain.h getoptn.h \
+dilib$(OBJ_EXT):	dilib.c config.h di.h dimain.h getoptn.h \
 				options.h
 
 digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h

@@ -13,8 +13,8 @@ extern "C" {
 # endif
 
     /* display.c */
-extern char *printDiskInfo      (diData_t *);
-extern void sortArray           (diOptions_t *, diDiskInfo_t *, int, int);
+extern char *printDiskInfo      (di_data_t *);
+extern void sortArray           (di_opt_t *, di_disk_info_t *, int, int);
 extern const char *getPrintFlagText (int);
 
 # if defined (__cplusplus) || defined (c_plusplus)

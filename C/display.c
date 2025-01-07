@@ -141,16 +141,16 @@ const char *sztabsuffix [] = {
 
 static sizeTable_t sizeTable [DI_SIZETAB_SIZE];
 
-static void addTotals           (const diDiskInfo_t *, diDiskInfo_t *, int);
-static void getMaxFormatLengths (diData_t *);
-static int  diCompare           (const diOptions_t *, const diDiskInfo_t *, unsigned int, unsigned int);
+static void addTotals           (const di_disk_info_t *, di_disk_info_t *, int);
+static void getMaxFormatLengths (di_data_t *);
+static int  diCompare           (const di_opt_t *, const di_disk_info_t *, unsigned int, unsigned int);
 static int  findDispSize        (dinum_t *);
 static Size_t istrlen           (const char *);
-static char *printInfo          (diDiskInfo_t *, diOptions_t *, diOutput_t *);
-static char *printSpace         (const diOptions_t *, const diOutput_t *, dinum_t *, int);
-static char *processTitles      (diOptions_t *, diOutput_t *);
+static char *printInfo          (di_disk_info_t *, di_opt_t *, diOutput_t *);
+static char *printSpace         (const di_opt_t *, const diOutput_t *, dinum_t *, int);
+static char *processTitles      (di_opt_t *, diOutput_t *);
 static char *printPerc          (dinum_t *, dinum_t *, const char *);
-static void initSizeTable       (diOptions_t *, diOutput_t *);
+static void initSizeTable       (di_opt_t *, diOutput_t *);
 static void appendFormatStr     (char *, const char *, char **, Size_t *, Size_t *);
 static void appendFormatVal     (char *, dinum_t *, char **, Size_t *, Size_t *);
 static void append              (const char *, char **, Size_t *, Size_t *);
@@ -167,13 +167,13 @@ static void append              (const char *, char **, Size_t *, Size_t *);
  */
 
 char *
-printDiskInfo (diData_t *diData)
+printDiskInfo (di_data_t *di_data)
 {
 #if 0
     int                 i;
-    diOptions_t         *diopts;
-    diDiskInfo_t        *diskInfo;
-    diDiskInfo_t        totals;
+    di_opt_t         *diopts;
+    di_disk_info_t        *diskInfo;
+    di_disk_info_t        totals;
     char                lastpool [DI_SPEC_NAME_LEN + 1];
     Size_t              lastpoollen = { 0 };
     int                 inpool = { false };
@@ -191,18 +191,18 @@ printDiskInfo (diData_t *diData)
     outlen = 0;
     outcurrlen = 0;
     lastpool[0] = '\0';
-    diopts = &diData->options;
-    diout = &diData->output;
+    diopts = &di_data->options;
+    diout = &di_data->output;
     initSizeTable (diopts, diout);
 
     if (diopts->printTotals)
     {
-        di_initDiskInfo (&totals);
+        di_init_disk_info (&totals);
         strncpy (totals.name, DI_GT("Total"), (Size_t) DI_NAME_LEN);
         totals.printFlag = DI_PRNT_OK;
     }
 
-    getMaxFormatLengths (diData);
+    getMaxFormatLengths (di_data);
     tout = processTitles (diopts, diout);
     if (diopts->printHeader) {
       append (tout, &out, &outcurrlen, &outlen);
@@ -265,24 +265,24 @@ printDiskInfo (diData_t *diData)
           "%%%d%s", (int) diout->inodeWidth, PRIu64);
     }
 
-    diskInfo = diData->diskInfo;
+    diskInfo = di_data->diskInfo;
     if (diopts->printTotals)
     {
-        if (diData->haspooledfs && ! diData->totsorted)
+        if (di_data->haspooledfs && ! di_data->totsorted)
         {
           char tempSortType [DI_SORT_MAX + 1];
               /* in order to find the main pool entries,              */
               /* we must have the array sorted by special device name */
           strncpy (tempSortType, diopts->sortType, DI_SORT_MAX);
           strncpy (diopts->sortType, "s", DI_SORT_MAX);
-          sortArray (diopts, diskInfo, diData->count, DI_TOT_SORT_IDX);
+          sortArray (diopts, diskInfo, di_data->count, DI_TOT_SORT_IDX);
           strncpy (diopts->sortType, tempSortType, DI_SORT_MAX);
-          diData->totsorted = true;
+          di_data->totsorted = true;
         }
 
-        for (i = 0; i < diData->count; ++i)
+        for (i = 0; i < di_data->count; ++i)
         {
-            diDiskInfo_t    *dinfo;
+            di_disk_info_t    *dinfo;
             int             ispooled;
             int             startpool;
 
@@ -291,7 +291,7 @@ printDiskInfo (diData_t *diData)
             dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
 
                 /* is it a pooled filesystem type? */
-            if (diData->haspooledfs && di_isPooledFs (dinfo)) {
+            if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
               ispooled = true;
               if (lastpoollen == 0 ||
                   strncmp (lastpool, dinfo->special, lastpoollen) != 0)
@@ -326,15 +326,15 @@ printDiskInfo (diData_t *diData)
         } /* for each entry */
     } /* if the totals are to be printed */
 
-    diskInfo = diData->diskInfo;
+    diskInfo = di_data->diskInfo;
     if (strcmp (diopts->sortType, "n") != 0)
     {
-      sortArray (diopts, diskInfo, diData->count, DI_MAIN_SORT_IDX);
+      sortArray (diopts, diskInfo, di_data->count, DI_MAIN_SORT_IDX);
     }
 
-    for (i = 0; i < diData->count; ++i)
+    for (i = 0; i < di_data->count; ++i)
     {
-      diDiskInfo_t        *dinfo;
+      di_disk_info_t        *dinfo;
 
       dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_MAIN_SORT_IDX]]);
       if (debug > 5)
@@ -384,7 +384,7 @@ printDiskInfo (diData_t *diData)
  *
  */
 void
-sortArray (diOptions_t *diopts, diDiskInfo_t *data, int count, int sidx)
+sortArray (di_opt_t *diopts, di_disk_info_t *data, int count, int sidx)
 {
   unsigned int  tempIndex;
   int           gap;
@@ -494,7 +494,7 @@ append (const char *val, char **ptr, Size_t *clen, Size_t *len)
  */
 
 static char *
-printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
+printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 {
 #if 0
     dinum_t          used;
@@ -886,7 +886,7 @@ printInfo (diDiskInfo_t *diskInfo, diOptions_t *diopts, diOutput_t *diout)
 }
 
 static char *
-printSpace (const diOptions_t *diopts, const diOutput_t *diout,
+printSpace (const di_opt_t *diopts, const diOutput_t *diout,
              dinum_t *usage, int idx)
 {
     static char     tdata [1024];
@@ -948,7 +948,7 @@ findDispSize (dinum_t *siz)
  */
 
 static void
-addTotals (const diDiskInfo_t *diskInfo, diDiskInfo_t *totals, int inpool)
+addTotals (const di_disk_info_t *diskInfo, di_disk_info_t *totals, int inpool)
 {
   if (debug > 2)
   {
@@ -1050,7 +1050,7 @@ addTotals (const diDiskInfo_t *diskInfo, diDiskInfo_t *totals, int inpool)
  */
 
 static char *
-processTitles (diOptions_t *diopts, diOutput_t *diout)
+processTitles (di_opt_t *diopts, diOutput_t *diout)
 {
 #if 0
     const char      *ptr;
@@ -1384,14 +1384,14 @@ printPerc (dinum_t *used, dinum_t *totAvail, const char *format)
 
 
 static int
-diCompare (const diOptions_t *diopts, const diDiskInfo_t *data,
+diCompare (const di_opt_t *diopts, const di_disk_info_t *data,
            unsigned int idx1, unsigned int idx2)
 {
     int             rc;
     int             sortOrder;
     const char            *ptr;
-    const diDiskInfo_t    *d1;
-    const diDiskInfo_t    *d2;
+    const di_disk_info_t    *d1;
+    const di_disk_info_t    *d2;
 
         /* reset sort order to the default start value */
     sortOrder = DI_SORT_ASCENDING;
@@ -1479,28 +1479,28 @@ diCompare (const diOptions_t *diopts, const diDiskInfo_t *data,
 }
 
 static void
-getMaxFormatLengths (diData_t *diData)
+getMaxFormatLengths (di_data_t *di_data)
 {
 #if 0
     int             i;
     unsigned int    len;
     diOutput_t      *diout;
 
-    diout = &diData->output;
+    diout = &di_data->output;
 
         /* this loop gets the max string lengths */
-    for (i = 0; i < diData->count; ++i)
+    for (i = 0; i < di_data->count; ++i)
     {
-        diDiskInfo_t        *dinfo;
+        di_disk_info_t        *dinfo;
 
-        dinfo = &diData->diskInfo[i];
+        dinfo = &di_data->diskInfo[i];
         if (dinfo->doPrint)
         {
-            if (diData->haspooledfs &&
+            if (di_data->haspooledfs &&
                 (strcmp (dinfo->fsType, "zfs") == 0 ||
                  strcmp (dinfo->fsType, "advfs") == 0))
             {
-              diData->disppooledfs = true;
+              di_data->disppooledfs = true;
             }
 
             len = (unsigned int) strlen (dinfo->name);
@@ -1567,7 +1567,7 @@ istrlen (const char *str)
 }
 
 static void
-initSizeTable (diOptions_t *diopts, diOutput_t *diout)
+initSizeTable (di_opt_t *diopts, diOutput_t *diout)
 {
   for (size_t i = 0; i < DI_SIZETAB_SIZE; ++i) {
     dinum_init (&sizeTable [i].high);

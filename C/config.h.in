@@ -3,12 +3,21 @@
 #ifndef INC_CONFIG_H
 #define INC_CONFIG_H 1
 
+#cmakedefine01 _hdr_stdio
+#cmakedefine01 _hdr_stdlib
+#cmakedefine01 _sys_types
+#cmakedefine01 _sys_param
+#define _key_void 1
+#define _key_const 1
+#define _param_void_star 1
+#define _proto_stdc 1
 #cmakedefine01 _hdr_ctype
 #cmakedefine01 _hdr_dirent
 #cmakedefine01 _hdr_errno
 #cmakedefine01 _hdr_fcntl
 #cmakedefine01 _hdr_fshelp
 #cmakedefine01 _hdr_gui_window
+#cmakedefine01 _hdr_inttypes
 #cmakedefine01 _hdr_jfs_quota
 #cmakedefine01 _hdr_kernel_fs_info
 #cmakedefine01 _hdr_limits
@@ -18,22 +27,18 @@
 #cmakedefine01 _hdr_libprop_proplib
 #cmakedefine01 _hdr_locale
 #cmakedefine01 _hdr_malloc
-#cmakedefine01 _hdr_mcheck
 #cmakedefine01 _hdr_memory
 #cmakedefine01 _hdr_mntent
 #cmakedefine01 _hdr_mnttab
 #cmakedefine01 _hdr_quota
 #cmakedefine01 _hdr_rpc_rpc
 #cmakedefine01 _hdr_rpcsvc_rquota
-#cmakedefine01 _hdr_stddef
 #cmakedefine01 _hdr_stdbool
-#cmakedefine01 _hdr_stdio
+#cmakedefine01 _hdr_stddef
 #cmakedefine01 _hdr_stdint
-#cmakedefine01 _hdr_stdlib
 #cmakedefine01 _hdr_storage_Directory
 #cmakedefine01 _hdr_storage_Entry
 #cmakedefine01 _hdr_storage_Path
-#cmakedefine01 _hdr_storage_volumes
 #cmakedefine01 _hdr_string
 #cmakedefine01 _hdr_strings
 #cmakedefine01 _hdr_time
@@ -57,13 +62,11 @@
 #cmakedefine01 _sys_mntent
 #cmakedefine01 _sys_mnttab
 #cmakedefine01 _sys_mount
-#cmakedefine01 _sys_param
 #cmakedefine01 _sys_quota
 #cmakedefine01 _sys_stat
 #cmakedefine01 _sys_statfs
 #cmakedefine01 _sys_statvfs
 #cmakedefine01 _sys_time
-#cmakedefine01 _sys_types
 #cmakedefine01 _sys_vfs
 #cmakedefine01 _sys_vfs_quota
 #cmakedefine01 _sys_vfstab
@@ -71,9 +74,7 @@
 // #cmakedefine01 _inc_conflict__hdr_time__sys_time
 // #cmakedefine01 _inc_conflict__sys_quota__hdr_linux_quota
 // #cmakedefine01 _command_msgfmt
-// #cmakedefine01 _cmd_loc_msgfmt "/usr/bin/msgfm
-// #cmakedefine01 _command_rpmbuild
-// #cmakedefine01 _cmd_loc_rpmbuild "/usr/bin/rpmbuil
+// #cmakedefine01 _cmd_loc_msgfmt "/usr/bin/msgfmt"
 // #cmakedefine01 _const_O_NOCTTY
 // #cmakedefine01 _define_IOCTL_STORAGE_CHECK_VERIFY2
 // #cmakedefine01 _define_MCTL_QUERY
@@ -89,6 +90,9 @@
 #cmakedefine01 _typ_size_t
 #cmakedefine01 _typ_uint_t
 #cmakedefine01 _typ_uid_t
+#cmakedefine01 _typ_uint64_t
+#define _siz_long ${_siz_long}
+#define _siz_long_long ${_siz_long_long}
 
 #cmakedefine01 _lib_bcopy
 #cmakedefine01 _lib_bzero
@@ -111,7 +115,6 @@
 #cmakedefine01 _lib_hasmntopt
 #cmakedefine01 _lib_lstat
 #cmakedefine01 _lib_mbrlen
-#cmakedefine01 _lib_mcheck_pedantic
 #cmakedefine01 _lib_memcpy
 #cmakedefine01 _lib_memset
 #cmakedefine01 _lib_mntctl
@@ -189,11 +192,10 @@
 #cmakedefine01 _mem_struct_statfs_mount_info
 #cmakedefine01 _mem_struct_statfs_f_type
 #cmakedefine01 _mem_struct_statvfs_f_basetype
-// #cmakedefine01 _siz_long_long
 // #cmakedefine01 _has_std_quotas
 // #cmakedefine01 _has_std_nfs_quotas
 
-#define DI_NONE 0
+#define DI_UINT64 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
 #define _use_math ${_use_math}

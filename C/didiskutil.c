@@ -39,11 +39,11 @@
     This module contains utility routines for conversion
     and checking the data.
 
-    di_initDiskInfo ()
+    di_init_disk_info ()
         initialize disk info structure
-    di_saveBlockSizes ()
+    di_save_block_sizes ()
         save the block sizes in the diskinfo structure.
-    di_saveInodeSizes ()
+    di_save_inode_sizes ()
         save the inode sizes in the diskinfo structure.
     convertMountOptions ()
         converts mount options to text format.
@@ -52,15 +52,15 @@
     chkMountOptions ()
         Checks to see if the mount option is set.
         Used if hasmntopt() is not present.
-    di_testRemoteDisk ()
+    di_is_remote_disk ()
         test a disk to see if it is remote (nfs, nfs3).
 
 */
 
 void
-di_initDiskInfo (diDiskInfo_t *diptr)
+di_init_disk_info (di_disk_info_t *diptr)
 {
-    memset ((char *) diptr, '\0', sizeof (diDiskInfo_t));
+    memset ((char *) diptr, '\0', sizeof (di_disk_info_t));
     diptr->printFlag = DI_PRNT_OK;
     diptr->isLocal = true;
     diptr->isReadOnly = false;
@@ -68,7 +68,7 @@ di_initDiskInfo (diDiskInfo_t *diptr)
 }
 
 void
-di_saveBlockSizes (diDiskInfo_t *diptr, uint64_t block_size,
+di_save_block_sizes (di_disk_info_t *diptr, uint64_t block_size,
     uint64_t total_blocks, uint64_t free_blocks, uint64_t avail_blocks)
 {
   dinum_mul_uu (&diptr->total_space, total_blocks, block_size);
@@ -77,7 +77,7 @@ di_saveBlockSizes (diDiskInfo_t *diptr, uint64_t block_size,
 }
 
 void
-di_saveInodeSizes (diDiskInfo_t *diptr, uint64_t total_nodes,
+di_save_inode_sizes (di_disk_info_t *diptr, uint64_t total_nodes,
     uint64_t free_nodes, uint64_t avail_nodes)
 {
   dinum_set_u (&diptr->total_inodes, total_nodes);
@@ -86,7 +86,7 @@ di_saveInodeSizes (diDiskInfo_t *diptr, uint64_t total_nodes,
 }
 
 void
-convertMountOptions (unsigned long flags, diDiskInfo_t *diptr)
+convertMountOptions (unsigned long flags, di_disk_info_t *diptr)
 {
 #if defined (MNT_RDONLY)
     if ((flags & MNT_RDONLY) == MNT_RDONLY)
@@ -328,7 +328,7 @@ convertMountOptions (unsigned long flags, diDiskInfo_t *diptr)
 }
 
 void
-convertNFSMountOptions (long flags, long wsize, long rsize, diDiskInfo_t *diptr)
+convertNFSMountOptions (long flags, long wsize, long rsize, di_disk_info_t *diptr)
 {
 #if defined (NFSMNT_SOFT)
     if ((flags & NFSMNT_SOFT) != NFSMNT_SOFT)
@@ -412,7 +412,7 @@ chkMountOptions (const char *mntopts, const char *str)
 #endif /* _lib_getmntent */
 
 void
-di_testRemoteDisk (diDiskInfo_t *diskInfo)
+di_is_remote_disk (di_disk_info_t *diskInfo)
 {
   if (strncmp (diskInfo->fsType, "nfs", 3) == 0)
   {
@@ -421,7 +421,7 @@ di_testRemoteDisk (diDiskInfo_t *diskInfo)
 }
 
 int
-di_isPooledFs (diDiskInfo_t *diskInfo)
+di_isPooledFs (di_disk_info_t *diskInfo)
 {
   if (strcmp (diskInfo->fsType, "zfs") == 0 ||
       strcmp (diskInfo->fsType, "advfs") == 0 ||
@@ -434,7 +434,7 @@ di_isPooledFs (diDiskInfo_t *diskInfo)
 }
 
 int
-di_isLoopbackFs (diDiskInfo_t *diskInfo)
+di_isLoopbackFs (di_disk_info_t *diskInfo)
 {
   if ((strcmp (diskInfo->fsType, "lofs") == 0 && diskInfo->sp_rdev != 0) ||
       (strcmp (diskInfo->fsType, "nullfs") == 0 &&

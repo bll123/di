@@ -91,7 +91,7 @@
 # include <sys/types.h>
 #endif
 
-#include "dimain.h"
+#include "dilib.h"
 #include "di.h"
 
 /* end of system specific includes/configurations */
@@ -99,23 +99,28 @@
 int
 main (int argc, const char * argv [])
 {
-  char      *disp;
-  diData_t  diData;
+  char      *disp = NULL;
+  di_data_t di_data;
 
-  disp = dimainproc (argc, argv, 0, &diData);
-  if (diData.options.exitFlag == DI_EXIT_FAIL) {
-    exit (2);
-  }
-  if (diData.options.exitFlag == DI_EXIT_WARN) {
-    exit (1);
-  }
-  if (diData.options.exitFlag == DI_EXIT_OK) {
-    exit (0);
+  di_get_data (&di_data, argc, argv, 0);
+  switch (di_data.options.exitFlag) {
+    case DI_EXIT_FAIL: {
+      exit (2);
+    }
+    case DI_EXIT_WARN: {
+      exit (1);
+    }
+    case DI_EXIT_OK: {
+      exit (0);
+    }
+    case DI_EXIT_NORM: {
+      break;
+    }
   }
   if (disp != (char *) NULL) {
     fputs (disp, stdout);
     free (disp);
   }
-  cleanup (&diData);
+  di_cleanup (&di_data);
   return 0;
 }

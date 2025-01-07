@@ -41,8 +41,8 @@
 #include "version.h"
 
 struct pa_tmp {
-  diData_t        *diData;
-  diOptions_t     *diopts;
+  di_data_t        *di_data;
+  di_opt_t     *diopts;
   diOutput_t      *diout;
   char            *dbsstr;
   Size_t          dbsstr_sz;
@@ -77,31 +77,31 @@ static dispTable_t dispTable [] =
 
 extern int debug;
 
-static void processStringArgs   (const char *, char *, diData_t *, char *);
-static int  processArgs         (int, const char * const [], diData_t *, char *, Size_t);
-static int  parseList           (iList_t *, char *);
+static void processStringArgs   (const char *, char *, di_data_t *, char *);
+static int  processArgs         (int, const char * const [], di_data_t *, char *, Size_t);
+static int  parseList           (di_strarr_t *, char *);
 static void processOptions      (const char *, char *);
 static void processOptionsVal   (const char *, char *, char *);
 static void usage               (void);
-static void setDispBlockSize    (char *, diOptions_t *, diOutput_t *);
-static void initDisplayTable    (diOptions_t *);
-static void setExitFlag         (diOptions_t *, unsigned int);
+static void setDispBlockSize    (char *, di_opt_t *, diOutput_t *);
+static void initDisplayTable    (di_opt_t *);
+static void setExitFlag         (di_opt_t *, unsigned int);
 
 static void
-processStringArgs (const char *progname, char *ptr, diData_t *diData,
+processStringArgs (const char *progname, char *ptr, di_data_t *di_data,
     char *dbsstr)
 {
   char        *dptr;
   char        *tptr;
   int         nargc;
   const char  *nargv [DI_MAX_ARGV];
-  diOptions_t *diopts;
+  di_opt_t *diopts;
 
   if (ptr == (char *) NULL || strcmp (ptr, "") == 0) {
     return;
   }
 
-  diopts = &diData->options;
+  diopts = &di_data->options;
 
   dptr = (char *) NULL;
   dptr = strdup (ptr);
@@ -123,7 +123,7 @@ processStringArgs (const char *progname, char *ptr, diData_t *diData,
       nargv[nargc++] = tptr;
       tptr = strtok ((char *) NULL, DI_ARGV_SEP);
     }
-    optidx = processArgs (nargc, nargv, diData, dbsstr, sizeof (dbsstr) - 1);
+    optidx = processArgs (nargc, nargv, di_data, dbsstr, sizeof (dbsstr) - 1);
     if (optidx < nargc) {
       fprintf (stderr, "%s: unknown data found in DI_ARGS: %s\n",
           progname, nargv [optidx]);
@@ -137,18 +137,18 @@ processStringArgs (const char *progname, char *ptr, diData_t *diData,
 }
 
 int
-getDIOptions (int argc, const char * const argv[], diData_t *diData)
+getDIOptions (int argc, const char * const argv[], di_data_t *di_data)
 {
   const char *      argvptr;
   char *            ptr;
   char              dbsstr [30];
   int               optidx;
   int               ec;
-  diOptions_t       *diopts;
+  di_opt_t       *diopts;
   diOutput_t        *diout;
 
-  diopts = &diData->options;
-  diout = &diData->output;
+  diopts = &di_data->options;
+  diout = &di_data->output;
   strncpy (dbsstr, DI_DEFAULT_DISP_SIZE, sizeof (dbsstr)); /* default */
   ec = 0;
 
@@ -183,10 +183,10 @@ getDIOptions (int argc, const char * const argv[], diData_t *diData)
   }
 
   if ((ptr = getenv ("DI_ARGS")) != (char *) NULL) {
-    processStringArgs (argv [0], ptr, diData, dbsstr);
+    processStringArgs (argv [0], ptr, di_data, dbsstr);
   }
 
-  optidx = processArgs (argc, argv, diData, dbsstr, sizeof (dbsstr) - 1);
+  optidx = processArgs (argc, argv, di_data, dbsstr, sizeof (dbsstr) - 1);
 
   if (debug > 0) {
     int j;
@@ -227,14 +227,14 @@ getDIOptions (int argc, const char * const argv[], diData_t *diData)
 static int
 processArgs (int argc,
              const char * const argv [],
-             diData_t *diData,
+             di_data_t *di_data,
              char *dbsstr,
              Size_t dbsstr_sz)
 {
   int           i;
   int           optidx;
   int           errorCount;
-  diOptions_t   *diopts;
+  di_opt_t   *diopts;
   diOutput_t    *diout;
   struct pa_tmp padata;
 
@@ -533,14 +533,14 @@ processArgs (int argc,
 /* 52 */
 #define OPT_INT_z 52
     { "-z",     GETOPTN_STRING,
-        NULL  /*&diData->zoneInfo.zoneDisplay*/,
-        0  /*sizeof (diData->zoneInfo.zoneDisplay)*/,
+        NULL  /*&di_data->zoneInfo.zoneDisplay*/,
+        0  /*sizeof (di_data->zoneInfo.zoneDisplay)*/,
         NULL },
 /* 53 */
 #define OPT_INT_Z 53
     { "-Z",     GETOPTN_STRING,
-        NULL  /*&diData->zoneInfo.zoneDisplay*/,
-        0  /*sizeof (diData->zoneInfo.zoneDisplay)*/,
+        NULL  /*&di_data->zoneInfo.zoneDisplay*/,
+        0  /*sizeof (di_data->zoneInfo.zoneDisplay)*/,
         (void *) "all" }
   };
   static int dbsids[] =
@@ -551,8 +551,8 @@ processArgs (int argc,
   static int paidv[] =
     { OPT_INT_B, OPT_INT_I, OPT_INT_s, OPT_INT_x, OPT_INT_X };
 
-  diopts = &diData->options;
-  diout = &diData->output;
+  diopts = &di_data->options;
+  diout = &di_data->output;
 
     /* this is seriously gross, but the old compilers don't have    */
     /* automatic aggregate initialization                           */
@@ -581,10 +581,10 @@ processArgs (int argc,
   opts[OPT_INT_w].valsiz = sizeof (diout->width);
   opts[OPT_INT_W].valptr = (void *) &diout->inodeWidth;     /* -W */
   opts[OPT_INT_W].valsiz = sizeof (diout->inodeWidth);
-  opts[OPT_INT_z].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -z */
-  opts[OPT_INT_z].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
-  opts[OPT_INT_Z].valptr = (void *) diData->zoneInfo.zoneDisplay;  /* -Z */
-  opts[OPT_INT_Z].valsiz = sizeof (diData->zoneInfo.zoneDisplay);
+  opts[OPT_INT_z].valptr = (void *) di_data->zoneInfo.zoneDisplay;  /* -z */
+  opts[OPT_INT_z].valsiz = sizeof (di_data->zoneInfo.zoneDisplay);
+  opts[OPT_INT_Z].valptr = (void *) di_data->zoneInfo.zoneDisplay;  /* -Z */
+  opts[OPT_INT_Z].valsiz = sizeof (di_data->zoneInfo.zoneDisplay);
 
   for (i = 0; i < (int) (sizeof (dbsids) / sizeof (int)); ++i) {
     opts[dbsids[i]].valptr = (void *) dbsstr;
@@ -610,7 +610,7 @@ processArgs (int argc,
     return optidx;
   }
 
-  padata.diData = diData;
+  padata.di_data = di_data;
   padata.diopts = diopts;
   padata.diout = diout;
   padata.dbsstr = dbsstr;
@@ -644,7 +644,7 @@ processOptions (const char *arg, char *valptr)
   padata = (struct pa_tmp *) valptr;
   if (strcmp (arg, "-a") == 0) {
     padata->diopts->displayAll = true;
-    strncpy (padata->diData->zoneInfo.zoneDisplay, "all", MAXPATHLEN);
+    strncpy (padata->di_data->zoneInfo.zoneDisplay, "all", MAXPATHLEN);
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     usage();
     setExitFlag (padata->diopts, DI_EXIT_OK);
@@ -695,7 +695,7 @@ processOptionsVal (const char *arg, char *valptr, char *value)
       padata->diopts->baseDispIdx = DI_DISP_1000_IDX;
     }
   } else if (strcmp (arg, "-I") == 0) {
-    rc = parseList (&padata->diData->includeList, value);
+    rc = parseList (&padata->di_data->include_list, value);
     if (rc != 0) {
       setExitFlag (padata->diopts, DI_EXIT_FAIL);
       return;
@@ -712,7 +712,7 @@ processOptionsVal (const char *arg, char *valptr, char *value)
         strncpy (padata->diopts->sortType, "tm", DI_SORT_MAX);
     }
   } else if (strcmp (arg, "-x") == 0) {
-    parseList (&padata->diData->ignoreList, value);
+    parseList (&padata->di_data->ignore_list, value);
   } else if (strcmp (arg, "-X") == 0) {
     debug = atoi (value);
     padata->diopts->printDebugHeader = true;
@@ -728,7 +728,7 @@ processOptionsVal (const char *arg, char *valptr, char *value)
 }
 
 static int
-parseList (iList_t *list, char *str)
+parseList (di_strarr_t *list, char *str)
 {
   char        *dstr;
   char        *ptr;
@@ -819,7 +819,7 @@ usage (void)
 }
 
 static void
-setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
+setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
 {
   unsigned int    len;
   int64_t         val;
@@ -962,7 +962,7 @@ setDispBlockSize (char *ptr, diOptions_t *diopts, diOutput_t *diout)
 
 
 static void
-initDisplayTable (diOptions_t *diopts)
+initDisplayTable (di_opt_t *diopts)
 {
   int       i;
 
@@ -975,7 +975,7 @@ initDisplayTable (diOptions_t *diopts)
 }
 
 static void
-setExitFlag (diOptions_t *diopts, unsigned int exitFlag)
+setExitFlag (di_opt_t *diopts, unsigned int exitFlag)
 {
   if (exitFlag > diopts->exitFlag) {
     diopts->exitFlag = exitFlag;

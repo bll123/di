@@ -30,7 +30,7 @@ extern "C" {
 #define DI_DISP_HR              -20.0
 #define DI_DISP_HR_2            -21.0
 
-extern int getDIOptions (int , const char * const [], diData_t *);
+extern int getDIOptions (int , const char * const [], di_data_t *);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }

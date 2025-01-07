@@ -5,8 +5,20 @@
 
 #include "config.h"
 
-#include <stdint.h>
-#include <inttypes.h>
+#if _hdr_stdint
+# include <stdint.h>
+#endif
+#if _hdr_inttypes
+# include <inttypes.h>
+#endif
+
+#if ! _typ_uint64_t
+# if _siz_long == 8
+  typedef long uint64_t;
+# elif _siz_long_long == 8
+  typedef long long uint64_t;
+# endif
+#endif
 
 #if _use_math == DI_GMP
 # include <gmp.h>
@@ -17,7 +29,7 @@
 # include <tommath.h>
   typedef mp_int dinum_t;
   typedef mp_int didbl_t;
-# else /* DI_NONE */
+# else /* DI_UINT64 */
   typedef uint64_t dinum_t;
   typedef double didbl_t;
 #endif
@@ -299,7 +311,13 @@ dinum_str (const dinum_t *r, char *str, size_t sz)
 #elif _use_math == DI_TOMMATH
   mp_to_decimal (r, str, sz);
 #else
+# if _hdr_inttypes
   snprintf (str, sz, "%" PRIu64, *r);
+# elif _siz_long == 8
+  snprintf (str, sz, "%ld", *r);
+# elif _siz_long_long == 8
+  snprintf (str, sz, "%lld", *r);
+# endif
 #endif
 }
 

@@ -17,6 +17,7 @@ hdr     errno.h
 hdr     fcntl.h
 hdr     fshelp.h
 hdr     gui/window.h
+hdr     inttypes.h
 hdr     jfs/quota.h
 hdr     kernel/fs_info.h
 hdr     limits.h
@@ -40,8 +41,6 @@ hdr     stdint.h
 hdr     storage/Directory.h
 hdr     storage/Entry.h
 hdr     storage/Path.h
-# syllable: broken design, broken header
-hdr     storage/volumes.h gui/window.h
 hdr     string.h
 hdr     strings.h
 hdr     time.h
@@ -78,8 +77,6 @@ sys     vmount.h
 include_conflict time.h sys/time.h
 include_conflict sys/quota.h linux/quota.h
 command msgfmt gmsgfmt
-# rpmbuild used for regression tests
-command rpmbuild
 const   O_NOCTTY
 define  bcopy
 define  bzero
@@ -153,14 +150,15 @@ lib     vquotactl
 lib     xdr_int -lnsl
 lib     zone_getattr
 lib     zone_list
+# to be removed
 # get the correct xdr types...
-memberxdr rquota rq_bhardlimit
-memberxdr rquota rq_bsoftlimit
-memberxdr rquota rq_curblocks
-memberxdr rquota rq_fhardlimit
-memberxdr rquota rq_fsoftlimit
-memberxdr rquota rq_curfiles
-memberxdr getquota_args gqa_uid
+# memberxdr rquota rq_bhardlimit
+# memberxdr rquota rq_bsoftlimit
+# memberxdr rquota rq_curblocks
+# memberxdr rquota rq_fhardlimit
+# memberxdr rquota rq_fsoftlimit
+# memberxdr rquota rq_curfiles
+# memberxdr getquota_args gqa_uid
 # to prevent warnings
 # some systems are u_int, size_t, u_long
 args noconst getfsstat
@@ -203,13 +201,8 @@ member  struct statfs f_fstypename
 member  struct statfs mount_info
 member  struct statfs f_type
 member  struct statvfs f_basetype
+size    long
 size    long long
-size    long double
-if have_long_double ( ( == _siz_long_double 8 ) || ( == _siz_long_double 16 ) )
-  printf_long_double
-else
-  setint _printf_long_double 0
-endif
 
 # workaround for AIX
 # mntctl() is not declared
@@ -241,6 +234,7 @@ else
 endif
 
 ifnotoption NLS
+# ### to be mostly removed
   set _lib_bindtextdomain 0
   set _lib_gettext 0
   set _lib_setlocale 0
@@ -330,13 +324,5 @@ include
 #if ! _lib_strcoll
 # define strcoll strcmp
 #endif
-
-# ifndef _
-#  if _proto_stdc
-#   define _(args) args
-#  else
-#   define _(args) ()
-#  endif
-# endif
 
 endinclude

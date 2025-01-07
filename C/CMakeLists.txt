@@ -219,6 +219,9 @@ macro (checkPrototype_setmntent hdr)
 endmacro()
 
 macro (checkdqblk hdr)
+  if (_hdr_linux_dqblk_xfs)
+    set (CMAKE_EXTRA_INCLUDE_FILES <linux/dqblk_xfs.h>)
+  endif()
   check_type_size ("struct dqblk" _typ_struct_dqblk)
   check_type_size ("struct quotaval" _typ_struct_quotaval)
   check_type_size ("struct ufs_dqblk" _typ_struct_ufs_dqblk)
@@ -233,6 +236,7 @@ macro (checkdqblk hdr)
       ${hdr} _mem_struct_dqblk_dqb_fsoftlimit)
   check_struct_has_member ("struct dqblk" dqb_curfiles
       ${hdr} _mem_struct_dqblk_dqb_curfiles)
+  unset (CMAKE_EXTRA_INCLUDE_FILES)
 endmacro ()
 
 macro (addIntlLibrary name)
@@ -251,11 +255,13 @@ check_include_file (fcntl.h _hdr_fcntl)
 check_include_file (gmp.h _hdr_gmp)
 check_include_file (fshelp.h _hdr_fshelp)
 check_include_file (gui/window.h _hdr_gui_window)
+check_include_file (inttypes.h _hdr_inttypes)
 check_include_file (jfs/quota.h _hdr_jfs_quota)
 check_include_file (kernel/fs_info.h _hdr_kernel_fs_info)
 check_include_file (limits.h _hdr_limits)
 check_include_file (linux/dqblk_xfs.h _hdr_linux_dqblk_xfs)
 check_include_file (linux/quota.h _hdr_linux_quota)
+check_include_file (libintl.h _hdr_libintl)
 check_include_file (libprop/proplib.h _hdr_libprop_proplib)
 check_include_file (locale.h _hdr_locale)
 check_include_file (malloc.h _hdr_malloc)
@@ -296,9 +302,17 @@ check_include_file (sys/fstypes.h _sys_fstypes)
 check_include_file (sys/ftype.h _sys_ftype)
 check_include_file (sys/io.h _sys_io)
 check_include_file (sys/mntctl.h _sys_mntctl)
+check_include_file (sys/param.h _sys_param)
+check_include_file (sys/types.h _sys_types)
+
 # SCO OpenServer/UnixWare require sys/mnttab.h for struct mnttab declaration.
 check_include_file (sys/mnttab.h _sys_mnttab)
+if (_sys_mnttab)
+  set (CMAKE_EXTRA_INCLUDE_FILES <sys/mnttab.h>)
+endif()
 check_include_file (sys/mntent.h _sys_mntent)
+unset (CMAKE_EXTRA_INCLUDE_FILES)
+
 check_include_file (sys/mount.h _sys_mount)
 check_include_file (sys/quota.h _sys_quota)
 check_include_file (sys/stat.h _sys_stat)
@@ -412,7 +426,7 @@ if (DEFINED MNTTAB_HDR)
 endif()
 
 if (_sys_statfs)
-  set (CMAKE_EXTRA_INCLUDE_FILES sys/statfs.h)
+  set (CMAKE_EXTRA_INCLUDE_FILES <sys/statfs.h>)
   check_struct_has_member ("struct statfs" f_bsize
       sys/statfs.h _mem_struct_statfs_f_bsize)
   check_struct_has_member ("struct statfs" f_fsize
@@ -432,7 +446,7 @@ if (_sys_statfs)
   unset (CMAKE_EXTRA_INCLUDE_FILES)
 endif()
 if (_sys_statvfs)
-  set (CMAKE_EXTRA_INCLUDE_FILES sys/statvfs.h)
+  set (CMAKE_EXTRA_INCLUDE_FILES <sys/statvfs.h>)
   check_type_size ("statvfs_t" _typ_statvfs_t)
   check_struct_has_member ("struct statvfs" f_basetype
       sys/statvfs.h _mem_struct_statvfs_f_basetype)
@@ -443,6 +457,9 @@ check_type_size ("gid_t" _typ_gid_t)
 check_type_size ("size_t" _typ_size_t)
 check_type_size ("uint_t" _typ_uint_t)
 check_type_size ("uid_t" _typ_uid_t)
+check_type_size ("uint64_t" _typ_uint64_t)
+check_type_size ("long" _siz_long)
+check_type_size ("long long" _siz_long_long)
 
 if (_hdr_quota)
   set (QUOTA_HDR "quota.h")
@@ -498,7 +515,7 @@ endif()
 #define  S_ISLNK
 
 if (DEFINED DI_USE_MATH AND NOT DI_USE_MATH STREQUAL "")
-  # must be one of DI_NONE, DI_GMP, DI_TOMMATH
+  # must be one of DI_UINT64, DI_GMP, DI_TOMMATH
   set (_use_math ${DI_USE_MATH})
 endif()
 if (NOT DEFINED _use_math)
@@ -514,7 +531,7 @@ if (NOT DEFINED _use_math)
   endif()
 endif()
 if (NOT DEFINED _use_math)
-  set (_use_math DI_NONE)
+  set (_use_math DI_UINT64)
 endif()
 message ("math-library: ${_use_math}")
 
@@ -526,7 +543,7 @@ add_library (${DI_LIBNAME}
   didiskutil.c
   digetentries.c
   digetinfo.c
-  dimain.c
+  dilib.c
   diquota.c
   display.c
   getoptn.c

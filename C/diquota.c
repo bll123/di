@@ -127,25 +127,25 @@ typedef union {
 # endif
 } qdata_t;
 
-static void di_process_quotas (const char *, diQuota_t *, int, int, qdata_t *);
+static void di_process_quotas (const char *, di_quota_t *, int, int, qdata_t *);
 #endif
 
 #if _has_std_quotas && _lib_vquotactl
 static void vq_updUsage (struct vqvalentry *, dinum_t);
 static void vq_updLimit (struct vqvalentry *, dinum_t);
 static int  vquotactl_send (char *, char *, prop_dictionary_t, prop_dictionary_t *);
-static int  vquotactl_get (diQuota_t *, struct vqval *);
+static int  vquotactl_get (di_quota_t *, struct vqval *);
 #endif
 #if _has_std_quotas && _lib_quota_open
 static int quota_open_get (struct quotahandle *, int, Uid_t, struct qval *);
 #endif
 #if _has_std_quotas && ! _lib_quota_open && ! _lib_vquotactl
-static int quotactl_get (diQuota_t *, int, Uid_t, qdata_t *);
+static int quotactl_get (di_quota_t *, int, Uid_t, qdata_t *);
 #endif
 #if _has_std_nfs_quotas && ! _lib_quota_open
 static bool_t xdr_quota_get (XDR *, struct getquota_args *);
 static bool_t xdr_quota_rslt (XDR *, struct getquota_rslt *);
-static void diquota_nfs (diQuota_t *);
+static void diquota_nfs (di_quota_t *);
 #endif
 
 extern int debug;
@@ -249,7 +249,7 @@ vquotactl_send (char *spec, char *cmd,
 }
 
 static int
-vquotactl_get (diQuota_t *diqinfo, struct vqval *vqval)
+vquotactl_get (di_quota_t *diqinfo, struct vqval *vqval)
 {
   prop_dictionary_t         args;
   prop_dictionary_t         res;
@@ -347,7 +347,7 @@ quota_open_get (struct quotahandle *qh, int idtype,
 
 #if _has_std_quotas && ! _lib_quota_open && ! _lib_vquotactl
 static int
-quotactl_get (diQuota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
+quotactl_get (di_quota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
 {
   int       rc;
 
@@ -400,7 +400,7 @@ quotactl_get (diQuota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
 #endif /* ! _lib_quota_open */
 
 void
-diquota (diQuota_t *diqinfo)
+diquota (di_quota_t *diqinfo)
 {
   int               rc;
   int               xfsflag;
@@ -576,7 +576,7 @@ xdr_quota_rslt (XDR *xp, struct getquota_rslt *rslt)
 }
 
 static void
-diquota_nfs (diQuota_t *diqinfo)
+diquota_nfs (di_quota_t *diqinfo)
 {
     CLIENT                  *rqclnt;
     enum clnt_stat          clnt_stat;
@@ -684,7 +684,7 @@ diquota_nfs (diQuota_t *diqinfo)
 
 #if _has_std_quotas
 static void
-di_process_quotas (const char *tag, diQuota_t *diqinfo,
+di_process_quotas (const char *tag, di_quota_t *diqinfo,
                   int rc, int xfsflag, qdata_t *qdata)
 {
   dinum_t        quot_block_sz;

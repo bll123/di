@@ -6,11 +6,11 @@
 /********************************************************/
 /*
 
-    In the cases where di_getDiskEntries() does not
-    get the volume information, di_getDiskInfo() is used
+    In the cases where di_get_disk_entries() does not
+    get the volume information, di_get_disk_info() is used
     to fetch the info.
 
-    di_getDiskInfo ()
+    di_get_disk_info ()
         Gets the disk space used/available on the
         partitions we want displayed.
 
@@ -103,7 +103,7 @@ extern int debug;
     && ! _lib_GetVolumeInformation
 
 /*
- * di_getDiskInfo
+ * di_get_disk_info
  *
  * SysV.4.  statvfs () returns both the free and available blocks.
  *
@@ -112,13 +112,13 @@ extern int debug;
 # define DI_GETDISKINFO_DEF 1
 
 void
-di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
+di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
 {
-    diDiskInfo_t     *diptr;
+    di_disk_info_t     *diptr;
     int             i;
     Statvfs_t       statBuf;
 
-    if (debug > 0) { printf ("# getDiskInfo: statvfs\n"); }
+    if (debug > 0) { printf ("# di_get_disk_info: statvfs\n"); }
     for (i = 0; i < *diCount; ++i)
     {
         diptr = *diskInfo + i;
@@ -143,9 +143,9 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
                 tblocksz = statBuf.f_bsize;
 #  endif /* linux */
 
-                di_saveBlockSizes (diptr, tblocksz, statBuf.f_blocks,
+                di_save_block_sizes (diptr, tblocksz, statBuf.f_blocks,
                     statBuf.f_bfree, statBuf.f_bavail);
-                di_saveInodeSizes (diptr, statBuf.f_files,
+                di_save_inode_sizes (diptr, statBuf.f_files,
                     statBuf.f_ffree, statBuf.f_favail);
 # if _mem_struct_statvfs_f_basetype
                 if (! *diptr->fsType) {
@@ -213,7 +213,7 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
 # endif
 
 /*
- * di_getDiskInfo
+ * di_get_disk_info
  *
  * SysV.3.  We don't have available blocks; just set it to free blocks.
  * The sysfs () call is used to get the disk type name.
@@ -223,13 +223,13 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
 # define DI_GETDISKINFO_DEF 1
 
 void
-di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
+di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
 {
-    diDiskInfo_t     *diptr;
+    di_disk_info_t     *diptr;
     int             i;
     struct statfs   statBuf;
 
-    if (debug > 0) { printf ("# getDiskInfo: sysv-statfs 4arg\n"); }
+    if (debug > 0) { printf ("# di_get_disk_info: sysv-statfs 4arg\n"); }
     for (i = 0; i < *diCount; ++i)
     {
         diptr = *diskInfo + i;
@@ -253,9 +253,9 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
 # else
                 tblocksz = UBSIZE;
 # endif
-                di_saveBlockSizes (diptr, tblocksz, statBuf.f_blocks,
+                di_save_block_sizes (diptr, tblocksz, statBuf.f_blocks,
                     statBuf.f_bfree, statBuf.f_bfree);
-                di_saveInodeSizes (diptr, statBuf.f_files,
+                di_save_inode_sizes (diptr, statBuf.f_files,
                     statBuf.f_ffree, statBuf.f_ffree);
 # if _lib_sysfs && _mem_struct_statfs_f_fstyp
                 sysfs (GETFSTYP, statBuf.f_fstyp, diptr->fsType);
@@ -299,7 +299,7 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
         && ! _lib_GetDiskFreeSpaceEx
 
 /*
- * di_getDiskInfo
+ * di_get_disk_info
  *
  * SunOS/BSD/Pyramid/Some Linux
  *
@@ -308,13 +308,13 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
 # define DI_GETDISKINFO_DEF 1
 
 void
-di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
+di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
 {
-    diDiskInfo_t     *diptr;
+    di_disk_info_t     *diptr;
     int             i;
     struct statfs   statBuf;
 
-    if (debug > 0) { printf ("# getDiskInfo: bsd-statfs 2/3arg\n"); }
+    if (debug > 0) { printf ("# di_get_disk_info: bsd-statfs 2/3arg\n"); }
     for (i = 0; i < *diCount; ++i)
     {
         diptr = *diskInfo + i;
@@ -324,9 +324,9 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
         {
             if (statfs (diptr->name, &statBuf) == 0)
             {
-                di_saveBlockSizes (diptr, statBuf.f_bsize, statBuf.f_blocks,
+                di_save_block_sizes (diptr, statBuf.f_bsize, statBuf.f_blocks,
                     statBuf.f_bfree, statBuf.f_bavail);
-                di_saveInodeSizes (diptr, statBuf.f_files,
+                di_save_inode_sizes (diptr, statBuf.f_files,
                     statBuf.f_ffree, statBuf.f_ffree);
 
 # if _lib_sysfs && _mem_struct_statfs_f_fstyp
@@ -362,7 +362,7 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
 #if _lib_GetVolumeInformation
 
 /*
- * di_getDiskInfo
+ * di_get_disk_info
  *
  * Windows
  *
@@ -373,9 +373,9 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
 # define MSDOS_BUFFER_SIZE          256
 
 void
-di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
+di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
 {
-    diDiskInfo_t         *diptr;
+    di_disk_info_t         *diptr;
     int                 i;
     int                 rc;
     char                volName [MSDOS_BUFFER_SIZE];
@@ -386,12 +386,12 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
 
 
 # if _lib_GetDiskFreeSpaceEx
-    if (debug > 0) { printf ("# getDiskInfo: GetDiskFreeSpaceEx\n"); }
+    if (debug > 0) { printf ("# di_get_disk_info: GetDiskFreeSpaceEx\n"); }
 # endif
 # if _lib_GetDiskFreeSpace
-    if (debug > 0) { printf ("# getDiskInfo: GetDiskFreeSpace\n"); }
+    if (debug > 0) { printf ("# di_get_disk_info: GetDiskFreeSpace\n"); }
 # endif
-    if (debug > 0) { printf ("# getDiskInfo: GetVolumeInformation\n"); }
+    if (debug > 0) { printf ("# di_get_disk_info: GetVolumeInformation\n"); }
     for (i = 0; i < *diCount; ++i)
     {
         diptr = *diskInfo + i;
@@ -417,9 +417,9 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
                         (PULARGE_INTEGER) &bytesFree);
                 if (rc > 0)
                 {
-                    di_saveBlockSizes (diptr, 1, bytesTotal,
+                    di_save_block_sizes (diptr, 1, bytesTotal,
                         bytesFree, bytesAvail);
-                    di_saveInodeSizes (diptr, 0, 0, 0);
+                    di_save_inode_sizes (diptr, 0, 0, 0);
                 }
                 else
                 {
@@ -454,10 +454,10 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
                         (LPDWORD) &totalclusters);
                 if (rc > 0)
                 {
-                    di_saveBlockSizes (diptr,
+                    di_save_block_sizes (diptr,
                         (sectorspercluster * bytespersector),
                         totalclusters, freeclusters, freeclusters);
-                    di_saveInodeSizes (diptr, 0, 0, 0);
+                    di_save_inode_sizes (diptr, 0, 0, 0);
                 }
                 else
                 {
@@ -488,9 +488,9 @@ di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
 
 #if ! defined (DI_GETDISKINFO_DEF)
 void
-di_getDiskInfo (diDiskInfo_t **diskInfo, int *diCount)
+di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
 {
-    if (debug > 0) { printf ("# getDiskInfo: empty\n"); }
+    if (debug > 0) { printf ("# di_get_disk_info: empty\n"); }
     return;
 }
 #endif

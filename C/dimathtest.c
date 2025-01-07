@@ -26,7 +26,7 @@ main (int argc, char *argv [])
 #elif _use_math == DI_TOMMATH
   fprintf (stdout, "TOMMATH:\n");
 #else
-  fprintf (stdout, "NONE:\n");
+  fprintf (stdout, "UINT64: %d %d %d\n", _typ_uint64_t, _siz_long, _siz_long_long);
 #endif
 
   dinum_init (&a);
@@ -171,8 +171,8 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_add_u (&a, UINT64_MAX);
-  dinum_add_u (&a, UINT64_MAX);
+  dinum_add_u (&a, 18446744073709551615ull);
+  dinum_add_u (&a, 18446744073709551615ull);
   dinum_str (&a, buff, sizeof (buff));
   fprintf (stdout, "buff: %s\n", buff);
 
