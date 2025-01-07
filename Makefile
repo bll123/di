@@ -1,17 +1,34 @@
 #
-#  di makefile - top level
+#  di makefile - C
 #
-#  Copyright 2001-2011 Brad Lanam Walnut Creek CA, USA
-#  Copyright 2023 Brad Lanam Pleasant Hill CA, USA
+#  Copyright 2001-2018 Brad Lanam Walnut Creek CA, USA
+#  Copyright 2023 Brad Lanam, Pleasant Hill, CA
 #
 
-SHELL = /bin/sh
-FROMDIR = C
+# cmake
+BUILDDIR = build
+# DI_USE_MATH = DI_GMP
+# DI_USE_MATH = DI_TOMMATH
+# DI_USE_MATH = DI_UINT64
 
-###
-# mkconfig variables
+# mkconfig
+MKC_PREFIX = di
+MKC_CONFDIR = mkc_config
+MKC_FILES = mkc_files
+MKC_OUTPUT = config.h
+MKC_ENV = $(MKC_PREFIX).env
+MKC_ENV_SHR = $(MKC_PREFIX)-shared.env
 
-MKCONFIGPATH = mkconfig
+MKC_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX).mkc
+MKC_ENV_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX)-env.mkc
+MKC_ENV_SHR_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX)-env-shared.mkc
+MKC_CONF_GETOPTN = $(MKC_CONFDIR)/$(MKC_PREFIX)-getoptn.mkc
+
+# for tests.done
+DC = gdc
+
+OBJ_EXT = .o
+EXE_EXT =
 
 ###
 # common programs
@@ -29,221 +46,466 @@ RPMBUILD = rpmbuild
 SED = sed
 TEST = test
 
-MKC_DIR = ./mkconfig
-
 ###
 # installation options
 #
 prefix = /usr/local
 PREFIX = $(prefix)
-PROG = di
-MPROG = mi
-#
 BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share
 MANDIR = $(DATADIR)/man
 LOCALEDIR = $(DATADIR)/locale
-INST_DIR = $(DESTDIR)$(PREFIX)
-INST_BINDIR = $(DESTDIR)$(BINDIR)
-INST_DATADIR = $(DESTDIR)$(DATADIR)
-INST_MANDIR = $(DESTDIR)$(MANDIR)
-INST_LOCALEDIR = $(DESTDIR)$(LOCALEDIR)
-DITARGET = $(INST_BINDIR)/$(PROG)$(EXE_EXT)
-MTARGET = $(INST_BINDIR)/$(MPROG)$(EXE_EXT)
-
-# if you need permissions other than the default,
-# edit these, and do a "make installperm".
-USER = root
-GROUP = bin
-INSTPERM = 4111   # install suid if your system has a mount table only root
-#                   can read.  For SysV.4 and Solaris, the mount command may
-#                   reset the permissions of /etc/mnttab.
-
-#
-# simple man page installation
-#
-DI_MANDIR = $(INST_MANDIR)/man1
-MAN_TARGET = $(PROG).1
-MANPERM = 644
 
 ###
-# all
+# additional flags/libraries
+#
+DI_SHARED =
+DI_CFLAGS = -DDI_LOCALE_DIR=\\\"$(LOCALEDIR)\\\"
+
+###
+# mkconfig variables
+
+MKC_DIR = ../mkconfig
+MKCONFIG_TYPE = sh
+MKC_REQLIB = di.reqlibs
+MKC_ECHO =
+#MKC_ECHO = -e
+
+###
+# cmake
 
 .PHONY: all
-all:
-	$(MAKE) checkbuild
-	cd C >/dev/null && $(MAKE) CC=$(CC) -e all
+all: cmake
 
-.PHONY: all-c
-all-c:
-	$(MAKE) checkbuild
-	cd C >/dev/null && $(MAKE) CC=$(CC) -e all
+# parallel doesn't seem to work under msys2
+# cmake doesn't seem to support parallel under *BSD
+.PHONY: cmake
+cmake:
+	@case $$(uname -s) in \
+	  CYGWIN*) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-windows; \
+	    $(MAKE) build; \
+            ;; \
+	  MINGW*) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-windows; \
+	    $(MAKE) build; \
+            ;; \
+	  BSD*) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-unix; \
+	    $(MAKE) build; \
+            ;; \
+	  *) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-unix; \
+	    pmode=--parallel $(MAKE) build; \
+            ;; \
+	esac
+
+.PHONY: cmakeclang
+cmakeclang:
+	case $$(uname -s) in \
+	  BSD*) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-unix; \
+	    $(MAKE) build; \
+            ;; \
+	  MINGW*) \
+	    COMP=/ucrt64/bin/clang.exe \
+	    $(MAKE) cmake-windows; \
+	    $(MAKE) build; \
+            ;; \
+	  *) \
+	    $(MAKE) cmake-unix; \
+	    pmode=--parallel $(MAKE) build; \
+            ;; \
+	esac
+
+# internal use
+.PHONY: cmake-unix
+cmake-unix:
+	@if [ "$(PREFIX)" = "" ]; then echo "No prefix set"; exit 1; fi
+	cmake \
+		-DCMAKE_C_COMPILER=$(COMP) \
+		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
+		-DDI_LOCALE_DIR:STATIC=$(LOCALEDIR) \
+		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
+		-S . -B $(BUILDDIR) -Werror=deprecated
+
+# internal use
+.PHONY: cmake-windows
+cmake-windows:
+	@if [ "$(PREFIX)" = "" ]; then echo "No prefix set"; exit 1; fi
+	cmake \
+		-DCMAKE_C_COMPILER=$(COMP) \
+		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
+		-DDI_LOCALE_DIR:STATIC=$(LOCALEDIR) \
+		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
+		-G "MSYS Makefiles" \
+		-S . -B $(BUILDDIR) -Werror=deprecated
+
+# cmake on windows installs extra unneeded crap
+# --parallel does not work correctly on msys2
+# --parallel also seems to not work on *BSD
+.PHONY: build
+build:
+	cmake --build $(BUILDDIR) $(pmode)
+
+.PHONY: install
+install:
+	cmake --install $(BUILDDIR)
+
+###
+# main
+
+# have to get various environment variables set up.
+
+.PHONY: all
+all:	all-sh
+
+.PHONY: all-sh
+all-sh:	$(MKC_ENV)
+	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=sh di-programs
 
 .PHONY: all-perl
-all-perl:
-	$(MAKE) checkperlbuild
-	cd C >/dev/null && $(MAKE) CC=$(CC) -e all-perl
+all-perl:	$(MKC_ENV)
+	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=perl di-programs
 
+# perl interface
+.PHONY: perl-sh
+perl-sh:	$(MKC_ENV_SHR)
+	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=sh perl-programs
+
+.PHONY: perl-perl
+perl-perl:	$(MKC_ENV_SHR)
+	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=perl perl-programs
+
+.PHONY: test
+test:		tests.done
+
+###
+# environment
+
+$(MKC_ENV):	$(MKC_ENV_CONF) ../dioptions.dat
+	@-$(RM) -f $(MKC_ENV) tests.done
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
+
+$(MKC_ENV_SHR):	$(MKC_ENV_SHR_CONF)
+	@-$(RM) -f $(MKC_ENV_SHR) tests.done
+	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh \
+		$(MKC_ENV_SHR_CONF)
+
+###
+# specific builds
+
+# This was tested using vc
+# Use:
+#     nmake MAKE=nmake windows
+#
+.PHONY: windows
+windows:
+	@$(MAKE) ../dioptions.dat
+	copy /y NUL: $(MKC_ENV)
+	-del config.h
+	copy /y /b NUL:+configs\config.ms.cl config.h
+	copy /y NUL: $(MKC_REQLIB)
+	$(MAKE) \
+		MAKE=nmake CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
+		DI_CFLAGS="$(DI_CFLAGS) -nologo -O2" \
+		LDFLAGS="-nologo -O2" di-programs
+
+# This was tested using cygwin
 .PHONY: windows-gcc
 windows-gcc:
-	cd C >/dev/null && $(MAKE) -e windows-gcc
-
-.PHONY: windows-clang
-windows-clang:
-	cd C >/dev/null && $(MAKE) -e windows-clang
+	@$(MAKE) ../dioptions.dat
+	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
+	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
+	$(CP) -f configs/config.cygwin.gcc config.h
+	@echo '-lintl' > $(MKC_REQLIB)
+	$(MAKE) \
+		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
+		LDFLAGS="-g -O2" di-programs
 
 .PHONY: windows-msys
 windows-msys:
-	cd C >/dev/null && $(MAKE) -e windows-msys
+	MAKE=mingw32-make
+	cp ../features/dioptions.dat ../dioptions.dat
+	> $(MKC_ENV)
+	-rm config.h
+	cp configs/config.mingw config.h
+	> $(MKC_REQLIB)
+	$(MAKE) \
+		MAKE=$(MAKE) \
+		CC=gcc \
+		EXE_EXT=".exe" OBJ_EXT=".o" \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
+		LDFLAGS="-g -O2" di-programs
 
 .PHONY: windows-mingw
 windows-mingw:
-	cd C >/dev/null && $(MAKE) -e windows-mingw
+	MAKE=mingw32-make
+	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
+	copy /y NUL: $(MKC_ENV)
+	-del config.h
+	copy /y /b NUL:+configs\config.mingw config.h
+	copy /y NUL: $(MKC_REQLIB)
+	$(MAKE) \
+		MAKE=$(MAKE) \
+		CC=gcc LD=gcc \
+		EXE_EXT=".exe" OBJ_EXT=".o" \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
+		LDFLAGS="-g -O2" mingw-di.exe
 
-.PHONY: test
-test:
-	$(MAKE) checkbuild
-	$(MAKE) checkinstall
-	cd C >/dev/null && $(MAKE) -e test
-	$(MAKE) -e tests.done
-
-tests.done: $(MKC_DIR)/runtests.sh
-	@echo "## running tests"
-	CC=$(CC) DC="skip" $(_MKCONFIG_SHELL) \
-		$(MKC_DIR)/runtests.sh ./tests.d
-	touch tests.done
-
+.PHONY: os2-gcc
+os2-gcc:
+	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
+	$(MAKE) MKCONFIG_TYPE=perl \
+		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
+		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
+		LDFLAGS="-g -O2 -Zexe" di.exe
 
 ###
+# cleaning
+
+# leaves:
+#   config.h di.reqlibs
+#   ../dioptions.dat, tests.done, test_di, $(MKC_ENV), $(MKC_ENV_SHR)
+.PHONY: clean
+clean:
+	@-cd Perl; \
+		if [ -f Makefile ]; then \
+		$(MAKE) clean; \
+		fi
+	@-$(RM) -f w ww di mi \
+		di.exe mingw-di.exe mi.exe \
+		diskspace.so diskspace.dylib diskspace.dll \
+		perlfilesysdi.bld libdiperl.a \
+		*.o *.obj $(MKC_FILES)/mkconfig.log \
+		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
+		$(MKC_FILES)/mkconfig.cache mkc*.vars \
+		getoptn_test* gconfig.h getoptn.reqlibs \
+		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
+		Perl/Filesys-di-*.tar.gz \
+		Perl/Makefile.old \
+		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
+	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
+
+# leaves:
+#   _mkconfig_runtests, mkc_files, ../dioptions.dat
+#   tests.done, test_di
+.PHONY: realclean
+realclean:
+	@$(MAKE) clean >/dev/null 2>&1
+	@-$(RM) -rf config.h gconfig.h \
+		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) \
+		>/dev/null 2>&1; exit 0
+
+# leaves:
+#   ../dioptions.dat
+.PHONY: distclean
+distclean:
+	@-cd Perl; \
+		if [ -f Makefile ]; then \
+		$(MAKE) distclean; \
+		fi
+	@$(MAKE) realclean >/dev/null 2>&1
+	@-$(RM) -rf tests.done test_di \
+		_mkconfig_runtests \
+		$(MKC_FILES) \
+		*~ *.orig */*.orig \
+		build \
+		>/dev/null 2>&1; exit 0
 
 ###
 # installation
 
 .PHONY: install
 install:
-	$(MAKE) all-c
-	$(MAKE) checkinstall
-	. ./C/di.env; $(MAKE) -e FROMDIR=$(FROMDIR) install-prog install-man
-
-.PHONY: build.po
-build-po:
-	-. ./C/di.env; \
-		(cd po >/dev/null && for i in *.po; do \
-		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
-		$${XMSGFMT} -o $$j.mo $$i; \
-	done)
-
-.PHONY: install-po
-install-po: 	build-po
-	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
-	-(cd po >/dev/null && for i in *.po; do \
-		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
-		$(TEST) -d $(INST_LOCALEDIR)/$$j || \
-			$(MKDIR) $(INST_LOCALEDIR)/$$j; \
-		$(TEST) -d $(INST_LOCALEDIR)/$$j/LC_MESSAGES || \
-			$(MKDIR) $(INST_LOCALEDIR)/$$j/LC_MESSAGES; \
-		$(CP) -f $$j.mo $(INST_LOCALEDIR)/$$j/LC_MESSAGES/di.mo; \
-		$(RM) -f $$j.mo; \
-		done)
-
-.PHONY: install-prog
-install-prog:
-	$(TEST) -d $(INST_DIR) || $(MKDIR) -p $(INST_DIR)
-	$(TEST) -d $(INST_BINDIR) || $(MKDIR) $(INST_BINDIR)
-	$(CP) -f ./$(FROMDIR)/$(PROG)$(EXE_EXT) $(DITARGET)
-	-$(RM) -f $(MTARGET) > /dev/null 2>&1
-	-$(LN) -s $(DITARGET) $(MTARGET)
-	@-test -f $(FROMDIR)/config.h && \
-		grep '^#define _enable_nls 1' $(FROMDIR)/config.h >/dev/null 2>&1 && \
-		(. ./$(FROMDIR)/di.env; $(MAKE) -e LOCALEDIR="$(LOCALEDIR)" \
-		install-po)
-
-.PHONY: install-man
-install-man:
-	-$(TEST) -d $(INST_MANDIR) || $(MKDIR) -p $(INST_MANDIR)
-	-$(TEST) -d $(DI_MANDIR) || $(MKDIR) -p $(DI_MANDIR)
-	$(CP) -f di.1 $(DI_MANDIR)/$(MAN_TARGET)
-	$(CHMOD) $(MANPERM) $(DI_MANDIR)/$(MAN_TARGET)
-
-.PHONY: installperms
-installperms:
-	$(CHOWN) $(USER) $(DITARGET)
-	$(CHGRP) $(GROUP) $(DITARGET)
-	$(CHMOD) $(INSTPERM) $(DITARGET)
+	$(MAKE) all
+	. ./$(MKC_ENV);cd ..;$(MAKE) -e PREFIX=$(PREFIX) \
+		LOCALEDIR=$(LOCALEDIR) FROMDIR=C install
 
 ###
-# packaging
+# programs
 
-.PHONY: tar
-tar:
-	@-rm -f di-[0-9].[0-9][0-9][a-z].tar.gz > /dev/null 2>&1
-	./mktar.sh
-
-###
-# cleaning
-
-# Leaves:
-#  _tmp_mkconfig/, _mkconfig_runtests/
-.PHONY: clean
-clean:
-	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
-		checkbuild checkperlbuild checkinstall \
-		tests.done \
-		tests.d/test_order.tmp > /dev/null 2>&1; exit 0
-	@-find . -name '*~' -print | xargs rm >/dev/null 2>&1; exit 0
-	@-(cd C >/dev/null && $(MAKE) clean > /dev/null 2>&1); exit 0
-
-# Leaves:
-#  _tmp_mkconfig/, _mkconfig_runtests/
-.PHONY: realclean
-realclean:
-	@-$(MAKE) clean > /dev/null 2>&1
-	@-(cd C >/dev/null && $(MAKE) realclean > /dev/null 2>&1); exit 0
-
-# leaves:
-#   dioptions.dat
-.PHONY: distclean
-distclean:
-	@-$(MAKE) realclean > /dev/null 2>&1
-	@-rm -rf mkconfig.cache mkc*.vars mkconfig.log \
-		mkc_files _mkconfig_runtests \
-		checkbuild checkperlbuild checkinstall \
-		tests.done _tmp_mkconfig *~ */*~ \
-		*/*/*~ *.orig > /dev/null 2>&1; exit 0
-	@-(cd C >/dev/null && $(MAKE) distclean > /dev/null 2>&1); exit 0
-
+.PHONY: di-programs
+di-programs:	di$(EXE_EXT)
+.PHONY: perl-programs
+perl-programs:	perlfilesysdi.bld
 
 ###
-# dioptions.dat
+# configuration file
 
-dioptions.dat:	features/dioptions.dat
-	@$(CP) features/dioptions.dat dioptions.dat
-	@$(CHMOD) u+w dioptions.dat
-	@touch dioptions.dat # to get mod date current
+../dioptions.dat:	../features/dioptions.dat
+	cd ../;$(MAKE) dioptions.dat
+
+config.h:	$(MKC_ENV) ../dioptions.dat $(MKC_CONF)
+	@-$(RM) -f config.h tests.done
+	@if [ "$(DI_NO_NLS)" != "" ]; then \
+		echo "*** User requested no NLS"; \
+		$(MKC_DIR)/mkc.sh -setopt -o ../dioptions.dat NLS F; fi
+	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
+		. ./$(MKC_ENV);$(_MKCONFIG_SHELL) \
+		$(MKC_DIR)/mkconfig.sh \
+		$(MKC_CONF); fi
+	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
+		. ./$(MKC_ENV);perl \
+		$(MKC_DIR)/mkconfig.pl \
+		$(MKC_CONF); fi
+
+$(MKC_REQLIB):	config.h
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
+		-o $(MKC_REQLIB) config.h
 
 ###
-# pre-checks
+# executables
 
-checkbuild:	features/checkbuild.dat
-	$(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkconfig.sh features/checkbuild.dat
-	touch checkbuild
+LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
+		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
+		diquota$(OBJ_EXT)  display$(OBJ_EXT) getoptn$(OBJ_EXT) \
+		options$(OBJ_EXT) realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
+		strstr$(OBJ_EXT) trimchar$(OBJ_EXT)
 
-checkperlbuild:	features/checkperlbuild.dat
-	$(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkconfig.sh features/checkperlbuild.dat
-	touch checkperlbuild
+MAINOBJECTS = di$(OBJ_EXT)
 
-checkinstall:	features/checkinstall.dat
-	$(_MKCONFIG_SHELL) \
-		$(MKCONFIGPATH)/mkconfig.sh features/checkinstall.dat
-	touch checkinstall
+di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
+		-link -exec $(MKC_ECHO) \
+		-r $(MKC_REQLIB) -o di$(EXE_EXT) \
+		$(MAINOBJECTS) $(LIBOBJECTS)
 
+# for ms cl
+#di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
+#	$(LD) -Fedi$(EXE_EXT) $(MAINOBJECTS) $(LIBOBJECTS)
 
-.PHONY: envcheck
-envcheck:
-	echo "prefix $(prefix)"
-	echo "PREFIX $(PREFIX)"
-	echo "BINDIR $(BINDIR)"
-	echo "DATADIR $(DATADIR)"
-	echo "LOCALEDIR $(LOCALEDIR)"
+perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
+	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -staticlib $(MKC_ECHO) \
+		-o libdiperl.a $(LIBOBJECTS) $(LIBS) \
+		`$(CAT) $(MKC_REQLIB)`
+	# Don't know how to pass additional libs to Makefile.PL
+	# so pass all the information.
+	( \
+	cd Perl ; \
+	perl Makefile.PL LIBS="-L.. -ldiperl `$(CAT) ../$(MKC_REQLIB)`" ; \
+	$(MAKE) ; \
+	$(MAKE) test ; \
+	)
+	@touch perlfilesysdi.bld
+
+mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
+	$(CC) -o mingw-di$(EXE_EXT) \
+		$(DI_CFLAGS) $(LDFLAGS) $(LIBOBJECTS) $(LIBS)
+
+###
+# objects
+
+.c$(OBJ_EXT):
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile $(MKC_ECHO) \
+		$(DI_SHARED) $(DI_CFLAGS) $<
+
+# for ms cl
+#.c$(OBJ_EXT):
+#	$(CC) -c $(DI_SHARED) $(DI_CFLAGS) $<
+
+di$(OBJ_EXT):		di.c config.h di.h dilib.h getoptn.h \
+				options.h version.h
+
+dilib$(OBJ_EXT):	dilib.c config.h di.h dimain.h getoptn.h \
+				options.h
+
+digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
+
+didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimntopt.h
+
+digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
+
+diquota$(OBJ_EXT):	diquota.c config.h di.h
+
+display$(OBJ_EXT):	display.c config.h di.h display.h options.h version.h
+
+getoptn$(OBJ_EXT):	getoptn.c config.h getoptn.h
+
+options$(OBJ_EXT):	options.c config.h di.h options.h
+
+realloc$(OBJ_EXT):	realloc.c config.h di.h
+
+strdup$(OBJ_EXT):	strdup.c config.h di.h
+
+strstr$(OBJ_EXT):	strstr.c config.h di.h
+
+trimchar$(OBJ_EXT):	trimchar.c config.h di.h
+
+###
+# regression testing
+
+.PHONY: all-test
+all-test:	tests.done
+
+tests.done: $(MKC_DIR)/runtests.sh
+	@echo "## running tests"
+	CC=$(CC) DC=$(DC) $(_MKCONFIG_SHELL) \
+		$(MKC_DIR)/runtests.sh ./tests.d
+	touch tests.done
+
+# needs environment
+.PHONY: testrpmbuild
+testrpmbuild:
+	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
+	$(MKDIR) -p ./rpmbuild/SOURCES
+	$(MKDIR) -p ./rpmbuild/BUILD
+	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
+	$(LN) -f ./rpmbuild/SOURCES/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES/download
+	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba ../di.spec
+	$(TEST) -f ./rpmbuild/RPMS/$(MARCH)/di-$(DI_VERSION)-1.$(MARCH).rpm || exit 1
+	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
+	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
+
+# needs environment
+.PHONY: rtest-env
+rtest-env:
+	@echo "$(_MKCONFIG_SYSTYPE)"
+	@echo "$(_MKCONFIG_SYSREV)"
+	@echo "$(_MKCONFIG_SYSARCH)"
+	@echo "$(CC)"
+	@echo "$(_MKCONFIG_USING_GCC)"
+	@echo "$(CFLAGS_OPTIMIZE)"
+	@echo "$(CFLAGS_COMPILER)"
+	@echo "$(LDFLAGS_COMPILER)"
+	@echo "$(OBJ_EXT)"
+	@echo "$(EXE_EXT)"
+	@echo "$(XMSGFMT)"
+
+.PHONY: test-env
+test-env:
+	@echo "cc: $(CC)"
+	@echo "make: $(MAKE)"
+
+gconfig.h:	$(MKC_ENV) mkc_config/di-getoptn.mkc
+	@-$(RM) -f gconfig.h
+	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
+		. ./$(MKC_ENV); \
+		$(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh \
+		$(MKC_CONF_GETOPTN); fi
+	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
+		. ./$(MKC_ENV); \
+		perl $(MKC_DIR)/mkconfig.pl \
+		$(MKC_CONF_GETOPTN); fi
+
+getoptn_test$(OBJ_EXT):	getoptn.c gconfig.h getoptn.h
+	@. ./$(MKC_ENV);$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile \
+		-DTEST_GETOPTN=1 \
+		-o getoptn_test$(OBJ_EXT) getoptn.c
+
+getoptn.reqlibs:	$(MKC_ENV) gconfig.h
+	@. ./$(MKC_ENV);$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
+		-o getoptn.reqlibs gconfig.h
+
+getoptn_test.exe:	getoptn_test$(OBJ_EXT) getoptn.reqlibs
+	@. ./$(MKC_ENV);$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec \
+		$(MKC_ECHO) -r getoptn.reqlibs \
+		-o getoptn_test.exe $(LDFLAGS) \
+		getoptn_test$(OBJ_EXT)

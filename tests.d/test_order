@@ -1,7 +1,5 @@
-1 buildsh
-2 diexec
-3 diarg
-3 disort
-3 ditot
-4 diinst
-5 dinls
+1 env
+2 getoptn
+3 buildpl
+4 compshpl
+5 rpmbuild
