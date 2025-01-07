@@ -1,9 +1,9 @@
+/*
+ * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
+ */
+
 #ifndef DI_INC_OPTIONS_H
 #define DI_INC_OPTIONS_H
-
-/*
- * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
- */
 
 #include "config.h"
 #include "di.h"

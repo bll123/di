@@ -1,10 +1,10 @@
-#ifndef DI_INC_DILIB_H
-#define DI_INC_DILIB_H
-
 /*
  * Copyright 2016-2018 Brad Lanam Walnut Creek CA USA
- * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
+ * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
  */
+
+#ifndef DI_INC_DILIB_H
+#define DI_INC_DILIB_H
 
 #include "config.h"
 #include "di.h"

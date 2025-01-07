@@ -545,7 +545,6 @@ add_library (${DI_LIBNAME}
   digetinfo.c
   dilib.c
   diquota.c
-  display.c
   getoptn.c
   options.c
   realloc.c
@@ -568,6 +567,7 @@ set_target_properties (${DI_LIBNAME} PROPERTIES
 
 add_executable (di
   di.c
+  display.c
 )
 target_link_libraries (di PRIVATE
   ${DI_LIBNAME}

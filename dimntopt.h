@@ -1,10 +1,10 @@
-#ifndef DI_INC_DIMNTOPT_H_
-#define DI_INC_DIMNTOPT_H_
-
 /*
  * Copyright 2011-2018 Brad Lanam, Walnut Creek, CA
- * Copyright 2023-2024 Brad Lanam, Pleasant Hill, CA
+ * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
  */
+
+#ifndef DI_INC_DIMNTOPT_H_
+#define DI_INC_DIMNTOPT_H_
 
 #include "config.h"
 

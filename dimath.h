@@ -1,4 +1,4 @@
-/* Copyright 2024 Brad Lanam Pleasant Hill CA */
+/* Copyright 2025 Brad Lanam Pleasant Hill CA */
 
 #ifndef DI_INC_DIMATH_H
 #define DI_INC_DIMATH_H
