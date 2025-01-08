@@ -31,6 +31,7 @@
 #endif
 
 #include "di.h"
+#include "strutils.h"
 #include "dimath.h"
 #include "dimntopt.h"
 

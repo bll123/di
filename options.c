@@ -36,6 +36,7 @@
 #endif
 
 #include "di.h"
+#include "strutils.h"
 #include "getoptn.h"
 #include "options.h"
 #include "version.h"
@@ -139,7 +140,7 @@ processStringArgs (const char *progname, char *ptr, di_data_t *di_data,
 }
 
 int
-getDIOptions (int argc, char * argv [], di_data_t *di_data)
+di_get_options (int argc, char * argv [], di_data_t *di_data)
 {
   const char *      argvptr;
   char *            ptr;

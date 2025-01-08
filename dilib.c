@@ -172,7 +172,7 @@ di_process_options (di_data_t *di_data, int argc, char * argv [])
   /* first argument is defaults */
   di_data->options.argc = argc;
   di_data->options.argv = argv;
-  di_data->options.optidx = getDIOptions (argc, argv, di_data);
+  di_data->options.optidx = di_get_options (argc, argv, di_data);
   if (di_data->options.exitFlag != DI_EXIT_NORM) {
     return;
   }

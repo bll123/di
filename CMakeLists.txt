@@ -567,10 +567,7 @@ add_library (${DI_LIBNAME}
   diquota.c
   getoptn.c
   options.c
-  realloc.c
-  strdup.c
-  strstr.c
-  trimchar.c
+  strutils.c
 )
 addIntlLibrary (${DI_LIBNAME})
 

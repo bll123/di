@@ -41,6 +41,7 @@
 # include <sys/types.h>
 #endif
 
+#include "strutils.h"
 #include "getoptn.h"
 
 typedef struct {

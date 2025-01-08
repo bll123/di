@@ -129,6 +129,7 @@
 #endif
 
 #include "di.h"
+#include "strutils.h"
 #include "dimntopt.h"
 
 /********************************************************/
@@ -713,7 +714,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
             convertNFSMountOptions (na->flags, na->wsize, na->rsize, diptr);
         }
 # endif
-        trimChar (diptr->options, ',');
+        di_trimchar (diptr->options, ',');
 
         strncpy (diptr->special, sp->f_mntfromname, (Size_t) DI_SPEC_NAME_LEN);
         strncpy (diptr->name, sp->f_mntonname, (Size_t) DI_NAME_LEN);
@@ -999,7 +1000,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         }
 # endif
         convertMountOptions ((unsigned long) mntbufp [idx].f_flags, diptr);
-        trimChar (diptr->options, ',');
+        di_trimchar (diptr->options, ',');
 
         if (debug > 1)
         {
@@ -1096,7 +1097,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         }
 # endif
         convertMountOptions ((unsigned long) sp->f_flag, diptr);
-        trimChar (diptr->options, ',');
+        di_trimchar (diptr->options, ',');
 
         if (sp->f_frsize == 0 && sp->f_bsize != 0)
         {
@@ -1249,7 +1250,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
             diptr->isReadOnly = false;
         }
         convertMountOptions ((unsigned long) fsdbuf [idx].fd_req.flags, diptr);
-        trimChar (diptr->options, ',');
+        di_trimchar (diptr->options, ',');
 
         if (debug > 1)
         {
@@ -1416,7 +1417,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
         strncpy (diptr->options, (char *) vmt2dataptr (vmtp, VMT_ARGS),
                  DI_OPT_LEN);
-        trimChar (diptr->options, ',');
+        di_trimchar (diptr->options, ',');
         bufp += vmtp->vmt_length;
 
         if (debug > 1)
@@ -1605,7 +1606,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         }
 # endif
         convertMountOptions ((unsigned long) fsinfo.flags, diptr);
-        trimChar (diptr->options, ',');
+        di_trimchar (diptr->options, ',');
 
         if (debug > 1)
         {

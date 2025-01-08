@@ -283,22 +283,6 @@ extern void di_get_disk_info          (di_disk_info_t **, int *);
 /* diquota.c */
 extern void diquota                 (di_quota_t *);
 
-/* strdup.c */
-# if ! _lib_strdup
-extern char *strdup                 (const char *);
-# endif
-
-/* strstr.c */
-# if ! _lib_strstr
-extern char *strstr           (const char *, const char *);
-# endif
-
-/* trimchar.c */
-extern void trimChar                (char *, int);
-
-/* realloc.c */
-extern void * di_realloc            (void *, Size_t);
-
 /* didiskutil.c */
 extern void di_init_disk_info (di_disk_info_t *);
 extern void di_save_block_sizes (di_disk_info_t *, uint64_t, uint64_t, uint64_t, uint64_t);

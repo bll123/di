@@ -36,6 +36,7 @@
 #endif
 
 #include "di.h"
+#include "strutils.h"
 #include "display.h"
 #include "options.h"
 #include "version.h"

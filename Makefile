@@ -85,22 +85,22 @@ cmake:
 	  CYGWIN*) \
 	    COMP=$(CC) \
 	    $(MAKE) cmake-windows; \
-	    $(MAKE) build; \
+	    $(MAKE) cmake-build; \
             ;; \
 	  MINGW*) \
 	    COMP=$(CC) \
 	    $(MAKE) cmake-windows; \
-	    $(MAKE) build; \
+	    $(MAKE) cmake-build; \
             ;; \
 	  BSD*) \
 	    COMP=$(CC) \
 	    $(MAKE) cmake-unix; \
-	    $(MAKE) build; \
+	    $(MAKE) cmake-build; \
             ;; \
 	  *) \
 	    COMP=$(CC) \
 	    $(MAKE) cmake-unix; \
-	    pmode=--parallel $(MAKE) build; \
+	    pmode=--parallel $(MAKE) cmake-build; \
             ;; \
 	esac
 
@@ -110,16 +110,16 @@ cmakeclang:
 	  BSD*) \
 	    COMP=$(CC) \
 	    $(MAKE) cmake-unix; \
-	    $(MAKE) build; \
+	    $(MAKE) cmake-build; \
             ;; \
 	  MINGW*) \
 	    COMP=/ucrt64/bin/clang.exe \
 	    $(MAKE) cmake-windows; \
-	    $(MAKE) build; \
+	    $(MAKE) cmake-build; \
             ;; \
 	  *) \
 	    $(MAKE) cmake-unix; \
-	    pmode=--parallel $(MAKE) build; \
+	    pmode=--parallel $(MAKE) cmake-build; \
             ;; \
 	esac
 
@@ -149,12 +149,12 @@ cmake-windows:
 # cmake on windows installs extra unneeded crap
 # --parallel does not work correctly on msys2
 # --parallel also seems to not work on *BSD
-.PHONY: build
-build-cmake:
+.PHONY: cmake-build
+cmake-build:
 	cmake --build $(BUILDDIR) $(pmode)
 
-.PHONY: install
-install-cmake:
+.PHONY: cmake-install
+cmake-install:
 	cmake --install $(BUILDDIR)
 
 ###
@@ -266,10 +266,6 @@ os2-gcc:
 #   dioptions.dat, tests.done, test_di, $(MKC_ENV), $(MKC_ENV_SHR)
 .PHONY: clean
 clean:
-	@-cd Perl; \
-		if [ -f Makefile ]; then \
-		$(MAKE) clean; \
-		fi
 	@-$(RM) -f w ww di mi libdi.* \
 		di.exe mingw-di.exe mi.exe \
 		diskspace.so diskspace.dylib diskspace.dll \
@@ -279,8 +275,6 @@ clean:
 		$(MKC_FILES)/mkconfig.cache mkc*.vars \
 		getoptn_test* gconfig.h getoptn.reqlibs \
 		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
-		Perl/Filesys-di-*.tar.gz \
-		Perl/Makefile.old \
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
 	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 
@@ -298,10 +292,6 @@ realclean:
 #   dioptions.dat
 .PHONY: distclean
 distclean:
-	@-cd Perl; \
-		if [ -f Makefile ]; then \
-		$(MAKE) distclean; \
-		fi
 	@$(MAKE) realclean >/dev/null 2>&1
 	@-$(RM) -rf tests.done test_di \
 		_mkconfig_runtests \

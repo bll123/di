@@ -1,5 +1,9 @@
 CHANGES
 
+    5.0.0                                   2025-xx-xx
+        Complete re-work.
+        Split into a library with a proper API and main program.
+
     4.54.0.1                                2024-10-15
         Fix single quotes in the manual page.
         Missing 4.54 entry in change log.

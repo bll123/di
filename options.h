@@ -21,7 +21,7 @@ extern "C" {
 #define DI_DISP_HR        -20.0
 #define DI_DISP_HR_2      -21.0
 
-extern int getDIOptions (int , char * argv [], di_data_t *);
+extern int di_get_options (int , char * argv [], di_data_t *);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }
