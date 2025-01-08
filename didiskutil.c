@@ -61,29 +61,34 @@
 void
 di_init_disk_info (di_disk_info_t *diptr)
 {
-    memset ((char *) diptr, '\0', sizeof (di_disk_info_t));
-    diptr->printFlag = DI_PRNT_OK;
-    diptr->isLocal = true;
-    diptr->isReadOnly = false;
-    diptr->isLoopback = false;
+  int     i;
+
+  memset ((char *) diptr, '\0', sizeof (di_disk_info_t));
+  for (i = 0; i < DI_VALUE_MAX; ++i) {
+    dinum_init (&diptr->values [i]);
+  }
+  diptr->printFlag = DI_PRNT_OK;
+  diptr->isLocal = true;
+  diptr->isReadOnly = false;
+  diptr->isLoopback = false;
 }
 
 void
 di_save_block_sizes (di_disk_info_t *diptr, uint64_t block_size,
     uint64_t total_blocks, uint64_t free_blocks, uint64_t avail_blocks)
 {
-  dinum_mul_uu (&diptr->total_space, total_blocks, block_size);
-  dinum_mul_uu (&diptr->free_space, free_blocks, block_size);
-  dinum_mul_uu (&diptr->avail_space, avail_blocks, block_size);
+  dinum_mul_uu (&diptr->values [DI_SPACE_TOTAL], total_blocks, block_size);
+  dinum_mul_uu (&diptr->values [DI_SPACE_FREE], free_blocks, block_size);
+  dinum_mul_uu (&diptr->values [DI_SPACE_AVAIL], avail_blocks, block_size);
 }
 
 void
 di_save_inode_sizes (di_disk_info_t *diptr, uint64_t total_nodes,
     uint64_t free_nodes, uint64_t avail_nodes)
 {
-  dinum_set_u (&diptr->total_inodes, total_nodes);
-  dinum_set_u (&diptr->free_inodes, free_nodes);
-  dinum_set_u (&diptr->avail_inodes, avail_nodes);
+  dinum_set_u (&diptr->values [DI_INODE_TOTAL], total_nodes);
+  dinum_set_u (&diptr->values [DI_INODE_FREE], free_nodes);
+  dinum_set_u (&diptr->values [DI_INODE_AVAIL], avail_nodes);
 }
 
 void

@@ -136,15 +136,34 @@ typedef unsigned long __ulong;
 #define DI_MAIN_SORT_IDX    0
 #define DI_TOT_SORT_IDX     1
 
-typedef struct
-{
-  unsigned int  sortIndex [2];
+#define DI_SPACE_TOTAL      0
+#define DI_SPACE_FREE       1
+#define DI_SPACE_AVAIL      2
+#define DI_INODE_TOTAL      3
+#define DI_INODE_FREE       4
+#define DI_INODE_AVAIL      5
+#define DI_VALUE_MAX        6
+
+#define DI_QUOTA_BLOCK_SZ   0
+#define DI_QUOTA_LIMIT      1
+#define DI_QUOTA_USED       2
+#define DI_QUOTA_ILIMIT     3
+#define DI_QUOTA_IUSED      4
+#define DI_QVAL_MAX         5
+
+#if 0
   dinum_t       total_space;
   dinum_t       free_space;
   dinum_t       avail_space;
   dinum_t       total_inodes;
   dinum_t       free_inodes;
   dinum_t       avail_inodes;
+#endif
+
+typedef struct
+{
+  unsigned int  sortIndex [2];
+  dinum_t       values [DI_VALUE_MAX];
   __ulong       st_dev;                      /* disk device number       */
   __ulong       sp_dev;                      /* special device number    */
   __ulong       sp_rdev;                     /* special rdev #           */
@@ -170,11 +189,14 @@ typedef struct
   char         *type;
   Uid_t        uid;
   Gid_t        gid;
+  dinum_t       values [DI_QVAL_MAX];
+#if 0
   dinum_t      block_size;
   dinum_t      limit;
   dinum_t      used;
   dinum_t      ilimit;
   dinum_t      iused;
+#endif
 } di_quota_t;
 
 typedef struct

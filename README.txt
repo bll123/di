@@ -1,4 +1,4 @@
-di - disk information utility (version 4.54.0.1)
+di - disk information utility (version 5.0.0)
 
 Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
@@ -6,8 +6,6 @@ SourceForge: https://sourceforge.net/projects/diskinfo-di/
 CONTENTS
   Description
   Installation
-  Tcl
-  Perl
   Bugs and Known Issues
   Requirements
   Porting Information
@@ -114,43 +112,6 @@ INSTALLATION
 
     If this is needed on your system, do:
         make installperms
-
-TCL
-    The Tcl extension provides access to the di utility via
-    the [diskspace] command.
-
-    To build:
-
-      cd C; make -e tcl-sh
-
-      Windows Cygwin:
-        cd C; make CC=gcc NO_PIE=yes tcl-sh
-      Windows Msys:
-        cd C; make WINAPI=T NO_PIE=yes tcl-sh
-
-    See C/di-example.tcl for a usage example.
-
-PERL
-    The Perl extension provides access to the di utility via
-    the [Filesys::di::diskspace] command.
-
-    To build:
-
-      # perl-perl can be substituted for perl-sh to use the
-      # perl configuration script instead of the shell
-      # configuration scripts.
-      cd C; make -e perl-sh; cd Perl; make PREFIX=your-prefix install
-
-      Windows Cygwin:
-        # I had to install libcrypt-devel for 'crypt.h'.
-        # No idea why perl would require that.
-        # perl-perl is faster than perl-sh.
-        cd C; make CC=gcc NO_PIE=yes perl-perl
-      Windows Msys:
-        # untested; I don't have mingw perl.
-        cd C; make -e WINAPI=T NO_PIE=yes CC=gcc perl-sh
-
-    See C/Perl/ex/perl-example.pl for a usage example.
 
 BUGS AND KNOWN ISSUES
     What's Not Tested:
@@ -285,6 +246,6 @@ ACKNOWLEDGEMENTS
 
 COPYRIGHT
 
-    Copyright 1994-2024 Brad Lanam, Pleasant Hill, CA, USA
+    Copyright 1994-2025 Brad Lanam, Pleasant Hill, CA, USA
     brad.lanam.di_at_gmail.com
     https://diskinfo-di.sourceforge.io

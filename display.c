@@ -560,46 +560,46 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         {
           case DI_FMT_BTOT:
           {
-              dinum_set (&temp, &diskInfo->total_space);
+              dinum_set (&temp, &diskInfo->values [DI_SPACE_TOTAL]);
               valid = true;
               break;
           }
 
           case DI_FMT_BTOT_AVAIL:
           {
-              dinum_set (&temp, &diskInfo->total_space);
-              dinum_sub (&temp, &diskInfo->free_space);
-              dinum_sub (&temp, &diskInfo->avail_space);
+              dinum_set (&temp, &diskInfo->values [DI_SPACE_TOTAL]);
+              dinum_sub (&temp, &diskInfo->values [DI_SPACE_FREE]);
+              dinum_sub (&temp, &diskInfo->values [DI_SPACE_AVAIL]);
               valid = true;
               break;
           }
 
           case DI_FMT_BUSED:
           {
-              dinum_set (&temp, &diskInfo->total_space);
-              dinum_sub (&temp, &diskInfo->free_space);
+              dinum_set (&temp, &diskInfo->values [DI_SPACE_TOTAL]);
+              dinum_sub (&temp, &diskInfo->values [DI_SPACE_FREE]);
               valid = true;
               break;
           }
 
           case DI_FMT_BCUSED:
           {
-              dinum_set (&temp, &diskInfo->total_space);
-              dinum_set (&temp, &diskInfo->avail_space);
+              dinum_set (&temp, &diskInfo->values [DI_SPACE_TOTAL]);
+              dinum_set (&temp, &diskInfo->values [DI_SPACE_AVAIL]);
               valid = true;
               break;
           }
 
           case DI_FMT_BFREE:
           {
-              dinum_set (&temp, &diskInfo->free_space);
+              dinum_set (&temp, &diskInfo->values [DI_SPACE_FREE]);
               valid = true;
               break;
           }
 
           case DI_FMT_BAVAIL:
           {
-              dinum_set (&temp, &diskInfo->avail_space);
+              dinum_set (&temp, &diskInfo->values [DI_SPACE_AVAIL]);
               valid = true;
               break;
           }
@@ -665,7 +665,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 
         case DI_FMT_BTOT:
         {
-          tout = printSpace (diopts, diout, &diskInfo->total_space, idx);
+          tout = printSpace (diopts, diout, &diskInfo->values [DI_SPACE_TOTAL], idx);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
@@ -677,9 +677,9 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 
           dinum_init (&tot);
           dinum_init (&tval);
-          dinum_set (&tot, &diskInfo->total_space);
-          dinum_set (&tval, &diskInfo->free_space);
-          dinum_sub (&tval, &diskInfo->avail_space);
+          dinum_set (&tot, &diskInfo->values [DI_SPACE_TOTAL]);
+          dinum_set (&tval, &diskInfo->values [DI_SPACE_FREE]);
+          dinum_sub (&tval, &diskInfo->values [DI_SPACE_AVAIL]);
           dinum_sub (&tot, &tval);
           tout = printSpace (diopts, diout, &tot, idx);
           append (tout, &out, &outcurrlen, &outlen);
@@ -691,8 +691,8 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
           dinum_t   tval;
 
           dinum_init (&tval);
-          dinum_set (&tval, &diskInfo->total_space);
-          dinum_sub (&tval, &diskInfo->free_space);
+          dinum_set (&tval, &diskInfo->values [DI_SPACE_TOTAL]);
+          dinum_sub (&tval, &diskInfo->values [DI_SPACE_FREE]);
           tout = printSpace (diopts, diout, &tval, idx);
           append (tout, &out, &outcurrlen, &outlen);
           dinum_clear (&tval);
@@ -704,8 +704,8 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
           dinum_t   tval;
 
           dinum_init (&tval);
-          dinum_set (&tval, &diskInfo->total_space);
-          dinum_sub (&tval, &diskInfo->avail_space);
+          dinum_set (&tval, &diskInfo->values [DI_SPACE_TOTAL]);
+          dinum_sub (&tval, &diskInfo->values [DI_SPACE_AVAIL]);
           tout = printSpace (diopts, diout, &tval, idx);
           append (tout, &out, &outcurrlen, &outlen);
           dinum_clear (&tval);
@@ -714,23 +714,23 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 
         case DI_FMT_BFREE:
         {
-          tout = printSpace (diopts, diout, &diskInfo->free_space, idx);
+          tout = printSpace (diopts, diout, &diskInfo->values [DI_SPACE_FREE], idx);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BAVAIL:
         {
-          tout = printSpace (diopts, diout, &diskInfo->avail_space, idx);
+          tout = printSpace (diopts, diout, &diskInfo->values [DI_SPACE_AVAIL], idx);
           append (tout, &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_BPERC_NAVAIL:
         {
-          dinum_set (&used, &diskInfo->total_space);
-          dinum_sub (&used, &diskInfo->avail_space);
-          dinum_set (&totAvail, &diskInfo->total_space);
+          dinum_set (&used, &diskInfo->values [DI_SPACE_TOTAL]);
+          dinum_sub (&used, &diskInfo->values [DI_SPACE_AVAIL]);
+          dinum_set (&totAvail, &diskInfo->values [DI_SPACE_TOTAL]);
           tout = printPerc (&used, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
           break;
@@ -738,9 +738,9 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 
         case DI_FMT_BPERC_USED:
         {
-          dinum_set (&used, &diskInfo->total_space);
-          dinum_sub (&used, &diskInfo->free_space);
-          dinum_set (&totAvail, &diskInfo->total_space);
+          dinum_set (&used, &diskInfo->values [DI_SPACE_TOTAL]);
+          dinum_sub (&used, &diskInfo->values [DI_SPACE_FREE]);
+          dinum_set (&totAvail, &diskInfo->values [DI_SPACE_TOTAL]);
           tout = printPerc (&used, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
           break;
@@ -751,11 +751,11 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
           dinum_t     tval;
 
           dinum_init (&tval);;
-          dinum_set (&used, &diskInfo->total_space);
-          dinum_sub (&used, &diskInfo->free_space);
-          dinum_set (&totAvail, &diskInfo->total_space);
-          dinum_set (&tval, &diskInfo->free_space);
-          dinum_sub (&tval, &diskInfo->avail_space);
+          dinum_set (&used, &diskInfo->values [DI_SPACE_TOTAL]);
+          dinum_sub (&used, &diskInfo->values [DI_SPACE_FREE]);
+          dinum_set (&totAvail, &diskInfo->values [DI_SPACE_TOTAL]);
+          dinum_set (&tval, &diskInfo->values [DI_SPACE_FREE]);
+          dinum_sub (&tval, &diskInfo->values [DI_SPACE_AVAIL]);
           dinum_sub (&totAvail, &tval);
           tout = printPerc (&used, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
@@ -768,8 +768,8 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
           dinum_t     bfree;
 
           dinum_init (&bfree);
-          dinum_set (&bfree, &diskInfo->avail_space);
-          dinum_set (&totAvail, &diskInfo->total_space);
+          dinum_set (&bfree, &diskInfo->values [DI_SPACE_AVAIL]);
+          dinum_set (&totAvail, &diskInfo->values [DI_SPACE_TOTAL]);
           tout = printPerc (&bfree, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
           dinum_clear (&bfree);
@@ -781,8 +781,8 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
           dinum_t     bfree;
 
           dinum_init (&bfree);
-          dinum_set (&bfree, &diskInfo->free_space);
-          dinum_set (&totAvail, &diskInfo->total_space);
+          dinum_set (&bfree, &diskInfo->values [DI_SPACE_FREE]);
+          dinum_set (&totAvail, &diskInfo->values [DI_SPACE_TOTAL]);
           tout = printPerc (&bfree, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
 
@@ -791,7 +791,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 
         case DI_FMT_ITOT:
         {
-          appendFormatVal (diout->inodeFormat, &diskInfo->total_inodes,
+          appendFormatVal (diout->inodeFormat, &diskInfo->values [DI_INODE_TOTAL],
               &out, &outcurrlen, &outlen);
           break;
         }
@@ -801,8 +801,8 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
           dinum_t     tval;
 
           dinum_init (&tval);
-          dinum_set (&tval, &diskInfo->total_inodes);
-          dinum_sub (&tval, &diskInfo->free_inodes);
+          dinum_set (&tval, &diskInfo->values [DI_INODE_TOTAL]);
+          dinum_sub (&tval, &diskInfo->values [DI_INODE_FREE]);
           appendFormatVal (diout->inodeFormat, &tval,
               &out, &outcurrlen, &outlen);
           dinum_clear (&tval);
@@ -811,7 +811,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 
         case DI_FMT_IFREE:
         {
-          appendFormatVal (diout->inodeFormat, &diskInfo->free_inodes,
+          appendFormatVal (diout->inodeFormat, &diskInfo->values [DI_INODE_FREE],
               &out, &outcurrlen, &outlen);
           break;
         }
@@ -819,9 +819,9 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         case DI_FMT_IPERC:
         {
           dinum_init (&used);
-          dinum_set (&used, &diskInfo->total_inodes);
-          dinum_sub (&used, &diskInfo->avail_inodes);
-          dinum_set (&totAvail, &diskInfo->total_inodes);
+          dinum_set (&used, &diskInfo->values [DI_INODE_TOTAL]);
+          dinum_sub (&used, &diskInfo->values [DI_INODE_AVAIL]);
+          dinum_set (&totAvail, &diskInfo->values [DI_INODE_TOTAL]);
           tout = printPerc (&used, &totAvail, percFormat);
           append (tout, &out, &outcurrlen, &outlen);
           break;
@@ -1010,33 +1010,33 @@ addTotals (const di_disk_info_t *diskInfo, di_disk_info_t *totals, int inpool)
       dinum_t   tval;
 
       dinum_init (&tval);
-      dinum_set (&tval, &diskInfo->total_space);
-      dinum_sub (&tval, &diskInfo->free_space);
-      dinum_sub (&totals->free_space, &tval);
+      dinum_set (&tval, &diskInfo->values [DI_SPACE_TOTAL]);
+      dinum_sub (&tval, &diskInfo->values [DI_SPACE_FREE]);
+      dinum_sub (&totals->values [DI_SPACE_FREE], &tval);
       dinum_clear (&tval);
     } else {
       /* zfs, old hammer, advfs */
       dinum_t   tval;
 
       dinum_init (&tval);
-      dinum_set (&tval, &diskInfo->total_space);
-      dinum_sub (&tval, &diskInfo->free_space);
-      dinum_add (&totals->total_space, &tval);
-      dinum_set (&tval, &diskInfo->total_inodes);
-      dinum_sub (&tval, &diskInfo->free_inodes);
-      dinum_add (&totals->total_inodes, &tval);
+      dinum_set (&tval, &diskInfo->values [DI_SPACE_TOTAL]);
+      dinum_sub (&tval, &diskInfo->values [DI_SPACE_FREE]);
+      dinum_add (&totals->values [DI_SPACE_TOTAL], &tval);
+      dinum_set (&tval, &diskInfo->values [DI_INODE_TOTAL]);
+      dinum_sub (&tval, &diskInfo->values [DI_INODE_FREE]);
+      dinum_add (&totals->values [DI_INODE_TOTAL], &tval);
       dinum_clear (&tval);
     }
   }
   else
   {
     if (debug > 2) {printf ("  tot:not inpool:add all totals\n"); }
-    dinum_add (&totals->total_space, &diskInfo->total_space);
-    dinum_add (&totals->free_space, &diskInfo->free_space);
-    dinum_add (&totals->avail_space, &diskInfo->avail_space);
-    dinum_add (&totals->total_inodes, &diskInfo->total_inodes);
-    dinum_add (&totals->free_inodes, &diskInfo->free_inodes);
-    dinum_add (&totals->avail_inodes, &diskInfo->avail_inodes);
+    dinum_add (&totals->values [DI_SPACE_TOTAL], &diskInfo->values [DI_SPACE_TOTAL]);
+    dinum_add (&totals->values [DI_SPACE_FREE], &diskInfo->values [DI_SPACE_FREE]);
+    dinum_add (&totals->values [DI_SPACE_AVAIL], &diskInfo->values [DI_SPACE_AVAIL]);
+    dinum_add (&totals->values [DI_INODE_TOTAL], &diskInfo->values [DI_INODE_TOTAL]);
+    dinum_add (&totals->values [DI_INODE_FREE], &diskInfo->values [DI_INODE_FREE]);
+    dinum_add (&totals->values [DI_INODE_AVAIL], &diskInfo->values [DI_INODE_AVAIL]);
   }
 }
 
@@ -1448,17 +1448,17 @@ diCompare (const di_opt_t *diopts, const di_disk_info_t *data,
           switch (*ptr) {
             case DI_SORT_AVAIL:
             {
-              temp = dinum_cmp (&d1->avail_space, &d2->avail_space);
+              temp = dinum_cmp (&d1->values [DI_SPACE_AVAIL], &d2->values [DI_SPACE_AVAIL]);
               break;
             }
             case DI_SORT_FREE:
             {
-              temp = dinum_cmp (&d1->free_space, &d2->free_space);
+              temp = dinum_cmp (&d1->values [DI_SPACE_FREE], &d2->values [DI_SPACE_FREE]);
               break;
             }
             case DI_SORT_TOTAL:
             {
-              temp = dinum_cmp (&d1->total_space, &d2->total_space);
+              temp = dinum_cmp (&d1->values [DI_SPACE_TOTAL], &d2->values [DI_SPACE_TOTAL]);
               break;
             }
           }

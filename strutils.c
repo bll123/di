@@ -24,6 +24,8 @@
 #  include <strings.h>
 # endif
 
+#include "strutils.h"
+
 /*
  *
  * portable realloc

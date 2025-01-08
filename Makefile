@@ -75,7 +75,16 @@ MKC_ECHO =
 # cmake
 
 .PHONY: all
-all: cmake
+all:
+	set -xv; \
+	cmv=0 ; \
+	cmv=`cmake --version | \
+	  sed -n -e '/version/ s,[^0-9]*\([0-9]\.[0-9]*\).*,\1, p'` ; \
+	if [ "$${cmv}" \> 3.18 ]; then \
+	  $(MAKE) cmake; \
+	else \
+	  $(MAKE) all-mkc; \
+	fi
 
 # parallel doesn't seem to work under msys2
 # cmake doesn't seem to support parallel under *BSD
@@ -347,8 +356,7 @@ $(MKC_REQLIB):	config.h
 LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		diquota$(OBJ_EXT)  getoptn$(OBJ_EXT) \
-		options$(OBJ_EXT) realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
-		strstr$(OBJ_EXT) trimchar$(OBJ_EXT)
+		options$(OBJ_EXT) strutils$(OBJ_EXT)
 
 MAINOBJECTS = di$(OBJ_EXT) display$(OBJ_EXT)
 
@@ -391,25 +399,19 @@ dilib$(OBJ_EXT):	dilib.c config.h di.h dilib.h getoptn.h \
 
 digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
 
-didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimntopt.h
+didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h strutils.h dimntopt.h
 
-digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimntopt.h
+digetentries$(OBJ_EXT):	digetentries.c config.h di.h strutils.h dimntopt.h
 
 diquota$(OBJ_EXT):	diquota.c config.h di.h
 
-display$(OBJ_EXT):	display.c config.h di.h display.h options.h version.h
+display$(OBJ_EXT):	display.c config.h di.h strutils.h display.h options.h version.h
 
-getoptn$(OBJ_EXT):	getoptn.c config.h getoptn.h
+getoptn$(OBJ_EXT):	getoptn.c config.h strutils.h getoptn.h
 
-options$(OBJ_EXT):	options.c config.h di.h options.h
+options$(OBJ_EXT):	options.c config.h di.h strutils.h options.h
 
-realloc$(OBJ_EXT):	realloc.c config.h di.h
-
-strdup$(OBJ_EXT):	strdup.c config.h di.h
-
-strstr$(OBJ_EXT):	strstr.c config.h di.h
-
-trimchar$(OBJ_EXT):	trimchar.c config.h di.h
+strutils$(OBJ_EXT):	strutils.c config.h strutils.h
 
 ###
 # regression testing

@@ -239,7 +239,12 @@ di_get_data (di_data_t *di_data)
 void
 di_cleanup (di_data_t *di_data)
 {
+  int     i;
+
   if (di_data->diskInfo != (di_disk_info_t *) NULL) {
+    for (i = 0; i < DI_VALUE_MAX; ++i) {
+      dinum_clear (&di_data->diskInfo->values [i]);
+    }
     free ((char *) di_data->diskInfo);
   }
 
@@ -577,16 +582,16 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
         if (debug > 5) {
           char  tbuff [100];
 
-          dinum_str (&dinfo->free_space, tbuff, sizeof (tbuff));
+          dinum_str (&dinfo->values [DI_SPACE_FREE], tbuff, sizeof (tbuff));
           printf ("chk: %s free: %s\n", dinfo->name, tbuff);
         }
-        if (dinum_cmp_s (&dinfo->free_space, -1) == 0 ||
-            dinum_cmp_s (&dinfo->free_space, -2) == 0) {
-          dinum_set_u (&dinfo->free_space, 0);
+        if (dinum_cmp_s (&dinfo->values [DI_SPACE_FREE], -1) == 0 ||
+            dinum_cmp_s (&dinfo->values [DI_SPACE_FREE], -2) == 0) {
+          dinum_set_u (&dinfo->values [DI_SPACE_FREE], 0);
         }
-        if (dinum_cmp_s (&dinfo->avail_space, -1) == 0 ||
-            dinum_cmp_s (&dinfo->avail_space, -2) == 0) {
-          dinum_set_u (&dinfo->avail_space, 0);
+        if (dinum_cmp_s (&dinfo->values [DI_SPACE_AVAIL], -1) == 0 ||
+            dinum_cmp_s (&dinfo->values [DI_SPACE_AVAIL], -2) == 0) {
+          dinum_set_u (&dinfo->values [DI_SPACE_AVAIL], 0);
         }
 
         {
@@ -595,10 +600,10 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
           dinum_init (&temp);
 
           dinum_set_u (&temp, ~0);
-          if (dinum_cmp (&dinfo->total_inodes, &temp) == 0) {
-            dinum_set_u (&dinfo->total_inodes, 0);
-            dinum_set_u (&dinfo->free_inodes, 0);
-            dinum_set_u (&dinfo->avail_inodes, 0);
+          if (dinum_cmp (&dinfo->values [DI_INODE_TOTAL], &temp) == 0) {
+            dinum_set_u (&dinfo->values [DI_INODE_TOTAL], 0);
+            dinum_set_u (&dinfo->values [DI_INODE_FREE], 0);
+            dinum_set_u (&dinfo->values [DI_INODE_AVAIL], 0);
           }
           dinum_clear (&temp);
         }
@@ -607,7 +612,7 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
           if (debug > 5) {
             char    tbuff [100];
 
-            dinum_str (&dinfo->total_space, tbuff, sizeof (tbuff));
+            dinum_str (&dinfo->values [DI_SPACE_TOTAL], tbuff, sizeof (tbuff));
             printf ("chk: %s total: %s\n", dinfo->name, tbuff);
           }
 
@@ -634,13 +639,13 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
           }
 
           /* Some systems return a -1 or -2 as an indicator.    */
-          if (dinum_cmp (&dinfo->total_space, 0) == 0 ||
-              dinum_cmp_s (&dinfo->total_space, -1) == 0 ||
-              dinum_cmp_s (&dinfo->total_space, -2L) == 0) {
+          if (dinum_cmp (&dinfo->values [DI_SPACE_TOTAL], 0) == 0 ||
+              dinum_cmp_s (&dinfo->values [DI_SPACE_TOTAL], -1) == 0 ||
+              dinum_cmp_s (&dinfo->values [DI_SPACE_TOTAL], -2L) == 0) {
             dinfo->printFlag = DI_PRNT_IGNORE;
             dinfo->doPrint = (char) diopts->displayAll;
             if (debug > 2) {
-              printf ("chk: ignore: total_space <= 0: %s\n",
+              printf ("chk: ignore: values [DI_SPACE_TOTAL] <= 0: %s\n",
                   dinfo->name);
             }
           }
@@ -722,9 +727,10 @@ static void
 checkDiskQuotas (di_data_t *di_data)
 {
   int           i;
+  int           j;
   Uid_t         uid;
   Gid_t         gid;
-  di_quota_t     diqinfo;
+  di_quota_t    diqinfo;
 
   uid = 0;
   gid = 0;
@@ -747,40 +753,44 @@ checkDiskQuotas (di_data_t *di_data)
     diqinfo.type = dinfo->fsType;
     diqinfo.uid = uid;
     diqinfo.gid = gid;
+    for (j = 0; j < DI_QVAL_MAX; ++j) {
+      dinum_init (&diqinfo.values [j]);
+    }
     diquota (&diqinfo);
 
     if (debug > 2) {
       char    tbuff [100];
-      dinum_str (&diqinfo.limit, tbuff, sizeof (tbuff));
+      dinum_str (&diqinfo.values [DI_QUOTA_LIMIT], tbuff, sizeof (tbuff));
       printf ("quota: %s limit: %s\n", dinfo->name, tbuff);
-      dinum_str (&dinfo->total_space, tbuff, sizeof (tbuff));
+      dinum_str (&dinfo->values [DI_SPACE_TOTAL], tbuff, sizeof (tbuff));
       printf ("quota:   tot: %s\n", tbuff);
-      dinum_str (&diqinfo.used, tbuff, sizeof (tbuff));
+      dinum_str (&diqinfo.values [DI_QUOTA_USED], tbuff, sizeof (tbuff));
       printf ("quota: %s used: %s\n", dinfo->name, tbuff);
-      dinum_str (&dinfo->avail_space, tbuff, sizeof (tbuff));
+      dinum_str (&dinfo->values [DI_SPACE_AVAIL], tbuff, sizeof (tbuff));
       printf ("quota:   avail: %s\n", tbuff);
     }
 
-    if (dinum_cmp_s (&diqinfo.limit, 0) != 0 &&
-        dinum_cmp (&diqinfo.limit, &dinfo->total_space) < 0) {
+    if (dinum_cmp_s (&diqinfo.values [DI_QUOTA_LIMIT], 0) != 0 &&
+        dinum_cmp (&diqinfo.values [DI_QUOTA_LIMIT], &dinfo->values [DI_SPACE_TOTAL]) < 0) {
       dinum_t     tsize;
 
       dinum_init (&tsize);
-      dinum_set (&dinfo->total_space, &diqinfo.limit);
-      dinum_set (&tsize, &diqinfo.limit);
-      dinum_sub (&tsize, &diqinfo.used);
+      dinum_set (&dinfo->values [DI_SPACE_TOTAL],
+          &diqinfo.values [DI_QUOTA_LIMIT]);
+      dinum_set (&tsize, &diqinfo.values [DI_QUOTA_LIMIT]);
+      dinum_sub (&tsize, &diqinfo.values [DI_QUOTA_USED]);
       if (dinum_cmp_s (&tsize, 0) < 0) {
         dinum_set_s (&tsize, 0);
       }
-      if (dinum_cmp (&tsize, &dinfo->avail_space) < 0) {
-        dinum_set (&dinfo->avail_space, &tsize);
-        dinum_set (&dinfo->free_space, &tsize);
+      if (dinum_cmp (&tsize, &dinfo->values [DI_SPACE_AVAIL]) < 0) {
+        dinum_set (&dinfo->values [DI_SPACE_AVAIL], &tsize);
+        dinum_set (&dinfo->values [DI_SPACE_FREE], &tsize);
         if (debug > 2) {
           printf ("quota: using quota for: total free avail\n");
         }
-      } else if (dinum_cmp (&tsize, &dinfo->avail_space) > 0 &&
-          dinum_cmp (&tsize, &dinfo->free_space) < 0) {
-        dinum_set (&dinfo->free_space, &tsize);
+      } else if (dinum_cmp (&tsize, &dinfo->values [DI_SPACE_AVAIL]) > 0 &&
+          dinum_cmp (&tsize, &dinfo->values [DI_SPACE_FREE]) < 0) {
+        dinum_set (&dinfo->values [DI_SPACE_FREE], &tsize);
         if (debug > 2) {
           printf ("quota: using quota for: total free\n");
         }
@@ -792,26 +802,26 @@ checkDiskQuotas (di_data_t *di_data)
       dinum_clear (&tsize);
     }
 
-    if (dinum_cmp_s (&diqinfo.ilimit, 0) != 0 &&
-          dinum_cmp (&diqinfo.ilimit, &dinfo->total_inodes) < 0) {
+    if (dinum_cmp_s (&diqinfo.values [DI_QUOTA_ILIMIT], 0) != 0 &&
+          dinum_cmp (&diqinfo.values [DI_QUOTA_ILIMIT], &dinfo->values [DI_INODE_TOTAL]) < 0) {
       dinum_t   tsize;
 
       dinum_init (&tsize);
-      dinum_set (&dinfo->total_inodes, &diqinfo.ilimit);
-      dinum_set (&tsize, &diqinfo.ilimit);
-      dinum_sub (&tsize, &diqinfo.iused);
+      dinum_set (&dinfo->values [DI_INODE_TOTAL], &diqinfo.values [DI_QUOTA_ILIMIT]);
+      dinum_set (&tsize, &diqinfo.values [DI_QUOTA_ILIMIT]);
+      dinum_sub (&tsize, &diqinfo.values [DI_QUOTA_IUSED]);
       if (dinum_cmp_s (&tsize, 0) < 0) {
         dinum_set_u (&tsize, 0);
       }
-      if (dinum_cmp (&tsize, &dinfo->avail_inodes) < 0) {
-        dinum_set (&dinfo->avail_inodes, &tsize);
-        dinum_set (&dinfo->free_inodes, &tsize);
+      if (dinum_cmp (&tsize, &dinfo->values [DI_INODE_AVAIL]) < 0) {
+        dinum_set (&dinfo->values [DI_INODE_AVAIL], &tsize);
+        dinum_set (&dinfo->values [DI_INODE_FREE], &tsize);
         if (debug > 2) {
           printf ("quota: using quota for inodes: total free avail\n");
         }
-      } else if (dinum_cmp (&tsize, &dinfo->avail_inodes) > 0 &&
-          dinum_cmp (&tsize, &dinfo->free_inodes) < 0) {
-        dinum_set (&dinfo->free_inodes, &tsize);
+      } else if (dinum_cmp (&tsize, &dinfo->values [DI_INODE_AVAIL]) > 0 &&
+          dinum_cmp (&tsize, &dinfo->values [DI_INODE_FREE]) < 0) {
+        dinum_set (&dinfo->values [DI_INODE_FREE], &tsize);
         if (debug > 2) {
           printf ("quota: using quota for inodes: total free\n");
         }
@@ -822,6 +832,11 @@ checkDiskQuotas (di_data_t *di_data)
       }
     }
   }
+
+  for (j = 0; j < DI_QVAL_MAX; ++j) {
+    dinum_clear (&diqinfo.values [j]);
+  }
+
   return;
 }
 

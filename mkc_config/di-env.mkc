@@ -10,6 +10,7 @@ output  di.env
 
 standard_system
 standard_cc
+addcflag -fPIC
 addcflag -fno-common
 addcflag -Wextra
 addcflag -Wno-unused-but-set-variable
@@ -74,11 +75,13 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
   addcflag -D_FORTIFY_SOURCE=0
  endif
 endif
-libs
 
+libs
 cflags_shared
 ldflags_shared
 sharednameflag
+shareexeclinkflag
+sharerunpathflag
 
 extension obj
 extension exe

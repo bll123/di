@@ -194,8 +194,8 @@ vq_updUsage (struct vqvalentry *entry, dinum_t usage)
 static void
 vq_updLimit (struct vqvalentry *entry, dinum_t limit)
 {
-  if (entry->limit == 0 || limit < entry->limit) {
-    entry->limit = limit;
+  if (entry->values [DI_QUOTA_LIMIT] == 0 || limit < entry->values [DI_QUOTA_LIMIT]) {
+    entry->values [DI_QUOTA_LIMIT] = limit;
   }
 }
 
@@ -261,8 +261,8 @@ vquotactl_get (di_quota_t *diqinfo, struct vqval *vqval)
   int                       grv;
   Uid_t                     tuid;
   Uid_t                     tgid;
-  dinum_t                space;
-  dinum_t                limit;
+  dinum_t                   space;
+  dinum_t                   limit;
 
   args = prop_dictionary_create();
   if (args == NULL) { return errno; }
@@ -291,9 +291,9 @@ vquotactl_get (di_quota_t *diqinfo, struct vqval *vqval)
   }
 
   vqval->uvqval.usage = 0;
-  vqval->uvqval.limit = 0;
+  vqval->uvqval.values [DI_QUOTA_LIMIT] = 0;
   vqval->gvqval.usage = 0;
-  vqval->gvqval.limit = 0;
+  vqval->gvqval.values [DI_QUOTA_LIMIT] = 0;
   while ((item = prop_object_iterator_next(iter)) != NULL) {
     rv = prop_dictionary_get_uint64 (item, "limit", &limit);
     if (rv && limit != 0) {
@@ -421,10 +421,10 @@ diquota (di_quota_t *diqinfo)
   rc = -1;
   xfsflag = false;
 
-  dinum_set_u (&diqinfo->limit, 0);
-  dinum_set_u (&diqinfo->used, 0);
-  dinum_set_u (&diqinfo->ilimit, 0);
-  dinum_set_u (&diqinfo->iused, 0);
+  dinum_set_u (&diqinfo->values [DI_QUOTA_LIMIT], 0);
+  dinum_set_u (&diqinfo->values [DI_QUOTA_USED], 0);
+  dinum_set_u (&diqinfo->values [DI_QUOTA_ILIMIT], 0);
+  dinum_set_u (&diqinfo->values [DI_QUOTA_IUSED], 0);
 
 #if _lib_vquotactl
   rc = vquotactl_get (diqinfo, &qdata.vqval);
@@ -652,24 +652,24 @@ diquota_nfs (di_quota_t *diqinfo)
         printf ("quota: nfs: rq_active: %d\n", rptr->rq_active);
       }
 
-      dinum_mul_uu (&diqinfo->limit, rptr->rq_bhardlimit, rptr->rq_bsize);
+      dinum_mul_uu (&diqinfo->values [DI_QUOTA_LIMIT], rptr->rq_bhardlimit, rptr->rq_bsize);
       dinum_mul_uu (&tsize, rptr->rq_bsoftlimit * rptr->rq_bsize);
       if (dinum_cmp_s (&tsize, 0) != 0 &&
-          dinum_cmp_s (&tsize, &diqinfo->limit) < 0) {
-        dinum_set (&diqinfo->limit, &tsize);
+          dinum_cmp_s (&tsize, &diqinfo->values [DI_QUOTA_LIMIT]) < 0) {
+        dinum_set (&diqinfo->values [DI_QUOTA_LIMIT], &tsize);
       }
-      if (dinum_cmp_s (&diqinfo->limit, 0) != 0) {
-        dinum_mul_uu (&diqinfo->used, rptr->rq_curblocks, rptr->rq_bsize);
+      if (dinum_cmp_s (&diqinfo->values [DI_QUOTA_LIMIT], 0) != 0) {
+        dinum_mul_uu (&diqinfo->values [DI_QUOTA_USED], rptr->rq_curblocks, rptr->rq_bsize);
       }
 
-      dinum_set_u (&diqinfo->ilimit, rptr->rq_fhardlimit);
+      dinum_set_u (&diqinfo->values [DI_QUOTA_ILIMIT], rptr->rq_fhardlimit);
       dinum_set_s (&tsize, rptr->rq_fsoftlimit);
       if (dinum_cmp_s (&tsize, 0) != 0 &&
-          dinum_cmp_s (&tsize, diqinfo->ilimit) < 0) {
-        dinum_set (&diqinfo->ilimit, &tsize);
+          dinum_cmp_s (&tsize, diqinfo->values [DI_QUOTA_ILIMIT]) < 0) {
+        dinum_set (&diqinfo->values [DI_QUOTA_ILIMIT], &tsize);
       }
-      if (dinum_cmp_s (&diqinfo->ilimit, 0) != 0) {
-        dinum_set_u (&diqinfo->iused, rptr->rq_curfiles);
+      if (dinum_cmp_s (&diqinfo->values [DI_QUOTA_ILIMIT], 0) != 0) {
+        dinum_set_u (&diqinfo->values [DI_QUOTA_IUSED], rptr->rq_curfiles);
       }
     }
 
@@ -729,7 +729,7 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     } else {
 # if _lib_vquotactl
       if (debug > 1) { printf ("# diquota: vquotactl\n"); }
-      dinum_set_u (&tsize, qdata->vqval.vqvalptr->limit);
+      dinum_set_u (&tsize, qdata->vqval.vqvalptr->values [DI_QUOTA_LIMIT]);
 # endif
 # if _typ_struct_quotaval
       if (debug > 1) { printf ("# diquota: struct quotaval\n"); }
@@ -747,12 +747,12 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     if (dinum_cmp_s (&tsize, 0) > 0) {
       dinum_mul (&tsize, &quot_block_sz);
       if (dinum_cmp_s (&tsize, 0) > 0 &&
-          (dinum_cmp_s (&tsize, diqinfo->limit) < 0 ||
-          diqinfo->limit == 0)) {
+          (dinum_cmp_s (&tsize, diqinfo->values [DI_QUOTA_LIMIT]) < 0 ||
+          diqinfo->values [DI_QUOTA_LIMIT] == 0)) {
         if (debug > 2) {
           printf ("quota: using b hard: %ld (%ld)\n", tsize, quot_block_sz);
         }
-        diqinfo->limit = tsize;
+        diqinfo->values [DI_QUOTA_LIMIT] = tsize;
         tlimit = tsize;
       }
     }
@@ -764,7 +764,7 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
       ;
     } else {
 # if _lib_vquotactl  /* no soft limit, use hard */
-      tsize = qdata->vqval.vqvalptr->limit;
+      tsize = qdata->vqval.vqvalptr->values [DI_QUOTA_LIMIT];
 # endif
 # if _typ_struct_quotaval
       tsize = qdata->qval.qbval.qv_softlimit;
@@ -779,12 +779,12 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     if (dinum_cmp_s (&tsize, 0) > 0) {
       dinum_mul (&tsize, &quot_block_sz);
       if (dinum_cmp_s (&tsize, 0) > 0 &&
-          (dinum_cmp (&tsize, &diqinfo->limit) < 0 ||
-           dinum_cmp_s (&diqinfo->limit, 0) == 0)) {
+          (dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_LIMIT]) < 0 ||
+           dinum_cmp_s (&diqinfo->values [DI_QUOTA_LIMIT], 0) == 0)) {
         if (debug > 2) {
           printf ("quota: using b soft: %ld (%ld)\n", tsize, quot_block_sz);
         }
-        dinum_set (&diqinfo->limit, &tsize);
+        dinum_set (&diqinfo->values [DI_QUOTA_LIMIT], &tsize);
         dinum_set (&tlimit, &tsize);
       }
     }
@@ -825,14 +825,14 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     }
 
     dinum_mul (&tsize, &qspace_block_sz);
-    if (dinum_cmp (&tsize, &diqinfo->used) > 0 ||
-        dinum_cmp_s (&diqinfo->used, 0) == 0) {
-      dinum_set (&diqinfo->used, &tsize);
+    if (dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_USED]) > 0 ||
+        dinum_cmp_s (&diqinfo->values [DI_QUOTA_USED], 0) == 0) {
+      dinum_set (&diqinfo->values [DI_QUOTA_USED], &tsize);
     }
 
     if (debug > 2) {
       printf ("quota: %s %s used: %ld limit: %ld\n", tag, diqinfo->name,
-          diqinfo->used, diqinfo->limit);
+          diqinfo->values [DI_QUOTA_USED], diqinfo->values [DI_QUOTA_LIMIT]);
     }
 
 # if ! _lib_vquotactl   /* no inode limits */
@@ -849,8 +849,8 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
       tsize = qdata->qinfo.dqb_ihardlimit;
 #  endif
     }
-    if (tsize > 0 && (tsize < diqinfo->ilimit || diqinfo->ilimit == 0)) {
-      diqinfo->ilimit = tsize;
+    if (tsize > 0 && (tsize < diqinfo->values [DI_QUOTA_ILIMIT] || diqinfo->values [DI_QUOTA_ILIMIT] == 0)) {
+      diqinfo->values [DI_QUOTA_ILIMIT] = tsize;
       tlimit = tsize;
     }
     if (debug > 2) {
@@ -870,8 +870,8 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
       tsize = qdata->qinfo.dqb_isoftlimit;
 #  endif
     }
-    if (tsize > 0 && (tsize < diqinfo->ilimit || diqinfo->ilimit == 0)) {
-      diqinfo->ilimit = tsize;
+    if (tsize > 0 && (tsize < diqinfo->values [DI_QUOTA_ILIMIT] || diqinfo->values [DI_QUOTA_ILIMIT] == 0)) {
+      diqinfo->values [DI_QUOTA_ILIMIT] = tsize;
       tlimit = tsize;
     }
     if (debug > 2) {
@@ -899,8 +899,8 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
       tsize = qdata->qinfo.dqb_curinodes;
 #  endif
     }
-    if (tsize > diqinfo->iused || diqinfo->iused == 0) {
-      diqinfo->iused = tsize;
+    if (tsize > diqinfo->values [DI_QUOTA_IUSED] || diqinfo->values [DI_QUOTA_IUSED] == 0) {
+      diqinfo->values [DI_QUOTA_IUSED] = tsize;
     }
     if (debug > 2) {
       printf ("quota: %s %s i used: %ld\n", tag, diqinfo->name, tsize);

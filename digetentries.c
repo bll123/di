@@ -1589,7 +1589,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         strncpy (diptr->name, path.Path(), DI_NAME_LEN);
         strncpy (diptr->special, fsinfo.device_name, DI_SPEC_NAME_LEN);
         strncpy (diptr->fsType, fsinfo.fsh_name, DI_TYPE_LEN);
-        di_save_block_sizes (diptr, fsinfo.block_size,
+        di_save_block_sizes (diptr, fsinfo.values [DI_QUOTA_BLOCK_SZ],
             fsinfo.total_blocks, fsinfo.free_blocks, fsinfo.free_blocks);
         di_save_inode_sizes (diptr, fsinfo.total_nodes,
             fsinfo.free_nodes, fsinfo.free_nodes);

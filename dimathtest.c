@@ -120,13 +120,73 @@ main (int argc, char *argv [])
   dinum_add (&a, &b);
   ++tcount;
   if (dinum_cmp_s (&a, 4) != 0) {
-    fprintf (stderr, "%d: add-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+    fprintf (stderr, "%d: add 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
   ++tcount;
   if (strcmp (buff, "4") != 0) {
     fprintf (stderr, "%d: str 4 fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+  /* subtract */
+  dinum_sub_u (&a, 1);
+  ++tcount;
+  if (dinum_cmp_s (&a, 3) != 0) {
+    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+    ++ecount;
+  }
+  dinum_str (&a, buff, sizeof (buff));
+  ++tcount;
+  if (strcmp (buff, "3") != 0) {
+    fprintf (stderr, "%d: str 3 fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+  dinum_sub (&a, &b);
+  ++tcount;
+  if (dinum_cmp_s (&a, 2) != 0) {
+    fprintf (stderr, "%d: sub 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+    ++ecount;
+  }
+  dinum_str (&a, buff, sizeof (buff));
+  ++tcount;
+  if (strcmp (buff, "2") != 0) {
+    fprintf (stderr, "%d: str 2 fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+  dinum_sub_u (&a, 1);
+  ++tcount;
+  if (dinum_cmp_s (&a, 1) != 0) {
+    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+    ++ecount;
+  }
+  dinum_str (&a, buff, sizeof (buff));
+  ++tcount;
+  if (strcmp (buff, "1") != 0) {
+    fprintf (stderr, "%d: str 1 fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+  dinum_sub_u (&a, 1);
+  ++tcount;
+  if (dinum_cmp_s (&a, 0) != 0) {
+    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+    ++ecount;
+  }
+  dinum_str (&a, buff, sizeof (buff));
+  ++tcount;
+  if (strcmp (buff, "0") != 0) {
+    fprintf (stderr, "%d: str 0 fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+  dinum_sub_u (&a, 1);
+  ++tcount;
+  if (dinum_cmp_s (&a, -1) != 0) {
+    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
     ++ecount;
   }
 
@@ -171,10 +231,12 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
+/*
   dinum_add_u (&a, 18446744073709551615ull);
   dinum_add_u (&a, 18446744073709551615ull);
   dinum_str (&a, buff, sizeof (buff));
   fprintf (stdout, "buff: %s\n", buff);
+*/
 
   dinum_clear (&a);
   dinum_clear (&b);
