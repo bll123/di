@@ -65,7 +65,7 @@ DI_CFLAGS = -DDI_LOCALE_DIR=\\\"$(LOCALEDIR)\\\"
 ###
 # mkconfig variables
 
-MKC_DIR = ../mkconfig
+MKC_DIR = mkconfig
 MKCONFIG_TYPE = sh
 MKC_REQLIB = di.reqlibs
 MKC_ECHO =
@@ -188,7 +188,7 @@ test:		tests.done
 ###
 # environment
 
-$(MKC_ENV):	$(MKC_ENV_CONF) ../dioptions.dat
+$(MKC_ENV):	$(MKC_ENV_CONF) dioptions.dat
 	@-$(RM) -f $(MKC_ENV) tests.done
 	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
 
@@ -206,7 +206,7 @@ $(MKC_ENV_SHR):	$(MKC_ENV_SHR_CONF)
 #
 .PHONY: windows
 windows:
-	@$(MAKE) ../dioptions.dat
+	@$(MAKE) dioptions.dat
 	copy /y NUL: $(MKC_ENV)
 	-del config.h
 	copy /y /b NUL:+configs\config.ms.cl config.h
@@ -219,7 +219,7 @@ windows:
 # This was tested using cygwin
 .PHONY: windows-gcc
 windows-gcc:
-	@$(MAKE) ../dioptions.dat
+	@$(MAKE) dioptions.dat
 	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	$(CP) -f configs/config.cygwin.gcc config.h
@@ -232,7 +232,7 @@ windows-gcc:
 .PHONY: windows-msys
 windows-msys:
 	MAKE=mingw32-make
-	cp ../features/dioptions.dat ../dioptions.dat
+	cp features/dioptions.dat dioptions.dat
 	> $(MKC_ENV)
 	-rm config.h
 	cp configs/config.mingw config.h
@@ -247,7 +247,7 @@ windows-msys:
 .PHONY: windows-mingw
 windows-mingw:
 	MAKE=mingw32-make
-	copy /y /b NUL:+..\features\dioptions.dat ..\dioptions.dat
+	copy /y /b NUL:+features\dioptions.dat dioptions.dat
 	copy /y NUL: $(MKC_ENV)
 	-del config.h
 	copy /y /b NUL:+configs\config.mingw config.h
@@ -272,14 +272,14 @@ os2-gcc:
 
 # leaves:
 #   config.h di.reqlibs
-#   ../dioptions.dat, tests.done, test_di, $(MKC_ENV), $(MKC_ENV_SHR)
+#   dioptions.dat, tests.done, test_di, $(MKC_ENV), $(MKC_ENV_SHR)
 .PHONY: clean
 clean:
 	@-cd Perl; \
 		if [ -f Makefile ]; then \
 		$(MAKE) clean; \
 		fi
-	@-$(RM) -f w ww di mi \
+	@-$(RM) -f w ww di mi libdi.* \
 		di.exe mingw-di.exe mi.exe \
 		diskspace.so diskspace.dylib diskspace.dll \
 		perlfilesysdi.bld libdiperl.a \
@@ -294,7 +294,7 @@ clean:
 	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 
 # leaves:
-#   _mkconfig_runtests, mkc_files, ../dioptions.dat
+#   _mkconfig_runtests, mkc_files, dioptions.dat
 #   tests.done, test_di
 .PHONY: realclean
 realclean:
@@ -304,7 +304,7 @@ realclean:
 		>/dev/null 2>&1; exit 0
 
 # leaves:
-#   ../dioptions.dat
+#   dioptions.dat
 .PHONY: distclean
 distclean:
 	@-cd Perl; \
@@ -325,8 +325,8 @@ distclean:
 .PHONY: install
 install:
 	$(MAKE) all
-	. ./$(MKC_ENV);cd ..;$(MAKE) -e PREFIX=$(PREFIX) \
-		LOCALEDIR=$(LOCALEDIR) FROMDIR=C install
+#	. ./$(MKC_ENV);$(MAKE) -e PREFIX=$(PREFIX) \
+#		LOCALEDIR=$(LOCALEDIR) install
 
 ###
 # programs
@@ -339,14 +339,14 @@ perl-programs:	perlfilesysdi.bld
 ###
 # configuration file
 
-../dioptions.dat:	../features/dioptions.dat
-	cd ../;$(MAKE) dioptions.dat
+dioptions.dat:	features/dioptions.dat
+	$(MAKE) dioptions.dat
 
-config.h:	$(MKC_ENV) ../dioptions.dat $(MKC_CONF)
+config.h:	$(MKC_ENV) dioptions.dat $(MKC_CONF)
 	@-$(RM) -f config.h tests.done
 	@if [ "$(DI_NO_NLS)" != "" ]; then \
 		echo "*** User requested no NLS"; \
-		$(MKC_DIR)/mkc.sh -setopt -o ../dioptions.dat NLS F; fi
+		$(MKC_DIR)/mkc.sh -setopt -o dioptions.dat NLS F; fi
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./$(MKC_ENV);$(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/mkconfig.sh \
@@ -365,36 +365,27 @@ $(MKC_REQLIB):	config.h
 
 LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		diquota$(OBJ_EXT)  display$(OBJ_EXT) getoptn$(OBJ_EXT) \
+		diquota$(OBJ_EXT)  getoptn$(OBJ_EXT) \
 		options$(OBJ_EXT) realloc$(OBJ_EXT) strdup$(OBJ_EXT) \
 		strstr$(OBJ_EXT) trimchar$(OBJ_EXT)
 
-MAINOBJECTS = di$(OBJ_EXT)
+MAINOBJECTS = di$(OBJ_EXT) display$(OBJ_EXT)
 
-di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) $(LIBOBJECTS)
+libdi$(SHLIB_EXT):	$(MKC_REQLIB) $(LIBOBJECTS)
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
+		-link -shared $(MKC_ECHO) \
+		-r $(MKC_REQLIB) -o libdi$(SHLIB_EXT) \
+		$(LIBOBJECTS)
+
+di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi.so
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
 		-r $(MKC_REQLIB) -o di$(EXE_EXT) \
-		$(MAINOBJECTS) $(LIBOBJECTS)
+		$(MAINOBJECTS) libdi$(SHLIB_EXT)
 
 # for ms cl
 #di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 #	$(LD) -Fedi$(EXE_EXT) $(MAINOBJECTS) $(LIBOBJECTS)
-
-perlfilesysdi.bld:	$(MKC_REQLIB) $(LIBOBJECTS)
-	@echo "*** Using libs: `$(CAT) $(MKC_REQLIB)`"
-	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -staticlib $(MKC_ECHO) \
-		-o libdiperl.a $(LIBOBJECTS) $(LIBS) \
-		`$(CAT) $(MKC_REQLIB)`
-	# Don't know how to pass additional libs to Makefile.PL
-	# so pass all the information.
-	( \
-	cd Perl ; \
-	perl Makefile.PL LIBS="-L.. -ldiperl `$(CAT) ../$(MKC_REQLIB)`" ; \
-	$(MAKE) ; \
-	$(MAKE) test ; \
-	)
-	@touch perlfilesysdi.bld
 
 mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 	$(CC) -o mingw-di$(EXE_EXT) \
@@ -414,7 +405,7 @@ mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 di$(OBJ_EXT):		di.c config.h di.h dilib.h getoptn.h \
 				options.h version.h
 
-dilib$(OBJ_EXT):	dilib.c config.h di.h dimain.h getoptn.h \
+dilib$(OBJ_EXT):	dilib.c config.h di.h dilib.h getoptn.h \
 				options.h
 
 digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
@@ -450,19 +441,6 @@ tests.done: $(MKC_DIR)/runtests.sh
 	CC=$(CC) DC=$(DC) $(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/runtests.sh ./tests.d
 	touch tests.done
-
-# needs environment
-.PHONY: testrpmbuild
-testrpmbuild:
-	-$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
-	$(MKDIR) -p ./rpmbuild/SOURCES
-	$(MKDIR) -p ./rpmbuild/BUILD
-	$(CP) -f $(DI_DIR)/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES
-	$(LN) -f ./rpmbuild/SOURCES/di-$(DI_VERSION).tar.gz ./rpmbuild/SOURCES/download
-	$(RPMBUILD) --define="_topdir `pwd`/rpmbuild" -ba ../di.spec
-	$(TEST) -f ./rpmbuild/RPMS/$(MARCH)/di-$(DI_VERSION)-1.$(MARCH).rpm || exit 1
-	$(TEST) -f ./rpmbuild/SRPMS/di-$(DI_VERSION)-1.src.rpm || exit 1
-	$(TEST) -d ./rpmbuild && rm -rf ./rpmbuild
 
 # needs environment
 .PHONY: rtest-env

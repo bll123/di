@@ -56,14 +56,16 @@ typedef struct
 
 static dispTable_t dispTable [] =
 {
-    { 0, { "KBytes", "KBytes" } },
-    { 0, { "Megs", "Mebis" } },
-    { 0, { "Gigs", "Gibis" } },
-    { 0, { "Teras", "Tebis" } },
-    { 0, { "Petas", "Pebis" } },
-    { 0, { "Exas", "Exbis" } },
-    { 0, { "Zettas", "Zebis" } },
-    { 0, { "Yottas", "Yobis" } }
+    { 0, { "Kilo", "Kibi" } },
+    { 0, { "Mega", "Mebi" } },
+    { 0, { "Giga", "Gibi" } },
+    { 0, { "Tera", "Tebi" } },
+    { 0, { "Peta", "Pebi" } },
+    { 0, { "Exa", "Exbi" } },
+    { 0, { "Zetta", "Zebi" } },
+    { 0, { "Yotta", "Yobi" } },
+    { 0, { "Ronna", "Ronni" } },
+    { 0, { "Quetta", "Quetti" } }
 };
 #define DI_DISPTAB_SIZE (sizeof (dispTable) / sizeof (dispTable_t))
 
@@ -78,7 +80,7 @@ static dispTable_t dispTable [] =
 extern int debug;
 
 static void processStringArgs   (const char *, char *, di_data_t *, char *);
-static int  processArgs         (int, const char * const [], di_data_t *, char *, Size_t);
+static int  processArgs         (int, char * argv [], di_data_t *, char *, Size_t);
 static int  parseList           (di_strarr_t *, char *);
 static void processOptions      (const char *, char *);
 static void processOptionsVal   (const char *, char *, char *);
@@ -94,7 +96,7 @@ processStringArgs (const char *progname, char *ptr, di_data_t *di_data,
   char        *dptr;
   char        *tptr;
   int         nargc;
-  const char  *nargv [DI_MAX_ARGV];
+  char        *nargv [DI_MAX_ARGV];
   di_opt_t *diopts;
 
   if (ptr == (char *) NULL || strcmp (ptr, "") == 0) {
@@ -115,12 +117,12 @@ processStringArgs (const char *progname, char *ptr, di_data_t *di_data,
 
     tptr = strtok (dptr, DI_ARGV_SEP);
     nargc = 1;
-    nargv[0] = progname;
+    nargv [0] = (char *) progname;
     while (tptr != (char *) NULL) {
       if (nargc >= DI_MAX_ARGV) {
         break;
       }
-      nargv[nargc++] = tptr;
+      nargv [nargc++] = tptr;
       tptr = strtok ((char *) NULL, DI_ARGV_SEP);
     }
     optidx = processArgs (nargc, nargv, di_data, dbsstr, sizeof (dbsstr) - 1);
@@ -137,14 +139,14 @@ processStringArgs (const char *progname, char *ptr, di_data_t *di_data,
 }
 
 int
-getDIOptions (int argc, const char * const argv[], di_data_t *di_data)
+getDIOptions (int argc, char * argv [], di_data_t *di_data)
 {
   const char *      argvptr;
   char *            ptr;
   char              dbsstr [30];
   int               optidx;
   int               ec;
-  di_opt_t       *diopts;
+  di_opt_t          *diopts;
   diOutput_t        *diout;
 
   diopts = &di_data->options;
@@ -193,7 +195,7 @@ getDIOptions (int argc, const char * const argv[], di_data_t *di_data)
 
     printf ("# ARGS:");
     for (j = 0; j < argc; ++j) {
-      printf (" %s", argv[j]);
+      printf (" %s", argv [j]);
     }
     printf ("\n");
     printf ("# blocksize: %s\n", dbsstr);
@@ -225,11 +227,8 @@ getDIOptions (int argc, const char * const argv[], di_data_t *di_data)
 }
 
 static int
-processArgs (int argc,
-             const char * const argv [],
-             di_data_t *di_data,
-             char *dbsstr,
-             Size_t dbsstr_sz)
+processArgs (int argc, char * argv [], di_data_t *di_data,
+    char *dbsstr, Size_t dbsstr_sz)
 {
   int           i;
   int           optidx;
@@ -647,7 +646,7 @@ processOptions (const char *arg, char *valptr)
     strncpy (padata->di_data->zoneInfo.zoneDisplay, "all", MAXPATHLEN);
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     usage();
-    setExitFlag (padata->diopts, DI_EXIT_OK);
+    setExitFlag (padata->diopts, DI_EXIT_HELP);
   } else if (strcmp (arg, "-P") == 0) {
     /* don't override -k option */
     if (strcmp (padata->dbsstr, "k") != 0) {
@@ -662,7 +661,7 @@ processOptions (const char *arg, char *valptr)
     strncpy (padata->dbsstr, "H", padata->dbsstr_sz);
   } else if (strcmp (arg, "--version") == 0) {
     printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
-    setExitFlag (padata->diopts, DI_EXIT_OK);
+    setExitFlag (padata->diopts, DI_EXIT_HELP);
   } else {
     fprintf (stderr, "di_panic: bad option setup\n");
   }
@@ -842,49 +841,49 @@ setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
     switch (*tptr) {
       case 'k':
       case 'K': {
-        idx = DI_ONE_K;
+        idx = DI_KILO;
         break;
       }
 
       case 'm':
       case 'M': {
-        idx = DI_ONE_MEG;
+        idx = DI_MEGA;
         break;
       }
 
       case 'g':
       case 'G': {
-        idx = DI_ONE_GIG;
+        idx = DI_GIGA;
         break;
       }
 
       case 't':
       case 'T': {
-        idx = DI_ONE_TERA;
+        idx = DI_TERA;
         break;
       }
 
       case 'p':
       case 'P': {
-        idx = DI_ONE_PETA;
+        idx = DI_PETA;
         break;
       }
 
       case 'e':
       case 'E': {
-        idx = DI_ONE_EXA;
+        idx = DI_EXA;
         break;
       }
 
       case 'z':
       case 'Z': {
-        idx = DI_ONE_ZETTA;
+        idx = DI_ZETTA;
         break;
       }
 
       case 'y':
       case 'Y': {
-        idx = DI_ONE_YOTTA;
+        idx = DI_YOTTA;
         break;
       }
 
@@ -905,7 +904,7 @@ setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
           val = DI_DISP_HR;
         } else {
           /* some unknown string value */
-          idx = DI_ONE_MEG;
+          idx = DI_MEGA;
         }
         break;
       }

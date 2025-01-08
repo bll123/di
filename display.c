@@ -132,7 +132,7 @@ typedef struct
   const char      *suffix;
 } sizeTable_t;
 
-#define DI_ONE_MEG_SZTAB   2
+#define DI_MEGA_SZTAB   2
 const char *sztabsuffix [] = {
   " ", "K", "M", "G", "T", "P", "E", "Z", "Y",
 };
@@ -548,7 +548,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
     dinum_set_u (&temp, 0);
     if (diopts->dispBlockSize == DI_DISP_HR_2)
     {
-      idx = DI_ONE_MEG_SZTAB; /* default */
+      idx = DI_MEGA_SZTAB; /* default */
 
       ptr = diopts->formatString;
       while (*ptr)
@@ -910,7 +910,7 @@ printSpace (const di_opt_t *diopts, const diOutput_t *diout,
     if (diopts->dispBlockSize == DI_DISP_HR ||
         diopts->dispBlockSize == DI_DISP_HR_2) {
       if (idx == -1) {
-        dinum_set (&tdbs, &sizeTable [DI_ONE_MEG].dbs);
+        dinum_set (&tdbs, &sizeTable [DI_MEGA].dbs);
       } else {
         dinum_set (&tdbs, &sizeTable [idx].dbs);
         format = sizeTable [idx].format;

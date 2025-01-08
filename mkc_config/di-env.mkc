@@ -1,4 +1,4 @@
-option-file ../dioptions.dat
+option-file dioptions.dat
 
 loadunit env-main
 loadunit env-systype
@@ -75,6 +75,13 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
  endif
 endif
 libs
+
+cflags_shared
+ldflags_shared
+sharednameflag
+
 extension obj
 extension exe
+extension shlib
 cmd_msgfmt
+

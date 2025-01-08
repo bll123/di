@@ -55,7 +55,7 @@ typedef struct {
     getoptn_opt_t       *opts;
     getoptn_optinfo_t   *optinfo;
     int                 argc;
-    const char          * const *argv;
+    char                **argv;
     const char          *arg;       /* current arg we're processing         */
     Size_t              arglen;     /* and the length of it                 */
     int                 hasvalue;   /* does this arg have a value attached? */
@@ -150,7 +150,7 @@ getoption_value (getoptn_info_t *info, getoptn_opt_t *opt)
     ptr = &info->arg[info->argidx];
   } else if (info->optidx + 1 < info->argc) {
     ++info->optidx;
-    ptr = info->argv[info->optidx];
+    ptr = info->argv [info->optidx];
   }
 
   return ptr;
@@ -161,11 +161,11 @@ dooptchecks (getoptn_info_t *info, getoptn_opt_t *opt,
      getoptn_optinfo_t *optinfo, const char *tag, Size_t sz)
 {
   if (sz != 0 && opt->valsiz != sz) {
-    fprintf (stderr, "%s: %s: invalid size (line %d)\n", info->argv[0], tag, optinfo->idx);
+    fprintf (stderr, "%s: %s: invalid size (line %d)\n", info->argv [0], tag, optinfo->idx);
     return 1;
   }
   if (opt->valptr == NULL) {
-    fprintf (stderr, "%s: %s: invalid pointer (line %d)\n", info->argv[0], tag, optinfo->idx);
+    fprintf (stderr, "%s: %s: invalid pointer (line %d)\n", info->argv [0], tag, optinfo->idx);
     return 1;
   }
 
@@ -187,7 +187,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
       opt->option_type == GETOPTN_FUNC_VALUE) {
     ptr = getoption_value (info, opt);
     if (ptr == (char *) NULL) {
-      fprintf (stderr, "%s: %s argument missing\n", info->argv[0], info->arg);
+      fprintf (stderr, "%s: %s argument missing\n", info->argv [0], info->arg);
       return 1;
     }
   }
@@ -244,7 +244,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
   } else if (opt->option_type == GETOPTN_FUNC_BOOL) {
     getoptn_func_bool_t f;
     if (opt->value2 == (void *) NULL) {
-      fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv[0], "func_bool", optinfo->idx);
+      fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv [0], "func_bool", optinfo->idx);
       return 1;
     }
     f = (getoptn_func_bool_t) opt->value2;
@@ -261,7 +261,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
     info->reprocess = false;
     info->offset = 0;
     fprintf (stderr, "%s: unknown option type %d\n",
-         info->argv[0], opt->option_type);
+         info->argv [0], opt->option_type);
     return 1;
   }
 
@@ -270,7 +270,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
 
 
 int
-getoptn (int style, int argc, const char * const argv [],
+getoptn (int style, int argc, char * argv [],
          Size_t optcount, getoptn_opt_t opts [], int *errorCount)
 {
   int               i;
@@ -299,7 +299,7 @@ getoptn (int style, int argc, const char * const argv [],
   }
 
   for (info.optidx = 1; info.optidx < argc; info.optidx++) {
-    arg = argv[info.optidx];
+    arg = argv [info.optidx];
     if (*arg != '-') {
       if (info.optinfo != (getoptn_optinfo_t *) NULL) {
         free (info.optinfo);
@@ -327,7 +327,7 @@ getoptn (int style, int argc, const char * const argv [],
       }
       if (i == GETOPTN_NOTFOUND) {
         if (info.reprocess == false) {
-          fprintf (stderr, "%s: unknown option %s\n", argv[0], arg);
+          fprintf (stderr, "%s: unknown option %s\n", argv [0], arg);
           ++*errorCount;
         }
         continue;
@@ -376,7 +376,7 @@ process_opts_val (const char *arg, char *valptr, char *value)
 }
 
 int
-main (int argc, const char * const argv[])
+main (int argc, char * argv [])
 {
   char      tmp[40];
   char      s[40];

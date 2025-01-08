@@ -97,12 +97,14 @@
 /* end of system specific includes/configurations */
 
 int
-main (int argc, const char * argv [])
+main (int argc, char * argv [])
 {
   char      *disp = NULL;
   di_data_t di_data;
 
-  di_get_data (&di_data, argc, argv, 0);
+  di_init (&di_data, 0);
+  di_process_options (&di_data, argc, argv);
+  di_get_data (&di_data);
   switch (di_data.options.exitFlag) {
     case DI_EXIT_FAIL: {
       exit (2);
@@ -110,7 +112,7 @@ main (int argc, const char * argv [])
     case DI_EXIT_WARN: {
       exit (1);
     }
-    case DI_EXIT_OK: {
+    case DI_EXIT_HELP: {
       exit (0);
     }
     case DI_EXIT_NORM: {

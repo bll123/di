@@ -26,7 +26,7 @@ main (int argc, char *argv [])
 #elif _use_math == DI_TOMMATH
   fprintf (stdout, "TOMMATH:\n");
 #else
-  fprintf (stdout, "UINT64: %d %d %d\n", _typ_uint64_t, _siz_long, _siz_long_long);
+  fprintf (stdout, "UINT64: %d %d %d\n", _siz_uint64_t, _siz_long, _siz_long_long);
 #endif
 
   dinum_init (&a);

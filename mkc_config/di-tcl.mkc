@@ -1,8 +1,0 @@
-option-file ../dioptions.dat
-
-loadunit c-main
-
-output  configtcl.h
-
-hdr     tcl.h
-lib     Tcl_InitStubs -DUSE_TCL_STUBS

@@ -90,7 +90,7 @@
 #cmakedefine01 _typ_size_t
 #cmakedefine01 _typ_uint_t
 #cmakedefine01 _typ_uid_t
-#cmakedefine01 _typ_uint64_t
+#define _siz_uint64_t ${_siz_uint64_t}
 #define _siz_long ${_siz_long}
 #define _siz_long_long ${_siz_long_long}
 

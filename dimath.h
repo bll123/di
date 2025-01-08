@@ -12,11 +12,13 @@
 # include <inttypes.h>
 #endif
 
-#if ! _typ_uint64_t
+#if ! defined (_siz_uint64_t) || _siz_uint64_t == 0
 # if _siz_long == 8
-  typedef long uint64_t;
+  typedef unsigned long uint64_t;
+  typedef long int64_t;
 # elif _siz_long_long == 8
-  typedef long long uint64_t;
+  typedef unsigned long long uint64_t;
+  typedef long long int64_t;
 # endif
 #endif
 
@@ -226,7 +228,7 @@ dinum_cmp_s (const dinum_t *r, int64_t val)
   int64_t   t;
   int       rc = 0;
 
-  t = *r;
+  t = (int64_t) *r;
   if (t < val) {
     rc = -1;
   } else if (t > val) {

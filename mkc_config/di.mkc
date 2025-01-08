@@ -2,7 +2,7 @@
 # Copyright 2006-2018 Brad Lanam, Walnut Creek, California USA
 #
 #
-option-file ../dioptions.dat
+option-file dioptions.dat
 
 loadunit c-main
 loadunit c-include-conflict
@@ -201,8 +201,10 @@ member  struct statfs f_fstypename
 member  struct statfs mount_info
 member  struct statfs f_type
 member  struct statvfs f_basetype
+size    uint64_t
 size    long
 size    long long
+
 
 # workaround for AIX
 # mntctl() is not declared
@@ -276,6 +278,11 @@ option  DI_DEFAULT_FORMAT smbuvpT
 option  DI_DEFAULT_DISP_SIZE H
 
 include
+
+#define DI_UINT64 0
+#define DI_GMP 1
+#define DI_TOMMATH 2
+#define _use_math DI_UINT64
 
 #if _typ_statvfs_t
 # define Statvfs_t statvfs_t

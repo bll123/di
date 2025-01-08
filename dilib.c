@@ -103,16 +103,10 @@ static int  checkForUUID        (const char *);
 #endif
 
 void
-di_get_data (di_data_t *di_data, int argc, const char * const argv [], int intfcflag)
+di_init (di_data_t *di_data, int intfcflag)
 {
-  di_opt_t         *diopts;
-  diOutput_t          *diout;
-  int                 hasLoop;
-  int                 optidx;
-  char                *disp;
-
-  /* initialization */
-  disp = (char *) NULL;
+  di_opt_t    *diopts;
+  diOutput_t  *diout;
 
   di_data->count = 0;
   di_data->haspooledfs = false;
@@ -166,17 +160,36 @@ di_get_data (di_data_t *di_data, int argc, const char * const argv [], int intfc
     diopts->csv_tabs = true;
     diopts->printHeader = false;
   }
+}
+
+void
+di_process_options (di_data_t *di_data, int argc, char * argv [])
+{
+  /* first argument is defaults */
+  di_data->options.argc = argc;
+  di_data->options.argv = argv;
+  di_data->options.optidx = getDIOptions (argc, argv, di_data);
+  if (di_data->options.exitFlag != DI_EXIT_NORM) {
+    return;
+  }
+}
+
+void
+di_get_data (di_data_t *di_data)
+{
+  di_opt_t    *diopts;
+  int         hasLoop;
+  char        *disp;
+
+  /* initialization */
+  disp = (char *) NULL;
+  diopts = &di_data->options;
 
   initLocale ();
 
-    /* first argument is defaults */
-  optidx = getDIOptions (argc, argv, di_data);
-  if (di_data->options.exitFlag != DI_EXIT_NORM) {
-    return disp;
-  }
   initZones (di_data);
   if (di_data->options.exitFlag != DI_EXIT_NORM) {
-    return disp;
+    return;
   }
 
   if (debug > 0) {
@@ -187,23 +200,24 @@ di_get_data (di_data_t *di_data, int argc, const char * const argv [], int intfc
 
   if (di_get_disk_entries (&di_data->diskInfo, &di_data->count) < 0) {
     di_cleanup (di_data);
-    return disp;
+    return;
   }
 
   hasLoop = false;
   preCheckDiskInfo (di_data);
-  if (optidx < argc || diopts->excludeLoopback) {
+  if (di_data->options.optidx < di_data->options.argc ||
+      diopts->excludeLoopback) {
     getDiskStatInfo (di_data);
     hasLoop = getDiskSpecialInfo (di_data, diopts->dontResolveSymlink);
   }
-  if (optidx < argc) {
+  if (di_data->options.optidx < di_data->options.argc) {
     int     rc;
 
-    rc = checkFileInfo (di_data, optidx, argc, argv);
+    rc = checkFileInfo (di_data);
     if (rc < 0) {
       di_cleanup (di_data);
       di_data->options.exitFlag = DI_EXIT_WARN;
-      return disp;
+      return;
     }
   }
   di_get_disk_info (&di_data->diskInfo, &di_data->count);
@@ -211,8 +225,6 @@ di_get_data (di_data_t *di_data, int argc, const char * const argv [], int intfc
   if (diopts->quota_check == true) {
     checkDiskQuotas (di_data);
   }
-
-  return di_data;
 }
 
 /*
@@ -225,203 +237,185 @@ di_get_data (di_data_t *di_data, int argc, const char * const argv [], int intfc
 void
 di_cleanup (di_data_t *di_data)
 {
-    if (di_data->diskInfo != (di_disk_info_t *) NULL)
-    {
-        free ((char *) di_data->diskInfo);
-    }
+  if (di_data->diskInfo != (di_disk_info_t *) NULL) {
+    free ((char *) di_data->diskInfo);
+  }
 
-    if (di_data->ignore_list.count > 0 &&
-        di_data->ignore_list.list != (char **) NULL)
-    {
-        free ((char *) di_data->ignore_list.list);
-    }
+  if (di_data->ignore_list.count > 0 &&
+      di_data->ignore_list.list != (char **) NULL) {
+    free ((char *) di_data->ignore_list.list);
+    di_data->ignore_list.count = 0;
+  }
 
-    if (di_data->include_list.count > 0 &&
-        di_data->include_list.list != (char **) NULL)
-    {
-        free ((char *) di_data->include_list.list);
-    }
+  if (di_data->include_list.count > 0 &&
+      di_data->include_list.list != (char **) NULL) {
+    free ((char *) di_data->include_list.list);
+    di_data->include_list.count = 0;
+  }
 
-    if (di_data->zoneInfo.zones != (di_zone_summ_t *) NULL)
-    {
-        free ((void *) di_data->zoneInfo.zones);
-    }
+  if (di_data->zoneInfo.zones != (di_zone_summ_t *) NULL) {
+    free ((void *) di_data->zoneInfo.zones);
+  }
 }
 
 extern int
-checkFileInfo (
-    di_data_t *di_data,
-    int optidx,
-    int argc,
-    const char * const argv [])
+checkFileInfo (di_data_t *di_data)
 {
-    int                 rc;
-    int                 i;
-    int                 j;
-    struct stat         statBuf;
-    di_opt_t         *diopts;
-    di_disk_info_t        *diskInfo;
+  int                 rc;
+  int                 i;
+  int                 j;
+  struct stat         statBuf;
+  di_opt_t            *diopts;
+  di_disk_info_t      *diskInfo;
 
 
-    rc = 0;
-    diopts = &di_data->options;
+  rc = 0;
+  diopts = &di_data->options;
 
-    diskInfo = di_data->diskInfo;
-    if (di_data->haspooledfs && ! di_data->totsorted)
-    {
-      char tempSortType [DI_SORT_MAX + 2];
+  diskInfo = di_data->diskInfo;
+  if (di_data->haspooledfs && ! di_data->totsorted)
+  {
+    char tempSortType [DI_SORT_MAX + 2];
 
-      strncpy (tempSortType, diopts->sortType, DI_SORT_MAX);
-      strncpy (diopts->sortType, "s", DI_SORT_MAX);
-      sortArray (diopts, diskInfo, di_data->count, DI_TOT_SORT_IDX);
-      strncpy (diopts->sortType, tempSortType, DI_SORT_MAX);
-      di_data->totsorted = true;
+    strncpy (tempSortType, diopts->sortType, DI_SORT_MAX);
+    strncpy (diopts->sortType, "s", DI_SORT_MAX);
+    sortArray (diopts, diskInfo, di_data->count, DI_TOT_SORT_IDX);
+    strncpy (diopts->sortType, tempSortType, DI_SORT_MAX);
+    di_data->totsorted = true;
+  }
+
+  for (i = diopts->optidx; i < diopts->argc; ++i) {
+    int fd;
+    int src;
+
+    /* do this to automount devices.                    */
+    /* stat() will not necessarily cause an automount.  */
+    fd = open (diopts->argv [i], O_RDONLY | O_NOCTTY);
+    if (fd < 0) {
+      src = stat (diopts->argv [i], &statBuf);
+    } else {
+      src = fstat (fd, &statBuf);
     }
 
-    for (i = optidx; i < argc; ++i)
-    {
-      int fd;
-      int src;
+    if (src == 0) {
+      int             saveIdx;
+      int             found = { false };
+      int             inpool = { false };
+      Size_t          lastpoollen = { 0 };
+      char            lastpool [DI_SPEC_NAME_LEN + 1];
 
-      /* do this to automount devices.                    */
-      /* stat() will not necessarily cause an automount.  */
-      fd = open (argv[i], O_RDONLY | O_NOCTTY);
-      if (fd < 0)
-      {
-        src = stat (argv [i], &statBuf);
-      } else {
-        src = fstat (fd, &statBuf);
-      }
+      saveIdx = 0;  /* should get overridden below */
+      for (j = 0; j < di_data->count; ++j) {
+        di_disk_info_t  *dinfo;
+        int             startpool;
+        int             poolmain;
 
-      if (src == 0)
-      {
-        int             saveIdx;
-        int             found = { false };
-        int             inpool = { false };
-        Size_t          lastpoollen = { 0 };
-        char            lastpool [DI_SPEC_NAME_LEN + 1];
+        startpool = false;
+        poolmain = false;
 
-        saveIdx = 0;  /* should get overridden below */
-        for (j = 0; j < di_data->count; ++j)
-        {
-          di_disk_info_t    *dinfo;
-          int             startpool;
-          int             poolmain;
+        dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
 
-          startpool = false;
-          poolmain = false;
-
-          dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
-
-              /* is it a pooled filesystem type? */
-          if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
-            if (lastpoollen == 0 ||
-                strncmp (lastpool, dinfo->special, lastpoollen) != 0)
-            {
-              strncpy (lastpool, dinfo->special, DI_SPEC_NAME_LEN);
-              lastpoollen = di_mungePoolName (lastpool);
-              inpool = false;
-            }
-
-            if (strncmp (lastpool, dinfo->special, lastpoollen) == 0)
-            {
-              startpool = true;
-              if (inpool == false)
-              {
-                poolmain = true;
-              }
-            }
-          } else {
+            /* is it a pooled filesystem type? */
+        if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
+          if (lastpoollen == 0 ||
+              strncmp (lastpool, dinfo->special, lastpoollen) != 0) {
+            strncpy (lastpool, dinfo->special, DI_SPEC_NAME_LEN);
+            lastpoollen = di_mungePoolName (lastpool);
             inpool = false;
           }
 
-          if (poolmain) {
-            saveIdx = j;
-          }
-
-          if (found && inpool) {
-            dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
-            dinfo->printFlag = DI_PRNT_SKIP;
-            if (debug > 2) {
-              printf ("  inpool B: also process %s %s\n",
-                      dinfo->special, dinfo->name);
+          if (strncmp (lastpool, dinfo->special, lastpoollen) == 0) {
+            startpool = true;
+            if (inpool == false) {
+              poolmain = true;
             }
           }
+        } else {
+          inpool = false;
+        }
 
-          if (dinfo->st_dev != (__ulong) DI_UNKNOWN_DEV &&
-              (__ulong) statBuf.st_dev == dinfo->st_dev &&
-              ! dinfo->isLoopback)
-          {
-            int foundnew = 0;
+        if (poolmain) {
+          saveIdx = j;
+        }
 
+        if (found && inpool) {
+          dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
+          dinfo->printFlag = DI_PRNT_SKIP;
+          if (debug > 2) {
+            printf ("  inpool B: also process %s %s\n",
+                    dinfo->special, dinfo->name);
+          }
+        }
+
+        if (dinfo->st_dev != (__ulong) DI_UNKNOWN_DEV &&
+            (__ulong) statBuf.st_dev == dinfo->st_dev &&
+            ! dinfo->isLoopback) {
+          int foundnew = 0;
+
+          ++foundnew;
+          if (dinfo->printFlag == DI_PRNT_OK) {
             ++foundnew;
-            if (dinfo->printFlag == DI_PRNT_OK) {
-              ++foundnew;
-            }
-            if (! isIgnoreFSType (dinfo->fsType)) {
-              ++foundnew;
-            }
-            if (foundnew == 3) {
-              dinfo->printFlag = DI_PRNT_FORCE;
-              found = true;
-            }
+          }
+          if (! isIgnoreFSType (dinfo->fsType)) {
+            ++foundnew;
+          }
+          if (foundnew == 3) {
+            dinfo->printFlag = DI_PRNT_FORCE;
+            found = true;
+          }
 
-            if (debug > 2) {
-              printf ("file %s specified: found device %ld : %d (%s %s)\n",
-                      argv[i], dinfo->st_dev, foundnew,
-                      dinfo->special, dinfo->name);
-            }
+          if (debug > 2) {
+            printf ("file %s specified: found device %ld : %d (%s %s)\n",
+                    diopts->argv [i], dinfo->st_dev, foundnew,
+                    dinfo->special, dinfo->name);
+          }
 
-            if (inpool) {
-              int   k;
-              for (k = saveIdx; k < j; ++k) {
-                dinfo = &(diskInfo [diskInfo [k].sortIndex[DI_TOT_SORT_IDX]]);
-                if (dinfo->printFlag != DI_PRNT_FORCE) {
-                  dinfo->printFlag = DI_PRNT_SKIP;
-                }
-                if (debug > 2)
-                {
-                  printf ("  inpool A: also process %s %s\n",
-                          dinfo->special, dinfo->name);
-                }
+          if (inpool) {
+            int   k;
+            for (k = saveIdx; k < j; ++k) {
+              dinfo = &(diskInfo [diskInfo [k].sortIndex[DI_TOT_SORT_IDX]]);
+              if (dinfo->printFlag != DI_PRNT_FORCE) {
+                dinfo->printFlag = DI_PRNT_SKIP;
+              }
+              if (debug > 2) {
+                printf ("  inpool A: also process %s %s\n",
+                        dinfo->special, dinfo->name);
               }
             }
           }
-
-          if (startpool)
-          {
-            inpool = true;
-          }
         }
-      } /* if stat ok */
-      else
-      {
-        if (errno != EACCES && errno != EPERM) {
-          fprintf (stderr, "stat: %s ", argv[i]);
-          perror ("");
+
+        if (startpool) {
+          inpool = true;
         }
-        rc = -1;
       }
-      if (fd >= 0) {
-        close (fd);
+      /* if stat ok */
+    } else {
+      if (errno != EACCES && errno != EPERM) {
+        fprintf (stderr, "stat: %s ", diopts->argv [i]);
+        perror ("");
       }
-    } /* for each file specified on command line */
-
-        /* turn everything off */
-    for (j = 0; j < di_data->count; ++j)
-    {
-      di_disk_info_t        *dinfo;
-
-      dinfo = &di_data->diskInfo[j];
-      if (dinfo->printFlag == DI_PRNT_OK) {
-        dinfo->printFlag = DI_PRNT_IGNORE;
-      }
+      rc = -1;
     }
+    if (fd >= 0) {
+      close (fd);
+    }
+  } /* for each file specified on command line */
 
-    /* also turn off the -I and -x lists */
-    di_data->include_list.count = 0;
-    di_data->ignore_list.count = 0;
-    return rc;
+      /* turn everything off */
+  for (j = 0; j < di_data->count; ++j) {
+    di_disk_info_t        *dinfo;
+
+    dinfo = &di_data->diskInfo[j];
+    if (dinfo->printFlag == DI_PRNT_OK) {
+      dinfo->printFlag = DI_PRNT_IGNORE;
+    }
+  }
+
+  /* also turn off the -I and -x lists */
+  di_data->include_list.count = 0;
+  di_data->ignore_list.count = 0;
+  return rc;
 }
 
 
@@ -435,40 +429,35 @@ checkFileInfo (
 extern void
 getDiskStatInfo (di_data_t *di_data)
 {
-    int         i;
-    struct stat statBuf;
+  int         i;
+  struct stat statBuf;
 
-    for (i = 0; i < di_data->count; ++i)
-    {
-        di_disk_info_t        *dinfo;
+  for (i = 0; i < di_data->count; ++i) {
+    di_disk_info_t        *dinfo;
 
-        dinfo = &di_data->diskInfo [i];
-            /* don't try to stat devices that are not accessible */
-        if (dinfo->printFlag == DI_PRNT_EXCLUDE ||
-            dinfo->printFlag == DI_PRNT_BAD ||
-            dinfo->printFlag == DI_PRNT_OUTOFZONE)
-        {
-            continue;
-        }
+    dinfo = &di_data->diskInfo [i];
 
-        dinfo->st_dev = (__ulong) DI_UNKNOWN_DEV;
-
-        if (stat (dinfo->name, &statBuf) == 0)
-        {
-            dinfo->st_dev = (__ulong) statBuf.st_dev;
-            if (debug > 2)
-            {
-                printf ("dev: %s: %ld\n", dinfo->name, dinfo->st_dev);
-            }
-        }
-        else
-        {
-          if (errno != EACCES && errno != EPERM) {
-            fprintf (stderr, "stat: %s ", dinfo->name);
-            perror ("");
-          }
-        }
+    /* don't try to stat devices that are not accessible */
+    if (dinfo->printFlag == DI_PRNT_EXCLUDE ||
+        dinfo->printFlag == DI_PRNT_BAD ||
+        dinfo->printFlag == DI_PRNT_OUTOFZONE) {
+      continue;
     }
+
+    dinfo->st_dev = (__ulong) DI_UNKNOWN_DEV;
+
+    if (stat (dinfo->name, &statBuf) == 0) {
+      dinfo->st_dev = (__ulong) statBuf.st_dev;
+      if (debug > 2) {
+        printf ("dev: %s: %ld\n", dinfo->name, dinfo->st_dev);
+      }
+    } else {
+      if (errno != EACCES && errno != EPERM) {
+        fprintf (stderr, "stat: %s ", dinfo->name);
+        perror ("");
+      }
+    }
+  }
 }
 
 /*
@@ -481,64 +470,62 @@ getDiskStatInfo (di_data_t *di_data)
 extern int
 getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
 {
-    int         i;
-    struct stat statBuf;
-    int         hasLoop;
+  int         i;
+  struct stat statBuf;
+  int         hasLoop;
 
-    hasLoop = false;
-    for (i = 0; i < di_data->count; ++i)
-    {
-        di_disk_info_t        *dinfo;
+  hasLoop = false;
+  for (i = 0; i < di_data->count; ++i)
+  {
+    di_disk_info_t        *dinfo;
 
-        dinfo = &di_data->diskInfo [i];
-           /* check for initial slash; otherwise we can pick up normal files */
-        if (*(dinfo->special) == '/' &&
-            stat (dinfo->special, &statBuf) == 0)
-        {
+    dinfo = &di_data->diskInfo [i];
+
+    /* check for initial slash; otherwise we can pick up normal files */
+    if (*(dinfo->special) == '/' &&
+        stat (dinfo->special, &statBuf) == 0) {
 #if _lib_realpath && _define_S_ISLNK && _lib_lstat
-            int                 rc;
+      int                 rc;
 
-            if (! dontResolveSymlink && checkForUUID (dinfo->special)) {
-              struct stat tstatBuf;
+      if (! dontResolveSymlink && checkForUUID (dinfo->special)) {
+        struct stat tstatBuf;
 
-              rc = lstat (dinfo->special, &tstatBuf);
-              if (rc == 0 && S_ISLNK(tstatBuf.st_mode)) {
-                char tspecial [DI_SPEC_NAME_LEN + 1];
-                if (realpath (dinfo->special, tspecial) != (char *) NULL) {
-                  strncpy (dinfo->special, tspecial, DI_SPEC_NAME_LEN);
-                }
-              }
-            }
+        rc = lstat (dinfo->special, &tstatBuf);
+        if (rc == 0 && S_ISLNK(tstatBuf.st_mode)) {
+          char tspecial [DI_SPEC_NAME_LEN + 1];
+          if (realpath (dinfo->special, tspecial) != (char *) NULL) {
+            strncpy (dinfo->special, tspecial, DI_SPEC_NAME_LEN);
+          }
+        }
+      }
 #endif
-            dinfo->sp_dev = (__ulong) statBuf.st_dev;
-            dinfo->sp_rdev = (__ulong) statBuf.st_rdev;
-              /* Solaris's loopback device is "lofs"            */
-              /* linux loopback device is "none"                */
-              /* linux has rdev = 0                             */
-              /* DragonFlyBSD's loopback device is "null"       */
-              /*   but not with special = /.../@@-               */
-              /* DragonFlyBSD has rdev = -1                     */
-              /* solaris is more consistent; rdev != 0 for lofs */
-              /* solaris makes sense.                           */
-            if (di_isLoopbackFs (dinfo)) {
-              dinfo->isLoopback = true;
-              hasLoop = true;
-            }
-            if (debug > 2)
-            {
-                printf ("special dev: %s %s: %ld rdev: %ld loopback: %d\n",
-                        dinfo->special, dinfo->name, dinfo->sp_dev,
-                        dinfo->sp_rdev, dinfo->isLoopback);
-            }
-        }
-        else
-        {
-            dinfo->sp_dev = 0;
-            dinfo->sp_rdev = 0;
-        }
-    }
+      dinfo->sp_dev = (__ulong) statBuf.st_dev;
+      dinfo->sp_rdev = (__ulong) statBuf.st_rdev;
 
-    return hasLoop;
+      /* Solaris's loopback device is "lofs"            */
+      /* linux loopback device is "none"                */
+      /* linux has rdev = 0                             */
+      /* DragonFlyBSD's loopback device is "null"       */
+      /*   but not with special = /.../@@-               */
+      /* DragonFlyBSD has rdev = -1                     */
+      /* solaris is more consistent; rdev != 0 for lofs */
+      /* solaris makes sense.                           */
+      if (di_isLoopbackFs (dinfo)) {
+        dinfo->isLoopback = true;
+        hasLoop = true;
+      }
+      if (debug > 2) {
+        printf ("special dev: %s %s: %ld rdev: %ld loopback: %d\n",
+            dinfo->special, dinfo->name, dinfo->sp_dev,
+            dinfo->sp_rdev, dinfo->isLoopback);
+      }
+    } else {
+      dinfo->sp_dev = 0;
+      dinfo->sp_rdev = 0;
+    }
+  }
+
+  return hasLoop;
 }
 
 /*

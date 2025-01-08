@@ -18,11 +18,9 @@ extern "C" {
 #endif
 
 /* dilib.c */
-extern void di_get_data   (di_data_t *di_data, int, const char * const [], int);
 extern void checkDiskInfo       (di_data_t *, int);
 extern void checkDiskQuotas     (di_data_t *);
-extern int  checkFileInfo       (di_data_t *, int, int, const char *const[]);
-extern void di_cleanup             (di_data_t *);
+extern int  checkFileInfo       (di_data_t *);
 extern int  getDiskSpecialInfo  (di_data_t *, unsigned int);
 extern void getDiskStatInfo     (di_data_t *);
 extern void preCheckDiskInfo    (di_data_t *);

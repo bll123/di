@@ -457,7 +457,7 @@ check_type_size ("gid_t" _typ_gid_t)
 check_type_size ("size_t" _typ_size_t)
 check_type_size ("uint_t" _typ_uint_t)
 check_type_size ("uid_t" _typ_uid_t)
-check_type_size ("uint64_t" _typ_uint64_t)
+check_type_size ("uint64_t" _siz_uint64_t)
 check_type_size ("long" _siz_long)
 check_type_size ("long long" _siz_long_long)
 
@@ -621,7 +621,7 @@ install (FILES di.h
 install (FILES man/di.1
   DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
 )
-install (FILES man/di.3
+install (FILES man/libdi.3
   DESTINATION "${CMAKE_INSTALL_MANDIR}/man3"
 )
 

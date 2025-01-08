@@ -208,11 +208,12 @@ typedef struct {
 
 /* order from best to worst */
 #define DI_EXIT_NORM      0
-#define DI_EXIT_OK        1
+#define DI_EXIT_HELP      1
 #define DI_EXIT_WARN      2
 #define DI_EXIT_FAIL      3
 
 typedef struct {
+  char            ** argv;
   const char      *formatString;
   int             dispBlockSize;
   unsigned int    baseDispSize;
@@ -232,6 +233,8 @@ typedef struct {
   unsigned int    dontResolveSymlink;
   unsigned int    exitFlag;
   int             errorCount;
+  int             optidx;
+  int             argc;
 } di_opt_t;
 
 typedef struct {
@@ -322,6 +325,24 @@ extern Size_t di_mungePoolName      (char *);
 #  define DI_GT(args) (args)
 # endif
 #endif
+
+/* these are also indexes into the dispTable array */
+#define DI_KILO           0
+#define DI_MEGA           1
+#define DI_GIGA           2
+#define DI_TERA           3
+#define DI_PETA           4
+#define DI_EXA            5
+#define DI_ZETTA          6
+#define DI_YOTTA          7
+#define DI_RONNA          8
+#define DI_QUETTA         9
+
+/* dilib.c */
+extern void di_init (di_data_t *di_data, int intfcflag);
+extern void di_process_options (di_data_t *di_data, int argc, char * argv []);
+extern void di_get_data (di_data_t *di_data);
+extern void di_cleanup (di_data_t *di_data);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }
