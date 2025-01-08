@@ -71,15 +71,15 @@
 #cmakedefine01 _sys_vfs_quota
 #cmakedefine01 _sys_vfstab
 #cmakedefine01 _sys_vmount
-// #cmakedefine01 _inc_conflict__hdr_time__sys_time
-// #cmakedefine01 _inc_conflict__sys_quota__hdr_linux_quota
+#cmakedefine01 _inc_conflict__hdr_time__sys_time
+#cmakedefine01 _inc_conflict__sys_quota__hdr_linux_quota
 // #cmakedefine01 _command_msgfmt
 // #cmakedefine01 _cmd_loc_msgfmt "/usr/bin/msgfmt"
-// #cmakedefine01 _const_O_NOCTTY
-// #cmakedefine01 _define_IOCTL_STORAGE_CHECK_VERIFY2
-// #cmakedefine01 _define_MCTL_QUERY
-// #cmakedefine01 _define_QCMD
-// #cmakedefine01 _define_S_ISLNK
+#cmakedefine01 _const_O_NOCTTY
+#cmakedefine01 _define_IOCTL_STORAGE_CHECK_VERIFY2
+#cmakedefine01 _define_MCTL_QUERY
+#cmakedefine01 _define_QCMD
+#cmakedefine01 _define_S_ISLNK
 
 #cmakedefine01 _typ_struct_dqblk
 #cmakedefine01 _typ_struct_quotaval

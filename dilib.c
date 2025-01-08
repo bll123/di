@@ -90,17 +90,21 @@ extern "C" {
 
 int debug = 0;
 
-#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
+static void checkDiskInfo       (di_data_t *, int);
+static void checkDiskQuotas     (di_data_t *);
+static int  checkFileInfo       (di_data_t *);
+static int  getDiskSpecialInfo  (di_data_t *, unsigned int);
+static void getDiskStatInfo     (di_data_t *);
+static void preCheckDiskInfo    (di_data_t *);
+static void initZones           (di_data_t *);
+
 static void checkZone           (di_disk_info_t *, di_zone_info_t *, unsigned int);
-#endif
 static void checkIgnoreList     (di_disk_info_t *, di_strarr_t *);
 static void checkIncludeList    (di_disk_info_t *, di_strarr_t *);
 static int  isIgnoreFSType      (const char *);
 static int  isIgnoreSpecial     (const char *);
 static int  isIgnoreFS          (const char *, const char *);
-#if _lib_realpath && _define_S_ISLNK && _lib_lstat
 static int  checkForUUID        (const char *);
-#endif
 
 void
 di_init (di_data_t *di_data, int intfcflag)
@@ -184,8 +188,6 @@ di_get_data (di_data_t *di_data)
   /* initialization */
   disp = (char *) NULL;
   diopts = &di_data->options;
-
-  initLocale ();
 
   initZones (di_data);
   if (di_data->options.exitFlag != DI_EXIT_NORM) {
@@ -426,7 +428,7 @@ checkFileInfo (di_data_t *di_data)
  *
  */
 
-extern void
+static void
 getDiskStatInfo (di_data_t *di_data)
 {
   int         i;
@@ -467,7 +469,7 @@ getDiskStatInfo (di_data_t *di_data)
  *
  */
 
-extern int
+static int
 getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
 {
   int         i;
@@ -484,21 +486,19 @@ getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
     /* check for initial slash; otherwise we can pick up normal files */
     if (*(dinfo->special) == '/' &&
         stat (dinfo->special, &statBuf) == 0) {
-#if _lib_realpath && _define_S_ISLNK && _lib_lstat
       int                 rc;
 
       if (! dontResolveSymlink && checkForUUID (dinfo->special)) {
         struct stat tstatBuf;
 
         rc = lstat (dinfo->special, &tstatBuf);
-        if (rc == 0 && S_ISLNK(tstatBuf.st_mode)) {
+        if (rc == 0 && S_ISLNK (tstatBuf.st_mode)) {
           char tspecial [DI_SPEC_NAME_LEN + 1];
           if (realpath (dinfo->special, tspecial) != (char *) NULL) {
             strncpy (dinfo->special, tspecial, DI_SPEC_NAME_LEN);
           }
         }
       }
-#endif
       dinfo->sp_dev = (__ulong) statBuf.st_dev;
       dinfo->sp_rdev = (__ulong) statBuf.st_rdev;
 
@@ -535,7 +535,7 @@ getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
  *
  */
 
-extern void
+static void
 checkDiskInfo (di_data_t *di_data, int hasLoop)
 {
     int             i;
@@ -718,7 +718,7 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
     } /* if the duplicate loopback mounts are to be excluded */
 }
 
-extern void
+static void
 checkDiskQuotas (di_data_t *di_data)
 {
   int           i;
@@ -834,7 +834,7 @@ checkDiskQuotas (di_data_t *di_data)
  *
  */
 
-extern void
+static void
 preCheckDiskInfo (di_data_t *di_data)
 {
     int             i;
@@ -855,9 +855,7 @@ preCheckDiskInfo (di_data_t *di_data)
         {
             printf ("## prechk:%s:\n", dinfo->name);
         }
-#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
         checkZone (dinfo, &di_data->zoneInfo, diopts->displayAll);
-#endif
 
         if (di_isPooledFs (dinfo)) {
           di_data->haspooledfs = true;
@@ -971,10 +969,10 @@ checkIncludeList (di_disk_info_t *diskInfo, di_strarr_t *include_list)
     } /* if an include list was specified */
 }
 
-#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
 static void
 checkZone (di_disk_info_t *diskInfo, di_zone_info_t *zoneInfo, unsigned int allFlag)
 {
+#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
     int         i;
     int         idx = { -1 };
 
@@ -1070,30 +1068,11 @@ checkZone (di_disk_info_t *diskInfo, di_zone_info_t *zoneInfo, unsigned int allF
         diskInfo->printFlag = DI_PRNT_IGNORE;
     }
 
+#endif
     return;
 }
-#endif
 
-extern void
-initLocale (void)
-{
-#if _enable_nls
-  const char      *localeptr;
-#endif
-
-#if _lib_setlocale && defined (LC_ALL)
-  setlocale (LC_ALL, "");
-#endif
-#if _enable_nls
-  if ((localeptr = getenv ("DI_LOCALE_DIR")) == (char *) NULL) {
-    localeptr = DI_LOCALE_DIR;
-  }
-  bindtextdomain ("di", localeptr);
-  textdomain ("di");
-#endif
-}
-
-extern void
+static void
 initZones (di_data_t *di_data)
 {
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
@@ -1220,10 +1199,11 @@ isIgnoreFSType (const char *fstype)
   return false;
 }
 
-#if _lib_realpath && _define_S_ISLNK && _lib_lstat
 static int
 checkForUUID (const char *spec)
 {
+#if _lib_realpath && _define_S_ISLNK && _lib_lstat
+
 /*
  *  /dev/mapper/luks-828fc648-9f30-43d8-a0b1-f7196a2edb66
  * /dev/disk/by-uuid/cfbbd7b3-b37a-4587-a711-58fd36b2cac6
@@ -1246,6 +1226,8 @@ checkForUUID (const char *spec)
       return true;
     }
   }
+
+#endif /* have _lib_realpath, etc. */
+
   return false;
 }
-#endif /* have _lib_realpath, etc. */

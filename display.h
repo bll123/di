@@ -16,6 +16,7 @@ extern "C" {
 extern char *printDiskInfo      (di_data_t *);
 extern void sortArray           (di_opt_t *, di_disk_info_t *, int, int);
 extern const char *getPrintFlagText (int);
+extern void initLocale          (void);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }

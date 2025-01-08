@@ -1601,3 +1601,22 @@ initSizeTable (di_opt_t *diopts, diOutput_t *diout)
   }
 }
 
+extern void
+initLocale (void)
+{
+#if _enable_nls
+  const char      *localeptr;
+#endif
+
+#if _lib_setlocale && defined (LC_ALL)
+  setlocale (LC_ALL, "");
+#endif
+#if _enable_nls
+  if ((localeptr = getenv ("DI_LOCALE_DIR")) == (char *) NULL) {
+    localeptr = DI_LOCALE_DIR;
+  }
+  bindtextdomain ("di", localeptr);
+  textdomain ("di");
+#endif
+}
+

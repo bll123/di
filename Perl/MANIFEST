@@ -1,8 +1,0 @@
-Changes
-di.xs
-Makefile.PL
-MANIFEST
-ppport.h
-README
-t/diskspace.t
-lib/Filesys/di.pm

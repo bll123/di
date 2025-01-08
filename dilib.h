@@ -17,16 +17,6 @@ extern "C" {
   extern int errno;
 #endif
 
-/* dilib.c */
-extern void checkDiskInfo       (di_data_t *, int);
-extern void checkDiskQuotas     (di_data_t *);
-extern int  checkFileInfo       (di_data_t *);
-extern int  getDiskSpecialInfo  (di_data_t *, unsigned int);
-extern void getDiskStatInfo     (di_data_t *);
-extern void preCheckDiskInfo    (di_data_t *);
-extern void initLocale          (void);
-extern void initZones           (di_data_t *);
-
 # if defined (__cplusplus) || defined (c_plusplus)
 }
 # endif

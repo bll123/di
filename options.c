@@ -51,21 +51,21 @@ struct pa_tmp {
 typedef struct
 {
   int64_t         size;
-  const char      *disp[2];
+  const char      *disp[3];
 } dispTable_t;
 
 static dispTable_t dispTable [] =
 {
-    { 0, { "Kilo", "Kibi" } },
-    { 0, { "Mega", "Mebi" } },
-    { 0, { "Giga", "Gibi" } },
-    { 0, { "Tera", "Tebi" } },
-    { 0, { "Peta", "Pebi" } },
-    { 0, { "Exa", "Exbi" } },
-    { 0, { "Zetta", "Zebi" } },
-    { 0, { "Yotta", "Yobi" } },
-    { 0, { "Ronna", "Ronni" } },
-    { 0, { "Quetta", "Quetti" } }
+    { 0, { "Kilo", "Kibi", "K" } },
+    { 0, { "Mega", "Mebi", "M" } },
+    { 0, { "Giga", "Gibi", "G" } },
+    { 0, { "Tera", "Tebi", "T" } },
+    { 0, { "Peta", "Pebi", "P" } },
+    { 0, { "Exa", "Exbi", "E" } },
+    { 0, { "Zetta", "Zebi", "Z" } },
+    { 0, { "Yotta", "Yobi", "Y" } },
+    { 0, { "Ronna", "Ronni", "R" } },
+    { 0, { "Quetta", "Quetti", "Q" } }
 };
 #define DI_DISPTAB_SIZE (sizeof (dispTable) / sizeof (dispTable_t))
 
@@ -165,7 +165,7 @@ getDIOptions (int argc, char * argv [], di_data_t *di_data)
     }
   }
 
-      /* gnu df */
+  /* gnu df */
   if ((ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL) {
     strncpy (dbsstr, "512", sizeof (dbsstr));
     diopts->formatString = DI_POSIX_FORMAT;
@@ -174,14 +174,14 @@ getDIOptions (int argc, char * argv [], di_data_t *di_data)
     diopts->json_output = false;
   }
 
-      /* bsd df */
+  /* bsd df */
   if ((ptr = getenv ("BLOCKSIZE")) != (char *) NULL) {
-    strncpy (dbsstr, ptr, sizeof (dbsstr)-1);
+    strncpy (dbsstr, ptr, sizeof (dbsstr) - 1);
   }
 
-      /* gnu df */
+  /* gnu df */
   if ((ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL) {
-    strncpy (dbsstr, ptr, sizeof (dbsstr)-1);
+    strncpy (dbsstr, ptr, sizeof (dbsstr) - 1);
   }
 
   if ((ptr = getenv ("DI_ARGS")) != (char *) NULL) {
@@ -233,7 +233,7 @@ processArgs (int argc, char * argv [], di_data_t *di_data,
   int           i;
   int           optidx;
   int           errorCount;
-  di_opt_t   *diopts;
+  di_opt_t      *diopts;
   diOutput_t    *diout;
   struct pa_tmp padata;
 

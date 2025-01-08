@@ -1,7 +1,7 @@
 #
 # Copyright 2024 Brad Lanam Pleasant Hill CA
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.19)
 
 # avoid msys2/windows issue
 set (CMAKE_C_COMPILER_WORKS 1)
@@ -161,6 +161,7 @@ include (CheckFunctionExists)
 include (CheckIncludeFile)
 include (CheckLibraryExists)
 include (CheckLinkerFlag)
+include (CheckSourceCompiles)
 include (CheckStructHasMember)
 include (CheckSymbolExists)
 include (CheckTypeSize)
@@ -484,6 +485,7 @@ if (DEFINED QUOTA_HDR)
       ${QUOTA_HDR} _mem_struct_getquota_rslt_gqr_rquota)
   checkdqblk (${QUOTA_HDR})
   checkPrototype_quotactl (${QUOTA_HDR})
+  check_symbol_exists (QCMD ${QUOTA_HDR} _define_QCMD)
 endif()
 
 if (_sys_mnttab)
@@ -508,11 +510,29 @@ if (DEFINED STATFS_HDR)
   checkPrototype_statfs (${STATFS_HDR})
 endif()
 
+check_source_compiles (C
+"#include <time.h>
+#include <sys/time.h>
+int main (int argc, char *argv []) { return 0; }"
+  _inc_conflict__hdr_time__sys_time)
+
+check_source_compiles (C
+"#include <sys/quota.h>
+#include <linux/quota.h>
+int main (int argc, char *argv []) { return 0; }"
+  _inc_conflict__sys_quota__hdr_linux_quota)
+
+check_symbol_exists (O_NOCTTY fcntl.h _const_O_NOCTTY)
+#if (_hdr_fcntl)
+#  set (CMAKE_EXTRA_INCLUDE_FILES <fcntl.h>)
+#endif()
 #const   O_NOCTTY
-#define  IOCTL_STORAGE_CHECK_VERIFY2
-#define  MCTL_QUERY
-#define  QCMD
-#define  S_ISLNK
+#unset (CMAKE_EXTRA_INCLUDE_FILES)
+
+check_symbol_exists (IOCTL_STORAGE_CHECK_VERIFY2 winioctl.h
+    _define_IOCTL_STORAGE_CHECK_VERIFY2)
+check_symbol_exists (MCTL_QUERY sys/mntctl.h _define_MCTL_QUERY)
+check_symbol_exists (S_ISLNK sys/stat.h _define_S_ISLNK)
 
 if (DEFINED DI_USE_MATH AND NOT DI_USE_MATH STREQUAL "")
   # must be one of DI_UINT64, DI_GMP, DI_TOMMATH

@@ -150,11 +150,11 @@ cmake-windows:
 # --parallel does not work correctly on msys2
 # --parallel also seems to not work on *BSD
 .PHONY: build
-build:
+build-cmake:
 	cmake --build $(BUILDDIR) $(pmode)
 
 .PHONY: install
-install:
+install-cmake:
 	cmake --install $(BUILDDIR)
 
 ###
@@ -162,8 +162,8 @@ install:
 
 # have to get various environment variables set up.
 
-.PHONY: all
-all:	all-sh
+.PHONY: all-mkc
+all-mkc: all-sh
 
 .PHONY: all-sh
 all-sh:	$(MKC_ENV)
@@ -172,15 +172,6 @@ all-sh:	$(MKC_ENV)
 .PHONY: all-perl
 all-perl:	$(MKC_ENV)
 	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=perl di-programs
-
-# perl interface
-.PHONY: perl-sh
-perl-sh:	$(MKC_ENV_SHR)
-	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=sh perl-programs
-
-.PHONY: perl-perl
-perl-perl:	$(MKC_ENV_SHR)
-	. ./$(MKC_ENV_SHR);$(MAKE) -e MKCONFIG_TYPE=perl perl-programs
 
 .PHONY: test
 test:		tests.done
@@ -323,7 +314,7 @@ distclean:
 # installation
 
 .PHONY: install
-install:
+install-mkc:
 	$(MAKE) all
 #	. ./$(MKC_ENV);$(MAKE) -e PREFIX=$(PREFIX) \
 #		LOCALEDIR=$(LOCALEDIR) install
