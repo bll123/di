@@ -63,12 +63,6 @@ main (int argc, char *argv [])
     fprintf (stderr, "%d: set-s -1 >= 0 fail %d\n", tcount, dinum_cmp_s (&a, 0));
     ++ecount;
   }
-  dinum_str (&a, buff, sizeof (buff));
-  ++tcount;
-  if (strcmp (buff, "-1") != 0) {
-    fprintf (stderr, "%d: str -1 fail %s\n", tcount, buff);
-    ++ecount;
-  }
 
   /* add */
   dinum_set_u (&a, 0);

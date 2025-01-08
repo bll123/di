@@ -6,6 +6,10 @@
 #
 
 # cmake
+# one less than the required version
+# 3.${CMAKE_REQ_VERSION}
+CMAKE_REQ_VERSION=10
+
 BUILDDIR = build
 # DI_USE_MATH = DI_GMP
 # DI_USE_MATH = DI_TOMMATH
@@ -76,11 +80,10 @@ MKC_ECHO =
 
 .PHONY: all
 all:
-	set -xv; \
-	cmv=0 ; \
+	@cmv=0 ; \
 	cmv=`cmake --version | \
-	  sed -n -e '/version/ s,[^0-9]*\([0-9]\.[0-9]*\).*,\1, p'` ; \
-	if [ "$${cmv}" \> 3.18 ]; then \
+	  sed -n -e '/version/ s,[^0-9]*3\.\([0-9]*\).*,\1, p'` ; \
+	if [ "$${cmv}" -ge $(CMAKE_REQ_VERSION) ]; then \
 	  $(MAKE) cmake; \
 	else \
 	  $(MAKE) all-mkc; \
@@ -278,7 +281,6 @@ clean:
 	@-$(RM) -f w ww di mi libdi.* \
 		di.exe mingw-di.exe mi.exe \
 		diskspace.so diskspace.dylib diskspace.dll \
-		perlfilesysdi.bld libdiperl.a \
 		*.o *.obj $(MKC_FILES)/mkconfig.log \
 		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
 		$(MKC_FILES)/mkconfig.cache mkc*.vars \
@@ -366,7 +368,7 @@ libdi$(SHLIB_EXT):	$(MKC_REQLIB) $(LIBOBJECTS)
 		-r $(MKC_REQLIB) -o libdi$(SHLIB_EXT) \
 		$(LIBOBJECTS)
 
-di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi.so
+di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
 		-r $(MKC_REQLIB) -o di$(EXE_EXT) \

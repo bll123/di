@@ -664,29 +664,26 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        dinum_t          tblocksz;
+        uint64_t      tblocksz;
 
         diptr = *diskInfo + idx;
         di_init_disk_info (diptr);
 
         sp = mntbufp + idx;
 # if defined (MNT_RDONLY)
-        if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY)
-        {
+        if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY) {
             diptr->isReadOnly = true;
         }
 # endif
 # if defined (MNT_LOCAL)
-        if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL)
-        {
+        if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL) {
             diptr->isLocal = false;
         }
 # endif
         convertMountOptions ((unsigned long) sp->f_flags, diptr);
 # if _mem_struct_statfs_f_type
 #  if defined (MOUNT_NFS3)
-        if (sp->f_type == MOUNT_NFS3)
-        {
+        if (sp->f_type == MOUNT_NFS3) {
             strncat (diptr->options, "v3,",
                     DI_OPT_LEN - strlen (diptr->options) - 1);
         }
@@ -719,10 +716,10 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         strncpy (diptr->special, sp->f_mntfromname, (Size_t) DI_SPEC_NAME_LEN);
         strncpy (diptr->name, sp->f_mntonname, (Size_t) DI_NAME_LEN);
 # if _mem_struct_statfs_f_fsize
-        tblocksz = (dinum_t) sp->f_fsize;
+        tblocksz = sp->f_fsize;
 # endif
 # if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
-        tblocksz = (dinum_t) sp->f_bsize;
+        tblocksz = sp->f_bsize;
 # endif
         di_save_block_sizes (diptr, tblocksz, sp->f_blocks,
             sp->f_bfree, sp->f_bavail);
@@ -810,7 +807,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        dinum_t      tblocksz;
+        uint64_t    tblocksz;
 
         diptr = *diskInfo + idx;
         di_init_disk_info (diptr);
@@ -825,13 +822,13 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
                 DI_SPEC_NAME_LEN);
         strncpy (diptr->name, mntbufp [idx].f_mntonname, DI_NAME_LEN);
 
-        tblocksz = (dinum_t) 1024;
+        tblocksz = 1024;
 
 # if _mem_struct_statfs_f_fsize /* OSF 1.x */
-        tblocksz = (dinum_t) mntbufp [idx].f_fsize;
+        tblocksz = mntbufp [idx].f_fsize;
 # endif
 # if _mem_struct_statfs_f_bsize /* OSF 2.x */
-        tblocksz = (dinum_t) mntbufp [idx].f_bsize;
+        tblocksz = mntbufp [idx].f_bsize;
 # endif
         di_save_block_sizes (diptr, tblocksz, mntbufp [idx].f_blocks,
             mntbufp [idx].f_bfree, mntbufp [idx].f_bavail);
@@ -1077,7 +1074,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        dinum_t      tblocksz;
+        uint64_t    tblocksz;
 
         diptr = *diskInfo + idx;
         di_init_disk_info (diptr);
@@ -1099,13 +1096,10 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         convertMountOptions ((unsigned long) sp->f_flag, diptr);
         di_trimchar (diptr->options, ',');
 
-        if (sp->f_frsize == 0 && sp->f_bsize != 0)
-        {
-            tblocksz = (dinum_t) sp->f_bsize;
-        }
-        else
-        {
-            tblocksz = (dinum_t) sp->f_frsize;
+        if (sp->f_frsize == 0 && sp->f_bsize != 0) {
+            tblocksz = sp->f_bsize;
+        } else {
+            tblocksz = sp->f_frsize;
         }
 
         di_save_block_sizes (diptr, tblocksz, sp->f_blocks,

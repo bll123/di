@@ -1,7 +1,7 @@
 #
 # Copyright 2024 Brad Lanam Pleasant Hill CA
 #
-cmake_minimum_required (VERSION 3.19)
+cmake_minimum_required (VERSION 3.10)
 
 # avoid msys2/windows issue
 set (CMAKE_C_COMPILER_WORKS 1)
@@ -17,14 +17,6 @@ set (default_build_type "Release")
 include (GNUInstallDirs)
 
 set (DI_LIBNAME libdi)
-if (WIN32)
-  set (CMAKE_SHARED_LIBRARY_PREFIX "lib")
-  set (CMAKE_STATIC_LIBRARY_PREFIX "lib")
-endif()
-
-include_directories (
-  "${CMAKE_BINARY_DIR}"
-)
 
 SET (CMAKE_SKIP_BUILD_RPATH FALSE)
 SET (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
@@ -140,13 +132,26 @@ if (NOT WIN32)
     # 15 = Sequoia
     add_compile_options (-mmacosx-version-min=10.12)
     add_link_options (-mmacosx-version-min=10.12)
-    # universal binary
-    set (CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+    # not universal binary, I don't have universal libintl installed.
+    # set (CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
   endif()
 else()
   add_link_options (-static-libgcc)
   add_link_options (-static-libstdc++)
 endif()
+
+#### include paths
+
+include_directories (
+  SYSTEM
+  /opt/local/include
+  "${CMAKE_BINARY_DIR}"
+  "${PROJECT_SOURCE_DIR}/include"
+)
+
+set (CMAKE_REQUIRED_INCLUDES
+  /opt/local/include
+)
 
 #### configuration
 
@@ -170,13 +175,13 @@ include (CheckPrototypeDefinition)
 
 macro (checkPrototype_quotactl hdr)
   check_prototype_definition (quotactl
-    "int quotactl (const char *, int,  int, caddr_t)"
+    "int quotactl (const char * a, int b, int c, caddr_t d)"
     0
     ${hdr}
     _quotactl_pos_1
     )
   check_prototype_definition (quotactl
-    "int quotactl (int, const char *, int, caddr_t)"
+    "int quotactl (int a, const char * b, int c, caddr_t d)"
     0
     ${hdr}
     _quotactl_pos_2
@@ -185,38 +190,105 @@ endmacro()
 
 macro (checkPrototype_statfs hdr)
   check_prototype_definition (statfs
-    "int statfs (const char *, struct statfs *)"
+    "int statfs (const char * a, struct statfs * b)"
     0
     ${hdr}
     _args_statfs_2
     )
   check_prototype_definition (statfs
-    "int statfs (const char *, struct statfs *, int)"
+    "int statfs (const char * a, struct statfs * b, int c)"
     0
     ${hdr}
     _args_statfs_3
     )
   check_prototype_definition (statfs
-    "int statfs (const char *, struct statfs *, int, int)"
+    "int statfs (const char * a, struct statfs * b, int c, int d)"
     0
     ${hdr}
     _args_statfs_4
     )
+  if (_args_statfs_2)
+    set (_args_statfs 2)
+  endif()
+  if (_args_statfs_3)
+    set (_args_statfs 3)
+  endif()
+  if (_args_statfs_4)
+    set (_args_statfs 4)
+  endif()
+endmacro()
+
+macro (checkMember_statfs hdr)
+  check_struct_has_member ("struct statfs" f_bsize
+      ${hdr} _mem_struct_statfs_f_bsize)
+  check_struct_has_member ("struct statfs" f_fsize
+      ${hdr} _mem_struct_statfs_f_fsize)
+  check_struct_has_member ("struct statfs" f_fstyp
+      ${hdr} _mem_struct_statfs_f_fstyp)
+  check_struct_has_member ("struct statfs" f_iosize
+      ${hdr} _mem_struct_statfs_f_iosize)
+  check_struct_has_member ("struct statfs" f_frsize
+      ${hdr} _mem_struct_statfs_f_frsize)
+  check_struct_has_member ("struct statfs" f_fstypename
+      ${hdr} _mem_struct_statfs_f_fstypename)
+  check_struct_has_member ("struct statfs" mount_info
+      ${hdr} _mem_struct_statfs_mount_info)
+  check_struct_has_member ("struct statfs" f_type
+      ${hdr} _mem_struct_statfs_f_type)
 endmacro()
 
 macro (checkPrototype_setmntent hdr)
   check_prototype_definition (setmntent
-    "FILE * setmntent (const char *)"
+    "FILE * setmntent (const char * a)"
     "NULL"
     "stdio.h;stddef.h;${hdr}"
     _args_setmntent_1
     )
   check_prototype_definition (setmntent
-    "FILE * setmntent (const char *, const char *)"
+    "FILE * setmntent (const char * a, const char * b)"
     "NULL"
     "stdio.h;stddef.h;${hdr}"
     _args_setmntent_2
     )
+  if (_args_setmntent_1)
+    set (_args_setmntent 1)
+  endif()
+  if (_args_setmntent_2)
+    set (_args_setmntent 2)
+  endif()
+endmacro()
+
+macro (checkPrototype_getfsstat hdr)
+  check_prototype_definition (getfsstat
+    "int getfsstat (struct statfs * a, int b, int c)"
+    0
+    "stdio.h;stddef.h;${hdr}"
+    _getfsstat_type_int
+    )
+  check_prototype_definition (getfsstat
+    "int getfsstat (struct statfs * a, long b, int c)"
+    0
+    "stdio.h;stddef.h;${hdr}"
+    _getfsstat_type_long
+    )
+  if (_getfsstat_type_int)
+    set (_c_arg_2_getfsstat int)
+  endif()
+  if (_getfsstat_type_long)
+    set (_c_arg_2_getfsstat long)
+  endif()
+endmacro()
+
+macro (checkPrototype_getvfsstat hdr)
+  check_prototype_definition (getvfsstat
+    "int getvfsstat (struct statvfs * a, int b, int c)"
+    0
+    "stdio.h;stddef.h;${hdr}"
+    _args_getvfsstat_3
+    )
+  if (_args_getvfsstat_3)
+    set (_args_getvfsstat 3)
+  endif()
 endmacro()
 
 macro (checkdqblk hdr)
@@ -285,6 +357,7 @@ check_include_file (string.h _hdr_string)
 check_include_file (strings.h _hdr_strings)
 check_include_file (time.h _hdr_time)
 check_include_file (tommath.h _hdr_tommath)
+check_include_file (libtommath/tommath.h _hdr_libtommath_tommath)
 check_include_file (ufs/quota.h _hdr_ufs_quota)
 check_include_file (ufs/ufs/quota.h _hdr_ufs_ufs_quota)
 check_include_file (unistd.h _hdr_unistd)
@@ -426,26 +499,6 @@ if (DEFINED MNTTAB_HDR)
       ${MNTTAB_HDR} _mem_struct_mnttab_mt_mntopts)
 endif()
 
-if (_sys_statfs)
-  set (CMAKE_EXTRA_INCLUDE_FILES <sys/statfs.h>)
-  check_struct_has_member ("struct statfs" f_bsize
-      sys/statfs.h _mem_struct_statfs_f_bsize)
-  check_struct_has_member ("struct statfs" f_fsize
-      sys/statfs.h _mem_struct_statfs_f_fsize)
-  check_struct_has_member ("struct statfs" f_fstyp
-      sys/statfs.h _mem_struct_statfs_f_fstyp)
-  check_struct_has_member ("struct statfs" f_iosize
-      sys/statfs.h _mem_struct_statfs_f_iosize)
-  check_struct_has_member ("struct statfs" f_frsize
-      sys/statfs.h _mem_struct_statfs_f_frsize)
-  check_struct_has_member ("struct statfs" f_fstypename
-      sys/statfs.h _mem_struct_statfs_f_fstypename)
-  check_struct_has_member ("struct statfs" mount_info
-      sys/statfs.h _mem_struct_statfs_mount_info)
-  check_struct_has_member ("struct statfs" f_type
-      sys/statfs.h _mem_struct_statfs_f_type)
-  unset (CMAKE_EXTRA_INCLUDE_FILES)
-endif()
 if (_sys_statvfs)
   set (CMAKE_EXTRA_INCLUDE_FILES <sys/statvfs.h>)
   check_type_size ("statvfs_t" _typ_statvfs_t)
@@ -494,33 +547,57 @@ endif()
 if (_hdr_mntent)
  set (SETMNTENT_HDR mntent.h)
 endif()
+set (_args_setmntent 0)
 if (DEFINED SETMNTENT_HDR)
   message ("setmntent header: ${SETMNTENT_HDR}")
   checkPrototype_setmntent (${SETMNTENT_HDR})
 endif()
 
-if (_sys_statfs)
+if ((_lib_statfs OR _lib_getfsstat) AND _sys_mount)
+  set (STATFS_HDR "sys/mount.h")
+endif()
+if ((_lib_statfs OR _lib_getfsstat) AND _sys_statfs)
   set (STATFS_HDR "sys/statfs.h")
 endif()
-if (_sys_vfs)
+if ((_lib_statfs OR _lib_getfsstat) AND _sys_vfs)
   set (STATFS_HDR "sys/vfs.h")
 endif()
+set (_args_statfs 0)
 if (DEFINED STATFS_HDR)
   message ("statfs header: ${STATFS_HDR}")
   checkPrototype_statfs (${STATFS_HDR})
+  checkMember_statfs (${STATFS_HDR})
 endif()
 
-check_source_compiles (C
-"#include <time.h>
-#include <sys/time.h>
-int main (int argc, char *argv []) { return 0; }"
-  _inc_conflict__hdr_time__sys_time)
+if (DEFINED STATFS_HDR AND _lib_getfsstat)
+  message ("getfsstat header: ${STATFS_HDR}")
+  checkPrototype_getfsstat (${STATFS_HDR})
+endif()
 
-check_source_compiles (C
-"#include <sys/quota.h>
-#include <linux/quota.h>
-int main (int argc, char *argv []) { return 0; }"
-  _inc_conflict__sys_quota__hdr_linux_quota)
+set (_args_getvfsstat 0)
+# ### needs fixing
+set (GETVFSSTAT_HDR "sys/mount.h")
+if (DEFINED GETVFSSTAT_HDR AND _lib_getvfsstat)
+  message ("getvfsstat header: ${GETVFSSTAT_HDR}")
+  checkPrototype_getvfsstat (${GETVFSSTAT_HDR})
+endif()
+
+# check_source_compiles requires a fairly recent version of cmake (3.19).
+# instead, assume that anything with cmake doesn't have broken headers
+set (_inc_conflict__hdr_time__sys_time 1)
+set (_inc_conflict__sys_quota__hdr_linux_quota 1)
+
+# check_source_compiles (C
+# "#include <time.h>
+# #include <sys/time.h>
+# int main (int argc, char *argv []) { return 0; }"
+#   _inc_conflict__hdr_time__sys_time)
+#
+# check_source_compiles (C
+# "#include <sys/quota.h>
+# #include <linux/quota.h>
+# int main (int argc, char *argv []) { return 0; }"
+#   _inc_conflict__sys_quota__hdr_linux_quota)
 
 check_symbol_exists (O_NOCTTY fcntl.h _const_O_NOCTTY)
 #if (_hdr_fcntl)
@@ -539,13 +616,13 @@ if (DEFINED DI_USE_MATH AND NOT DI_USE_MATH STREQUAL "")
   set (_use_math ${DI_USE_MATH})
 endif()
 if (NOT DEFINED _use_math)
-  if (_hdr_gmp AND NOT _hdr_tommath)
+  if (_hdr_gmp AND NOT (_hdr_tommath OR _hdr_libtommath_tommath))
     set (_use_math DI_GMP)
   endif()
-  if (_hdr_tommath AND NOT _hdr_gmp)
+  if ((_hdr_tommath OR _hdr_libtommath_tommath) AND NOT _hdr_gmp)
     set (_use_math DI_TOMMATH)
   endif()
-  if (_hdr_gmp AND _hdr_tommath)
+  if (_hdr_gmp AND (_hdr_tommath OR _hdr_libtommath_tommath))
     # use the smaller library if both are present
     set (_use_math DI_TOMMATH)
   endif()
@@ -560,16 +637,32 @@ configure_file (config.h.in config.h)
 #### libraries
 
 add_library (${DI_LIBNAME}
-  didiskutil.c
-  digetentries.c
-  digetinfo.c
-  dilib.c
-  diquota.c
-  getoptn.c
-  options.c
-  strutils.c
+  src/didiskutil.c
+  src/digetentries.c
+  src/digetinfo.c
+  src/dilib.c
+  src/diquota.c
+  src/getoptn.c
+  src/options.c
+  src/strutils.c
 )
+# cmake's auto prefixing is annoying
+set_target_properties (${DI_LIBNAME} PROPERTIES PREFIX "")
+if (WIN32)
+  set (CMAKE_SHARED_LIBRARY_PREFIX "lib")
+  set (CMAKE_STATIC_LIBRARY_PREFIX "lib")
+endif()
 addIntlLibrary (${DI_LIBNAME})
+if (_use_math STREQUAL "DI_GMP")
+  target_link_libraries (${DI_LIBNAME} PRIVATE
+    ${GMP_LDFLAGS}
+  )
+endif()
+if (_use_math STREQUAL "DI_TOMMATH")
+  target_link_libraries (${DI_LIBNAME} PRIVATE
+    ${TOMMATH_LDFLAGS}
+  )
+endif()
 
 # I don't know if this is needed.  windows works fine for me.
 if (WIN32)
@@ -583,8 +676,8 @@ set_target_properties (${DI_LIBNAME} PROPERTIES
 #### executables
 
 add_executable (di
-  di.c
-  display.c
+  src/di.c
+  src/display.c
 )
 target_link_libraries (di PRIVATE
   ${DI_LIBNAME}
@@ -601,7 +694,7 @@ if (_use_math STREQUAL "DI_TOMMATH")
 endif()
 
 add_executable (dimathtest
-  dimathtest.c
+  src/dimathtest.c
 )
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (dimathtest PRIVATE

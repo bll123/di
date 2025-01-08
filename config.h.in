@@ -10,7 +10,6 @@
 #define _key_void 1
 #define _key_const 1
 #define _param_void_star 1
-#define _proto_stdc 1
 #cmakedefine01 _hdr_ctype
 #cmakedefine01 _hdr_dirent
 #cmakedefine01 _hdr_errno
@@ -42,6 +41,8 @@
 #cmakedefine01 _hdr_string
 #cmakedefine01 _hdr_strings
 #cmakedefine01 _hdr_time
+#cmakedefine01 _hdr_tommath
+#cmakedefine01 _hdr_libtommath_tommath
 #cmakedefine01 _hdr_ufs_quota
 #cmakedefine01 _hdr_ufs_ufs_quota
 #cmakedefine01 _hdr_unistd
@@ -138,37 +139,12 @@
 #cmakedefine01 _lib_xdr_int
 #cmakedefine01 _lib_zone_getattr
 #cmakedefine01 _lib_zone_list
-// #cmakedefine01 _args_getvfsstat
 #cmakedefine01 _quotactl_pos_1
 #cmakedefine01 _quotactl_pos_2
-#cmakedefine01 _args_setmntent_1
-#cmakedefine01 _args_setmntent_2
-#define _args_setmntent 0
-#if _args_setmntent_1
-# undef _args_setmntent
-# define _args_setmntent 1
-#endif
-#if _args_setmntent_2
-# undef _args_setmntent
-# define _args_setmntent 2
-#endif
-#cmakedefine01 _args_statfs_4
-#cmakedefine01 _args_statfs_2
-#cmakedefine01 _args_statfs_3
-#cmakedefine01 _args_statfs_4
-#define _args_statfs 0
-#if _args_statfs_2
-# undef _args_statfs
-# define _args_statfs 2
-#endif
-#if _args_statfs_3
-# undef _args_statfs
-# define _args_statfs 3
-#endif
-#if _args_statfs_4
-# undef _args_statfs
-# define _args_statfs 4
-#endif
+#define _args_setmntent ${_args_setmntent}
+#define _args_statfs ${_args_statfs}
+#define _c_arg_2_getfsstat ${_c_arg_2_getfsstat}
+#define _args_getvfsstat ${_args_getvfsstat}
 // #cmakedefine01 _npt_getenv 0
 // #cmakedefine01 _npt_getmnt 1
 // #cmakedefine01 _npt_mntctl 1

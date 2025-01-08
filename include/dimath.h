@@ -28,7 +28,12 @@
   typedef mpq_t didbl_t;
 #elif _use_math == DI_TOMMATH
 # define MP_WUR
-# include <tommath.h>
+# if _hdr_tommath
+#  include <tommath.h>
+# endif
+# if _hdr_libtommath_tommath
+#  include <libtommath/tommath.h>
+# endif
   typedef mp_int dinum_t;
   typedef mp_int didbl_t;
 # else /* DI_UINT64 */

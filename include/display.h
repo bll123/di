@@ -1,10 +1,9 @@
 /*
- * Copyright 2016-2018 Brad Lanam Walnut Creek CA USA
  * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
  */
 
-#ifndef DI_INC_DILIB_H
-#define DI_INC_DILIB_H
+#ifndef DI_INC_DISPLAY_H
+#define DI_INC_DISPLAY_H
 
 #include "config.h"
 #include "di.h"
@@ -13,12 +12,12 @@
 extern "C" {
 # endif
 
-#if ! _dcl_errno
-  extern int errno;
-#endif
+    /* display.c */
+extern char *printDiskInfo      (di_data_t *);
+extern void initLocale          (void);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }
 # endif
 
-#endif /* DI_INC_DILIB_H */
+#endif /* DI_INC_DISPLAY_H */

@@ -109,16 +109,6 @@ static formatNames_t formatNames [] =
 #define DI_FORMATNAMES_SIZE (sizeof (formatNames) / sizeof (formatNames_t))
 
 
-#define DI_SORT_NONE            'n'
-#define DI_SORT_MOUNT           'm'
-#define DI_SORT_SPECIAL         's'
-#define DI_SORT_TOTAL           'T'
-#define DI_SORT_FREE            'f'
-#define DI_SORT_AVAIL           'a'
-#define DI_SORT_REVERSE         'r'
-#define DI_SORT_TYPE            't'
-#define DI_SORT_ASCENDING       1
-
 #define DI_PERC_FMT             " %%3.0" PRIu64 "%%%% "
 #define DI_POSIX_PERC_FMT       "    %%3.0" PRIu64 "%%%% "
 #define DI_JUST_LEFT            0
@@ -144,7 +134,6 @@ static sizeTable_t sizeTable [DI_SIZETAB_SIZE];
 
 static void addTotals           (const di_disk_info_t *, di_disk_info_t *, int);
 static void getMaxFormatLengths (di_data_t *);
-static int  diCompare           (const di_opt_t *, const di_disk_info_t *, unsigned int, unsigned int);
 static int  findDispSize        (dinum_t *);
 static Size_t istrlen           (const char *);
 static char *printInfo          (di_disk_info_t *, di_opt_t *, diOutput_t *);
@@ -379,65 +368,6 @@ printDiskInfo (di_data_t *di_data)
 #endif
   return strdup ("dbg\n");
 }
-
-/*
- * sortArray
- *
- */
-void
-sortArray (di_opt_t *diopts, di_disk_info_t *data, int count, int sidx)
-{
-  unsigned int  tempIndex;
-  int           gap;
-  int           j;
-  int           i;
-
-  if (count <= 1)
-  {
-    return;
-  }
-
-  gap = 1;
-  while (gap < count)
-  {
-      gap = 3 * gap + 1;
-  }
-
-  for (gap /= 3; gap > 0; gap /= 3)
-  {
-    for (i = gap; i < count; ++i)
-    {
-      tempIndex = data[i].sortIndex[sidx];
-      j = i - gap;
-
-      while (j >= 0 && diCompare (diopts, data, data[j].sortIndex[sidx], tempIndex) > 0)
-      {
-        data[j + gap].sortIndex[sidx] = data[j].sortIndex[sidx];
-        j -= gap;
-      }
-
-      j += gap;
-      if (j != i)
-      {
-        data[j].sortIndex[sidx] = tempIndex;
-      }
-    }
-  }
-}
-
-/* for debugging */
-const char *
-getPrintFlagText (int pf)
-{
-  return pf == DI_PRNT_OK ? "ok" :
-      pf == DI_PRNT_BAD ? "bad" :
-      pf == DI_PRNT_IGNORE ? "ignore" :
-      pf == DI_PRNT_EXCLUDE ? "exclude" :
-      pf == DI_PRNT_OUTOFZONE ? "outofzone" :
-      pf == DI_PRNT_FORCE ? "force" :
-      pf == DI_PRNT_SKIP ? "skip" : "unknown";
-}
-
 
 static void
 appendFormatStr (char *fmt, const char *val, char **ptr, Size_t *clen, Size_t *len)
@@ -1383,101 +1313,6 @@ printPerc (dinum_t *used, dinum_t *totAvail, const char *format)
   return tdata;
 }
 
-
-static int
-diCompare (const di_opt_t *diopts, const di_disk_info_t *data,
-           unsigned int idx1, unsigned int idx2)
-{
-    int             rc;
-    int             sortOrder;
-    const char            *ptr;
-    const di_disk_info_t    *d1;
-    const di_disk_info_t    *d2;
-
-        /* reset sort order to the default start value */
-    sortOrder = DI_SORT_ASCENDING;
-    rc = 0;
-
-    d1 = &(data[idx1]);
-    d2 = &(data[idx2]);
-
-    ptr = diopts->sortType;
-    while (*ptr)
-    {
-      switch (*ptr)
-      {
-        case DI_SORT_NONE:
-        {
-            break;
-        }
-
-        case DI_SORT_MOUNT:
-        {
-            rc = strcoll (d1->name, d2->name);
-            rc *= sortOrder;
-            break;
-        }
-
-        case DI_SORT_REVERSE:
-        {
-            sortOrder *= -1;
-            break;
-        }
-
-        case DI_SORT_SPECIAL:
-        {
-            rc = strcoll (d1->special, d2->special);
-            rc *= sortOrder;
-            break;
-        }
-
-        case DI_SORT_TYPE:
-        {
-            rc = strcoll (d1->fsType, d2->fsType);
-            rc *= sortOrder;
-            break;
-        }
-
-        case DI_SORT_AVAIL:
-        case DI_SORT_FREE:
-        case DI_SORT_TOTAL:
-        {
-          int   temp;
-
-          temp = 0;
-          switch (*ptr) {
-            case DI_SORT_AVAIL:
-            {
-              temp = dinum_cmp (&d1->values [DI_SPACE_AVAIL], &d2->values [DI_SPACE_AVAIL]);
-              break;
-            }
-            case DI_SORT_FREE:
-            {
-              temp = dinum_cmp (&d1->values [DI_SPACE_FREE], &d2->values [DI_SPACE_FREE]);
-              break;
-            }
-            case DI_SORT_TOTAL:
-            {
-              temp = dinum_cmp (&d1->values [DI_SPACE_TOTAL], &d2->values [DI_SPACE_TOTAL]);
-              break;
-            }
-          }
-
-          rc *= sortOrder;
-          break;
-        }
-      } /* switch on sort type */
-
-      if (rc != 0)
-      {
-        return rc;
-      }
-
-      ++ptr;
-    }
-
-    return rc;
-}
 
 static void
 getMaxFormatLengths (di_data_t *di_data)
