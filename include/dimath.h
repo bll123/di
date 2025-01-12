@@ -49,6 +49,9 @@
   typedef double didbl_t;
 #endif
 
+#define DI_PERC_PRECISION 1000000
+#define DI_PERC_DIV ((double) (DI_PERC_PRECISION / 100));
+
 static inline void
 dinum_init (dinum_t *r)
 {
@@ -291,7 +294,7 @@ dinum_mul_uu (dinum_t *r, diuint_t vala, diuint_t valb)
 #endif
 }
 
-/* rounds up always */
+/* ceiling of number */
 static inline void
 dinum_scale (dinum_t *result, dinum_t *r, dinum_t *val)
 {
@@ -322,6 +325,58 @@ dinum_scale (dinum_t *result, dinum_t *r, dinum_t *val)
     *result += 1;
   }
 #endif
+}
+
+static inline double
+dinum_perc (dinum_t *r, dinum_t *val)
+{
+  double      dval = 0.0;
+
+#if _use_math == DI_GMP
+  mpz_t     quot;
+  mpz_t     rem;
+  mpz_t     t;
+  double    tval;
+
+  mpz_init (quot);
+  mpz_init (t);
+
+  /* multiply by a larger value */
+  /* so that the double can get rounded appropriately */
+  mpz_mul_ui (t, *r, DI_PERC_PRECISION);
+  mpz_tdiv_q (quot, t, *val);
+  dval = mpz_get_d (quot);
+  dval /= DI_PERC_DIV;
+
+  mpz_clear (quot);
+  mpz_clear (t);
+#elif _use_math == DI_TOMMATH
+  mp_int    quot;
+  mp_int    rem;
+  mp_int    t;
+
+  mp_init (&quot);
+  mp_init (&rem);
+  mp_init (&t);
+
+  /* multiply by a larger value */
+  /* so that the double can get rounded appropriately */
+  mp_set_u64 (&t, DI_PERC_PRECISION);
+  mp_mul (r, &t, &t);
+  mp_div (&t, val, &quot, &rem);
+  dval = mp_get_double (&quot);
+  dval /= DI_PERC_DIV;
+
+  mp_clear (&t);
+  mp_clear (&quot);
+  mp_clear (&rem);
+#else
+  /* in the case of a uint, simply convert and divide */
+  dval = (double) *r / (double) *val;
+  dval *= 100.0;
+#endif
+
+  return dval;
 }
 
 static inline void

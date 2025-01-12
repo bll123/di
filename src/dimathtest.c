@@ -8,6 +8,7 @@
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
+#include <math.h>
 
 #include "dimath.h"
 
@@ -17,6 +18,7 @@ main (int argc, char *argv [])
   dinum_t   a;
   dinum_t   b;
   dinum_t   r;
+  double    dval;
   char      buff [200];
   int       tcount = 0;
   int       ecount = 0;
@@ -258,38 +260,35 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-#if 0
   /* percentage tests */
+  dval = 1024 * 1024 * 0.01;
+  dinum_set_u (&a, (diuint_t) dval);
+  dinum_set_u (&b, 1024 * 1024);
+  dval = dinum_perc (&a, &b);
+  ++tcount;
+  if (fabs (dval - 1.0) > 0.0001) {
+    fprintf (stderr, "%d: perc 1024 a fail %.4f\n", tcount, dval);
+    ++ecount;
+  }
+
+  dval = 1024 * 1024 * 0.5;
+  dinum_set_u (&a, (diuint_t) dval);
+  dinum_set_u (&b, 1024 * 1024);
+  dval = dinum_perc (&a, &b);
+  ++tcount;
+  if (fabs (dval - 50.0) > 0.0001) {
+    fprintf (stderr, "%d: perc 1024 b fail %.4f\n", tcount, dval);
+    ++ecount;
+  }
+
   dinum_set_u (&a, 1024 * 1024);
-  dinum_set_u (&b, 1024);
+  dinum_set_u (&b, 1024 * 1024);
   dval = dinum_perc (&a, &b);
   ++tcount;
-  if (dinum_cmp_s (&r, 1024) != 0) {
-    dinum_str (&r, buff, sizeof (buff));
-    fprintf (stderr, "%d: scale 1024 a fail %s\n", tcount, buff);
+  if (fabs (dval - 100.0) > 0.0001) {
+    fprintf (stderr, "%d: perc 1024 c fail %.4f\n", tcount, dval);
     ++ecount;
   }
-
-  dinum_set_u (&a, 1024 * 1024 + 510);
-  dinum_set_u (&b, 1024);
-  dval = dinum_perc (&a, &b);
-  ++tcount;
-  if (dinum_cmp_s (&r, 1025) != 0) {
-    dinum_str (&r, buff, sizeof (buff));
-    fprintf (stderr, "%d: scale 1024 b fail %s\n", tcount, buff);
-    ++ecount;
-  }
-
-  dinum_set_u (&a, 1024 * 1024 + 512);
-  dinum_set_u (&b, 1024);
-  dval = dinum_perc (&a, &b);
-  ++tcount;
-  if (dinum_cmp_s (&r, 1025) != 0) {
-    dinum_str (&r, buff, sizeof (buff));
-    fprintf (stderr, "%d: scale 1024 c fail %s\n", tcount, buff);
-    ++ecount;
-  }
-#endif
 
   dinum_clear (&a);
   dinum_clear (&b);
