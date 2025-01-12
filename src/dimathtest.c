@@ -16,6 +16,7 @@ main (int argc, char *argv [])
 {
   dinum_t   a;
   dinum_t   b;
+  dinum_t   r;
   char      buff [200];
   int       tcount = 0;
   int       ecount = 0;
@@ -26,11 +27,12 @@ main (int argc, char *argv [])
 #elif _use_math == DI_TOMMATH
   fprintf (stdout, "TOMMATH:\n");
 #else
-  fprintf (stdout, "UINT64: %d %d %d\n", _siz_uint64_t, _siz_long, _siz_long_long);
+  fprintf (stdout, "UINT: %d %d %d\n", _siz_uint64_t, _siz_long, _siz_long_long);
 #endif
 
   dinum_init (&a);
   dinum_init (&b);
+  dinum_init (&r);
 
   /* set */
   dinum_set_u (&a, 1);
@@ -225,15 +227,73 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-/*
-  dinum_add_u (&a, 18446744073709551615ull);
-  dinum_add_u (&a, 18446744073709551615ull);
-  dinum_str (&a, buff, sizeof (buff));
-  fprintf (stdout, "buff: %s\n", buff);
-*/
+  /* scaled value tests */
+  dinum_set_u (&a, 1024 * 1024);
+  dinum_set_u (&b, 1024);
+  dinum_scale (&r, &a, &b);
+  ++tcount;
+  if (dinum_cmp_s (&r, 1024) != 0) {
+    dinum_str (&r, buff, sizeof (buff));
+    fprintf (stderr, "%d: scale 1024 a fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+  dinum_set_u (&a, 1024 * 1024 + 510);
+  dinum_set_u (&b, 1024);
+  dinum_scale (&r, &a, &b);
+  ++tcount;
+  if (dinum_cmp_s (&r, 1025) != 0) {
+    dinum_str (&r, buff, sizeof (buff));
+    fprintf (stderr, "%d: scale 1024 b fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+  dinum_set_u (&a, 1024 * 1024 + 512);
+  dinum_set_u (&b, 1024);
+  dinum_scale (&r, &a, &b);
+  ++tcount;
+  if (dinum_cmp_s (&r, 1025) != 0) {
+    dinum_str (&r, buff, sizeof (buff));
+    fprintf (stderr, "%d: scale 1024 c fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+#if 0
+  /* percentage tests */
+  dinum_set_u (&a, 1024 * 1024);
+  dinum_set_u (&b, 1024);
+  dval = dinum_perc (&a, &b);
+  ++tcount;
+  if (dinum_cmp_s (&r, 1024) != 0) {
+    dinum_str (&r, buff, sizeof (buff));
+    fprintf (stderr, "%d: scale 1024 a fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+  dinum_set_u (&a, 1024 * 1024 + 510);
+  dinum_set_u (&b, 1024);
+  dval = dinum_perc (&a, &b);
+  ++tcount;
+  if (dinum_cmp_s (&r, 1025) != 0) {
+    dinum_str (&r, buff, sizeof (buff));
+    fprintf (stderr, "%d: scale 1024 b fail %s\n", tcount, buff);
+    ++ecount;
+  }
+
+  dinum_set_u (&a, 1024 * 1024 + 512);
+  dinum_set_u (&b, 1024);
+  dval = dinum_perc (&a, &b);
+  ++tcount;
+  if (dinum_cmp_s (&r, 1025) != 0) {
+    dinum_str (&r, buff, sizeof (buff));
+    fprintf (stderr, "%d: scale 1024 c fail %s\n", tcount, buff);
+    ++ecount;
+  }
+#endif
 
   dinum_clear (&a);
   dinum_clear (&b);
+  dinum_clear (&r);
   fprintf (stdout, "tests: %d errors: %d\n", tcount, ecount);
   return ecount;
 }

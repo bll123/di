@@ -512,6 +512,7 @@ check_type_size ("size_t" _typ_size_t)
 check_type_size ("uint_t" _typ_uint_t)
 check_type_size ("uid_t" _typ_uid_t)
 check_type_size ("uint64_t" _siz_uint64_t)
+check_type_size ("uint32_t" _siz_uint32_t)
 check_type_size ("long" _siz_long)
 check_type_size ("long long" _siz_long_long)
 
@@ -612,7 +613,7 @@ check_symbol_exists (MCTL_QUERY sys/mntctl.h _define_MCTL_QUERY)
 check_symbol_exists (S_ISLNK sys/stat.h _define_S_ISLNK)
 
 if (DEFINED DI_USE_MATH AND NOT DI_USE_MATH STREQUAL "")
-  # must be one of DI_UINT64, DI_GMP, DI_TOMMATH
+  # must be one of DI_UINT, DI_GMP, DI_TOMMATH
   set (_use_math ${DI_USE_MATH})
 endif()
 if (NOT DEFINED _use_math)
@@ -623,12 +624,12 @@ if (NOT DEFINED _use_math)
     set (_use_math DI_TOMMATH)
   endif()
   if (_hdr_gmp AND (_hdr_tommath OR _hdr_libtommath_tommath))
-    # use the smaller library if both are present
-    set (_use_math DI_TOMMATH)
+    # use the more popular library if both are present
+    set (_use_math DI_GMP)
   endif()
 endif()
 if (NOT DEFINED _use_math)
-  set (_use_math DI_UINT64)
+  set (_use_math DI_UINT)
 endif()
 message ("math-library: ${_use_math}")
 

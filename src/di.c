@@ -93,8 +93,9 @@
 
 #include "dilib.h"
 #include "di.h"
+#include "version.h"
 
-/* end of system specific includes/configurations */
+static void usage (void);
 
 int
 main (int argc, char * argv [])
@@ -113,6 +114,7 @@ main (int argc, char * argv [])
       exit (1);
     }
     case DI_EXIT_HELP: {
+      usage ();
       exit (0);
     }
     case DI_EXIT_NORM: {
@@ -126,3 +128,34 @@ main (int argc, char * argv [])
   di_cleanup (&di_data);
   return 0;
 }
+
+static void
+usage (void)
+{
+  printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
+          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
+  printf (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
+  printf (DI_GT("       [-I include-fstyp-list] [file [...]]\n"));
+  printf (DI_GT("   -a   : print all mounted devices\n"));
+  printf (DI_GT("   -d x : size to print blocks in (512 - POSIX, k - kbytes,\n"));
+  printf (DI_GT("          m - megabytes, g - gigabytes, t - terabytes, h - human readable).\n"));
+  printf (DI_GT("   -f x : use format string <x>\n"));
+  printf (DI_GT("   -I x : include only file system types in <x>\n"));
+  printf (DI_GT("   -x x : exclude file system types in <x>\n"));
+  printf (DI_GT("   -l   : display local filesystems only\n"));
+  printf (DI_GT("   -n   : don't print header\n"));
+  printf (DI_GT("   -t   : print totals\n"));
+  printf (DI_GT(" Format string values:\n"));
+  printf (DI_GT("    m - mount point                     M - mount point, full length\n"));
+  printf (DI_GT("    b - total kbytes                    B - kbytes available for use\n"));
+  printf (DI_GT("    u - used kbytes                     c - calculated kbytes in use\n"));
+  printf (DI_GT("    f - kbytes free                     v - kbytes available\n"));
+  printf (DI_GT("    p - percentage not avail. for use   1 - percentage used\n"));
+  printf (DI_GT("    2 - percentage of user-available space in use.\n"));
+  printf (DI_GT("    i - total file slots (i-nodes)      U - used file slots\n"));
+  printf (DI_GT("    F - free file slots                 P - percentage file slots used\n"));
+  printf (DI_GT("    s - filesystem name                 S - filesystem name, full length\n"));
+  printf (DI_GT("    t - disk partition type             T - partition type, full length\n"));
+  printf (DI_GT("See manual page for more options.\n"));
+}
+

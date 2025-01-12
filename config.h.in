@@ -92,6 +92,7 @@
 #cmakedefine01 _typ_uint_t
 #cmakedefine01 _typ_uid_t
 #define _siz_uint64_t ${_siz_uint64_t}
+#define _siz_uint32_t ${_siz_uint32_t}
 #define _siz_long ${_siz_long}
 #define _siz_long_long ${_siz_long_long}
 
@@ -171,7 +172,7 @@
 // #cmakedefine01 _has_std_quotas
 // #cmakedefine01 _has_std_nfs_quotas
 
-#define DI_UINT64 0
+#define DI_UINT 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
 #define _use_math ${_use_math}

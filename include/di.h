@@ -237,7 +237,10 @@ typedef struct {
 typedef struct {
   char            ** argv;
   const char      *formatString;
+  /* should always be <= 1024 */
+  /* usually 1000 or 1024 */
   int             dispBlockSize;
+  dinum_t         dispScaleValue;
   unsigned int    baseDispSize;
   unsigned int    baseDispIdx;
   char            sortType [DI_SORT_MAX + 1];
@@ -307,8 +310,8 @@ extern void diquota                 (di_quota_t *);
 
 /* didiskutil.c */
 extern void di_init_disk_info (di_disk_info_t *);
-extern void di_save_block_sizes (di_disk_info_t *, uint64_t, uint64_t, uint64_t, uint64_t);
-extern void di_save_inode_sizes (di_disk_info_t *, uint64_t, uint64_t, uint64_t);
+extern void di_save_block_sizes (di_disk_info_t *, diuint_t, diuint_t, diuint_t, diuint_t);
+extern void di_save_inode_sizes (di_disk_info_t *, diuint_t, diuint_t, diuint_t);
 #if _lib_getmntent \
     && ! _lib_getmntinfo \
     && ! _lib_getfsstat \

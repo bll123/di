@@ -12,14 +12,22 @@
 # include <inttypes.h>
 #endif
 
-#if ! defined (_siz_uint64_t) || _siz_uint64_t == 0
-# if _siz_long == 8
-  typedef unsigned long uint64_t;
-  typedef long int64_t;
-# elif _siz_long_long == 8
-  typedef unsigned long long uint64_t;
-  typedef long long int64_t;
-# endif
+#if _siz_uint64_t == 8
+  typedef uint64_t diuint_t;
+  typedef int64_t diint_t;
+#elif _siz_long == 8
+  typedef unsigned long diuint_t;
+  typedef long diint_t;
+#elif _siz_long_long == 8
+  typedef unsigned long long diuint_t;
+  typedef long long diint_t;
+#elif _siz_long == 4
+  typedef unsigned long diuint_t;
+  typedef long diint_t;
+#else
+  /* unknown */
+  typedef unsigned long diuint_t;
+  typedef long diint_t;
 #endif
 
 #if _use_math == DI_GMP
@@ -36,8 +44,8 @@
 # endif
   typedef mp_int dinum_t;
   typedef mp_int didbl_t;
-# else /* DI_UINT64 */
-  typedef uint64_t dinum_t;
+# else /* DI_UINT */
+  typedef diuint_t dinum_t;
   typedef double didbl_t;
 #endif
 
@@ -76,7 +84,7 @@ dinum_set (dinum_t *r, const dinum_t *val)
 }
 
 static inline void
-dinum_set_u (dinum_t *r, uint64_t val)
+dinum_set_u (dinum_t *r, diuint_t val)
 {
 #if _use_math == DI_GMP
   mpz_set_ui (*r, val);
@@ -88,7 +96,7 @@ dinum_set_u (dinum_t *r, uint64_t val)
 }
 
 static inline void
-dinum_set_s (dinum_t *r, int64_t val)
+dinum_set_s (dinum_t *r, diint_t val)
 {
 #if _use_math == DI_GMP
   mpz_set_si (*r, val);
@@ -100,7 +108,7 @@ dinum_set_s (dinum_t *r, int64_t val)
 }
 
 static inline void
-dinum_add_u (dinum_t *r, uint64_t val)
+dinum_add_u (dinum_t *r, diuint_t val)
 {
 #if _use_math == DI_GMP
   mpz_t     v;
@@ -114,13 +122,9 @@ dinum_add_u (dinum_t *r, uint64_t val)
   mpz_clear (v);
 #elif _use_math == DI_TOMMATH
   mp_int    v;
-//  mp_int    t;
 
   mp_init_u64 (&v, val);
-//  mp_init (&t);
-//  mp_copy (r, &t);
   mp_add (r, &v, r);
-//  mp_clear (&t);
   mp_clear (&v);
 #else
   *r += val;
@@ -128,7 +132,7 @@ dinum_add_u (dinum_t *r, uint64_t val)
 }
 
 static inline void
-dinum_sub_u (dinum_t *r, uint64_t val)
+dinum_sub_u (dinum_t *r, diuint_t val)
 {
 #if _use_math == DI_GMP
   mpz_t     v;
@@ -142,13 +146,9 @@ dinum_sub_u (dinum_t *r, uint64_t val)
   mpz_clear (v);
 #elif _use_math == DI_TOMMATH
   mp_int    v;
-//  mp_int    t;
 
   mp_init_u64 (&v, val);
-//  mp_init (&t);
-//  mp_copy (r, &t);
   mp_sub (r, &v, r);
-//  mp_clear (&t);
   mp_clear (&v);
 #else
   *r -= val;
@@ -166,12 +166,7 @@ dinum_add (dinum_t *r, const dinum_t *val)
   mpz_add (*r, t, *val);
   mpz_clear (t);
 #elif _use_math == DI_TOMMATH
-//  mp_int    t;
-
-//  mp_init (&t);
-//  mp_copy (r, &t);
   mp_add (r, val, r);
-//  mp_clear (&t);
 #else
   *r += *val;
 #endif
@@ -188,12 +183,7 @@ dinum_sub (dinum_t *r, const dinum_t *val)
   mpz_sub (*r, t, *val);
   mpz_clear (t);
 #elif _use_math == DI_TOMMATH
-//  mp_int    t;
-
-//  mp_init (&t);
-//  mp_copy (r, &t);
   mp_sub (r, val, r);
-//  mp_clear (&t);
 #else
   *r -= *val;
 #endif
@@ -219,7 +209,7 @@ dinum_cmp (const dinum_t *r, const dinum_t *val)
 }
 
 static inline int
-dinum_cmp_s (const dinum_t *r, int64_t val)
+dinum_cmp_s (const dinum_t *r, diint_t val)
 {
 #if _use_math == DI_GMP
   return mpz_cmp_si (*r, val);
@@ -230,10 +220,10 @@ dinum_cmp_s (const dinum_t *r, int64_t val)
   mp_set_i64 (&t, val);
   return mp_cmp (r, &t);
 #else
-  int64_t   t;
+  diint_t   t;
   int       rc = 0;
 
-  t = (int64_t) *r;
+  t = (diint_t) *r;
   if (t < val) {
     rc = -1;
   } else if (t > val) {
@@ -254,32 +244,23 @@ dinum_mul (dinum_t *r, const dinum_t *val)
   mpz_mul (*r, t, *val);
   mpz_clear (t);
 #elif _use_math == DI_TOMMATH
-//  mp_int    t;
-
-//  mp_init (&t);
-//  mp_copy (&t, r);
   mp_mul (r, (mp_int *) val, r);
-//  mp_clear (&t);
 #else
   *r *= *val;
 #endif
 }
 
 static inline void
-dinum_mul_u (dinum_t *r, uint64_t val)
+dinum_mul_u (dinum_t *r, diuint_t val)
 {
 #if _use_math == DI_GMP
   mpz_mul_ui (*r, *r, val);
 #elif _use_math == DI_TOMMATH
-//  mp_int    t;
   mp_int    v;
 
-//  mp_init (&t);
-//  mp_copy (&t, r);
   mp_init (&v);
   mp_set_u64 (&v, val);
   mp_mul (r, &v, r);
-//  mp_clear (&t);
   mp_clear (&v);
 #else
   *r *= val;
@@ -287,7 +268,7 @@ dinum_mul_u (dinum_t *r, uint64_t val)
 }
 
 static inline void
-dinum_mul_uu (dinum_t *r, uint64_t vala, uint64_t valb)
+dinum_mul_uu (dinum_t *r, diuint_t vala, diuint_t valb)
 {
 #if _use_math == DI_GMP
   mpz_set_ui (*r, 1);
@@ -310,6 +291,39 @@ dinum_mul_uu (dinum_t *r, uint64_t vala, uint64_t valb)
 #endif
 }
 
+/* rounds up always */
+static inline void
+dinum_scale (dinum_t *result, dinum_t *r, dinum_t *val)
+{
+#if _use_math == DI_GMP
+  mpz_cdiv_q (*result, *r, *val);
+#elif _use_math == DI_TOMMATH
+  mp_int    rem;
+  mp_int    t;
+
+  mp_init (&rem);
+  mp_div (r, val, result, &rem);
+
+  mp_init_u64 (&t, 0);
+  if (mp_cmp (&rem, &t) > 0) {
+    mp_int    v;
+
+    mp_init_u64 (&v, 1);
+    mp_add (result, &v, result);
+    mp_clear (&v);
+  }
+  mp_clear (&t);
+#else
+  diuint_t    rem;
+
+  *result = *r / *val;
+  rem = *r % *val;
+  if (rem > 0) {
+    *result += 1;
+  }
+#endif
+}
+
 static inline void
 dinum_str (const dinum_t *r, char *str, size_t sz)
 {
@@ -318,12 +332,14 @@ dinum_str (const dinum_t *r, char *str, size_t sz)
 #elif _use_math == DI_TOMMATH
   mp_to_decimal (r, str, sz);
 #else
-# if _hdr_inttypes
+# if _hdr_inttypes && _siz_uint64_t == 8
   snprintf (str, sz, "%" PRIu64, *r);
 # elif _siz_long == 8
   snprintf (str, sz, "%ld", *r);
 # elif _siz_long_long == 8
   snprintf (str, sz, "%lld", *r);
+# else
+  snprintf (str, sz, "%d", *r);
 # endif
 #endif
 }
