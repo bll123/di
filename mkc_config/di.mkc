@@ -28,6 +28,7 @@ hdr     libintl.h
 hdr     libprop/proplib.h
 hdr     locale.h
 hdr     malloc.h
+hdr     math.h
 hdr     memory.h
 hdr     mntent.h
 hdr     mnttab.h
@@ -44,6 +45,8 @@ hdr     storage/Path.h
 hdr     string.h
 hdr     strings.h
 hdr     time.h
+hdr     tommath.h
+hdr     libtommath/tommath.h
 hdr     ufs/quota.h
 hdr     ufs/ufs/quota.h
 hdr     unistd.h
@@ -74,10 +77,14 @@ sys     vfs.h
 sys     vfs_quota.h
 sys     vfstab.h
 sys     vmount.h
+
 include_conflict time.h sys/time.h
 include_conflict sys/quota.h linux/quota.h
+
 command msgfmt gmsgfmt
+
 const   O_NOCTTY
+
 define  bcopy
 define  bzero
 define  IOCTL_STORAGE_CHECK_VERIFY2
@@ -86,6 +93,7 @@ define  memcpy
 define  memset
 define  QCMD
 define  S_ISLNK
+
 typ     struct dqblk
 typ     struct quotaval
 typ     struct ufs_dqblk
@@ -95,6 +103,13 @@ typ     statvfs_t
 typ     size_t
 typ     uint_t
 typ     uid_t
+
+size    long double
+size    double
+size    uint64_t
+size    long long
+size    long
+
 lib     bcopy
 lib     bindtextdomain -lintl, -lintl -liconv
 lib     bzero
@@ -159,11 +174,13 @@ lib     zone_list
 # memberxdr rquota rq_fsoftlimit
 # memberxdr rquota rq_curfiles
 # memberxdr getquota_args gqa_uid
+
 # to prevent warnings
 # some systems are u_int, size_t, u_long
 args noconst getfsstat
 args noconst getvfsstat
 args noconst quotactl
+
 setint _quotactl_pos_1 0
 setint _quotactl_pos_2 0
 if quotactl_pos_1 == _c_arg_1_quotactl 'char *'
@@ -177,13 +194,16 @@ if quotactl_pos_2 == _c_arg_2_quotactl 'caddr_t'
 endif
 args noconst setmntent
 args noconst statfs
+
 npt     getenv
 npt     getmnt
 npt     mntctl
 npt     quotactl
 npt     statfs _lib_statfs
+
 dcl     int  errno
 dcl     ptr  mnt_names
+
 member  struct dqblk dqb_curspace
 member  struct dqblk dqb_curblocks
 member  struct dqblk dqb_fhardlimit
@@ -201,10 +221,6 @@ member  struct statfs f_fstypename
 member  struct statfs mount_info
 member  struct statfs f_type
 member  struct statvfs f_basetype
-size    uint64_t
-size    long
-size    long long
-
 
 # workaround for AIX
 # mntctl() is not declared

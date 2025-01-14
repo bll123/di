@@ -13,7 +13,7 @@ CMAKE_REQ_VERSION=10
 BUILDDIR = build
 # DI_USE_MATH = DI_GMP
 # DI_USE_MATH = DI_TOMMATH
-# DI_USE_MATH = DI_UINT64
+# DI_USE_MATH = DI_INTERNAL
 
 # mkconfig
 MKC_PREFIX = di
@@ -84,15 +84,15 @@ all:
 	cmv=`cmake --version | \
 	  sed -n -e '/version/ s,[^0-9]*3\.\([0-9]*\).*,\1, p'` ; \
 	if [ "$${cmv}" -ge $(CMAKE_REQ_VERSION) ]; then \
-	  $(MAKE) cmake; \
+	  $(MAKE) cmake-all; \
 	else \
-	  $(MAKE) all-mkc; \
+	  $(MAKE) mkc-all; \
 	fi
 
 # parallel doesn't seem to work under msys2
 # cmake doesn't seem to support parallel under *BSD
-.PHONY: cmake
-cmake:
+.PHONY: cmake-all
+cmake-all:
 	@case $$(uname -s) in \
 	  CYGWIN*) \
 	    COMP=$(CC) \
@@ -174,19 +174,19 @@ cmake-install:
 
 # have to get various environment variables set up.
 
-.PHONY: all-mkc
-all-mkc: all-sh
+.PHONY: mkc-all
+mkc-all: mkc-sh
 
-.PHONY: all-sh
-all-sh:	$(MKC_ENV)
+.PHONY: mkc-sh
+mkc-sh:	$(MKC_ENV)
 	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=sh di-programs
 
-.PHONY: all-perl
-all-perl:	$(MKC_ENV)
+.PHONY: mkc-perl
+mkc-perl:	$(MKC_ENV)
 	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=perl di-programs
 
 .PHONY: test
-test:		tests.done
+mkc-test:		tests.done
 
 ###
 # environment
@@ -357,7 +357,7 @@ $(MKC_REQLIB):	config.h
 
 LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		diquota$(OBJ_EXT)  getoptn$(OBJ_EXT) \
+		diquota$(OBJ_EXT) getoptn$(OBJ_EXT) \
 		options$(OBJ_EXT) strutils$(OBJ_EXT)
 
 MAINOBJECTS = di$(OBJ_EXT) display$(OBJ_EXT)

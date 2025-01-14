@@ -310,8 +310,8 @@ extern void diquota                 (di_quota_t *);
 
 /* didiskutil.c */
 extern void di_init_disk_info (di_disk_info_t *);
-extern void di_save_block_sizes (di_disk_info_t *, diuint_t, diuint_t, diuint_t, diuint_t);
-extern void di_save_inode_sizes (di_disk_info_t *, diuint_t, diuint_t, diuint_t);
+extern void di_save_block_sizes (di_disk_info_t *, di_unum_t, di_unum_t, di_unum_t, di_unum_t);
+extern void di_save_inode_sizes (di_disk_info_t *, di_unum_t, di_unum_t, di_unum_t);
 #if _lib_getmntent \
     && ! _lib_getmntinfo \
     && ! _lib_getfsstat \

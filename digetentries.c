@@ -664,7 +664,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        diuint_t      tblocksz;
+        di_unum_t      tblocksz;
 
         diptr = *diskInfo + idx;
         di_init_disk_info (diptr);
@@ -807,7 +807,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        diuint_t    tblocksz;
+        di_unum_t    tblocksz;
 
         diptr = *diskInfo + idx;
         di_init_disk_info (diptr);
@@ -1074,7 +1074,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        diuint_t    tblocksz;
+        di_unum_t    tblocksz;
 
         diptr = *diskInfo + idx;
         di_init_disk_info (diptr);

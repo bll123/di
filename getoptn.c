@@ -41,6 +41,10 @@
 # include <sys/types.h>
 #endif
 
+#if TEST_GETOPTN
+# include <math.h>
+#endif
+
 #include "strutils.h"
 #include "getoptn.h"
 
@@ -350,38 +354,12 @@ getoptn (int style, int argc, char * argv [],
 
 #if defined(TEST_GETOPTN)
 
-#if _hdr_math
-# include <math.h>
-#endif
-
-static void
-process_opts (const char *arg, char *valptr)
-{
-  if (strcmp (arg, "-h") == 0) {
-    double *v;
-    v = (double *) valptr;
-    *v = 9.9;
-  }
-  return;
-}
-
-static void
-process_opts_val (const char *arg, char *valptr, char *value)
-{
-  if (strcmp (arg, "-g") == 0) {
-    double *v;
-    v = (double *) valptr;
-    *v = atof (value);
-  }
-  return;
-}
-
 int
 main (int argc, char * argv [])
 {
-  char      tmp[40];
-  char      s[40];
-  char      s2[5];
+  char      tmp [40];
+  char      s [40];
+  char      s2 [5];
   char      *sp;
   long      l;
   double    d;
@@ -391,7 +369,7 @@ main (int argc, char * argv [])
   int       ec;
   int       optidx;
   int       ac;
-  const char *av[10];
+  char      *av [10];
 
   int  grc = 0;
   int  testno = 0;
@@ -431,9 +409,9 @@ main (int argc, char * argv [])
   memset (s, '\0', sizeof (s));
   ac = 2;
   sprintf (tmp, "test: %d", testno);
-  av[0] = tmp;
-  av[1] = "-D";
-  av[2] = NULL;
+  av [0] = tmp;
+  av [1] = "-D";
+  av [2] = NULL;
   ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);

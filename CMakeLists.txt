@@ -292,13 +292,10 @@ macro (checkPrototype_getvfsstat hdr)
 endmacro()
 
 macro (checkdqblk hdr)
-  if (_hdr_linux_dqblk_xfs)
-    set (CMAKE_EXTRA_INCLUDE_FILES <linux/dqblk_xfs.h>)
-  endif()
+  set (CMAKE_EXTRA_INCLUDE_FILES ${hdr})
   check_type_size ("struct dqblk" _typ_struct_dqblk)
   check_type_size ("struct quotaval" _typ_struct_quotaval)
   check_type_size ("struct ufs_dqblk" _typ_struct_ufs_dqblk)
-  check_type_size ("fs_disk_quota_t" _typ_fs_disk_quota_t)
   check_struct_has_member ("struct dqblk" dqb_curspace
       ${hdr} _mem_struct_dqblk_dqb_curspace)
   check_struct_has_member ("struct dqblk" dqb_curblocks
@@ -338,6 +335,7 @@ check_include_file (libintl.h _hdr_libintl)
 check_include_file (libprop/proplib.h _hdr_libprop_proplib)
 check_include_file (locale.h _hdr_locale)
 check_include_file (malloc.h _hdr_malloc)
+check_include_file (math.h _hdr_math)
 check_include_file (memory.h _hdr_memory)
 check_include_file (mntent.h _hdr_mntent)
 check_include_file (mnttab.h _hdr_mnttab)
@@ -511,8 +509,9 @@ check_type_size ("gid_t" _typ_gid_t)
 check_type_size ("size_t" _typ_size_t)
 check_type_size ("uint_t" _typ_uint_t)
 check_type_size ("uid_t" _typ_uid_t)
+check_type_size ("double" _siz_double)
+check_type_size ("long double" _siz_long_double)
 check_type_size ("uint64_t" _siz_uint64_t)
-check_type_size ("uint32_t" _siz_uint32_t)
 check_type_size ("long" _siz_long)
 check_type_size ("long long" _siz_long_long)
 
@@ -540,6 +539,12 @@ if (DEFINED QUOTA_HDR)
   checkdqblk (${QUOTA_HDR})
   checkPrototype_quotactl (${QUOTA_HDR})
   check_symbol_exists (QCMD ${QUOTA_HDR} _define_QCMD)
+
+  if (_hdr_linux_dqblk_xfs)
+    set (CMAKE_EXTRA_INCLUDE_FILES <linux/dqblk_xfs.h>)
+  endif()
+  check_type_size ("fs_disk_quota_t" _typ_fs_disk_quota_t)
+  unset (CMAKE_EXTRA_INCLUDE_FILES)
 endif()
 
 if (_sys_mnttab)
@@ -583,6 +588,62 @@ if (DEFINED GETVFSSTAT_HDR AND _lib_getvfsstat)
   checkPrototype_getvfsstat (${GETVFSSTAT_HDR})
 endif()
 
+check_prototype_definition (getenv
+    "char * getenv (const char * a)"
+    "NULL"
+    stdlib.h
+    _npt_getenv
+    )
+if (_npt_getenv)
+  set (_npt_getenv 0)
+else()
+  set (_npt_getenv 1)
+endif()
+
+# ultrix, which header?
+check_prototype_definition (getmnt
+    "int getmnt (int * a, struct fs_data * b, int c, int d, char * e)"
+    0
+    stdlib.h
+    _npt_getmnt
+    )
+if (_npt_getmnt)
+  set (_npt_getmnt 0)
+else()
+  set (_npt_getmnt 1)
+endif()
+
+# AIX
+check_prototype_definition (mntctl
+    "int mntctl (int a, size_t b, char * c)"
+    0
+    sys/mntctl.h
+    _npt_mntctl
+    )
+if (_npt_mntctl)
+  set (_npt_mntctl 0)
+else()
+  set (_npt_mntctl 1)
+endif()
+
+# HP-UX
+check_prototype_definition (quotactl
+    "int quotactl (int a, const char * b, uid_t c, void * d)"
+    0
+    ${QUOTA_HDR}
+    _npt_quotactl
+    )
+if (_npt_quotactl)
+  set (_npt_quotactl 0)
+else()
+  set (_npt_quotactl 1)
+endif()
+
+check_symbol_exists (errno errno.h _dcl_errno)
+# *BSD
+# which include files?
+check_symbol_exists (mnt_names ${STATFS_HDR} _dcl_mnt_names)
+
 # check_source_compiles requires a fairly recent version of cmake (3.19).
 # instead, assume that anything with cmake doesn't have broken headers
 set (_inc_conflict__hdr_time__sys_time 1)
@@ -613,7 +674,7 @@ check_symbol_exists (MCTL_QUERY sys/mntctl.h _define_MCTL_QUERY)
 check_symbol_exists (S_ISLNK sys/stat.h _define_S_ISLNK)
 
 if (DEFINED DI_USE_MATH AND NOT DI_USE_MATH STREQUAL "")
-  # must be one of DI_UINT, DI_GMP, DI_TOMMATH
+  # must be one of DI_INTERNAL, DI_GMP, DI_TOMMATH
   set (_use_math ${DI_USE_MATH})
 endif()
 if (NOT DEFINED _use_math)
@@ -629,7 +690,7 @@ if (NOT DEFINED _use_math)
   endif()
 endif()
 if (NOT DEFINED _use_math)
-  set (_use_math DI_UINT)
+  set (_use_math DI_INTERNAL)
 endif()
 message ("math-library: ${_use_math}")
 
@@ -638,14 +699,17 @@ configure_file (config.h.in config.h)
 #### libraries
 
 add_library (${DI_LIBNAME}
-  src/didiskutil.c
-  src/digetentries.c
-  src/digetinfo.c
-  src/dilib.c
-  src/diquota.c
-  src/getoptn.c
-  src/options.c
-  src/strutils.c
+  didiskutil.c
+  digetentries.c
+  digetinfo.c
+  dilib.c
+  diquota.c
+  getoptn.c
+  options.c
+  strutils.c
+)
+target_link_libraries (${DI_LIBNAME} PRIVATE
+  m
 )
 # cmake's auto prefixing is annoying
 set_target_properties (${DI_LIBNAME} PROPERTIES PREFIX "")
@@ -677,11 +741,12 @@ set_target_properties (${DI_LIBNAME} PROPERTIES
 #### executables
 
 add_executable (di
-  src/di.c
-  src/display.c
+  di.c
+  display.c
 )
 target_link_libraries (di PRIVATE
   ${DI_LIBNAME}
+  m
 )
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (di PRIVATE
@@ -695,7 +760,10 @@ if (_use_math STREQUAL "DI_TOMMATH")
 endif()
 
 add_executable (dimathtest
-  src/dimathtest.c
+  dimathtest.c
+)
+target_link_libraries (dimathtest PRIVATE
+  m
 )
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (dimathtest PRIVATE
@@ -707,6 +775,13 @@ if (_use_math STREQUAL "DI_TOMMATH")
     ${TOMMATH_LDFLAGS}
   )
 endif()
+
+add_executable (getoptn_test
+  getoptn.c
+)
+target_compile_options (getoptn_test PRIVATE
+  -DTEST_GETOPTN
+)
 
 # di.pc
 

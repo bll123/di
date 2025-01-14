@@ -17,11 +17,10 @@ Archive
 TODO
 \.vars$
 # dioptions.dat
-Info
-Platforms
-^Test
+^dev
 ^w$
 ^ww$
 ^w\.*
 ^mkconfig\.link$
 ^mkconfig\.old$
+^mkc_files/

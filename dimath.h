@@ -12,22 +12,37 @@
 # include <inttypes.h>
 #endif
 
-#if _siz_uint64_t == 8
-  typedef uint64_t diuint_t;
-  typedef int64_t diint_t;
+/* a double has a longer mantissa than an unsigned int, */
+/* but the accuracy may be less. */
+#if _siz_long_double > 8
+  typedef long double di_unum_t;
+  typedef long double di_snum_t;
+# define DI_INTERNAL_DOUBLE
+#elif _siz_double == 8
+  typedef double di_unum_t;
+  typedef double di_snum_t;
+# define DI_INTERNAL_DOUBLE
+#elif _siz_uint64_t == 8
+  typedef uint64_t di_unum_t;
+  typedef int64_t di_snum_t;
+# define DI_INTERNAL_INT
 #elif _siz_long == 8
-  typedef unsigned long diuint_t;
-  typedef long diint_t;
+  typedef unsigned long di_unum_t;
+  typedef long di_snum_t;
+# define DI_INTERNAL_INT
 #elif _siz_long_long == 8
-  typedef unsigned long long diuint_t;
-  typedef long long diint_t;
+  typedef unsigned long long di_unum_t;
+  typedef long long di_snum_t;
+# define DI_INTERNAL_INT
 #elif _siz_long == 4
-  typedef unsigned long diuint_t;
-  typedef long diint_t;
+  typedef unsigned long di_unum_t;
+  typedef long di_snum_t;
+# define DI_INTERNAL_INT
 #else
   /* unknown */
-  typedef unsigned long diuint_t;
-  typedef long diint_t;
+  typedef unsigned long di_unum_t;
+  typedef long di_snum_t;
+# define DI_INTERNAL_INT
 #endif
 
 #if _use_math == DI_GMP
@@ -44,8 +59,8 @@
 # endif
   typedef mp_int dinum_t;
   typedef mp_int didbl_t;
-# else /* DI_UINT */
-  typedef diuint_t dinum_t;
+# else /* DI_INTERNAL */
+  typedef di_unum_t dinum_t;
   typedef double didbl_t;
 #endif
 
@@ -87,7 +102,7 @@ dinum_set (dinum_t *r, const dinum_t *val)
 }
 
 static inline void
-dinum_set_u (dinum_t *r, diuint_t val)
+dinum_set_u (dinum_t *r, di_unum_t val)
 {
 #if _use_math == DI_GMP
   mpz_set_ui (*r, val);
@@ -99,7 +114,7 @@ dinum_set_u (dinum_t *r, diuint_t val)
 }
 
 static inline void
-dinum_set_s (dinum_t *r, diint_t val)
+dinum_set_s (dinum_t *r, di_snum_t val)
 {
 #if _use_math == DI_GMP
   mpz_set_si (*r, val);
@@ -111,7 +126,7 @@ dinum_set_s (dinum_t *r, diint_t val)
 }
 
 static inline void
-dinum_add_u (dinum_t *r, diuint_t val)
+dinum_add_u (dinum_t *r, di_unum_t val)
 {
 #if _use_math == DI_GMP
   mpz_t     v;
@@ -135,7 +150,7 @@ dinum_add_u (dinum_t *r, diuint_t val)
 }
 
 static inline void
-dinum_sub_u (dinum_t *r, diuint_t val)
+dinum_sub_u (dinum_t *r, di_unum_t val)
 {
 #if _use_math == DI_GMP
   mpz_t     v;
@@ -212,7 +227,7 @@ dinum_cmp (const dinum_t *r, const dinum_t *val)
 }
 
 static inline int
-dinum_cmp_s (const dinum_t *r, diint_t val)
+dinum_cmp_s (const dinum_t *r, di_snum_t val)
 {
 #if _use_math == DI_GMP
   return mpz_cmp_si (*r, val);
@@ -223,10 +238,10 @@ dinum_cmp_s (const dinum_t *r, diint_t val)
   mp_set_i64 (&t, val);
   return mp_cmp (r, &t);
 #else
-  diint_t   t;
+  di_snum_t   t;
   int       rc = 0;
 
-  t = (diint_t) *r;
+  t = (di_snum_t) *r;
   if (t < val) {
     rc = -1;
   } else if (t > val) {
@@ -254,7 +269,7 @@ dinum_mul (dinum_t *r, const dinum_t *val)
 }
 
 static inline void
-dinum_mul_u (dinum_t *r, diuint_t val)
+dinum_mul_u (dinum_t *r, di_unum_t val)
 {
 #if _use_math == DI_GMP
   mpz_mul_ui (*r, *r, val);
@@ -271,7 +286,7 @@ dinum_mul_u (dinum_t *r, diuint_t val)
 }
 
 static inline void
-dinum_mul_uu (dinum_t *r, diuint_t vala, diuint_t valb)
+dinum_mul_uu (dinum_t *r, di_unum_t vala, di_unum_t valb)
 {
 #if _use_math == DI_GMP
   mpz_set_ui (*r, 1);
@@ -294,7 +309,6 @@ dinum_mul_uu (dinum_t *r, diuint_t vala, diuint_t valb)
 #endif
 }
 
-/* ceiling of number */
 static inline void
 dinum_scale (dinum_t *result, dinum_t *r, dinum_t *val)
 {
@@ -317,13 +331,24 @@ dinum_scale (dinum_t *result, dinum_t *r, dinum_t *val)
   }
   mp_clear (&t);
 #else
-  diuint_t    rem;
+# if defined (DI_INTERNAL_INT)
+  di_unum_t    rem;
 
   *result = *r / *val;
   rem = *r % *val;
   if (rem > 0) {
     *result += 1;
   }
+# endif
+# if defined (DI_INTERNAL_DOUBLE)
+  di_unum_t    rem;
+
+  *result = *r / *val;
+  rem = *r - (*result * *val);
+  if (rem > 0.0) {
+    *result += 1;
+  }
+# endif
 #endif
 }
 
@@ -387,14 +412,22 @@ dinum_str (const dinum_t *r, char *str, size_t sz)
 #elif _use_math == DI_TOMMATH
   mp_to_decimal (r, str, sz);
 #else
-# if _hdr_inttypes && _siz_uint64_t == 8
-  snprintf (str, sz, "%" PRIu64, *r);
-# elif _siz_long == 8
-  snprintf (str, sz, "%ld", *r);
-# elif _siz_long_long == 8
-  snprintf (str, sz, "%lld", *r);
+# if defined (DI_INTERNAL_DOUBLE)
+#  if _siz_long_double > 8
+  snprintf (str, sz, "%.0Lf", *r);
+#  else
+  snprintf (str, sz, "%.0f", *r);
+#  endif
 # else
+#  if _hdr_inttypes && _siz_uint64_t == 8
+  snprintf (str, sz, "%" PRIu64, *r);
+#  elif _siz_long == 8
+  snprintf (str, sz, "%ld", *r);
+#  elif _siz_long_long == 8
+  snprintf (str, sz, "%lld", *r);
+#  else
   snprintf (str, sz, "%d", *r);
+#  endif
 # endif
 #endif
 }
