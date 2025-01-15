@@ -10,6 +10,7 @@ output  di.env
 
 standard_system
 standard_cc
+
 addcflag -fPIC
 addcflag -fno-common
 addcflag -Wextra
@@ -73,11 +74,28 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
  endif
 endif
 
+pkg cflags gmp /opt/local/lib/pkgconfig
+pkg libs gmp /opt/local/lib/pkgconfig
+
+if not_have_pkg_gmp ! _pkg_libs_gmp
+ pkg cflags libtommath /opt/local/lib/pkgconfig
+ pkg libs libtommath /opt/local/lib/pkgconfig
+endif
+
+option _use_math DI_INTERNAL
+if have_gmp _pkg_libs_gmp
+ option _use_math DI_GMP
+endif
+if have_tommath _pkg_libs_libtommath
+ option _use_math DI_TOMMATH
+endif
+
 libs
 shared_flags
 
 extension obj
 extension exe
 extension shlib
+
 cmd_msgfmt
 

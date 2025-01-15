@@ -45,8 +45,10 @@ hdr     storage/Path.h
 hdr     string.h
 hdr     strings.h
 hdr     time.h
-hdr     tommath.h
-hdr     libtommath/tommath.h
+if have_pkg_libtommath _pkg_libs_tommath
+ hdr     tommath.h
+ hdr     libtommath/tommath.h
+endif
 hdr     ufs/quota.h
 hdr     ufs/ufs/quota.h
 hdr     unistd.h
@@ -167,13 +169,13 @@ lib     zone_getattr
 lib     zone_list
 # to be removed
 # get the correct xdr types...
-# memberxdr rquota rq_bhardlimit
+memberxdr rquota rq_bhardlimit
+memberxdr getquota_args gqa_uid
 # memberxdr rquota rq_bsoftlimit
 # memberxdr rquota rq_curblocks
 # memberxdr rquota rq_fhardlimit
 # memberxdr rquota rq_fsoftlimit
 # memberxdr rquota rq_curfiles
-# memberxdr getquota_args gqa_uid
 
 # to prevent warnings
 # some systems are u_int, size_t, u_long
@@ -297,7 +299,6 @@ include
 #define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
-#define _use_math DI_INTERNAL
 
 #if _typ_statvfs_t
 # define Statvfs_t statvfs_t
@@ -348,3 +349,4 @@ include
 #endif
 
 endinclude
+

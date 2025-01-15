@@ -14,6 +14,7 @@ CHANGES
       mkcl.sh: Fix ldpaths/runpath generation.
       units/c-main.sh: Change pvoid.
       units/c-main.sh: Remove define of _ for ancient C compilers.
+      Remove D language.
 
     2.6.3                                   2021-1-30
       Fix 'pkg libs' directive.

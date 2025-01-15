@@ -29,7 +29,7 @@ main (int argc, char *argv [])
 #elif _use_math == DI_TOMMATH
   fprintf (stdout, "TOMMATH:\n");
 #else
-  fprintf (stdout, "UINT: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long, _siz_long_long);
+  fprintf (stdout, "INTERNAL: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long, _siz_long_long);
 #endif
 
   dinum_init (&a);

@@ -324,9 +324,7 @@ install-mkc:
 # programs
 
 .PHONY: di-programs
-di-programs:	di$(EXE_EXT)
-.PHONY: perl-programs
-perl-programs:	perlfilesysdi.bld
+di-programs:	di$(EXE_EXT) dimathtest$(EXE_EXT) getoptn_test$(EXE_EXT)
 
 ###
 # configuration file
@@ -365,14 +363,32 @@ MAINOBJECTS = di$(OBJ_EXT) display$(OBJ_EXT)
 libdi$(SHLIB_EXT):	$(MKC_REQLIB) $(LIBOBJECTS)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -shared $(MKC_ECHO) \
-		-r $(MKC_REQLIB) -o libdi$(SHLIB_EXT) \
+                -r $(MKC_REQLIB) \
+		-o libdi$(SHLIB_EXT) \
 		$(LIBOBJECTS)
 
 di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
-		-r $(MKC_REQLIB) -o di$(EXE_EXT) \
-		$(MAINOBJECTS) libdi$(SHLIB_EXT)
+		-r $(MKC_REQLIB) \
+		-o di$(EXE_EXT) \
+		$(MAINOBJECTS) \
+		libdi$(SHLIB_EXT)
+
+dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
+		-link -exec $(MKC_ECHO) \
+		-r $(MKC_REQLIB) \
+		-o dimathtest$(EXE_EXT) \
+		dimathtest$(OBJ_EXT) \
+		-lm
+
+getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT)
+	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
+		-link -exec $(MKC_ECHO) \
+		-o getoptn_test$(EXE_EXT) \
+		getoptn_test$(OBJ_EXT) \
+		-lm
 
 # for ms cl
 #di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
@@ -393,27 +409,35 @@ mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 #.c$(OBJ_EXT):
 #	$(CC) -c $(DI_SHARED) $(DI_CFLAGS) $<
 
-di$(OBJ_EXT):		di.c config.h di.h dilib.h getoptn.h \
+di$(OBJ_EXT):		di.c config.h di.h dimath.h dilib.h version.h
+
+dilib$(OBJ_EXT):	dilib.c config.h di.h dimath.h dilib.h \
 				options.h version.h
 
-dilib$(OBJ_EXT):	dilib.c config.h di.h dilib.h getoptn.h \
-				options.h
+digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimath.h dimntopt.h
 
-digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimntopt.h
+didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimath.h strutils.h \
+				dimntopt.h
 
-didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h strutils.h dimntopt.h
+digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimath.h strutils.h \
+				dimntopt.h
 
-digetentries$(OBJ_EXT):	digetentries.c config.h di.h strutils.h dimntopt.h
+diquota$(OBJ_EXT):	diquota.c config.h di.h dimath.h
 
-diquota$(OBJ_EXT):	diquota.c config.h di.h
-
-display$(OBJ_EXT):	display.c config.h di.h strutils.h display.h options.h version.h
+display$(OBJ_EXT):	display.c config.h di.h dimath.h strutils.h \
+				display.h options.h version.h
 
 getoptn$(OBJ_EXT):	getoptn.c config.h strutils.h getoptn.h
 
-options$(OBJ_EXT):	options.c config.h di.h strutils.h options.h
+options$(OBJ_EXT):	options.c config.h di.h dimath.h strutils.h options.h
 
 strutils$(OBJ_EXT):	strutils.c config.h strutils.h
+
+dimathtest$(OBJ_EXT):	dimathtest.c config.h dimath.h
+
+getoptn_test$(OBJ_EXT):	getoptn.c config.h getoptn.h
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile $(MKC_ECHO) \
+		-DTEST_GETOPTN=1 $(DI_CFLAGS) -o getoptn_test$(OBJ_EXT) $<
 
 ###
 # regression testing
@@ -447,28 +471,3 @@ test-env:
 	@echo "cc: $(CC)"
 	@echo "make: $(MAKE)"
 
-gconfig.h:	$(MKC_ENV) mkc_config/di-getoptn.mkc
-	@-$(RM) -f gconfig.h
-	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
-		. ./$(MKC_ENV); \
-		$(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh \
-		$(MKC_CONF_GETOPTN); fi
-	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
-		. ./$(MKC_ENV); \
-		perl $(MKC_DIR)/mkconfig.pl \
-		$(MKC_CONF_GETOPTN); fi
-
-getoptn_test$(OBJ_EXT):	getoptn.c gconfig.h getoptn.h
-	@. ./$(MKC_ENV);$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile \
-		-DTEST_GETOPTN=1 \
-		-o getoptn_test$(OBJ_EXT) getoptn.c
-
-getoptn.reqlibs:	$(MKC_ENV) gconfig.h
-	@. ./$(MKC_ENV);$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
-		-o getoptn.reqlibs gconfig.h
-
-getoptn_test.exe:	getoptn_test$(OBJ_EXT) getoptn.reqlibs
-	@. ./$(MKC_ENV);$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -link -exec \
-		$(MKC_ECHO) -r getoptn.reqlibs \
-		-o getoptn_test.exe $(LDFLAGS) \
-		getoptn_test$(OBJ_EXT)

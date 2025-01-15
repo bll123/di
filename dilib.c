@@ -69,9 +69,8 @@
 
 #include "di.h"
 #include "dilib.h"
-#include "display.h"
-#include "version.h"
 #include "options.h"
+#include "version.h"
 
 #if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {

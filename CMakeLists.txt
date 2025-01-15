@@ -649,6 +649,25 @@ check_symbol_exists (errno errno.h _dcl_errno)
 # which include files?
 check_symbol_exists (mnt_names ${STATFS_HDR} _dcl_mnt_names)
 
+set (_has_std_quotas 0)
+if (_lib_quotactl OR _lib_quota_open OR _lib_vquotactl OR
+    _typ_struct_dqblk OR _typ_struct_ufs_dqblk)
+  set (_has_std_quotas 1)
+endif()
+
+set (_has_std_nfs_quotas 0)
+if (_hdr_rpc_rpc AND _hdr_rpcsvc_rquota AND _lib_xdr_int AND
+    _memberxd_rquota_rq_bhardlimit AND _memberxdr_getquota_args_gqa_uid)
+  set (_has_std_nfs_quotas 1)
+endif()
+
+set (_enable_nls 0)
+if (_lib_bindtextdomain AND _lib_gettext AND _lib_setlocale AND
+    _lib_textdomain AND _hdr_libintl AND _hdr_locale AND
+    _command_msgfmt)
+  set (_enable_nls 1)
+endif()
+
 # check_source_compiles requires a fairly recent version of cmake (3.19).
 # instead, assume that anything with cmake doesn't have broken headers
 set (_inc_conflict__hdr_time__sys_time 1)
