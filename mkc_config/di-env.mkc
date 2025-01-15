@@ -17,13 +17,15 @@ addcflag -Wno-unused-but-set-variable
 addcflag -Wno-unused-parameter
 addcflag -Wno-unknown-pragmas
 addcflag -Wno-float-equal
-addcflag -Wno-shift-sign-overflow
 addcflag -Wno-stringop-overflow
 addcflag -Wno-stringop-truncation
 addcflag -Wunreachable-code
 
 # turn off mac os warning
-addcflag -Wno-poison-system-directories
+if UsingCLANG == _MKCONFIG_USING_CLANG Y
+  addcflag -Wno-poison-system-directories
+  addcflag -Wno-shift-sign-overflow
+endif
 
 if UsingGNU_LD == _MKCONFIG_USING_GNU_LD Y && == _MKCONFIG_USING_CPLUSPLUS Y
  addcflag -fpermissive
@@ -35,6 +37,8 @@ addcflag -Wformat
 addcflag -Wformat-security
 addcflag -Werror=format-security
 
+addldflag -fPIC
+
 # these confuse other compilers...make them GCC only
 # solaris will not link w/-fstack-protector, so it
 # can only be set when the gnu linker is in use.
@@ -45,11 +49,8 @@ if UsingGNU_LD == _MKCONFIG_USING_GNU_LD Y && == _MKCONFIG_USING_GCC Y
   addcflag -D_FORTIFY_SOURCE=2
   addcflag -fstack-protector-strong
   addcflag -fstack-protector-all
-  addcflag -fPIE
   addldflag -fstack-protector-strong
   addldflag -fstack-protector-all
-  addldflag -pie
-  addldflag -Wl,-pie
   addldflag -Wl,-z,relro
   addldflag -Wl,-z,now
  else
@@ -67,10 +68,6 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
   addcflag -fstack-protector-all
   addldflag -fstack-protector-strong
   addldflag -fstack-protector-all
-  addcflag -DPIE
-  addcflag -fPIE
-  addldflag -pie
-  addldflag -Wl,-pie
  else
   addcflag -D_FORTIFY_SOURCE=0
  endif

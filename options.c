@@ -74,8 +74,6 @@ static dispTable_t dispTable [] =
 };
 #define DI_DISPTAB_SIZE ((int)(sizeof (dispTable) / sizeof (dispTable_t)))
 
-dinum_t dispSizes [DI_DISPTAB_SIZE];
-
 #define DI_ARGV_SEP             " 	"  /* space, tab */
 #define DI_MAX_ARGV             50
 #define DI_LIST_SEP             ","
@@ -83,6 +81,8 @@ dinum_t dispSizes [DI_DISPTAB_SIZE];
 #define DI_POSIX_FORMAT         "SbuvpM"
 #define DI_DEF_MOUNT_FORMAT     "MST\n\tO"
 #define DI_ALL_FORMAT           "MTS\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
+
+dinum_t dispSizes [DI_DISPTAB_SIZE];
 
 extern int debug;
 
@@ -684,7 +684,7 @@ processOptionsVal (const char *arg, char *valptr, char *value)
 
   if (strcmp (arg, "-B") == 0) {
     if (isdigit ((int) (*value))) {
-      padata->diopts->baseDispSize = atof (value);
+      padata->diopts->baseDispSize = (unsigned int) atoi (value);
       padata->diopts->baseDispIdx = DI_DISP_SI_PREFIX; /* unknown, really */
       if (padata->diopts->baseDispSize == DI_VAL_1024)
       {
@@ -801,8 +801,8 @@ setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
   val = 1;
   if (isdigit ((int) (*ptr))) {
     /* it is unlikely that anyone is going to type in some large number */
-    /* on the command line, atol() should be good enough */
-    val = atol (ptr);
+    /* on the command line, atoi() should be good enough */
+    val = atoi (ptr);
   }
 
   tptr = ptr;
@@ -862,7 +862,6 @@ setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
       }
     } /* known size multiplier */
   } else {
-    int         i;
     int         ok;
 
     ok = 0;

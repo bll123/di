@@ -90,6 +90,9 @@
 # define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+#if _hdr_libintl
+# include <libintl.h>
+#endif
 
 #include "dilib.h"
 #include "di.h"
