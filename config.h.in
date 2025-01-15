@@ -77,8 +77,8 @@
 #cmakedefine01 _inc_conflict__hdr_time__sys_time
 #cmakedefine01 _inc_conflict__sys_quota__hdr_linux_quota
 
-// #cmakedefine01 _command_msgfmt
-// #cmakedefine01 _cmd_loc_msgfmt "/usr/bin/msgfmt"
+#cmakedefine01 _command_msgfmt
+#define _cmd_loc_msgfmt ${_command_msgfmt}
 
 #cmakedefine01 _const_O_NOCTTY
 
@@ -151,6 +151,8 @@
 
 #cmakedefine01 _quotactl_pos_1
 #cmakedefine01 _quotactl_pos_2
+#define _c_arg_2_quotactl ${_c_arg_2_quotactl}
+#define _args_quotactl ${_args_quotactl}
 #define _args_setmntent ${_args_setmntent}
 #define _args_statfs ${_args_statfs}
 #define _c_arg_2_getfsstat ${_c_arg_2_getfsstat}
@@ -181,8 +183,10 @@
 #cmakedefine01 _mem_struct_statfs_mount_info
 #cmakedefine01 _mem_struct_statfs_f_type
 #cmakedefine01 _mem_struct_statvfs_f_basetype
-// #cmakedefine01 _has_std_quotas
-// #cmakedefine01 _has_std_nfs_quotas
+
+#cmakedefine01 _has_std_quotas
+#cmakedefine01 _has_std_nfs_quotas
+#cmakedefine01 _enable_nls
 
 #ifndef MKC_STANDARD_DEFS
 # define MKC_STANDARD_DEFS 1

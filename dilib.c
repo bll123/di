@@ -117,7 +117,7 @@ static int  checkForUUID        (const char *);
 static int  diCompare           (const di_opt_t *, const di_disk_info_t *, unsigned int, unsigned int);
 
 void
-di_init (di_data_t *di_data, int intfcflag)
+di_initialize (di_data_t *di_data, int intfcflag)
 {
   di_opt_t    *diopts;
   diOutput_t  *diout;
@@ -185,6 +185,16 @@ di_process_options (di_data_t *di_data, int argc, char * argv [])
   di_data->options.optidx = di_get_options (argc, argv, di_data);
   if (di_data->options.exitFlag != DI_EXIT_NORM) {
     return;
+  }
+
+  if (debug > 0) {
+#if _use_math == DI_GMP
+    fprintf (stdout, "# GMP:\n");
+#elif _use_math == DI_TOMMATH
+    fprintf (stdout, "# TOMMATH:\n");
+#else
+    fprintf (stdout, "# INTERNAL: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long, _siz_long_long);
+#endif
   }
 }
 
@@ -330,9 +340,9 @@ checkFileInfo (di_data_t *di_data)
         startpool = false;
         poolmain = false;
 
-        dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_TOT_SORT_IDX]]);
+        dinfo = &(diskInfo [diskInfo [j].sortIndex [DI_TOT_SORT_IDX]]);
 
-            /* is it a pooled filesystem type? */
+        /* is it a pooled filesystem type? */
         if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
           if (lastpoollen == 0 ||
               strncmp (lastpool, dinfo->special, lastpoollen) != 0) {
@@ -409,7 +419,7 @@ checkFileInfo (di_data_t *di_data)
       /* if stat ok */
     } else {
       if (errno != EACCES && errno != EPERM) {
-        fprintf (stderr, "stat: %s ", diopts->argv [i]);
+        fprintf (stderr, "stat: %s", diopts->argv [i]);
         perror ("");
       }
       rc = -1;
@@ -649,7 +659,7 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
           }
 
           /* Some systems return a -1 or -2 as an indicator.    */
-          if (dinum_cmp (&dinfo->values [DI_SPACE_TOTAL], 0) == 0 ||
+          if (dinum_cmp_s (&dinfo->values [DI_SPACE_TOTAL], 0) == 0 ||
               dinum_cmp_s (&dinfo->values [DI_SPACE_TOTAL], -1) == 0 ||
               dinum_cmp_s (&dinfo->values [DI_SPACE_TOTAL], -2L) == 0) {
             dinfo->printFlag = DI_PRNT_IGNORE;

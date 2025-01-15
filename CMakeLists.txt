@@ -161,6 +161,7 @@ find_package (Iconv)
 
 pkg_check_modules (GMP gmp)
 pkg_check_modules (TOMMATH libtommath)
+pkg_check_modules (TIRPC libtirpc)
 
 include (CheckFunctionExists)
 include (CheckIncludeFile)
@@ -186,6 +187,14 @@ macro (checkPrototype_quotactl hdr)
     ${hdr}
     _quotactl_pos_2
     )
+  if (_quotactl_pos_1)
+    set (_c_arg_2_quotactl "int")
+    set (_args_quotactl 4)
+  endif()
+  if (_quotactl_pos_2)
+    set (_c_arg_2_quotactl "const char *")
+    set (_args_quotactl 4)
+  endif()
 endmacro()
 
 macro (checkPrototype_statfs hdr)
@@ -292,6 +301,7 @@ macro (checkPrototype_getvfsstat hdr)
 endmacro()
 
 macro (checkdqblk hdr)
+  # the calls to checkdqblk do not include the angle brackets
   set (CMAKE_EXTRA_INCLUDE_FILES ${hdr})
   check_type_size ("struct dqblk" _typ_struct_dqblk)
   check_type_size ("struct quotaval" _typ_struct_quotaval)
@@ -308,15 +318,6 @@ macro (checkdqblk hdr)
       ${hdr} _mem_struct_dqblk_dqb_curfiles)
   unset (CMAKE_EXTRA_INCLUDE_FILES)
 endmacro ()
-
-macro (addIntlLibrary name)
-  if (Intl_LIBRARY)
-    target_link_libraries (${name} PRIVATE
-      ${Intl_LIBRARY}
-      ${Iconv_LIBRARY}
-    )
-  endif()
-endmacro()
 
 check_include_file (ctype.h _hdr_ctype)
 check_include_file (dirent.h _hdr_dirent)
@@ -341,8 +342,11 @@ check_include_file (mntent.h _hdr_mntent)
 check_include_file (mnttab.h _hdr_mnttab)
 # NetBSD
 check_include_file (quota.h _hdr_quota)
+set (CMAKE_REQUIRED_INCLUDES ${TIRPC_INCLUDE_DIRS})
 check_include_file (rpc/rpc.h _hdr_rpc_rpc)
+# rquota.h includes rpc/rpc.h
 check_include_file (rpcsvc/rquota.h _hdr_rpcsvc_rquota)
+unset (CMAKE_REQUIRED_INCLUDES)
 check_include_file (storage/Directory.h _hdr_storage_Directory)
 check_include_file (storage/Entry.h _hdr_storage_Entry)
 check_include_file (storage/Path.h _hdr_storage_Path)
@@ -397,7 +401,6 @@ check_include_file (sys/vfstab.h _sys_vfstab)
 check_include_file (sys/vmount.h _sys_vmount)
 
 check_function_exists (bcopy _lib_bcopy)
-check_function_exists (bindtextdomain _lib_bindtextdomain)
 check_function_exists (bzero _lib_bzero)
 # -lsun, -lseq
 check_function_exists (endmntent _lib_endmntent)
@@ -422,7 +425,6 @@ if (NOT _lib_getmntent)
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 check_function_exists (getmntinfo _lib_getmntinfo)
-check_function_exists (gettext _lib_gettext)
 check_function_exists (getvfsstat _lib_getvfsstat)
 check_function_exists (getzoneid _lib_getzoneid)
 check_function_exists (hasmntopt _lib_hasmntopt)
@@ -463,13 +465,13 @@ if (NOT _lib_snprintf)
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 
+check_function_exists (setlocale _lib_setlocale)
 check_function_exists (statfs _lib_statfs)
 check_function_exists (statvfs _lib_statvfs)
 check_function_exists (strcoll _lib_strcoll)
 check_function_exists (strdup _lib_strdup)
 check_function_exists (strstr _lib_strstr)
 check_function_exists (sysfs _lib_sysfs)
-check_function_exists (textdomain _lib_textdomain)
 # dragonflybsd
 check_function_exists (vquotactl _lib_vquotactl)
 
@@ -488,6 +490,12 @@ endif()
 check_function_exists (zone_getattr _lib_zone_getattr)
 check_function_exists (zone_list _lib_zone_list)
 
+set (CMAKE_REQUIRED_LIBRARIES ${Intl_LIBRARY} ${Iconv_LIBRARY})
+check_function_exists (bindtextdomain _lib_bindtextdomain)
+check_function_exists (gettext _lib_gettext)
+check_function_exists (textdomain _lib_textdomain)
+unset (CMAKE_REQUIRED_LIBRARIES)
+
 if (_sys_mnttab)
   set (MNTTAB_HDR sys/mnttab.h)
 endif()
@@ -501,8 +509,10 @@ if (DEFINED MNTTAB_HDR)
 endif()
 
 if (_sys_statvfs)
-  set (CMAKE_EXTRA_INCLUDE_FILES <sys/statvfs.h>)
+  # cmake: check_type_size and extra-include files issue
+  set (CMAKE_EXTRA_INCLUDE_FILES sys/statvfs.h)
   check_type_size ("statvfs_t" _typ_statvfs_t)
+  set (CMAKE_EXTRA_INCLUDE_FILES <sys/statvfs.h>)
   check_struct_has_member ("struct statvfs" f_basetype
       sys/statvfs.h _mem_struct_statvfs_f_basetype)
   unset (CMAKE_EXTRA_INCLUDE_FILES)
@@ -544,7 +554,9 @@ if (DEFINED QUOTA_HDR)
   check_symbol_exists (QCMD ${QUOTA_HDR} _define_QCMD)
 
   if (_hdr_linux_dqblk_xfs)
-    set (CMAKE_EXTRA_INCLUDE_FILES <linux/dqblk_xfs.h>)
+    # cmake doesn't properly handle the angle brackets when
+    # using check_type_size
+    set (CMAKE_EXTRA_INCLUDE_FILES linux/dqblk_xfs.h)
   endif()
   check_type_size ("fs_disk_quota_t" _typ_fs_disk_quota_t)
   unset (CMAKE_EXTRA_INCLUDE_FILES)
@@ -656,15 +668,22 @@ if (_lib_quotactl OR _lib_quota_open OR _lib_vquotactl OR
 endif()
 
 set (_has_std_nfs_quotas 0)
-if (_hdr_rpc_rpc AND _hdr_rpcsvc_rquota AND _lib_xdr_int AND
-    _memberxd_rquota_rq_bhardlimit AND _memberxdr_getquota_args_gqa_uid)
+if (_hdr_rpc_rpc AND _hdr_rpcsvc_rquota AND
+    _lib_xdr_int AND
+    _memberxd_rquota_rq_bhardlimit AND
+    _memberxdr_getquota_args_gqa_uid)
   set (_has_std_nfs_quotas 1)
+endif()
+
+find_program (_command_msgfmt msgfmt)
+find_program (_command_gmsgfmt gmsgfmt)
+if (_command_gmsgfmt)
+  set (_command_msgfmt ${_command_gmsgfmt})
 endif()
 
 set (_enable_nls 0)
 if (_lib_bindtextdomain AND _lib_gettext AND _lib_setlocale AND
-    _lib_textdomain AND _hdr_libintl AND _hdr_locale AND
-    _command_msgfmt)
+    _lib_textdomain AND _hdr_libintl AND _hdr_locale)
   set (_enable_nls 1)
 endif()
 
@@ -720,6 +739,15 @@ message ("math-library: ${_use_math}")
 
 configure_file (config.h.in config.h)
 
+macro (addIntlLibrary name)
+  if (Intl_LIBRARY)
+    target_link_libraries (${name} PRIVATE
+      ${Intl_LIBRARY}
+      ${Iconv_LIBRARY}
+    )
+  endif()
+endmacro()
+
 #### libraries
 
 add_library (${DI_LIBNAME}
@@ -732,9 +760,6 @@ add_library (${DI_LIBNAME}
   options.c
   strutils.c
 )
-target_link_libraries (${DI_LIBNAME} PRIVATE
-  m
-)
 # cmake's auto prefixing is annoying
 set_target_properties (${DI_LIBNAME} PROPERTIES PREFIX "")
 if (WIN32)
@@ -742,6 +767,12 @@ if (WIN32)
   set (CMAKE_STATIC_LIBRARY_PREFIX "lib")
 endif()
 addIntlLibrary (${DI_LIBNAME})
+target_include_directories (${DI_LIBNAME} PRIVATE
+  ${TIRPC_INCLUDE_DIRS}
+)
+target_link_libraries (${DI_LIBNAME} PRIVATE
+  ${TIRPC_LDFLAGS}
+)
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (${DI_LIBNAME} PRIVATE
     ${GMP_LDFLAGS}
@@ -768,9 +799,15 @@ add_executable (di
   di.c
   display.c
 )
+addIntlLibrary (di)
+target_include_directories (di PRIVATE
+  ${TIRPC_INCLUDE_DIRS}
+)
+target_link_libraries (di PRIVATE
+  ${TIRPC_LDFLAGS}
+)
 target_link_libraries (di PRIVATE
   ${DI_LIBNAME}
-  m
 )
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (di PRIVATE

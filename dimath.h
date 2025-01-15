@@ -359,9 +359,7 @@ dinum_perc (dinum_t *r, dinum_t *val)
 
 #if _use_math == DI_GMP
   mpz_t     quot;
-  mpz_t     rem;
   mpz_t     t;
-  double    tval;
 
   mpz_init (quot);
   mpz_init (t);

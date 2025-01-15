@@ -40,7 +40,7 @@
     This module contains utility routines for conversion
     and checking the data.
 
-    di_init_disk_info ()
+    di_initialize_disk_info ()
         initialize disk info structure
     di_save_block_sizes ()
         save the block sizes in the diskinfo structure.
@@ -59,7 +59,7 @@
 */
 
 void
-di_init_disk_info (di_disk_info_t *diptr)
+di_initialize_disk_info (di_disk_info_t *diptr)
 {
   int     i;
 

@@ -187,7 +187,7 @@ printDiskInfo (di_data_t *di_data)
 
     if (diopts->printTotals)
     {
-        di_init_disk_info (&totals);
+        di_initialize_disk_info (&totals);
         strncpy (totals.name, DI_GT("Total"), (Size_t) DI_NAME_LEN);
         totals.printFlag = DI_PRNT_OK;
     }

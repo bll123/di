@@ -106,7 +106,7 @@ main (int argc, char * argv [])
   char      *disp = NULL;
   di_data_t di_data;
 
-  di_init (&di_data, 0);
+  di_initialize (&di_data, 0);
   di_process_options (&di_data, argc, argv);
   di_get_data (&di_data);
   switch (di_data.options.exitFlag) {

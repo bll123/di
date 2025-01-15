@@ -135,6 +135,7 @@ cmakeclang:
             ;; \
 	esac
 
+# --debug-trycompile
 # internal use
 .PHONY: cmake-unix
 cmake-unix:

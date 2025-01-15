@@ -224,7 +224,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
           return -1;
         }
         diptr = *diskInfo + idx;
-        di_init_disk_info (diptr);
+        di_initialize_disk_info (diptr);
 
         strncpy (diptr->special, mntEntry.mnt_special, DI_SPEC_NAME_LEN);
         strncpy (diptr->name, mntEntry.mnt_mountp, DI_NAME_LEN);
@@ -312,7 +312,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     char            *devp;   /* local ptr to dev entry */
 
 
-    if (debug > 0) { printf ("# getDiskEntries: set/get/endmntent\n"); }
+    if (debug > 0) { printf ("# di_get_disk_entries: set/get/endmntent\n"); }
 /* if both are set not an ansi compiler... */
 #if _args_setmntent == 1
     if ((f = setmntent (DI_MOUNT_FILE)) == (FILE *) NULL)
@@ -335,7 +335,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
           return -1;
         }
         diptr = *diskInfo + idx;
-        di_init_disk_info (diptr);
+        di_initialize_disk_info (diptr);
 
         strncpy (diptr->special, mntEntry->mnt_fsname,
             (Size_t) DI_SPEC_NAME_LEN);
@@ -413,7 +413,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 int
 di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 {
-    if (debug > 0) { printf ("# getDiskEntries: QNX\n"); }
+    if (debug > 0) { printf ("# di_get_disk_entries: QNX\n"); }
     return di_getQNXDiskEntries ("/proc/mount", diskInfo, diCount);
 }
 
@@ -507,7 +507,7 @@ di_getQNXDiskEntries (char *ipath, di_disk_info_t **diskInfo, int *diCount)
         return -1;
       }
       diptr = *diskInfo + idx;
-      di_init_disk_info (diptr);
+      di_initialize_disk_info (diptr);
 
       path[len] = '\0';
       strncpy (diptr->special, tspecial, DI_SPEC_NAME_LEN);
@@ -552,7 +552,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     struct mnttab    mntEntry;
 
 
-    if (debug > 0) { printf ("# getDiskEntries: not anything; sys v.3\n"); }
+    if (debug > 0) { printf ("# di_get_disk_entries: not anything; sys v.3\n"); }
     if ((f = fopen (DI_MOUNT_FILE, "r")) == (FILE *) NULL)
     {
         fprintf (stderr, "Unable to open: %s errno %d\n", DI_MOUNT_FILE, errno);
@@ -575,7 +575,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
               return -1;
             }
             diptr = *diskInfo + idx;
-            di_init_disk_info (diptr);
+            di_initialize_disk_info (diptr);
 
 # if defined (COHERENT)
                 /* Coherent seems to have these fields reversed. oh well. */
@@ -615,6 +615,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
  * di_get_disk_entries
  *
  * OSF/1 / Digital Unix / Compaq Tru64 / FreeBSD / NetBSD 2.x / OpenBSD
+ *  MacOS
  *
  */
 
@@ -627,128 +628,124 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 int
 di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 {
-    di_disk_info_t     *diptr;
-    int             count;
-    int             idx;
+  di_disk_info_t  *diptr;
+  int             count;
+  int             idx;
 # if _dcl_mnt_names && _mem_struct_statfs_f_type
-    short           fstype;
+  short           fstype;
 # endif
-    _c_arg_2_getfsstat bufsize;
-    struct statfs   *mntbufp;
-    struct statfs   *sp;
+  _c_arg_2_getfsstat bufsize;
+  struct statfs   *mntbufp;
+  struct statfs   *sp;
 
-    if (debug > 0) { printf ("# getDiskEntries: getfsstat\n"); }
-    count = getfsstat ((struct statfs *) NULL, (_c_arg_2_getfsstat) 0, MNT_NOWAIT);
-    if (count < 1)
-    {
-        fprintf (stderr, "Unable to do getfsstat () errno %d\n", errno);
-        return -1;
-    }
-    bufsize = (_c_arg_2_getfsstat) (sizeof (struct statfs) * (Size_t) count);
-    mntbufp = malloc ((Size_t) bufsize);
-    if (mntbufp == (struct statfs *) NULL) {
-      fprintf (stderr, "malloc failed for mntbufp. errno %d\n", errno);
-      return -1;
-    }
-    memset ((char *) mntbufp, '\0', sizeof (struct statfs) * (Size_t) count);
-    count = getfsstat (mntbufp, bufsize, MNT_NOWAIT);
+  if (debug > 0) { printf ("# di_get_disk_entries: getfsstat\n"); }
+  count = getfsstat ((struct statfs *) NULL, (_c_arg_2_getfsstat) 0, MNT_NOWAIT);
+  if (count < 1) {
+    fprintf (stderr, "Unable to do getfsstat () errno %d\n", errno);
+    return -1;
+  }
+  bufsize = (_c_arg_2_getfsstat) (sizeof (struct statfs) * (Size_t) count);
+  mntbufp = malloc ((Size_t) bufsize);
+  if (mntbufp == (struct statfs *) NULL) {
+    fprintf (stderr, "malloc failed for mntbufp. errno %d\n", errno);
+    return -1;
+  }
+  memset ((char *) mntbufp, '\0', sizeof (struct statfs) * (Size_t) count);
+  count = getfsstat (mntbufp, bufsize, MNT_NOWAIT);
 
-    *diCount = count;
-    *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) count);
-    if (*diskInfo == (di_disk_info_t *) NULL)
-    {
-        fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
-        return -1;
-    }
-    memset ((char *) *diskInfo, '\0', sizeof (di_disk_info_t) * (Size_t) count);
+  *diCount = count;
+  *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) count);
+  if (*diskInfo == (di_disk_info_t *) NULL) {
+    fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
+    return -1;
+  }
+  memset ((char *) *diskInfo, '\0', sizeof (di_disk_info_t) * (Size_t) count);
 
-    for (idx = 0; idx < count; idx++)
-    {
-        di_unum_t      tblocksz;
+  for (idx = 0; idx < count; idx++) {
+    di_unum_t      tblocksz;
 
-        diptr = *diskInfo + idx;
-        di_init_disk_info (diptr);
+    diptr = *diskInfo + idx;
+    di_initialize_disk_info (diptr);
 
-        sp = mntbufp + idx;
+    sp = mntbufp + idx;
 # if defined (MNT_RDONLY)
-        if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY) {
-            diptr->isReadOnly = true;
-        }
+    if ((sp->f_flags & MNT_RDONLY) == MNT_RDONLY) {
+      diptr->isReadOnly = true;
+    }
 # endif
 # if defined (MNT_LOCAL)
-        if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL) {
-            diptr->isLocal = false;
-        }
+    if ((sp->f_flags & MNT_LOCAL) != MNT_LOCAL) {
+      diptr->isLocal = false;
+    }
 # endif
-        convertMountOptions ((unsigned long) sp->f_flags, diptr);
+    convertMountOptions ((unsigned long) sp->f_flags, diptr);
 # if _mem_struct_statfs_f_type
 #  if defined (MOUNT_NFS3)
-        if (sp->f_type == MOUNT_NFS3) {
-            strncat (diptr->options, "v3,",
-                    DI_OPT_LEN - strlen (diptr->options) - 1);
-        }
+    if (sp->f_type == MOUNT_NFS3) {
+      strncat (diptr->options, "v3,",
+          DI_OPT_LEN - strlen (diptr->options) - 1);
+    }
 #  endif
 # endif
 # if _mem_struct_statfs_mount_info \
-        && defined (MOUNT_NFS) \
-        && (_mem_struct_statfs_f_type || _mem_struct_statfs_f_fstypename)
+    && defined (MOUNT_NFS) \
+    && (_mem_struct_statfs_f_type || _mem_struct_statfs_f_fstypename)
 #  if _mem_struct_statfs_f_type
-        if (sp->f_type == MOUNT_NFS
+    if (sp->f_type == MOUNT_NFS
 #  endif
 #  if _mem_struct_statfs_f_fstypename
-        if (strcmp (sp->f_fstypename, MOUNT_NFS) == 0
+    if (strcmp (sp->f_fstypename, MOUNT_NFS) == 0
 #  endif
 #  if _mem_struct_statfs_f_fstypename && defined (MOUNT_NFS3)
-                || strcmp (sp->f_fstypename, MOUNT_NFS3) == 0
+        || strcmp (sp->f_fstypename, MOUNT_NFS3) == 0
 #  endif
 #  if _mem_struct_statfs_f_type && defined (MOUNT_NFS3)
-                || sp->f_type == MOUNT_NFS3
+        || sp->f_type == MOUNT_NFS3
 #  endif
-           )
-        {
-            struct nfs_args *na;
-            na = &sp->mount_info.nfs_args;
-            convertNFSMountOptions (na->flags, na->wsize, na->rsize, diptr);
-        }
+    ) {
+      struct nfs_args *na;
+      na = &sp->mount_info.nfs_args;
+      convertNFSMountOptions (na->flags, na->wsize, na->rsize, diptr);
+    }
 # endif
-        di_trimchar (diptr->options, ',');
+    di_trimchar (diptr->options, ',');
 
-        strncpy (diptr->special, sp->f_mntfromname, (Size_t) DI_SPEC_NAME_LEN);
-        strncpy (diptr->name, sp->f_mntonname, (Size_t) DI_NAME_LEN);
+    strncpy (diptr->special, sp->f_mntfromname, (Size_t) DI_SPEC_NAME_LEN);
+    strncpy (diptr->name, sp->f_mntonname, (Size_t) DI_NAME_LEN);
+fprintf (stderr, "-- mnt-from: %s\n", sp->f_mntfromname);
+fprintf (stderr, "-- mnt-on: %s\n", sp->f_mntonname);
+
 # if _mem_struct_statfs_f_fsize
-        tblocksz = sp->f_fsize;
+    tblocksz = sp->f_fsize;
 # endif
 # if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
-        tblocksz = sp->f_bsize;
+    tblocksz = sp->f_bsize;
 # endif
-        di_save_block_sizes (diptr, tblocksz, sp->f_blocks,
-            sp->f_bfree, sp->f_bavail);
-        di_save_inode_sizes (diptr, sp->f_files, sp->f_ffree, sp->f_ffree);
+    di_save_block_sizes (diptr, tblocksz, sp->f_blocks,
+        sp->f_bfree, sp->f_bavail);
+    di_save_inode_sizes (diptr, sp->f_files, sp->f_ffree, sp->f_ffree);
 # if _mem_struct_statfs_f_fstypename
-        strncpy (diptr->fsType, sp->f_fstypename, (Size_t) DI_TYPE_LEN);
+    strncpy (diptr->fsType, sp->f_fstypename, (Size_t) DI_TYPE_LEN);
 # else
 #  if _lib_sysfs && _mem_struct_statfs_f_type
-        sysfs (GETFSTYP, sp->f_type, diptr->fsType);
+    sysfs (GETFSTYP, sp->f_type, diptr->fsType);
 #  else
 #   if _dcl_mnt_names && _mem_struct_statfs_f_type
 #    define DI_UNKNOWN_FSTYPE       "(%.2d)?"
-        fstype = sp->f_type;
-        if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
-        {
-            strncpy (diptr->fsType, mnt_names [fstype], DI_TYPE_LEN);
-        }
-        else
-        {
-            Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
-                      DI_UNKNOWN_FSTYPE, fstype);
-        }
+    fstype = sp->f_type;
+    if ((fstype >= 0) && (fstype < MNT_NUMTYPES)) {
+      strncpy (diptr->fsType, mnt_names [fstype], DI_TYPE_LEN);
+    } else {
+      Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
+          DI_UNKNOWN_FSTYPE, fstype);
+    }
 #   endif
 #  endif
 # endif
-    }
+  }
 
-    free ((char *) mntbufp);
-    return 0;
+  free ((char *) mntbufp);
+  return 0;
 }
 
 #endif /* _lib_getfsstat */
@@ -782,7 +779,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     short           fstype;
     struct statfs   *mntbufp;
 
-    if (debug > 0) { printf ("# getDiskEntries: getmntinfo\n"); }
+    if (debug > 0) { printf ("# di_get_disk_entries: getmntinfo\n"); }
     count = getmntinfo (&mntbufp, MNT_WAIT);
     if (count < 1)
     {
@@ -810,7 +807,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         di_unum_t    tblocksz;
 
         diptr = *diskInfo + idx;
-        di_init_disk_info (diptr);
+        di_initialize_disk_info (diptr);
 # if defined (MNT_LOCAL)
         if ((mntbufp [idx].f_flags & MNT_LOCAL) != MNT_LOCAL)
         {
@@ -1047,7 +1044,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     struct statvfs  *mntbufp;
     struct statvfs  *sp;
 
-    if (debug > 0) { printf ("# getDiskEntries: getvfsstat\n"); }
+    if (debug > 0) { printf ("# di_get_disk_entries: getvfsstat\n"); }
     count = getvfsstat ((struct statvfs *) NULL, 0, ST_NOWAIT);
     if (count < 1)
     {
@@ -1077,7 +1074,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         di_unum_t    tblocksz;
 
         diptr = *diskInfo + idx;
-        di_init_disk_info (diptr);
+        di_initialize_disk_info (diptr);
 
         sp = mntbufp + idx;
 
@@ -1166,7 +1163,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     int             len;
 
 
-    if (debug > 0) { printf ("# getDiskEntries: getmnt\n"); }
+    if (debug > 0) { printf ("# di_get_disk_entries: getmnt\n"); }
     bufsize = NMOUNT * sizeof (struct fs_data);  /* enough for max # mounts */
     fsdbuf = (struct fs_data *) malloc ((Size_t) bufsize);
     if (fsdbuf == (struct fs_data *) NULL)
@@ -1199,7 +1196,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     for (idx = 0; idx < count; idx++)
     {
         diptr = *diskInfo + idx;
-        di_init_disk_info (diptr);
+        di_initialize_disk_info (diptr);
 
         if ((fsdbuf [idx].fd_req.flags & MNT_LOCAL) != MNT_LOCAL)
         {
@@ -1306,7 +1303,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     struct vfs_ent  *ve;        /* pointer for file system type entry   */
 
 
-    if (debug > 0) { printf ("# getDiskEntries: mntctl\n"); }
+    if (debug > 0) { printf ("# di_get_disk_entries: mntctl\n"); }
     i = 0;
     vmbufsz = sizeof (struct vmount) * DI_FSMAGIC; /* initial vmount buffer */
 
@@ -1367,7 +1364,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     for (i = 0; i < num; i++)
     {
         diptr = *diskInfo + i;
-        di_init_disk_info (diptr);
+        di_initialize_disk_info (diptr);
 
         vmtp = (struct vmount *) bufp;
         if ((vmtp->vmt_flags & MNT_REMOTE) == MNT_REMOTE)
@@ -1554,7 +1551,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     BEntry          entry;
     BPath           path;
 
-    if (debug > 0) { printf ("# getDiskEntries: fs_stat_dev\n"); }
+    if (debug > 0) { printf ("# di_get_disk_entries: fs_stat_dev\n"); }
     count = 0;
     while ((dev = next_dev (&count)) != B_BAD_VALUE)
     {
@@ -1572,7 +1569,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
           return -1;
         }
         diptr = *diskInfo + idx;
-        di_init_disk_info (diptr);
+        di_initialize_disk_info (diptr);
 
         *buff = '\0';
         nref.device = dev;

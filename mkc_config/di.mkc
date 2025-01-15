@@ -167,10 +167,10 @@ lib     vquotactl
 lib     xdr_int -lnsl
 lib     zone_getattr
 lib     zone_list
-# to be removed
 # get the correct xdr types...
 memberxdr rquota rq_bhardlimit
 memberxdr getquota_args gqa_uid
+# these are not used
 # memberxdr rquota rq_bsoftlimit
 # memberxdr rquota rq_curblocks
 # memberxdr rquota rq_fhardlimit
@@ -246,8 +246,10 @@ else
   setint _has_std_quotas 0
 endif
 
-if stdnfsquotas _hdr_rpc_rpc && _hdr_rpcsvc_rquota && _lib_xdr_int && \
-    _memberxdr_rquota_rq_bhardlimit && _memberxdr_getquota_args_gqa_uid
+if stdnfsquotas _hdr_rpc_rpc && _hdr_rpcsvc_rquota && \
+    _lib_xdr_int && \
+    _memberxdr_rquota_rq_bhardlimit && \
+    _memberxdr_getquota_args_gqa_uid
   setint _has_std_nfs_quotas 1
 else
   setint _has_std_nfs_quotas 0
@@ -264,8 +266,7 @@ ifnotoption NLS
 endif
 
 if hasnls _lib_bindtextdomain && _lib_gettext && _lib_setlocale && \
-    _lib_textdomain && _hdr_libintl && _hdr_locale && \
-    _command_msgfmt
+    _lib_textdomain && _hdr_libintl && _hdr_locale
   setint _enable_nls 1
 else
   set _lib_bindtextdomain 0

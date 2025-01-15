@@ -309,7 +309,7 @@ extern void di_get_disk_info          (di_disk_info_t **, int *);
 extern void diquota                 (di_quota_t *);
 
 /* didiskutil.c */
-extern void di_init_disk_info (di_disk_info_t *);
+extern void di_initialize_disk_info (di_disk_info_t *);
 extern void di_save_block_sizes (di_disk_info_t *, di_unum_t, di_unum_t, di_unum_t, di_unum_t);
 extern void di_save_inode_sizes (di_disk_info_t *, di_unum_t, di_unum_t, di_unum_t);
 #if _lib_getmntent \
@@ -348,7 +348,7 @@ extern Size_t di_mungePoolName      (char *);
 #define DI_QUETTA         9
 
 /* dilib.c */
-extern void di_init (di_data_t *di_data, int intfcflag);
+extern void di_initialize (di_data_t *di_data, int intfcflag);
 extern void di_process_options (di_data_t *di_data, int argc, char * argv []);
 extern void di_get_data (di_data_t *di_data);
 extern void di_cleanup (di_data_t *di_data);

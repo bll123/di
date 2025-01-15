@@ -74,6 +74,9 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
  endif
 endif
 
+pkg cflags libtirpc
+pkg libs libtirpc
+
 pkg cflags gmp /opt/local/lib/pkgconfig
 pkg libs gmp /opt/local/lib/pkgconfig
 
