@@ -397,6 +397,7 @@ check_include_file (sys/vfstab.h _sys_vfstab)
 check_include_file (sys/vmount.h _sys_vmount)
 
 check_function_exists (bcopy _lib_bcopy)
+check_function_exists (bindtextdomain _lib_bindtextdomain)
 check_function_exists (bzero _lib_bzero)
 # -lsun, -lseq
 check_function_exists (endmntent _lib_endmntent)
@@ -421,6 +422,7 @@ if (NOT _lib_getmntent)
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 check_function_exists (getmntinfo _lib_getmntinfo)
+check_function_exists (gettext _lib_gettext)
 check_function_exists (getvfsstat _lib_getvfsstat)
 check_function_exists (getzoneid _lib_getzoneid)
 check_function_exists (hasmntopt _lib_hasmntopt)
@@ -467,6 +469,7 @@ check_function_exists (strcoll _lib_strcoll)
 check_function_exists (strdup _lib_strdup)
 check_function_exists (strstr _lib_strstr)
 check_function_exists (sysfs _lib_sysfs)
+check_function_exists (textdomain _lib_textdomain)
 # dragonflybsd
 check_function_exists (vquotactl _lib_vquotactl)
 
@@ -627,16 +630,18 @@ else()
 endif()
 
 # HP-UX
-check_prototype_definition (quotactl
-    "int quotactl (int a, const char * b, uid_t c, void * d)"
-    0
-    ${QUOTA_HDR}
-    _npt_quotactl
-    )
-if (_npt_quotactl)
-  set (_npt_quotactl 0)
-else()
-  set (_npt_quotactl 1)
+if (NOT _quotactl_pos_1 AND NOT _quotactl_pos_2)
+  check_prototype_definition (quotactl
+      "int quotactl (int a, const char * b, uid_t c, void * d)"
+      0
+      ${QUOTA_HDR}
+      _npt_quotactl
+      )
+  if (_npt_quotactl)
+    set (_npt_quotactl 0)
+  else()
+    set (_npt_quotactl 1)
+  endif()
 endif()
 
 check_symbol_exists (errno errno.h _dcl_errno)

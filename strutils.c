@@ -33,13 +33,13 @@
  *
  */
 
-void *
-di_realloc (void * ptr, Size_t size)
+pvoid *
+di_realloc (pvoid * ptr, Size_t size)
 {
-  if (ptr == NULL) {
-    ptr = malloc (size);
+  if (ptr == (pvoid *) NULL) {
+    ptr = (pvoid *) malloc (size);
   } else {
-    ptr = realloc (ptr, size);
+    ptr = (pvoid *) realloc (ptr, size);
   }
 
   return ptr;

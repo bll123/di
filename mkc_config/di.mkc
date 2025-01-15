@@ -252,7 +252,6 @@ else
 endif
 
 ifnotoption NLS
-# ### to be mostly removed
   set _lib_bindtextdomain 0
   set _lib_gettext 0
   set _lib_setlocale 0
@@ -295,10 +294,10 @@ option  DI_DEFAULT_DISP_SIZE H
 
 include
 
-#define DI_UINT64 0
+#define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
-#define _use_math DI_UINT64
+#define _use_math DI_INTERNAL
 
 #if _typ_statvfs_t
 # define Statvfs_t statvfs_t
@@ -309,7 +308,7 @@ include
 #if _typ_size_t
 # define Size_t size_t
 #else
-# define Size_t unsigned int
+# define Size_t unsigned long
 #endif
 
 #if _typ_uint_t

@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
 # Copyright 2006-2018 Brad Lanam Walnut Creek, CA USA
-# Copyright 2020-2024 Brad Lanam Pleasant Hill CA
+# Copyright 2020 Brad Lanam Pleasant Hill CA
 #
 
 # HP-UX doesn't have these installed.
@@ -1117,12 +1117,12 @@ check_lib
       $code = <<"_HERE_";
 CPP_EXTERNS_BEG
 #undef $rfunc
-typedef void (*_TEST_fun_)(void);
-char $rfunc(void);
-_TEST_fun_ f = (void *) $rfunc;
+typedef char (*_TEST_fun_)();
+char $rfunc();
+_TEST_fun_ f = $rfunc;
 CPP_EXTERNS_END
 int main () {
-if ((void *) f == (void *) $rfunc) { return 0; }
+if (f == $rfunc) { return 0; }
 return 1;
 }
 _HERE_
@@ -1130,11 +1130,11 @@ _HERE_
       $hinc = 'all';
       $code = <<"_HERE_";
 CPP_EXTERNS_BEG
-typedef void (*_TEST_fun_)(void);
-_TEST_fun_ f = (void *) $rfunc;
+typedef char (*_TEST_fun_)();
+_TEST_fun_ f = $rfunc;
 CPP_EXTERNS_END
 int main () {
-f(); if ((void *) f == (void *) $rfunc) { return 0; }
+f(); if (f == $rfunc) { return 0; }
 return 1;
 }
 _HERE_

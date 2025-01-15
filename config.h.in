@@ -104,6 +104,7 @@
 #define _siz_long ${_siz_long}
 
 #cmakedefine01 _lib_bcopy
+#cmakedefine01 _lib_bindtextdomain
 #cmakedefine01 _lib_bzero
 #cmakedefine01 _lib_CreateFile
 #cmakedefine01 _lib_DeviceIoControl
@@ -119,6 +120,7 @@
 #cmakedefine01 _lib_getmnt
 #cmakedefine01 _lib_getmntent
 #cmakedefine01 _lib_getmntinfo
+#cmakedefine01 _lib_gettext
 #cmakedefine01 _lib_getvfsstat
 #cmakedefine01 _lib_getzoneid
 #cmakedefine01 _lib_hasmntopt
@@ -141,6 +143,7 @@
 #cmakedefine01 _lib_strdup
 #cmakedefine01 _lib_strstr
 #cmakedefine01 _lib_sysfs
+#cmakedefine01 _lib_textdomain
 #cmakedefine01 _lib_vquotactl
 #cmakedefine01 _lib_xdr_int
 #cmakedefine01 _lib_zone_getattr
@@ -181,7 +184,23 @@
 // #cmakedefine01 _has_std_quotas
 // #cmakedefine01 _has_std_nfs_quotas
 
-#define DI_UINT 0
+#ifndef MKC_STANDARD_DEFS
+# define MKC_STANDARD_DEFS 1
+# if ! _key_void
+#  define void int
+# endif
+# if ! _key_void || ! _param_void_star
+   typedef char pvoid;
+# else
+   typedef void pvoid;
+# endif
+# if ! _key_const
+#  define const
+# endif
+
+#endif /* MKC_STANDARD_DEFS */
+
+#define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
 #define _use_math ${_use_math}

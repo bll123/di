@@ -70,8 +70,9 @@
 #if _hdr_jfs_quota
 # include <jfs/quota.h>
 #endif
-  /* AIX 5.1 doesn't seem to have quotactl declared.... */
-  /* use their compatibility routine.                   */
+// ### FIX
+/* AIX 5.1 doesn't seem to have quotactl declared.... */
+/* use their compatibility routine.                   */
 #if ! _args_quotactl && _hdr_linux_quota \
       && _inc_conflict__sys_quota__hdr_linux_quota
 # include <linux/quota.h>

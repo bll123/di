@@ -74,11 +74,7 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
 endif
 
 libs
-cflags_shared
-ldflags_shared
-sharednameflag
-shareexeclinkflag
-sharerunpathflag
+shared_flags
 
 extension obj
 extension exe
