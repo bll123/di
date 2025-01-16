@@ -235,14 +235,12 @@ typedef struct {
   char         typeFormat [25];
 } diOutput_t;
 
-typedef struct di_opt di_opt_t;
-
 typedef struct {
   int             count;
   int             haspooledfs;
   int             disppooledfs;
   int             totsorted;
-  di_opt_t        *options;
+  pvoid           *options;
   diOutput_t      output;
   di_disk_info_t  *diskInfo;
   di_zone_info_t  zoneInfo;

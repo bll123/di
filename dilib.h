@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include "di.h"
+#include "options.h" // ### for sortarray, may change later
 
 # if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {

@@ -120,7 +120,6 @@ void
 di_initialize (di_data_t *di_data)
 {
   di_opt_t    *diopts;
-  diOutput_t  *diout;
 
   di_data->count = 0;
   di_data->haspooledfs = false;
@@ -131,13 +130,16 @@ di_initialize (di_data_t *di_data)
 
   /* options defaults */
   di_data->options = di_init_options ();
-  diopts = di_data->options;
+  diopts = (di_opt_t *) di_data->options;
 }
 
 int
 di_process_options (di_data_t *di_data, int argc, char * argv [])
 {
-  di_data->options->optidx = di_get_options (argc, argv, di_data->options);
+  di_opt_t    *diopts;
+
+  diopts = (di_opt_t *) di_data->options;
+  diopts->optidx = di_get_options (argc, argv, (di_opt_t *) di_data->options);
 
   if (debug > 0) {
 #if _use_math == DI_GMP
@@ -149,7 +151,7 @@ di_process_options (di_data_t *di_data, int argc, char * argv [])
 #endif
   }
 
-  return di_data->options->exitFlag;
+  return diopts->exitFlag;
 }
 
 void
@@ -161,10 +163,10 @@ di_get_data (di_data_t *di_data)
 
   /* initialization */
   disp = (char *) NULL;
-  diopts = di_data->options;
+  diopts = (di_opt_t *) di_data->options;
 
   initZones (di_data);
-  if (di_data->options->exitFlag != DI_EXIT_NORM) {
+  if (diopts->exitFlag != DI_EXIT_NORM) {
     return;
   }
 
@@ -181,18 +183,18 @@ di_get_data (di_data_t *di_data)
 
   hasLoop = false;
   preCheckDiskInfo (di_data);
-  if (di_data->options->optidx < di_data->options->argc ||
+  if (diopts->optidx < diopts->argc ||
       diopts->excludeLoopback) {
     getDiskStatInfo (di_data);
     hasLoop = getDiskSpecialInfo (di_data, diopts->dontResolveSymlink);
   }
-  if (di_data->options->optidx < di_data->options->argc) {
+  if (diopts->optidx < diopts->argc) {
     int     rc;
 
     rc = checkFileInfo (di_data);
     if (rc < 0) {
       di_cleanup (di_data);
-      di_data->options->exitFlag = DI_EXIT_WARN;
+      diopts->exitFlag = DI_EXIT_WARN;
       return;
     }
   }
@@ -223,7 +225,7 @@ di_cleanup (di_data_t *di_data)
     free ((char *) di_data->diskInfo);
   }
 
-  diopts = di_data->options;
+  diopts = (di_opt_t *) di_data->options;
   if (diopts != NULL) {
     if (diopts->ignore_list.count > 0 &&
         diopts->ignore_list.list != (char **) NULL) {
@@ -256,7 +258,7 @@ checkFileInfo (di_data_t *di_data)
 
 
   rc = 0;
-  diopts = di_data->options;
+  diopts = (di_opt_t *) di_data->options;
 
   diskInfo = di_data->diskInfo;
   if (di_data->haspooledfs && ! di_data->totsorted)
@@ -526,7 +528,7 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
     int             j;
     di_opt_t     *diopts;
 
-    diopts = di_data->options;
+    diopts = (di_opt_t *) di_data->options;
 
     for (i = 0; i < di_data->count; ++i) {
         di_disk_info_t        *dinfo;
@@ -836,7 +838,7 @@ preCheckDiskInfo (di_data_t *di_data)
   int           hasLoop;
 
   hasLoop = false;
-  diopts = di_data->options;
+  diopts = (di_opt_t *) di_data->options;
   for (i = 0; i < di_data->count; ++i) {
     di_disk_info_t        *dinfo;
 
@@ -1057,7 +1059,7 @@ initZones (di_data_t *di_data)
         if (zids == (zoneid_t *) NULL)
         {
           fprintf (stderr, "malloc failed in main() (1).  errno %d\n", errno);
-          di_data->options->exitFlag = DI_EXIT_FAIL;
+          diopts->exitFlag = DI_EXIT_FAIL;
           return;
         }
         zone_list (zids, &zi->zoneCount);
@@ -1066,7 +1068,7 @@ initZones (di_data_t *di_data)
         if (zi->zones == (di_zone_summ_t *) NULL)
         {
           fprintf (stderr, "malloc failed in main() (2).  errno %d\n", errno);
-          di_data->options->exitFlag = DI_EXIT_FAIL;
+          diopts->exitFlag = DI_EXIT_FAIL;
           return;
         }
       }
