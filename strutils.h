@@ -1,5 +1,5 @@
-#ifndef DI_INC_STRUTILS_H
-#define DI_INC_STRUTILS_H
+#ifndef INC_STRUTILS_H
+#define INC_STRUTILS_H
 
 #include "config.h"
 #if _hdr_stddef
@@ -25,4 +25,4 @@ extern char * strstr (const char *, const char *);
 }
 # endif
 
-#endif /* DI_INC_STRUTILS_H */
+#endif /* INC_STRUTILS_H */

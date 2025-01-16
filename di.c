@@ -103,15 +103,15 @@ static void usage (void);
 int
 main (int argc, char * argv [])
 {
-  di_data_t di_data;
+  void      *di_data;
   int       exitflag;
 
-  di_initialize (&di_data);
-  exitflag = di_process_options (&di_data, argc, argv);
+  di_data = di_initialize ();
+  exitflag = di_process_options (di_data, argc, argv);
   switch (exitflag) {
     case DI_EXIT_FAIL:
     case DI_EXIT_WARN: {
-      di_cleanup (&di_data);
+      di_cleanup (di_data);
       exit (exitflag);
     }
     case DI_EXIT_HELP:
@@ -122,16 +122,16 @@ main (int argc, char * argv [])
       if (exitflag == DI_EXIT_VERS) {
         printf (DI_GT("di version %s\n"), DI_VERSION);
       }
-      di_cleanup (&di_data);
+      di_cleanup (di_data);
       exit (0);
     }
     case DI_EXIT_NORM: {
       break;
     }
   }
-  di_get_data (&di_data);
-  di_display_data (&di_data);
-  di_cleanup (&di_data);
+  di_get_data (di_data);
+  di_display_data (di_data);
+  di_cleanup (di_data);
   return 0;
 }
 

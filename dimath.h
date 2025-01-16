@@ -1,7 +1,7 @@
 /* Copyright 2025 Brad Lanam Pleasant Hill CA */
 
-#ifndef DI_INC_DIMATH_H
-#define DI_INC_DIMATH_H
+#ifndef INC_DIMATH_H
+#define INC_DIMATH_H
 
 #include "config.h"
 
@@ -444,4 +444,4 @@ dinum_str (const dinum_t *r, char *str, Size_t sz)
 }
 # endif
 
-#endif /* DI_INC_DIMATH_H */
+#endif /* INC_DIMATH_H */

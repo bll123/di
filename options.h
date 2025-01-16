@@ -2,8 +2,8 @@
  * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
  */
 
-#ifndef DI_INC_OPTIONS_H
-#define DI_INC_OPTIONS_H
+#ifndef INC_OPTIONS_H
+#define INC_OPTIONS_H
 
 #include "disystem.h"
 
@@ -66,4 +66,4 @@ extern int di_get_options (int , char * argv [], di_opt_t *);
 }
 # endif
 
-#endif /* DI_INC_OPTIONS_H */
+#endif /* INC_OPTIONS_H */

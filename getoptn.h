@@ -3,8 +3,8 @@
  * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
  */
 
-#ifndef DI_INC_GETOPTN_H_
-#define DI_INC_GETOPTN_H_
+#ifndef INC_GETOPTN_H
+#define INC_GETOPTN_H
 
 #include "config.h"
 
@@ -61,4 +61,4 @@ extern int getoptn (int style, int argc, char * argv [],
 }
 # endif
 
-#endif /*DI_INC_GETOPTN_H_ */
+#endif /* INC_GETOPTN_H */

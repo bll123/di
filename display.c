@@ -132,6 +132,7 @@ const char *sztabsuffix [] = {
 
 static sizeTable_t sizeTable [DI_SIZETAB_SIZE];
 
+#if 0
 static void addTotals           (const di_disk_info_t *, di_disk_info_t *, int);
 static void getMaxFormatLengths (di_data_t *);
 static int  findDispSize        (dinum_t *);
@@ -144,13 +145,15 @@ static void initSizeTable       (di_opt_t *, diOutput_t *);
 static void appendFormatStr     (char *, const char *, char **, Size_t *, Size_t *);
 static void appendFormatVal     (char *, dinum_t *, char **, Size_t *, Size_t *);
 static void append              (const char *, char **, Size_t *, Size_t *);
+#endif
 
 void
-di_display_data (di_data_t *di_data)
+di_display_data (void *di_data)
 {
   return;
 }
 
+#if 0
 /*
  * printDiskInfo
  *
@@ -163,9 +166,8 @@ di_display_data (di_data_t *di_data)
  */
 
 char *
-printDiskInfo (di_data_t *di_data)
+printDiskInfo (void *di_data)
 {
-#if 0
     int                 i;
     di_opt_t         *diopts;
     di_disk_info_t        *diskInfo;
@@ -371,36 +373,30 @@ printDiskInfo (di_data_t *di_data)
     }
 
     return out;
-#endif
   return strdup ("dbg\n");
 }
 
 static void
 appendFormatStr (char *fmt, const char *val, char **ptr, Size_t *clen, Size_t *len)
 {
-#if 0
   char          tdata [1024];
 
   Snprintf1 (tdata, sizeof(tdata), fmt, val);
   append (tdata, ptr, clen, len);
-#endif
 }
 
 static void
 appendFormatVal (char *fmt, dinum_t *val, char **ptr, Size_t *clen, Size_t *len)
 {
-#if 0
   char          tdata [1024];
 
   Snprintf1 (tdata, sizeof(tdata), fmt, val);
   append (tdata, ptr, clen, len);
-#endif
 }
 
 static void
 append (const char *val, char **ptr, Size_t *clen, Size_t *len)
 {
-#if 0
   Size_t    vlen;
   Size_t    bumplen;
   Size_t    nlen;
@@ -419,7 +415,6 @@ append (const char *val, char **ptr, Size_t *clen, Size_t *len)
   }
   strcat (*ptr, val);
   *clen += vlen;
-#endif
 }
 
 /*
@@ -433,7 +428,6 @@ append (const char *val, char **ptr, Size_t *clen, Size_t *len)
 static char *
 printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 {
-#if 0
     dinum_t          used;
     dinum_t          totAvail;
     const char          *ptr;
@@ -818,7 +812,6 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
   dinum_clear (&used);
   dinum_clear (&totAvail);
   return out;
-#endif
   return (strdup ("dbg\n"));
 }
 
@@ -827,7 +820,6 @@ printSpace (const di_opt_t *diopts, const diOutput_t *diout,
              dinum_t *usage, int idx)
 {
     static char     tdata [1024];
-#if 0
     dinum_t         tdbs;
     double          mult;
     dinum_t         temp;
@@ -858,7 +850,6 @@ printSpace (const di_opt_t *diopts, const diOutput_t *diout,
 //    mult = 1.0 / tdbs;
 //    Snprintf2 (tdata, sizeof(tdata), format, usage * mult, suffix);
     return tdata;
-#endif
 *tdata = '\0';
     return tdata;
 }
@@ -989,7 +980,6 @@ addTotals (const di_disk_info_t *diskInfo, di_disk_info_t *totals, int inpool)
 static char *
 processTitles (di_opt_t *diopts, diOutput_t *diout)
 {
-#if 0
     const char      *ptr;
     int             valid;
     Size_t          wlen;
@@ -1288,7 +1278,6 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
       append ("\n", &out, &outcurrlen, &outlen);
     }
     return out;
-#endif
     return strdup ("dbg-out\n");
 }
 
@@ -1303,7 +1292,6 @@ static char *
 printPerc (dinum_t *used, dinum_t *totAvail, const char *format)
 {
   static char   tdata [1024];
-#if 0
   double        perc;
 
   if (dinum_cmp_s (&totAvail, 0) > 0) {
@@ -1314,7 +1302,6 @@ printPerc (dinum_t *used, dinum_t *totAvail, const char *format)
   }
 
   Snprintf1 (tdata, sizeof(tdata), format, perc);
-#endif
 *tdata = '\0';
   return tdata;
 }
@@ -1323,7 +1310,6 @@ printPerc (dinum_t *used, dinum_t *totAvail, const char *format)
 static void
 getMaxFormatLengths (di_data_t *di_data)
 {
-#if 0
     int             i;
     unsigned int    len;
     diOutput_t      *diout;
@@ -1376,14 +1362,13 @@ getMaxFormatLengths (di_data_t *di_data)
             }
         } /* if we are printing this item */
     } /* for all disks */
-#endif
 }
 
 static Size_t
 istrlen (const char *str)
 {
   Size_t            len;
-#if _lib_mbrlen && _enable_nls
+#if _lib_mbrlen
   Size_t            mlen;
   Size_t            slen;
   mbstate_t         ps;
@@ -1442,6 +1427,8 @@ initSizeTable (di_opt_t *diopts, diOutput_t *diout)
     dinum_mul_u (&sizeTable [i].dbs, diopts->baseDispSize);
   }
 }
+
+#endif
 
 extern void
 initLocale (void)

@@ -118,10 +118,12 @@ static int  checkForUUID        (const char *);
 static int  diCompare           (const di_opt_t *, const di_disk_info_t *, unsigned int, unsigned int);
 static void checkZone (di_disk_info_t *, di_zone_info_t *, di_opt_t *);
 
-void
-di_initialize (di_data_t *di_data)
+void *
+di_initialize (void)
 {
-  di_opt_t    *diopts;
+  di_data_t   *di_data;
+
+  di_data = malloc (sizeof (di_data_t));
 
   di_data->count = 0;
   di_data->haspooledfs = false;
@@ -132,13 +134,70 @@ di_initialize (di_data_t *di_data)
 
   /* options defaults */
   di_data->options = di_init_options ();
+
+  return di_data;
+}
+
+/*
+ * di_cleanup
+ *
+ * free up allocated memory
+ *
+ */
+
+void
+di_cleanup (void *tdi_data)
+{
+  di_data_t       *di_data = (di_data_t *) tdi_data;
+  int             i;
+  di_opt_t        *diopts;
+  di_zone_info_t  *zinfo;
+
+  if (di_data == NULL) {
+    return;
+  }
+
+  if (di_data->diskInfo != (di_disk_info_t *) NULL) {
+    di_disk_info_t  *dinfo;
+
+    for (i = 0; i < di_data->count; ++i) {
+      dinfo = &di_data->diskInfo [i];
+      di_free_disk_info (dinfo);
+    }
+    free (di_data->diskInfo);
+  }
+
   diopts = (di_opt_t *) di_data->options;
+  if (diopts != NULL) {
+    if (diopts->ignore_list.count > 0 &&
+        diopts->ignore_list.list != (char **) NULL) {
+      free ((pvoid *) diopts->ignore_list.list);
+      diopts->ignore_list.count = 0;
+    }
+
+    if (diopts->include_list.count > 0 &&
+        diopts->include_list.list != (char **) NULL) {
+      free (diopts->include_list.list);
+      diopts->include_list.count = 0;
+    }
+    free (diopts);
+  }
+
+  zinfo = (di_zone_info_t *) di_data->zoneInfo;
+  di_free_zones (zinfo);
+
+  free (di_data);
 }
 
 int
-di_process_options (di_data_t *di_data, int argc, char * argv [])
+di_process_options (void *tdi_data, int argc, char * argv [])
 {
+  di_data_t   *di_data = (di_data_t *) tdi_data;
   di_opt_t    *diopts;
+
+  if (di_data == NULL) {
+    return DI_EXIT_FAIL;
+  }
 
   diopts = (di_opt_t *) di_data->options;
   diopts->optidx = di_get_options (argc, argv, (di_opt_t *) di_data->options);
@@ -157,11 +216,16 @@ di_process_options (di_data_t *di_data, int argc, char * argv [])
 }
 
 void
-di_get_data (di_data_t *di_data)
+di_get_data (void *tdi_data)
 {
+  di_data_t   *di_data = (di_data_t *) tdi_data;
   di_opt_t    *diopts;
   int         hasLoop;
   char        *disp;
+
+  if (di_data == NULL) {
+    return;
+  }
 
   /* initialization */
   disp = (char *) NULL;
@@ -205,54 +269,6 @@ di_get_data (di_data_t *di_data)
   if (diopts->quota_check == true) {
     checkDiskQuotas (di_data);
   }
-}
-
-/*
- * di_cleanup
- *
- * free up allocated memory
- *
- */
-
-void
-di_cleanup (di_data_t *di_data)
-{
-  int             i;
-  di_opt_t        *diopts;
-  di_zone_info_t  *zinfo;
-
-  if (di_data == NULL) {
-    return;
-  }
-
-  if (di_data->diskInfo != (di_disk_info_t *) NULL) {
-    di_disk_info_t  *dinfo;
-
-    for (i = 0; i < di_data->count; ++i) {
-      dinfo = &di_data->diskInfo [i];
-      di_free_disk_info (dinfo);
-    }
-    free (di_data->diskInfo);
-  }
-
-  diopts = (di_opt_t *) di_data->options;
-  if (diopts != NULL) {
-    if (diopts->ignore_list.count > 0 &&
-        diopts->ignore_list.list != (char **) NULL) {
-      free ((pvoid *) diopts->ignore_list.list);
-      diopts->ignore_list.count = 0;
-    }
-
-    if (diopts->include_list.count > 0 &&
-        diopts->include_list.list != (char **) NULL) {
-      free (diopts->include_list.list);
-      diopts->include_list.count = 0;
-    }
-    free (diopts);
-  }
-
-  zinfo = (di_zone_info_t *) di_data->zoneInfo;
-  di_free_zones (zinfo);
 }
 
 extern int

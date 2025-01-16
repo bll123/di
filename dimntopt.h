@@ -3,8 +3,8 @@
  * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
  */
 
-#ifndef DI_INC_DIMNTOPT_H_
-#define DI_INC_DIMNTOPT_H_
+#ifndef INC_DIMNTOPT_H
+#define INC_DIMNTOPT_H
 
 #include "config.h"
 
@@ -157,4 +157,4 @@ extern "C" {
 }
 # endif
 
-#endif /* DI_INC_DIMNTOPT_H_ */
+#endif /* INC_DIMNTOPT_H */
