@@ -35,7 +35,7 @@
 # include <libintl.h>
 #endif
 
-#include "di.h"
+#include "diinternal.h" // DI_DEFAULT_FORMAT
 #include "strutils.h"
 #include "getoptn.h"
 #include "options.h"

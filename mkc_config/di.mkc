@@ -347,5 +347,22 @@ include
 # define strcoll strcmp
 #endif
 
+#if ! _dcl_errno
+  extern int errno;
+#endif
+
+#if ! _const_O_NOCTTY
+# define O_NOCTTY 0
+#endif
+
+/* macro for gettext() */
+#ifndef DI_GT
+# if _enable_nls
+#  define DI_GT(args) gettext(args)
+# else
+#  define DI_GT(args) (args)
+# endif
+#endif
+
 endinclude
 

@@ -68,7 +68,10 @@
 #endif
 
 #include "di.h"
-#include "dilib.h"
+#include "disystem.h"
+#include "diinternal.h"
+#include "dizone.h"
+#include "diquota.h"
 #include "options.h"
 #include "version.h"
 
@@ -105,9 +108,7 @@ static int  checkFileInfo       (di_data_t *);
 static int  getDiskSpecialInfo  (di_data_t *, unsigned int);
 static void getDiskStatInfo     (di_data_t *);
 static void preCheckDiskInfo    (di_data_t *);
-static void initZones           (di_data_t *);
 
-static void checkZone           (di_disk_info_t *, di_zone_info_t *, di_opt_t *);
 static void checkIgnoreList     (di_disk_info_t *, di_strarr_t *);
 static void checkIncludeList    (di_disk_info_t *, di_strarr_t *);
 static int  isIgnoreFSType      (const char *);
@@ -115,6 +116,7 @@ static int  isIgnoreSpecial     (const char *);
 static int  isIgnoreFS          (const char *, const char *);
 static int  checkForUUID        (const char *);
 static int  diCompare           (const di_opt_t *, const di_disk_info_t *, unsigned int, unsigned int);
+static void checkZone (di_disk_info_t *, di_zone_info_t *, di_opt_t *);
 
 void
 di_initialize (di_data_t *di_data)
@@ -165,7 +167,7 @@ di_get_data (di_data_t *di_data)
   disp = (char *) NULL;
   diopts = (di_opt_t *) di_data->options;
 
-  initZones (di_data);
+  di_data->zoneInfo = di_initialize_zones ();
   if (diopts->exitFlag != DI_EXIT_NORM) {
     return;
   }
@@ -215,35 +217,42 @@ di_get_data (di_data_t *di_data)
 void
 di_cleanup (di_data_t *di_data)
 {
-  int         i;
-  di_opt_t    *diopts;
+  int             i;
+  di_opt_t        *diopts;
+  di_zone_info_t  *zinfo;
+
+  if (di_data == NULL) {
+    return;
+  }
 
   if (di_data->diskInfo != (di_disk_info_t *) NULL) {
-    for (i = 0; i < DI_VALUE_MAX; ++i) {
-      dinum_clear (&di_data->diskInfo->values [i]);
+    di_disk_info_t  *dinfo;
+
+    for (i = 0; i < di_data->count; ++i) {
+      dinfo = &di_data->diskInfo [i];
+      di_free_disk_info (dinfo);
     }
-    free ((char *) di_data->diskInfo);
+    free (di_data->diskInfo);
   }
 
   diopts = (di_opt_t *) di_data->options;
   if (diopts != NULL) {
     if (diopts->ignore_list.count > 0 &&
         diopts->ignore_list.list != (char **) NULL) {
-      free ((char *) diopts->ignore_list.list);
+      free ((pvoid *) diopts->ignore_list.list);
       diopts->ignore_list.count = 0;
     }
 
     if (diopts->include_list.count > 0 &&
         diopts->include_list.list != (char **) NULL) {
-      free ((char *) diopts->include_list.list);
+      free (diopts->include_list.list);
       diopts->include_list.count = 0;
     }
     free (diopts);
   }
 
-  if (di_data->zoneInfo.zones != (di_zone_summ_t *) NULL) {
-    free ((void *) di_data->zoneInfo.zones);
-  }
+  zinfo = (di_zone_info_t *) di_data->zoneInfo;
+  di_free_zones (zinfo);
 }
 
 extern int
@@ -335,8 +344,8 @@ checkFileInfo (di_data_t *di_data)
           }
         }
 
-        if (dinfo->st_dev != (__ulong) DI_UNKNOWN_DEV &&
-            (__ulong) statBuf.st_dev == dinfo->st_dev &&
+        if (dinfo->st_dev != (unsigned long) DI_UNKNOWN_DEV &&
+            (unsigned long) statBuf.st_dev == dinfo->st_dev &&
             ! dinfo->isLoopback) {
           int foundnew = 0;
 
@@ -432,10 +441,10 @@ getDiskStatInfo (di_data_t *di_data)
       continue;
     }
 
-    dinfo->st_dev = (__ulong) DI_UNKNOWN_DEV;
+    dinfo->st_dev = (unsigned long) DI_UNKNOWN_DEV;
 
     if (stat (dinfo->mountpt, &statBuf) == 0) {
-      dinfo->st_dev = (__ulong) statBuf.st_dev;
+      dinfo->st_dev = (unsigned long) statBuf.st_dev;
       if (debug > 2) {
         printf ("dev: %s: %ld\n", dinfo->mountpt, dinfo->st_dev);
       }
@@ -485,8 +494,8 @@ getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
           }
         }
       }
-      dinfo->sp_dev = (__ulong) statBuf.st_dev;
-      dinfo->sp_rdev = (__ulong) statBuf.st_rdev;
+      dinfo->sp_dev = (unsigned long) statBuf.st_dev;
+      dinfo->sp_rdev = (unsigned long) statBuf.st_rdev;
 
       /* Solaris's loopback device is "lofs"            */
       /* linux loopback device is "none"                */
@@ -652,8 +661,8 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
 
           /* don't need to bother checking real partitions  */
         if (dinfo->sp_dev != 0 && dinfo->isLoopback) {
-          __ulong         sp_dev;
-          __ulong         sp_rdev;
+          unsigned long         sp_dev;
+          unsigned long         sp_rdev;
 
           sp_dev = dinfo->sp_dev;
           sp_rdev = dinfo->sp_rdev;
@@ -849,7 +858,7 @@ preCheckDiskInfo (di_data_t *di_data)
     if (debug > 4) {
       printf ("## prechk:%s:\n", dinfo->mountpt);
     }
-    checkZone (dinfo, &di_data->zoneInfo, diopts);
+    checkZone (dinfo, (di_zone_info_t *) &di_data->zoneInfo, diopts);
 
     if (di_isPooledFs (dinfo)) {
       di_data->haspooledfs = true;
@@ -953,7 +962,7 @@ checkZone (di_disk_info_t *diskInfo, di_zone_info_t *zoneInfo, di_opt_t *diopts)
   int         idx = -1;
 
   if (strcmp (diopts->zoneDisplay, "all") == 0 &&
-    zoneInfo->uid == 0) {
+      zoneInfo->uid == 0) {
     return;
   }
 
@@ -1031,84 +1040,6 @@ checkZone (di_disk_info_t *diskInfo, di_zone_info_t *zoneInfo, di_opt_t *diopts)
 
 #endif
   return;
-}
-
-static void
-initZones (di_data_t *di_data)
-{
-#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
-  di_data->zoneInfo.uid = geteuid ();
-#endif
-  di_data->zoneInfo.zoneCount = 0;
-  di_data->zoneInfo.zones = (di_zone_summ_t *) NULL;
-
-#if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
-  {
-    int             i;
-    zoneid_t        *zids = (zoneid_t *) NULL;
-    di_zone_info_t      *zi;
-
-    zi = &di_data->zoneInfo;
-    zi->myzoneid = getzoneid ();
-
-    if (zone_list (zids, &zi->zoneCount) == 0)
-    {
-      if (zi->zoneCount > 0)
-      {
-        zids = malloc (sizeof (zoneid_t) * zi->zoneCount);
-        if (zids == (zoneid_t *) NULL)
-        {
-          fprintf (stderr, "malloc failed in main() (1).  errno %d\n", errno);
-          diopts->exitFlag = DI_EXIT_FAIL;
-          return;
-        }
-        zone_list (zids, &zi->zoneCount);
-        zi->zones = malloc (sizeof (di_zone_summ_t) *
-                zi->zoneCount);
-        if (zi->zones == (di_zone_summ_t *) NULL)
-        {
-          fprintf (stderr, "malloc failed in main() (2).  errno %d\n", errno);
-          diopts->exitFlag = DI_EXIT_FAIL;
-          return;
-        }
-      }
-    }
-
-    zi->globalIdx = 0;
-    for (i = 0; i < (int) zi->zoneCount; ++i) {
-      int     len;
-
-      zi->zones[i].zoneid = zids[i];
-      len = zone_getattr (zids[i], ZONE_ATTR_ROOT,
-          zi->zones[i].rootpath, MAXPATHLEN);
-      if (len >= 0) {
-        zi->zones[i].rootpathlen = (Size_t) len;
-        strncat (zi->zones[i].rootpath, "/", MAXPATHLEN);
-        if (zi->zones[i].zoneid == 0) {
-          zi->globalIdx = i;
-        }
-
-        len = zone_getattr (zids[i], ZONE_ATTR_NAME,
-            zi->zones[i].name, ZONENAME_MAX);
-        if (*diopts->zoneDisplay == '\0' &&
-            zi->myzoneid == zi->zones[i].zoneid) {
-          strncpy (diopts->zoneDisplay, zi->zones[i].name, MAXPATHLEN);
-        }
-        if (debug > 4) {
-          printf ("zone:%d:%s:%s:\n", (int) zi->zones[i].zoneid,
-              zi->zones[i].name, zi->zones[i].rootpath);
-        }
-      }
-    }
-
-    free ((void *) zids);
-  }
-
-  if (debug > 4) {
-    printf ("zone:my:%d:%s:glob:%d:\n", (int) di_data->zoneInfo.myzoneid,
-        di_data->zoneInfo.zoneDisplay, di_data->zoneInfo.globalIdx);
-  }
-#endif
 }
 
 static int

@@ -2,6 +2,9 @@
 #define DI_INC_STRUTILS_H
 
 #include "config.h"
+#if _hdr_stddef
+# include <stddef.h>
+#endif
 
 # if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {

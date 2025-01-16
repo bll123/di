@@ -94,7 +94,6 @@
 # include <libintl.h>
 #endif
 
-#include "dilib.h"
 #include "di.h"
 #include "display.h"
 #include "version.h"
@@ -139,7 +138,7 @@ main (int argc, char * argv [])
 static void
 usage (void)
 {
-  printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
+  printf (DI_GT("di version %s\n"), DI_VERSION);
              /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
   printf (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
   printf (DI_GT("       [-I include-fstyp-list] [file [...]]\n"));

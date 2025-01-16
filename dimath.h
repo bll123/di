@@ -5,6 +5,12 @@
 
 #include "config.h"
 
+#if _hdr_stdio
+# include <stdio.h>
+#endif
+#if _hdr_stddef
+# include <stddef.h>
+#endif
 #if _hdr_stdint
 # include <stdint.h>
 #endif
@@ -66,6 +72,10 @@
   typedef di_unum_t dinum_t;
   typedef double didbl_t;
 #endif
+
+# if defined (__cplusplus) || defined (c_plusplus)
+extern "C" {
+# endif
 
 #define DI_PERC_PRECISION 1000000
 #define DI_PERC_DIV ((double) (DI_PERC_PRECISION / 100));
@@ -403,7 +413,7 @@ dinum_perc (dinum_t *r, dinum_t *val)
 }
 
 static inline void
-dinum_str (const dinum_t *r, char *str, size_t sz)
+dinum_str (const dinum_t *r, char *str, Size_t sz)
 {
 #if _use_math == DI_GMP
   gmp_snprintf (str, sz, "%Zd", *r);
@@ -412,22 +422,26 @@ dinum_str (const dinum_t *r, char *str, size_t sz)
 #else
 # if defined (DI_INTERNAL_DOUBLE)
 #  if _siz_long_double > 8
-  snprintf (str, sz, "%.0Lf", *r);
+  Snprintf1 (str, sz, "%.0Lf", *r);
 #  else
-  snprintf (str, sz, "%.0f", *r);
+  Snprintf1 (str, sz, "%.0f", *r);
 #  endif
 # else
 #  if _hdr_inttypes && _siz_uint64_t == 8
-  snprintf (str, sz, "%" PRIu64, *r);
+  Snprintf1 (str, sz, "%" PRIu64, *r);
 #  elif _siz_long == 8
-  snprintf (str, sz, "%ld", *r);
+  Snprintf1 (str, sz, "%ld", *r);
 #  elif _siz_long_long == 8
-  snprintf (str, sz, "%lld", *r);
+  Snprintf1 (str, sz, "%lld", *r);
 #  else
-  snprintf (str, sz, "%d", *r);
+  Snprintf1 (str, sz, "%d", *r);
 #  endif
 # endif
 #endif
 }
+
+# if defined (__cplusplus) || defined (c_plusplus)
+}
+# endif
 
 #endif /* DI_INC_DIMATH_H */

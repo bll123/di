@@ -31,6 +31,8 @@
 #endif
 
 #include "di.h"
+#include "disystem.h"
+#include "diinternal.h"
 #include "strutils.h"
 #include "dimath.h"
 #include "dimntopt.h"
@@ -71,6 +73,35 @@ di_initialize_disk_info (di_disk_info_t *diptr)
   diptr->isLocal = true;
   diptr->isReadOnly = false;
   diptr->isLoopback = false;
+}
+
+void
+di_free_disk_info (di_disk_info_t *diptr)
+{
+  int     i;
+
+  if (diptr == NULL) {
+    return;
+  }
+
+  for (i = 0; i < DI_VALUE_MAX; ++i) {
+    dinum_clear (&diptr->values [i]);
+  }
+  if (diptr->mountpt != NULL) {
+    free (diptr->mountpt);
+  }
+  if (diptr->devname != NULL) {
+    free (diptr->devname);
+  }
+  if (diptr->fstype != NULL) {
+    free (diptr->fstype);
+  }
+  if (diptr->options != NULL) {
+    free (diptr->options);
+  }
+  if (diptr->mountTime != NULL) {
+    free (diptr->mountTime);
+  }
 }
 
 void

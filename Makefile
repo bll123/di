@@ -369,7 +369,7 @@ $(MKC_REQLIB):	config.h
 
 LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
-		diquota$(OBJ_EXT) getoptn$(OBJ_EXT) \
+		diquota$(OBJ_EXT) dizone$(OBJ_EXT) getoptn$(OBJ_EXT) \
 		options$(OBJ_EXT) strutils$(OBJ_EXT)
 
 MAINOBJECTS = di$(OBJ_EXT) display$(OBJ_EXT)
@@ -436,6 +436,8 @@ digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimath.h strutils.h \
 				dimntopt.h
 
 diquota$(OBJ_EXT):	diquota.c config.h di.h dimath.h
+
+dizone$(OBJ_EXT):	dizone.c config.h di.h dimath.h
 
 display$(OBJ_EXT):	display.c config.h di.h dimath.h strutils.h \
 				display.h options.h version.h

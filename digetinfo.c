@@ -65,6 +65,8 @@
 #endif
 
 #include "di.h"
+#include "disystem.h"
+#include "diinternal.h"
 #include "dimntopt.h"
 
 /********************************************************/

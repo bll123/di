@@ -85,6 +85,7 @@
 #endif
 
 #include "di.h"
+#include "diquota.h"
 
 #if _has_std_quotas
 

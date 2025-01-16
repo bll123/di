@@ -129,6 +129,8 @@
 #endif
 
 #include "di.h"
+#include "disystem.h"
+#include "diinternal.h"
 #include "strutils.h"
 #include "dimntopt.h"
 

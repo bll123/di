@@ -5,7 +5,7 @@
 #ifndef DI_INC_OPTIONS_H
 #define DI_INC_OPTIONS_H
 
-#include "di.h"   /* for maxpathlen */
+#include "disystem.h"
 
 # if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
@@ -19,6 +19,8 @@ extern "C" {
 
 #define DI_DISP_HR        -20.0
 #define DI_DISP_HR_2      -21.0
+
+#define DI_SORT_MAX     10
 
 typedef struct
 {
@@ -35,7 +37,7 @@ typedef struct di_opt {
   /* should always be <= 1024 */
   /* usually 1000 or 1024 */
   int             dispBlockSize;
-//  __ulong         dispScaleValue;
+//  unsigned long         dispScaleValue;
   unsigned int    baseDispSize;
   unsigned int    baseDispIdx;
   char            sortType [DI_SORT_MAX + 1];

@@ -756,6 +756,7 @@ add_library (${DI_LIBNAME}
   digetinfo.c
   dilib.c
   diquota.c
+  dizone.c
   getoptn.c
   options.c
   strutils.c
