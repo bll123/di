@@ -13,8 +13,8 @@
 # define DI_INC_MNTENT 1
 # include <mntent.h>                /* MNTOPT_... */
 #endif
-#if _sys_mount \
-  && ! defined (DI_INC_SYS_MOUNT)     /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+/* FreeBSD, OpenBSD, NetBSD, HP-UX, MacOS */
+#if _sys_mount && ! defined (DI_INC_SYS_MOUNT)
 # define DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>             /* MNT_...; M_... (hp-ux) */
 #endif

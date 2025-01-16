@@ -42,9 +42,7 @@
 #include "version.h"
 
 struct pa_tmp {
-  di_data_t       *di_data;
   di_opt_t        *diopts;
-  diOutput_t      *diout;
   char            *dbsstr;
   Size_t          dbsstr_sz;
 };
@@ -86,30 +84,27 @@ dinum_t dispSizes [DI_DISPTAB_SIZE];
 
 extern int debug;
 
-static void processStringArgs   (const char *, char *, di_data_t *, char *);
-static int  processArgs         (int, char * argv [], di_data_t *, char *, Size_t);
+static void processStringArgs   (const char *, char *, di_opt_t *, char *);
+static int  processArgs         (int, char * argv [], di_opt_t *, char *, Size_t);
 static int  parseList           (di_strarr_t *, char *);
 static void processOptions      (const char *, char *);
-static void processOptionsVal   (const char *, char *, char *);
-static void setDispBlockSize    (char *, di_opt_t *, diOutput_t *);
+static void processOptionsVal   (const char *, pvoid *, char *);
+static void setDispBlockSize    (char *, di_opt_t *);
 static void initDisplayTable    (di_opt_t *);
 static void setExitFlag         (di_opt_t *, unsigned int);
 
 static void
-processStringArgs (const char *progname, char *ptr, di_data_t *di_data,
+processStringArgs (const char *progname, char *ptr, di_opt_t *diopts,
     char *dbsstr)
 {
   char        *dptr;
   char        *tptr;
   int         nargc;
   char        *nargv [DI_MAX_ARGV];
-  di_opt_t *diopts;
 
   if (ptr == (char *) NULL || strcmp (ptr, "") == 0) {
     return;
   }
-
-  diopts = &di_data->options;
 
   dptr = (char *) NULL;
   dptr = strdup (ptr);
@@ -131,7 +126,7 @@ processStringArgs (const char *progname, char *ptr, di_data_t *di_data,
       nargv [nargc++] = tptr;
       tptr = strtok ((char *) NULL, DI_ARGV_SEP);
     }
-    optidx = processArgs (nargc, nargv, di_data, dbsstr, sizeof (dbsstr) - 1);
+    optidx = processArgs (nargc, nargv, diopts, dbsstr, sizeof (dbsstr) - 1);
     if (optidx < nargc) {
       fprintf (stderr, "%s: unknown data found in DI_ARGS: %s\n",
           progname, nargv [optidx]);
@@ -144,19 +139,55 @@ processStringArgs (const char *progname, char *ptr, di_data_t *di_data,
   }
 }
 
+di_opt_t *
+di_init_options (void)
+{
+  di_opt_t    *diopts;
+
+  diopts = malloc (sizeof (di_opt_t));
+
+  diopts->formatString = DI_DEFAULT_FORMAT;
+  diopts->zoneDisplay [0] = '\0';
+  diopts->ignore_list.count = 0;
+  diopts->ignore_list.list = (char **) NULL;
+  diopts->include_list.count = 0;
+  diopts->include_list.list = (char **) NULL;
+  diopts->dispBlockSize = DI_VAL_1024 * DI_VAL_1024;
+  diopts->printTotals = false;
+  diopts->printDebugHeader = false;
+  diopts->printHeader = true;
+  diopts->localOnly = false;
+  diopts->displayAll = false;
+  diopts->dontResolveSymlink = false;
+  diopts->excludeLoopback = true;
+
+  strncpy (diopts->sortType, "m", DI_SORT_MAX); /* default - by mount point*/
+  diopts->posix_compat = false;
+  diopts->baseDispSize = DI_VAL_1024;
+  diopts->baseDispIdx = DI_DISP_1024_IDX;
+  diopts->quota_check = true;
+  diopts->csv_output = false;
+  diopts->csv_tabs = false;
+  diopts->exitFlag = DI_EXIT_NORM;
+  diopts->errorCount = 0;
+  diopts->json_output = false;
+
+  return diopts;
+}
+
 int
-di_get_options (int argc, char * argv [], di_data_t *di_data)
+di_get_options (int argc, char * argv [], di_opt_t *diopts)
 {
   const char *      argvptr;
   char *            ptr;
   char              dbsstr [30];
   int               optidx;
   int               ec;
-  di_opt_t          *diopts;
-  diOutput_t        *diout;
+//  diOutput_t        *diout;
 
-  diopts = &di_data->options;
-  diout = &di_data->output;
+//  diout = &di_data->output;
+  diopts->argc = argc;
+  diopts->argv = argv;
   strncpy (dbsstr, DI_DEFAULT_DISP_SIZE, sizeof (dbsstr)); /* default */
   ec = 0;
 
@@ -191,10 +222,10 @@ di_get_options (int argc, char * argv [], di_data_t *di_data)
   }
 
   if ((ptr = getenv ("DI_ARGS")) != (char *) NULL) {
-    processStringArgs (argv [0], ptr, di_data, dbsstr);
+    processStringArgs (argv [0], ptr, diopts, dbsstr);
   }
 
-  optidx = processArgs (argc, argv, di_data, dbsstr, sizeof (dbsstr) - 1);
+  optidx = processArgs (argc, argv, diopts, dbsstr, sizeof (dbsstr) - 1);
 
   if (debug > 0) {
     int j;
@@ -227,20 +258,19 @@ di_get_options (int argc, char * argv [], di_data_t *di_data)
   }
 
   initDisplayTable (diopts);
-  setDispBlockSize (dbsstr, diopts, diout);
+  setDispBlockSize (dbsstr, diopts);
 
   return optidx;
 }
 
 static int
-processArgs (int argc, char * argv [], di_data_t *di_data,
+processArgs (int argc, char * argv [], di_opt_t *diopts,
     char *dbsstr, Size_t dbsstr_sz)
 {
   int           i;
   int           optidx;
   int           errorCount;
-  di_opt_t      *diopts;
-  diOutput_t    *diout;
+//  diOutput_t    *diout;
   struct pa_tmp padata;
 
     /* the really old compilers don't have automatic initialization */
@@ -508,15 +538,15 @@ processArgs (int argc, char * argv [], di_data_t *di_data,
         NULL  /*processOptions*/ },
 /* 47 */
 #define OPT_INT_w 47
-    { "-w",     GETOPTN_SIZET,
-        NULL  /*&diout->width*/,
-        0  /*sizeof (diout->width)*/,
+    { "-w",     GETOPTN_IGNORE_ARG,
+        NULL,
+        0,
         NULL },
 /* 48 */
 #define OPT_INT_W 48
-    { "-W",     GETOPTN_SIZET,
-        NULL  /*&diout->inodeWidth*/,
-        0  /*sizeof (diout->inodeWidth)*/,
+    { "-W",     GETOPTN_IGNORE_ARG,
+        NULL,
+        0,
         NULL },
 /* 49 */
 #define OPT_INT_x 49
@@ -538,14 +568,14 @@ processArgs (int argc, char * argv [], di_data_t *di_data,
 /* 52 */
 #define OPT_INT_z 52
     { "-z",     GETOPTN_STRING,
-        NULL  /*&di_data->zoneInfo.zoneDisplay*/,
-        0  /*sizeof (di_data->zoneInfo.zoneDisplay)*/,
+        NULL  /*diopts->zoneDisplay*/,
+        0  /*sizeof (diopts->zoneDisplay)*/,
         NULL },
 /* 53 */
 #define OPT_INT_Z 53
     { "-Z",     GETOPTN_STRING,
-        NULL  /*&di_data->zoneInfo.zoneDisplay*/,
-        0  /*sizeof (di_data->zoneInfo.zoneDisplay)*/,
+        NULL  /*diopts->.zoneDisplay*/,
+        0  /*sizeof (diopts->zoneDisplay)*/,
         (void *) "all" }
   };
   static int dbsids[] =
@@ -556,12 +586,12 @@ processArgs (int argc, char * argv [], di_data_t *di_data,
   static int paidv[] =
     { OPT_INT_B, OPT_INT_I, OPT_INT_s, OPT_INT_x, OPT_INT_X };
 
-  diopts = &di_data->options;
-  diout = &di_data->output;
+//  diopts = &di_data->options;
+//  diout = &di_data->output;
 
-    /* this is seriously gross, but the old compilers don't have    */
-    /* automatic aggregate initialization                           */
-    /* don't forget to change dbsids, paidb and paidv above also    */
+  /* this is seriously gross, but the old compilers don't have    */
+  /* automatic aggregate initialization                           */
+  /* don't forget to change dbsids, paidb and paidv above also    */
   opts[OPT_INT_A].valptr = (void *) &diopts->formatString;   /* -A */
   opts[OPT_INT_c].valptr = (void *) &diopts->csv_output;     /* -c */
   opts[OPT_INT_c].valsiz = sizeof (diopts->csv_output);
@@ -582,14 +612,10 @@ processArgs (int argc, char * argv [], di_data_t *di_data,
   opts[OPT_INT_R].valsiz = sizeof (diopts->dontResolveSymlink);
   opts[OPT_INT_t].valptr = (void *) &diopts->printTotals;    /* -t */
   opts[OPT_INT_t].valsiz = sizeof (diopts->printTotals);
-  opts[OPT_INT_w].valptr = (void *) &diout->width;          /* -w */
-  opts[OPT_INT_w].valsiz = sizeof (diout->width);
-  opts[OPT_INT_W].valptr = (void *) &diout->inodeWidth;     /* -W */
-  opts[OPT_INT_W].valsiz = sizeof (diout->inodeWidth);
-  opts[OPT_INT_z].valptr = (void *) di_data->zoneInfo.zoneDisplay;  /* -z */
-  opts[OPT_INT_z].valsiz = sizeof (di_data->zoneInfo.zoneDisplay);
-  opts[OPT_INT_Z].valptr = (void *) di_data->zoneInfo.zoneDisplay;  /* -Z */
-  opts[OPT_INT_Z].valsiz = sizeof (di_data->zoneInfo.zoneDisplay);
+  opts[OPT_INT_z].valptr = (void *) diopts->zoneDisplay;  /* -z */
+  opts[OPT_INT_z].valsiz = sizeof (diopts->zoneDisplay);
+  opts[OPT_INT_Z].valptr = (void *) diopts->zoneDisplay;  /* -Z */
+  opts[OPT_INT_Z].valsiz = sizeof (diopts->zoneDisplay);
 
   for (i = 0; i < (int) (sizeof (dbsids) / sizeof (int)); ++i) {
     opts[dbsids[i]].valptr = (void *) dbsstr;
@@ -615,9 +641,9 @@ processArgs (int argc, char * argv [], di_data_t *di_data,
     return optidx;
   }
 
-  padata.di_data = di_data;
+//  padata.di_data = di_data;
   padata.diopts = diopts;
-  padata.diout = diout;
+//  padata.diout = diout;
   padata.dbsstr = dbsstr;
   padata.dbsstr_sz = dbsstr_sz;
 
@@ -649,7 +675,7 @@ processOptions (const char *arg, char *valptr)
   padata = (struct pa_tmp *) valptr;
   if (strcmp (arg, "-a") == 0) {
     padata->diopts->displayAll = true;
-    strncpy (padata->di_data->zoneInfo.zoneDisplay, "all", MAXPATHLEN);
+    strncpy (padata->diopts->zoneDisplay, "all", MAXPATHLEN);
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     setExitFlag (padata->diopts, DI_EXIT_HELP);
   } else if (strcmp (arg, "-P") == 0) {
@@ -665,8 +691,7 @@ processOptions (const char *arg, char *valptr)
     padata->diopts->baseDispIdx = DI_DISP_SI_PREFIX;
     strncpy (padata->dbsstr, "H", padata->dbsstr_sz);
   } else if (strcmp (arg, "--version") == 0) {
-    printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
-    setExitFlag (padata->diopts, DI_EXIT_HELP);
+    setExitFlag (padata->diopts, DI_EXIT_VERS);
   } else {
     fprintf (stderr, "di_panic: bad option setup\n");
   }
@@ -675,7 +700,7 @@ processOptions (const char *arg, char *valptr)
 }
 
 static void
-processOptionsVal (const char *arg, char *valptr, char *value)
+processOptionsVal (const char *arg, pvoid *valptr, char *value)
 {
   struct pa_tmp     *padata;
   int               rc;
@@ -699,7 +724,7 @@ processOptionsVal (const char *arg, char *valptr, char *value)
       padata->diopts->baseDispIdx = DI_DISP_SI_PREFIX;
     }
   } else if (strcmp (arg, "-I") == 0) {
-    rc = parseList (&padata->di_data->include_list, value);
+    rc = parseList (&padata->diopts->include_list, value);
     if (rc != 0) {
       setExitFlag (padata->diopts, DI_EXIT_FAIL);
       return;
@@ -716,14 +741,12 @@ processOptionsVal (const char *arg, char *valptr, char *value)
         strncpy (padata->diopts->sortType, "tm", DI_SORT_MAX);
     }
   } else if (strcmp (arg, "-x") == 0) {
-    parseList (&padata->di_data->ignore_list, value);
+    parseList (&padata->diopts->ignore_list, value);
   } else if (strcmp (arg, "-X") == 0) {
     debug = atoi (value);
     padata->diopts->printDebugHeader = true;
     padata->diopts->printTotals = true;
     padata->diopts->printHeader = true;
-    padata->diout->width = 10;
-    padata->diout->inodeWidth = 10;
   } else {
     fprintf (stderr, "di_panic: bad option setup\n");
   }
@@ -789,7 +812,7 @@ parseList (di_strarr_t *list, char *str)
 
 
 static void
-setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
+setDispBlockSize (char *ptr, di_opt_t *diopts)
 {
   unsigned int    len;
   int             i;
@@ -821,11 +844,9 @@ setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
     if (idx == -1) {
       if (*tptr == 'h') {
         val = DI_DISP_HR;
-        diout->dispBlockLabel = "Size";
       }
       if (*tptr == 'H') {
         val = DI_DISP_HR_2;
-        diout->dispBlockLabel = "Size";
       }
     }
 
@@ -848,18 +869,18 @@ setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
       }
 
       if (val == 1) {
-        diout->dispBlockLabel = dispTable [idx].disp [diopts->baseDispIdx];
+//        diout->dispBlockLabel = dispTable [idx].disp [diopts->baseDispIdx];
       } else {
         Snprintf1 (ttempbl, sizeof (tempbl), "%%.0f");
         Snprintf2 (tempbl, sizeof (tempbl), ttempbl,
             val, DI_GT (dispTable [idx].disp [diopts->baseDispIdx]));
-        diout->dispBlockLabel = tempbl;
+//        diout->dispBlockLabel = tempbl;
       }
       diopts->dispBlockSize = val;
-      if (idx != -1) {
-        dinum_set_u (&diopts->dispScaleValue, val);
-        dinum_mul (&diopts->dispScaleValue, &dispSizes [idx]);
-      }
+//      if (idx != -1) {
+//        dinum_set_u (&diopts->dispScaleValue, val);
+//        dinum_mul (&diopts->dispScaleValue, &dispSizes [idx]);
+//      }
     } /* known size multiplier */
   } else {
     int         ok;
@@ -868,7 +889,7 @@ setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
     for (i = 0; i < (int) DI_DISPTAB_SIZE; ++i) {
       /* only works for the smaller numbers, should be fine */
       if (dinum_cmp_s (&dispSizes [i], val) == 0) {
-        diout->dispBlockLabel = dispTable [i].disp [diopts->baseDispIdx];
+//        diout->dispBlockLabel = dispTable [i].disp [diopts->baseDispIdx];
         ok = 1;
         break;
       }
@@ -877,15 +898,15 @@ setDispBlockSize (char *ptr, di_opt_t *diopts, diOutput_t *diout)
     if (ok == 0) {
       Snprintf1 (ttempbl, sizeof (ttempbl), "%%.0fb");
       Snprintf1 (tempbl, sizeof (tempbl), ttempbl, val);
-      diout->dispBlockLabel = tempbl;
+//      diout->dispBlockLabel = tempbl;
     }
   }  /* some oddball block size */
 
   if (diopts->posix_compat && val == DI_VAL_512) {
-    diout->dispBlockLabel = "512-blocks";
+//    diout->dispBlockLabel = "512-blocks";
   }
   if (diopts->posix_compat && val == DI_VAL_1024) {
-    diout->dispBlockLabel = "1024-blocks";
+//    diout->dispBlockLabel = "1024-blocks";
   }
 
   diopts->dispBlockSize = val;

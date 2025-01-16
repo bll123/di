@@ -420,7 +420,7 @@ chkMountOptions (const char *mntopts, const char *str)
 void
 di_is_remote_disk (di_disk_info_t *diskInfo)
 {
-  if (strncmp (diskInfo->fsType, "nfs", 3) == 0)
+  if (strncmp (diskInfo->fstype, "nfs", 3) == 0)
   {
     diskInfo->isLocal = false;
   }
@@ -429,11 +429,11 @@ di_is_remote_disk (di_disk_info_t *diskInfo)
 int
 di_isPooledFs (di_disk_info_t *diskInfo)
 {
-  if (strcmp (diskInfo->fsType, "zfs") == 0 ||
-      strcmp (diskInfo->fsType, "advfs") == 0 ||
-      strcmp (diskInfo->fsType, "apfs") == 0 ||
-      (strcmp (diskInfo->fsType, "null") == 0 &&
-       strstr (diskInfo->special, "/@@-") != (char *) NULL)) {
+  if (strcmp (diskInfo->fstype, "zfs") == 0 ||
+      strcmp (diskInfo->fstype, "advfs") == 0 ||
+      strcmp (diskInfo->fstype, "apfs") == 0 ||
+      (strcmp (diskInfo->fstype, "null") == 0 &&
+       strstr (diskInfo->devname, "/@@-") != (char *) NULL)) {
     return true;
   }
   return false;
@@ -442,10 +442,10 @@ di_isPooledFs (di_disk_info_t *diskInfo)
 int
 di_isLoopbackFs (di_disk_info_t *diskInfo)
 {
-  if ((strcmp (diskInfo->fsType, "lofs") == 0 && diskInfo->sp_rdev != 0) ||
-      (strcmp (diskInfo->fsType, "nullfs") == 0 &&
-       strstr (diskInfo->special, "/@@-") == (char *) NULL) ||
-      strcmp (diskInfo->fsType, "none") == 0) {
+  if ((strcmp (diskInfo->fstype, "lofs") == 0 && diskInfo->sp_rdev != 0) ||
+      (strcmp (diskInfo->fstype, "nullfs") == 0 &&
+       strstr (diskInfo->devname, "/@@-") == (char *) NULL) ||
+      strcmp (diskInfo->fstype, "none") == 0) {
     return true;
   }
   return false;

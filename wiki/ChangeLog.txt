@@ -8,6 +8,7 @@
     * Add cmake configuration for modern systems.
     * Drop syllable and VMS support.
     * mkconfig: Updated to version 2.6.4.
+    * -w and -W options are no longer supported and are now ignored.
 
 **4.54.0.1 2024-10-15**
     * Fix single quotes in the manual page.

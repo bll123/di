@@ -11,6 +11,9 @@
 #if _hdr_inttypes
 # include <inttypes.h>
 #endif
+#if _hdr_math
+# include <math.h>
+#endif
 
 /* a double has a longer mantissa than an unsigned int, */
 /* but the accuracy may be less. */
@@ -39,7 +42,7 @@
   typedef long di_snum_t;
 # define DI_INTERNAL_INT
 #else
-  /* unknown */
+  /* unknown, this can't happen */
   typedef unsigned long di_unum_t;
   typedef long di_snum_t;
 # define DI_INTERNAL_INT
@@ -341,13 +344,10 @@ dinum_scale (dinum_t *result, dinum_t *r, dinum_t *val)
   }
 # endif
 # if defined (DI_INTERNAL_DOUBLE)
-  di_unum_t    rem;
-
   *result = *r / *val;
-  rem = *r - (*result * *val);
-  if (rem > 0.0) {
-    *result += 1;
-  }
+#  if _hdr_math
+  *result = ceil (*result);
+#  endif
 # endif
 #endif
 }

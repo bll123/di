@@ -67,10 +67,12 @@
 #  define DI_TYPE_LEN       FSTYPSZ
 # endif
 #endif
-#if _sys_mount \
-    && ! defined (DI_INC_SYS_MOUNT)       /* NetBSD */
+/* FreeBSD, OpenBSD, NetBSD, HP-UX, MacOS */
+#if _sys_mount && ! defined (DI_INC_SYS_MOUNT)
 # define DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>                 /* MFSNAMELEN */
+#endif
+#if _sys_mount
 # if ! defined (DI_TYPE_LEN) && defined (MFSNAMELEN)
 #  define DI_TYPE_LEN       MFSNAMELEN
 # endif
@@ -86,11 +88,11 @@
 # define DI_TYPE_LEN        65
 #endif
 
-#if ! _lib_memcpy && ! _define_memcpy
-# if ! _lib_bcopy && ! _define_bcopy
-   #error No_memcpy/bcopy_available.
+#if ! _lib_memcpy && ! defined (memcpy)
+# if ! _lib_bcopy && ! defined (bcopy)
+#  error No_memcpy/bcopy_available.
 # else
-#  define memcpy(dst, src, cnt)     (bcopy((src), (dst), (cnt)), dst)
+#  define memcpy(dst, src, cnt) (bcopy((src), (dst), (cnt)), dst)
 # endif
 #endif
 
@@ -108,8 +110,8 @@
 extern "C" {
 # endif
 
-#define DI_NAME_LEN            MAXPATHLEN
-#define DI_SPEC_NAME_LEN       MAXPATHLEN
+#define DI_MOUNTPT_LEN         MAXPATHLEN
+#define DI_DEVNAME_LEN         MAXPATHLEN
 #define DI_OPT_LEN             MAXPATHLEN
 #define DI_MNT_TIME_LEN        24
 #ifndef DI_DEFAULT_DISP_SIZE
@@ -119,12 +121,13 @@ extern "C" {
 # define DI_DEFAULT_FORMAT "smbuvpT"
 #endif
 #ifndef DI_LOCALE_DIR
-/* temporary */
+// ### temporary
 # define DI_LOCALE_DIR "/usr/share/di/locale"
 #endif
 
 typedef unsigned long __ulong;
 
+/* print flags */
 #define DI_PRNT_IGNORE      0
 #define DI_PRNT_OK          1
 #define DI_PRNT_BAD         2
@@ -136,6 +139,7 @@ typedef unsigned long __ulong;
 #define DI_MAIN_SORT_IDX    0
 #define DI_TOT_SORT_IDX     1
 
+/* value identifiers */
 #define DI_SPACE_TOTAL      0
 #define DI_SPACE_FREE       1
 #define DI_SPACE_AVAIL      2
@@ -144,21 +148,20 @@ typedef unsigned long __ulong;
 #define DI_INODE_AVAIL      5
 #define DI_VALUE_MAX        6
 
+/* options return values */
+#define DI_EXIT_NORM      0
+#define DI_EXIT_HELP      1
+#define DI_EXIT_VERS      2
+#define DI_EXIT_WARN      3
+#define DI_EXIT_FAIL      4
+
+/* quota value identifiers */
 #define DI_QUOTA_BLOCK_SZ   0
 #define DI_QUOTA_LIMIT      1
 #define DI_QUOTA_USED       2
 #define DI_QUOTA_ILIMIT     3
 #define DI_QUOTA_IUSED      4
 #define DI_QVAL_MAX         5
-
-#if 0
-  dinum_t       total_space;
-  dinum_t       free_space;
-  dinum_t       avail_space;
-  dinum_t       total_inodes;
-  dinum_t       free_inodes;
-  dinum_t       avail_inodes;
-#endif
 
 typedef struct
 {
@@ -167,43 +170,30 @@ typedef struct
   __ulong       st_dev;                      /* disk device number       */
   __ulong       sp_dev;                      /* special device number    */
   __ulong       sp_rdev;                     /* special rdev #           */
-  char          doPrint;                     /* do we want to print      */
-                                               /* this entry?              */
+  char          doPrint;                     /* should this entry        */
+                                             /*   be printed?            */
   char          printFlag;                   /* print flags              */
   char          isLocal;                     /* is this mount point      */
-                                               /* local?                   */
+                                             /*   local?                 */
   char          isReadOnly;                  /* is this mount point      */
-                                               /* read-only?               */
+                                             /*   read-only?             */
   char          isLoopback;                  /* lofs or none fs type?    */
-  char          name [DI_NAME_LEN + 1];         /* mount point           */
-  char          special [DI_SPEC_NAME_LEN + 1]; /* special device name   */
-  char          fsType [DI_TYPE_LEN + 1];       /* type of file system   */
-  char          options [DI_OPT_LEN + 1];
+  char          mountpt [DI_MOUNTPT_LEN + 1];   /* mount point           */
+  char          devname [DI_DEVNAME_LEN + 1];   /* special device name   */
+  char          fstype [DI_TYPE_LEN + 1];       /* type of file system   */
+  char          options [DI_OPT_LEN + 1];       /* mount options         */
   char          mountTime [DI_MNT_TIME_LEN + 1];
 } di_disk_info_t;
 
 typedef struct
 {
-  char         *special;
-  char         *name;
-  char         *type;
+  char         *devname;
+  char         *mountpt;
+  char         *fstype;
   Uid_t        uid;
   Gid_t        gid;
-  dinum_t       values [DI_QVAL_MAX];
-#if 0
-  dinum_t      block_size;
-  dinum_t      limit;
-  dinum_t      used;
-  dinum_t      ilimit;
-  dinum_t      iused;
-#endif
+  dinum_t      values [DI_QVAL_MAX];
 } di_quota_t;
-
-typedef struct
-{
-  int    count;
-  char   **list;
-} di_strarr_t;
 
 #if ! _lib_zone_list
 # define zoneid_t       int
@@ -222,54 +212,17 @@ typedef struct {
   zoneid_t        myzoneid;
   di_zone_summ_t   *zones;
   Uint_t          zoneCount;
-  char            zoneDisplay [MAXPATHLEN + 1];
   int             globalIdx;
 } di_zone_info_t;
 
-#define DI_SORT_MAX             10
-
-/* order from best to worst */
-#define DI_EXIT_NORM      0
-#define DI_EXIT_HELP      1
-#define DI_EXIT_WARN      2
-#define DI_EXIT_FAIL      3
+#define DI_SORT_MAX     10
 
 typedef struct {
-  char            ** argv;
-  const char      *formatString;
-  /* should always be <= 1024 */
-  /* usually 1000 or 1024 */
-  int             dispBlockSize;
-  dinum_t         dispScaleValue;
-  unsigned int    baseDispSize;
-  unsigned int    baseDispIdx;
-  char            sortType [DI_SORT_MAX + 1];
-  unsigned int    posix_compat;
-  unsigned int    quota_check;
-  unsigned int    csv_output;
-  unsigned int    csv_tabs;
-  unsigned int    excludeLoopback;
-  unsigned int    json_output;
-  unsigned int    printTotals;
-  unsigned int    printDebugHeader;
-  unsigned int    printHeader;
-  unsigned int    displayAll;
-  unsigned int    localOnly;
-  unsigned int    dontResolveSymlink;
-  unsigned int    exitFlag;
-  int             errorCount;
-  int             optidx;
-  int             argc;
-} di_opt_t;
-
-typedef struct {
-  Size_t       inodeWidth;
   Size_t       maxMntTimeString;
   Size_t       maxMountString;
   Size_t       maxOptString;
   Size_t       maxSpecialString;
   Size_t       maxTypeString;
-  Size_t       width;
   const char   *dispBlockLabel;
   char         blockFormat [25];
   char         blockFormatNR [25];   /* no radix */
@@ -282,16 +235,16 @@ typedef struct {
   char         typeFormat [25];
 } diOutput_t;
 
+typedef struct di_opt di_opt_t;
+
 typedef struct {
   int             count;
   int             haspooledfs;
   int             disppooledfs;
   int             totsorted;
-  di_opt_t        options;
+  di_opt_t        *options;
   diOutput_t      output;
   di_disk_info_t  *diskInfo;
-  di_strarr_t     ignore_list;
-  di_strarr_t     include_list;
   di_zone_info_t  zoneInfo;
 } di_data_t;
 
@@ -348,8 +301,8 @@ extern Size_t di_mungePoolName      (char *);
 #define DI_QUETTA         9
 
 /* dilib.c */
-extern void di_initialize (di_data_t *di_data, int intfcflag);
-extern void di_process_options (di_data_t *di_data, int argc, char * argv []);
+extern void di_initialize (di_data_t *di_data);
+extern int di_process_options (di_data_t *di_data, int argc, char * argv []);
 extern void di_get_data (di_data_t *di_data);
 extern void di_cleanup (di_data_t *di_data);
 

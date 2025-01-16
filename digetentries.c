@@ -66,8 +66,8 @@
 # include <mntent.h>            /* hasmntopt(); _PATH_MNTTAB */
 #endif                          /* HP-UX: set/get/endmntent(); hasmntopt() */
 
-#if _sys_mount \
-  && ! defined (DI_INC_SYS_MOUNT) /* FreeBSD, OpenBSD, NetBSD, HP-UX */
+/* FreeBSD, OpenBSD, NetBSD, HP-UX, MacOS */
+#if _sys_mount && ! defined (DI_INC_SYS_MOUNT)
 # define DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>         /* getmntinfo(); struct statfs */
 #endif
@@ -226,15 +226,15 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         diptr = *diskInfo + idx;
         di_initialize_disk_info (diptr);
 
-        strncpy (diptr->special, mntEntry.mnt_special, DI_SPEC_NAME_LEN);
-        strncpy (diptr->name, mntEntry.mnt_mountp, DI_NAME_LEN);
+        strncpy (diptr->devname, mntEntry.mnt_special, DI_DEVNAME_LEN);
+        strncpy (diptr->mountpt, mntEntry.mnt_mountp, DI_MOUNTPT_LEN);
         if (checkMountOptions (&mntEntry, DI_MNTOPT_IGNORE) != (char *) NULL)
         {
             diptr->printFlag = DI_PRNT_IGNORE;
             if (debug > 2)
             {
                 printf ("mnt: ignore: mntopt 'ignore': %s\n",
-                        diptr->name);
+                        diptr->mountpt);
             }
         }
         if ((devp = checkMountOptions (&mntEntry, DI_MNTOPT_DEV)) !=
@@ -253,15 +253,15 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         strncpy (diptr->options, mntEntry.mnt_mntopts, DI_OPT_LEN);
 
             /* get the file system type now... */
-        strncpy (diptr->fsType, mntEntry.mnt_fstype, DI_TYPE_LEN);
+        strncpy (diptr->fstype, mntEntry.mnt_fstype, DI_TYPE_LEN);
         if (debug > 2)
         {
-            printf ("mnt:%s - %s\n", diptr->name, diptr->fsType);
+            printf ("mnt:%s - %s\n", diptr->mountpt, diptr->fstype);
         }
 
         if (debug > 1)
         {
-            printf ("mnt:%s - %s\n", diptr->name, diptr->special);
+            printf ("mnt:%s - %s\n", diptr->mountpt, diptr->devname);
         }
     }
 
@@ -337,15 +337,15 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         diptr = *diskInfo + idx;
         di_initialize_disk_info (diptr);
 
-        strncpy (diptr->special, mntEntry->mnt_fsname,
-            (Size_t) DI_SPEC_NAME_LEN);
-        strncpy (diptr->name, mntEntry->mnt_dir, (Size_t) DI_NAME_LEN);
-        strncpy (diptr->fsType, mntEntry->mnt_type, (Size_t) DI_TYPE_LEN);
+        strncpy (diptr->devname, mntEntry->mnt_fsname,
+            (Size_t) DI_DEVNAME_LEN);
+        strncpy (diptr->mountpt, mntEntry->mnt_dir, (Size_t) DI_MOUNTPT_LEN);
+        strncpy (diptr->fstype, mntEntry->mnt_type, (Size_t) DI_TYPE_LEN);
 
         if (strcmp (mntEntry->mnt_fsname, "none") == 0) {
           diptr->printFlag = DI_PRNT_IGNORE;
           if (debug > 2) {
-            printf ("mnt: ignore: special 'none': %s\n", diptr->name);
+            printf ("mnt: ignore: special 'none': %s\n", diptr->mountpt);
           }
         }
 
@@ -355,7 +355,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
             if (debug > 2)
             {
                 printf ("mnt: ignore: mntopt 'ignore': %s\n",
-                        diptr->name);
+                        diptr->mountpt);
             }
         }
 
@@ -375,8 +375,8 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
         if (debug > 1)
         {
-            printf ("mnt:%s - %s : %s\n", diptr->name,
-                    diptr->special, diptr->fsType);
+            printf ("mnt:%s - %s : %s\n", diptr->mountpt,
+                    diptr->devname, diptr->fstype);
         }
     }
 
@@ -434,7 +434,7 @@ di_getQNXDiskEntries (char *ipath, di_disk_info_t **diskInfo, int *diCount)
     int             ftype;
     struct stat     statinfo;
     int             fd;
-    char            tspecial [DI_SPEC_NAME_LEN];
+    char            tdevname [DI_DEVNAME_LEN];
 
     if (strcmp (ipath, "/proc/mount/dev") == 0) {
       return 0;
@@ -481,12 +481,12 @@ di_getQNXDiskEntries (char *ipath, di_disk_info_t **diskInfo, int *diCount)
         continue;
       }
 
-      *tspecial = '\0';
+      *tdevname = '\0';
       if (S_ISDIR(statinfo.st_mode) && ftype == _FTYPE_ANY) {
         if ((fd = open (path, /* O_ACCMODE */ O_RDONLY | O_NOCTTY)) != -1) {
-          devctl (fd, DCMD_FSYS_MOUNTED_ON, tspecial, DI_SPEC_NAME_LEN, 0);
+          devctl (fd, DCMD_FSYS_MOUNTED_ON, tdevname, DI_DEVNAME_LEN, 0);
           close (fd);
-          if (*tspecial == '\0') {
+          if (*tdevname == '\0') {
             /* unfortunately, this cuts out /proc, /dev/sem, etc. */
             /* but it also removes strange duplicate stuff        */
             continue;
@@ -510,12 +510,12 @@ di_getQNXDiskEntries (char *ipath, di_disk_info_t **diskInfo, int *diCount)
       di_initialize_disk_info (diptr);
 
       path[len] = '\0';
-      strncpy (diptr->special, tspecial, DI_SPEC_NAME_LEN);
-      strncpy (diptr->name, path + 11, DI_NAME_LEN);
-      if (*diptr->name == '\0') {
-        strncpy (diptr->name, "/", DI_NAME_LEN);
+      strncpy (diptr->devname, tdevname, DI_DEVNAME_LEN);
+      strncpy (diptr->mountpt, path + 11, DI_MOUNTPT_LEN);
+      if (*diptr->mountpt == '\0') {
+        strncpy (diptr->mountpt, "/", DI_MOUNTPT_LEN);
       }
-      if (debug > 4) { printf ("found: %s %s\n", diptr->special, diptr->name); }
+      if (debug > 4) { printf ("found: %s %s\n", diptr->devname, diptr->mountpt); }
     }
 
     closedir (dirp);
@@ -579,11 +579,11 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
 # if defined (COHERENT)
                 /* Coherent seems to have these fields reversed. oh well. */
-            strncpy (diptr->name, mntEntry.mt_dev, DI_NAME_LEN);
-            strncpy (diptr->special, mntEntry.mt_filsys, DI_SPEC_NAME_LEN);
+            strncpy (diptr->mountpt, mntEntry.mt_dev, DI_MOUNTPT_LEN);
+            strncpy (diptr->devname, mntEntry.mt_filsys, DI_DEVNAME_LEN);
 # else
-            strncpy (diptr->special, mntEntry.mt_dev, DI_SPEC_NAME_LEN);
-            strncpy (diptr->name, mntEntry.mt_filsys, DI_NAME_LEN);
+            strncpy (diptr->devname, mntEntry.mt_dev, DI_DEVNAME_LEN);
+            strncpy (diptr->mountpt, mntEntry.mt_filsys, DI_MOUNTPT_LEN);
 # endif
 # if _mem_struct_mnttab_mntopts
             strncpy (diptr->options, mntEntry.mt_mntopts, DI_OPT_LEN);
@@ -592,8 +592,8 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
         if (debug > 1)
         {
-            printf ("mnt:%s - %s\n", diptr->name,
-                    diptr->special);
+            printf ("mnt:%s - %s\n", diptr->mountpt,
+                    diptr->devname);
         }
     }
 
@@ -710,8 +710,8 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 # endif
     di_trimchar (diptr->options, ',');
 
-    strncpy (diptr->special, sp->f_mntfromname, (Size_t) DI_SPEC_NAME_LEN);
-    strncpy (diptr->name, sp->f_mntonname, (Size_t) DI_NAME_LEN);
+    strncpy (diptr->devname, sp->f_mntfromname, (Size_t) DI_DEVNAME_LEN);
+    strncpy (diptr->mountpt, sp->f_mntonname, (Size_t) DI_MOUNTPT_LEN);
 fprintf (stderr, "-- mnt-from: %s\n", sp->f_mntfromname);
 fprintf (stderr, "-- mnt-on: %s\n", sp->f_mntonname);
 
@@ -725,18 +725,18 @@ fprintf (stderr, "-- mnt-on: %s\n", sp->f_mntonname);
         sp->f_bfree, sp->f_bavail);
     di_save_inode_sizes (diptr, sp->f_files, sp->f_ffree, sp->f_ffree);
 # if _mem_struct_statfs_f_fstypename
-    strncpy (diptr->fsType, sp->f_fstypename, (Size_t) DI_TYPE_LEN);
+    strncpy (diptr->fstype, sp->f_fstypename, (Size_t) DI_TYPE_LEN);
 # else
 #  if _lib_sysfs && _mem_struct_statfs_f_type
-    sysfs (GETFSTYP, sp->f_type, diptr->fsType);
+    sysfs (GETFSTYP, sp->f_type, diptr->fstype);
 #  else
 #   if _dcl_mnt_names && _mem_struct_statfs_f_type
 #    define DI_UNKNOWN_FSTYPE       "(%.2d)?"
     fstype = sp->f_type;
     if ((fstype >= 0) && (fstype < MNT_NUMTYPES)) {
-      strncpy (diptr->fsType, mnt_names [fstype], DI_TYPE_LEN);
+      strncpy (diptr->fstype, mnt_names [fstype], DI_TYPE_LEN);
     } else {
-      Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
+      Snprintf1 (diptr->fstype, sizeof (diptr->fstype),
           DI_UNKNOWN_FSTYPE, fstype);
     }
 #   endif
@@ -799,7 +799,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     if (debug > 1)
     {
         printf ("type_len %d name_len %d spec_name_len %d\n", DI_TYPE_LEN,
-                DI_NAME_LEN, DI_SPEC_NAME_LEN);
+                DI_MOUNTPT_LEN, DI_DEVNAME_LEN);
     }
 
     for (idx = 0; idx < count; idx++)
@@ -815,9 +815,9 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         }
 # endif
 
-        strncpy (diptr->special, mntbufp [idx].f_mntfromname,
-                DI_SPEC_NAME_LEN);
-        strncpy (diptr->name, mntbufp [idx].f_mntonname, DI_NAME_LEN);
+        strncpy (diptr->devname, mntbufp [idx].f_mntfromname,
+                DI_DEVNAME_LEN);
+        strncpy (diptr->mountpt, mntbufp [idx].f_mntonname, DI_MOUNTPT_LEN);
 
         tblocksz = 1024;
 
@@ -842,126 +842,126 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 #  if defined (MOUNT_NONE)
                 case MOUNT_NONE:         /* No Filesystem */
                 {
-                    strncpy (diptr->fsType, "none", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "none", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_UFS)
                 case MOUNT_UFS:         /* UNIX "Fast" Filesystem */
                 {
-                    strncpy (diptr->fsType, "ufs", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "ufs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_NFS)
                 case MOUNT_NFS:         /* Network Filesystem */
                 {
-                    strncpy (diptr->fsType, "nfs", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "nfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_MFS)
                 case MOUNT_MFS:         /* Memory Filesystem */
                 {
-                    strncpy (diptr->fsType, "mfs", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "mfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_MSDOS)
                 case MOUNT_MSDOS:       /* MSDOS Filesystem */
                 {
-                    strncpy (diptr->fsType, "msdos", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "msdos", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_LFS)
                 case MOUNT_LFS:
                 {
-                    strncpy (diptr->fsType, "lfs", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "lfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_LOFS)
                 case MOUNT_LOFS:
                 {
-                    strncpy (diptr->fsType, "lofs", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "lofs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_FDESC)
                 case MOUNT_FDESC:
                 {
-                    strncpy (diptr->fsType, "fdesc", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "fdesc", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_PORTAL)
                 case MOUNT_PORTAL:
                 {
-                    strncpy (diptr->fsType, "portal", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "portal", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_NULL)
                 case MOUNT_NULL:
                 {
-                    strncpy (diptr->fsType, "null", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "null", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_UMAP)
                 case MOUNT_UMAP:
                 {
-                    strncpy (diptr->fsType, "umap", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "umap", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_KERNFS)
                 case MOUNT_KERNFS:
                 {
-                    strncpy (diptr->fsType, "kernfs", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "kernfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_PROCFS)
                 case MOUNT_PROCFS:      /* proc filesystem */
                 {
-                    strncpy (diptr->fsType, "pfs", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "pfs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_AFS)
                 case MOUNT_AFS:
                 {
-                    strncpy (diptr->fsType, "afs", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "afs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_ISOFS)
                 case MOUNT_ISOFS:       /* iso9660 cdrom */
                 {
-                    strncpy (diptr->fsType, "iso9660fs", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "iso9660fs", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_ISO9660) && ! defined (MOUNT_CD9660)
                 case MOUNT_ISO9660:       /* iso9660 cdrom */
                 {
-                    strncpy (diptr->fsType, "iso9660", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "iso9660", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_CD9660)
                 case MOUNT_CD9660:       /* iso9660 cdrom */
                 {
-                    strncpy (diptr->fsType, "cd9660", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "cd9660", DI_TYPE_LEN);
                     break;
                 }
 #  endif
 #  if defined (MOUNT_UNION)
                 case MOUNT_UNION:
                 {
-                    strncpy (diptr->fsType, "union", DI_TYPE_LEN);
+                    strncpy (diptr->fstype, "union", DI_TYPE_LEN);
                     break;
                 }
 #  endif
@@ -969,18 +969,18 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         }
 # else
 #  if _mem_struct_statfs_f_fstypename
-        strncpy (diptr->fsType, mntbufp [idx].f_fstypename, DI_TYPE_LEN);
+        strncpy (diptr->fstype, mntbufp [idx].f_fstypename, DI_TYPE_LEN);
 #  else
 #   define DI_UNKNOWN_FSTYPE       "(%.2d)?"
 
             /* could use getvfsbytype here... */
         if ((fstype >= 0) && (fstype < MNT_NUMTYPES))
         {
-            strncpy (diptr->fsType, mnt_names [fstype], DI_TYPE_LEN);
+            strncpy (diptr->fstype, mnt_names [fstype], DI_TYPE_LEN);
         }
         else
         {
-            Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
+            Snprintf1 (diptr->fstype, sizeof (diptr->fstype),
                       DI_UNKNOWN_FSTYPE, fstype);
         }
 #  endif
@@ -998,7 +998,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
         if (debug > 1)
         {
-            printf ("%s: %s\n", diptr->name, diptr->fsType);
+            printf ("%s: %s\n", diptr->mountpt, diptr->fstype);
             printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
                     (long) mntbufp [idx].f_blocks,
                     (long) mntbufp [idx].f_bfree,
@@ -1104,13 +1104,13 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         di_save_inode_sizes (diptr, sp->f_files,
             sp->f_ffree, sp->f_ffree);
 
-        strncpy (diptr->special, sp->f_mntfromname, DI_SPEC_NAME_LEN);
-        strncpy (diptr->name, sp->f_mntonname, DI_NAME_LEN);
-        strncpy (diptr->fsType, sp->f_fstypename, DI_TYPE_LEN);
+        strncpy (diptr->devname, sp->f_mntfromname, DI_DEVNAME_LEN);
+        strncpy (diptr->mountpt, sp->f_mntonname, DI_MOUNTPT_LEN);
+        strncpy (diptr->fstype, sp->f_fstypename, DI_TYPE_LEN);
 
         if (debug > 1)
         {
-            printf ("%s: %s\n", diptr->name, diptr->fsType);
+            printf ("%s: %s\n", diptr->mountpt, diptr->fstype);
             printf ("\tbsize:%ld  frsize:%ld\n", (long) sp->f_bsize,
                     (long) sp->f_frsize);
 #if _siz_long_long >= 8
@@ -1203,8 +1203,8 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
             diptr->isLocal = false;
         }
 
-        strncpy (diptr->special, fsdbuf [idx].fd_devname, DI_SPEC_NAME_LEN);
-        strncpy (diptr->name, fsdbuf [idx].fd_path, DI_NAME_LEN);
+        strncpy (diptr->devname, fsdbuf [idx].fd_devname, DI_DEVNAME_LEN);
+        strncpy (diptr->mountpt, fsdbuf [idx].fd_path, DI_MOUNTPT_LEN);
 
         /* ULTRIX keeps these fields in units of 1K byte */
         di_save_block_sizes (diptr, 1024, fsdbuf [idx].fd_btot,
@@ -1219,16 +1219,16 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
             if (debug > 2)
             {
                 printf ("mnt: ignore: disk type unknown: %s\n",
-                        diptr->name);
+                        diptr->mountpt);
             }
         }
         else if ((fstype > 0) && (fstype < GT_NUMTYPES))
         {
-            strncpy (diptr->fsType, gt_names [fstype], DI_TYPE_LEN);
+            strncpy (diptr->fstype, gt_names [fstype], DI_TYPE_LEN);
         }
         else
         {
-            Snprintf1 (diptr->fsType, sizeof (diptr->fsType),
+            Snprintf1 (diptr->fstype, sizeof (diptr->fstype),
                           "Unknown fstyp %.2d", fstype);
         }
 
@@ -1245,7 +1245,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
         if (debug > 1)
         {
-            printf ("%s: %s\n", diptr->name, diptr->fsType);
+            printf ("%s: %s\n", diptr->mountpt, diptr->fstype);
             printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
                     fsdbuf [idx].fd_btot, fsdbuf [idx].fd_bfree,
                     (int) fsdbuf [idx].fd_bfreen);
@@ -1274,7 +1274,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
 # define DI_FSMAGIC 10    /* base AIX configuration has 5 file systems */
 # define NUM_AIX_FSTYPES         6
-static char *AIX_fsType [NUM_AIX_FSTYPES] =
+static char *AIX_fstype [NUM_AIX_FSTYPES] =
     { "oaix", "", "nfs", "jfs", "", "cdrom" };
 
 /*
@@ -1376,20 +1376,20 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
             diptr->isReadOnly = true;
         }
 
-        *diptr->special = '\0';
+        *diptr->devname = '\0';
         if (diptr->isLocal == false)
         {
-            strncpy (diptr->special,
+            strncpy (diptr->devname,
                     (char *) vmt2dataptr (vmtp, VMT_HOSTNAME),
-                    DI_SPEC_NAME_LEN);
-            strncat (diptr->special, ":",
-                    DI_SPEC_NAME_LEN - strlen (diptr->special) - 1);
+                    DI_DEVNAME_LEN);
+            strncat (diptr->devname, ":",
+                    DI_DEVNAME_LEN - strlen (diptr->devname) - 1);
         }
-        strncat (diptr->special,
+        strncat (diptr->devname,
                 (char *) vmt2dataptr (vmtp, VMT_OBJECT),
-                DI_SPEC_NAME_LEN - strlen (diptr->special) - 1);
-        strncpy (diptr->name,
-                (char *) vmt2dataptr (vmtp, VMT_STUB), DI_NAME_LEN);
+                DI_DEVNAME_LEN - strlen (diptr->devname) - 1);
+        strncpy (diptr->mountpt,
+                (char *) vmt2dataptr (vmtp, VMT_STUB), DI_MOUNTPT_LEN);
 
         ve = getvfsbytype (vmtp->vmt_gfstype);
         if (ve == (struct vfs_ent *) NULL || *ve->vfsent_name == '\0')
@@ -1397,13 +1397,13 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
             if (vmtp->vmt_gfstype >= 0 &&
                     (vmtp->vmt_gfstype < NUM_AIX_FSTYPES))
             {
-                strncpy (diptr->fsType,
-                        AIX_fsType [vmtp->vmt_gfstype], DI_TYPE_LEN);
+                strncpy (diptr->fstype,
+                        AIX_fstype [vmtp->vmt_gfstype], DI_TYPE_LEN);
             }
         }
         else
         {
-            strncpy (diptr->fsType, ve->vfsent_name, DI_TYPE_LEN);
+            strncpy (diptr->fstype, ve->vfsent_name, DI_TYPE_LEN);
         }
 
         strncpy (diptr->options, (char *) vmt2dataptr (vmtp, VMT_ARGS),
@@ -1413,8 +1413,8 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
         if (debug > 1)
         {
-            printf ("mnt:%s - %s : %s\n", diptr->name,
-                    diptr->special, diptr->fsType);
+            printf ("mnt:%s - %s : %s\n", diptr->mountpt,
+                    diptr->devname, diptr->fstype);
             printf ("\t%s\n", (char *) vmt2dataptr (vmtp, VMT_ARGS));
         }
     }
@@ -1465,7 +1465,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     {
         diptr = *diskInfo + i;
         p = buff + (BYTES_PER_LOGICAL_DRIVE * i);
-        strncpy (diptr->name, p, DI_NAME_LEN);
+        strncpy (diptr->mountpt, p, DI_MOUNTPT_LEN);
         rc = (int) GetDriveType (p);
         diptr->printFlag = DI_PRNT_OK;
 
@@ -1577,9 +1577,9 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         dir = new BDirectory (&nref);
         stat = dir->GetEntry (&entry);
         stat = entry.GetPath (&path);
-        strncpy (diptr->name, path.Path(), DI_NAME_LEN);
-        strncpy (diptr->special, fsinfo.device_name, DI_SPEC_NAME_LEN);
-        strncpy (diptr->fsType, fsinfo.fsh_name, DI_TYPE_LEN);
+        strncpy (diptr->mountpt, path.Path(), DI_MOUNTPT_LEN);
+        strncpy (diptr->devname, fsinfo.device_name, DI_DEVNAME_LEN);
+        strncpy (diptr->fstype, fsinfo.fsh_name, DI_TYPE_LEN);
         di_save_block_sizes (diptr, fsinfo.values [DI_QUOTA_BLOCK_SZ],
             fsinfo.total_blocks, fsinfo.free_blocks, fsinfo.free_blocks);
         di_save_inode_sizes (diptr, fsinfo.total_nodes,
@@ -1601,9 +1601,9 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
         if (debug > 1)
         {
-            printf ("mnt:%s - %s\n", diptr->name, diptr->special);
-            printf ("dev:%d fs:%s\n", dev, diptr->fsType);
-            printf ("%s: %s\n", diptr->name, diptr->fsType);
+            printf ("mnt:%s - %s\n", diptr->mountpt, diptr->devname);
+            printf ("dev:%d fs:%s\n", dev, diptr->fstype);
+            printf ("%s: %s\n", diptr->mountpt, diptr->fstype);
             printf ("\tblocks: tot:%ld free:%ld\n",
                     fsinfo.total_blocks, fsinfo.free_blocks);
             printf ("\tinodes: tot:%ld free:%ld\n",

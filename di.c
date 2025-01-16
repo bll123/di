@@ -96,6 +96,7 @@
 
 #include "dilib.h"
 #include "di.h"
+#include "display.h"
 #include "version.h"
 
 static void usage (void);
@@ -103,31 +104,34 @@ static void usage (void);
 int
 main (int argc, char * argv [])
 {
-  char      *disp = NULL;
   di_data_t di_data;
+  int       exitflag;
 
-  di_initialize (&di_data, 0);
-  di_process_options (&di_data, argc, argv);
-  di_get_data (&di_data);
-  switch (di_data.options.exitFlag) {
-    case DI_EXIT_FAIL: {
-      exit (2);
-    }
+  di_initialize (&di_data);
+  exitflag = di_process_options (&di_data, argc, argv);
+  switch (exitflag) {
+    case DI_EXIT_FAIL:
     case DI_EXIT_WARN: {
-      exit (1);
+      di_cleanup (&di_data);
+      exit (exitflag);
     }
-    case DI_EXIT_HELP: {
-      usage ();
+    case DI_EXIT_HELP:
+    case DI_EXIT_VERS: {
+      if (exitflag == DI_EXIT_HELP) {
+        usage ();
+      }
+      if (exitflag == DI_EXIT_VERS) {
+        printf (DI_GT("di version %s\n"), DI_VERSION);
+      }
+      di_cleanup (&di_data);
       exit (0);
     }
     case DI_EXIT_NORM: {
       break;
     }
   }
-  if (disp != (char *) NULL) {
-    fputs (disp, stdout);
-    free (disp);
-  }
+  di_get_data (&di_data);
+  di_display_data (&di_data);
   di_cleanup (&di_data);
   return 0;
 }
@@ -136,7 +140,7 @@ static void
 usage (void)
 {
   printf (DI_GT("di version %s    Default Format: %s\n"), DI_VERSION, DI_DEFAULT_FORMAT);
-          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
+             /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
   printf (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
   printf (DI_GT("       [-I include-fstyp-list] [file [...]]\n"));
   printf (DI_GT("   -a   : print all mounted devices\n"));

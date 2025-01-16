@@ -772,6 +772,7 @@ target_include_directories (${DI_LIBNAME} PRIVATE
 )
 target_link_libraries (${DI_LIBNAME} PRIVATE
   ${TIRPC_LDFLAGS}
+  m
 )
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (${DI_LIBNAME} PRIVATE
@@ -805,6 +806,7 @@ target_include_directories (di PRIVATE
 )
 target_link_libraries (di PRIVATE
   ${TIRPC_LDFLAGS}
+  m
 )
 target_link_libraries (di PRIVATE
   ${DI_LIBNAME}

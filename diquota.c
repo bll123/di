@@ -165,9 +165,9 @@ extern int debug;
 # endif
 #endif
 
-  /* rename certain structure members for portability       */
-  /* it make the code below cleaner, but it's a bit more    */
-  /* difficult to read it                                   */
+/* rename certain structure members for portability       */
+/* it make the code below cleaner, but it's a bit more    */
+/* difficult to read it                                   */
 #if _mem_struct_dqblk_dqb_fsoftlimit
 # define dqb_isoftlimit dqb_fsoftlimit
 #endif
@@ -270,7 +270,7 @@ vquotactl_get (di_quota_t *diqinfo, struct vqval *vqval)
   res  = prop_dictionary_create();
   if (res == NULL) { return errno; }
 
-  rv = vquotactl_send (diqinfo->name, "get usage all", args, &res);
+  rv = vquotactl_send (diqinfo->mountpt, "get usage all", args, &res);
   if (! rv) {
     prop_object_release (args);
     prop_object_release (res);
@@ -355,37 +355,38 @@ quotactl_get (di_quota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
   rc = -4;
 # if defined (__FreeBSD__) && __FreeBSD__ == 5
     /* quotactl on devfs fs panics the system (FreeBSD 5.1) */
-  if (strcmp (diqinfo->type, "ufs") != 0) {
+  if (strcmp (diqinfo->fstype, "ufs") != 0) {
     return -4;
   }
 # endif
 
   if (debug > 5) {
-    printf ("quota: quotactl on %s (%d %d)\n", diqinfo->name, _quotactl_pos_1, _quotactl_pos_2);
+    printf ("quota: quotactl on %s (%d %d)\n", diqinfo->mountpt, _quotactl_pos_1, _quotactl_pos_2);
   }
   /* AIX 7 has quotactl position 1 */
 # if _lib_quotactl && _quotactl_pos_1
-  rc = quotactl (diqinfo->name, cmd, (int) id, (caddr_t) &(qdata->qinfo));
+  rc = quotactl (diqinfo->mountpt, cmd, (int) id, (caddr_t) &(qdata->qinfo));
 # endif
 # if _lib_quotactl && ! _quotactl_pos_1 && (_quotactl_pos_2 || defined(_AIX))
 #  if defined(_AIX)
-  /* AIX has linux compatibility routine, but needs name rather than special */
-  rc = quotactl (cmd, diqinfo->name, (int) id, (caddr_t) &(qdata->qinfo));
+  /* AIX has linux compatibility routine, */
+  /* but needs mount-pt rather than dev-name */
+  rc = quotactl (cmd, diqinfo->mountpt, (int) id, (caddr_t) &(qdata->qinfo));
 #  else
-  rc = quotactl (cmd, (_c_arg_2_quotactl) diqinfo->special, (int) id, (caddr_t) &(qdata->qinfo));
+  rc = quotactl (cmd, (_c_arg_2_quotactl) diqinfo->devname, (int) id, (caddr_t) &(qdata->qinfo));
 #  endif
 # endif
 # if _has_std_quotas && _sys_fs_ufs_quota && ! _lib_vquotactl /* Solaris */
   {
     int             fd;
     struct quotctl  qop;
-    char            tname [DI_NAME_LEN + 1];
+    char            tname [DI_MOUNTPT_LEN + 1];
 
     qop.op = Q_GETQUOTA;
     qop.uid = id;
     qop.addr = (caddr_t) &(qdata->qinfo);
-    strncpy (tname, diqinfo->name, DI_NAME_LEN);
-    strncat (tname, "/quotas", DI_NAME_LEN);
+    strncpy (tname, diqinfo->mountpt, DI_MOUNTPT_LEN);
+    strncat (tname, "/quotas", DI_MOUNTPT_LEN);
     fd = open (tname, O_RDONLY | O_NOCTTY);
     if (fd >= 0) {
       rc = ioctl (fd, Q_QUOTACTL, &qop);
@@ -433,13 +434,13 @@ diquota (di_quota_t *diqinfo)
 #endif
 
 #if _lib_quota_open
-  qh = quota_open (diqinfo->name);
+  qh = quota_open (diqinfo->mountpt);
   rc = quota_open_get (qh, QUOTA_IDTYPE_USER, diqinfo->uid, &qdata.qval);
 #endif
 
 #if ! _lib_quota_open
-  if (strncmp (diqinfo->type, "nfs", (Size_t) 3) == 0 &&
-      strcmp (diqinfo->type, "nfsd") != 0) {
+  if (strncmp (diqinfo->fstype, "nfs", (Size_t) 3) == 0 &&
+      strcmp (diqinfo->fstype, "nfsd") != 0) {
 # if _has_std_nfs_quotas
     diquota_nfs (diqinfo);
 # endif
@@ -448,7 +449,7 @@ diquota (di_quota_t *diqinfo)
 #endif
 
 #if _has_std_quotas && ! _lib_quota_open && ! _lib_vquotactl
-  if (strcmp (diqinfo->type, "xfs") == 0) {
+  if (strcmp (diqinfo->fstype, "xfs") == 0) {
 # if _hdr_linux_dqblk_xfs
     ucmd = QCMD (Q_XGETQUOTA, USRQUOTA);
     gcmd = QCMD (Q_XGETQUOTA, GRPQUOTA);
@@ -582,7 +583,7 @@ diquota_nfs (di_quota_t *diqinfo)
     CLIENT                  *rqclnt;
     enum clnt_stat          clnt_stat;
     struct timeval          timeout;
-    char                    host [DI_SPEC_NAME_LEN + 1];
+    char                    host [DI_DEVNAME_LEN + 1];
     char                    *ptr;
     char                    *path;
     struct getquota_args    args;
@@ -599,7 +600,7 @@ diquota_nfs (di_quota_t *diqinfo)
     timeout.tv_sec = 2;
     timeout.tv_usec = 0;
 
-    strncpy (host, diqinfo->special, DI_SPEC_NAME_LEN);
+    strncpy (host, diqinfo->devname, DI_DEVNAME_LEN);
     path = host;
     ptr = strchr (host, ':');
     if (ptr != (char *) NULL) {
@@ -746,7 +747,7 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     if (debug > 2) {
       char tbuff [100];
       dinum_str (&tsize, tbuff, sizeof (tbuff));
-      printf ("quota: %s %s b hard: %s\n", tag, diqinfo->name, tbuff);
+      printf ("quota: %s %s b hard: %s\n", tag, diqinfo->mountpt, tbuff);
     }
 
     if (dinum_cmp_s (&tsize, 0) > 0) {
@@ -785,7 +786,7 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     if (debug > 2) {
       char tbuffa [100];
       dinum_str (&quot_block_sz, tbuffa, sizeof (tbuffa));
-      printf ("quota: %s %s b soft: %s\n", tag, diqinfo->name, tbuffa);
+      printf ("quota: %s %s b soft: %s\n", tag, diqinfo->mountpt, tbuffa);
     }
     if (dinum_cmp_s (&tsize, 0) > 0) {
       dinum_mul (&tsize, &quot_block_sz);
@@ -807,7 +808,7 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     /* any quota set? */
     if (dinum_cmp_s (&tlimit, 0) == 0) {
       if (debug > 2) {
-        printf ("quota: %s %s no quota\n", tag, diqinfo->name);
+        printf ("quota: %s %s no quota\n", tag, diqinfo->mountpt);
       }
       return;
     }
@@ -854,7 +855,7 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
       char  tbuffb [100];
       dinum_str (&diqinfo->values [DI_QUOTA_USED], tbuffa, sizeof (tbuffa));
       dinum_str (&diqinfo->values [DI_QUOTA_LIMIT], tbuffb, sizeof (tbuffb));
-      printf ("quota: %s %s used: %s limit: %s\n", tag, diqinfo->name,
+      printf ("quota: %s %s used: %s limit: %s\n", tag, diqinfo->mountpt,
           tbuffa, tbuffb);
     }
 
@@ -879,7 +880,7 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     if (debug > 2) {
       char tbuffa [100];
       dinum_str (&quot_block_sz, tbuffa, sizeof (tbuffa));
-      printf ("quota: %s %s i hard: %s\n", tag, diqinfo->name, tbuffa);
+      printf ("quota: %s %s i hard: %s\n", tag, diqinfo->mountpt, tbuffa);
     }
 
     if (xfsflag) {
@@ -902,13 +903,13 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     if (debug > 2) {
       char  tbuffa [100];
       dinum_str (&tsize, tbuffa, sizeof (tbuffa));
-      printf ("quota: %s %s i soft: %s\n", tag, diqinfo->name, tbuffa);
+      printf ("quota: %s %s i soft: %s\n", tag, diqinfo->mountpt, tbuffa);
     }
 
       /* any quota set? */
     if (dinum_cmp_s (&tlimit, 0) == 0) {
       if (debug > 2) {
-        printf ("quota: %s %s no inode quota\n", tag, diqinfo->name);
+        printf ("quota: %s %s no inode quota\n", tag, diqinfo->mountpt);
       }
       return;
     }
@@ -933,12 +934,12 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
     if (debug > 2) {
       char  tbuffa [100];
       dinum_str (&tsize, tbuffa, sizeof (tbuffa));
-      printf ("quota: %s %s i used: %s\n", tag, diqinfo->name, tbuffa);
+      printf ("quota: %s %s i used: %s\n", tag, diqinfo->mountpt, tbuffa);
     }
 # endif /* ! _lib_vquotactl */
   } else {
     if (debug > 2) {
-      printf ("quota: %s %s errno %d\n", tag, diqinfo->name, errno);
+      printf ("quota: %s %s errno %d\n", tag, diqinfo->mountpt, errno);
     }
   }
 

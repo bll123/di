@@ -240,13 +240,13 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_set_u (&a, 1024 * 1024 + 510);
+  dinum_set_u (&a, 1024 * 1024 + 2);
   dinum_set_u (&b, 1024);
   dinum_scale (&r, &a, &b);
   ++tcount;
   if (dinum_cmp_s (&r, 1025) != 0) {
     dinum_str (&r, buff, sizeof (buff));
-    fprintf (stderr, "%d: scale 1024 b fail %s\n", tcount, buff);
+    fprintf (stderr, "%d: scale 1025 b fail %s\n", tcount, buff);
     ++ecount;
   }
 
@@ -256,7 +256,7 @@ main (int argc, char *argv [])
   ++tcount;
   if (dinum_cmp_s (&r, 1025) != 0) {
     dinum_str (&r, buff, sizeof (buff));
-    fprintf (stderr, "%d: scale 1024 c fail %s\n", tcount, buff);
+    fprintf (stderr, "%d: scale 1025 c fail %s\n", tcount, buff);
     ++ecount;
   }
 

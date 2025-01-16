@@ -283,6 +283,7 @@ getoptn (int style, int argc, char * argv [],
   const char        *arg;
   getoptn_opt_t     *opt;
   getoptn_info_t    info;
+  int               ignorenext;
 
   info.style = style;
   info.argc = argc;
@@ -325,9 +326,18 @@ getoptn (int style, int argc, char * argv [],
     info.reprocess = false;
     info.offset = 0;
 
+    ignorenext = false;
     do {
+      if (ignorenext) {
+        ignorenext = false;
+        continue;
+      }
       i = find_option (&info, arg, arg, &info.argidx);
       if (opts[i].option_type == GETOPTN_IGNORE) {
+        continue;
+      }
+      if (opts[i].option_type == GETOPTN_IGNORE_ARG) {
+        ignorenext = true;
         continue;
       }
       if (i == GETOPTN_NOTFOUND) {
@@ -369,7 +379,7 @@ main (int argc, char * argv [])
   int       ec;
   int       optidx;
   int       ac;
-  char      *av [10];
+  char      *av [20];
 
   int  grc = 0;
   int  testno = 0;
@@ -401,7 +411,9 @@ main (int argc, char * argv [])
     { "-np3",  GETOPTN_FUNC_VALUE, NULL, sizeof(s2), NULL },
     { "-z1", GETOPTN_ALIAS,      (void *) "--c", 0, NULL },
     { "-z2", GETOPTN_ALIAS,      (void *) "-z1", 0, NULL },
-    { "-z3", GETOPTN_ALIAS,      (void *) "-z2", 0, NULL }
+    { "-z3", GETOPTN_ALIAS,      (void *) "-z2", 0, NULL },
+    { "-w", GETOPTN_IGNORE,      NULL, 0, NULL },
+    { "-W", GETOPTN_IGNORE_ARG, NULL, 0, NULL }
   };
 
   /* test 1 */
@@ -1255,6 +1267,40 @@ main (int argc, char * argv [])
   av[0] = tmp;
   av[1] = "-c";
   av[2] = NULL;
+  ec = 0;
+  optidx = getoptn (GETOPTN_LEGACY, ac, av,
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || ec != 0) {
+    fprintf (stderr, "fail test %d\n", testno);
+    grc = 1;
+  }
+
+  /* test 50 - ignore */
+  ++testno;
+  i = 0;
+  ac = 2;
+  sprintf (tmp, "test %d", testno);
+  av[0] = tmp;
+  av[1] = "-w";
+  av[2] = NULL;
+  ec = 0;
+  optidx = getoptn (GETOPTN_LEGACY, ac, av,
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);
+  if (i != 0 || ec != 0) {
+    fprintf (stderr, "fail test %d\n", testno);
+    grc = 1;
+  }
+
+  /* test 51 - ignore args */
+  ++testno;
+  i = 0;
+  ac = 4;
+  sprintf (tmp, "test %d", testno);
+  av[0] = tmp;
+  av[1] = "-w";
+  av[2] = "20";
+  av[3] = "-c";
+  av[4] = NULL;
   ec = 0;
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts, &ec);

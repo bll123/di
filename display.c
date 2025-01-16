@@ -86,7 +86,7 @@ static formatNames_t formatNames [] =
   { DI_FMT_MOUNT_FULL,        "Mount", "Mounted On", "mount" },
   { DI_FMT_SPECIAL,           "Filesystem", NULL, "filesystem" },
   { DI_FMT_SPECIAL_FULL,      "Filesystem", NULL, "filesystem" },
-  { DI_FMT_TYPE,              "fsType", NULL, "fstype" },
+  { DI_FMT_TYPE,              "fstype", NULL, "fstype" },
   { DI_FMT_TYPE_FULL,         "fs Type", NULL, "fstype" },
   { DI_FMT_BTOT,              NULL, NULL, "size" },
   { DI_FMT_BTOT_AVAIL,        NULL, NULL, "size" },
@@ -145,6 +145,12 @@ static void appendFormatStr     (char *, const char *, char **, Size_t *, Size_t
 static void appendFormatVal     (char *, dinum_t *, char **, Size_t *, Size_t *);
 static void append              (const char *, char **, Size_t *, Size_t *);
 
+void
+di_display_data (di_data_t *di_data)
+{
+  return;
+}
+
 /*
  * printDiskInfo
  *
@@ -164,7 +170,7 @@ printDiskInfo (di_data_t *di_data)
     di_opt_t         *diopts;
     di_disk_info_t        *diskInfo;
     di_disk_info_t        totals;
-    char                lastpool [DI_SPEC_NAME_LEN + 1];
+    char                lastpool [DI_DEVNAME_LEN + 1];
     Size_t              lastpoollen = { 0 };
     int                 inpool = { false };
     diOutput_t          *diout;
@@ -188,7 +194,7 @@ printDiskInfo (di_data_t *di_data)
     if (diopts->printTotals)
     {
         di_initialize_disk_info (&totals);
-        strncpy (totals.name, DI_GT("Total"), (Size_t) DI_NAME_LEN);
+        strncpy (totals.name, DI_GT("Total"), (Size_t) DI_MOUNTPT_LEN);
         totals.printFlag = DI_PRNT_OK;
     }
 
@@ -284,14 +290,14 @@ printDiskInfo (di_data_t *di_data)
             if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
               ispooled = true;
               if (lastpoollen == 0 ||
-                  strncmp (lastpool, dinfo->special, lastpoollen) != 0)
+                  strncmp (lastpool, diptr->devname, lastpoollen) != 0)
               {
-                strncpy (lastpool, dinfo->special, DI_SPEC_NAME_LEN);
+                strncpy (lastpool, diptr->devname, DI_DEVNAME_LEN);
                 lastpoollen = di_mungePoolName (lastpool);
                 inpool = false;
                 startpool = true;
-                if (strcmp (dinfo->fsType, "null") == 0 &&
-                    strcmp (dinfo->special + strlen (dinfo->special) - 5,
+                if (strcmp (dinfo->fstype, "null") == 0 &&
+                    strcmp (diptr->devname + strlen (diptr->devname) - 5,
                             "00000") != 0) {
                     /* dragonflybsd doesn't have the main pool mounted */
                   inpool = true;
@@ -305,7 +311,7 @@ printDiskInfo (di_data_t *di_data)
               addTotals (dinfo, &totals, inpool);
             } else {
               if (debug > 2) {
-                printf ("tot:%s:%s:skip\n", dinfo->special, dinfo->name);
+                printf ("tot:%s:%s:skip\n", diptr->devname, diptr->mountpt);
               }
             }
 
@@ -329,7 +335,7 @@ printDiskInfo (di_data_t *di_data)
       dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_MAIN_SORT_IDX]]);
       if (debug > 5)
       {
-        printf ("pdi:%s:%s:%d:\n", dinfo->name,
+        printf ("pdi:%s:%s:%d:\n", diptr->mountpt,
             getPrintFlagText ((int) dinfo->printFlag), dinfo->doPrint);
       }
 
@@ -589,7 +595,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         case DI_FMT_MOUNT:
         case DI_FMT_MOUNT_FULL:
         {
-          appendFormatStr (diout->mountFormat, diskInfo->name, &out, &outcurrlen, &outlen);
+          appendFormatStr (diout->mountFormat, diskInfo->mountpt, &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -760,7 +766,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         case DI_FMT_SPECIAL:
         case DI_FMT_SPECIAL_FULL:
         {
-          appendFormatStr (diout->specialFormat, diskInfo->special,
+          appendFormatStr (diout->specialFormat, diskInfo->devname,
               &out, &outcurrlen, &outlen);
           break;
         }
@@ -768,7 +774,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         case DI_FMT_TYPE:
         case DI_FMT_TYPE_FULL:
         {
-          appendFormatStr (diout->typeFormat, diskInfo->fsType, &out, &outcurrlen, &outlen);
+          appendFormatStr (diout->typeFormat, diskInfo->fstype, &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -884,7 +890,7 @@ addTotals (const di_disk_info_t *diskInfo, di_disk_info_t *totals, int inpool)
   if (debug > 2)
   {
     printf ("tot:%s:%s:inp:%d\n",
-        diskInfo->special, diskInfo->name, inpool);
+        diskInfo->devname, diskInfo->mountpt, inpool);
   }
 
   /*
@@ -936,7 +942,7 @@ addTotals (const di_disk_info_t *diskInfo, di_disk_info_t *totals, int inpool)
   if (inpool)
   {
     if (debug > 2) {printf ("  tot:inpool:\n"); }
-    if (strcmp (diskInfo->fsType, "apfs") == 0) {
+    if (strcmp (diskInfo->fstype, "apfs") == 0) {
       dinum_t   tval;
 
       dinum_init (&tval);
@@ -1333,25 +1339,25 @@ getMaxFormatLengths (di_data_t *di_data)
         if (dinfo->doPrint)
         {
             if (di_data->haspooledfs &&
-                (strcmp (dinfo->fsType, "zfs") == 0 ||
-                 strcmp (dinfo->fsType, "advfs") == 0))
+                (strcmp (dinfo->fstype, "zfs") == 0 ||
+                 strcmp (dinfo->fstype, "advfs") == 0))
             {
               di_data->disppooledfs = true;
             }
 
-            len = (unsigned int) strlen (dinfo->name);
+            len = (unsigned int) strlen (diptr->mountpt);
             if (len > diout->maxMountString)
             {
                 diout->maxMountString = len;
             }
 
-            len = (unsigned int) strlen (dinfo->special);
+            len = (unsigned int) strlen (diptr->devname);
             if (len > diout->maxSpecialString)
             {
                 diout->maxSpecialString = len;
             }
 
-            len = (unsigned int) strlen (dinfo->fsType);
+            len = (unsigned int) strlen (dinfo->fstype);
             if (len > diout->maxTypeString)
             {
                 diout->maxTypeString = len;

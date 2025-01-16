@@ -89,6 +89,18 @@ all:
 	  $(MAKE) mkc-all; \
 	fi
 
+.PHONY: cmake-release
+cmake-release:
+	$(MAKE) DI_BUILD=Release cmake-all
+
+.PHONY: cmake-debug
+cmake-debug:
+	$(MAKE) DI_BUILD=Debug cmake-all
+
+.PHONY: cmake-sanitize
+cmake-sanitize:
+	$(MAKE) DI_BUILD=SanitizeAddress cmake-all
+
 # parallel doesn't seem to work under msys2
 # cmake doesn't seem to support parallel under *BSD
 .PHONY: cmake-all
@@ -143,6 +155,7 @@ cmake-unix:
 	cmake \
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
+		-DDI_BUILD:STATIC=$(DI_BUILD) \
 		-DDI_LOCALE_DIR:STATIC=$(LOCALEDIR) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-S . -B $(BUILDDIR) -Werror=deprecated
@@ -154,6 +167,7 @@ cmake-windows:
 	cmake \
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
+		-DDI_BUILD:STATIC=$(DI_BUILD) \
 		-DDI_LOCALE_DIR:STATIC=$(LOCALEDIR) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-G "MSYS Makefiles" \
@@ -279,13 +293,12 @@ os2-gcc:
 #   dioptions.dat, tests.done, test_di, $(MKC_ENV), $(MKC_ENV_SHR)
 .PHONY: clean
 clean:
-	@-$(RM) -f w ww di mi libdi.* \
-		di.exe mingw-di.exe mi.exe \
-		diskspace.so diskspace.dylib diskspace.dll \
+	@-$(RM) -f w ww \
+		di libdi.* dimathtest getoptn_test \
+		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
 		*.o *.obj $(MKC_FILES)/mkconfig.log \
 		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
 		$(MKC_FILES)/mkconfig.cache mkc*.vars \
-		getoptn_test* gconfig.h getoptn.reqlibs \
 		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
 	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
@@ -296,7 +309,7 @@ clean:
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean >/dev/null 2>&1
-	@-$(RM) -rf config.h gconfig.h \
+	@-$(RM) -rf config.h \
 		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) \
 		>/dev/null 2>&1; exit 0
 
@@ -366,7 +379,7 @@ libdi$(SHLIB_EXT):	$(MKC_REQLIB) $(LIBOBJECTS)
 		-link -shared $(MKC_ECHO) \
                 -r $(MKC_REQLIB) \
 		-o libdi$(SHLIB_EXT) \
-		$(LIBOBJECTS)
+		$(LIBOBJECTS) -lm
 
 di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
@@ -374,7 +387,7 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 		-r $(MKC_REQLIB) \
 		-o di$(EXE_EXT) \
 		$(MAINOBJECTS) \
-		libdi$(SHLIB_EXT)
+		libdi$(SHLIB_EXT) -lm
 
 dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
@@ -388,8 +401,7 @@ getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT)
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
 		-o getoptn_test$(EXE_EXT) \
-		getoptn_test$(OBJ_EXT) \
-		-lm
+		getoptn_test$(OBJ_EXT)
 
 # for ms cl
 #di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)

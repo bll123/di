@@ -43,7 +43,8 @@ extern "C" {
 #define GETOPTN_FUNC_VALUE  7
 #define GETOPTN_ALIAS       8
 #define GETOPTN_IGNORE      9
-#define GETOPTN_SIZET      10
+#define GETOPTN_IGNORE_ARG 10
+#define GETOPTN_SIZET      11
 
 typedef struct {
   const char    *option;

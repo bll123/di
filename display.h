@@ -12,7 +12,8 @@
 extern "C" {
 # endif
 
-    /* display.c */
+/* display.c */
+extern void di_display_data (di_data_t *di_data);
 extern char *printDiskInfo      (di_data_t *);
 extern void initLocale          (void);
 
