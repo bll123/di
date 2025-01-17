@@ -362,7 +362,8 @@ quotactl_get (di_quota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
 # endif
 
   if (debug > 5) {
-    printf ("quota: quotactl on %s (%d %d)\n", diqinfo->mountpt, _quotactl_pos_1, _quotactl_pos_2);
+    printf ("quota: quotactl on %s (%d %d)\n", diqinfo->mountpt,
+            _quotactl_pos_1, _quotactl_pos_2);
   }
   /* AIX 7 has quotactl position 1 */
 # if _lib_quotactl && _quotactl_pos_1
@@ -755,7 +756,7 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
       dinum_mul (&tsize, &quot_block_sz);
       if (dinum_cmp_s (&tsize, 0) > 0 &&
           (dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_LIMIT]) < 0 ||
-          diqinfo->values [DI_QUOTA_LIMIT] == 0)) {
+          dinum_cmp_s (&diqinfo->values [DI_QUOTA_LIMIT], 0) == 0)) {
         if (debug > 2) {
           char  tbuffa [100];
           char  tbuffb [100];

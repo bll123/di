@@ -131,7 +131,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
         {
             di_unum_t    tblocksz;
 
-            if (statvfs (diptr->mountpt, &statBuf) == 0) {
+            if (statvfs (diptr->strdata [DI_DISP_MOUNTPT], &statBuf) == 0) {
               /* data general DG/UX 5.4R3.00 sometime returns 0   */
               /* in the fragment size field.                      */
               if (statBuf.f_frsize == 0 && statBuf.f_bsize != 0) {
@@ -150,14 +150,14 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
                 di_save_inode_sizes (diptr, statBuf.f_files,
                     statBuf.f_ffree, statBuf.f_favail);
 # if _mem_struct_statvfs_f_basetype
-                if (! *diptr->fstype) {
-                  strncpy (diptr->fstype, statBuf.f_basetype, DI_TYPE_LEN);
+                if (! *diptr->strdata [DI_DISP_FSTYPE]) {
+                  strncpy (diptr->strdata [DI_DISP_FSTYPE], statBuf.f_basetype, DI_FSTYPE_LEN);
                 }
 # endif
 
                 if (debug > 1)
                 {
-                    printf ("%s: %s\n", diptr->mountpt, diptr->fstype);
+                    printf ("%s: %s\n", diptr->strdata [DI_DISP_MOUNTPT], diptr->strdata [DI_DISP_FSTYPE]);
                     printf ("\tbsize:%ld  frsize:%ld\n", (long) statBuf.f_bsize,
                             (long) statBuf.f_frsize);
 # if _siz_long_long >= 8
@@ -183,7 +183,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
             {
               diptr->printFlag = DI_PRNT_BAD;
               if (errno != EACCES && errno != EPERM) {
-                fprintf (stderr, "statvfs: %s ", diptr->mountpt);
+                fprintf (stderr, "statvfs: %s ", diptr->strdata [DI_DISP_MOUNTPT]);
                 perror ("");
               }
             }
@@ -241,7 +241,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
         {
             dinum_t      tblocksz;
 
-            if (statfs (diptr->mountpt, &statBuf, sizeof (statBuf), 0) == 0)
+            if (statfs (diptr->strdata [DI_DISP_MOUNTPT], &statBuf, sizeof (statBuf), 0) == 0)
             {
 # if _mem_struct_statfs_f_frsize
                 if (statBuf.f_frsize == 0 && statBuf.f_bsize != 0)
@@ -260,12 +260,12 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
                 di_save_inode_sizes (diptr, statBuf.f_files,
                     statBuf.f_ffree, statBuf.f_ffree);
 # if _lib_sysfs && _mem_struct_statfs_f_fstyp
-                sysfs (GETFSTYP, statBuf.f_fstyp, diptr->fstype);
+                sysfs (GETFSTYP, statBuf.f_fstyp, diptr->strdata [DI_DISP_FSTYPE]);
 # endif
 
                 if (debug > 1)
                 {
-                    printf ("%s: %s\n", diptr->mountpt, diptr->fstype);
+                    printf ("%s: %s\n", diptr->strdata [DI_DISP_MOUNTPT], diptr->strdata [DI_DISP_FSTYPE]);
 # if _mem_struct_statfs_f_frsize
                     printf ("\tbsize:%ld\n", statBuf.f_bsize);
                     printf ("\tfrsize:%ld\n", statBuf.f_frsize);
@@ -282,7 +282,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
             {
               diptr->printFlag = DI_PRNT_BAD;
               if (errno != EACCES && errno != EPERM) {
-                fprintf (stderr, "statfs: %s ", diptr->mountpt);
+                fprintf (stderr, "statfs: %s ", diptr->strdata [DI_DISP_MOUNTPT]);
                 perror ("");
               }
             }
@@ -324,7 +324,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
             diptr->printFlag == DI_PRNT_SKIP ||
             diptr->printFlag == DI_PRNT_FORCE)
         {
-            if (statfs (diptr->mountpt, &statBuf) == 0)
+            if (statfs (diptr->strdata [DI_DISP_MOUNTPT], &statBuf) == 0)
             {
                 di_save_block_sizes (diptr, statBuf.f_bsize, statBuf.f_blocks,
                     statBuf.f_bfree, statBuf.f_bavail);
@@ -332,12 +332,12 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
                     statBuf.f_ffree, statBuf.f_ffree);
 
 # if _lib_sysfs && _mem_struct_statfs_f_fstyp
-                sysfs (GETFSTYP, statBuf.f_fstyp, diptr->fstype);
+                sysfs (GETFSTYP, statBuf.f_fstyp, diptr->strdata [DI_DISP_FSTYPE]);
 # endif
 
                 if (debug > 1)
                 {
-                    printf ("%s: %s\n", diptr->mountpt, diptr->fstype);
+                    printf ("%s: %s\n", diptr->strdata [DI_DISP_MOUNTPT], diptr->strdata [DI_DISP_FSTYPE]);
                     printf ("\tbsize:%ld\n", (long) statBuf.f_bsize);
                     printf ("\tblocks: tot:%ld free:%ld avail:%ld\n",
                             (long) statBuf.f_blocks, (long) statBuf.f_bfree,
@@ -350,7 +350,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
             {
               diptr->printFlag = DI_PRNT_BAD;
               if (errno != EACCES && errno != EPERM) {
-                fprintf (stderr, "statfs: %s ", diptr->mountpt);
+                fprintf (stderr, "statfs: %s ", diptr->strdata [DI_DISP_MOUNTPT]);
                 perror ("");
               }
             }
@@ -401,11 +401,11 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
             diptr->printFlag == DI_PRNT_SKIP ||
             diptr->printFlag == DI_PRNT_FORCE)
         {
-            rc = GetVolumeInformation (diptr->mountpt,
+            rc = GetVolumeInformation (diptr->strdata [DI_DISP_MOUNTPT],
                     volName, MSDOS_BUFFER_SIZE, &serialNo, &maxCompLen,
                     &fsFlags, fsName, MSDOS_BUFFER_SIZE);
-            strncpy (diptr->fstype, fsName, DI_TYPE_LEN);
-            strncpy (diptr->devname, volName, DI_DEVNAME_LEN);
+            strncpy (diptr->strdata [DI_DISP_FSTYPE], fsName, DI_FSTYPE_LEN);
+            strncpy (diptr->strdata [DI_DISP_DEVNAME], volName, DI_DEVNAME_LEN);
 
 # if _lib_GetDiskFreeSpaceEx
             {
@@ -413,7 +413,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
                 ULONGLONG bytesTotal;
                 ULONGLONG bytesFree;
 
-                rc = GetDiskFreeSpaceEx (diptr->mountpt,
+                rc = GetDiskFreeSpaceEx (diptr->strdata [DI_DISP_MOUNTPT],
                         (PULARGE_INTEGER) &bytesAvail,
                         (PULARGE_INTEGER) &bytesTotal,
                         (PULARGE_INTEGER) &bytesFree);
@@ -429,13 +429,13 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
                     if (debug)
                     {
                         printf ("disk %s; could not get disk space\n",
-                                diptr->mountpt);
+                                diptr->strdata [DI_DISP_MOUNTPT]);
                     }
                 }
 
                 if (debug > 1)
                 {
-                    printf ("%s: %s\n", diptr->mountpt, diptr->fstype);
+                    printf ("%s: %s\n", diptr->strdata [DI_DISP_MOUNTPT], diptr->strdata [DI_DISP_FSTYPE]);
                     printf ("\ttot:%llu  free:%llu\n",
                             bytesTotal, bytesFree);
                     printf ("\tavail:%llu\n", bytesAvail);
@@ -449,7 +449,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
                 unsigned long           totalclusters;
                 unsigned long           freeclusters;
 
-                rc = GetDiskFreeSpace (diptr->mountpt,
+                rc = GetDiskFreeSpace (diptr->strdata [DI_DISP_MOUNTPT],
                         (LPDWORD) &sectorspercluster,
                         (LPDWORD) &bytespersector,
                         (LPDWORD) &freeclusters,
@@ -467,13 +467,13 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
                     if (debug)
                     {
                         printf ("disk %s; could not get disk space\n",
-                                diptr->mountpt);
+                                diptr->strdata [DI_DISP_MOUNTPT]);
                     }
                 }
 
                 if (debug > 1)
                 {
-                    printf ("%s: %s\n", diptr->mountpt, diptr->fstype);
+                    printf ("%s: %s\n", diptr->strdata [DI_DISP_MOUNTPT], diptr->strdata [DI_DISP_FSTYPE]);
                     printf ("\ts/c:%ld  b/s:%ld\n", sectorspercluster,
                         bytespersector);
                     printf ("\tclusters: tot:%ld free:%ld\n",

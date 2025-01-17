@@ -45,7 +45,7 @@ extern int debug;
 
 #define DI_FMT_VALID_CHARS     "mMsStTbBucfvp12a3iUFPIO"
 
-    /* mount information */
+/* mount information */
 #define DI_FMT_MOUNT           'm'
 #define DI_FMT_MOUNT_FULL      'M'
 #define DI_FMT_SPECIAL         's'
@@ -53,7 +53,7 @@ extern int debug;
 #define DI_FMT_TYPE            't'
 #define DI_FMT_TYPE_FULL       'T'
 
-    /* disk information */
+/* disk information */
 #define DI_FMT_BTOT            'b'
 #define DI_FMT_BTOT_AVAIL      'B'
 #define DI_FMT_BUSED           'u'
@@ -103,7 +103,6 @@ static formatNames_t formatNames [] =
   { DI_FMT_IUSED,             "IUsed", NULL, "inodesused" },
   { DI_FMT_IFREE,             "IFree", NULL, "inodesfree" },
   { DI_FMT_IPERC,             "%IUsed", NULL, "percinodesused" },
-  { DI_FMT_MOUNT_TIME,        "Mount Time", NULL, "mounttime" },
   { DI_FMT_MOUNT_OPTIONS,     "Options", NULL, "options" }
 };
 #define DI_FORMATNAMES_SIZE (sizeof (formatNames) / sizeof (formatNames_t))
@@ -189,11 +188,11 @@ printDiskInfo (void *di_data)
     outlen = 0;
     outcurrlen = 0;
     lastpool[0] = '\0';
-    diopts = &di_data->options;
+    diopts = &di_data->strdata [DI_DISP_MOUNTOPT];
     diout = &di_data->output;
     initSizeTable (diopts, diout);
 
-    if (diopts->printTotals)
+    if (diopts->optval [DI_OPT_OUT_TOTALS)
     {
         di_initialize_disk_info (&totals);
         strncpy (totals.name, DI_GT("Total"), (Size_t) DI_MOUNTPT_LEN);
@@ -202,11 +201,11 @@ printDiskInfo (void *di_data)
 
     getMaxFormatLengths (di_data);
     tout = processTitles (diopts, diout);
-    if (diopts->printHeader) {
+    if (diopts->optval [DI_OPT_OUT_HEADER]) {
       append (tout, &out, &outcurrlen, &outlen);
     }
     free (tout);
-    if (diopts->json_output) {
+    if (diopts->optval [DI_OPT_OUT_JSON]]) {
       const char *tjson = "{\n  \"partitions\" : [\n";
       append (tjson, &out, &outcurrlen, &outlen);
     }
@@ -223,7 +222,7 @@ printDiskInfo (void *di_data)
     if (! ishr &&
         (diopts->dispBlockSize > 0 &&
          diopts->dispBlockSize <= DI_VAL_1024)) {
-      if (diopts->csv_output || diopts->json_output) {
+      if (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]]) {
         Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
             "%%" PRIu64);
       } else {
@@ -231,7 +230,7 @@ printDiskInfo (void *di_data)
             "%%%d" PRIu64, (int) diout->width);
       }
     } else {
-      if (diopts->csv_output || diopts->json_output) {
+      if (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]]) {
         Snprintf1 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
             "%%" PRIu64);
         if (! ishr) {
@@ -255,7 +254,7 @@ printDiskInfo (void *di_data)
         ++diout->width;
     }
 
-    if (diopts->csv_output || diopts->json_output) {
+    if (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]]) {
       Snprintf1 (diout->inodeFormat, sizeof (diout->inodeFormat),
           "%%%s", PRIu64);
     } else {
@@ -264,7 +263,7 @@ printDiskInfo (void *di_data)
     }
 
     diskInfo = di_data->diskInfo;
-    if (diopts->printTotals)
+    if (diopts->optval [DI_OPT_OUT_TOTALS)
     {
         if (di_data->haspooledfs && ! di_data->totsorted)
         {
@@ -273,7 +272,7 @@ printDiskInfo (void *di_data)
               /* we must have the array sorted by special device name */
           strncpy (tempSortType, diopts->sortType, DI_SORT_MAX);
           strncpy (diopts->sortType, "s", DI_SORT_MAX);
-          sortArray (diopts, diskInfo, di_data->count, DI_TOT_SORT_IDX);
+          sortArray (diopts, diskInfo, di_data->count, DI_SORT_TOTAL);
           strncpy (diopts->sortType, tempSortType, DI_SORT_MAX);
           di_data->totsorted = true;
         }
@@ -286,20 +285,20 @@ printDiskInfo (void *di_data)
 
             ispooled = false;
             startpool = false;
-            dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_TOT_SORT_IDX]]);
+            dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_SORT_TOTAL]]);
 
                 /* is it a pooled filesystem type? */
             if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
               ispooled = true;
               if (lastpoollen == 0 ||
-                  strncmp (lastpool, diptr->devname, lastpoollen) != 0)
+                  strncmp (lastpool, diptr->strdata [DI_DISP_DEVNAME], lastpoollen) != 0)
               {
-                strncpy (lastpool, diptr->devname, DI_DEVNAME_LEN);
+                strncpy (lastpool, diptr->strdata [DI_DISP_DEVNAME], DI_DEVNAME_LEN);
                 lastpoollen = di_mungePoolName (lastpool);
                 inpool = false;
                 startpool = true;
-                if (strcmp (dinfo->fstype, "null") == 0 &&
-                    strcmp (diptr->devname + strlen (diptr->devname) - 5,
+                if (strcmp (dinfo->strdata [DI_DISP_FSTYPE], "null") == 0 &&
+                    strcmp (diptr->strdata [DI_DISP_DEVNAME] + strlen (diptr->strdata [DI_DISP_DEVNAME]) - 5,
                             "00000") != 0) {
                     /* dragonflybsd doesn't have the main pool mounted */
                   inpool = true;
@@ -313,7 +312,7 @@ printDiskInfo (void *di_data)
               addTotals (dinfo, &totals, inpool);
             } else {
               if (debug > 2) {
-                printf ("tot:%s:%s:skip\n", diptr->devname, diptr->mountpt);
+                printf ("tot:%s:%s:skip\n", diptr->strdata [DI_DISP_DEVNAME], diptr->strdata [DI_DISP_MOUNTPT]);
               }
             }
 
@@ -327,17 +326,17 @@ printDiskInfo (void *di_data)
     diskInfo = di_data->diskInfo;
     if (strcmp (diopts->sortType, "n") != 0)
     {
-      sortArray (diopts, diskInfo, di_data->count, DI_MAIN_SORT_IDX);
+      sortArray (diopts, diskInfo, di_data->count, DI_SORT_MAIN);
     }
 
     for (i = 0; i < di_data->count; ++i)
     {
       di_disk_info_t        *dinfo;
 
-      dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_MAIN_SORT_IDX]]);
+      dinfo = &(diskInfo [diskInfo [i].sortIndex[DI_SORT_MAIN]]);
       if (debug > 5)
       {
-        printf ("pdi:%s:%s:%d:\n", diptr->mountpt,
+        printf ("pdi:%s:%s:%d:\n", diptr->strdata [DI_DISP_MOUNTPT],
             getPrintFlagText ((int) dinfo->printFlag), dinfo->doPrint);
       }
 
@@ -346,7 +345,7 @@ printDiskInfo (void *di_data)
         continue;
       }
 
-      if (! first && diopts->json_output) {
+      if (! first && diopts->optval [DI_OPT_OUT_JSON]]) {
         append (",\n", &out, &outcurrlen, &outlen);
       }
       first = false;
@@ -356,18 +355,18 @@ printDiskInfo (void *di_data)
       free (tout);
     }
 
-    if (diopts->json_output) {
+    if (diopts->optval [DI_OPT_OUT_JSON]]) {
       append ("\n", &out, &outcurrlen, &outlen);
     }
 
-    if (diopts->printTotals)
+    if (diopts->optval [DI_OPT_OUT_TOTALS)
     {
       tout = printInfo (&totals, diopts, diout);
       append (tout, &out, &outcurrlen, &outlen);
       free (tout);
     }
 
-    if (diopts->json_output) {
+    if (diopts->optval [DI_OPT_OUT_JSON]]) {
       const char *tjson = "  ]\n}\n";
       append (tjson, &out, &outcurrlen, &outlen);
     }
@@ -455,19 +454,19 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
     outlen = 0;
     outcurrlen = 0;
 
-    if (diopts->json_output) {
+    if (diopts->optval [DI_OPT_OUT_JSON]]) {
       t = "    {\n";
       append (t, &out, &outcurrlen, &outlen);
     }
 
     first = true;
     if (! percInit) {
-      if (diopts->json_output) {
+      if (diopts->optval [DI_OPT_OUT_JSON]]) {
         Snprintf1 (percFormat, sizeof(percFormat), "%%" PRIu64);
-      } else if (diopts->csv_output) {
+      } else if (diopts->optval [DI_OPT_OUT_CSV]]) {
         Snprintf1 (percFormat, sizeof(percFormat), "%%" PRIu64 "%%%%");
       } else {
-        if (diopts->posix_compat) {
+        if (diopts->optval [DI_OPT_POSIX_COMPAT]) {
           Snprintf1 (percFormat, sizeof(percFormat), DI_POSIX_PERC_FMT);
         } else {
           Snprintf1 (percFormat, sizeof(percFormat), DI_PERC_FMT);
@@ -556,13 +555,13 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         valid = false;
       }
 
-      if (valid && (diopts->csv_output || diopts->json_output)) {
+      if (valid && (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]])) {
         if (! first) {
           t = ",";
-          if (diopts->csv_tabs) {
+          if (diopts->optval [DI_OPT_OUT_CSV_TAB]) {
             t = "	"; /* tab here */
           }
-          if (diopts->json_output) {
+          if (diopts->optval [DI_OPT_OUT_JSON]]) {
             t = ",\n";
           }
           append (t, &out, &outcurrlen, &outlen);
@@ -570,7 +569,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         first = false;
       }
 
-      if (valid && diopts->json_output) {
+      if (valid && diopts->optval [DI_OPT_OUT_JSON]]) {
         for (i = 0; i < (int) DI_FORMATNAMES_SIZE; ++i) {
           if (*ptr == formatNames[i].fmtChar) {
             t = "      \"";
@@ -589,7 +588,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         case DI_FMT_MOUNT:
         case DI_FMT_MOUNT_FULL:
         {
-          appendFormatStr (diout->mountFormat, diskInfo->mountpt, &out, &outcurrlen, &outlen);
+          appendFormatStr (diout->mountFormat, diskInfo->strdata [DI_DISP_MOUNTPT], &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -760,7 +759,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         case DI_FMT_SPECIAL:
         case DI_FMT_SPECIAL_FULL:
         {
-          appendFormatStr (diout->specialFormat, diskInfo->devname,
+          appendFormatStr (diout->specialFormat, diskInfo->strdata [DI_DISP_DEVNAME],
               &out, &outcurrlen, &outlen);
           break;
         }
@@ -768,13 +767,13 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         case DI_FMT_TYPE:
         case DI_FMT_TYPE_FULL:
         {
-          appendFormatStr (diout->typeFormat, diskInfo->fstype, &out, &outcurrlen, &outlen);
+          appendFormatStr (diout->typeFormat, diskInfo->strdata [DI_DISP_FSTYPE], &out, &outcurrlen, &outlen);
           break;
         }
 
         case DI_FMT_MOUNT_OPTIONS:
         {
-          appendFormatStr (diout->optFormat, diskInfo->options, &out, &outcurrlen, &outlen);
+          appendFormatStr (diout->optFormat, diskInfo->strdata [DI_DISP_MOUNTOPT], &out, &outcurrlen, &outlen);
           break;
         }
 
@@ -785,7 +784,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 
         default:
         {
-          if (! diopts->json_output) {
+          if (! diopts->optval [DI_OPT_OUT_JSON]]) {
             ttext[0] = *ptr;
             ttext[1] = '\0';
             append (ttext, &out, &outcurrlen, &outlen);
@@ -795,16 +794,16 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
       }
 
       ++ptr;
-      if (! diopts->csv_output && ! diopts->json_output && *ptr && valid)
+      if (! diopts->optval [DI_OPT_OUT_CSV]] && ! diopts->optval [DI_OPT_OUT_JSON]] && *ptr && valid)
       {
         append (" ", &out, &outcurrlen, &outlen);
       }
     }
 
-    if (diopts->json_output) {
+    if (diopts->optval [DI_OPT_OUT_JSON]]) {
       append ("\n    }", &out, &outcurrlen, &outlen);
     }
-    if (! diopts->json_output && outcurrlen > 0) {
+    if (! diopts->optval [DI_OPT_OUT_JSON]] && outcurrlen > 0) {
       append ("\n", &out, &outcurrlen, &outlen);
     }
 
@@ -881,7 +880,7 @@ addTotals (const di_disk_info_t *diskInfo, di_disk_info_t *totals, int inpool)
   if (debug > 2)
   {
     printf ("tot:%s:%s:inp:%d\n",
-        diskInfo->devname, diskInfo->mountpt, inpool);
+        diskInfo->strdata [DI_DISP_DEVNAME], diskInfo->strdata [DI_DISP_MOUNTPT], inpool);
   }
 
   /*
@@ -933,7 +932,7 @@ addTotals (const di_disk_info_t *diskInfo, di_disk_info_t *totals, int inpool)
   if (inpool)
   {
     if (debug > 2) {printf ("  tot:inpool:\n"); }
-    if (strcmp (diskInfo->fstype, "apfs") == 0) {
+    if (strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "apfs") == 0) {
       dinum_t   tval;
 
       dinum_init (&tval);
@@ -1001,7 +1000,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
     outlen = 0;
     outcurrlen = 0;
     first = true;
-    if (diopts->printDebugHeader)
+    if (diopts->optval [DI_OPT_OUT_DBG_HEADER])
     {
         printf (DI_GT("di version %s    Default Format: %s\n"),
                 DI_VERSION, DI_DEFAULT_FORMAT);
@@ -1021,7 +1020,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
       for (i = 0; i < (int) DI_FORMATNAMES_SIZE; ++i) {
         if (*ptr == formatNames[i].fmtChar) {
           pstr = formatNames[i].displayName;
-          if (diopts->posix_compat && formatNames[i].posixName != NULL) {
+          if (diopts->optval [DI_OPT_POSIX_COMPAT] && formatNames[i].posixName != NULL) {
             pstr = formatNames[i].posixName;
           }
           if (pstr == NULL) {
@@ -1092,7 +1091,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
           case DI_FMT_BPERC_USED:
           case DI_FMT_BPERC_BSD:
           {
-              if (diopts->posix_compat)
+              if (diopts->optval [DI_OPT_POSIX_COMPAT])
               {
                   wlen = 9;
               }
@@ -1198,7 +1197,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
 
           default:
           {
-            if (! diopts->json_output) {
+            if (! diopts->optval [DI_OPT_OUT_JSON]]) {
               ttext[0] = *ptr;
               ttext[1] = '\0';
               append (ttext, &out, &outcurrlen, &outlen);
@@ -1226,9 +1225,9 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
         Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
             jstr, (int) tlen, (int) tlen);
 
-        if (diopts->csv_output) {
+        if (diopts->optval [DI_OPT_OUT_CSV]]) {
           if (! first) {
-            if (diopts->csv_tabs) {
+            if (diopts->optval [DI_OPT_OUT_CSV_TAB]) {
               append ("	", &out, &outcurrlen, &outlen); /* tab here */
             } else {
               append (",", &out, &outcurrlen, &outlen);
@@ -1237,7 +1236,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
           first = false;
         }
           /* title handling */
-        if (diopts->csv_output) {
+        if (diopts->optval [DI_OPT_OUT_CSV]]) {
           ttext[0] = *ptr;
           ttext[1] = '\0';
           append (ttext, &out, &outcurrlen, &outlen);
@@ -1246,15 +1245,15 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
         }
 
         if (fstr != (char *) NULL) {
-          if (diopts->csv_output || diopts->json_output) {
-            if (diopts->csv_tabs) {
+          if (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]]) {
+            if (diopts->optval [DI_OPT_OUT_CSV_TAB]) {
               strncpy (tformat, "%s", sizeof (tformat));
             } else {
               strncpy (tformat, "\"%s\"", sizeof (tformat));
             }
           }
           if (tlen != len) {
-            if (! diopts->csv_output) {
+            if (! diopts->optval [DI_OPT_OUT_CSV]]) {
               Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
                   jstr, (int) len, (int) len);
             }
@@ -1268,7 +1267,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
       }
 
       ++ptr;
-      if (! diopts->csv_output && *ptr && valid)
+      if (! diopts->optval [DI_OPT_OUT_CSV]] && *ptr && valid)
       {
         append (" ", &out, &outcurrlen, &outlen);
       }
@@ -1325,31 +1324,31 @@ getMaxFormatLengths (di_data_t *di_data)
         if (dinfo->doPrint)
         {
             if (di_data->haspooledfs &&
-                (strcmp (dinfo->fstype, "zfs") == 0 ||
-                 strcmp (dinfo->fstype, "advfs") == 0))
+                (strcmp (dinfo->strdata [DI_DISP_FSTYPE], "zfs") == 0 ||
+                 strcmp (dinfo->strdata [DI_DISP_FSTYPE], "advfs") == 0))
             {
               di_data->disppooledfs = true;
             }
 
-            len = (unsigned int) strlen (diptr->mountpt);
+            len = (unsigned int) strlen (diptr->strdata [DI_DISP_MOUNTPT]);
             if (len > diout->maxMountString)
             {
                 diout->maxMountString = len;
             }
 
-            len = (unsigned int) strlen (diptr->devname);
+            len = (unsigned int) strlen (diptr->strdata [DI_DISP_DEVNAME]);
             if (len > diout->maxSpecialString)
             {
                 diout->maxSpecialString = len;
             }
 
-            len = (unsigned int) strlen (dinfo->fstype);
+            len = (unsigned int) strlen (dinfo->strdata [DI_DISP_FSTYPE]);
             if (len > diout->maxTypeString)
             {
                 diout->maxTypeString = len;
             }
 
-            len = (unsigned int) strlen (dinfo->options);
+            len = (unsigned int) strlen (dinfo->strdata [DI_DISP_MOUNTOPT]);
             if (len > diout->maxOptString)
             {
                 diout->maxOptString = len;

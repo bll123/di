@@ -468,6 +468,7 @@ endif()
 check_function_exists (setlocale _lib_setlocale)
 check_function_exists (statfs _lib_statfs)
 check_function_exists (statvfs _lib_statvfs)
+check_function_exists (stpecpy _lib_stpecpy)
 check_function_exists (strcoll _lib_strcoll)
 check_function_exists (strdup _lib_strdup)
 check_function_exists (strstr _lib_strstr)
@@ -799,7 +800,6 @@ set_target_properties (${DI_LIBNAME} PROPERTIES
 
 add_executable (di
   di.c
-  display.c
 )
 addIntlLibrary (di)
 target_include_directories (di PRIVATE

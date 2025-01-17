@@ -139,6 +139,7 @@
 #cmakedefine01 _lib_snprintf
 #cmakedefine01 _lib_statfs
 #cmakedefine01 _lib_statvfs
+#cmakedefine01 _lib_stpecpy
 #cmakedefine01 _lib_strcoll
 #cmakedefine01 _lib_strdup
 #cmakedefine01 _lib_strstr

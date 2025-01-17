@@ -154,6 +154,7 @@ lib     setmntent -lsun, -lseq
 lib     snprintf -lsnprintf
 lib     statfs
 lib     statvfs
+lib     stpecpy
 lib     strcoll
 lib     strdup
 lib     strstr

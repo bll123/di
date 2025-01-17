@@ -29,8 +29,12 @@
  *      r - reverse sort
  *
  *  Format string values:
+ *    Strings
  *      m - mount point
- *      M - mount point, full length
+ *      d - device name (special)
+ *      t - disk partition type
+ *      O - mount options.
+ *    Disk Space
  *      b - total kbytes
  *      B - total kbytes available for use by the user.
  *             [ (tot - (free - avail)) ]
@@ -38,6 +42,7 @@
  *      c - calculated number of kbytes used [ (tot - avail) ]
  *      f - kbytes free
  *      v - kbytes available
+ *  Disk Space Percentages
  *      p - percentage not available for use.
  *          (space not available for use / total disk space)
  *             [ (tot - avail) / tot ]
@@ -48,16 +53,11 @@
  *          Note that values over 100% are possible.
  *          (actual space used / disk space available to user)
  *             [ (tot - free) / (tot - (free - avail)) ]
+ *  Inodes
  *      i - total i-nodes (files)
  *      U - used i-nodes
  *      F - free i-nodes
  *      P - percent i-nodes used     [ (tot - avail) / tot ]
- *      s - filesystem name (special)
- *      S - filesystem name (special), full length
- *      t - disk partition type
- *      T - disk partition type (full length)
- *      I - mount time
- *      O - mount options.
  *
  *  System V.4 `/usr/bin/df -v` Has format: msbuf1
  *  System V.4 `/usr/bin/df -k` Has format: sbcvpm
@@ -82,22 +82,30 @@
 #if _hdr_stdio
 # include <stdio.h>
 #endif
+#if _hdr_stddef
+# include <stddef.h>
+#endif
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
-#if _sys_types \
-    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
-# define DI_INC_SYS_TYPES_H
-# include <sys/types.h>
+#if _hdr_string
+# include <string.h>
+#endif
+#if _hdr_strings
+# include <strings.h>
 #endif
 #if _hdr_libintl
 # include <libintl.h>
 #endif
 
 #include "di.h"
-#include "display.h"
+#include "disystem.h"
+#include "strutils.h"
 #include "version.h"
 
+#define DI_INIT_DISP_SZ   10000
+
+static void di_display_data (void *);
 static void usage (void);
 
 int
@@ -143,8 +151,8 @@ usage (void)
   printf (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
   printf (DI_GT("       [-I include-fstyp-list] [file [...]]\n"));
   printf (DI_GT("   -a   : print all mounted devices\n"));
-  printf (DI_GT("   -d x : size to print blocks in (512 - POSIX, k - kbytes,\n"));
-  printf (DI_GT("          m - megabytes, g - gigabytes, t - terabytes, h - human readable).\n"));
+  printf (DI_GT("   -d x : size to print blocks in (k,m,g,t,etc.)\n"));
+  printf (DI_GT("          h - human readable.\n"));
   printf (DI_GT("   -f x : use format string <x>\n"));
   printf (DI_GT("   -I x : include only file system types in <x>\n"));
   printf (DI_GT("   -x x : exclude file system types in <x>\n"));
@@ -152,7 +160,9 @@ usage (void)
   printf (DI_GT("   -n   : don't print header\n"));
   printf (DI_GT("   -t   : print totals\n"));
   printf (DI_GT(" Format string values:\n"));
-  printf (DI_GT("    m - mount point                     M - mount point, full length\n"));
+  printf (DI_GT("    m - mount point\n"));
+  printf (DI_GT("    d - device name\n"));
+  printf (DI_GT("    t - file-system type\n"));
   printf (DI_GT("    b - total kbytes                    B - kbytes available for use\n"));
   printf (DI_GT("    u - used kbytes                     c - calculated kbytes in use\n"));
   printf (DI_GT("    f - kbytes free                     v - kbytes available\n"));
@@ -160,8 +170,153 @@ usage (void)
   printf (DI_GT("    2 - percentage of user-available space in use.\n"));
   printf (DI_GT("    i - total file slots (i-nodes)      U - used file slots\n"));
   printf (DI_GT("    F - free file slots                 P - percentage file slots used\n"));
-  printf (DI_GT("    s - filesystem name                 S - filesystem name, full length\n"));
-  printf (DI_GT("    t - disk partition type             T - partition type, full length\n"));
   printf (DI_GT("See manual page for more options.\n"));
 }
 
+static void
+di_display_data (void *di_data)
+{
+  di_pub_disk_info_t  *pub;
+  unsigned int        maxlen [DI_DISP_MAX];
+  int                 i;
+  int                 iterval;
+  char                *disp = NULL;
+  char                *end = NULL;
+  char                *dp = NULL;
+  char                temp [MAXPATHLEN + 1];
+
+  for (i = 0; i < DI_DISP_MAX; ++i) {
+    maxlen [i] = 0;
+  }
+
+  iterval = di_check_option (di_data, DI_OPT_DISP_ALL);
+  di_iterate_init (di_data, iterval);
+  while ((pub = di_iterate (di_data)) != NULL) {
+    Size_t    len;
+
+    for (i = 0; i < DI_DISP_MAX; ++i) {
+      if (pub->strdata [i] == NULL) {
+        continue;
+      }
+
+      len = strlen (pub->strdata [i]);
+      if (len > maxlen [i]) {
+        maxlen [i] = len;
+      }
+    }
+  }
+
+  /* some large number to start with */
+  disp = malloc (DI_INIT_DISP_SZ);
+  *disp = '\0';
+  end = disp + DI_INIT_DISP_SZ;
+  dp = disp;
+
+  di_iterate_init (di_data, iterval);
+  while ((pub = di_iterate (di_data)) != NULL) {
+    int   fmt;
+
+    di_format_iter_init (di_data);
+fprintf (stdout, "== %-*s\n", maxlen [DI_DISP_MOUNTPT], pub->strdata [DI_DISP_MOUNTPT]);
+    while ((fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
+      *temp = '\0';
+
+      switch (fmt) {
+        /* string values */
+        case DI_FMT_MOUNT:
+        case DI_FMT_MOUNT_OLD: {
+          Snprintf1 (temp, sizeof (temp), "%-*s",
+              maxlen [DI_DISP_MOUNTPT], pub->strdata [DI_DISP_MOUNTPT]);
+          break;
+        }
+        case DI_FMT_DEVNAME:
+        case DI_FMT_DEVNAME_OLD:
+        case DI_FMT_DEVNAME_OLD_B: {
+          Snprintf1 (temp, sizeof (temp), "%-*s",
+              maxlen [DI_DISP_DEVNAME], pub->strdata [DI_DISP_DEVNAME]);
+          break;
+        }
+        case DI_FMT_FSTYPE:
+        case DI_FMT_FSTYPE_OLD: {
+          Snprintf1 (temp, sizeof (temp), "%-*s",
+              maxlen [DI_DISP_FSTYPE], pub->strdata [DI_DISP_FSTYPE]);
+          break;
+        }
+        case DI_FMT_MOUNT_OPTIONS: {
+          Snprintf1 (temp, sizeof (temp), "%-*s",
+              maxlen [DI_DISP_MOUNTOPT], pub->strdata [DI_DISP_MOUNTOPT]);
+          break;
+        }
+
+        /* disk space values */
+        case DI_FMT_BTOT: {
+          break;
+        }
+        case DI_FMT_BTOT_AVAIL: {
+          break;
+        }
+        case DI_FMT_BUSED: {
+          break;
+        }
+        case DI_FMT_BCUSED: {
+          break;
+        }
+        case DI_FMT_BFREE: {
+          break;
+        }
+        case DI_FMT_BAVAIL: {
+          break;
+        }
+
+        /* disk space percentages */
+        case DI_FMT_BPERC_NAVAIL: {
+          break;
+        }
+        case DI_FMT_BPERC_USED: {
+          break;
+        }
+        case DI_FMT_BPERC_BSD: {
+          break;
+        }
+        case DI_FMT_BPERC_AVAIL: {
+          break;
+        }
+        case DI_FMT_BPERC_FREE: {
+          break;
+        }
+
+        /* inode information */
+        case DI_FMT_ITOT: {
+          break;
+        }
+        case DI_FMT_IUSED: {
+          break;
+        }
+        case DI_FMT_IFREE: {
+          break;
+        }
+        case DI_FMT_IPERC: {
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+
+      dp = stpecpy (dp, end, temp);
+      dp = stpecpy (dp, end, " ");
+    }
+    dp = stpecpy (dp, end, "\n");
+
+#if 0
+    fprintf (stdout, "%-*s %-*s %-*s dp:%d pf:%d l:%d ro:%d lo:%d\n",
+        maxlen [DI_DISP_MOUNTPT], pub->strdata [DI_DISP_MOUNTPT],
+        maxlen [DI_DISP_DEVNAME], pub->strdata [DI_DISP_DEVNAME],
+        maxlen [DI_DISP_FSTYPE], pub->strdata [DI_DISP_FSTYPE],
+        pub->doPrint, pub->printFlag,
+        pub->isLocal, pub->isReadOnly, pub->isLoopback);
+#endif
+  }
+  fprintf (stdout, "%s", disp);
+  free (disp);
+}

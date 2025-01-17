@@ -10,8 +10,8 @@
 di \- disk information
 .SH Synopsis
 .\" di [-AacghHjklLmnPqRtZ] [-B block-size] [-d display-size] [-f format]
-.\" [-I include-fstyp-list] [-s sort-type] [-w block-width]
-.\" [-W inode-width] [-x exclude-fstyp-list] [-X debug-level]
+.\" [-I include-fstyp-list] [-s sort-type]
+.\" [-x exclude-fstyp-list] [-X debug-level]
 .\" [-z zone-name] [file [...]]
 .B di
 [\fB\-AacghHjklLmnPqRtZ\fP]
@@ -20,19 +20,10 @@ di \- disk information
 [\fB\-f\fP \fIformat\fP]
 [\fB\-I\fP \fIinclude\-fstyp\-list\fP]
 [\fB\-s\fP \fIsort\-type\fP]
-[\fB\-w\fP \fIblock\-width\fP]
-[\fB\-W\fP \fIinode\-width\fP]
 [\fB\-x\fP \fIexclude\-fstyp\-list\fP]
 [\fB\-X\fP \fIdebug-level\fP]
 [\fB\-z\fP \fIzone\-name\fP]
 [\fIfile\fP [...]]
-.PP
-.B mi
-.SH Description
-\fIdi\fP Displays usage information on mounted filesystems.  Block values are
-reported in a human readable format.  If the user or group has a
-disk quota, the values reported are adjusted according the quotas that
-apply to the user.
 .PP
 If \fIfile\fP is specified, the usage information for the partition on which
 \fIfile\fP is located is printed.
@@ -53,15 +44,11 @@ filesystems that have a device name starting with
 Filesystems that the user does not have permissions to access will
 not be displayed at all.
 .PP
-\fImi\fP Displays the mounted filesystem information.
-.PP
 Several options may be specified to
-control the output of
-\fIdi\fP and \fImi\fP:
+control the output of \fIdi\fP:
 .TP
 .B \-A
-Print all fields (used for debugging).  Mount points and
-device names are printed at full width.
+Print all fields (used for debugging).
 .TP
 .B \-a
 (compatibility: \fB\-\-all\fP)
@@ -100,19 +87,13 @@ display size is calculated using those units.
 may be one of: 512\ \-\ POSIX, k\ \-\ kilobytes,
 m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, p\ \-\ petabytes,
 e\ \-\ exabytes, z\ \-\ zettabytes, y\ \-\ yottabytes,
-h\ \-\ Scaled alternative 1, H\ \-\ Scaled alternative 2,
-or a specific value to use as the block size.
+h\ \-\ human readable, H\ \-\ human readable alternative.
 .IP
-Block display sizes greater than 1024 bytes are displayed with a precision
-of one decimal place after the radix.
-.IP
-The Scaled alternatives scale the sizes displayed and
-appends a suffix (e.g. 48.0k, 3.4M).
-.IP
-With scaled alternative 1, sizes within a
+The human readable format scales the sizes displayed and
+appends a suffix (e.g. 48.0k, 3.4M). Sizes within a
 line may scale to different units.
 .IP
-Scaled alternative 2 scales all the sizes in each individual line
+The human readable alternative scales all the sizes in each individual line
 to the same unit size (the largest needed).
 .TP
 .B \-f
@@ -246,22 +227,18 @@ swap-based (memfs, mfs, tmpfs) filesystems and user (fuse*)
 filesystems.  Excluding the \[aq]fuse\[aq] filesystem will exclude all
 fuse* filesystems.
 .TP
-.B \-w
-.I block\-width
-.br
-Set the print width for block values.  The default is eight.
-.TP
 .B \-v
 Ignored.
 .TP
 .B \-\-version
 .br
-Display di's version and default format string.
+Display the di version.
+.TP
+.B \-w
+Ignored.  The following argument is ignored.
 .TP
 .B \-W
-.I inode\-width
-.br
-Set the print width for inode values.  Default is seven.
+Ignored.  The following argument is ignored.
 .TP
 .B \-x
 .I exclude\-fstype\-list
@@ -299,28 +276,23 @@ following columns:
 .B m
 Print the name of the mount point.
 .TP
-.B M
-Print the name of the mount point, at full length.  The mount point
-is formatted to the maximum width necessary for the longest mount
-point name.
+.B M (deprecated)
+Print the name of the mount point.
 .TP
-.B s
-Print the file system name (device name or remote mount point).
+.B d
+Print the device name.
 .TP
-.B S
-Print the file system name (device name or remote mount point),
-at full length.
-The file system name
-is formatted to the maximum width necessary for the longest file system
-name.
+.B s (deprecated)
+Print the device name.
+.TP
+.B S (deprecated)
+Print the device name.
 .TP
 .B t
 Print the file system type.
 .TP
-.B T
-Print the file system type at full length.  The file system type
-is formatted to the maximum width necessary for the longest file system
-type.
+.B T (deprecated)
+Print the file system type.
 .TP
 .B Total Available
 .TP
@@ -395,17 +367,11 @@ Print the percentage of file slots in use.
 .TP
 .B Mount Information
 .TP
-.B I
-Print the time the filesystem was mounted.  This column is
-not supported on all systems.
-.TP
 .B O
 Print the filesystem mount options.
 .RE
 .PP
 The default format string for \fIdi\fP is \fBsmbuvpT\fP.
-.PP
-The default format string for \fImi\fP is \fBMSTIO\fP.
 .PP
 The format string may also contain any other character not listed
 above.  The character will be printed as is.  e.g. di \-f \[aq]mbuvp|iUFP\[aq]
@@ -431,17 +397,19 @@ equivalent format strings for System V release 4 are:
 .RE
 GNU df:
 .RS
-\fIdf\fP                 di \-dk \-f SbuvpM \-w 10
+\fIdf\fP                 di \-dk \-f SbuvpM
 .br
-\fIdf \-T\fP              di \-dk \-f STbuvpM \-w 10
+\fIdf \-T\fP              di \-dk \-f STbuvpM
+.br
+\fIdf \-h \-T\fP              di \-dh \-f STbuvpM
 .RE
 AIX df:
 .RS
-\fIdf\fP                 di \-d 512 \-f Sbf1UPM \-w 10
+\fIdf\fP                 di \-d 512 \-f Sbf1UPM
 .br
 \fIdf \-I\fP              di -d 512 \-f Sbuf1M
 .br
-\fIdf \-I \-M\fP           di \-d 512 \-f SMbuf1 \-w 10
+\fIdf \-I \-M\fP           di \-d 512 \-f SMbuf1
 .RE
 HP-UX bdf:
 .RS

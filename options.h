@@ -20,7 +20,7 @@ extern "C" {
 #define DI_DISP_HR        -20.0
 #define DI_DISP_HR_2      -21.0
 
-#define DI_SORT_MAX     10
+#define DI_SORT_TYPE_MAX     10
 
 typedef struct
 {
@@ -35,32 +35,25 @@ typedef struct di_opt {
   di_strarr_t     include_list;
   char            zoneDisplay [MAXPATHLEN + 1];
   /* should always be <= 1024 */
-  /* usually 1000 or 1024 */
+  /* should be 1, 512, 1000 or 1024 */
   int             dispBlockSize;
-//  unsigned long         dispScaleValue;
   unsigned int    baseDispSize;
   unsigned int    baseDispIdx;
-  char            sortType [DI_SORT_MAX + 1];
-  unsigned int    posix_compat;
-  unsigned int    quota_check;
-  unsigned int    csv_output;
-  unsigned int    csv_tabs;
-  unsigned int    excludeLoopback;
-  unsigned int    json_output;
-  unsigned int    printTotals;
-  unsigned int    printDebugHeader;
-  unsigned int    printHeader;
-  unsigned int    displayAll;
-  unsigned int    localOnly;
-  unsigned int    dontResolveSymlink;
+  char            sortType [DI_SORT_TYPE_MAX + 1];
+  int             optval [DI_OPT_MAX];
   unsigned int    exitFlag;
+  int             formatLen;
   int             errorCount;
   int             optidx;
   int             argc;
+  int             optiteridx;
 } di_opt_t;
 
 extern di_opt_t * di_init_options (void);
-extern int di_get_options (int , char * argv [], di_opt_t *);
+extern void di_opt_cleanup (di_opt_t *);
+extern int di_get_options (int, char * argv [], di_opt_t *);
+extern void di_opt_format_iter_init (di_opt_t *);
+extern int di_opt_format_iterate (di_opt_t *);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }

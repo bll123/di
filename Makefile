@@ -293,7 +293,7 @@ os2-gcc:
 #   dioptions.dat, tests.done, test_di, $(MKC_ENV), $(MKC_ENV_SHR)
 .PHONY: clean
 clean:
-	@-$(RM) -f w ww \
+	@-$(RM) -f w ww asan.* \
 		di libdi.* dimathtest getoptn_test \
 		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
 		*.o *.obj $(MKC_FILES)/mkconfig.log \
@@ -372,7 +372,7 @@ LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		diquota$(OBJ_EXT) dizone$(OBJ_EXT) getoptn$(OBJ_EXT) \
 		options$(OBJ_EXT) strutils$(OBJ_EXT)
 
-MAINOBJECTS = di$(OBJ_EXT) display$(OBJ_EXT)
+MAINOBJECTS = di$(OBJ_EXT)
 
 libdi$(SHLIB_EXT):	$(MKC_REQLIB) $(LIBOBJECTS)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
@@ -438,9 +438,6 @@ digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimath.h strutils.h \
 diquota$(OBJ_EXT):	diquota.c config.h di.h dimath.h
 
 dizone$(OBJ_EXT):	dizone.c config.h di.h dimath.h
-
-display$(OBJ_EXT):	display.c config.h di.h dimath.h strutils.h \
-				display.h options.h version.h
 
 getoptn$(OBJ_EXT):	getoptn.c config.h strutils.h getoptn.h
 
