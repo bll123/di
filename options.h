@@ -54,6 +54,7 @@ extern void di_opt_cleanup (di_opt_t *);
 extern int di_get_options (int, char * argv [], di_opt_t *);
 extern void di_opt_format_iter_init (di_opt_t *);
 extern int di_opt_format_iterate (di_opt_t *);
+int di_opt_check_option (di_opt_t *, int);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }

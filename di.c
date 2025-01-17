@@ -97,16 +97,19 @@
 #if _hdr_libintl
 # include <libintl.h>
 #endif
+#if _hdr_wchar
+# include <wchar.h>
+#endif
 
 #include "di.h"
 #include "disystem.h"
 #include "strutils.h"
 #include "version.h"
 
-#define DI_INIT_DISP_SZ   10000
-
 static void di_display_data (void *);
+static void di_display_header (void *di_data, char **strdata, unsigned int *maxlen);
 static void usage (void);
+static Size_t istrlen (const char *str);
 
 int
 main (int argc, char * argv [])
@@ -177,74 +180,109 @@ static void
 di_display_data (void *di_data)
 {
   di_pub_disk_info_t  *pub;
-  unsigned int        maxlen [DI_DISP_MAX];
+  unsigned int        *maxlen;
   int                 i;
   int                 iterval;
-  char                *disp = NULL;
-  char                *end = NULL;
-  char                *dp = NULL;
-  char                temp [MAXPATHLEN + 1];
+  int                 fmtstrlen;
+  int                 count;
+  int                 dispcount;
+  char                **strdata;
+  int                 csvout;
+  int                 csvtabs;
+  int                 jsonout;
+  char                temp [MAXPATHLEN * 2];
 
-  for (i = 0; i < DI_DISP_MAX; ++i) {
+  csvout = di_check_option (di_data, DI_OPT_OUT_CSV);
+  csvtabs = di_check_option (di_data, DI_OPT_OUT_CSV_TAB);
+  jsonout = di_check_option (di_data, DI_OPT_OUT_JSON);
+
+  fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
+  maxlen = malloc (sizeof (unsigned int) * fmtstrlen);
+  for (i = 0; i < fmtstrlen; ++i) {
     maxlen [i] = 0;
   }
 
   iterval = di_check_option (di_data, DI_OPT_DISP_ALL);
-  di_iterate_init (di_data, iterval);
-  while ((pub = di_iterate (di_data)) != NULL) {
-    Size_t    len;
-
-    for (i = 0; i < DI_DISP_MAX; ++i) {
-      if (pub->strdata [i] == NULL) {
-        continue;
-      }
-
-      len = strlen (pub->strdata [i]);
-      if (len > maxlen [i]) {
-        maxlen [i] = len;
-      }
-    }
+  count = di_iterate_init (di_data, iterval);
+  if (di_check_option (di_data, DI_OPT_OUT_HEADER)) {
+    ++count;
   }
 
-  /* some large number to start with */
-  disp = malloc (DI_INIT_DISP_SZ);
-  *disp = '\0';
-  end = disp + DI_INIT_DISP_SZ;
-  dp = disp;
+  strdata = malloc (sizeof (char *) * count * fmtstrlen);
+
+  dispcount = 0;
+
+  if (di_check_option (di_data, DI_OPT_OUT_HEADER)) {
+    di_display_header (di_data, strdata, maxlen);
+    dispcount = 1;
+  }
+
+  if (jsonout) {
+    printf ("{\n");
+    printf ("  \"partitions\" : [\n");
+  }
 
   di_iterate_init (di_data, iterval);
   while ((pub = di_iterate (di_data)) != NULL) {
-    int   fmt;
+    int         fmt;
+    int         fmtcount;
+    int         stridx;
+    const char  *comma;
 
     di_format_iter_init (di_data);
-fprintf (stdout, "== %-*s\n", maxlen [DI_DISP_MOUNTPT], pub->strdata [DI_DISP_MOUNTPT]);
+    fmtcount = 0;
+    comma = ",";
     while ((fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
-      *temp = '\0';
+      stridx = dispcount * fmtstrlen + fmtcount;
 
+      strdata [stridx] = NULL;
+      if (fmtcount == fmtstrlen - 1) {
+        comma = "";
+      }
       switch (fmt) {
         /* string values */
         case DI_FMT_MOUNT:
         case DI_FMT_MOUNT_OLD: {
-          Snprintf1 (temp, sizeof (temp), "%-*s",
-              maxlen [DI_DISP_MOUNTPT], pub->strdata [DI_DISP_MOUNTPT]);
+          if (jsonout) {
+            Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
+                "mount", pub->strdata [DI_DISP_MOUNTPT], comma);
+            strdata [stridx] = strdup (temp);
+          } else {
+            strdata [stridx] = strdup (pub->strdata [DI_DISP_MOUNTPT]);
+          }
           break;
         }
         case DI_FMT_DEVNAME:
         case DI_FMT_DEVNAME_OLD:
         case DI_FMT_DEVNAME_OLD_B: {
-          Snprintf1 (temp, sizeof (temp), "%-*s",
-              maxlen [DI_DISP_DEVNAME], pub->strdata [DI_DISP_DEVNAME]);
+          if (jsonout) {
+            Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
+                "filesystem", pub->strdata [DI_DISP_DEVNAME], comma);
+            strdata [stridx] = strdup (temp);
+          } else {
+            strdata [stridx] = strdup (pub->strdata [DI_DISP_DEVNAME]);
+          }
           break;
         }
         case DI_FMT_FSTYPE:
         case DI_FMT_FSTYPE_OLD: {
-          Snprintf1 (temp, sizeof (temp), "%-*s",
-              maxlen [DI_DISP_FSTYPE], pub->strdata [DI_DISP_FSTYPE]);
+          if (jsonout) {
+            Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
+                "fstype", pub->strdata [DI_DISP_FSTYPE], comma);
+            strdata [stridx] = strdup (temp);
+          } else {
+            strdata [stridx] = strdup (pub->strdata [DI_DISP_FSTYPE]);
+          }
           break;
         }
         case DI_FMT_MOUNT_OPTIONS: {
-          Snprintf1 (temp, sizeof (temp), "%-*s",
-              maxlen [DI_DISP_MOUNTOPT], pub->strdata [DI_DISP_MOUNTOPT]);
+          if (jsonout) {
+            Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
+                "options", pub->strdata [DI_DISP_FSTYPE], comma);
+            strdata [stridx] = strdup (temp);
+          } else {
+            strdata [stridx] = strdup (pub->strdata [DI_DISP_MOUNTOPT]);
+          }
           break;
         }
 
@@ -299,24 +337,261 @@ fprintf (stdout, "== %-*s\n", maxlen [DI_DISP_MOUNTPT], pub->strdata [DI_DISP_MO
           break;
         }
         default: {
+          fprintf (stderr, "Unknown format: %c\n", fmt);
+          exit (DI_EXIT_FAIL);
           break;
         }
       }
 
-      dp = stpecpy (dp, end, temp);
-      dp = stpecpy (dp, end, " ");
+      ++fmtcount;
     }
-    dp = stpecpy (dp, end, "\n");
-
-#if 0
-    fprintf (stdout, "%-*s %-*s %-*s dp:%d pf:%d l:%d ro:%d lo:%d\n",
-        maxlen [DI_DISP_MOUNTPT], pub->strdata [DI_DISP_MOUNTPT],
-        maxlen [DI_DISP_DEVNAME], pub->strdata [DI_DISP_DEVNAME],
-        maxlen [DI_DISP_FSTYPE], pub->strdata [DI_DISP_FSTYPE],
-        pub->doPrint, pub->printFlag,
-        pub->isLocal, pub->isReadOnly, pub->isLoopback);
-#endif
+    ++dispcount;
   }
-  fprintf (stdout, "%s", disp);
-  free (disp);
+
+  if (! csvout && ! jsonout) {
+    for (i = 0; i < count; ++i) {
+      int     j;
+
+      for (j = 0; j < fmtstrlen; ++j) {
+        int     stridx;
+        Size_t  len;
+
+        stridx = i * fmtstrlen + j;
+        if (strdata [stridx] != NULL) {
+          len = istrlen (strdata [stridx]);
+          if (len > maxlen [j]) {
+            maxlen [j] = len;
+          }
+        }
+      }
+    }
+  }
+
+  for (i = 0; i < count; ++i) {
+    int     j;
+
+    if (jsonout) {
+      printf ("    {\n");
+    }
+    for (j = 0; j < fmtstrlen; ++j) {
+      int     stridx;
+
+      stridx = i * fmtstrlen + j;
+      if (strdata [stridx] != NULL) {
+        if (csvout) {
+          if (csvtabs) {
+            printf ("%s", strdata [stridx]);
+          } else {
+            printf ("\"%s\"", strdata [stridx]);
+          }
+        } else if (jsonout) {
+          printf ("      %s", strdata [stridx]);
+        } else {
+          printf ("%-*s", maxlen [j], strdata [stridx]);
+        }
+
+        if (jsonout) {
+          printf ("\n");
+        } else {
+          if (j != fmtstrlen - 1) {
+            if (csvout) {
+              if (csvtabs) {
+                printf ("\t");
+              } else {
+                printf (",");
+              }
+            } else {
+              printf (" ");
+            }
+          }
+        }
+      }
+    }
+    if (jsonout) {
+      printf ("    }");
+      if (i != count - 1) {
+        printf (",");
+      }
+    }
+    printf ("\n");
+  }
+
+  if (jsonout) {
+    printf ("  ]\n");
+    printf ("}\n");
+  }
+
+
+  for (i = 0; i < count; ++i) {
+    int     j;
+
+    for (j = 0; j < fmtstrlen; ++j) {
+      int     stridx;
+
+      stridx = i * fmtstrlen + j;
+      if (strdata [stridx] != NULL) {
+        free (strdata [stridx]);
+      }
+    }
+  }
+
+  free (maxlen);
+  free (strdata);
 }
+
+static void
+di_display_header (void *di_data, char **strdata, unsigned int *maxlen)
+{
+  int         fmt;
+  int         fmtcount;
+  int         fmtstrlen;
+  int         csvout;
+
+  csvout = di_check_option (di_data, DI_OPT_OUT_CSV);
+  fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
+  fmtcount = 0;
+  di_format_iter_init (di_data);
+  while ((fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
+    const char  *temp;
+    char        tcsv [2];
+    int         stridx;
+
+    temp = "";
+    stridx = fmtcount;
+    if (csvout) {
+      tcsv [0] = fmt;
+      tcsv [1] = '\0';
+      temp = tcsv;
+    }
+
+    if (! csvout) {
+      switch (fmt) {
+        /* string values */
+        case DI_FMT_MOUNT:
+        case DI_FMT_MOUNT_OLD: {
+          temp = DI_GT ("Mount");
+          break;
+        }
+        case DI_FMT_DEVNAME:
+        case DI_FMT_DEVNAME_OLD:
+        case DI_FMT_DEVNAME_OLD_B: {
+          temp = DI_GT ("Device");
+          break;
+        }
+        case DI_FMT_FSTYPE:
+        case DI_FMT_FSTYPE_OLD: {
+          temp = DI_GT ("Type");
+          break;
+        }
+        case DI_FMT_MOUNT_OPTIONS: {
+          temp = DI_GT ("Options");
+          break;
+        }
+
+        /* disk space values */
+        case DI_FMT_BTOT: {
+          temp = DI_GT ("Size");
+          break;
+        }
+        case DI_FMT_BTOT_AVAIL: {
+          temp = DI_GT ("Size");
+          break;
+        }
+        case DI_FMT_BUSED: {
+          temp = DI_GT ("Used");
+          break;
+        }
+        case DI_FMT_BCUSED: {
+          temp = DI_GT ("Used");
+          break;
+        }
+        case DI_FMT_BFREE: {
+          temp = DI_GT ("Free");
+          break;
+        }
+        case DI_FMT_BAVAIL: {
+          temp = DI_GT ("Avail");
+          break;
+        }
+
+        /* disk space percentages */
+        case DI_FMT_BPERC_NAVAIL: {
+          temp = DI_GT ("%Used");
+          break;
+        }
+        case DI_FMT_BPERC_USED: {
+          temp = DI_GT ("%Used");
+          break;
+        }
+        case DI_FMT_BPERC_BSD: {
+          temp = DI_GT ("%Used");
+          break;
+        }
+        case DI_FMT_BPERC_AVAIL: {
+          temp = DI_GT ("%Free");
+          break;
+        }
+        case DI_FMT_BPERC_FREE: {
+          temp = DI_GT ("%Free");
+          break;
+        }
+
+        /* inode information */
+        case DI_FMT_ITOT: {
+          temp = DI_GT ("Inodes");
+          break;
+        }
+        case DI_FMT_IUSED: {
+          temp = DI_GT ("IUsed");
+          break;
+        }
+        case DI_FMT_IFREE: {
+          temp = DI_GT ("IFree");
+          break;
+        }
+        case DI_FMT_IPERC: {
+          temp = DI_GT ("%IUsed");
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+
+    strdata [stridx] = strdup (temp);
+    ++fmtcount;
+  }
+
+  return;
+}
+
+static Size_t
+istrlen (const char *str)
+{
+  Size_t            len;
+#if _lib_mbrlen
+  Size_t            mlen;
+  Size_t            slen;
+  mbstate_t         ps;
+  const char        *tstr;
+
+  len = 0;
+  memset (&ps, 0, sizeof (mbstate_t));
+  slen = strlen (str);
+  tstr = str;
+  while (slen > 0) {
+    mlen = mbrlen (tstr, slen, &ps);
+    if ((int) mlen <= 0) {
+      return strlen (str);
+    }
+    ++len;
+    tstr += mlen;
+    slen -= mlen;
+  }
+#else
+  len = strlen (str);
+#endif
+  return len;
+}
+

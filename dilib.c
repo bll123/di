@@ -355,12 +355,8 @@ di_check_option (void *tdi_data, int optidx)
     return 0;
   }
 
-  if (optidx < 0 || optidx >= DI_OPT_MAX) {
-    return 0;
-  }
-
   diopts = (di_opt_t *) di_data->options;
-  return diopts->optval [optidx];
+  return di_opt_check_option (diopts, optidx);
 }
 
 extern void

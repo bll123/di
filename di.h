@@ -76,6 +76,7 @@ extern "C" {
 #define DI_OPT_LOCAL_ONLY       10
 #define DI_OPT_NO_SYMLINK       11
 #define DI_OPT_MAX              12
+#define DI_OPT_FMT_STR_LEN      13
 
 #define DI_FMT_ITER_STOP        -1
 
@@ -107,6 +108,7 @@ extern "C" {
 #define DI_FMT_IFREE           'F'
 #define DI_FMT_IPERC           'P'
 
+#define DI_FMT_MAX            19
 
 typedef struct
 {

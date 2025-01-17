@@ -302,6 +302,24 @@ di_opt_format_iterate (di_opt_t *diopts)
   return val;
 }
 
+int
+di_opt_check_option (di_opt_t *diopts, int optidx)
+{
+  if (diopts == NULL) {
+    return 0;
+  }
+
+  if (optidx == DI_OPT_FMT_STR_LEN) {
+    return diopts->formatLen;
+  }
+
+  if (optidx < 0 || optidx >= DI_OPT_MAX) {
+    return 0;
+  }
+
+  return diopts->optval [optidx];
+}
+
 static int
 processArgs (int argc, char * argv [], di_opt_t *diopts,
     char *dbsstr, Size_t dbsstr_sz)
