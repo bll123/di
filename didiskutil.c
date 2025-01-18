@@ -61,11 +61,13 @@
 */
 
 void
-di_initialize_disk_info (di_disk_info_t *diptr)
+di_initialize_disk_info (di_disk_info_t *diptr, int idx)
 {
   int     i;
 
   memset ( (char *) diptr, '\0', sizeof (di_disk_info_t));
+  diptr->sortIndex [DI_SORT_MAIN] = idx;
+  diptr->sortIndex [DI_SORT_TOTAL] = idx;
   for (i = 0; i < DI_VALUE_MAX; ++i) {
     dinum_init (&diptr->values [i]);
   }
@@ -74,7 +76,7 @@ di_initialize_disk_info (di_disk_info_t *diptr)
   diptr->isReadOnly = false;
   diptr->isLoopback = false;
   diptr->strdata [DI_DISP_MOUNTPT] = malloc (DI_MOUNTPT_LEN + 1);
-  diptr->strdata [DI_DISP_DEVNAME] = malloc (DI_DEVNAME_LEN + 1);
+  diptr->strdata [DI_DISP_FILESYSTEM] = malloc (DI_FILESYSTEM_LEN + 1);
   diptr->strdata [DI_DISP_MOUNTOPT] = malloc (DI_MOUNT_OPT_LEN + 1);
   diptr->strdata [DI_DISP_FSTYPE] = malloc (DI_FSTYPE_LEN + 1);
 }
@@ -94,8 +96,8 @@ di_free_disk_info (di_disk_info_t *diptr)
   if (diptr->strdata [DI_DISP_MOUNTPT] != NULL) {
     free (diptr->strdata [DI_DISP_MOUNTPT]);
   }
-  if (diptr->strdata [DI_DISP_DEVNAME] != NULL) {
-    free (diptr->strdata [DI_DISP_DEVNAME]);
+  if (diptr->strdata [DI_DISP_FILESYSTEM] != NULL) {
+    free (diptr->strdata [DI_DISP_FILESYSTEM]);
   }
   if (diptr->strdata [DI_DISP_FSTYPE] != NULL) {
     free (diptr->strdata [DI_DISP_FSTYPE]);
@@ -465,7 +467,7 @@ di_isPooledFs (di_disk_info_t *diskInfo)
       strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "advfs") == 0 ||
       strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "apfs") == 0 ||
       (strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "null") == 0 &&
-       strstr (diskInfo->strdata [DI_DISP_DEVNAME], "/@@-") != (char *) NULL)) {
+       strstr (diskInfo->strdata [DI_DISP_FILESYSTEM], "/@@-") != (char *) NULL)) {
     return true;
   }
   return false;
@@ -476,7 +478,7 @@ di_isLoopbackFs (di_disk_info_t *diskInfo)
 {
   if ( (strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "lofs") == 0 && diskInfo->sp_rdev != 0) ||
       (strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "nullfs") == 0 &&
-       strstr (diskInfo->strdata [DI_DISP_DEVNAME], "/@@-") == (char *) NULL) ||
+       strstr (diskInfo->strdata [DI_DISP_FILESYSTEM], "/@@-") == (char *) NULL) ||
       strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "none") == 0) {
     return true;
   }

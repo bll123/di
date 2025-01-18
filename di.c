@@ -252,15 +252,15 @@ di_display_data (void *di_data)
           }
           break;
         }
-        case DI_FMT_DEVNAME:
-        case DI_FMT_DEVNAME_OLD:
-        case DI_FMT_DEVNAME_OLD_B: {
+        case DI_FMT_FILESYSTEM:
+        case DI_FMT_FILESYSTEM_OLD:
+        case DI_FMT_FILESYSTEM_OLD_B: {
           if (jsonout) {
             Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
-                "filesystem", pub->strdata [DI_DISP_DEVNAME], comma);
+                "filesystem", pub->strdata [DI_DISP_FILESYSTEM], comma);
             strdata [stridx] = strdup (temp);
           } else {
-            strdata [stridx] = strdup (pub->strdata [DI_DISP_DEVNAME]);
+            strdata [stridx] = strdup (pub->strdata [DI_DISP_FILESYSTEM]);
           }
           break;
         }
@@ -472,9 +472,9 @@ di_display_header (void *di_data, char **strdata, unsigned int *maxlen)
           temp = DI_GT ("Mount");
           break;
         }
-        case DI_FMT_DEVNAME:
-        case DI_FMT_DEVNAME_OLD:
-        case DI_FMT_DEVNAME_OLD_B: {
+        case DI_FMT_FILESYSTEM:
+        case DI_FMT_FILESYSTEM_OLD:
+        case DI_FMT_FILESYSTEM_OLD_B: {
           temp = DI_GT ("Device");
           break;
         }

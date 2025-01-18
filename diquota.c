@@ -375,7 +375,7 @@ quotactl_get (di_quota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
   /* but needs mount-pt rather than dev-name */
   rc = quotactl (cmd, diqinfo->mountpt, (int) id, (caddr_t) & (qdata->qinfo));
 #  else
-  rc = quotactl (cmd, (_c_arg_2_quotactl) diqinfo->devname, (int) id, (caddr_t) & (qdata->qinfo));
+  rc = quotactl (cmd, (_c_arg_2_quotactl) diqinfo->filesystem, (int) id, (caddr_t) & (qdata->qinfo));
 #  endif
 # endif
 # if _has_std_quotas && _sys_fs_ufs_quota && ! _lib_vquotactl /* Solaris */
@@ -585,7 +585,7 @@ diquota_nfs (di_quota_t *diqinfo)
     CLIENT                  *rqclnt;
     enum clnt_stat          clnt_stat;
     struct timeval          timeout;
-    char                    host [DI_DEVNAME_LEN + 1];
+    char                    host [DI_FILESYSTEM_LEN + 1];
     char                    *ptr;
     char                    *path;
     struct getquota_args    args;
@@ -602,7 +602,7 @@ diquota_nfs (di_quota_t *diqinfo)
     timeout.tv_sec = 2;
     timeout.tv_usec = 0;
 
-    strncpy (host, diqinfo->devname, DI_DEVNAME_LEN);
+    strncpy (host, diqinfo->filesystem, DI_FILESYSTEM_LEN);
     path = host;
     ptr = strchr (host, ':');
     if (ptr != (char *) NULL) {

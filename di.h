@@ -38,7 +38,7 @@ extern "C" {
 
 /* string identifiers */
 #define DI_DISP_MOUNTPT     0
-#define DI_DISP_DEVNAME     1
+#define DI_DISP_FILESYSTEM     1
 #define DI_DISP_FSTYPE      2
 #define DI_DISP_MOUNTOPT    3
 #define DI_DISP_MAX         4
@@ -85,13 +85,13 @@ extern "C" {
 
 /* string formats */
 #define DI_FMT_MOUNT           'm'
-#define DI_FMT_DEVNAME         'd'
+#define DI_FMT_FILESYSTEM         'd'
 #define DI_FMT_FSTYPE          't'
 #define DI_FMT_MOUNT_OPTIONS   'O'
 /* these will be processed (forever probably), but are no longer used */
 #define DI_FMT_MOUNT_OLD       'M'
-#define DI_FMT_DEVNAME_OLD     's'
-#define DI_FMT_DEVNAME_OLD_B   'S'
+#define DI_FMT_FILESYSTEM_OLD     's'
+#define DI_FMT_FILESYSTEM_OLD_B   'S'
 #define DI_FMT_FSTYPE_OLD      'T'
 
 /* disk information */

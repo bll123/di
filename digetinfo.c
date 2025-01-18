@@ -405,7 +405,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
                     volName, MSDOS_BUFFER_SIZE, &serialNo, &maxCompLen,
                     &fsFlags, fsName, MSDOS_BUFFER_SIZE);
             strncpy (diptr->strdata [DI_DISP_FSTYPE], fsName, DI_FSTYPE_LEN);
-            strncpy (diptr->strdata [DI_DISP_DEVNAME], volName, DI_DEVNAME_LEN);
+            strncpy (diptr->strdata [DI_DISP_FILESYSTEM], volName, DI_FILESYSTEM_LEN);
 
 # if _lib_GetDiskFreeSpaceEx
             {

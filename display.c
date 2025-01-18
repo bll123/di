@@ -171,7 +171,7 @@ printDiskInfo (void *di_data)
     di_opt_t         *diopts;
     di_disk_info_t        *diskInfo;
     di_disk_info_t        totals;
-    char                lastpool [DI_DEVNAME_LEN + 1];
+    char                lastpool [DI_FILESYSTEM_LEN + 1];
     Size_t              lastpoollen = { 0 };
     int                 inpool = { false };
     diOutput_t          *diout;
@@ -192,11 +192,10 @@ printDiskInfo (void *di_data)
     diout = &di_data->output;
     initSizeTable (diopts, diout);
 
-    if (diopts->optval [DI_OPT_OUT_TOTALS)
-    {
-        di_initialize_disk_info (&totals);
-        strncpy (totals.name, DI_GT ("Total"), (Size_t) DI_MOUNTPT_LEN);
-        totals.printFlag = DI_PRNT_OK;
+    if (diopts->optval [DI_OPT_OUT_TOTALS) {
+      di_initialize_disk_info (&totals, 0);
+      strncpy (totals.name, DI_GT ("Total"), (Size_t) DI_MOUNTPT_LEN);
+      totals.printFlag = DI_PRNT_OK;
     }
 
     getMaxFormatLengths (di_data);
@@ -291,14 +290,14 @@ printDiskInfo (void *di_data)
             if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
               ispooled = true;
               if (lastpoollen == 0 ||
-                  strncmp (lastpool, diptr->strdata [DI_DISP_DEVNAME], lastpoollen) != 0)
+                  strncmp (lastpool, diptr->strdata [DI_DISP_FILESYSTEM], lastpoollen) != 0)
               {
-                strncpy (lastpool, diptr->strdata [DI_DISP_DEVNAME], DI_DEVNAME_LEN);
+                strncpy (lastpool, diptr->strdata [DI_DISP_FILESYSTEM], DI_FILESYSTEM_LEN);
                 lastpoollen = di_mungePoolName (lastpool);
                 inpool = false;
                 startpool = true;
                 if (strcmp (dinfo->strdata [DI_DISP_FSTYPE], "null") == 0 &&
-                    strcmp (diptr->strdata [DI_DISP_DEVNAME] + strlen (diptr->strdata [DI_DISP_DEVNAME]) - 5,
+                    strcmp (diptr->strdata [DI_DISP_FILESYSTEM] + strlen (diptr->strdata [DI_DISP_FILESYSTEM]) - 5,
                             "00000") != 0) {
                     /* dragonflybsd doesn't have the main pool mounted */
                   inpool = true;
@@ -312,7 +311,7 @@ printDiskInfo (void *di_data)
               addTotals (dinfo, &totals, inpool);
             } else {
               if (debug > 2) {
-                printf ("tot:%s:%s:skip\n", diptr->strdata [DI_DISP_DEVNAME], diptr->strdata [DI_DISP_MOUNTPT]);
+                printf ("tot:%s:%s:skip\n", diptr->strdata [DI_DISP_FILESYSTEM], diptr->strdata [DI_DISP_MOUNTPT]);
               }
             }
 
@@ -759,7 +758,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         case DI_FMT_SPECIAL:
         case DI_FMT_SPECIAL_FULL:
         {
-          appendFormatStr (diout->specialFormat, diskInfo->strdata [DI_DISP_DEVNAME],
+          appendFormatStr (diout->specialFormat, diskInfo->strdata [DI_DISP_FILESYSTEM],
               &out, &outcurrlen, &outlen);
           break;
         }
@@ -880,7 +879,7 @@ addTotals (const di_disk_info_t *diskInfo, di_disk_info_t *totals, int inpool)
   if (debug > 2)
   {
     printf ("tot:%s:%s:inp:%d\n",
-        diskInfo->strdata [DI_DISP_DEVNAME], diskInfo->strdata [DI_DISP_MOUNTPT], inpool);
+        diskInfo->strdata [DI_DISP_FILESYSTEM], diskInfo->strdata [DI_DISP_MOUNTPT], inpool);
   }
 
   /*
@@ -1336,7 +1335,7 @@ getMaxFormatLengths (di_data_t *di_data)
                 diout->maxMountString = len;
             }
 
-            len = (unsigned int) strlen (diptr->strdata [DI_DISP_DEVNAME]);
+            len = (unsigned int) strlen (diptr->strdata [DI_DISP_FILESYSTEM]);
             if (len > diout->maxSpecialString)
             {
                 diout->maxSpecialString = len;

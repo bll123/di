@@ -94,7 +94,7 @@ int debug = 0;
 
 #define DI_SORT_OPT_NONE            'n'
 #define DI_SORT_OPT_MOUNT           'm'
-#define DI_SORT_OPT_SPECIAL         's'
+#define DI_SORT_OPT_FILESYSTEM      's'
 #define DI_SORT_OPT_TOTAL           'T'
 #define DI_SORT_OPT_FREE            'f'
 #define DI_SORT_OPT_AVAIL           'a'
@@ -115,8 +115,9 @@ static int  isIgnoreFSType      (const char *);
 static int  isIgnoreSpecial     (const char *);
 static int  isIgnoreFS          (const char *, const char *);
 static int  checkForUUID        (const char *);
-static int  diCompare           (const di_opt_t *, const di_disk_info_t *, unsigned int, unsigned int);
+static int  diCompare           (const di_opt_t *, const char *sortType, const di_disk_info_t *, unsigned int, unsigned int);
 static void checkZone (di_disk_info_t *, di_zone_info_t *, di_opt_t *);
+static void di_sort_disk_info (di_opt_t *, di_disk_info_t *, int, const char *, int);
 
 void *
 di_initialize (void)
@@ -255,7 +256,22 @@ di_get_data (void *tdi_data)
     }
   }
   di_get_disk_info (&di_data->diskInfo, &di_data->count);
+
+  /* need the sort-by-filesystem before checkDiskInfo() is called */
+  if ((di_data->haspooledfs || diopts->optval [DI_OPT_OUT_TOTALS]) &&
+      ! di_data->totsorted) {
+    di_sort_disk_info (diopts, di_data->diskInfo, di_data->count, "s", DI_SORT_TOTAL);
+    di_data->totsorted = true;
+  }
+
+  if (strcmp (diopts->sortType, "n") != 0) {
+    /* user's specified sort */
+    di_sort_disk_info (diopts, di_data->diskInfo, di_data->count,
+        diopts->sortType, DI_SORT_MAIN);
+  }
+
   checkDiskInfo (di_data, hasLoop);
+
   if (diopts->optval [DI_OPT_QUOTA_CHECK] == true) {
     checkDiskQuotas (di_data);
   }
@@ -286,6 +302,9 @@ di_iterate_init (void *tdi_data, int iteropt)
     }
   }
 
+fprintf (stderr, "\n");
+fprintf (stderr, "== count: %d %d\n", count, di_data->count);
+
   return count;
 }
 
@@ -296,6 +315,7 @@ di_iterate (void *tdi_data)
   di_pub_disk_info_t  *pub;
   di_disk_info_t      *dinfo;
   int                 i;
+  int                 sortidx;
 
   if (di_data == NULL) {
     return NULL;
@@ -310,16 +330,19 @@ di_iterate (void *tdi_data)
     return NULL;
   }
 
-  if (di_data->iteridx >= di_data->count) {
-    return NULL;
-  }
-
-  dinfo = &di_data->diskInfo [di_data->iteridx];
+  sortidx = di_data->diskInfo [di_data->iteridx].sortIndex [DI_SORT_MAIN];
+fprintf (stderr, "a: iter: %d sortidx: %d fs-sort: %d\n", di_data->iteridx, sortidx, di_data->diskInfo [di_data->iteridx].sortIndex [DI_SORT_TOTAL]);
+  dinfo = & (di_data->diskInfo [sortidx]);
 
   if (di_data->iteropt == DI_ITER_PRINTABLE) {
-    while (di_data->iteridx < di_data->count && ! dinfo->doPrint) {
+    while (! dinfo->doPrint) {
       ++di_data->iteridx;
-      dinfo = &di_data->diskInfo [di_data->iteridx];
+      if (di_data->iteridx >= di_data->count) {
+        break;
+      }
+      sortidx = di_data->diskInfo [di_data->iteridx].sortIndex [DI_SORT_MAIN];
+fprintf (stderr, " b: iter: %d sortidx: %d fs-sort: %d\n", di_data->iteridx, sortidx, di_data->diskInfo [di_data->iteridx].sortIndex [DI_SORT_TOTAL]);
+      dinfo = & (di_data->diskInfo [sortidx]);
     }
   }
 
@@ -328,7 +351,7 @@ di_iterate (void *tdi_data)
   }
 
   /* populate pub structure */
-  pub->index = di_data->iteridx;
+  pub->index = sortidx;
   for (i = 0; i < DI_DISP_MAX; ++i) {
     pub->strdata [i] = dinfo->strdata [i];
   }
@@ -402,16 +425,6 @@ checkFileInfo (di_data_t *di_data)
   diopts = (di_opt_t *) di_data->options;
 
   diskInfo = di_data->diskInfo;
-  if (di_data->haspooledfs && ! di_data->totsorted)
-  {
-    char tempSortType [DI_SORT_TYPE_MAX + 2];
-
-    strncpy (tempSortType, diopts->sortType, DI_SORT_TYPE_MAX);
-    strncpy (diopts->sortType, "s", DI_SORT_TYPE_MAX);
-    sortArray (diopts, diskInfo, di_data->count, DI_SORT_OPT_TOTAL);
-    strncpy (diopts->sortType, tempSortType, DI_SORT_TYPE_MAX);
-    di_data->totsorted = true;
-  }
 
   for (i = diopts->optidx; i < diopts->argc; ++i) {
     int fd;
@@ -431,7 +444,7 @@ checkFileInfo (di_data_t *di_data)
       int             found = { false };
       int             inpool = { false };
       Size_t          lastpoollen = { 0 };
-      char            lastpool [DI_DEVNAME_LEN + 1];
+      char            lastpool [DI_FILESYSTEM_LEN + 1];
 
       saveIdx = 0;  /* should get overridden below */
       for (j = 0; j < di_data->count; ++j) {
@@ -447,13 +460,13 @@ checkFileInfo (di_data_t *di_data)
         /* is it a pooled filesystem type? */
         if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
           if (lastpoollen == 0 ||
-              strncmp (lastpool, dinfo->strdata [DI_DISP_DEVNAME], lastpoollen) != 0) {
-            strncpy (lastpool, dinfo->strdata [DI_DISP_DEVNAME], DI_DEVNAME_LEN);
+              strncmp (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], lastpoollen) != 0) {
+            strncpy (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], DI_FILESYSTEM_LEN);
             lastpoollen = di_mungePoolName (lastpool);
             inpool = false;
           }
 
-          if (strncmp (lastpool, dinfo->strdata [DI_DISP_DEVNAME], lastpoollen) == 0) {
+          if (strncmp (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], lastpoollen) == 0) {
             startpool = true;
             if (inpool == false) {
               poolmain = true;
@@ -472,7 +485,7 @@ checkFileInfo (di_data_t *di_data)
           dinfo->printFlag = DI_PRNT_SKIP;
           if (debug > 2) {
             printf ("  inpool B: also process %s %s\n",
-                    dinfo->strdata [DI_DISP_DEVNAME], dinfo->strdata [DI_DISP_MOUNTPT]);
+                    dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
           }
         }
 
@@ -496,7 +509,7 @@ checkFileInfo (di_data_t *di_data)
           if (debug > 2) {
             printf ("file %s specified: found device %ld : %d (%s %s)\n",
                     diopts->argv [i], dinfo->st_dev, foundnew,
-                    dinfo->strdata [DI_DISP_DEVNAME], dinfo->strdata [DI_DISP_MOUNTPT]);
+                    dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
           }
 
           if (inpool) {
@@ -508,7 +521,7 @@ checkFileInfo (di_data_t *di_data)
               }
               if (debug > 2) {
                 printf ("  inpool A: also process %s %s\n",
-                        dinfo->strdata [DI_DISP_DEVNAME], dinfo->strdata [DI_DISP_MOUNTPT]);
+                        dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
               }
             }
           }
@@ -611,18 +624,18 @@ getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
     dinfo = &di_data->diskInfo [i];
 
     /* check for initial slash; otherwise we can pick up normal files */
-    if (* (dinfo->strdata [DI_DISP_DEVNAME]) == '/' &&
-        stat (dinfo->strdata [DI_DISP_DEVNAME], &statBuf) == 0) {
+    if (* (dinfo->strdata [DI_DISP_FILESYSTEM]) == '/' &&
+        stat (dinfo->strdata [DI_DISP_FILESYSTEM], &statBuf) == 0) {
       int                 rc;
 
-      if (! dontResolveSymlink && checkForUUID (dinfo->strdata [DI_DISP_DEVNAME])) {
+      if (! dontResolveSymlink && checkForUUID (dinfo->strdata [DI_DISP_FILESYSTEM])) {
         struct stat tstatBuf;
 
-        rc = lstat (dinfo->strdata [DI_DISP_DEVNAME], &tstatBuf);
+        rc = lstat (dinfo->strdata [DI_DISP_FILESYSTEM], &tstatBuf);
         if (rc == 0 && S_ISLNK (tstatBuf.st_mode)) {
-          char tspecial [DI_DEVNAME_LEN + 1];
-          if (realpath (dinfo->strdata [DI_DISP_DEVNAME], tspecial) != (char *) NULL) {
-            strncpy (dinfo->strdata [DI_DISP_DEVNAME], tspecial, DI_DEVNAME_LEN);
+          char tspecial [DI_FILESYSTEM_LEN + 1];
+          if (realpath (dinfo->strdata [DI_DISP_FILESYSTEM], tspecial) != (char *) NULL) {
+            strncpy (dinfo->strdata [DI_DISP_FILESYSTEM], tspecial, DI_FILESYSTEM_LEN);
           }
         }
       }
@@ -643,7 +656,7 @@ getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
       }
       if (debug > 2) {
         printf ("special dev: %s %s: %ld rdev: %ld loopback: %d\n",
-            dinfo->strdata [DI_DISP_DEVNAME], dinfo->strdata [DI_DISP_MOUNTPT], dinfo->sp_dev,
+            dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT], dinfo->sp_dev,
             dinfo->sp_rdev, dinfo->isLoopback);
       }
     } else {
@@ -745,11 +758,11 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
               printf ("chk: ignore-fstype: %s\n", dinfo->strdata [DI_DISP_FSTYPE]);
             }
           }
-          if (isIgnoreSpecial (dinfo->strdata [DI_DISP_DEVNAME])) {
+          if (isIgnoreSpecial (dinfo->strdata [DI_DISP_FILESYSTEM])) {
             dinfo->printFlag = DI_PRNT_IGNORE;
             dinfo->doPrint = (char) diopts->optval [DI_OPT_DISP_ALL];
             if (debug > 2) {
-              printf ("chk: ignore-special: %s\n", dinfo->strdata [DI_DISP_DEVNAME]);
+              printf ("chk: ignore-special: %s\n", dinfo->strdata [DI_DISP_FILESYSTEM]);
             }
           }
           if (isIgnoreFS (dinfo->strdata [DI_DISP_FSTYPE], dinfo->strdata [DI_DISP_MOUNTPT])) {
@@ -870,7 +883,7 @@ checkDiskQuotas (di_data_t *di_data)
       continue;
     }
 
-    diqinfo.devname = dinfo->strdata [DI_DISP_DEVNAME];
+    diqinfo.filesystem = dinfo->strdata [DI_DISP_FILESYSTEM];
     diqinfo.mountpt = dinfo->strdata [DI_DISP_MOUNTPT];
     diqinfo.fstype = dinfo->strdata [DI_DISP_FSTYPE];
     diqinfo.uid = uid;
@@ -985,8 +998,6 @@ preCheckDiskInfo (di_data_t *di_data)
 
     dinfo = &di_data->diskInfo [i];
 
-    dinfo->sortIndex [0] = (unsigned int) i;
-    dinfo->sortIndex [1] = (unsigned int) i;
     if (debug > 4) {
       printf ("## prechk:%s:\n", dinfo->strdata [DI_DISP_MOUNTPT]);
     }
@@ -1263,12 +1274,9 @@ getPrintFlagText (int pf)
 }
 
 
-/*
- * sortArray
- *
- */
 void
-sortArray (di_opt_t *diopts, di_disk_info_t *data, int count, int sidx)
+di_sort_disk_info (di_opt_t *diopts, di_disk_info_t *data, int count,
+    const char *sortType, int sidx)
 {
   unsigned int  tempIndex;
   int           gap;
@@ -1289,7 +1297,7 @@ sortArray (di_opt_t *diopts, di_disk_info_t *data, int count, int sidx)
       tempIndex = data [i].sortIndex [sidx];
       j = i - gap;
 
-      while (j >= 0 && diCompare (diopts, data, data [j].sortIndex [sidx], tempIndex) > 0) {
+      while (j >= 0 && diCompare (diopts, sortType, data, data [j].sortIndex [sidx], tempIndex) > 0) {
         data [j + gap].sortIndex [sidx] = data [j].sortIndex [sidx];
         j -= gap;
       }
@@ -1303,8 +1311,8 @@ sortArray (di_opt_t *diopts, di_disk_info_t *data, int count, int sidx)
 }
 
 static int
-diCompare (const di_opt_t *diopts, const di_disk_info_t *data,
-           unsigned int idx1, unsigned int idx2)
+diCompare (const di_opt_t *diopts, const char *sortType,
+    const di_disk_info_t *data, unsigned int idx1, unsigned int idx2)
 {
     int             rc;
     int             sortOrder;
@@ -1319,7 +1327,7 @@ diCompare (const di_opt_t *diopts, const di_disk_info_t *data,
     d1 = & (data [idx1]);
     d2 = & (data [idx2]);
 
-    ptr = diopts->sortType;
+    ptr = sortType;
     while (*ptr)
     {
       switch (*ptr)
@@ -1342,9 +1350,9 @@ diCompare (const di_opt_t *diopts, const di_disk_info_t *data,
             break;
         }
 
-        case DI_SORT_OPT_SPECIAL:
+        case DI_SORT_OPT_FILESYSTEM:
         {
-            rc = strcoll (d1->strdata [DI_DISP_DEVNAME], d2->strdata [DI_DISP_DEVNAME]);
+            rc = strcoll (d1->strdata [DI_DISP_FILESYSTEM], d2->strdata [DI_DISP_FILESYSTEM]);
             rc *= sortOrder;
             break;
         }
