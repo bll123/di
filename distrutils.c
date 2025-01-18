@@ -24,7 +24,7 @@
 #  include <strings.h>
 # endif
 
-#include "strutils.h"
+#include "distrutils.h"
 
 /*
  *
@@ -67,7 +67,7 @@ di_trimchar (char *str, int ch)
 /* modified from the linux stpecpy manual page */
 
 char *
-stpecpy (char *dst, char end[0], const char *src)
+stpecpy (char *dst, char end [0], const char *src)
 {
   char  *p;
 

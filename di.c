@@ -103,7 +103,7 @@
 
 #include "di.h"
 #include "disystem.h"
-#include "strutils.h"
+#include "distrutils.h"
 #include "version.h"
 
 static void di_display_data (void *);
@@ -131,7 +131,7 @@ main (int argc, char * argv [])
         usage ();
       }
       if (exitflag == DI_EXIT_VERS) {
-        printf (DI_GT("di version %s\n"), DI_VERSION);
+        printf (DI_GT ("di version %s\n"), DI_VERSION);
       }
       di_cleanup (di_data);
       exit (0);
@@ -149,31 +149,31 @@ main (int argc, char * argv [])
 static void
 usage (void)
 {
-  printf (DI_GT("di version %s\n"), DI_VERSION);
+  printf (DI_GT ("di version %s\n"), DI_VERSION);
              /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
-  printf (DI_GT("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
-  printf (DI_GT("       [-I include-fstyp-list] [file [...]]\n"));
-  printf (DI_GT("   -a   : print all mounted devices\n"));
-  printf (DI_GT("   -d x : size to print blocks in (k,m,g,t,etc.)\n"));
-  printf (DI_GT("          h - human readable.\n"));
-  printf (DI_GT("   -f x : use format string <x>\n"));
-  printf (DI_GT("   -I x : include only file system types in <x>\n"));
-  printf (DI_GT("   -x x : exclude file system types in <x>\n"));
-  printf (DI_GT("   -l   : display local filesystems only\n"));
-  printf (DI_GT("   -n   : don't print header\n"));
-  printf (DI_GT("   -t   : print totals\n"));
-  printf (DI_GT(" Format string values:\n"));
-  printf (DI_GT("    m - mount point\n"));
-  printf (DI_GT("    d - device name\n"));
-  printf (DI_GT("    t - file-system type\n"));
-  printf (DI_GT("    b - total kbytes                    B - kbytes available for use\n"));
-  printf (DI_GT("    u - used kbytes                     c - calculated kbytes in use\n"));
-  printf (DI_GT("    f - kbytes free                     v - kbytes available\n"));
-  printf (DI_GT("    p - percentage not avail. for use   1 - percentage used\n"));
-  printf (DI_GT("    2 - percentage of user-available space in use.\n"));
-  printf (DI_GT("    i - total file slots (i-nodes)      U - used file slots\n"));
-  printf (DI_GT("    F - free file slots                 P - percentage file slots used\n"));
-  printf (DI_GT("See manual page for more options.\n"));
+  printf (DI_GT ("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
+  printf (DI_GT ("       [-I include-fstyp-list] [file [...]]\n"));
+  printf (DI_GT ("   -a   : print all mounted devices\n"));
+  printf (DI_GT ("   -d x : size to print blocks in (k,m,g,t,etc.)\n"));
+  printf (DI_GT ("          h - human readable.\n"));
+  printf (DI_GT ("   -f x : use format string <x>\n"));
+  printf (DI_GT ("   -I x : include only file system types in <x>\n"));
+  printf (DI_GT ("   -x x : exclude file system types in <x>\n"));
+  printf (DI_GT ("   -l   : display local filesystems only\n"));
+  printf (DI_GT ("   -n   : don't print header\n"));
+  printf (DI_GT ("   -t   : print totals\n"));
+  printf (DI_GT (" Format string values:\n"));
+  printf (DI_GT ("    m - mount point\n"));
+  printf (DI_GT ("    d - device name\n"));
+  printf (DI_GT ("    t - file-system type\n"));
+  printf (DI_GT ("    b - total kbytes                    B - kbytes available for use\n"));
+  printf (DI_GT ("    u - used kbytes                     c - calculated kbytes in use\n"));
+  printf (DI_GT ("    f - kbytes free                     v - kbytes available\n"));
+  printf (DI_GT ("    p - percentage not avail. for use   1 - percentage used\n"));
+  printf (DI_GT ("    2 - percentage of user-available space in use.\n"));
+  printf (DI_GT ("    i - total file slots (i-nodes)      U - used file slots\n"));
+  printf (DI_GT ("    F - free file slots                 P - percentage file slots used\n"));
+  printf (DI_GT ("See manual page for more options.\n"));
 }
 
 static void
@@ -223,7 +223,7 @@ di_display_data (void *di_data)
   }
 
   di_iterate_init (di_data, iterval);
-  while ((pub = di_iterate (di_data)) != NULL) {
+  while ( (pub = di_iterate (di_data)) != NULL) {
     int         fmt;
     int         fmtcount;
     int         stridx;
@@ -232,7 +232,7 @@ di_display_data (void *di_data)
     di_format_iter_init (di_data);
     fmtcount = 0;
     comma = ",";
-    while ((fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
+    while ( (fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
       stridx = dispcount * fmtstrlen + fmtcount;
 
       strdata [stridx] = NULL;
@@ -451,7 +451,7 @@ di_display_header (void *di_data, char **strdata, unsigned int *maxlen)
   fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
   fmtcount = 0;
   di_format_iter_init (di_data);
-  while ((fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
+  while ( (fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
     const char  *temp;
     char        tcsv [2];
     int         stridx;
@@ -582,7 +582,7 @@ istrlen (const char *str)
   tstr = str;
   while (slen > 0) {
     mlen = mbrlen (tstr, slen, &ps);
-    if ((int) mlen <= 0) {
+    if ( (int) mlen <= 0) {
       return strlen (str);
     }
     ++len;

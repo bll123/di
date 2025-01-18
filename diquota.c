@@ -210,7 +210,7 @@ vquotactl_send (char *spec, char *cmd,
   int               rv;
   int               error;
 
-  dict = prop_dictionary_create();
+  dict = prop_dictionary_create ();
 
   if (dict == NULL) {
     return false;
@@ -240,7 +240,7 @@ vquotactl_send (char *spec, char *cmd,
     return false;
   }
 
-  error = prop_dictionary_recv_syscall(&pref, res);
+  error = prop_dictionary_recv_syscall (&pref, res);
   if (error != 0) {
     prop_object_release (dict);
     return false;
@@ -266,9 +266,9 @@ vquotactl_get (di_quota_t *diqinfo, struct vqval *vqval)
   dinum_t                   space;
   dinum_t                   limit;
 
-  args = prop_dictionary_create();
+  args = prop_dictionary_create ();
   if (args == NULL) { return errno; }
-  res  = prop_dictionary_create();
+  res  = prop_dictionary_create ();
   if (res == NULL) { return errno; }
 
   rv = vquotactl_send (diqinfo->mountpt, "get usage all", args, &res);
@@ -296,23 +296,23 @@ vquotactl_get (di_quota_t *diqinfo, struct vqval *vqval)
   vqval->uvqval.values [DI_QUOTA_LIMIT] = 0;
   vqval->gvqval.usage = 0;
   vqval->gvqval.values [DI_QUOTA_LIMIT] = 0;
-  while ((item = prop_object_iterator_next(iter)) != NULL) {
+  while ( (item = prop_object_iterator_next (iter)) != NULL) {
     rv = prop_dictionary_get_uint64 (item, "limit", &limit);
     if (rv && limit != 0) {
       rv = prop_dictionary_get_uint64 (item, "space used", &space);
       urv = prop_dictionary_get_uint32 (item, "uid", &tuid);
       grv = prop_dictionary_get_uint32 (item, "gid", &tgid);
       if (urv && tuid == diqinfo->uid) {
-        vq_updUsage (&(vqval->uvqval), space);
-        vq_updLimit (&(vqval->uvqval), limit);
+        vq_updUsage (& (vqval->uvqval), space);
+        vq_updLimit (& (vqval->uvqval), limit);
       } else if (grv && tgid == diqinfo->gid) {
-        vq_updUsage (&(vqval->gvqval), space);
-        vq_updLimit (&(vqval->gvqval), limit);
+        vq_updUsage (& (vqval->gvqval), space);
+        vq_updLimit (& (vqval->gvqval), limit);
       } else if (! urv && ! grv) {
-        vq_updUsage (&(vqval->uvqval), space);
-        vq_updLimit (&(vqval->uvqval), limit);
-        vq_updUsage (&(vqval->gvqval), space);
-        vq_updLimit (&(vqval->gvqval), limit);
+        vq_updUsage (& (vqval->uvqval), space);
+        vq_updLimit (& (vqval->uvqval), limit);
+        vq_updUsage (& (vqval->gvqval), space);
+        vq_updLimit (& (vqval->gvqval), limit);
       }
     }
   }
@@ -337,10 +337,10 @@ quota_open_get (struct quotahandle *qh, int idtype,
     qkey.qk_idtype = idtype;
     qkey.qk_id = (id_t) id;
     qkey.qk_objtype = QUOTA_OBJTYPE_BLOCKS;
-    rc = quota_get (qh, &qkey, &(qval->qbval));
+    rc = quota_get (qh, &qkey, & (qval->qbval));
     if (rc == 0) {
       qkey.qk_objtype = QUOTA_OBJTYPE_FILES;
-      rc = quota_get (qh, &qkey, &(qval->qival));
+      rc = quota_get (qh, &qkey, & (qval->qival));
     }
   }
   return rc;
@@ -367,15 +367,15 @@ quotactl_get (di_quota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
   }
   /* AIX 7 has quotactl position 1 */
 # if _lib_quotactl && _quotactl_pos_1
-  rc = quotactl (diqinfo->mountpt, cmd, (int) id, (caddr_t) &(qdata->qinfo));
+  rc = quotactl (diqinfo->mountpt, cmd, (int) id, (caddr_t) & (qdata->qinfo));
 # endif
-# if _lib_quotactl && ! _quotactl_pos_1 && (_quotactl_pos_2 || defined(_AIX))
-#  if defined(_AIX)
+# if _lib_quotactl && ! _quotactl_pos_1 && (_quotactl_pos_2 || defined (_AIX))
+#  if defined (_AIX)
   /* AIX has linux compatibility routine, */
   /* but needs mount-pt rather than dev-name */
-  rc = quotactl (cmd, diqinfo->mountpt, (int) id, (caddr_t) &(qdata->qinfo));
+  rc = quotactl (cmd, diqinfo->mountpt, (int) id, (caddr_t) & (qdata->qinfo));
 #  else
-  rc = quotactl (cmd, (_c_arg_2_quotactl) diqinfo->devname, (int) id, (caddr_t) &(qdata->qinfo));
+  rc = quotactl (cmd, (_c_arg_2_quotactl) diqinfo->devname, (int) id, (caddr_t) & (qdata->qinfo));
 #  endif
 # endif
 # if _has_std_quotas && _sys_fs_ufs_quota && ! _lib_vquotactl /* Solaris */
@@ -386,7 +386,7 @@ quotactl_get (di_quota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
 
     qop.op = Q_GETQUOTA;
     qop.uid = id;
-    qop.addr = (caddr_t) &(qdata->qinfo);
+    qop.addr = (caddr_t) & (qdata->qinfo);
     strncpy (tname, diqinfo->mountpt, DI_MOUNTPT_LEN);
     strncat (tname, "/quotas", DI_MOUNTPT_LEN);
     fd = open (tname, O_RDONLY | O_NOCTTY);
@@ -495,7 +495,7 @@ diquota (di_quota_t *diqinfo)
   }
 # endif
 
-# if defined(GRPQUOTA) || _lib_quota_open || _lib_vquotactl
+# if defined (GRPQUOTA) || _lib_quota_open || _lib_vquotactl
   di_process_quotas ("grp", diqinfo, rc, xfsflag, &qdata);
 # endif
 #endif /* _has_std_quotas */
@@ -623,7 +623,7 @@ diquota_nfs (di_quota_t *diqinfo)
       }
       return;
     }
-    rqclnt->cl_auth = authunix_create_default();
+    rqclnt->cl_auth = authunix_create_default ();
     clnt_stat = clnt_call (rqclnt, (unsigned long) RQUOTAPROC_GETQUOTA,
         (xdrproc_t) xdr_quota_get, (caddr_t) &args,
         (xdrproc_t) xdr_quota_rslt, (caddr_t) &result, timeout);

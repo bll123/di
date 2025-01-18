@@ -370,7 +370,7 @@ $(MKC_REQLIB):	config.h
 LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
 		diquota$(OBJ_EXT) dizone$(OBJ_EXT) getoptn$(OBJ_EXT) \
-		options$(OBJ_EXT) strutils$(OBJ_EXT)
+		dioptions$(OBJ_EXT) distrutils$(OBJ_EXT)
 
 MAINOBJECTS = di$(OBJ_EXT)
 
@@ -425,25 +425,26 @@ mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 di$(OBJ_EXT):		di.c config.h di.h dimath.h dilib.h version.h
 
 dilib$(OBJ_EXT):	dilib.c config.h di.h dimath.h dilib.h \
-				options.h version.h
+				dioptions.h version.h
 
 digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimath.h dimntopt.h
 
-didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimath.h strutils.h \
+didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimath.h distrutils.h \
 				dimntopt.h
 
-digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimath.h strutils.h \
+digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimath.h distrutils.h \
 				dimntopt.h
 
 diquota$(OBJ_EXT):	diquota.c config.h di.h dimath.h
 
 dizone$(OBJ_EXT):	dizone.c config.h di.h dimath.h
 
-getoptn$(OBJ_EXT):	getoptn.c config.h strutils.h getoptn.h
+getoptn$(OBJ_EXT):	getoptn.c config.h distrutils.h getoptn.h
 
-options$(OBJ_EXT):	options.c config.h di.h dimath.h strutils.h options.h
+dioptions$(OBJ_EXT):	dioptions.c config.h di.h dimath.h 
+				distrutils.h dioptions.h
 
-strutils$(OBJ_EXT):	strutils.c config.h strutils.h
+distrutils$(OBJ_EXT):	distrutils.c config.h distrutils.h
 
 dimathtest$(OBJ_EXT):	dimathtest.c config.h dimath.h
 

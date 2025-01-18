@@ -759,8 +759,8 @@ add_library (${DI_LIBNAME}
   diquota.c
   dizone.c
   getoptn.c
-  options.c
-  strutils.c
+  dioptions.c
+  distrutils.c
 )
 # cmake's auto prefixing is annoying
 set_target_properties (${DI_LIBNAME} PROPERTIES PREFIX "")

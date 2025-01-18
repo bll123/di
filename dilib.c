@@ -72,7 +72,7 @@
 #include "diinternal.h"
 #include "dizone.h"
 #include "diquota.h"
-#include "options.h"
+#include "dioptions.h"
 #include "version.h"
 
 #if defined (__cplusplus) || defined (c_plusplus)
@@ -188,13 +188,14 @@ di_process_options (void *tdi_data, int argc, char * argv [])
 {
   di_data_t   *di_data = (di_data_t *) tdi_data;
   di_opt_t    *diopts;
+  int         exitflag;
 
   if (di_data == NULL) {
     return DI_EXIT_FAIL;
   }
 
   diopts = (di_opt_t *) di_data->options;
-  diopts->optidx = di_get_options (argc, argv, diopts);
+  exitflag = di_get_options (argc, argv, diopts);
 
   if (debug > 0) {
 #if _use_math == DI_GMP
@@ -206,7 +207,7 @@ di_process_options (void *tdi_data, int argc, char * argv [])
 #endif
   }
 
-  return diopts->exitFlag;
+  return exitflag;
 }
 
 void
@@ -224,9 +225,6 @@ di_get_data (void *tdi_data)
   diopts = (di_opt_t *) di_data->options;
 
   di_data->zoneInfo = di_initialize_zones ();
-  if (diopts->exitFlag != DI_EXIT_NORM) {
-    return;
-  }
 
   if (debug > 0) {
     printf ("di version %s\n", DI_VERSION);
@@ -420,7 +418,7 @@ checkFileInfo (di_data_t *di_data)
     int src;
 
     /* do this to automount devices.                    */
-    /* stat() will not necessarily cause an automount.  */
+    /* stat () will not necessarily cause an automount.  */
     fd = open (diopts->argv [i], O_RDONLY | O_NOCTTY);
     if (fd < 0) {
       src = stat (diopts->argv [i], &statBuf);
@@ -444,7 +442,7 @@ checkFileInfo (di_data_t *di_data)
         startpool = false;
         poolmain = false;
 
-        dinfo = &(diskInfo [diskInfo [j].sortIndex [DI_SORT_TOTAL]]);
+        dinfo = & (diskInfo [diskInfo [j].sortIndex [DI_SORT_TOTAL]]);
 
         /* is it a pooled filesystem type? */
         if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
@@ -470,7 +468,7 @@ checkFileInfo (di_data_t *di_data)
         }
 
         if (found && inpool) {
-          dinfo = &(diskInfo [diskInfo [j].sortIndex[DI_SORT_TOTAL]]);
+          dinfo = & (diskInfo [diskInfo [j].sortIndex [DI_SORT_TOTAL]]);
           dinfo->printFlag = DI_PRNT_SKIP;
           if (debug > 2) {
             printf ("  inpool B: also process %s %s\n",
@@ -504,7 +502,7 @@ checkFileInfo (di_data_t *di_data)
           if (inpool) {
             int   k;
             for (k = saveIdx; k < j; ++k) {
-              dinfo = &(diskInfo [diskInfo [k].sortIndex[DI_SORT_TOTAL]]);
+              dinfo = & (diskInfo [diskInfo [k].sortIndex [DI_SORT_TOTAL]]);
               if (dinfo->printFlag != DI_PRNT_FORCE) {
                 dinfo->printFlag = DI_PRNT_SKIP;
               }
@@ -537,7 +535,7 @@ checkFileInfo (di_data_t *di_data)
   for (j = 0; j < di_data->count; ++j) {
     di_disk_info_t        *dinfo;
 
-    dinfo = &di_data->diskInfo[j];
+    dinfo = &di_data->diskInfo [j];
     if (dinfo->printFlag == DI_PRNT_OK) {
       dinfo->printFlag = DI_PRNT_IGNORE;
     }
@@ -613,7 +611,7 @@ getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
     dinfo = &di_data->diskInfo [i];
 
     /* check for initial slash; otherwise we can pick up normal files */
-    if (*(dinfo->strdata [DI_DISP_DEVNAME]) == '/' &&
+    if (* (dinfo->strdata [DI_DISP_DEVNAME]) == '/' &&
         stat (dinfo->strdata [DI_DISP_DEVNAME], &statBuf) == 0) {
       int                 rc;
 
@@ -676,15 +674,15 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
     for (i = 0; i < di_data->count; ++i) {
         di_disk_info_t        *dinfo;
 
-        dinfo = &di_data->diskInfo[i];
+        dinfo = &di_data->diskInfo [i];
         dinfo->doPrint = true;
           /* these are never printed... */
         if (dinfo->printFlag == DI_PRNT_EXCLUDE ||
             dinfo->printFlag == DI_PRNT_BAD ||
             dinfo->printFlag == DI_PRNT_OUTOFZONE) {
             if (debug > 2) {
-                printf ("chk: skipping(%s):%s\n",
-                    getPrintFlagText ((int) dinfo->printFlag), dinfo->strdata [DI_DISP_MOUNTPT]);
+                printf ("chk: skipping (%s):%s\n",
+                    getPrintFlagText ( (int) dinfo->printFlag), dinfo->strdata [DI_DISP_MOUNTPT]);
             }
             dinfo->doPrint = false;
             continue;
@@ -694,8 +692,8 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
         if (dinfo->printFlag == DI_PRNT_IGNORE ||
             dinfo->printFlag == DI_PRNT_SKIP) {
           if (debug > 2) {
-              printf ("chk: skipping(%s):%s\n",
-                  getPrintFlagText ((int) dinfo->printFlag), dinfo->strdata [DI_DISP_MOUNTPT]);
+              printf ("chk: skipping (%s):%s\n",
+                  getPrintFlagText ( (int) dinfo->printFlag), dinfo->strdata [DI_DISP_MOUNTPT]);
           }
           dinfo->doPrint = (char) diopts->optval [DI_OPT_DISP_ALL];
         }
@@ -784,11 +782,11 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
       for (i = 0; i < di_data->count; ++i) {
         di_disk_info_t        *dinfo;
 
-        dinfo = &di_data->diskInfo[i];
+        dinfo = &di_data->diskInfo [i];
         if (dinfo->printFlag != DI_PRNT_OK) {
           if (debug > 2) {
-              printf ("dup: chk: skipping(%s):%s\n",
-                  getPrintFlagText ((int) dinfo->printFlag), dinfo->strdata [DI_DISP_MOUNTPT]);
+              printf ("dup: chk: skipping (%s):%s\n",
+                  getPrintFlagText ( (int) dinfo->printFlag), dinfo->strdata [DI_DISP_MOUNTPT]);
           }
           continue;
         }
@@ -867,7 +865,7 @@ checkDiskQuotas (di_data_t *di_data)
   {
     di_disk_info_t        *dinfo;
 
-    dinfo = &di_data->diskInfo[i];
+    dinfo = &di_data->diskInfo [i];
     if (! dinfo->doPrint) {
       continue;
     }
@@ -985,10 +983,10 @@ preCheckDiskInfo (di_data_t *di_data)
   for (i = 0; i < di_data->count; ++i) {
     di_disk_info_t        *dinfo;
 
-    dinfo = &di_data->diskInfo[i];
+    dinfo = &di_data->diskInfo [i];
 
-    dinfo->sortIndex[0] = (unsigned int) i;
-    dinfo->sortIndex[1] = (unsigned int) i;
+    dinfo->sortIndex [0] = (unsigned int) i;
+    dinfo->sortIndex [1] = (unsigned int) i;
     if (debug > 4) {
       printf ("## prechk:%s:\n", dinfo->strdata [DI_DISP_MOUNTPT]);
     }
@@ -1105,14 +1103,14 @@ checkZone (di_disk_info_t *diskInfo, di_zone_info_t *zoneInfo, di_opt_t *diopts)
     if (debug > 5) {
       printf (" checkZone:%s:compare:%d:%s:\n",
           diskInfo->strdata [DI_DISP_MOUNTPT],
-          zoneInfo->zones[i].rootpathlen,
-          zoneInfo->zones[i].rootpath);
+          zoneInfo->zones [i].rootpathlen,
+          zoneInfo->zones [i].rootpath);
     }
-    if (strncmp (zoneInfo->zones[i].rootpath,
-        diskInfo->strdata [DI_DISP_MOUNTPT], zoneInfo->zones[i].rootpathlen) == 0) {
+    if (strncmp (zoneInfo->zones [i].rootpath,
+        diskInfo->strdata [DI_DISP_MOUNTPT], zoneInfo->zones [i].rootpathlen) == 0) {
       if (debug > 4) {
           printf (" checkZone:%s:found zone:%s:\n",
-                  diskInfo->strdata [DI_DISP_MOUNTPT], zoneInfo->zones[i].name);
+                  diskInfo->strdata [DI_DISP_MOUNTPT], zoneInfo->zones [i].name);
       }
       idx = i;
       break;
@@ -1130,13 +1128,13 @@ checkZone (di_disk_info_t *diskInfo, di_zone_info_t *zoneInfo, di_opt_t *diopts)
     if (debug > 5) {
       printf (" checkZone:uid non-zero:chk zone:%d:%d:\n",
           (int) zoneInfo->myzoneid,
-          (int) zoneInfo->zones[idx].zoneid);
+          (int) zoneInfo->zones [idx].zoneid);
     }
-    if (zoneInfo->myzoneid != zoneInfo->zones[idx].zoneid) {
+    if (zoneInfo->myzoneid != zoneInfo->zones [idx].zoneid) {
       if (debug > 4) {
         printf (" checkZone:not root, not zone:%d:%d:outofzone:\n",
             (int) zoneInfo->myzoneid,
-            (int) zoneInfo->zones[idx].zoneid);
+            (int) zoneInfo->zones [idx].zoneid);
       }
       diskInfo->printFlag = DI_PRNT_OUTOFZONE;
     }
@@ -1151,7 +1149,7 @@ checkZone (di_disk_info_t *diskInfo, di_zone_info_t *zoneInfo, di_opt_t *diopts)
   if (! diopts->optval [DI_OPT_DISP_ALL] &&
       diskInfo->printFlag == DI_PRNT_OK &&
       strcmp (diopts->zoneDisplay, "all") != 0 &&
-      strcmp (diopts->zoneDisplay, zoneInfo->zones[idx].name) != 0) {
+      strcmp (diopts->zoneDisplay, zoneInfo->zones [idx].name) != 0) {
     if (debug > 4) {
       printf (" checkZone:wrong zone:ignore:\n");
     }
@@ -1183,7 +1181,7 @@ isIgnoreSpecial (const char *special)
 
   /* solaris: swap */
   /* linux: cgroup, tmpfs */
-  if (strncmp (special, appletimemachine, strlen(appletimemachine)) == 0 ||
+  if (strncmp (special, appletimemachine, strlen (appletimemachine)) == 0 ||
       strcmp (special, "tmpfs") == 0 ||
       strcmp (special, "cgroup") == 0 ||
       strcmp (special, "swap") == 0) {
@@ -1198,7 +1196,7 @@ isIgnoreFS (const char *fstype, const char *name)
   static const char   *applesystem = "/System/";
 
   if (strcmp (fstype, "apfs") == 0 &&
-       strncmp (name, applesystem, strlen(applesystem)) == 0) {
+       strncmp (name, applesystem, strlen (applesystem)) == 0) {
     return true;
   }
   return false;
@@ -1237,10 +1235,10 @@ checkForUUID (const char *spec)
     Size_t      offset;
 
     offset = len - 36;
-    if (*(spec + offset + 8) == '-' &&
-        *(spec + offset + 13) == '-' &&
-        *(spec + offset + 18) == '-' &&
-        *(spec + offset + 23) == '-' &&
+    if (* (spec + offset + 8) == '-' &&
+        * (spec + offset + 13) == '-' &&
+        * (spec + offset + 18) == '-' &&
+        * (spec + offset + 23) == '-' &&
         strspn (spec + offset, "-1234567890abcdef") == 36) {
       return true;
     }
@@ -1288,17 +1286,17 @@ sortArray (di_opt_t *diopts, di_disk_info_t *data, int count, int sidx)
 
   for (gap /= 3; gap > 0; gap /= 3) {
     for (i = gap; i < count; ++i) {
-      tempIndex = data[i].sortIndex[sidx];
+      tempIndex = data [i].sortIndex [sidx];
       j = i - gap;
 
-      while (j >= 0 && diCompare (diopts, data, data[j].sortIndex[sidx], tempIndex) > 0) {
-        data[j + gap].sortIndex[sidx] = data[j].sortIndex[sidx];
+      while (j >= 0 && diCompare (diopts, data, data [j].sortIndex [sidx], tempIndex) > 0) {
+        data [j + gap].sortIndex [sidx] = data [j].sortIndex [sidx];
         j -= gap;
       }
 
       j += gap;
       if (j != i) {
-        data[j].sortIndex[sidx] = tempIndex;
+        data [j].sortIndex [sidx] = tempIndex;
       }
     }
   }
@@ -1318,8 +1316,8 @@ diCompare (const di_opt_t *diopts, const di_disk_info_t *data,
     sortOrder = DI_SORT_OPT_ASCENDING;
     rc = 0;
 
-    d1 = &(data[idx1]);
-    d2 = &(data[idx2]);
+    d1 = & (data [idx1]);
+    d2 = & (data [idx2]);
 
     ptr = diopts->sortType;
     while (*ptr)

@@ -78,7 +78,7 @@ extern "C" {
 # endif
 
 #define DI_PERC_PRECISION 1000000
-#define DI_PERC_DIV ((double) (DI_PERC_PRECISION / 100));
+#define DI_PERC_DIV ( (double) (DI_PERC_PRECISION / 100));
 
 static inline void
 dinum_init (dinum_t *r)

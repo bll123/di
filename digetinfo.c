@@ -6,8 +6,8 @@
 /********************************************************/
 /*
 
-    In the cases where di_get_disk_entries() does not
-    get the volume information, di_get_disk_info() is used
+    In the cases where di_get_disk_entries () does not
+    get the volume information, di_get_disk_info () is used
     to fetch the info.
 
     di_get_disk_info ()
@@ -46,22 +46,22 @@
 /* FreeBSD, OpenBSD, NetBSD, HP-UX, MacOS */
 #if _sys_mount && ! defined (DI_INC_SYS_MOUNT)
 # define DI_INC_SYS_MOUNT 1
-# include <sys/mount.h>         /* statfs(); struct statfs; getfsstat() */
+# include <sys/mount.h>         /* statfs (); struct statfs; getfsstat () */
 #endif
 #if _sys_statvfs                /* Linux, Solaris, FreeBSD, NetBSD, HP-UX */
-# include <sys/statvfs.h>       /* statvfs(); struct statvfs */
+# include <sys/statvfs.h>       /* statvfs (); struct statvfs */
 #endif
 #if _sys_vfs                    /* Linux, HP-UX, BSD 4.3 */
 # include <sys/vfs.h>           /* struct statfs */
 #endif
 #if _sys_statfs && ! _sys_statvfs     /* Linux, SysV.3 */
-# include <sys/statfs.h>                        /* statfs(); struct statfs */
+# include <sys/statfs.h>                        /* statfs (); struct statfs */
 #endif
 #if _sys_fstyp                  /* SysV.3 */
-# include <sys/fstyp.h>         /* sysfs() */
+# include <sys/fstyp.h>         /* sysfs () */
 #endif
 #if _hdr_windows            /* windows */
-# include <windows.h>       /* GetDiskFreeSpace(); GetVolumeInformation() */
+# include <windows.h>       /* GetDiskFreeSpace (); GetVolumeInformation () */
 #endif
 
 #include "di.h"
@@ -139,7 +139,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
               } else {
                 tblocksz = statBuf.f_frsize;
               }
-/* Linux! statvfs() returns values in f_bsize rather f_frsize.  Bleah.  */
+/* Linux! statvfs () returns values in f_bsize rather f_frsize.  Bleah.  */
 /* Non-POSIX!  Linux manual pages are incorrect.                        */
 #  if linux
                 tblocksz = statBuf.f_bsize;

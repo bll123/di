@@ -3,12 +3,15 @@
 ### di Change Log
 
 **5.0.0 2025-xx-xx**
-    * Use big number/multi precision libraries (GMP or libtommath).
+  * Changes
+    * Drop syllable and VMS support.
+    * -w and -W options are no longer supported and are now ignored.
+    * default display size is now gigabytes.
+    * mkconfig: Updated to version 2.6.4.
+  * New Features
+    * Use big number/multi precision libraries (GMP or libtommath) if available.
     * Split into a library with a proper API and main program.
     * Add cmake configuration for modern systems.
-    * Drop syllable and VMS support.
-    * mkconfig: Updated to version 2.6.4.
-    * -w and -W options are no longer supported and are now ignored.
 
 **4.54.0.1 2024-10-15**
     * Fix single quotes in the manual page.

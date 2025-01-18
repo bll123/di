@@ -11,16 +11,15 @@
 extern "C" {
 # endif
 
-#define DI_VAL_512              512.0
-#define DI_VAL_1000             1000.0
+#define DI_BLKSZ_1                1
+#define DI_BLKSZ_512              512
+#define DI_BLKSZ_1000             1000
+#define DI_BLKSZ_1024             1024
+// ### need to check these
 #define DI_DISP_1000_IDX        0
-#define DI_VAL_1024             1024.0
 #define DI_DISP_1024_IDX        1
 
-#define DI_DISP_HR        -20.0
-#define DI_DISP_HR_2      -21.0
-
-#define DI_SORT_TYPE_MAX     10
+#define DI_SORT_TYPE_MAX        10
 
 typedef struct
 {
@@ -36,9 +35,8 @@ typedef struct di_opt {
   char            zoneDisplay [MAXPATHLEN + 1];
   /* should always be <= 1024 */
   /* should be 1, 512, 1000 or 1024 */
-  int             dispBlockSize;
-  unsigned int    baseDispSize;
-  unsigned int    baseDispIdx;
+  unsigned int    blockSize;
+  unsigned int    scaleSize;
   char            sortType [DI_SORT_TYPE_MAX + 1];
   int             optval [DI_OPT_MAX];
   unsigned int    exitFlag;

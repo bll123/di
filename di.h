@@ -11,19 +11,21 @@ extern "C" {
 # endif
 
 /* scaled values */
-#define DI_KILO           0
-#define DI_MEGA           1
-#define DI_GIGA           2
-#define DI_TERA           3
-#define DI_PETA           4
-#define DI_EXA            5
-#define DI_ZETTA          6
-#define DI_YOTTA          7
-#define DI_RONNA          8
-#define DI_QUETTA         9
-
+#define DI_SCALE_BYTE     0
+#define DI_SCALE_KILO     1
+#define DI_SCALE_MEGA     2
+#define DI_SCALE_GIGA     3
+#define DI_SCALE_TERA     4
+#define DI_SCALE_PETA     5
+#define DI_SCALE_EXA      6
+#define DI_SCALE_ZETTA    7
+#define DI_SCALE_YOTTA    8
+#define DI_SCALE_RONNA    9
+#define DI_SCALE_QUETTA   10
+#define DI_SCALE_MAX      11
 /* human readable */
-#define DI_HR             -20
+#define DI_SCALE_HR       -20
+#define DI_SCALE_HR_ALT   -21
 
 /* print flags */
 #define DI_PRNT_IGNORE      0
@@ -49,6 +51,7 @@ extern "C" {
 #define DI_INODE_FREE       4
 #define DI_INODE_AVAIL      5
 #define DI_VALUE_MAX        6
+#define DI_VALUE_NONE       7
 
 /* options return values */
 #define DI_EXIT_NORM      0
