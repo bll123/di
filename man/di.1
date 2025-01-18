@@ -281,14 +281,11 @@ Print the name of the mount point.
 .B M (deprecated)
 Print the name of the mount point.
 .TP
-.B d
-Print the device name.
-.TP
-.B s (deprecated)
-Print the device name.
+.B s
+Print the filesystem name (device name).
 .TP
 .B S (deprecated)
-Print the device name.
+Print the filesystem name.
 .TP
 .B t
 Print the file system type.
@@ -299,58 +296,56 @@ Print the file system type.
 .B Total Available
 .TP
 .B b
-Print the total number of megabytes on the file system.
+Print the total space on the file system.
 .TP
 .B B
-Print the total number of megabytes on the file system
-available for use by normal
+Print the total space on the file system available for use by normal
 users.
 .TP
 .B In Use
 .TP
 .B u
-Print the number of megabytes in use on the file system
-(actual number of megabytes used = total \- free).
+Print the space in use on the file system
+(actual space used = total \- free).
 .TP
 .B c
-Print the number of megabytes not available for use by normal users
-(total \- available).  Note that this calculation does work correctly
-the \[aq]apfs\[aq] filesystem.
+Print the space not available for use by normal users
+(total \- available).  Note that this calculation does not work correctly
+on the \[aq]apfs\[aq] filesystem.
 .TP
 .B Free
 .TP
 .B f
-Print the number of free (unused) megabytes on the file system.
+Print the amount of free (unused) space on the file system.
 .TP
 .B v
-Print the number of megabytes available for use by normal users.
+Print the space available for use by normal users.
 .TP
 .B Percentage Used
 .TP
 .B p
-Print the percentage of megabytes not available for use by normal users
-(number of megabytes not available for use / total disk space).
+Print the percentage of space not available for use by normal users
+(space not available for use / total disk space).
 .TP
 .B 1
-Print the percentage of total megabytes in use
-(actual number of megabytes used / total disk space).
+Print the percentage of space in use
+(actual space used / total disk space).
 .TP
 .B 2
-Print the percentage of megabytes in use, BSD-style.  Represents the
+Print the percentage of space in use, BSD-style.  Represents the
 percentage of user-available space in use.  Note that values over 100%
 are possible
-(actual number of megabytes used / disk
-space available to non-root users).
+(actual space used / disk space available to non-root users).
 .TP
 .B Percentage Free
 .TP
 .B a
-Print the percentage of megabytes available for use by normal users
-(number of megabytes available for use / total disk space).
+Print the percentage of space available for use by normal users
+(space available for use / total disk space).
 .TP
 .B 3
-Print the percentage of total megabytes free
-(actual number of megabytes free / total disk space).
+Print the percentage of space free
+(actual space free / total disk space).
 .TP
 .B Inodes
 .TP

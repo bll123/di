@@ -192,7 +192,7 @@ printDiskInfo (void *di_data)
     diout = &di_data->output;
     initSizeTable (diopts, diout);
 
-    if (diopts->optval [DI_OPT_OUT_TOTALS) {
+    if (diopts->optval [DI_OPT_DISP_TOTALS) {
       di_initialize_disk_info (&totals, 0);
       strncpy (totals.name, DI_GT ("Total"), (Size_t) DI_MOUNTPT_LEN);
       totals.printFlag = DI_PRNT_OK;
@@ -200,11 +200,11 @@ printDiskInfo (void *di_data)
 
     getMaxFormatLengths (di_data);
     tout = processTitles (diopts, diout);
-    if (diopts->optval [DI_OPT_OUT_HEADER]) {
+    if (diopts->optval [DI_OPT_DISP_HEADER]) {
       append (tout, &out, &outcurrlen, &outlen);
     }
     free (tout);
-    if (diopts->optval [DI_OPT_OUT_JSON]]) {
+    if (diopts->optval [DI_OPT_DISP_JSON]]) {
       const char *tjson = "{\n  \"partitions\" : [\n";
       append (tjson, &out, &outcurrlen, &outlen);
     }
@@ -221,7 +221,7 @@ printDiskInfo (void *di_data)
     if (! ishr &&
         (diopts->dispBlockSize > 0 &&
          diopts->dispBlockSize <= DI_BLKSZ_1024)) {
-      if (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]]) {
+      if (diopts->optval [DI_OPT_DISP_CSV]] || diopts->optval [DI_OPT_DISP_JSON]]) {
         Snprintf1 (diout->blockFormat, sizeof (diout->blockFormat),
             "%%" PRIu64);
       } else {
@@ -229,7 +229,7 @@ printDiskInfo (void *di_data)
             "%%%d" PRIu64, (int) diout->width);
       }
     } else {
-      if (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]]) {
+      if (diopts->optval [DI_OPT_DISP_CSV]] || diopts->optval [DI_OPT_DISP_JSON]]) {
         Snprintf1 (diout->blockFormatNR, sizeof (diout->blockFormatNR),
             "%%" PRIu64);
         if (! ishr) {
@@ -253,7 +253,7 @@ printDiskInfo (void *di_data)
         ++diout->width;
     }
 
-    if (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]]) {
+    if (diopts->optval [DI_OPT_DISP_CSV]] || diopts->optval [DI_OPT_DISP_JSON]]) {
       Snprintf1 (diout->inodeFormat, sizeof (diout->inodeFormat),
           "%%%s", PRIu64);
     } else {
@@ -262,7 +262,7 @@ printDiskInfo (void *di_data)
     }
 
     diskInfo = di_data->diskInfo;
-    if (diopts->optval [DI_OPT_OUT_TOTALS)
+    if (diopts->optval [DI_OPT_DISP_TOTALS)
     {
         if (di_data->haspooledfs && ! di_data->totsorted)
         {
@@ -344,7 +344,7 @@ printDiskInfo (void *di_data)
         continue;
       }
 
-      if (! first && diopts->optval [DI_OPT_OUT_JSON]]) {
+      if (! first && diopts->optval [DI_OPT_DISP_JSON]]) {
         append (",\n", &out, &outcurrlen, &outlen);
       }
       first = false;
@@ -354,18 +354,18 @@ printDiskInfo (void *di_data)
       free (tout);
     }
 
-    if (diopts->optval [DI_OPT_OUT_JSON]]) {
+    if (diopts->optval [DI_OPT_DISP_JSON]]) {
       append ("\n", &out, &outcurrlen, &outlen);
     }
 
-    if (diopts->optval [DI_OPT_OUT_TOTALS)
+    if (diopts->optval [DI_OPT_DISP_TOTALS)
     {
       tout = printInfo (&totals, diopts, diout);
       append (tout, &out, &outcurrlen, &outlen);
       free (tout);
     }
 
-    if (diopts->optval [DI_OPT_OUT_JSON]]) {
+    if (diopts->optval [DI_OPT_DISP_JSON]]) {
       const char *tjson = "  ]\n}\n";
       append (tjson, &out, &outcurrlen, &outlen);
     }
@@ -453,16 +453,16 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
     outlen = 0;
     outcurrlen = 0;
 
-    if (diopts->optval [DI_OPT_OUT_JSON]]) {
+    if (diopts->optval [DI_OPT_DISP_JSON]]) {
       t = "    {\n";
       append (t, &out, &outcurrlen, &outlen);
     }
 
     first = true;
     if (! percInit) {
-      if (diopts->optval [DI_OPT_OUT_JSON]]) {
+      if (diopts->optval [DI_OPT_DISP_JSON]]) {
         Snprintf1 (percFormat, sizeof (percFormat), "%%" PRIu64);
-      } else if (diopts->optval [DI_OPT_OUT_CSV]]) {
+      } else if (diopts->optval [DI_OPT_DISP_CSV]]) {
         Snprintf1 (percFormat, sizeof (percFormat), "%%" PRIu64 "%%%%");
       } else {
         if (diopts->optval [DI_OPT_POSIX_COMPAT]) {
@@ -554,13 +554,13 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         valid = false;
       }
 
-      if (valid && (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]])) {
+      if (valid && (diopts->optval [DI_OPT_DISP_CSV]] || diopts->optval [DI_OPT_DISP_JSON]])) {
         if (! first) {
           t = ",";
-          if (diopts->optval [DI_OPT_OUT_CSV_TAB]) {
+          if (diopts->optval [DI_OPT_DISP_CSV_TAB]) {
             t = "	"; /* tab here */
           }
-          if (diopts->optval [DI_OPT_OUT_JSON]]) {
+          if (diopts->optval [DI_OPT_DISP_JSON]]) {
             t = ",\n";
           }
           append (t, &out, &outcurrlen, &outlen);
@@ -568,7 +568,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
         first = false;
       }
 
-      if (valid && diopts->optval [DI_OPT_OUT_JSON]]) {
+      if (valid && diopts->optval [DI_OPT_DISP_JSON]]) {
         for (i = 0; i < (int) DI_FORMATNAMES_SIZE; ++i) {
           if (*ptr == formatNames [i].fmtChar) {
             t = "      \"";
@@ -783,7 +783,7 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
 
         default:
         {
-          if (! diopts->optval [DI_OPT_OUT_JSON]]) {
+          if (! diopts->optval [DI_OPT_DISP_JSON]]) {
             ttext [0] = *ptr;
             ttext [1] = '\0';
             append (ttext, &out, &outcurrlen, &outlen);
@@ -793,16 +793,16 @@ printInfo (di_disk_info_t *diskInfo, di_opt_t *diopts, diOutput_t *diout)
       }
 
       ++ptr;
-      if (! diopts->optval [DI_OPT_OUT_CSV]] && ! diopts->optval [DI_OPT_OUT_JSON]] && *ptr && valid)
+      if (! diopts->optval [DI_OPT_DISP_CSV]] && ! diopts->optval [DI_OPT_DISP_JSON]] && *ptr && valid)
       {
         append (" ", &out, &outcurrlen, &outlen);
       }
     }
 
-    if (diopts->optval [DI_OPT_OUT_JSON]]) {
+    if (diopts->optval [DI_OPT_DISP_JSON]]) {
       append ("\n    }", &out, &outcurrlen, &outlen);
     }
-    if (! diopts->optval [DI_OPT_OUT_JSON]] && outcurrlen > 0) {
+    if (! diopts->optval [DI_OPT_DISP_JSON]] && outcurrlen > 0) {
       append ("\n", &out, &outcurrlen, &outlen);
     }
 
@@ -999,7 +999,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
     outlen = 0;
     outcurrlen = 0;
     first = true;
-    if (diopts->optval [DI_OPT_OUT_DBG_HEADER])
+    if (diopts->optval [DI_OPT_DISP_DBG_HEADER])
     {
         printf (DI_GT ("di version %s    Default Format: %s\n"),
                 DI_VERSION, DI_DEFAULT_FORMAT);
@@ -1196,7 +1196,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
 
           default:
           {
-            if (! diopts->optval [DI_OPT_OUT_JSON]]) {
+            if (! diopts->optval [DI_OPT_DISP_JSON]]) {
               ttext [0] = *ptr;
               ttext [1] = '\0';
               append (ttext, &out, &outcurrlen, &outlen);
@@ -1224,9 +1224,9 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
         Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
             jstr, (int) tlen, (int) tlen);
 
-        if (diopts->optval [DI_OPT_OUT_CSV]]) {
+        if (diopts->optval [DI_OPT_DISP_CSV]]) {
           if (! first) {
-            if (diopts->optval [DI_OPT_OUT_CSV_TAB]) {
+            if (diopts->optval [DI_OPT_DISP_CSV_TAB]) {
               append ("	", &out, &outcurrlen, &outlen); /* tab here */
             } else {
               append (",", &out, &outcurrlen, &outlen);
@@ -1235,7 +1235,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
           first = false;
         }
           /* title handling */
-        if (diopts->optval [DI_OPT_OUT_CSV]]) {
+        if (diopts->optval [DI_OPT_DISP_CSV]]) {
           ttext [0] = *ptr;
           ttext [1] = '\0';
           append (ttext, &out, &outcurrlen, &outlen);
@@ -1244,15 +1244,15 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
         }
 
         if (fstr != (char *) NULL) {
-          if (diopts->optval [DI_OPT_OUT_CSV]] || diopts->optval [DI_OPT_OUT_JSON]]) {
-            if (diopts->optval [DI_OPT_OUT_CSV_TAB]) {
+          if (diopts->optval [DI_OPT_DISP_CSV]] || diopts->optval [DI_OPT_DISP_JSON]]) {
+            if (diopts->optval [DI_OPT_DISP_CSV_TAB]) {
               strncpy (tformat, "%s", sizeof (tformat));
             } else {
               strncpy (tformat, "\"%s\"", sizeof (tformat));
             }
           }
           if (tlen != len) {
-            if (! diopts->optval [DI_OPT_OUT_CSV]]) {
+            if (! diopts->optval [DI_OPT_DISP_CSV]]) {
               Snprintf3 (tformat, sizeof (tformat), "%%%s%d.%ds",
                   jstr, (int) len, (int) len);
             }
@@ -1266,7 +1266,7 @@ processTitles (di_opt_t *diopts, diOutput_t *diout)
       }
 
       ++ptr;
-      if (! diopts->optval [DI_OPT_OUT_CSV]] && *ptr && valid)
+      if (! diopts->optval [DI_OPT_DISP_CSV]] && *ptr && valid)
       {
         append (" ", &out, &outcurrlen, &outlen);
       }

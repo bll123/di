@@ -51,7 +51,7 @@ extern "C" {
 #define DI_INODE_FREE       4
 #define DI_INODE_AVAIL      5
 #define DI_VALUE_MAX        6
-#define DI_VALUE_NONE       7
+#define DI_VALUE_NONE       -1
 
 /* options return values */
 #define DI_EXIT_NORM      0
@@ -68,30 +68,30 @@ extern "C" {
 /* di options */
 #define DI_OPT_POSIX_COMPAT     0
 #define DI_OPT_QUOTA_CHECK      1
-#define DI_OPT_OUT_CSV          2
-#define DI_OPT_OUT_CSV_TAB      3
+#define DI_OPT_DISP_CSV          2
+#define DI_OPT_DISP_CSV_TAB      3
 #define DI_OPT_EXCL_LOOPBACK    4
-#define DI_OPT_OUT_JSON         5
-#define DI_OPT_OUT_TOTALS       6
-#define DI_OPT_OUT_DBG_HEADER   7
-#define DI_OPT_OUT_HEADER       8
+#define DI_OPT_DISP_JSON         5
+#define DI_OPT_DISP_TOTALS       6
+#define DI_OPT_DISP_DBG_HEADER   7
+#define DI_OPT_DISP_HEADER       8
 #define DI_OPT_DISP_ALL         9
 #define DI_OPT_LOCAL_ONLY       10
 #define DI_OPT_NO_SYMLINK       11
 #define DI_OPT_MAX              12
 #define DI_OPT_FMT_STR_LEN      13
+#define DI_OPT_SCALE            14
 
 #define DI_FMT_ITER_STOP        -1
 
 /* string formats */
 #define DI_FMT_MOUNT           'm'
-#define DI_FMT_FILESYSTEM         'd'
+#define DI_FMT_FILESYSTEM      's'
 #define DI_FMT_FSTYPE          't'
 #define DI_FMT_MOUNT_OPTIONS   'O'
 /* these will be processed (forever probably), but are no longer used */
 #define DI_FMT_MOUNT_OLD       'M'
-#define DI_FMT_FILESYSTEM_OLD     's'
-#define DI_FMT_FILESYSTEM_OLD_B   'S'
+#define DI_FMT_FILESYSTEM_OLD   'S'
 #define DI_FMT_FSTYPE_OLD      'T'
 
 /* disk information */
@@ -132,14 +132,17 @@ typedef struct
 
 /* dilib.c */
 extern void * di_initialize (void);
-extern int di_process_options (void *di_data, int argc, char * argv []);
-extern void di_get_data (void *di_data);
-extern void di_cleanup (void *di_data);
-extern int di_iterate_init (void *di_data, int iteropt);
-extern di_pub_disk_info_t *di_iterate (void *di_data);
-extern int di_check_option (void *di_data, int optidx);
-extern void di_format_iter_init (void *di_data);
-extern int di_format_iterate (void *di_data);
+extern int di_process_options (void *, int, char * []);
+extern void di_get_data (void *);
+extern void di_cleanup (void *);
+extern int di_iterate_init (void *, int);
+extern di_pub_disk_info_t *di_iterate (void *);
+extern int di_check_option (void *, int);
+extern void di_format_iter_init (void *);
+extern int di_format_iterate (void *);
+extern int di_get_scale_max (void *, int, int, int, int);
+extern void di_disp_scaled (void *, char *, long, int, int, int, int, int);
+extern void di_disp_perc (void *tdi_data, char *buff, long sz, int infoidx, int validxA, int validxB, int validxC, int validxD, int validxE);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }

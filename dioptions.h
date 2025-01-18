@@ -36,7 +36,7 @@ typedef struct di_opt {
   /* should always be <= 1024 */
   /* should be 1, 512, 1000 or 1024 */
   unsigned int    blockSize;
-  unsigned int    scaleSize;
+  int             scale;
   char            sortType [DI_SORT_TYPE_MAX + 1];
   int             optval [DI_OPT_MAX];
   unsigned int    exitFlag;

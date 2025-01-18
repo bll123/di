@@ -875,7 +875,9 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
       dinum_set_u (&tsize, qdata->qinfo.dqb_ihardlimit);
 #  endif
     }
-    if (tsize > 0 && (tsize < diqinfo->values [DI_QUOTA_ILIMIT] || diqinfo->values [DI_QUOTA_ILIMIT] == 0)) {
+    if (dinum_cmp_s (&tsize, 0) > 0 &&
+        (dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_ILIMIT]) < 0 ||
+        dinum_cmp_s (&diqinfo->values [DI_QUOTA_ILIMIT], 0) == 0)) {
       dinum_set (&diqinfo->values [DI_QUOTA_ILIMIT], &tsize);
       dinum_set (&tlimit, &tsize);
     }
@@ -898,7 +900,9 @@ di_process_quotas (const char *tag, di_quota_t *diqinfo,
       dinum_set_u (&tsize, qdata->qinfo.dqb_isoftlimit);
 #  endif
     }
-    if (tsize > 0 && (tsize < diqinfo->values [DI_QUOTA_ILIMIT] || diqinfo->values [DI_QUOTA_ILIMIT] == 0)) {
+    if (dinum_cmp_s (&tsize, 0) > 0 &&
+        (dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_ILIMIT]) < 0 ||
+        dinum_cmp_s (&diqinfo->values [DI_QUOTA_ILIMIT], 0) == 0)) {
       dinum_set (&diqinfo->values [DI_QUOTA_ILIMIT], &tsize);
       dinum_set (&tlimit, &tsize);
     }

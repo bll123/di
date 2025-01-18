@@ -102,6 +102,9 @@ int debug = 0;
 #define DI_SORT_OPT_TYPE            't'
 #define DI_SORT_OPT_ASCENDING       1
 
+static int scale_values_init = 0;
+static dinum_t scale_values [DI_SCALE_MAX];
+
 static void checkDiskInfo       (di_data_t *, int);
 static void checkDiskQuotas     (di_data_t *);
 static int  checkFileInfo       (di_data_t *);
@@ -118,6 +121,9 @@ static int  checkForUUID        (const char *);
 static int  diCompare           (const di_opt_t *, const char *sortType, const di_disk_info_t *, unsigned int, unsigned int);
 static void checkZone (di_disk_info_t *, di_zone_info_t *, di_opt_t *);
 static void di_sort_disk_info (di_opt_t *, di_disk_info_t *, int, const char *, int);
+static void init_scale_values (di_opt_t *);
+static void di_calc_space (di_data_t *di_data, int infoidx, int validxA, int validxB, int validxC, dinum_t *val);
+static double di_calc_perc (di_data_t *di_data, int infoidx, int validxA, int validxB, int validxC, int validxD, int validxE);
 
 void *
 di_initialize (void)
@@ -182,6 +188,13 @@ di_cleanup (void *tdi_data)
   di_free_zones (zinfo);
 
   free (di_data);
+
+  if (scale_values_init) {
+    for (int i = 0; i < DI_SCALE_MAX; ++i) {
+      dinum_clear (&scale_values [i]);
+    }
+    scale_values_init = 0;
+  }
 }
 
 int
@@ -207,6 +220,8 @@ di_process_options (void *tdi_data, int argc, char * argv [])
     fprintf (stdout, "# INTERNAL: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long, _siz_long_long);
 #endif
   }
+
+  init_scale_values (diopts);
 
   return exitflag;
 }
@@ -258,7 +273,7 @@ di_get_data (void *tdi_data)
   di_get_disk_info (&di_data->diskInfo, &di_data->count);
 
   /* need the sort-by-filesystem before checkDiskInfo() is called */
-  if ((di_data->haspooledfs || diopts->optval [DI_OPT_OUT_TOTALS]) &&
+  if ((di_data->haspooledfs || diopts->optval [DI_OPT_DISP_TOTALS]) &&
       ! di_data->totsorted) {
     di_sort_disk_info (diopts, di_data->diskInfo, di_data->count, "s", DI_SORT_TOTAL);
     di_data->totsorted = true;
@@ -302,9 +317,6 @@ di_iterate_init (void *tdi_data, int iteropt)
     }
   }
 
-fprintf (stderr, "\n");
-fprintf (stderr, "== count: %d %d\n", count, di_data->count);
-
   return count;
 }
 
@@ -331,7 +343,6 @@ di_iterate (void *tdi_data)
   }
 
   sortidx = di_data->diskInfo [di_data->iteridx].sortIndex [DI_SORT_MAIN];
-fprintf (stderr, "a: iter: %d sortidx: %d fs-sort: %d\n", di_data->iteridx, sortidx, di_data->diskInfo [di_data->iteridx].sortIndex [DI_SORT_TOTAL]);
   dinfo = & (di_data->diskInfo [sortidx]);
 
   if (di_data->iteropt == DI_ITER_PRINTABLE) {
@@ -341,7 +352,6 @@ fprintf (stderr, "a: iter: %d sortidx: %d fs-sort: %d\n", di_data->iteridx, sort
         break;
       }
       sortidx = di_data->diskInfo [di_data->iteridx].sortIndex [DI_SORT_MAIN];
-fprintf (stderr, " b: iter: %d sortidx: %d fs-sort: %d\n", di_data->iteridx, sortidx, di_data->diskInfo [di_data->iteridx].sortIndex [DI_SORT_TOTAL]);
       dinfo = & (di_data->diskInfo [sortidx]);
     }
   }
@@ -408,6 +418,96 @@ di_format_iterate (void *tdi_data)
   diopts = (di_opt_t *) di_data->options;
 
   return di_opt_format_iterate (diopts);
+}
+
+int
+di_get_scale_max (void *tdi_data, int infoidx,
+    int validxA, int validxB, int validxC)
+{
+  di_data_t   *di_data = (di_data_t *) tdi_data;
+  di_opt_t    *diopts;
+  int         scaleidx;
+  dinum_t     val;
+  int         i;
+
+  if (di_data == NULL) {
+    return DI_SCALE_GIGA;
+  }
+
+  if (infoidx < 0 || infoidx >= di_data->count) {
+    return DI_SCALE_GIGA;
+  }
+
+  diopts = (di_opt_t *) di_data->options;
+  init_scale_values (diopts);
+
+  dinum_init (&val);
+  di_calc_space (di_data, infoidx, validxA, validxB, validxC, &val);
+
+  /* if the comparison loop doesn't find it, it's a large number */
+  scaleidx = DI_SCALE_MAX - 1;
+  for (i = DI_SCALE_KILO; i < DI_SCALE_MAX; ++i) {
+    if (dinum_cmp (&val, &scale_values [i]) < 0) {
+      scaleidx = i - 1;
+      break;
+    }
+  }
+
+  dinum_clear (&val);
+  return scaleidx;
+}
+
+void
+di_disp_scaled (void *tdi_data, char *buff, long sz, int infoidx,
+    int scaleidx, int validxA, int validxB, int validxC)
+{
+  di_data_t   *di_data = (di_data_t *) tdi_data;
+  di_opt_t    *diopts;
+  dinum_t     val;
+  double      dval;
+
+  *buff = '\0';
+  if (di_data == NULL) {
+    return;
+  }
+
+  if (infoidx < 0 || infoidx >= di_data->count) {
+    return;
+  }
+
+  diopts = (di_opt_t *) di_data->options;
+  init_scale_values (diopts);
+
+  dinum_init (&val);
+  di_calc_space (di_data, infoidx, validxA, validxB, validxC, &val);
+  dval = dinum_scale (&val, &scale_values [scaleidx]);
+  Snprintf1 (buff, sz, "%.1f", dval);
+
+  dinum_clear (&val);
+}
+
+void
+di_disp_perc (void *tdi_data, char *buff, long sz, int infoidx,
+    int validxA, int validxB, int validxC, int validxD, int validxE)
+{
+  di_data_t   *di_data = (di_data_t *) tdi_data;
+  di_opt_t    *diopts;
+  double      dval;
+
+  *buff = '\0';
+  if (di_data == NULL) {
+    return;
+  }
+
+  if (infoidx < 0 || infoidx >= di_data->count) {
+    return;
+  }
+
+  diopts = (di_opt_t *) di_data->options;
+  init_scale_values (diopts);
+
+  dval = di_calc_perc (di_data, infoidx, validxA, validxB, validxC, validxD, validxE);
+  Snprintf1 (buff, sz, "%.0f", dval);
 }
 
 extern int
@@ -1403,5 +1503,96 @@ diCompare (const di_opt_t *diopts, const char *sortType,
     }
 
     return rc;
+}
+
+static void
+init_scale_values (di_opt_t *diopts)
+{
+  int       i;
+  dinum_t   base;
+
+  if (scale_values_init) {
+    return;
+  }
+
+  for (i = 0; i < DI_SCALE_MAX; ++i) {
+    dinum_init (&scale_values [i]);
+  }
+  dinum_init (&base);
+  dinum_set_u (&base, diopts->blockSize);
+  dinum_set_u (&scale_values [DI_SCALE_BYTE], 1);
+  for (i = DI_SCALE_KILO; i < DI_SCALE_MAX; ++i) {
+    dinum_set (&scale_values [i], &base);
+    dinum_mul (&scale_values [i], &scale_values [i - 1]);
+  }
+
+  scale_values_init = 1;
+  dinum_clear (&base);
+}
+
+static void
+di_calc_space (di_data_t *di_data, int infoidx,
+    int validxA, int validxB, int validxC, dinum_t *val)
+{
+  dinum_t         sub;
+  di_disk_info_t  *dinfo;
+
+  dinfo = &di_data->diskInfo [infoidx];
+
+  dinum_init (&sub);
+  dinum_set_u (&sub, 0);
+  if (validxB != DI_VALUE_NONE) {
+    dinum_set (&sub, &dinfo->values [validxB]);
+  }
+  if (validxB != DI_VALUE_NONE && validxC != DI_VALUE_NONE) {
+    dinum_sub (&sub, &dinfo->values [validxC]);
+  }
+  dinum_set (val, &dinfo->values [validxA]);
+  dinum_sub (val, &sub);
+
+  dinum_clear (&sub);
+}
+
+static double
+di_calc_perc (di_data_t *di_data, int infoidx,
+    int validxA, int validxB, int validxC, int validxD, int validxE)
+{
+  dinum_t         subd;
+  dinum_t         subr;
+  dinum_t         dividend;
+  dinum_t         divisor;
+  di_disk_info_t  *dinfo;
+  double          dval;
+
+  dinfo = &di_data->diskInfo [infoidx];
+
+  dinum_init (&subd);
+  dinum_init (&subr);
+  dinum_init (&dividend);
+  dinum_init (&divisor);
+  dinum_set_u (&subd, 0);
+  dinum_set_u (&subr, 0);
+
+  if (validxB != DI_VALUE_NONE) {
+    dinum_set (&subd, &dinfo->values [validxB]);
+  }
+  dinum_set (&dividend, &dinfo->values [validxA]);
+  dinum_sub (&dividend, &subd);
+
+  if (validxD != DI_VALUE_NONE) {
+    dinum_set (&subr, &dinfo->values [validxD]);
+  }
+  if (validxD != DI_VALUE_NONE && validxE != DI_VALUE_NONE) {
+    dinum_sub (&subr, &dinfo->values [validxE]);
+  }
+  dinum_set (&divisor, &dinfo->values [validxC]);
+  dinum_sub (&divisor, &subr);
+  dval = dinum_perc (&dividend, &divisor);
+
+  dinum_clear (&subd);
+  dinum_clear (&subr);
+  dinum_clear (&dividend);
+  dinum_clear (&divisor);
+  return dval;
 }
 

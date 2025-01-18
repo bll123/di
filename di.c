@@ -31,7 +31,7 @@
  *  Format string values:
  *    Strings
  *      m - mount point
- *      d - device name (special)
+ *      s - filesystem (device name / special)
  *      t - disk partition type
  *      O - mount options.
  *    Disk Space
@@ -106,8 +106,38 @@
 #include "distrutils.h"
 #include "version.h"
 
+typedef struct {
+  unsigned int    *maxlen;
+  unsigned int    *scaleidx;
+  const char      **suffix;
+  unsigned int    *leftjust;
+} di_disp_info_t;
+
+typedef struct {
+  char    *uc;
+  char    *lc;
+  char    *name;
+  char    *nameb;
+} di_disp_text_t;
+
+static di_disp_text_t disptext [] =
+{
+  { " ", " ", "Byte", "Byte" },
+  { "K", "k", "Kilo", "Kibi" },
+  { "M", "m", "Mega", "Mebi" },
+  { "G", "g", "Giga", "Gibi" },
+  { "T", "t", "Tera", "Tebi" },
+  { "P", "p", "Peta", "Pebi" },
+  { "E", "e", "Exa", "Exbi" },
+  { "Z", "z", "Zetta", "Zebi" },
+  { "Y", "y", "Yotta", "Yobi" },
+  { "R", "r", "Ronna", "Ronni" },
+  { "Q", "q", "Quetta", "Quetti" }
+};
+#define DI_DISPTEXT_SZ ( (int) (sizeof (disptext) / sizeof (di_disp_text_t)))
+
 static void di_display_data (void *);
-static void di_display_header (void *di_data, char **strdata, unsigned int *maxlen);
+static void di_display_header (void *, char **);
 static void usage (void);
 static Size_t istrlen (const char *str);
 
@@ -180,7 +210,6 @@ static void
 di_display_data (void *di_data)
 {
   di_pub_disk_info_t  *pub;
-  unsigned int        *maxlen;
   int                 i;
   int                 iterval;
   int                 fmtstrlen;
@@ -190,30 +219,53 @@ di_display_data (void *di_data)
   int                 csvout;
   int                 csvtabs;
   int                 jsonout;
+  int                 scaleidx;
+  int                 scalehr;
   char                temp [MAXPATHLEN * 2];
+  di_disp_info_t      dispinfo;
 
-  csvout = di_check_option (di_data, DI_OPT_OUT_CSV);
-  csvtabs = di_check_option (di_data, DI_OPT_OUT_CSV_TAB);
-  jsonout = di_check_option (di_data, DI_OPT_OUT_JSON);
-
+  csvout = di_check_option (di_data, DI_OPT_DISP_CSV);
+  csvtabs = di_check_option (di_data, DI_OPT_DISP_CSV_TAB);
+  jsonout = di_check_option (di_data, DI_OPT_DISP_JSON);
   fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
-  maxlen = malloc (sizeof (unsigned int) * fmtstrlen);
-  for (i = 0; i < fmtstrlen; ++i) {
-    maxlen [i] = 0;
+  scaleidx = di_check_option (di_data, DI_OPT_SCALE);
+  scalehr = 0;
+  if (scaleidx == DI_SCALE_HR || scaleidx == DI_SCALE_HR_ALT) {
+    scalehr = 1;
   }
 
   iterval = di_check_option (di_data, DI_OPT_DISP_ALL);
   count = di_iterate_init (di_data, iterval);
-  if (di_check_option (di_data, DI_OPT_OUT_HEADER)) {
+  if (di_check_option (di_data, DI_OPT_DISP_HEADER)) {
     ++count;
+  }
+
+  dispinfo.maxlen = malloc (sizeof (unsigned int) * fmtstrlen);
+  dispinfo.scaleidx = malloc (sizeof (unsigned int) * count * fmtstrlen);
+  dispinfo.suffix = malloc (sizeof (char *) * count * fmtstrlen);
+  dispinfo.leftjust = malloc (sizeof (unsigned int) * fmtstrlen);
+  for (i = 0; i < fmtstrlen; ++i) {
+    dispinfo.maxlen [i] = DI_SCALE_GIGA;
+    dispinfo.leftjust [i] = 0;
+  }
+  for (i = 0; i < count; ++i) {
+    int   j;
+
+    for (j = 0; j < fmtstrlen; ++j) {
+      int       idx;
+
+      idx = i * fmtstrlen + j;
+      dispinfo.scaleidx [idx] = scaleidx;
+      dispinfo.suffix [idx] = "";
+    }
   }
 
   strdata = malloc (sizeof (char *) * count * fmtstrlen);
 
   dispcount = 0;
 
-  if (di_check_option (di_data, DI_OPT_OUT_HEADER)) {
-    di_display_header (di_data, strdata, maxlen);
+  if (di_check_option (di_data, DI_OPT_DISP_HEADER)) {
+    di_display_header (di_data, strdata);
     dispcount = 1;
   }
 
@@ -226,100 +278,193 @@ di_display_data (void *di_data)
   while ( (pub = di_iterate (di_data)) != NULL) {
     int         fmt;
     int         fmtcount;
-    int         stridx;
+    int         dataidx;
     const char  *comma;
 
     di_format_iter_init (di_data);
     fmtcount = 0;
     comma = ",";
     while ( (fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
-      stridx = dispcount * fmtstrlen + fmtcount;
+      dataidx = dispcount * fmtstrlen + fmtcount;
+      strdata [dataidx] = NULL;
 
-      strdata [stridx] = NULL;
       if (fmtcount == fmtstrlen - 1) {
         comma = "";
       }
+
       switch (fmt) {
         /* string values */
         case DI_FMT_MOUNT:
         case DI_FMT_MOUNT_OLD: {
+          dispinfo.leftjust [fmtcount] = 1;
           if (jsonout) {
+// ### move the json output to the output loop...
             Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
                 "mount", pub->strdata [DI_DISP_MOUNTPT], comma);
-            strdata [stridx] = strdup (temp);
+            strdata [dataidx] = strdup (temp);
           } else {
-            strdata [stridx] = strdup (pub->strdata [DI_DISP_MOUNTPT]);
+            strdata [dataidx] = strdup (pub->strdata [DI_DISP_MOUNTPT]);
           }
           break;
         }
         case DI_FMT_FILESYSTEM:
-        case DI_FMT_FILESYSTEM_OLD:
-        case DI_FMT_FILESYSTEM_OLD_B: {
+        case DI_FMT_FILESYSTEM_OLD: {
+          dispinfo.leftjust [fmtcount] = 1;
           if (jsonout) {
+// ### move the json output to the output loop...
             Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
                 "filesystem", pub->strdata [DI_DISP_FILESYSTEM], comma);
-            strdata [stridx] = strdup (temp);
+            strdata [dataidx] = strdup (temp);
           } else {
-            strdata [stridx] = strdup (pub->strdata [DI_DISP_FILESYSTEM]);
+            strdata [dataidx] = strdup (pub->strdata [DI_DISP_FILESYSTEM]);
           }
           break;
         }
         case DI_FMT_FSTYPE:
         case DI_FMT_FSTYPE_OLD: {
+          dispinfo.leftjust [fmtcount] = 1;
           if (jsonout) {
+// ### move the json output to the output loop...
             Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
                 "fstype", pub->strdata [DI_DISP_FSTYPE], comma);
-            strdata [stridx] = strdup (temp);
+            strdata [dataidx] = strdup (temp);
           } else {
-            strdata [stridx] = strdup (pub->strdata [DI_DISP_FSTYPE]);
+            strdata [dataidx] = strdup (pub->strdata [DI_DISP_FSTYPE]);
           }
           break;
         }
         case DI_FMT_MOUNT_OPTIONS: {
+          dispinfo.leftjust [fmtcount] = 1;
           if (jsonout) {
+// ### move the json output to the output loop...
             Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
                 "options", pub->strdata [DI_DISP_FSTYPE], comma);
-            strdata [stridx] = strdup (temp);
+            strdata [dataidx] = strdup (temp);
           } else {
-            strdata [stridx] = strdup (pub->strdata [DI_DISP_MOUNTOPT]);
+            strdata [dataidx] = strdup (pub->strdata [DI_DISP_MOUNTOPT]);
           }
           break;
         }
 
         /* disk space values */
         case DI_FMT_BTOT: {
+          if (scalehr) {
+            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
+                pub->index, DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+            dispinfo.suffix [dataidx] =
+                disptext [dispinfo.scaleidx [dataidx]].uc;
+          }
+          di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
+              dispinfo.scaleidx [dataidx],
+              DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
           break;
         }
         case DI_FMT_BTOT_AVAIL: {
+          if (scalehr) {
+            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
+                pub->index, DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_AVAIL);
+            dispinfo.suffix [dataidx] =
+                disptext [dispinfo.scaleidx [dataidx]].uc;
+          }
+          di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
+              dispinfo.scaleidx [dataidx],
+              DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_AVAIL);
+          strdata [dataidx] = strdup (temp);
           break;
         }
         case DI_FMT_BUSED: {
+          if (scalehr) {
+            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
+                pub->index, DI_SPACE_TOTAL, DI_SPACE_FREE, DI_VALUE_NONE);
+            dispinfo.suffix [dataidx] =
+                disptext [dispinfo.scaleidx [dataidx]].uc;
+          }
+          di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
+              dispinfo.scaleidx [dataidx],
+              DI_SPACE_TOTAL, DI_SPACE_FREE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
           break;
         }
         case DI_FMT_BCUSED: {
+          if (scalehr) {
+            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
+                pub->index, DI_SPACE_TOTAL, DI_SPACE_AVAIL, DI_VALUE_NONE);
+            dispinfo.suffix [dataidx] =
+                disptext [dispinfo.scaleidx [dataidx]].uc;
+          }
+          di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
+              dispinfo.scaleidx [dataidx],
+              DI_SPACE_TOTAL, DI_SPACE_AVAIL, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
           break;
         }
         case DI_FMT_BFREE: {
+          if (scalehr) {
+            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
+                pub->index, DI_SPACE_FREE, DI_VALUE_NONE, DI_VALUE_NONE);
+            dispinfo.suffix [dataidx] =
+                disptext [dispinfo.scaleidx [dataidx]].uc;
+          }
+          di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
+              dispinfo.scaleidx [dataidx],
+              DI_SPACE_FREE, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
           break;
         }
         case DI_FMT_BAVAIL: {
+          if (scalehr) {
+            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
+                pub->index, DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE);
+            dispinfo.suffix [dataidx] =
+                disptext [dispinfo.scaleidx [dataidx]].uc;
+          }
+          di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
+              dispinfo.scaleidx [dataidx],
+              DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
           break;
         }
 
         /* disk space percentages */
         case DI_FMT_BPERC_NAVAIL: {
+          di_disp_perc (di_data, temp, sizeof (temp), pub->index,
+              DI_SPACE_TOTAL, DI_SPACE_AVAIL,
+              DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
+          dispinfo.suffix [dataidx] = "%";
           break;
         }
         case DI_FMT_BPERC_USED: {
+          di_disp_perc (di_data, temp, sizeof (temp), pub->index,
+              DI_SPACE_TOTAL, DI_SPACE_FREE,
+              DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
+          dispinfo.suffix [dataidx] = "%";
           break;
         }
         case DI_FMT_BPERC_BSD: {
+          di_disp_perc (di_data, temp, sizeof (temp), pub->index,
+              DI_SPACE_TOTAL, DI_SPACE_FREE,
+              DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_AVAIL);
+          strdata [dataidx] = strdup (temp);
+          dispinfo.suffix [dataidx] = "%";
           break;
         }
         case DI_FMT_BPERC_AVAIL: {
+          di_disp_perc (di_data, temp, sizeof (temp), pub->index,
+              DI_SPACE_AVAIL, DI_VALUE_NONE,
+              DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
+          dispinfo.suffix [dataidx] = "%";
           break;
         }
         case DI_FMT_BPERC_FREE: {
+          di_disp_perc (di_data, temp, sizeof (temp), pub->index,
+              DI_SPACE_FREE, DI_VALUE_NONE,
+              DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
+          dispinfo.suffix [dataidx] = "%";
           break;
         }
 
@@ -353,14 +498,17 @@ di_display_data (void *di_data)
       int     j;
 
       for (j = 0; j < fmtstrlen; ++j) {
-        int     stridx;
+        int     dataidx;
         Size_t  len;
 
-        stridx = i * fmtstrlen + j;
-        if (strdata [stridx] != NULL) {
-          len = istrlen (strdata [stridx]);
-          if (len > maxlen [j]) {
-            maxlen [j] = len;
+        dataidx = i * fmtstrlen + j;
+        if (strdata [dataidx] != NULL) {
+          len = istrlen (strdata [dataidx]);
+          if (* (dispinfo.suffix [dataidx])) {
+            ++len;
+          }
+          if (len > dispinfo.maxlen [j]) {
+            dispinfo.maxlen [j] = len;
           }
         }
       }
@@ -374,35 +522,49 @@ di_display_data (void *di_data)
       printf ("    {\n");
     }
     for (j = 0; j < fmtstrlen; ++j) {
-      int     stridx;
+      int         dataidx;
+      const char  *tmp;
 
-      stridx = i * fmtstrlen + j;
-      if (strdata [stridx] != NULL) {
-        if (csvout) {
-          if (csvtabs) {
-            printf ("%s", strdata [stridx]);
-          } else {
-            printf ("\"%s\"", strdata [stridx]);
-          }
-        } else if (jsonout) {
-          printf ("      %s", strdata [stridx]);
+      dataidx = i * fmtstrlen + j;
+      tmp = strdata [dataidx];
+      if (tmp == NULL) {
+        tmp = "n/a";
+      }
+
+      if (csvout) {
+        if (csvtabs) {
+          printf ("%s", strdata [dataidx]);
         } else {
-          printf ("%-*s", maxlen [j], strdata [stridx]);
+          printf ("\"%s\"", strdata [dataidx]);
         }
+      } else if (jsonout) {
+        printf ("      %s", strdata [dataidx]);
+      } else {
+        int       len;
 
-        if (jsonout) {
-          printf ("\n");
+        len = dispinfo.maxlen [j];
+        if (*dispinfo.suffix [dataidx]) {
+          --len;
+        }
+        if (dispinfo.leftjust [j]) {
+          printf ("%-*s%s", len, strdata [dataidx], dispinfo.suffix [dataidx]);
         } else {
-          if (j != fmtstrlen - 1) {
-            if (csvout) {
-              if (csvtabs) {
-                printf ("\t");
-              } else {
-                printf (",");
-              }
+          printf ("%*s%s", len, strdata [dataidx], dispinfo.suffix [dataidx]);
+        }
+      }
+
+      if (jsonout) {
+        printf ("\n");
+      } else {
+        if (j != fmtstrlen - 1) {
+          if (csvout) {
+            if (csvtabs) {
+              printf ("\t");
             } else {
-              printf (" ");
+              printf (",");
             }
+          } else {
+            printf (" ");
           }
         }
       }
@@ -421,43 +583,43 @@ di_display_data (void *di_data)
     printf ("}\n");
   }
 
-
   for (i = 0; i < count; ++i) {
     int     j;
 
     for (j = 0; j < fmtstrlen; ++j) {
-      int     stridx;
+      int     dataidx;
 
-      stridx = i * fmtstrlen + j;
-      if (strdata [stridx] != NULL) {
-        free (strdata [stridx]);
+      dataidx = i * fmtstrlen + j;
+      if (strdata [dataidx] != NULL) {
+        free (strdata [dataidx]);
       }
     }
   }
 
-  free (maxlen);
+  free (dispinfo.maxlen);
+  free (dispinfo.scaleidx);
   free (strdata);
 }
 
 static void
-di_display_header (void *di_data, char **strdata, unsigned int *maxlen)
+di_display_header (void *di_data, char **strdata)
 {
   int         fmt;
   int         fmtcount;
   int         fmtstrlen;
   int         csvout;
 
-  csvout = di_check_option (di_data, DI_OPT_OUT_CSV);
+  csvout = di_check_option (di_data, DI_OPT_DISP_CSV);
   fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
   fmtcount = 0;
   di_format_iter_init (di_data);
   while ( (fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
     const char  *temp;
     char        tcsv [2];
-    int         stridx;
+    int         dataidx;
 
     temp = "";
-    stridx = fmtcount;
+    dataidx = fmtcount;
     if (csvout) {
       tcsv [0] = fmt;
       tcsv [1] = '\0';
@@ -473,9 +635,8 @@ di_display_header (void *di_data, char **strdata, unsigned int *maxlen)
           break;
         }
         case DI_FMT_FILESYSTEM:
-        case DI_FMT_FILESYSTEM_OLD:
-        case DI_FMT_FILESYSTEM_OLD_B: {
-          temp = DI_GT ("Device");
+        case DI_FMT_FILESYSTEM_OLD: {
+          temp = DI_GT ("Filesystem");
           break;
         }
         case DI_FMT_FSTYPE:
@@ -559,7 +720,7 @@ di_display_header (void *di_data, char **strdata, unsigned int *maxlen)
       }
     }
 
-    strdata [stridx] = strdup (temp);
+    strdata [dataidx] = strdup (temp);
     ++fmtcount;
   }
 

@@ -232,30 +232,30 @@ main (int argc, char *argv [])
   /* scaled value tests */
   dinum_set_u (&a, 1024 * 1024);
   dinum_set_u (&b, 1024);
-  dinum_scale (&r, &a, &b);
+  dval = dinum_scale (&a, &b);
   ++tcount;
-  if (dinum_cmp_s (&r, 1024) != 0) {
-    dinum_str (&r, buff, sizeof (buff));
+  if (dval != 1024.0) {
+    Snprintf1 (buff, sizeof (buff), "%.3f", dval);
     fprintf (stderr, "%d: scale 1024 a fail %s\n", tcount, buff);
     ++ecount;
   }
 
   dinum_set_u (&a, 1024 * 1024 + 2);
   dinum_set_u (&b, 1024);
-  dinum_scale (&r, &a, &b);
+  dval = dinum_scale (&a, &b);
   ++tcount;
-  if (dinum_cmp_s (&r, 1025) != 0) {
-    dinum_str (&r, buff, sizeof (buff));
+  if (dval > 1025.0) {
+    Snprintf1 (buff, sizeof (buff), "%.3f", dval);
     fprintf (stderr, "%d: scale 1025 b fail %s\n", tcount, buff);
     ++ecount;
   }
 
   dinum_set_u (&a, 1024 * 1024 + 512);
   dinum_set_u (&b, 1024);
-  dinum_scale (&r, &a, &b);
+  dval = dinum_scale (&a, &b);
   ++tcount;
-  if (dinum_cmp_s (&r, 1025) != 0) {
-    dinum_str (&r, buff, sizeof (buff));
+  if (dval > 1025.0) {
+    Snprintf1 (buff, sizeof (buff), "%.3f", dval);
     fprintf (stderr, "%d: scale 1025 c fail %s\n", tcount, buff);
     ++ecount;
   }

@@ -149,11 +149,11 @@ di_init_options (void)
   diopts->ignore_list.list = (char **) NULL;
   diopts->include_list.count = 0;
   diopts->include_list.list = (char **) NULL;
-  diopts->scaleSize = DI_SCALE_GIGA;
+  diopts->scale = DI_SCALE_GIGA;
   diopts->blockSize = DI_BLKSZ_1024;
-  diopts->optval [DI_OPT_OUT_TOTALS] = false;
-  diopts->optval [DI_OPT_OUT_DBG_HEADER] = false;
-  diopts->optval [DI_OPT_OUT_HEADER] = true;
+  diopts->optval [DI_OPT_DISP_TOTALS] = false;
+  diopts->optval [DI_OPT_DISP_DBG_HEADER] = false;
+  diopts->optval [DI_OPT_DISP_HEADER] = true;
   diopts->optval [DI_OPT_LOCAL_ONLY] = false;
   diopts->optval [DI_OPT_DISP_ALL] = false;
   diopts->optval [DI_OPT_NO_SYMLINK] = false;
@@ -162,11 +162,11 @@ di_init_options (void)
   strncpy (diopts->sortType, "m", DI_SORT_TYPE_MAX); /* default - by mount point*/
   diopts->optval [DI_OPT_POSIX_COMPAT] = false;
   diopts->optval [DI_OPT_QUOTA_CHECK] = true;
-  diopts->optval [DI_OPT_OUT_CSV] = false;
-  diopts->optval [DI_OPT_OUT_CSV_TAB] = false;
+  diopts->optval [DI_OPT_DISP_CSV] = false;
+  diopts->optval [DI_OPT_DISP_CSV_TAB] = false;
   diopts->exitFlag = DI_EXIT_NORM;
   diopts->errorCount = 0;
-  diopts->optval [DI_OPT_OUT_JSON] = false;
+  diopts->optval [DI_OPT_DISP_JSON] = false;
 
   return diopts;
 }
@@ -214,8 +214,8 @@ di_get_options (int argc, char * argv [], di_opt_t *diopts)
     strncpy (scalestr, "512", sizeof (scalestr) - 1);
     diopts->formatString = DI_POSIX_FORMAT;
     diopts->optval [DI_OPT_POSIX_COMPAT] = true;
-    diopts->optval [DI_OPT_OUT_CSV] = false;
-    diopts->optval [DI_OPT_OUT_JSON] = false;
+    diopts->optval [DI_OPT_DISP_CSV] = false;
+    diopts->optval [DI_OPT_DISP_JSON] = false;
   }
 
   /* bsd df */
@@ -304,6 +304,9 @@ di_opt_check_option (di_opt_t *diopts, int optidx)
   if (optidx == DI_OPT_FMT_STR_LEN) {
     return diopts->formatLen;
   }
+  if (optidx == DI_OPT_SCALE) {
+    return diopts->scale;
+  }
 
   if (optidx < 0 || optidx >= DI_OPT_MAX) {
     return 0;
@@ -359,14 +362,14 @@ processArgs (int argc, char * argv [], di_opt_t *diopts,
 /* 6 */
 #define OPT_INT_c 6
     { "-c",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_OUT_CSV]*/,
-        0     /*sizeof (diopts->optval [DI_OPT_OUT_CSV])*/,
+        NULL  /*&diopts->optval [DI_OPT_DISP_CSV]*/,
+        0     /*sizeof (diopts->optval [DI_OPT_DISP_CSV])*/,
         NULL },
 /* 7 */
 #define OPT_INT_C 7
     { "-C",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_OUT_CSV_TAB]*/,
-        0     /*sizeof (diopts->optval [DI_OPT_OUT_CSV_TAB])*/,
+        NULL  /*&diopts->optval [DI_OPT_DISP_CSV_TAB]*/,
+        0     /*sizeof (diopts->optval [DI_OPT_DISP_CSV_TAB])*/,
         NULL },
 /* 8 */
     { "--csv-output", GETOPTN_ALIAS,
@@ -464,8 +467,8 @@ processArgs (int argc, char * argv [], di_opt_t *diopts,
 /* 25 */
 #define OPT_INT_j 25
     { "-j",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_OUT_JSON]*/,
-        0     /*sizeof (diopts->optval [DI_OPT_OUT_JSON])*/,
+        NULL  /*&diopts->optval [DI_OPT_DISP_JSON]*/,
+        0     /*sizeof (diopts->optval [DI_OPT_DISP_JSON])*/,
         NULL },
 /* 26 */
     { "--json-output", GETOPTN_ALIAS,
@@ -504,8 +507,8 @@ processArgs (int argc, char * argv [], di_opt_t *diopts,
 /* 32 */
 #define OPT_INT_n 32
     { "-n",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_OUT_HEADER]*/,
-        0  /*sizeof (diopts->optval [DI_OPT_OUT_HEADER])*/,
+        NULL  /*&diopts->optval [DI_OPT_DISP_HEADER]*/,
+        0  /*sizeof (diopts->optval [DI_OPT_DISP_HEADER])*/,
         NULL },
 /* 33 */
     { "--no-sync",  GETOPTN_IGNORE,
@@ -560,8 +563,8 @@ processArgs (int argc, char * argv [], di_opt_t *diopts,
 /* 42 */
 #define OPT_INT_t 42
     { "-t",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_OUT_TOTALS] */,
-        0  /*sizeof (diopts->optval [DI_OPT_OUT_TOTALS])*/,
+        NULL  /*&diopts->optval [DI_OPT_DISP_TOTALS] */,
+        0  /*sizeof (diopts->optval [DI_OPT_DISP_TOTALS])*/,
         NULL },
 /* 43 */
     { "--total",GETOPTN_ALIAS,
@@ -638,25 +641,25 @@ processArgs (int argc, char * argv [], di_opt_t *diopts,
   /* automatic aggregate initialization                           */
   /* don't forget to change scaleids, paidb and paidv above also    */
   opts [OPT_INT_A].valptr = (void *) &diopts->formatString;   /* -A */
-  opts [OPT_INT_c].valptr = (void *) &diopts->optval [DI_OPT_OUT_CSV];     /* -c */
-  opts [OPT_INT_c].valsiz = sizeof (diopts->optval [DI_OPT_OUT_CSV]);
-  opts [OPT_INT_C].valptr = (void *) &diopts->optval [DI_OPT_OUT_CSV_TAB];     /* -C */
-  opts [OPT_INT_C].valsiz = sizeof (diopts->optval [DI_OPT_OUT_CSV_TAB]);
+  opts [OPT_INT_c].valptr = (void *) &diopts->optval [DI_OPT_DISP_CSV];     /* -c */
+  opts [OPT_INT_c].valsiz = sizeof (diopts->optval [DI_OPT_DISP_CSV]);
+  opts [OPT_INT_C].valptr = (void *) &diopts->optval [DI_OPT_DISP_CSV_TAB];     /* -C */
+  opts [OPT_INT_C].valsiz = sizeof (diopts->optval [DI_OPT_DISP_CSV_TAB]);
   opts [OPT_INT_f].valptr = (void *) &diopts->formatString;  /* -f */
-  opts [OPT_INT_j].valptr = (void *) &diopts->optval [DI_OPT_OUT_JSON];     /* -j */
-  opts [OPT_INT_j].valsiz = sizeof (diopts->optval [DI_OPT_OUT_JSON]);
+  opts [OPT_INT_j].valptr = (void *) &diopts->optval [DI_OPT_DISP_JSON];     /* -j */
+  opts [OPT_INT_j].valsiz = sizeof (diopts->optval [DI_OPT_DISP_JSON]);
   opts [OPT_INT_l].valptr = (void *) &diopts->optval [DI_OPT_LOCAL_ONLY];     /* -l */
   opts [OPT_INT_l].valsiz = sizeof (diopts->optval [DI_OPT_LOCAL_ONLY]);
   opts [OPT_INT_L].valptr = (void *) &diopts->optval [DI_OPT_EXCL_LOOPBACK]; /* -L */
   opts [OPT_INT_L].valsiz = sizeof (diopts->optval [DI_OPT_EXCL_LOOPBACK]);
-  opts [OPT_INT_n].valptr = (void *) &diopts->optval [DI_OPT_OUT_HEADER];   /* -n */
-  opts [OPT_INT_n].valsiz = sizeof (diopts->optval [DI_OPT_OUT_HEADER]);
+  opts [OPT_INT_n].valptr = (void *) &diopts->optval [DI_OPT_DISP_HEADER];   /* -n */
+  opts [OPT_INT_n].valsiz = sizeof (diopts->optval [DI_OPT_DISP_HEADER]);
   opts [OPT_INT_q].valptr = (void *) &diopts->optval [DI_OPT_QUOTA_CHECK];    /* -q */
   opts [OPT_INT_q].valsiz = sizeof (diopts->optval [DI_OPT_QUOTA_CHECK]);
   opts [OPT_INT_R].valptr = (void *) &diopts->optval [DI_OPT_NO_SYMLINK];    /* -R */
   opts [OPT_INT_R].valsiz = sizeof (diopts->optval [DI_OPT_NO_SYMLINK]);
-  opts [OPT_INT_t].valptr = (void *) &diopts->optval [DI_OPT_OUT_TOTALS];    /* -t */
-  opts [OPT_INT_t].valsiz = sizeof (diopts->optval [DI_OPT_OUT_TOTALS]);
+  opts [OPT_INT_t].valptr = (void *) &diopts->optval [DI_OPT_DISP_TOTALS];    /* -t */
+  opts [OPT_INT_t].valsiz = sizeof (diopts->optval [DI_OPT_DISP_TOTALS]);
   opts [OPT_INT_z].valptr = (void *) diopts->zoneDisplay;  /* -z */
   opts [OPT_INT_z].valsiz = sizeof (diopts->zoneDisplay);
   opts [OPT_INT_Z].valptr = (void *) diopts->zoneDisplay;  /* -Z */
@@ -697,14 +700,14 @@ processArgs (int argc, char * argv [], di_opt_t *diopts,
     setExitFlag (diopts, DI_EXIT_WARN);
   }
 
-  if (diopts->optval [DI_OPT_OUT_CSV_TAB]) {
-    diopts->optval [DI_OPT_OUT_CSV] = true;
+  if (diopts->optval [DI_OPT_DISP_CSV_TAB]) {
+    diopts->optval [DI_OPT_DISP_CSV] = true;
   }
-  if (diopts->optval [DI_OPT_OUT_CSV] || diopts->optval [DI_OPT_OUT_JSON]) {
-    diopts->optval [DI_OPT_OUT_TOTALS] = false;
+  if (diopts->optval [DI_OPT_DISP_CSV] || diopts->optval [DI_OPT_DISP_JSON]) {
+    diopts->optval [DI_OPT_DISP_TOTALS] = false;
   }
-  if (diopts->optval [DI_OPT_OUT_JSON]) {
-    diopts->optval [DI_OPT_OUT_HEADER] = false;
+  if (diopts->optval [DI_OPT_DISP_JSON]) {
+    diopts->optval [DI_OPT_DISP_HEADER] = false;
   }
 
   return optidx;
@@ -728,7 +731,7 @@ processOptions (const char *arg, char *valptr)
     }
     padata->diopts->formatString = DI_POSIX_FORMAT;
     padata->diopts->optval [DI_OPT_POSIX_COMPAT] = true;
-    padata->diopts->optval [DI_OPT_OUT_CSV] = false;
+    padata->diopts->optval [DI_OPT_DISP_CSV] = false;
   } else if (strcmp (arg, "--si") == 0) {
     strncpy (padata->scalestr, "H", padata->scalestrsz - 1);
   } else if (strcmp (arg, "--version") == 0) {
@@ -784,9 +787,9 @@ processOptionsVal (const char *arg, pvoid *valptr, char *value)
     parseList (&padata->diopts->ignore_list, value);
   } else if (strcmp (arg, "-X") == 0) {
     debug = atoi (value);
-    padata->diopts->optval [DI_OPT_OUT_DBG_HEADER] = true;
-    padata->diopts->optval [DI_OPT_OUT_TOTALS] = true;
-    padata->diopts->optval [DI_OPT_OUT_HEADER] = true;
+    padata->diopts->optval [DI_OPT_DISP_DBG_HEADER] = true;
+    padata->diopts->optval [DI_OPT_DISP_TOTALS] = true;
+    padata->diopts->optval [DI_OPT_DISP_HEADER] = true;
   } else {
     fprintf (stderr, "di_panic: bad option setup\n");
   }
@@ -859,11 +862,14 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
   int             val;
   char            *tptr;
 
-  val = 1;
+fprintf (stderr, "-- psv: %s\n", ptr);
+  val = DI_BLKSZ_1024;
   if (isdigit ( (int) (*ptr))) {
-    /* it is unlikely that anyone is going to type in some large number */
-    /* on the command line, atoi () should be good enough */
     val = atoi (ptr);
+    if (val != DI_BLKSZ_1 && val != DI_BLKSZ_512 &&
+        val != DI_BLKSZ_1000 && val != DI_BLKSZ_1024) {
+      val = DI_BLKSZ_1024;
+    }
   }
 
   tptr = ptr;
@@ -874,22 +880,26 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
     idx = -1;
     for (i = 0; i < DI_VALID_SCALE_SZ; ++i) {
       if (*tptr == validscale [i].uc || *tptr == validscale [i].lc) {
+fprintf (stderr, "-- psv: found %d\n", i);
         idx = i;
+        break;
       }
     }
 
     if (idx == -1) {
       if (*tptr == 'h') {
-        val = DI_SCALE_HR;
+        idx = DI_SCALE_HR;
+fprintf (stderr, "-- psv: found hr\n");
       }
       if (*tptr == 'H') {
-        val = DI_SCALE_HR_ALT;
+        idx = DI_SCALE_HR_ALT;
+fprintf (stderr, "-- psv: found hr-alt\n");
       }
     }
 
     if (idx == -1) {
       if (strncmp (ptr, "HUMAN", (Size_t) 5) == 0) {
-        val = DI_SCALE_HR;
+        idx = DI_SCALE_HR;
       } else {
         /* some unknown string value */
         idx = DI_SCALE_GIGA;
@@ -900,12 +910,17 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
       if (len > 1) {
         ++tptr;
         if (*tptr == 'B') {
-           diopts->blockSize = DI_BLKSZ_1000;
+          diopts->blockSize = DI_BLKSZ_1000;
         }
       }
-
-      diopts->scaleSize = val;
     } /* known size multiplier */
+
+fprintf (stderr, "opt: scale: %d\n", idx);
+    diopts->scale = idx;
+
+    if (idx == -1) {
+// ### convert the value to a scale value...
+    }
   }
 }
 

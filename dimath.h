@@ -79,6 +79,7 @@ extern "C" {
 
 #define DI_PERC_PRECISION 1000000
 #define DI_PERC_DIV ( (double) (DI_PERC_PRECISION / 100));
+#define DI_SCALE_PREC 1000
 
 static inline void
 dinum_init (dinum_t *r)
@@ -99,6 +100,34 @@ dinum_clear (dinum_t *r)
   mpz_clear (*r);
 #elif _use_math == DI_TOMMATH
   mp_clear (r);
+#endif
+}
+
+static inline void
+dinum_str (const dinum_t *r, char *str, Size_t sz)
+{
+#if _use_math == DI_GMP
+  gmp_snprintf (str, sz, "%Zd", *r);
+#elif _use_math == DI_TOMMATH
+  mp_to_decimal (r, str, sz);
+#else
+# if defined (DI_INTERNAL_DOUBLE)
+#  if _siz_long_double > 8
+  Snprintf1 (str, sz, "%.0Lf", *r);
+#  else
+  Snprintf1 (str, sz, "%.0f", *r);
+#  endif
+# else
+#  if _hdr_inttypes && _siz_uint64_t == 8
+  Snprintf1 (str, sz, "%" PRIu64, *r);
+#  elif _siz_long == 8
+  Snprintf1 (str, sz, "%ld", *r);
+#  elif _siz_long_long == 8
+  Snprintf1 (str, sz, "%lld", *r);
+#  else
+  Snprintf1 (str, sz, "%d", *r);
+#  endif
+# endif
 #endif
 }
 
@@ -246,10 +275,13 @@ dinum_cmp_s (const dinum_t *r, di_snum_t val)
   return mpz_cmp_si (*r, val);
 #elif _use_math == DI_TOMMATH
   mp_int      t;
+  int         rv;
 
   mp_init (&t);
   mp_set_i64 (&t, val);
-  return mp_cmp (r, &t);
+  rv = mp_cmp (r, &t);
+  mp_clear (&t);
+  return rv;
 #else
   di_snum_t   t;
   int       rc = 0;
@@ -268,12 +300,7 @@ static inline void
 dinum_mul (dinum_t *r, const dinum_t *val)
 {
 #if _use_math == DI_GMP
-  mpz_t     t;
-
-  mpz_init (t);
-  mpz_set (t, *r);
-  mpz_mul (*r, t, *val);
-  mpz_clear (t);
+  mpz_mul (*r, *r, *val);
 #elif _use_math == DI_TOMMATH
   mp_mul (r, (mp_int *) val, r);
 #else
@@ -322,44 +349,70 @@ dinum_mul_uu (dinum_t *r, di_unum_t vala, di_unum_t valb)
 #endif
 }
 
-static inline void
-dinum_scale (dinum_t *result, dinum_t *r, dinum_t *val)
+static inline double
+dinum_scale (dinum_t *r, dinum_t *val)
 {
+  double    dval;
+
 #if _use_math == DI_GMP
-  mpz_cdiv_q (*result, *r, *val);
+  mpz_t     t;
+  mpz_t     result;
+
+  if (mpz_cmp_si (*val, 0) == 0) {
+    return 0.0;
+  }
+
+  mpz_init_set_ui (t, DI_SCALE_PREC);
+  mpz_init (result);
+  mpz_mul (t, t, *r);
+  mpz_cdiv_q (result, t, *val);
+  dval = mpz_get_d (result);
+  dval /= (double) DI_SCALE_PREC;
+  mpz_clear (result);
+  mpz_clear (t);
 #elif _use_math == DI_TOMMATH
   mp_int    rem;
   mp_int    t;
-
-  mp_init (&rem);
-  mp_div (r, val, result, &rem);
+  mp_int    result;
 
   mp_init_u64 (&t, 0);
-  if (mp_cmp (&rem, &t) > 0) {
-    mp_int    v;
 
-    mp_init_u64 (&v, 1);
-    mp_add (result, &v, result);
-    mp_clear (&v);
+  if (mp_cmp (val, &t) == 0) {
+    mp_clear (&t);
+    return 0.0;
   }
+
+  mp_init (&rem);
+  mp_init (&result);
+  mp_set_u64 (&t, DI_SCALE_PREC);
+  mp_mul (&t, r, &t);
+
+  mp_div (&t, val, &result, &rem);
+  dval = mp_get_double (&result);
+  dval /= (double) DI_SCALE_PREC;
   mp_clear (&t);
+  mp_clear (&rem);
+  mp_clear (&result);
 #else
 # if defined (DI_INTERNAL_INT)
-  di_unum_t    rem;
+  dinum_t   t;
 
-  *result = *r / *val;
-  rem = *r % *val;
-  if (rem > 0) {
-    *result += 1;
+  if (*val == 0) {
+    return 0.0;
   }
+  t = (*r * DI_SCALE_PREC) / *val;
+  dval = (double) t;
+  dval /= (double) DI_SCALE_PREC;
 # endif
 # if defined (DI_INTERNAL_DOUBLE)
-  *result = *r / *val;
-#  if _hdr_math
-  *result = ceil (*result);
-#  endif
+  if (*val == 0.0) {
+    return 0.0;
+  }
+  dval = (double) (*r / *val);
 # endif
 #endif
+
+  return dval;
 }
 
 static inline double
@@ -410,34 +463,6 @@ dinum_perc (dinum_t *r, dinum_t *val)
 #endif
 
   return dval;
-}
-
-static inline void
-dinum_str (const dinum_t *r, char *str, Size_t sz)
-{
-#if _use_math == DI_GMP
-  gmp_snprintf (str, sz, "%Zd", *r);
-#elif _use_math == DI_TOMMATH
-  mp_to_decimal (r, str, sz);
-#else
-# if defined (DI_INTERNAL_DOUBLE)
-#  if _siz_long_double > 8
-  Snprintf1 (str, sz, "%.0Lf", *r);
-#  else
-  Snprintf1 (str, sz, "%.0f", *r);
-#  endif
-# else
-#  if _hdr_inttypes && _siz_uint64_t == 8
-  Snprintf1 (str, sz, "%" PRIu64, *r);
-#  elif _siz_long == 8
-  Snprintf1 (str, sz, "%ld", *r);
-#  elif _siz_long_long == 8
-  Snprintf1 (str, sz, "%lld", *r);
-#  else
-  Snprintf1 (str, sz, "%d", *r);
-#  endif
-# endif
-#endif
 }
 
 # if defined (__cplusplus) || defined (c_plusplus)

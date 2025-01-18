@@ -288,12 +288,17 @@ os2-gcc:
 ###
 # cleaning
 
-# leaves:
-#   config.h di.reqlibs
-#   dioptions.dat, tests.done, test_di, $(MKC_ENV), $(MKC_ENV_SHR)
+# clean temporary files
+.PHONY: clean
+tclean:
+	@-$(RM) -f w ww asan.* *.orig >/dev/null 2>&1; exit 0
+	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
+
+# leaves config.h
 .PHONY: clean
 clean:
-	@-$(RM) -f w ww asan.* \
+	@$(MAKE) tclean
+	@-$(RM) -f \
 		di libdi.* dimathtest getoptn_test \
 		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
 		*.o *.obj $(MKC_FILES)/mkconfig.log \
@@ -301,27 +306,12 @@ clean:
 		$(MKC_FILES)/mkconfig.cache mkc*.vars \
 		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
-	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 
-# leaves:
-#   _mkconfig_runtests, mkc_files, dioptions.dat
-#   tests.done, test_di
-.PHONY: realclean
-realclean:
-	@$(MAKE) clean >/dev/null 2>&1
-	@-$(RM) -rf config.h \
-		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) \
-		>/dev/null 2>&1; exit 0
-
-# leaves:
-#   dioptions.dat
 .PHONY: distclean
 distclean:
-	@$(MAKE) realclean >/dev/null 2>&1
-	@-$(RM) -rf tests.done test_di \
-		_mkconfig_runtests \
+	@$(MAKE) clean >/dev/null 2>&1
+	@-$(RM) -rf tests.done test_di _mkconfig_runtests \
 		$(MKC_FILES) \
-		*~ *.orig */*.orig \
 		build \
 		>/dev/null 2>&1; exit 0
 
