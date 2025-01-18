@@ -3,15 +3,19 @@
 ### di Change Log
 
 **5.0.0 2025-xx-xx**
+  * Bug Fixes
+    * Fix some internal errors (string sizing).
   * Changes
     * Drop syllable and VMS support.
+    * All format strings options (mstO) no longer truncate the output.
+    * Default display size is now gigabytes.
     * -w and -W options are no longer supported and are now ignored.
-    * default display size is now gigabytes.
     * mkconfig: Updated to version 2.6.4.
   * New Features
     * Use big number/multi precision libraries (GMP or libtommath) if available.
     * Split into a library with a proper API and main program.
     * Add cmake configuration for modern systems.
+    * json output: Add "scaling" information.
 
 **4.54.0.1 2024-10-15**
     * Fix single quotes in the manual page.

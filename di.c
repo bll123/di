@@ -111,6 +111,7 @@ typedef struct {
   unsigned int    *scaleidx;
   const char      **suffix;
   unsigned int    *leftjust;
+  const char      **jsonident;
 } di_disp_info_t;
 
 typedef struct {
@@ -161,7 +162,7 @@ main (int argc, char * argv [])
         usage ();
       }
       if (exitflag == DI_EXIT_VERS) {
-        printf (DI_GT ("di version %s\n"), DI_VERSION);
+        fprintf (stdout, DI_GT ("di version %s\n"), DI_VERSION);
       }
       di_cleanup (di_data);
       exit (0);
@@ -179,31 +180,31 @@ main (int argc, char * argv [])
 static void
 usage (void)
 {
-  printf (DI_GT ("di version %s\n"), DI_VERSION);
+  fprintf (stdout, DI_GT ("di version %s\n"), DI_VERSION);
              /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
-  printf (DI_GT ("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
-  printf (DI_GT ("       [-I include-fstyp-list] [file [...]]\n"));
-  printf (DI_GT ("   -a   : print all mounted devices\n"));
-  printf (DI_GT ("   -d x : size to print blocks in (k,m,g,t,etc.)\n"));
-  printf (DI_GT ("          h - human readable.\n"));
-  printf (DI_GT ("   -f x : use format string <x>\n"));
-  printf (DI_GT ("   -I x : include only file system types in <x>\n"));
-  printf (DI_GT ("   -x x : exclude file system types in <x>\n"));
-  printf (DI_GT ("   -l   : display local filesystems only\n"));
-  printf (DI_GT ("   -n   : don't print header\n"));
-  printf (DI_GT ("   -t   : print totals\n"));
-  printf (DI_GT (" Format string values:\n"));
-  printf (DI_GT ("    m - mount point\n"));
-  printf (DI_GT ("    d - device name\n"));
-  printf (DI_GT ("    t - file-system type\n"));
-  printf (DI_GT ("    b - total kbytes                    B - kbytes available for use\n"));
-  printf (DI_GT ("    u - used kbytes                     c - calculated kbytes in use\n"));
-  printf (DI_GT ("    f - kbytes free                     v - kbytes available\n"));
-  printf (DI_GT ("    p - percentage not avail. for use   1 - percentage used\n"));
-  printf (DI_GT ("    2 - percentage of user-available space in use.\n"));
-  printf (DI_GT ("    i - total file slots (i-nodes)      U - used file slots\n"));
-  printf (DI_GT ("    F - free file slots                 P - percentage file slots used\n"));
-  printf (DI_GT ("See manual page for more options.\n"));
+  fprintf (stdout, DI_GT ("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
+  fprintf (stdout, DI_GT ("       [-I include-fstyp-list] [file [...]]\n"));
+  fprintf (stdout, DI_GT ("   -a   : print all mounted devices\n"));
+  fprintf (stdout, DI_GT ("   -d x : size to print blocks in (k,m,g,t,etc.)\n"));
+  fprintf (stdout, DI_GT ("          h - human readable.\n"));
+  fprintf (stdout, DI_GT ("   -f x : use format string <x>\n"));
+  fprintf (stdout, DI_GT ("   -I x : include only file system types in <x>\n"));
+  fprintf (stdout, DI_GT ("   -x x : exclude file system types in <x>\n"));
+  fprintf (stdout, DI_GT ("   -l   : display local filesystems only\n"));
+  fprintf (stdout, DI_GT ("   -n   : don't print header\n"));
+  fprintf (stdout, DI_GT ("   -t   : print totals\n"));
+  fprintf (stdout, DI_GT (" Format string values:\n"));
+  fprintf (stdout, DI_GT ("    m - mount point\n"));
+  fprintf (stdout, DI_GT ("    d - device name\n"));
+  fprintf (stdout, DI_GT ("    t - file-system type\n"));
+  fprintf (stdout, DI_GT ("    b - total kbytes                    B - kbytes available for use\n"));
+  fprintf (stdout, DI_GT ("    u - used kbytes                     c - calculated kbytes in use\n"));
+  fprintf (stdout, DI_GT ("    f - kbytes free                     v - kbytes available\n"));
+  fprintf (stdout, DI_GT ("    p - percentage not avail. for use   1 - percentage used\n"));
+  fprintf (stdout, DI_GT ("    2 - percentage of user-available space in use.\n"));
+  fprintf (stdout, DI_GT ("    i - total file slots (i-nodes)      U - used file slots\n"));
+  fprintf (stdout, DI_GT ("    F - free file slots                 P - percentage file slots used\n"));
+  fprintf (stdout, DI_GT ("See manual page for more options.\n"));
 }
 
 static void
@@ -244,9 +245,11 @@ di_display_data (void *di_data)
   dispinfo.scaleidx = malloc (sizeof (unsigned int) * count * fmtstrlen);
   dispinfo.suffix = malloc (sizeof (char *) * count * fmtstrlen);
   dispinfo.leftjust = malloc (sizeof (unsigned int) * fmtstrlen);
+  dispinfo.jsonident = malloc (sizeof (char *) * fmtstrlen);
   for (i = 0; i < fmtstrlen; ++i) {
     dispinfo.maxlen [i] = DI_SCALE_GIGA;
     dispinfo.leftjust [i] = 0;
+    dispinfo.jsonident [i] = NULL;
   }
   for (i = 0; i < count; ++i) {
     int   j;
@@ -270,8 +273,13 @@ di_display_data (void *di_data)
   }
 
   if (jsonout) {
-    printf ("{\n");
-    printf ("  \"partitions\" : [\n");
+    fprintf (stdout, "{\n");
+    if (scalehr) {
+      fprintf (stdout, "  \"scaling\" : \"human\",\n");
+    } else {
+      fprintf (stdout, "  \"scaling\" : \"%s\"\n", disptext [scaleidx].uc);
+    }
+    fprintf (stdout, "  \"partitions\" : [\n");
   }
 
   di_iterate_init (di_data, iterval);
@@ -279,75 +287,46 @@ di_display_data (void *di_data)
     int         fmt;
     int         fmtcount;
     int         dataidx;
-    const char  *comma;
 
     di_format_iter_init (di_data);
     fmtcount = 0;
-    comma = ",";
     while ( (fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
       dataidx = dispcount * fmtstrlen + fmtcount;
       strdata [dataidx] = NULL;
-
-      if (fmtcount == fmtstrlen - 1) {
-        comma = "";
-      }
 
       switch (fmt) {
         /* string values */
         case DI_FMT_MOUNT:
         case DI_FMT_MOUNT_OLD: {
+          dispinfo.jsonident [fmtcount] = "mount";
           dispinfo.leftjust [fmtcount] = 1;
-          if (jsonout) {
-// ### move the json output to the output loop...
-            Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
-                "mount", pub->strdata [DI_DISP_MOUNTPT], comma);
-            strdata [dataidx] = strdup (temp);
-          } else {
-            strdata [dataidx] = strdup (pub->strdata [DI_DISP_MOUNTPT]);
-          }
+          strdata [dataidx] = strdup (pub->strdata [DI_DISP_MOUNTPT]);
           break;
         }
         case DI_FMT_FILESYSTEM:
         case DI_FMT_FILESYSTEM_OLD: {
           dispinfo.leftjust [fmtcount] = 1;
-          if (jsonout) {
-// ### move the json output to the output loop...
-            Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
-                "filesystem", pub->strdata [DI_DISP_FILESYSTEM], comma);
-            strdata [dataidx] = strdup (temp);
-          } else {
-            strdata [dataidx] = strdup (pub->strdata [DI_DISP_FILESYSTEM]);
-          }
+          dispinfo.jsonident [fmtcount] = "filesystem";
+          strdata [dataidx] = strdup (pub->strdata [DI_DISP_FILESYSTEM]);
           break;
         }
         case DI_FMT_FSTYPE:
         case DI_FMT_FSTYPE_OLD: {
           dispinfo.leftjust [fmtcount] = 1;
-          if (jsonout) {
-// ### move the json output to the output loop...
-            Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
-                "fstype", pub->strdata [DI_DISP_FSTYPE], comma);
-            strdata [dataidx] = strdup (temp);
-          } else {
-            strdata [dataidx] = strdup (pub->strdata [DI_DISP_FSTYPE]);
-          }
+          dispinfo.jsonident [fmtcount] = "fstype";
+          strdata [dataidx] = strdup (pub->strdata [DI_DISP_FSTYPE]);
           break;
         }
         case DI_FMT_MOUNT_OPTIONS: {
           dispinfo.leftjust [fmtcount] = 1;
-          if (jsonout) {
-// ### move the json output to the output loop...
-            Snprintf3 (temp, sizeof (temp), "\"%s\" : \"%s\"%s",
-                "options", pub->strdata [DI_DISP_FSTYPE], comma);
-            strdata [dataidx] = strdup (temp);
-          } else {
-            strdata [dataidx] = strdup (pub->strdata [DI_DISP_MOUNTOPT]);
-          }
+          dispinfo.jsonident [fmtcount] = "options";
+          strdata [dataidx] = strdup (pub->strdata [DI_DISP_MOUNTOPT]);
           break;
         }
 
         /* disk space values */
         case DI_FMT_BTOT: {
+          dispinfo.jsonident [fmtcount] = "size";
           if (scalehr) {
             dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
                 pub->index, DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
@@ -361,6 +340,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_BTOT_AVAIL: {
+          dispinfo.jsonident [fmtcount] = "size";
           if (scalehr) {
             dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
                 pub->index, DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_AVAIL);
@@ -374,6 +354,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_BUSED: {
+          dispinfo.jsonident [fmtcount] = "used";
           if (scalehr) {
             dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
                 pub->index, DI_SPACE_TOTAL, DI_SPACE_FREE, DI_VALUE_NONE);
@@ -387,6 +368,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_BCUSED: {
+          dispinfo.jsonident [fmtcount] = "used";
           if (scalehr) {
             dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
                 pub->index, DI_SPACE_TOTAL, DI_SPACE_AVAIL, DI_VALUE_NONE);
@@ -400,6 +382,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_BFREE: {
+          dispinfo.jsonident [fmtcount] = "free";
           if (scalehr) {
             dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
                 pub->index, DI_SPACE_FREE, DI_VALUE_NONE, DI_VALUE_NONE);
@@ -413,6 +396,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_BAVAIL: {
+          dispinfo.jsonident [fmtcount] = "available";
           if (scalehr) {
             dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
                 pub->index, DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE);
@@ -428,6 +412,7 @@ di_display_data (void *di_data)
 
         /* disk space percentages */
         case DI_FMT_BPERC_NAVAIL: {
+          dispinfo.jsonident [fmtcount] = "percused";
           di_disp_perc (di_data, temp, sizeof (temp), pub->index,
               DI_SPACE_TOTAL, DI_SPACE_AVAIL,
               DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
@@ -436,6 +421,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_BPERC_USED: {
+          dispinfo.jsonident [fmtcount] = "percused";
           di_disp_perc (di_data, temp, sizeof (temp), pub->index,
               DI_SPACE_TOTAL, DI_SPACE_FREE,
               DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
@@ -444,6 +430,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_BPERC_BSD: {
+          dispinfo.jsonident [fmtcount] = "percused";
           di_disp_perc (di_data, temp, sizeof (temp), pub->index,
               DI_SPACE_TOTAL, DI_SPACE_FREE,
               DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_AVAIL);
@@ -452,6 +439,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_BPERC_AVAIL: {
+          dispinfo.jsonident [fmtcount] = "percfree";
           di_disp_perc (di_data, temp, sizeof (temp), pub->index,
               DI_SPACE_AVAIL, DI_VALUE_NONE,
               DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
@@ -460,6 +448,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_BPERC_FREE: {
+          dispinfo.jsonident [fmtcount] = "percfree";
           di_disp_perc (di_data, temp, sizeof (temp), pub->index,
               DI_SPACE_FREE, DI_VALUE_NONE,
               DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
@@ -470,15 +459,19 @@ di_display_data (void *di_data)
 
         /* inode information */
         case DI_FMT_ITOT: {
+          dispinfo.jsonident [fmtcount] = "inodes";
           break;
         }
         case DI_FMT_IUSED: {
+          dispinfo.jsonident [fmtcount] = "inodesused";
           break;
         }
         case DI_FMT_IFREE: {
+          dispinfo.jsonident [fmtcount] = "inodesfree";
           break;
         }
         case DI_FMT_IPERC: {
+          dispinfo.jsonident [fmtcount] = "percinodesused";
           break;
         }
         default: {
@@ -516,14 +509,20 @@ di_display_data (void *di_data)
   }
 
   for (i = 0; i < count; ++i) {
-    int     j;
+    int         j;
+    const char  *comma;
 
     if (jsonout) {
-      printf ("    {\n");
+      fprintf (stdout, "    {\n");
     }
+    comma = ",";
     for (j = 0; j < fmtstrlen; ++j) {
       int         dataidx;
       const char  *tmp;
+
+      if (j == fmtstrlen - 1) {
+        comma = "";
+      }
 
       dataidx = i * fmtstrlen + j;
       tmp = strdata [dataidx];
@@ -533,12 +532,13 @@ di_display_data (void *di_data)
 
       if (csvout) {
         if (csvtabs) {
-          printf ("%s", strdata [dataidx]);
+          fprintf (stdout, "%s", strdata [dataidx]);
         } else {
-          printf ("\"%s\"", strdata [dataidx]);
+          fprintf (stdout, "\"%s\"", strdata [dataidx]);
         }
       } else if (jsonout) {
-        printf ("      %s", strdata [dataidx]);
+        fprintf (stdout, "      \"%s\" : \"%s%s\"%s", dispinfo.jsonident [j],
+            strdata [dataidx], dispinfo.suffix [dataidx], comma);
       } else {
         int       len;
 
@@ -547,40 +547,40 @@ di_display_data (void *di_data)
           --len;
         }
         if (dispinfo.leftjust [j]) {
-          printf ("%-*s%s", len, strdata [dataidx], dispinfo.suffix [dataidx]);
+          fprintf (stdout, "%-*s%s", len, strdata [dataidx], dispinfo.suffix [dataidx]);
         } else {
-          printf ("%*s%s", len, strdata [dataidx], dispinfo.suffix [dataidx]);
+          fprintf (stdout, "%*s%s", len, strdata [dataidx], dispinfo.suffix [dataidx]);
         }
       }
 
       if (jsonout) {
-        printf ("\n");
+        fprintf (stdout, "\n");
       } else {
         if (j != fmtstrlen - 1) {
           if (csvout) {
             if (csvtabs) {
-              printf ("\t");
+              fprintf (stdout, "\t");
             } else {
-              printf (",");
+              fprintf (stdout, ",");
             }
           } else {
-            printf (" ");
+            fprintf (stdout, " ");
           }
         }
       }
     }
     if (jsonout) {
-      printf ("    }");
+      fprintf (stdout, "    }");
       if (i != count - 1) {
-        printf (",");
+        fprintf (stdout, ",");
       }
     }
-    printf ("\n");
+    fprintf (stdout, "\n");
   }
 
   if (jsonout) {
-    printf ("  ]\n");
-    printf ("}\n");
+    fprintf (stdout, "  ]\n");
+    fprintf (stdout, "}\n");
   }
 
   for (i = 0; i < count; ++i) {
@@ -598,6 +598,9 @@ di_display_data (void *di_data)
 
   free (dispinfo.maxlen);
   free (dispinfo.scaleidx);
+  free (dispinfo.suffix);
+  free (dispinfo.leftjust);
+  free (dispinfo.jsonident);
   free (strdata);
 }
 
