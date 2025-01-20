@@ -232,7 +232,7 @@ di_process_options (void *tdi_data, int argc, char * argv [])
 }
 
 void
-di_get_data (void *tdi_data)
+di_get_all_disk_info (void *tdi_data)
 {
   di_data_t   *di_data = (di_data_t *) tdi_data;
   di_opt_t    *diopts;

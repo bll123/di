@@ -38,7 +38,7 @@ extern "C" {
 
 /* string identifiers */
 #define DI_DISP_MOUNTPT     0
-#define DI_DISP_FILESYSTEM     1
+#define DI_DISP_FILESYSTEM  1
 #define DI_DISP_FSTYPE      2
 #define DI_DISP_MOUNTOPT    3
 #define DI_DISP_MAX         4
@@ -84,28 +84,30 @@ extern "C" {
 
 #define DI_FMT_ITER_STOP        -1
 
-/* string formats */
+/* format string characters */
+/* strings */
 #define DI_FMT_MOUNT           'm'
 #define DI_FMT_FILESYSTEM      's'
 #define DI_FMT_FSTYPE          't'
 #define DI_FMT_MOUNT_OPTIONS   'O'
 /* these will be processed (forever probably), but are no longer used */
-#define DI_FMT_MOUNT_OLD       'M'
-#define DI_FMT_FILESYSTEM_OLD   'S'
-#define DI_FMT_FSTYPE_OLD      'T'
-
-/* disk information */
+#define DI_FMT_MOUNT_FULL      'M'
+#define DI_FMT_FILESYSTEM_FULL 'S'
+#define DI_FMT_FSTYPE_FULL     'T'
+/* space */
 #define DI_FMT_BTOT            'b'
 #define DI_FMT_BTOT_AVAIL      'B'
 #define DI_FMT_BUSED           'u'
 #define DI_FMT_BCUSED          'c'
 #define DI_FMT_BFREE           'f'
 #define DI_FMT_BAVAIL          'v'
+/* percentages */
 #define DI_FMT_BPERC_NAVAIL    'p'
 #define DI_FMT_BPERC_USED      '1'
 #define DI_FMT_BPERC_BSD       '2'
 #define DI_FMT_BPERC_AVAIL     'a'
 #define DI_FMT_BPERC_FREE      '3'
+/* inodes */
 #define DI_FMT_ITOT            'i'
 #define DI_FMT_IUSED           'U'
 #define DI_FMT_IFREE           'F'
@@ -133,7 +135,7 @@ typedef struct
 /* dilib.c */
 extern void * di_initialize (void);
 extern int di_process_options (void *, int, char * []);
-extern void di_get_data (void *);
+extern void di_get_all_disk_info (void *);
 extern void di_cleanup (void *);
 extern int di_iterate_init (void *, int);
 extern di_pub_disk_info_t *di_iterate (void *);

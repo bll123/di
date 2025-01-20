@@ -12,7 +12,7 @@ Version 5 beta
 
 Version 5 Roadmap (more or less)
 
-- move the totals processing into the main library.
+- done: move the totals processing into the main library.
 - get all the basics working
 - finish the api, there's still a couple of routines to write
 - wiki documentation for the api

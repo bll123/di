@@ -174,7 +174,7 @@ main (int argc, char * argv [])
       break;
     }
   }
-  di_get_data (di_data);
+  di_get_all_disk_info (di_data);
   di_display_data (di_data);
   di_cleanup (di_data);
   return 0;
@@ -312,7 +312,7 @@ di_display_data (void *di_data)
       switch (fmt) {
         /* string values */
         case DI_FMT_MOUNT:
-        case DI_FMT_MOUNT_OLD: {
+        case DI_FMT_MOUNT_FULL: {
           dispinfo.jsonident [fmtcount] = "mount";
           dispinfo.leftjust [fmtcount] = 1;
           if (dispcount == totline) {
@@ -323,7 +323,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_FILESYSTEM:
-        case DI_FMT_FILESYSTEM_OLD: {
+        case DI_FMT_FILESYSTEM_FULL: {
           dispinfo.leftjust [fmtcount] = 1;
           dispinfo.jsonident [fmtcount] = "filesystem";
           if (dispcount == totline) {
@@ -334,7 +334,7 @@ di_display_data (void *di_data)
           break;
         }
         case DI_FMT_FSTYPE:
-        case DI_FMT_FSTYPE_OLD: {
+        case DI_FMT_FSTYPE_FULL: {
           dispinfo.leftjust [fmtcount] = 1;
           dispinfo.jsonident [fmtcount] = "fstype";
           if (dispcount == totline) {
@@ -685,17 +685,17 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
       switch (fmt) {
         /* string values */
         case DI_FMT_MOUNT:
-        case DI_FMT_MOUNT_OLD: {
+        case DI_FMT_MOUNT_FULL: {
           temp = DI_GT ("Mount");
           break;
         }
         case DI_FMT_FILESYSTEM:
-        case DI_FMT_FILESYSTEM_OLD: {
+        case DI_FMT_FILESYSTEM_FULL: {
           temp = DI_GT ("Filesystem");
           break;
         }
         case DI_FMT_FSTYPE:
-        case DI_FMT_FSTYPE_OLD: {
+        case DI_FMT_FSTYPE_FULL: {
           temp = DI_GT ("Type");
           break;
         }
