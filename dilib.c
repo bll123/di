@@ -69,6 +69,7 @@
 
 #include "di.h"
 #include "disystem.h"
+#include "dimath.h"
 #include "diinternal.h"
 #include "dizone.h"
 #include "diquota.h"

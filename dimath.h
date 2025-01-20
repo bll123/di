@@ -17,9 +17,6 @@
 #if _hdr_inttypes
 # include <inttypes.h>
 #endif
-#if _hdr_math
-# include <math.h>
-#endif
 
 /* a double has a longer mantissa than an unsigned int, */
 /* but the accuracy may be less. */

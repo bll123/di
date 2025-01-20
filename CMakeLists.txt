@@ -477,12 +477,34 @@ check_function_exists (sysfs _lib_sysfs)
 check_function_exists (vquotactl _lib_vquotactl)
 
 check_function_exists (xdr_int _lib_xdr_int)
-set (LIBNSL_REQUIRED 1)
+set (LIBNSL_REQUIRED 0)
+set (LIBTIRPC_REQUIRED 0)
 if (NOT _lib_xdr_int)
-  set (CMAKE_REQUIRED_LIBRARIES -lnsl)
-  check_function_exists (xdr_int _lib_xdr_int)
-  if (_lib_xdr_int)
+message ("xdr-a")
+  set (CMAKE_REQUIRED_LIBRARIES nsl)
+  check_function_exists (xdr_int _lib_xdr_int_nsl)
+  if (_lib_xdr_int_nsl)
+    set (_lib_xdr_int 1)
     set (LIBNSL_REQUIRED 1)
+  endif()
+endif()
+if (NOT _lib_xdr_int)
+message ("xdr-b")
+  set (CMAKE_REQUIRED_LIBRARIES tirpc)
+  check_function_exists (xdr_int _lib_xdr_int_tirpc)
+  if (_lib_xdr_int_tirpc)
+    set (_lib_xdr_int 1)
+    set (LIBTIRPC_REQUIRED 1)
+  endif()
+endif()
+if (NOT _lib_xdr_int)
+message ("xdr-c")
+  set (CMAKE_REQUIRED_LIBRARIES tirpc;nsl)
+  check_function_exists (xdr_int _lib_xdr_int_tirpc_nsl)
+  if (_lib_xdr_int_tirpc_nsl)
+    set (_lib_xdr_int 1)
+    set (LIBNSL_REQUIRED 1)
+    set (LIBTIRPC_REQUIRED 1)
   endif()
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
@@ -546,10 +568,6 @@ if (_sys_fs_ufs_quota)
 endif()
 if (DEFINED QUOTA_HDR)
   message ("quota header: ${QUOTA_HDR}")
-  check_struct_has_member ("struct getquota_rslt" gqr_status
-      ${QUOTA_HDR} _mem_struct_getquota_rslt_gqr_status)
-  check_struct_has_member ("struct getquota_rslt" gqr_rquota
-      ${QUOTA_HDR} _mem_struct_getquota_rslt_gqr_rquota)
   checkdqblk (${QUOTA_HDR})
   checkPrototype_quotactl (${QUOTA_HDR})
   check_symbol_exists (QCMD ${QUOTA_HDR} _define_QCMD)
@@ -573,6 +591,20 @@ set (_args_setmntent 0)
 if (DEFINED SETMNTENT_HDR)
   message ("setmntent header: ${SETMNTENT_HDR}")
   checkPrototype_setmntent (${SETMNTENT_HDR})
+endif()
+
+if (_hdr_rpcsvc_rquota)
+  # linux rpcsvc/rquota.h includes rpc/rpc.h
+  set (CMAKE_REQUIRED_INCLUDES ${TIRPC_INCLUDE_DIRS})
+  check_struct_has_member ("struct getquota_rslt" gqr_status
+      rpcsvc/rquota.h _mem_struct_getquota_rslt_gqr_status)
+  check_struct_has_member ("struct getquota_rslt" gqr_rquota
+      rpcsvc/rquota.h _mem_struct_getquota_rslt_gqr_rquota)
+  check_struct_has_member ("struct rquota" rq_bhardlimit
+      rpcsvc/rquota.h _mem_struct_rquota_rq_bhardlimit)
+  check_struct_has_member ("struct getquota_args" gqa_uid
+      rpcsvc/rquota.h _mem_struct_getquota_args_gqa_uid)
+  unset (CMAKE_REQUIRED_INCLUDES)
 endif()
 
 if ((_lib_statfs OR _lib_getfsstat) AND _sys_mount)
@@ -616,11 +648,12 @@ else()
   set (_npt_getenv 1)
 endif()
 
-# ultrix, which header?
+# ultrix, which header should be checked?
+# this is so old, it can probably be removed.
 check_prototype_definition (getmnt
     "int getmnt (int * a, struct fs_data * b, int c, int d, char * e)"
     0
-    stdlib.h
+    stdio.h
     _npt_getmnt
     )
 if (_npt_getmnt)
@@ -669,10 +702,11 @@ if (_lib_quotactl OR _lib_quota_open OR _lib_vquotactl OR
 endif()
 
 set (_has_std_nfs_quotas 0)
+message ("r:${_hdr_rpc_rpc} rq:${_hdr_rpcsvc_rquota} x:${_lib_xdr_int} bh:${_mem_struct_rquota_rq_bhardlimit} gq:${_mem_struct_getquota_args_gqa_uid}")
 if (_hdr_rpc_rpc AND _hdr_rpcsvc_rquota AND
     _lib_xdr_int AND
-    _memberxd_rquota_rq_bhardlimit AND
-    _memberxdr_getquota_args_gqa_uid)
+    _mem_struct_rquota_rq_bhardlimit AND
+    _mem_struct_getquota_args_gqa_uid)
   set (_has_std_nfs_quotas 1)
 endif()
 
@@ -774,7 +808,6 @@ target_include_directories (${DI_LIBNAME} PRIVATE
 )
 target_link_libraries (${DI_LIBNAME} PRIVATE
   ${TIRPC_LDFLAGS}
-  m
 )
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (${DI_LIBNAME} PRIVATE
@@ -807,7 +840,6 @@ target_include_directories (di PRIVATE
 )
 target_link_libraries (di PRIVATE
   ${TIRPC_LDFLAGS}
-  m
 )
 target_link_libraries (di PRIVATE
   ${DI_LIBNAME}
@@ -825,9 +857,6 @@ endif()
 
 add_executable (dimathtest
   dimathtest.c
-)
-target_link_libraries (dimathtest PRIVATE
-  m
 )
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (dimathtest PRIVATE

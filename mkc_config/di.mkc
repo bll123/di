@@ -35,7 +35,8 @@ hdr     mnttab.h
 # NetBSD
 hdr     quota.h
 hdr     rpc/rpc.h
-hdr     rpcsvc/rquota.h
+# Linux rquota.h includes rpc/rpc.h which is in the tirpc dir
+hdr     rpcsvc/rquota.h rpc/rpc.h
 hdr     stdbool.h
 hdr     stddef.h
 hdr     stdint.h
@@ -166,15 +167,10 @@ lib     vquotactl
 lib     xdr_int -lnsl
 lib     zone_getattr
 lib     zone_list
-# get the correct xdr types...
-memberxdr rquota rq_bhardlimit
-memberxdr getquota_args gqa_uid
-# these are not used
-# memberxdr rquota rq_bsoftlimit
-# memberxdr rquota rq_curblocks
-# memberxdr rquota rq_fhardlimit
-# memberxdr rquota rq_fsoftlimit
-# memberxdr rquota rq_curfiles
+
+# check for the correct xdr types...
+member struct rquota rq_bhardlimit
+member struct getquota_args gqa_uid
 
 # to prevent warnings
 # some systems are u_int, size_t, u_long
@@ -247,8 +243,8 @@ endif
 
 if stdnfsquotas _hdr_rpc_rpc && _hdr_rpcsvc_rquota && \
     _lib_xdr_int && \
-    _memberxdr_rquota_rq_bhardlimit && \
-    _memberxdr_getquota_args_gqa_uid
+    _mem_struct_rquota_rq_bhardlimit && \
+    _mem_struct_getquota_args_gqa_uid
   setint _has_std_nfs_quotas 1
 else
   setint _has_std_nfs_quotas 0

@@ -301,6 +301,7 @@ clean:
 	@-$(RM) -f \
 		di libdi.* dimathtest getoptn_test \
 		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
+		$(MKC_ENV) config.h \
 		*.o *.obj $(MKC_FILES)/mkconfig.log \
 		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
 		$(MKC_FILES)/mkconfig.cache mkc*.vars \
@@ -369,7 +370,7 @@ libdi$(SHLIB_EXT):	$(MKC_REQLIB) $(LIBOBJECTS)
 		-link -shared $(MKC_ECHO) \
                 -r $(MKC_REQLIB) \
 		-o libdi$(SHLIB_EXT) \
-		$(LIBOBJECTS) -lm
+		$(LIBOBJECTS)
 
 di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
@@ -377,15 +378,14 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 		-r $(MKC_REQLIB) \
 		-o di$(EXE_EXT) \
 		$(MAINOBJECTS) \
-		libdi$(SHLIB_EXT) -lm
+		libdi$(SHLIB_EXT)
 
 dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
 		-r $(MKC_REQLIB) \
 		-o dimathtest$(EXE_EXT) \
-		dimathtest$(OBJ_EXT) \
-		-lm
+		dimathtest$(OBJ_EXT)
 
 getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT)
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
@@ -412,33 +412,47 @@ mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 #.c$(OBJ_EXT):
 #	$(CC) -c $(DI_SHARED) $(DI_CFLAGS) $<
 
-di$(OBJ_EXT):		di.c config.h di.h dimath.h dilib.h version.h
+# diinternal.h: config.h disystem.h di.h dimath.h dioptions.h
+# dioptions.h: disystem.h
+# diquota.h: disystem.h dimath.h
+# dizone.h: disystem.h
 
-dilib$(OBJ_EXT):	dilib.c config.h di.h dimath.h dilib.h \
-				dioptions.h version.h
+di$(OBJ_EXT):		di.c config.h di.h disystem.h distrutils.h version.h
 
-digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h dimath.h dimntopt.h
+didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h disystem.h diinternal.h \
+				distrutils.h dimath.h dimntopt.h \
+				dioptions.h
 
-didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h dimath.h distrutils.h \
-				dimntopt.h
+digetentries$(OBJ_EXT):	digetentries.c config.h di.h disystem.h diinternal.h \
+				distrutils.h dimntopt.h \
+				dimath.h dioptions.h
 
-digetentries$(OBJ_EXT):	digetentries.c config.h di.h dimath.h distrutils.h \
-				dimntopt.h
+digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h disystem.h diinternal.h \
+				dimntopt.h \
+				dimath.h dioptions.h
 
-diquota$(OBJ_EXT):	diquota.c config.h di.h dimath.h
-
-dizone$(OBJ_EXT):	dizone.c config.h di.h dimath.h
-
-getoptn$(OBJ_EXT):	getoptn.c config.h distrutils.h getoptn.h
-
-dioptions$(OBJ_EXT):	dioptions.c config.h di.h dimath.h 
-				distrutils.h dioptions.h
-
-distrutils$(OBJ_EXT):	distrutils.c config.h distrutils.h
+dilib$(OBJ_EXT):	dilib.c config.h di.h disystem.h diinternal.h \
+				dizone.h diquota.h dioptions.h version.h \
+                                dimath.h
 
 dimathtest$(OBJ_EXT):	dimathtest.c config.h dimath.h
 
-getoptn_test$(OBJ_EXT):	getoptn.c config.h getoptn.h
+dioptions$(OBJ_EXT):	dioptions.c config.h di.h diinternal.h distrutils.h \
+				getoptn.h dioptions.h version.h \
+				disystem.h dimath.h
+
+diquota$(OBJ_EXT):	diquota.c config.h di.h diquota.h \
+				dimath.h diinternal.h \
+				disystem.h dioptions.h
+
+distrutils$(OBJ_EXT):	distrutils.c config.h distrutils.h
+
+dizone$(OBJ_EXT):	dizone.c config.h di.h dizone.h \
+				disystem.h
+
+getoptn$(OBJ_EXT):	getoptn.c config.h distrutils.h getoptn.h
+
+getoptn_test$(OBJ_EXT):	getoptn.c config.h distrutils.h getoptn.h
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile $(MKC_ECHO) \
 		-DTEST_GETOPTN=1 $(DI_CFLAGS) -o getoptn_test$(OBJ_EXT) $<
 
@@ -474,3 +488,4 @@ test-env:
 	@echo "cc: $(CC)"
 	@echo "make: $(MAKE)"
 
+# DO NOT DELETE

@@ -184,6 +184,8 @@
 #cmakedefine01 _mem_struct_statfs_mount_info
 #cmakedefine01 _mem_struct_statfs_f_type
 #cmakedefine01 _mem_struct_statvfs_f_basetype
+#cmakedefine01 _mem_struct_rquota_rq_bhardlimit
+#cmakedefine01 _mem_struct_getquota_args_gqa_uid
 
 #cmakedefine01 _has_std_quotas
 #cmakedefine01 _has_std_nfs_quotas
