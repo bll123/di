@@ -141,6 +141,8 @@ static void di_display_data (void *);
 static void di_display_header (void *, char **);
 static void usage (void);
 static Size_t istrlen (const char *str);
+static void updateScaleValues (void *di_data, int iterval, di_disp_info_t *dispinfo);
+static void determineMaxScaleValue (void *di_data, int iterval, di_disp_info_t *dispinfo);
 
 int
 main (int argc, char * argv [])
@@ -282,14 +284,21 @@ di_display_data (void *di_data)
     fprintf (stdout, "  \"partitions\" : [\n");
   }
 
+  if (scalehr) {
+    updateScaleValues (di_data, iterval, &dispinfo);
+    if (scaleidx == DI_SCALE_HR_ALT) {
+      determineMaxScaleValue (di_data, iterval, &dispinfo);
+    }
+  }
+
   di_iterate_init (di_data, iterval);
   while ( (pub = di_iterate (di_data)) != NULL) {
     int         fmt;
     int         fmtcount;
     int         dataidx;
 
-    di_format_iter_init (di_data);
     fmtcount = 0;
+    di_format_iter_init (di_data);
     while ( (fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
       dataidx = dispcount * fmtstrlen + fmtcount;
       strdata [dataidx] = NULL;
@@ -328,8 +337,6 @@ di_display_data (void *di_data)
         case DI_FMT_BTOT: {
           dispinfo.jsonident [fmtcount] = "size";
           if (scalehr) {
-            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
-                pub->index, DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
             dispinfo.suffix [dataidx] =
                 disptext [dispinfo.scaleidx [dataidx]].uc;
           }
@@ -342,8 +349,6 @@ di_display_data (void *di_data)
         case DI_FMT_BTOT_AVAIL: {
           dispinfo.jsonident [fmtcount] = "size";
           if (scalehr) {
-            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
-                pub->index, DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_AVAIL);
             dispinfo.suffix [dataidx] =
                 disptext [dispinfo.scaleidx [dataidx]].uc;
           }
@@ -356,8 +361,6 @@ di_display_data (void *di_data)
         case DI_FMT_BUSED: {
           dispinfo.jsonident [fmtcount] = "used";
           if (scalehr) {
-            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
-                pub->index, DI_SPACE_TOTAL, DI_SPACE_FREE, DI_VALUE_NONE);
             dispinfo.suffix [dataidx] =
                 disptext [dispinfo.scaleidx [dataidx]].uc;
           }
@@ -370,8 +373,6 @@ di_display_data (void *di_data)
         case DI_FMT_BCUSED: {
           dispinfo.jsonident [fmtcount] = "used";
           if (scalehr) {
-            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
-                pub->index, DI_SPACE_TOTAL, DI_SPACE_AVAIL, DI_VALUE_NONE);
             dispinfo.suffix [dataidx] =
                 disptext [dispinfo.scaleidx [dataidx]].uc;
           }
@@ -384,8 +385,6 @@ di_display_data (void *di_data)
         case DI_FMT_BFREE: {
           dispinfo.jsonident [fmtcount] = "free";
           if (scalehr) {
-            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
-                pub->index, DI_SPACE_FREE, DI_VALUE_NONE, DI_VALUE_NONE);
             dispinfo.suffix [dataidx] =
                 disptext [dispinfo.scaleidx [dataidx]].uc;
           }
@@ -398,8 +397,6 @@ di_display_data (void *di_data)
         case DI_FMT_BAVAIL: {
           dispinfo.jsonident [fmtcount] = "available";
           if (scalehr) {
-            dispinfo.scaleidx [dataidx] = di_get_scale_max (di_data,
-                pub->index, DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE);
             dispinfo.suffix [dataidx] =
                 disptext [dispinfo.scaleidx [dataidx]].uc;
           }
@@ -460,29 +457,48 @@ di_display_data (void *di_data)
         /* inode information */
         case DI_FMT_ITOT: {
           dispinfo.jsonident [fmtcount] = "inodes";
+          di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
+              DI_SCALE_BYTE, DI_INODE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
           break;
         }
         case DI_FMT_IUSED: {
           dispinfo.jsonident [fmtcount] = "inodesused";
+          di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
+              DI_SCALE_BYTE, DI_INODE_TOTAL, DI_INODE_FREE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
           break;
         }
         case DI_FMT_IFREE: {
           dispinfo.jsonident [fmtcount] = "inodesfree";
+          di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
+              DI_SCALE_BYTE, DI_INODE_FREE, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
           break;
         }
         case DI_FMT_IPERC: {
           dispinfo.jsonident [fmtcount] = "percinodesused";
+          di_disp_perc (di_data, temp, sizeof (temp), pub->index,
+              DI_INODE_TOTAL, DI_INODE_AVAIL,
+              DI_INODE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+          strdata [dataidx] = strdup (temp);
+          dispinfo.suffix [dataidx] = "%";
           break;
         }
         default: {
-          fprintf (stderr, "Unknown format: %c\n", fmt);
-          exit (DI_EXIT_FAIL);
+          dispinfo.leftjust [fmtcount] = 1;
+          dispinfo.jsonident [fmtcount] = NULL;
+          temp [0] = fmt;
+          temp [1] = '\0';
+          strdata [dataidx] = strdup (temp);
+          dispinfo.suffix [dataidx] = "";
           break;
         }
       }
 
       ++fmtcount;
     }
+
     ++dispcount;
   }
 
@@ -511,6 +527,7 @@ di_display_data (void *di_data)
   for (i = 0; i < count; ++i) {
     int         j;
     const char  *comma;
+    int         fmtchar;
 
     if (jsonout) {
       fprintf (stdout, "    {\n");
@@ -530,16 +547,24 @@ di_display_data (void *di_data)
         tmp = "n/a";
       }
 
-      if (csvout) {
-        if (csvtabs) {
-          fprintf (stdout, "%s", strdata [dataidx]);
-        } else {
-          fprintf (stdout, "\"%s\"", strdata [dataidx]);
+      fmtchar = 1;
+      if (dispinfo.jsonident [j] == NULL) {
+        fmtchar = 0;
+      }
+
+      if (fmtchar) {
+        if (csvout) {
+          if (csvtabs) {
+            fprintf (stdout, "%s", tmp);
+          } else {
+            fprintf (stdout, "\"%s\"", tmp);
+          }
+        } else if (jsonout) {
+          fprintf (stdout, "      \"%s\" : \"%s%s\"%s", dispinfo.jsonident [j],
+              tmp, dispinfo.suffix [dataidx], comma);
         }
-      } else if (jsonout) {
-        fprintf (stdout, "      \"%s\" : \"%s%s\"%s", dispinfo.jsonident [j],
-            strdata [dataidx], dispinfo.suffix [dataidx], comma);
-      } else {
+      }
+      if (! csvout && ! jsonout) {
         int       len;
 
         len = dispinfo.maxlen [j];
@@ -547,28 +572,31 @@ di_display_data (void *di_data)
           --len;
         }
         if (dispinfo.leftjust [j]) {
-          fprintf (stdout, "%-*s%s", len, strdata [dataidx], dispinfo.suffix [dataidx]);
+          fprintf (stdout, "%-*s%s", len, tmp, dispinfo.suffix [dataidx]);
         } else {
-          fprintf (stdout, "%*s%s", len, strdata [dataidx], dispinfo.suffix [dataidx]);
+          fprintf (stdout, "%*s%s", len, tmp, dispinfo.suffix [dataidx]);
         }
       }
 
-      if (jsonout) {
-        fprintf (stdout, "\n");
-      } else {
-        if (j != fmtstrlen - 1) {
-          if (csvout) {
-            if (csvtabs) {
-              fprintf (stdout, "\t");
+      if (fmtchar) {
+        if (jsonout) {
+          fprintf (stdout, "\n");
+        } else {
+          if (j != fmtstrlen - 1) {
+            if (csvout) {
+              if (csvtabs) {
+                fprintf (stdout, "\t");
+              } else {
+                fprintf (stdout, ",");
+              }
             } else {
-              fprintf (stdout, ",");
+              fprintf (stdout, " ");
             }
-          } else {
-            fprintf (stdout, " ");
-          }
-        }
-      }
-    }
+          } /* not the last format character */
+        } /* not json, json output is per-line */
+      } /* is a standard format character */
+    } /* for each format character */
+
     if (jsonout) {
       fprintf (stdout, "    }");
       if (i != count - 1) {
@@ -615,18 +643,19 @@ di_display_header (void *di_data, char **strdata)
   csvout = di_check_option (di_data, DI_OPT_DISP_CSV);
   fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
   fmtcount = 0;
+
   di_format_iter_init (di_data);
   while ( (fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
     const char  *temp;
-    char        tcsv [2];
+    char        tbuff [2];
     int         dataidx;
 
     temp = "";
     dataidx = fmtcount;
     if (csvout) {
-      tcsv [0] = fmt;
-      tcsv [1] = '\0';
-      temp = tcsv;
+      tbuff [0] = fmt;
+      tbuff [1] = '\0';
+      temp = tbuff;
     }
 
     if (! csvout) {
@@ -718,6 +747,9 @@ di_display_header (void *di_data, char **strdata)
           break;
         }
         default: {
+          tbuff [0] = fmt;
+          tbuff [1] = '\0';
+          temp = tbuff;
           break;
         }
       }
@@ -759,3 +791,156 @@ istrlen (const char *str)
   return len;
 }
 
+static void
+updateScaleValues (void *di_data, int iterval,
+    di_disp_info_t *dispinfo)
+{
+  di_pub_disk_info_t  *pub;
+  int                 dispcount;
+  int                 fmtstrlen;
+
+  dispcount = 0;
+  if (di_check_option (di_data, DI_OPT_DISP_HEADER)) {
+    dispcount = 1;
+  }
+  fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
+
+  di_iterate_init (di_data, iterval);
+  while ( (pub = di_iterate (di_data)) != NULL) {
+    int         fmt;
+    int         fmtcount;
+    int         dataidx;
+
+    fmtcount = 0;
+
+    di_format_iter_init (di_data);
+    while ((fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
+      dataidx = dispcount * fmtstrlen + fmtcount;
+
+      switch (fmt) {
+        /* disk space values */
+        case DI_FMT_BTOT: {
+          dispinfo->scaleidx [dataidx] = di_get_scale_max (di_data,
+              pub->index, DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+          break;
+        }
+        case DI_FMT_BTOT_AVAIL: {
+          dispinfo->scaleidx [dataidx] = di_get_scale_max (di_data,
+              pub->index, DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_AVAIL);
+          break;
+        }
+        case DI_FMT_BUSED: {
+          dispinfo->scaleidx [dataidx] = di_get_scale_max (di_data,
+              pub->index, DI_SPACE_TOTAL, DI_SPACE_FREE, DI_VALUE_NONE);
+          break;
+        }
+        case DI_FMT_BCUSED: {
+          dispinfo->scaleidx [dataidx] = di_get_scale_max (di_data,
+              pub->index, DI_SPACE_TOTAL, DI_SPACE_AVAIL, DI_VALUE_NONE);
+          break;
+        }
+        case DI_FMT_BFREE: {
+          dispinfo->scaleidx [dataidx] = di_get_scale_max (di_data,
+              pub->index, DI_SPACE_FREE, DI_VALUE_NONE, DI_VALUE_NONE);
+          break;
+        }
+        case DI_FMT_BAVAIL: {
+          dispinfo->scaleidx [dataidx] = di_get_scale_max (di_data,
+              pub->index, DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE);
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+
+      ++fmtcount;
+    }
+
+    ++dispcount;
+  }
+
+}
+
+static void
+determineMaxScaleValue (void *di_data, int iterval,
+    di_disp_info_t *dispinfo)
+{
+  di_pub_disk_info_t  *pub;
+  int                 dispcount;
+  int                 fmtstrlen;
+
+  dispcount = 0;
+  if (di_check_option (di_data, DI_OPT_DISP_HEADER)) {
+    dispcount = 1;
+  }
+  fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
+
+  di_iterate_init (di_data, iterval);
+  while ( (pub = di_iterate (di_data)) != NULL) {
+    int         fmt;
+    int         fmtcount;
+    int         dataidx;
+    int         maxscaleidx;
+    int         scaleidx;
+
+    fmtcount = 0;
+    maxscaleidx = DI_SCALE_BYTE;
+
+    di_format_iter_init (di_data);
+    while ((fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
+      dataidx = dispcount * fmtstrlen + fmtcount;
+
+      switch (fmt) {
+        /* disk space values */
+        case DI_FMT_BTOT:
+        case DI_FMT_BTOT_AVAIL:
+        case DI_FMT_BUSED:
+        case DI_FMT_BCUSED:
+        case DI_FMT_BFREE:
+        case DI_FMT_BAVAIL: {
+          scaleidx = dispinfo->scaleidx [dataidx];
+          break;
+        }
+        default: {
+          scaleidx = DI_SCALE_BYTE;
+          break;
+        }
+      }
+
+      if (scaleidx > maxscaleidx) {
+        maxscaleidx = scaleidx;
+      }
+
+      ++fmtcount;
+    }
+
+    /* and loop through again, and set the scaleidx to the max scaleidx */
+    fmtcount = 0;
+
+    di_format_iter_init (di_data);
+    while ((fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
+      dataidx = dispcount * fmtstrlen + fmtcount;
+
+      switch (fmt) {
+        /* disk space values */
+        case DI_FMT_BTOT:
+        case DI_FMT_BTOT_AVAIL:
+        case DI_FMT_BUSED:
+        case DI_FMT_BCUSED:
+        case DI_FMT_BFREE:
+        case DI_FMT_BAVAIL: {
+          dispinfo->scaleidx [dataidx] = maxscaleidx;
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+
+      ++fmtcount;
+    }
+
+    ++dispcount;
+  }
+}

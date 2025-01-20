@@ -164,13 +164,21 @@ lib     textdomain  -lintl, -lintl -liconv
 # dragonflybsd
 lib     vquotactl
 # need this to get the optional library
-lib     xdr_int -lnsl
+lib     xdr_int -ltirpc, -lnsl
 lib     zone_getattr
 lib     zone_list
 
-# check for the correct xdr types...
+# check for basic existence...
 member struct rquota rq_bhardlimit
 member struct getquota_args gqa_uid
+# check for the correct xdr types...
+memberxdr rquota rq_bhardlimit
+memberxdr rquota rq_bsoftlimit
+memberxdr rquota rq_curblocks
+memberxdr rquota rq_fhardlimit
+memberxdr rquota rq_fsoftlimit
+memberxdr rquota rq_curfiles
+memberxdr getquota_args gqa_uid
 
 # to prevent warnings
 # some systems are u_int, size_t, u_long
@@ -241,7 +249,8 @@ else
   setint _has_std_quotas 0
 endif
 
-if stdnfsquotas _hdr_rpc_rpc && _hdr_rpcsvc_rquota && \
+if stdnfsquotas _hdr_rpc_rpc && \
+    _hdr_rpcsvc_rquota && \
     _lib_xdr_int && \
     _mem_struct_rquota_rq_bhardlimit && \
     _mem_struct_getquota_args_gqa_uid

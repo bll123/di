@@ -5,17 +5,16 @@
 #  Copyright 2023 Brad Lanam, Pleasant Hill, CA
 #
 
-# cmake
-# one less than the required version
-# 3.${CMAKE_REQ_VERSION}
-CMAKE_REQ_VERSION=10
-
+# for cmake
+CMAKE_REQ_MAJ_VERSION=3
+CMAKE_REQ_MIN_VERSION=10
 BUILDDIR = build
+
 # DI_USE_MATH = DI_GMP
 # DI_USE_MATH = DI_TOMMATH
 # DI_USE_MATH = DI_INTERNAL
 
-# mkconfig
+# for mkconfig
 MKC_PREFIX = di
 MKC_CONFDIR = mkc_config
 MKC_FILES = mkc_files
@@ -46,7 +45,6 @@ LN = ln
 MKDIR = mkdir
 MV = mv
 RM = rm
-RPMBUILD = rpmbuild
 SED = sed
 TEST = test
 
@@ -59,6 +57,7 @@ BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share
 MANDIR = $(DATADIR)/man
 LOCALEDIR = $(DATADIR)/locale
+DI_VERSION = 5.0.0-beta-1
 
 ###
 # additional flags/libraries
@@ -76,18 +75,37 @@ MKC_ECHO =
 #MKC_ECHO = -e
 
 ###
-# cmake
+# generic targets
 
+# checks the cmake version, and runs the
 .PHONY: all
 all:
-	@cmv=0 ; \
-	cmv=`cmake --version | \
-	  sed -n -e '/version/ s,[^0-9]*3\.\([0-9]*\).*,\1, p'` ; \
-	if [ "$${cmv}" -ge $(CMAKE_REQ_VERSION) ]; then \
-	  $(MAKE) cmake-all; \
+	@$(MAKE) TARGET=$@ switcher
+
+.PHONY: install
+install:
+	@$(MAKE) TARGET=$@ switcher
+
+.PHONY: test
+test:
+	@$(MAKE) TARGET=$@ switcher
+
+.PHONY: switcher
+switcher:
+	@cmvers=`cmake --version 2>/dev/null`; \
+	cmmajv=`echo $${cmvers} | \
+	  $(SED) -n -e '/version/ s,[^0-9]*\([0-9]*\)\..*,\1, p'` ; \
+	cmminv=`echo $${cmvers} | \
+	  $(SED) -n -e '/version/ s,[^0-9]*3\.\([0-9]*\).*,\1, p'` ; \
+	if [ "$${cmmajv}" -ge $(CMAKE_REQ_MAJ_VERSION) -a \
+	    "$${cmminv}" -ge $(CMAKE_REQ_MIN_VERSION) ]; then \
+	  $(MAKE) cmake-$(TARGET); \
 	else \
-	  $(MAKE) mkc-all; \
+	  $(MAKE) mkc-$(TARGET); \
 	fi
+
+###
+# cmake
 
 .PHONY: cmake-release
 cmake-release:
@@ -453,8 +471,10 @@ dizone$(OBJ_EXT):	dizone.c config.h di.h dizone.h \
 getoptn$(OBJ_EXT):	getoptn.c config.h distrutils.h getoptn.h
 
 getoptn_test$(OBJ_EXT):	getoptn.c config.h distrutils.h getoptn.h
-	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile $(MKC_ECHO) \
-		-DTEST_GETOPTN=1 $(DI_CFLAGS) -o getoptn_test$(OBJ_EXT) $<
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
+		-compile $(MKC_ECHO) \
+		-DTEST_GETOPTN=1 $(DI_CFLAGS) \
+		-o getoptn_test$(OBJ_EXT) getoptn.c
 
 ###
 # regression testing

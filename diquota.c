@@ -671,7 +671,7 @@ diquota_nfs (di_quota_t *diqinfo)
       dinum_set_u (&diqinfo->values [DI_QUOTA_ILIMIT], rptr->rq_fhardlimit);
       dinum_set_s (&tsize, rptr->rq_fsoftlimit);
       if (dinum_cmp_s (&tsize, 0) != 0 &&
-          dinum_cmp_s (&tsize, diqinfo->values [DI_QUOTA_ILIMIT]) < 0) {
+          dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_ILIMIT]) < 0) {
         dinum_set (&diqinfo->values [DI_QUOTA_ILIMIT], &tsize);
       }
       if (dinum_cmp_s (&diqinfo->values [DI_QUOTA_ILIMIT], 0) != 0) {

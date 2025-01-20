@@ -150,6 +150,16 @@
 #cmakedefine01 _lib_zone_getattr
 #cmakedefine01 _lib_zone_list
 
+#cmakedefine01 _mem_struct_rquota_rq_bhardlimit
+#cmakedefine01 _mem_struct_getquota_args_gqa_uid
+#define xdr_rq_bhardlimit ${xdr_rq_bhardlimit}
+#define xdr_rq_bsoftlimit ${xdr_rq_bsoftlimit}
+#define xdr_rq_curblocks ${xdr_rq_curblocks}
+#define xdr_rq_fhardlimit ${xdr_rq_fhardlimit}
+#define xdr_rq_fsoftlimit ${xdr_rq_fsoftlimit}
+#define xdr_rq_curfiles ${xdr_rq_curfiles}
+#define xdr_gqa_uid ${xdr_gqa_uid}
+
 #cmakedefine01 _quotactl_pos_1
 #cmakedefine01 _quotactl_pos_2
 #define _c_arg_2_quotactl ${_c_arg_2_quotactl}
@@ -184,8 +194,6 @@
 #cmakedefine01 _mem_struct_statfs_mount_info
 #cmakedefine01 _mem_struct_statfs_f_type
 #cmakedefine01 _mem_struct_statvfs_f_basetype
-#cmakedefine01 _mem_struct_rquota_rq_bhardlimit
-#cmakedefine01 _mem_struct_getquota_args_gqa_uid
 
 #cmakedefine01 _has_std_quotas
 #cmakedefine01 _has_std_nfs_quotas

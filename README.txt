@@ -1,0 +1,68 @@
+di Version 5.x beta
+
+Website: https://diskinfo-di.sourceforge.io/
+SourceForge: https://sourceforge.net/projects/diskinfo-di/
+
+Version 5 beta
+
+- re-worked to have a library and proper api
+- cmake configuration
+- wiki pages to document the api
+- optionally use gmp or libtommath to handle large numbers
+
+Version 5 Roadmap (more or less)
+
+- move the totals processing into the main library.
+- get all the basics working
+- finish the api, there's still a couple of routines to write
+- wiki documentation for the api
+- make the beta available to download
+- get basic di working on all platforms I have access to.
+- check the cmake configuration against mkconfig.  check again. re-check.
+- apfs testing on macos
+- i have macos now, test quotas and nfs quotas there
+- test quota handling
+- test nfs quota handling
+- linux tirpc library
+- xfs quotas
+- dragonflybsd quotas
+- zfs testing on solaris
+- write the manual page for the library
+- re-write the readme, get ready for production release
+- wiki page updates and rewrite
+- production release
+
+Version 5 beta Notes
+
+GMP and libtommath work fine.  But long doubles seem to be quite
+capable (where long doubles are supported).
+
+I have a *lot* of VMs.  These are mostly old Linux and old *BSD,
+though there are a couple of others.
+
+But access to non-Linux and non-*BSD systems is limited. Amazingly, I
+still have access to a Tru64 machine (so slow), QNX and SCO Openserver
+(thanks to polarhome).
+
+For MacOS, I removed some of my older versions (no disk space).  I
+have Big Sur, Ventura, Sonoma and Sequoia.  I did something wrong and
+apparently removed the Monterey partitions.  I don't think that will
+be an issue.  Someone tell the Mac people to fix the damned audiomxd
+bug.
+
+I don't have access to the old Solaris machines.  OpenCSW appears to
+be up, but I don't remember my password (the problem with using ssh
+keys, sometimes they get changed).  I have a few VMs with Solaris.
+
+I do not have access to any HP-UX machine.
+
+I should have (or be able to get) access to modern AIX on the gcc farm.
+
+I think that there is no need to maintain 'mkconfig' for modern
+systems. If a system has cmake 3.10 or later, I will ignore
+'mkconfig', though it will work to some extent (e.g. Linux tirpc will
+not work).  This will save a good deal of trouble.
+
+Version 5 beta Timeline
+
+2025-1-20 Very early days, wrote this readme...

@@ -5,6 +5,7 @@
 **5.0.0 2025-xx-xx**
   * Bug Fixes
     * Fix some internal errors (string sizing).
+    * Locate and use Linux tirpc library.
   * Changes
     * Drop syllable and VMS support.
     * All format strings options (mstO) no longer truncate the output.

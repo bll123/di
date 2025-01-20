@@ -281,7 +281,7 @@ dinum_cmp_s (const dinum_t *r, di_snum_t val)
   return rv;
 #else
   di_snum_t   t;
-  int       rc = 0;
+  int         rc = 0;
 
   t = (di_snum_t) *r;
   if (t < val) {

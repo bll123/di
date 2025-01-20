@@ -75,7 +75,7 @@ static di_valid_scale_t validscale [] =
 #define DI_LIST_SEP             ","
 
 #define DI_POSIX_FORMAT         "SbuvpM"
-#define DI_ALL_FORMAT           "MTS\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
+#define DI_ALL_FORMAT           "mts\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 
 extern int debug;
 

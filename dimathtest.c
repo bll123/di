@@ -40,12 +40,17 @@ main (int argc, char *argv [])
   dinum_set_u (&a, 1);
   ++tcount;
   if (dinum_cmp_s (&a, 1) != 0) {
-    fprintf (stderr, "%d: set-u 1 != 0 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+    fprintf (stderr, "%d: cmp-s 1 != 0 fail %d\n", tcount, dinum_cmp_s (&a, 1));
     ++ecount;
   }
   ++tcount;
   if (dinum_cmp_s (&a, 0) <= 0) {
-    fprintf (stderr, "%d: set-u 1 <= 0 fail %d\n", tcount, dinum_cmp_s (&a, 0));
+    fprintf (stderr, "%d: cmp-s 1 > 0 fail %d\n", tcount, dinum_cmp_s (&a, 0));
+    ++ecount;
+  }
+  ++tcount;
+  if (dinum_cmp_s (&a, 2) >= 0) {
+    fprintf (stderr, "%d: cmp-s 1 < 2 fail %d\n", tcount, dinum_cmp_s (&a, 2));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));

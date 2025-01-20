@@ -319,6 +319,58 @@ macro (checkdqblk hdr)
   unset (CMAKE_EXTRA_INCLUDE_FILES)
 endmacro ()
 
+macro (memberxdr structnm membernm)
+  message ("-- Determining ${structnm} ${membernm} xdr type")
+  file (WRITE txdr.c "#include <rpcsvc/rquota.h>")
+  set (tinc ".")
+  if (NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
+    set (tinc ${TIRPC_INCLUDE_DIRS})
+  endif()
+  execute_process (
+    OUTPUT_FILE txdr.out
+    ERROR_QUIET
+    COMMAND ${CMAKE_C_COMPILER} -I ${tinc} -E txdr.c
+  )
+  unset (tinc)
+  if (EXISTS txdr.out)
+    execute_process (
+      OUTPUT_VARIABLE xdr_out
+      COMMAND grep "^ *[a-z_][a-z_]* *${membernm};" txdr.out
+      COMMAND sed -e "s,^ *,," -e "s, .*,,"
+      COMMAND tr -d "\n"
+    )
+    set (xdr_${membernm} xdr_${xdr_out})
+  endif()
+  file (REMOVE txdr.c)
+  if (EXISTS txdr.out)
+    file (REMOVE txdr.out)
+  endif()
+  unset (CMAKE_REQUIRED_INCLUDES)
+endmacro()
+
+macro (checkIncludeConflict hdra hdrb varnm)
+  message ("-- Check for include conflict ${hdra} ${hdrb}")
+  # use execute_process rather than check_source_compiles
+  # so that earlier versions of cmake can be used.
+  file (WRITE tinc.c "#include <${hdra}>
+#include <${hdrb}>
+int main (int argc, char *argv []) {
+  return 0;
+}"
+  )
+  execute_process (
+    OUTPUT_QUIET
+    ERROR_QUIET
+    RESULT_VARIABLE tincres
+    COMMAND ${CMAKE_C_COMPILER} -c tinc.c
+  )
+  set (${varnm} 0)
+  if (tincres EQUAL 0)
+    set (${varnm} 1)
+  endif()
+  file (REMOVE tinc.c)
+endmacro()
+
 check_include_file (ctype.h _hdr_ctype)
 check_include_file (dirent.h _hdr_dirent)
 check_include_file (errno.h _hdr_errno)
@@ -342,11 +394,13 @@ check_include_file (mntent.h _hdr_mntent)
 check_include_file (mnttab.h _hdr_mnttab)
 # NetBSD
 check_include_file (quota.h _hdr_quota)
+
 set (CMAKE_REQUIRED_INCLUDES ${TIRPC_INCLUDE_DIRS})
 check_include_file (rpc/rpc.h _hdr_rpc_rpc)
-# rquota.h includes rpc/rpc.h
+# Linux: rquota.h includes rpc/rpc.h
 check_include_file (rpcsvc/rquota.h _hdr_rpcsvc_rquota)
 unset (CMAKE_REQUIRED_INCLUDES)
+
 check_include_file (storage/Directory.h _hdr_storage_Directory)
 check_include_file (storage/Entry.h _hdr_storage_Entry)
 check_include_file (storage/Path.h _hdr_storage_Path)
@@ -480,7 +534,7 @@ check_function_exists (xdr_int _lib_xdr_int)
 set (LIBNSL_REQUIRED 0)
 set (LIBTIRPC_REQUIRED 0)
 if (NOT _lib_xdr_int)
-message ("xdr-a")
+  # check with nsl library
   set (CMAKE_REQUIRED_LIBRARIES nsl)
   check_function_exists (xdr_int _lib_xdr_int_nsl)
   if (_lib_xdr_int_nsl)
@@ -489,24 +543,13 @@ message ("xdr-a")
   endif()
 endif()
 if (NOT _lib_xdr_int)
-message ("xdr-b")
+  # check with tirpc library
   set (CMAKE_REQUIRED_LIBRARIES tirpc)
   check_function_exists (xdr_int _lib_xdr_int_tirpc)
   if (_lib_xdr_int_tirpc)
     set (_lib_xdr_int 1)
     set (LIBTIRPC_REQUIRED 1)
   endif()
-endif()
-if (NOT _lib_xdr_int)
-message ("xdr-c")
-  set (CMAKE_REQUIRED_LIBRARIES tirpc;nsl)
-  check_function_exists (xdr_int _lib_xdr_int_tirpc_nsl)
-  if (_lib_xdr_int_tirpc_nsl)
-    set (_lib_xdr_int 1)
-    set (LIBNSL_REQUIRED 1)
-    set (LIBTIRPC_REQUIRED 1)
-  endif()
-  unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 
 # solaris
@@ -594,6 +637,7 @@ if (DEFINED SETMNTENT_HDR)
 endif()
 
 if (_hdr_rpcsvc_rquota)
+message ("== have rpcsvc rquota")
   # linux rpcsvc/rquota.h includes rpc/rpc.h
   set (CMAKE_REQUIRED_INCLUDES ${TIRPC_INCLUDE_DIRS})
   check_struct_has_member ("struct getquota_rslt" gqr_status
@@ -605,6 +649,14 @@ if (_hdr_rpcsvc_rquota)
   check_struct_has_member ("struct getquota_args" gqa_uid
       rpcsvc/rquota.h _mem_struct_getquota_args_gqa_uid)
   unset (CMAKE_REQUIRED_INCLUDES)
+
+  memberxdr (rquota rq_bhardlimit)
+  memberxdr (rquota rq_bsoftlimit)
+  memberxdr (rquota rq_curblocks)
+  memberxdr (rquota rq_fhardlimit)
+  memberxdr (rquota rq_fsoftlimit)
+  memberxdr (rquota rq_curfiles)
+  memberxdr (getquota_args gqa_uid)
 endif()
 
 if ((_lib_statfs OR _lib_getfsstat) AND _sys_mount)
@@ -702,8 +754,8 @@ if (_lib_quotactl OR _lib_quota_open OR _lib_vquotactl OR
 endif()
 
 set (_has_std_nfs_quotas 0)
-message ("r:${_hdr_rpc_rpc} rq:${_hdr_rpcsvc_rquota} x:${_lib_xdr_int} bh:${_mem_struct_rquota_rq_bhardlimit} gq:${_mem_struct_getquota_args_gqa_uid}")
-if (_hdr_rpc_rpc AND _hdr_rpcsvc_rquota AND
+if (_hdr_rpc_rpc AND
+    _hdr_rpcsvc_rquota AND
     _lib_xdr_int AND
     _mem_struct_rquota_rq_bhardlimit AND
     _mem_struct_getquota_args_gqa_uid)
@@ -727,6 +779,8 @@ endif()
 set (_inc_conflict__hdr_time__sys_time 1)
 set (_inc_conflict__sys_quota__hdr_linux_quota 1)
 
+checkIncludeConflict (time.h sys/time.h _inc_conflict__hdr_time__sys_time)
+checkIncludeConflict (sys/quota.h linux/quota.h _inc_conflict__sys_quota__hdr_linux_quota)
 # check_source_compiles (C
 # "#include <time.h>
 # #include <sys/time.h>

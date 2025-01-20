@@ -191,7 +191,7 @@ di_cleanup (void *tdi_data)
   free (di_data);
 
   if (scale_values_init) {
-    for (int i = 0; i < DI_SCALE_MAX; ++i) {
+    for (i = 0; i < DI_SCALE_MAX; ++i) {
       dinum_clear (&scale_values [i]);
     }
     scale_values_init = 0;
@@ -458,8 +458,8 @@ di_get_scale_max (void *tdi_data, int infoidx,
   return scaleidx;
 }
 
-void
-di_disp_scaled (void *tdi_data, char *buff, long sz, int infoidx,
+double
+di_get_scaled (void *tdi_data, int infoidx,
     int scaleidx, int validxA, int validxB, int validxC)
 {
   di_data_t   *di_data = (di_data_t *) tdi_data;
@@ -467,13 +467,12 @@ di_disp_scaled (void *tdi_data, char *buff, long sz, int infoidx,
   dinum_t     val;
   double      dval;
 
-  *buff = '\0';
   if (di_data == NULL) {
-    return;
+    return 0.0;
   }
 
   if (infoidx < 0 || infoidx >= di_data->count) {
-    return;
+    return 0.0;
   }
 
   diopts = (di_opt_t *) di_data->options;
@@ -482,17 +481,14 @@ di_disp_scaled (void *tdi_data, char *buff, long sz, int infoidx,
   dinum_init (&val);
   di_calc_space (di_data, infoidx, validxA, validxB, validxC, &val);
   dval = dinum_scale (&val, &scale_values [scaleidx]);
-  Snprintf1 (buff, sz, "%.1f", dval);
-
-  dinum_clear (&val);
+  return dval;
 }
 
 void
-di_disp_perc (void *tdi_data, char *buff, long sz, int infoidx,
-    int validxA, int validxB, int validxC, int validxD, int validxE)
+di_disp_scaled (void *tdi_data, char *buff, long sz, int infoidx,
+    int scaleidx, int validxA, int validxB, int validxC)
 {
   di_data_t   *di_data = (di_data_t *) tdi_data;
-  di_opt_t    *diopts;
   double      dval;
 
   *buff = '\0';
@@ -504,10 +500,54 @@ di_disp_perc (void *tdi_data, char *buff, long sz, int infoidx,
     return;
   }
 
+  dval = di_get_scaled (di_data, infoidx, scaleidx, validxA, validxB, validxC);
+  if (scaleidx == DI_SCALE_BYTE) {
+    Snprintf1 (buff, sz, "%.0f", dval);
+  } else {
+    Snprintf1 (buff, sz, "%.1f", dval);
+  }
+}
+
+double
+di_get_perc (void *tdi_data, int infoidx,
+    int validxA, int validxB, int validxC, int validxD, int validxE)
+{
+  di_data_t   *di_data = (di_data_t *) tdi_data;
+  di_opt_t    *diopts;
+  double      dval;
+
+  if (di_data == NULL) {
+    return 0.0;
+  }
+
+  if (infoidx < 0 || infoidx >= di_data->count) {
+    return 0.0;
+  }
+
   diopts = (di_opt_t *) di_data->options;
   init_scale_values (diopts);
 
   dval = di_calc_perc (di_data, infoidx, validxA, validxB, validxC, validxD, validxE);
+  return dval;
+}
+
+void
+di_disp_perc (void *tdi_data, char *buff, long sz, int infoidx,
+    int validxA, int validxB, int validxC, int validxD, int validxE)
+{
+  di_data_t   *di_data = (di_data_t *) tdi_data;
+  double      dval;
+
+  *buff = '\0';
+  if (di_data == NULL) {
+    return;
+  }
+
+  if (infoidx < 0 || infoidx >= di_data->count) {
+    return;
+  }
+
+  dval = di_get_perc (di_data, infoidx, validxA, validxB, validxC, validxD, validxE);
   Snprintf1 (buff, sz, "%.0f", dval);
 }
 
@@ -1588,7 +1628,11 @@ di_calc_perc (di_data_t *di_data, int infoidx,
   }
   dinum_set (&divisor, &dinfo->values [validxC]);
   dinum_sub (&divisor, &subr);
-  dval = dinum_perc (&dividend, &divisor);
+  if (dinum_cmp_s (&divisor, 0) == 0) {
+    dval = 0.0;
+  } else {
+    dval = dinum_perc (&dividend, &divisor);
+  }
 
   dinum_clear (&subd);
   dinum_clear (&subr);

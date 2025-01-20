@@ -141,8 +141,10 @@ extern int di_check_option (void *, int);
 extern void di_format_iter_init (void *);
 extern int di_format_iterate (void *);
 extern int di_get_scale_max (void *, int, int, int, int);
+extern double di_get_scaled (void *, int, int, int, int, int);
 extern void di_disp_scaled (void *, char *, long, int, int, int, int, int);
-extern void di_disp_perc (void *tdi_data, char *buff, long sz, int infoidx, int validxA, int validxB, int validxC, int validxD, int validxE);
+extern double di_get_perc (void *, int, int, int, int, int, int);
+extern void di_disp_perc (void *, char *, long, int, int, int, int, int, int);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }
