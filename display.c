@@ -271,12 +271,12 @@ printDiskInfo (void *di_data)
               /* we must have the array sorted by special device name */
           strncpy (tempSortType, diopts->sortType, DI_SORT_MAX);
           strncpy (diopts->sortType, "s", DI_SORT_MAX);
-          sortArray (diopts, diskInfo, di_data->count, DI_SORT_TOTAL);
+          sortArray (diopts, diskInfo, di_data->fscount, DI_SORT_TOTAL);
           strncpy (diopts->sortType, tempSortType, DI_SORT_MAX);
           di_data->totsorted = true;
         }
 
-        for (i = 0; i < di_data->count; ++i)
+        for (i = 0; i < di_data->fscount; ++i)
         {
             di_disk_info_t    *dinfo;
             int             ispooled;
@@ -325,10 +325,10 @@ printDiskInfo (void *di_data)
     diskInfo = di_data->diskInfo;
     if (strcmp (diopts->sortType, "n") != 0)
     {
-      sortArray (diopts, diskInfo, di_data->count, DI_SORT_MAIN);
+      sortArray (diopts, diskInfo, di_data->fscount, DI_SORT_MAIN);
     }
 
-    for (i = 0; i < di_data->count; ++i)
+    for (i = 0; i < di_data->fscount; ++i)
     {
       di_disk_info_t        *dinfo;
 
@@ -1315,7 +1315,7 @@ getMaxFormatLengths (di_data_t *di_data)
     diout = &di_data->output;
 
         /* this loop gets the max string lengths */
-    for (i = 0; i < di_data->count; ++i)
+    for (i = 0; i < di_data->fscount; ++i)
     {
         di_disk_info_t        *dinfo;
 

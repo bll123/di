@@ -71,6 +71,7 @@ di_initialize_disk_info (di_disk_info_t *diptr, int idx)
   for (i = 0; i < DI_VALUE_MAX; ++i) {
     dinum_init (&diptr->values [i]);
   }
+  diptr->doPrint = 0;
   diptr->printFlag = DI_PRNT_OK;
   diptr->isLocal = true;
   diptr->isReadOnly = false;

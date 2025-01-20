@@ -220,7 +220,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         idx = *diCount;
         ++*diCount;
         *diskInfo = (di_disk_info_t *) di_realloc ( (char *) *diskInfo,
-                sizeof (di_disk_info_t) * (Size_t) *diCount);
+                sizeof (di_disk_info_t) * (Size_t) (*diCount + 1));
         if (*diskInfo == (di_disk_info_t *) NULL) {
           fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
           return -1;
@@ -331,7 +331,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         idx = *diCount;
         ++*diCount;
         *diskInfo = (di_disk_info_t *) di_realloc ( (char *) *diskInfo,
-                sizeof (di_disk_info_t) * (Size_t) *diCount);
+                sizeof (di_disk_info_t) * (Size_t) (*diCount + 1));
         if (*diskInfo == (di_disk_info_t *) NULL) {
           fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
           return -1;
@@ -503,7 +503,7 @@ di_getQNXDiskEntries (char *ipath, di_disk_info_t **diskInfo, int *diCount)
       idx = *diCount;
       ++*diCount;
       *diskInfo = (di_disk_info_t *) di_realloc ( (char *) *diskInfo,
-              sizeof (di_disk_info_t) * (Size_t) *diCount);
+              sizeof (di_disk_info_t) * (Size_t) (*diCount + 1));
       if (*diskInfo == (di_disk_info_t *) NULL) {
         fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
         return -1;
@@ -571,7 +571,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
             idx = *diCount;
             ++*diCount;
             *diskInfo = (di_disk_info_t *) di_realloc ( (char *) *diskInfo,
-                    sizeof (di_disk_info_t) * *diCount);
+                    sizeof (di_disk_info_t) * (*diCount + 1));
             if (*diskInfo == (di_disk_info_t *) NULL) {
               fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
               return -1;
@@ -656,7 +656,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
   count = getfsstat (mntbufp, bufsize, MNT_NOWAIT);
 
   *diCount = count;
-  *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) count);
+  *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) (count + 1));
   if (*diskInfo == (di_disk_info_t *) NULL) {
     fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
     return -1;
@@ -789,7 +789,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     }
 
     *diCount = count;
-    *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) count);
+    *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) (count + 1));
     if (*diskInfo == (di_disk_info_t *) NULL) {
       fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
       return -1;
@@ -1059,7 +1059,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     count = getvfsstat (mntbufp, (Size_t) bufsize, ST_NOWAIT);
 
     *diCount = count;
-    *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) count);
+    *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) (count + 1));
     if (*diskInfo == (di_disk_info_t *) NULL) {
       fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
       return -1;
@@ -1181,7 +1181,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     }
 
     *diCount = count;
-    *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) count);
+    *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) * (Size_t) (count + 1));
     if (*diskInfo == (di_disk_info_t *) NULL) {
       fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
       free ( (char *) fsdbuf);
@@ -1348,7 +1348,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         /* <num> vmount structs returned in vmbuf */
     *diCount = num;
     *diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) *
-        (Size_t) *diCount);
+        (Size_t) (*diCount + 1));
     if (*diskInfo == (di_disk_info_t *) NULL) {
       fprintf (stderr, "malloc failed for diskInfo. %s errno %d\n",
           strerror (errno), errno);
@@ -1449,7 +1449,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     *diCount = rc / BYTES_PER_LOGICAL_DRIVE;
 
     *diskInfo = (di_disk_info_t *)
-        malloc (sizeof (di_disk_info_t) * (Size_t) *diCount);
+        malloc (sizeof (di_disk_info_t) * (Size_t) (*diCount + 1));
     if (*diskInfo == (di_disk_info_t *) NULL)
     {
         fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
@@ -1560,7 +1560,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         idx = *diCount;
         ++*diCount;
         *diskInfo = (di_disk_info_t *) di_realloc ( (char *) *diskInfo,
-                sizeof (di_disk_info_t) * *diCount);
+                sizeof (di_disk_info_t) * (*diCount + 1));
         if (*diskInfo == (di_disk_info_t *) NULL) {
           fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
           return -1;

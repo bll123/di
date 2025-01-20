@@ -856,7 +856,6 @@ if (WIN32)
   set (CMAKE_SHARED_LIBRARY_PREFIX "lib")
   set (CMAKE_STATIC_LIBRARY_PREFIX "lib")
 endif()
-addIntlLibrary (${DI_LIBNAME})
 target_include_directories (${DI_LIBNAME} PRIVATE
   ${TIRPC_INCLUDE_DIRS}
 )

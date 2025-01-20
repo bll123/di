@@ -863,7 +863,6 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
   int             val;
   char            *tptr;
 
-fprintf (stderr, "-- psv: %s\n", ptr);
   val = DI_BLKSZ_1024;
   if (isdigit ( (int) (*ptr))) {
     val = atoi (ptr);
@@ -881,7 +880,6 @@ fprintf (stderr, "-- psv: %s\n", ptr);
     idx = -1;
     for (i = 0; i < DI_VALID_SCALE_SZ; ++i) {
       if (*tptr == validscale [i].uc || *tptr == validscale [i].lc) {
-fprintf (stderr, "-- psv: found %d\n", i);
         idx = i;
         break;
       }
@@ -890,11 +888,9 @@ fprintf (stderr, "-- psv: found %d\n", i);
     if (idx == -1) {
       if (*tptr == 'h') {
         idx = DI_SCALE_HR;
-fprintf (stderr, "-- psv: found hr\n");
       }
       if (*tptr == 'H') {
         idx = DI_SCALE_HR_ALT;
-fprintf (stderr, "-- psv: found hr-alt\n");
       }
     }
 
@@ -916,7 +912,6 @@ fprintf (stderr, "-- psv: found hr-alt\n");
       }
     } /* known size multiplier */
 
-fprintf (stderr, "opt: scale: %d\n", idx);
     diopts->scale = idx;
 
     if (idx == -1) {
