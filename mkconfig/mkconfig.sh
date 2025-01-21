@@ -136,15 +136,10 @@ setdata () {
       _doexport $sdname "$sdval"
     fi
 
-    oprefix=$prefix
-    if [ "$prefix" = none ]; then
-      prefix=""
-    fi
-
     cmd="mkc_${prefix}_${sdname}=\"${sdval}\""
     eval $cmd
     puts "   setdata: $cmd" >&9
-    setvariable $oprefix $sdname
+    setvariable $prefix $sdname
 }
 
 getdata () {
@@ -259,7 +254,7 @@ _loadoptions () {
 
       topt=`puts "$o" | sed 's/=.*//'`
       tval=`puts "$o" | sed 's/.*=//'`
-      eval "mkc__opt_${topt}=\"${tval}\""
+      eval "mkc_c_opt_${topt}=\"${tval}\""
     done
     exec <&6 6<&-
     optionsloaded=T
@@ -329,7 +324,7 @@ check_ifoption () {
 
     found=F
 
-    eval tval=\$mkc__opt_${oopt}
+    eval tval=\$mkc_c_opt_${oopt}
     # override the option value with the environment variable
     eval tenvval=\$${oopt}
     if [ "$tenvval" != "" ]; then
@@ -493,7 +488,7 @@ _read_option () {
 
   oval=$def
   if [ $optionsloaded = T ]; then
-    eval tval=\$mkc__opt_${onm}
+    eval tval=\$mkc_c_opt_${onm}
     if [ "$tval" != "" ]; then
       found=T
       puts "  found option: $onm $tval" >&9
@@ -515,7 +510,9 @@ check_option () {
 
   printyesno_actual $nm "$oval"
   # options always have a null prefix
-  setdata none ${nm} "${oval}"
+set -x
+  setdata ${_MKCONFIG_PREFIX} ${nm} "${oval}"
+set +x
 }
 
 check_echo () {
@@ -854,7 +851,7 @@ main_process () {
             optnm=$2
             shift; shift
             tval=$@
-            nm="opt_${optnm}"
+            nm="_opt_${optnm}"
             check_option ${nm} $optnm "${tval}"
             ;;
           output*)

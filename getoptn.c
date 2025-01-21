@@ -70,8 +70,8 @@ typedef struct {
   Size_t              offset;     /* reprocessing offset                  */
 } getoptn_info_t;
 
-typedef void (*getoptn_func_bool_t) (const char *option, void *valptr);
-typedef void (*getoptn_func_value_t) (const char *option, void *valptr, const char *value);
+typedef void (*getoptn_func_bool_t) (const char *option, void * valptr);
+typedef void (*getoptn_func_value_t) (const char *option, void * valptr, const char *value);
 
 static int
 find_option (getoptn_info_t *info, const char *arg, const char *oarg, Size_t *argidx)
@@ -144,7 +144,7 @@ getoption_value (getoptn_info_t *info, getoptn_opt_t *opt)
 
   ptr = (char *) NULL;
   if (opt->option_type != GETOPTN_FUNC_VALUE &&
-      opt->value2 != (void *) NULL) {
+      opt->value2 != (void * ) NULL) {
     ptr = (const char *) opt->value2;
     return ptr;
   }
@@ -248,7 +248,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
     *v = strdup (ptr); /* memory leak (one time) */
   } else if (opt->option_type == GETOPTN_FUNC_BOOL) {
     getoptn_func_bool_t f;
-    if (opt->value2 == (void *) NULL) {
+    if (opt->value2 == (void * ) NULL) {
       fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv [0], "func_bool", optinfo->idx);
       return 1;
     }
@@ -256,7 +256,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
     (f) (opt->option, opt->valptr);
   } else if (opt->option_type == GETOPTN_FUNC_VALUE) {
     getoptn_func_value_t f;
-    if (opt->value2 == (void *) NULL) {
+    if (opt->value2 == (void * ) NULL) {
       fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv [0], "func_val", optinfo->idx);
       return 1;
     }
@@ -385,11 +385,11 @@ main (int argc, char * argv [])
   int  testno = 0;
 
   getoptn_opt_t opts [] = {
-    { "-D",  GETOPTN_STRING,     &s, sizeof (s), (void *) "abc123" },
+    { "-D",  GETOPTN_STRING,     &s, sizeof (s), (void * ) "abc123" },
     { "-b",  GETOPTN_BOOL,       &i, sizeof (i), NULL },
     { "--b", GETOPTN_BOOL,       &i, sizeof (i), NULL },
     { "-c",  GETOPTN_BOOL,       &j, sizeof (j), NULL },
-    { "--c", GETOPTN_ALIAS,      (void *) "-c", 0, NULL },
+    { "--c", GETOPTN_ALIAS,      (void * ) "-c", 0, NULL },
     { "-bc", GETOPTN_BOOL,       &k, sizeof (k), NULL },
     { "-d",  GETOPTN_DOUBLE,     &d, sizeof (d), NULL },
     { "-f1",  GETOPTN_INT,       &i, 8, NULL },
@@ -404,14 +404,14 @@ main (int argc, char * argv [])
     { "-sabcd", GETOPTN_BOOL,    &i, sizeof (i), NULL },
     { "-sp",  GETOPTN_STRPTR,    &sp, 0, NULL },
     { "-p",  GETOPTN_STRPTR,     &sp, 0, NULL },
-    { "-S",  GETOPTN_STRPTR,     &sp, 0, (void *) "abc1234" },
+    { "-S",  GETOPTN_STRPTR,     &sp, 0, (void * ) "abc1234" },
     { "-s2",  GETOPTN_STRING,    &s2, sizeof (s2), NULL },
     { "-np1",  GETOPTN_STRING,   NULL, sizeof (s2), NULL },
     { "-np2",  GETOPTN_FUNC_BOOL, NULL, sizeof (s2), NULL },
     { "-np3",  GETOPTN_FUNC_VALUE, NULL, sizeof (s2), NULL },
-    { "-z1", GETOPTN_ALIAS,      (void *) "--c", 0, NULL },
-    { "-z2", GETOPTN_ALIAS,      (void *) "-z1", 0, NULL },
-    { "-z3", GETOPTN_ALIAS,      (void *) "-z2", 0, NULL },
+    { "-z1", GETOPTN_ALIAS,      (void * ) "--c", 0, NULL },
+    { "-z2", GETOPTN_ALIAS,      (void * ) "-z1", 0, NULL },
+    { "-z3", GETOPTN_ALIAS,      (void * ) "-z2", 0, NULL },
     { "-w", GETOPTN_IGNORE,      NULL, 0, NULL },
     { "-W", GETOPTN_IGNORE_ARG, NULL, 0, NULL }
   };

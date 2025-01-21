@@ -45,7 +45,7 @@ for d in C D; do
 
     putsnonl " ${d}" >&5
     ${MAKE:-make} ${TMAKEFLAGS} realclean
-    ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} all > make.log 2>&1
+    ${MAKE:-make} ${TMAKEFLAGS} -e prefix=${instdir} mkc-all > make.log 2>&1
     rc=$?
     if [ $rc != 0 ]; then grc=$rc; fi
 

@@ -25,13 +25,6 @@ chkccompiler () {
   fi
 }
 
-chkdcompiler () {
-  if [ "${DC}" = "" ]; then
-    echo " no D compiler; skipped" >&5
-    exit 0
-  fi
-}
-
 getsname () {
   tsnm=$1
   tsnm=`echo $tsnm | sed -e 's,.*/,,' -e 's,\.sh$,,'`
@@ -93,20 +86,6 @@ int main () { return 0; }
   fi
 }
 
-chkdcompile () {
-  fn=$1
-
-  bfn=$fn
-  bfn=`echo $fn | sed 's/\.d$//'`
-  cmd="${_MKCONFIG_DIR}/mkc.sh -d `pwd` -complink -e -c ${DC} \
-      -o ${bfn}${OBJ_EXT} -- ${DFLAGS} ${fn} "
-  eval ${cmd}
-  if [ $? -ne 0 ]; then
-    echo "## compile of ${fn} failed"
-    grc=1
-  fi
-}
-
 chkdiff () {
   f1=$1
   f2=$2
@@ -126,12 +105,11 @@ chkgrep () {
   arg=$3
   arg2=$4
 
-echo "chkgrep: pwd: `pwd`"
-echo "chkgrep: fn: $fn"
   if [ "$arg" = "wc" ]; then
     tl=`egrep -l "$pat" ${fn} 2>/dev/null | wc -l`
     rc=$?
     if [ ${tl} -ne ${arg2} ]; then
+      echo "chkgrep: fail wc"
       grc=1
     fi
   else
@@ -139,10 +117,12 @@ echo "chkgrep: fn: $fn"
     rc=$?
   fi
   if [ "$arg" = "" -a $rc -ne 0 ]; then
+    echo "chkgrep: pattern match fail"
     grc=$rc
     echo "## ${fn}: grep for '$pat' failed"
   fi
   if [ "$arg" = "neg" -a $rc -eq 0 ]; then
+    echo "chkgrep: neg test fail"
     grc=$rc
     echo "## ${fn}: grep for '$pat' succeeded when it should not"
   fi

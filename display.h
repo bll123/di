@@ -36,7 +36,7 @@ typedef struct {
 } diOutput_t;
 
 /* display.c */
-extern void di_display_data (void *di_data);
+extern void di_display_data (void * di_data);
 extern char *printDiskInfo      (void *);
 extern void initLocale          (void);
 

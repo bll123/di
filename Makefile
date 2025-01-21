@@ -63,7 +63,7 @@ DI_VERSION = 5.0.0-beta-1
 # additional flags/libraries
 #
 DI_SHARED =
-DI_CFLAGS = -DDI_LOCALE_DIR=\\\"$(LOCALEDIR)\\\"
+DI_CFLAGS =
 
 ###
 # mkconfig variables
@@ -174,7 +174,6 @@ cmake-unix:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
-		-DDI_LOCALE_DIR:STATIC=$(LOCALEDIR) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-S . -B $(BUILDDIR) -Werror=deprecated
 
@@ -186,7 +185,6 @@ cmake-windows:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
-		-DDI_LOCALE_DIR:STATIC=$(LOCALEDIR) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-G "MSYS Makefiles" \
 		-S . -B $(BUILDDIR) -Werror=deprecated
@@ -201,6 +199,11 @@ cmake-build:
 .PHONY: cmake-install
 cmake-install:
 	cmake --install $(BUILDDIR)
+
+.PHONY: cmake-test
+cmake-test:
+	./build/dimathtest
+	./build/getoptn_test
 
 ###
 # main
@@ -220,11 +223,13 @@ mkc-perl:	$(MKC_ENV)
 
 .PHONY: test
 mkc-test:		tests.done
+	./dimathtest
+	./getoptn_test
 
 ###
 # environment
 
-$(MKC_ENV):	$(MKC_ENV_CONF) dioptions.dat
+$(MKC_ENV):	$(MKC_ENV_CONF)
 	@-$(RM) -f $(MKC_ENV) tests.done
 	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
 
@@ -242,7 +247,6 @@ $(MKC_ENV_SHR):	$(MKC_ENV_SHR_CONF)
 #
 .PHONY: windows
 windows:
-	@$(MAKE) dioptions.dat
 	copy /y NUL: $(MKC_ENV)
 	-del config.h
 	copy /y /b NUL:+configs\config.ms.cl config.h
@@ -255,7 +259,6 @@ windows:
 # This was tested using cygwin
 .PHONY: windows-gcc
 windows-gcc:
-	@$(MAKE) dioptions.dat
 	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
 	$(CP) -f configs/config.cygwin.gcc config.h
@@ -268,7 +271,6 @@ windows-gcc:
 .PHONY: windows-msys
 windows-msys:
 	MAKE=mingw32-make
-	cp features/dioptions.dat dioptions.dat
 	> $(MKC_ENV)
 	-rm config.h
 	cp configs/config.mingw config.h
@@ -283,7 +285,6 @@ windows-msys:
 .PHONY: windows-mingw
 windows-mingw:
 	MAKE=mingw32-make
-	copy /y /b NUL:+features\dioptions.dat dioptions.dat
 	copy /y NUL: $(MKC_ENV)
 	-del config.h
 	copy /y /b NUL:+configs\config.mingw config.h
@@ -325,6 +326,15 @@ clean:
 		$(MKC_FILES)/mkconfig.cache mkc*.vars \
 		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
+	@-test -d build && cmake --build build --target clean
+
+# mkc tests use this
+.PHONY: realclean
+realclean:
+	@$(MAKE) clean >/dev/null 2>&1
+	@-$(RM) -rf config.h \
+		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) \
+		>/dev/null 2>&1; exit 0
 
 .PHONY: distclean
 distclean:
@@ -352,14 +362,8 @@ di-programs:	di$(EXE_EXT) dimathtest$(EXE_EXT) getoptn_test$(EXE_EXT)
 ###
 # configuration file
 
-dioptions.dat:	features/dioptions.dat
-	$(MAKE) dioptions.dat
-
-config.h:	$(MKC_ENV) dioptions.dat $(MKC_CONF)
+config.h:	$(MKC_ENV) $(MKC_CONF)
 	@-$(RM) -f config.h tests.done
-	@if [ "$(DI_NO_NLS)" != "" ]; then \
-		echo "*** User requested no NLS"; \
-		$(MKC_DIR)/mkc.sh -setopt -o dioptions.dat NLS F; fi
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./$(MKC_ENV);$(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/mkconfig.sh \
@@ -405,11 +409,12 @@ dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
 		-o dimathtest$(EXE_EXT) \
 		dimathtest$(OBJ_EXT)
 
-getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT)
+getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT) distrutils$(OBJ_EXT)
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
 		-o getoptn_test$(EXE_EXT) \
-		getoptn_test$(OBJ_EXT)
+		getoptn_test$(OBJ_EXT) \
+		distrutils$(OBJ_EXT)
 
 # for ms cl
 #di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)

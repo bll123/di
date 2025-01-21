@@ -222,7 +222,7 @@ di_display_data (void *di_data)
   int                 iterval;
   int                 fmtstrlen;
   int                 displinecount;
-  int                 totline;
+  int                 totline = -1;
   int                 dispcount;
   int                 csvout;
   int                 csvtabs;

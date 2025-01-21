@@ -84,7 +84,7 @@ static int  processArgs (int, char * argv [], di_opt_t *, char *, Size_t);
 static int  parseList (di_strarr_t *, char *);
 static void parseScaleValue (di_opt_t *diopts, char *ptr);
 static void processOptions (const char *, char *);
-static void processOptionsVal (const char *, pvoid *, char *);
+static void processOptionsVal (const char *, void *, char *);
 static void setExitFlag (di_opt_t *, unsigned int);
 
 static void
@@ -182,7 +182,7 @@ di_opt_cleanup (di_opt_t *diopts)
 
   if (diopts->ignore_list.count > 0 &&
       diopts->ignore_list.list != (char **) NULL) {
-    free ( (pvoid *) diopts->ignore_list.list);
+    free ( (void *) diopts->ignore_list.list);
     diopts->ignore_list.count = 0;
   }
 
@@ -749,7 +749,7 @@ processOptions (const char *arg, char *valptr)
 }
 
 static void
-processOptionsVal (const char *arg, pvoid *valptr, char *value)
+processOptionsVal (const char *arg, void *valptr, char *value)
 {
   struct pa_tmp     *padata;
   int               rc;

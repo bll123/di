@@ -25,12 +25,6 @@ my $REQLIB = "../../${MKC_FILES}/mkconfig.reqlibs";
 my $_MKCONFIG_DIR = "invalid";
 
 my $precc = <<'_HERE_';
-#if defined(__STDC__) || defined(__cplusplus) || defined(c_plusplus)
-# define _(x) x
-#else
-# define _(x) ()
-# define void char
-#endif
 #if defined(__cplusplus) || defined (c_plusplus)
 # define CPP_EXTERNS_BEG extern "C" {
 # define CPP_EXTERNS_END }
@@ -1521,20 +1515,12 @@ _HERE_
 #  define void int
 # endif
 # if ! _key_void || ! _param_void_star
-   typedef char *_pvoid;
+   typedef char *pvoid;
 # else
-   typedef void *_pvoid;
+   typedef void *pvoid;
 # endif
 # if ! _key_const
 #  define const
-# endif
-
-# ifndef _
-#  if _proto_stdc
-#   define _(args) args
-#  else
-#   define _(args) ()
-#  endif
 # endif
 #endif /* MKC_STANDARD_DEFS */
 

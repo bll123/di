@@ -295,10 +295,6 @@ ifnotoption WINAPI
   set _lib_GetVolumeInformation 0
 endif
 
-# see dioptions.dat to change these
-option  DI_DEFAULT_FORMAT smbuvpT
-option  DI_DEFAULT_DISP_SIZE H
-
 include
 
 #define DI_INTERNAL 0
