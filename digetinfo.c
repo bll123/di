@@ -151,7 +151,9 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
                     statBuf.f_ffree, statBuf.f_favail);
 # if _mem_struct_statvfs_f_basetype
                 if (! *diptr->strdata [DI_DISP_FSTYPE]) {
-                  strncpy (diptr->strdata [DI_DISP_FSTYPE], statBuf.f_basetype, DI_FSTYPE_LEN);
+                  stpecpy (diptr->strdata [DI_DISP_FSTYPE],
+                      diptr->strdata [DI_DISP_FSTYPE] + DI_FSTYPE_LEN,
+                      statBuf.f_basetype);
                 }
 # endif
 
@@ -404,8 +406,12 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
             rc = GetVolumeInformation (diptr->strdata [DI_DISP_MOUNTPT],
                     volName, MSDOS_BUFFER_SIZE, &serialNo, &maxCompLen,
                     &fsFlags, fsName, MSDOS_BUFFER_SIZE);
-            strncpy (diptr->strdata [DI_DISP_FSTYPE], fsName, DI_FSTYPE_LEN);
-            strncpy (diptr->strdata [DI_DISP_FILESYSTEM], volName, DI_FILESYSTEM_LEN);
+            stpecpy (diptr->strdata [DI_DISP_FSTYPE],
+                diptr->strdata [DI_DISP_FSTYPE] + DI_FSTYPE_LEN,
+                fsName);
+            stpecpy (diptr->strdata [DI_DISP_FILESYSTEM],
+                diptr->strdata [DI_DISP_FILESYSTEM] + DI_FILESYSTEM_LEN,
+                volName);
 
 # if _lib_GetDiskFreeSpaceEx
             {

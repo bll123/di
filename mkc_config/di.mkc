@@ -34,6 +34,7 @@ hdr     mntent.h
 hdr     mnttab.h
 # NetBSD
 hdr     quota.h
+hdr     rpc/auth.h
 hdr     rpc/rpc.h
 # Linux rquota.h includes rpc/rpc.h which is in the tirpc dir
 hdr     rpcsvc/rquota.h rpc/rpc.h
@@ -102,7 +103,6 @@ typ     fs_disk_quota_t
 typ     gid_t
 typ     statvfs_t
 typ     size_t
-typ     uint_t
 typ     uid_t
 
 size    long double

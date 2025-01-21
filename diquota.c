@@ -80,6 +80,9 @@
 #if _hdr_rpc_rpc
 # include <rpc/rpc.h>
 #endif
+#if _hdr_rpc_auth
+# include <rpc/auth.h>
+#endif
 #if _hdr_rpcsvc_rquota
 # include <rpcsvc/rquota.h>
 #endif
@@ -88,6 +91,7 @@
 #include "dimath.h"
 #include "diquota.h"
 #include "diinternal.h"
+#include "distrutils.h"
 
 #if _has_std_quotas
 
@@ -384,13 +388,14 @@ quotactl_get (di_quota_t *diqinfo, int cmd, Uid_t id, qdata_t *qdata)
   {
     int             fd;
     struct quotctl  qop;
-    char            tname [DI_MOUNTPT_LEN + 1];
+    char            tname [DI_MOUNTPT_LEN];
+    char            *p;
 
     qop.op = Q_GETQUOTA;
     qop.uid = id;
     qop.addr = (caddr_t) & (qdata->qinfo);
-    strncpy (tname, diqinfo->mountpt, DI_MOUNTPT_LEN);
-    strncat (tname, "/quotas", DI_MOUNTPT_LEN);
+    p = stpecpy (tname, tname + DI_MOUNTPT_LEN, diqinfo->mountpt);
+    stpecpy (p, tname + DI_MOUNTPT_LEN, "/quotas");
     fd = open (tname, O_RDONLY | O_NOCTTY);
     if (fd >= 0) {
       rc = ioctl (fd, Q_QUOTACTL, &qop);
@@ -587,7 +592,7 @@ diquota_nfs (di_quota_t *diqinfo)
   CLIENT                  *rqclnt;
   enum clnt_stat          clnt_stat;
   struct timeval          timeout;
-  char                    host [DI_FILESYSTEM_LEN + 1];
+  char                    host [DI_FILESYSTEM_LEN];
   char                    *ptr;
   char                    *path;
   struct getquota_args    args;
@@ -604,7 +609,7 @@ diquota_nfs (di_quota_t *diqinfo)
   timeout.tv_sec = 2;
   timeout.tv_usec = 0;
 
-  strncpy (host, diqinfo->filesystem, DI_FILESYSTEM_LEN);
+  stpecpy (host, host + DI_FILESYSTEM_LEN, diqinfo->filesystem);
   path = host;
   ptr = strchr (host, ':');
   if (ptr != (char *) NULL) {

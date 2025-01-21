@@ -160,7 +160,8 @@ di_init_options (void)
   diopts->optval [DI_OPT_NO_SYMLINK] = false;
   diopts->optval [DI_OPT_EXCL_LOOPBACK] = true;
 
-  strncpy (diopts->sortType, "m", DI_SORT_TYPE_MAX); /* default - by mount point*/
+  /* default - by mount point*/
+  stpecpy (diopts->sortType, diopts->sortType + sizeof (diopts->sortType), "m");
   diopts->optval [DI_OPT_POSIX_COMPAT] = false;
   diopts->optval [DI_OPT_QUOTA_CHECK] = true;
   diopts->optval [DI_OPT_DISP_CSV] = false;
@@ -199,7 +200,6 @@ di_get_options (int argc, char * argv [], di_opt_t *diopts)
   char *            ptr;
   char              scalestr [30];
   int               optidx;
-  int               ec;
 
   if (diopts == NULL) {
     return DI_EXIT_FAIL;
@@ -207,12 +207,11 @@ di_get_options (int argc, char * argv [], di_opt_t *diopts)
 
   diopts->argc = argc;
   diopts->argv = argv;
-  strncpy (scalestr, DI_DEFAULT_DISP_SIZE, sizeof (scalestr) - 1);
-  ec = 0;
+  stpecpy (scalestr, scalestr + sizeof (scalestr), DI_DEFAULT_DISP_SIZE);
 
   /* gnu df */
   if ( (ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL) {
-    strncpy (scalestr, "k", sizeof (scalestr) - 1);
+    stpecpy (scalestr, scalestr + sizeof (scalestr), "k");
     diopts->formatString = DI_POSIX_FORMAT;
     diopts->optval [DI_OPT_POSIX_COMPAT] = true;
     diopts->optval [DI_OPT_DISP_CSV] = false;
@@ -221,12 +220,12 @@ di_get_options (int argc, char * argv [], di_opt_t *diopts)
 
   /* bsd df */
   if ( (ptr = getenv ("BLOCKSIZE")) != (char *) NULL) {
-    strncpy (scalestr, ptr, sizeof (scalestr) - 1);
+    stpecpy (scalestr, scalestr + sizeof (scalestr), ptr);
   }
 
   /* gnu df */
   if ( (ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL) {
-    strncpy (scalestr, ptr, sizeof (scalestr) - 1);
+    stpecpy (scalestr, scalestr + sizeof (scalestr), ptr);
   }
 
   if ( (ptr = getenv ("DI_ARGS")) != (char *) NULL) {
@@ -243,7 +242,7 @@ di_get_options (int argc, char * argv [], di_opt_t *diopts)
       printf (" %s", argv [j]);
     }
     printf ("\n");
-    printf ("# blocksize: %s\n", diopts->blockSize);
+    printf ("# blocksize: %d\n", diopts->blockSize);
     printf ("# scale: %s\n", scalestr);
 
     if ( (ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL) {
@@ -726,18 +725,20 @@ processOptions (const char *arg, char *valptr)
   padata = (struct pa_tmp *) valptr;
   if (strcmp (arg, "-a") == 0) {
     padata->diopts->optval [DI_OPT_DISP_ALL] = true;
-    strncpy (padata->diopts->zoneDisplay, "all", MAXPATHLEN);
+    stpecpy (padata->diopts->zoneDisplay,
+        padata->diopts->zoneDisplay + sizeof (padata->diopts->zoneDisplay),
+        "all");
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     setExitFlag (padata->diopts, DI_EXIT_HELP);
   } else if (strcmp (arg, "-P") == 0) {
     /* always use -k option, 512 is not supported */
-    strncpy (padata->scalestr, "k", padata->scalestrsz - 1);
+    stpecpy (padata->scalestr, padata->scalestr + padata->scalestrsz, "k");
     padata->diopts->formatString = DI_POSIX_FORMAT;
     padata->diopts->optval [DI_OPT_POSIX_COMPAT] = true;
     padata->diopts->optval [DI_OPT_DISP_CSV] = false;
     padata->diopts->optval [DI_OPT_DISP_JSON] = false;
   } else if (strcmp (arg, "--si") == 0) {
-    strncpy (padata->scalestr, "H", padata->scalestrsz - 1);
+    stpecpy (padata->scalestr, padata->scalestr + padata->scalestrsz, "H");
   } else if (strcmp (arg, "--version") == 0) {
     setExitFlag (padata->diopts, DI_EXIT_VERS);
   } else {
@@ -776,15 +777,18 @@ processOptionsVal (const char *arg, pvoid *valptr, char *value)
       return;
     }
   } else if (strcmp (arg, "-s") == 0) {
-    strncpy (padata->diopts->sortType, value, DI_SORT_TYPE_MAX);
+    char      *stend = padata->diopts->sortType + sizeof (padata->diopts->sortType);
+
+    stpecpy (padata->scalestr, padata->scalestr + padata->scalestrsz, "H");
+    stpecpy (padata->diopts->sortType, stend, value);
     /* for backwards compatibility                       */
     /* reverse by itself - change to reverse mount point */
     if (strcmp (padata->diopts->sortType, "r") == 0) {
-        strncpy (padata->diopts->sortType, "rm", DI_SORT_TYPE_MAX);
+      stpecpy (padata->diopts->sortType, stend, "rm");
     }
     /* add some sense to the sort order */
     if (strcmp (padata->diopts->sortType, "t") == 0) {
-        strncpy (padata->diopts->sortType, "tm", DI_SORT_TYPE_MAX);
+      stpecpy (padata->diopts->sortType, stend, "tm");
     }
   } else if (strcmp (arg, "-x") == 0) {
     parseList (&padata->diopts->ignore_list, value);
@@ -846,7 +850,7 @@ parseList (di_strarr_t *list, char *str)
       free ( (char *) dstr);
       return 1;
     }
-    strncpy (lptr, ptr, (Size_t) len);
+    stpecpy (lptr, lptr + len, ptr);
     lptr [len] = '\0';
     list->list [i] = lptr;
     ptr += len + 1;

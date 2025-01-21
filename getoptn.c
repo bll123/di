@@ -238,7 +238,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
       return 1;
     }
     v = (char *) opt->valptr;
-    strncpy (v, ptr, opt->valsiz - 1);
+    stpecpy (v, v + opt->valsiz, ptr);
   } else if (opt->option_type == GETOPTN_STRPTR) {
     const char **v;
     if (dooptchecks (info, opt, optinfo, "strptr", 0) != 0) {

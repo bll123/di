@@ -101,7 +101,7 @@ strdup (const char *ptr)
 
   len = strlen (ptr);
   nptr = malloc (len + 1);
-  strncpy (nptr, ptr, len);
+  stpecpy (nptr, nptr + len + 1, ptr);
   return nptr;
 }
 

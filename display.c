@@ -171,7 +171,7 @@ printDiskInfo (void *di_data)
     di_opt_t         *diopts;
     di_disk_info_t        *diskInfo;
     di_disk_info_t        totals;
-    char                lastpool [DI_FILESYSTEM_LEN + 1];
+    char                lastpool [DI_FILESYSTEM_LEN];
     Size_t              lastpoollen = { 0 };
     int                 inpool = { false };
     diOutput_t          *diout;
@@ -266,9 +266,9 @@ printDiskInfo (void *di_data)
     {
         if (di_data->haspooledfs && ! di_data->totsorted)
         {
-          char tempSortType [DI_SORT_MAX + 1];
-              /* in order to find the main pool entries,              */
-              /* we must have the array sorted by special device name */
+          char tempSortType [DI_SORT_MAX];
+          /* in order to find the main pool entries,              */
+          /* we must have the array sorted by special device name */
           strncpy (tempSortType, diopts->sortType, DI_SORT_MAX);
           strncpy (diopts->sortType, "s", DI_SORT_MAX);
           sortArray (diopts, diskInfo, di_data->fscount, DI_SORT_TOTAL);

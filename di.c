@@ -672,7 +672,6 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
 {
   int         fmt;
   int         fmtcount;
-  int         fmtstrlen;
   int         csvout;
   int         scaleidx;
   int         scalehr;
@@ -680,7 +679,6 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
   char        **strdata = dispinfo->strdata;
 
   csvout = di_check_option (di_data, DI_OPT_DISP_CSV);
-  fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
   posixcompat = di_check_option (di_data, DI_OPT_POSIX_COMPAT);
   fmtcount = 0;
   scaleidx = di_check_option (di_data, DI_OPT_SCALE);

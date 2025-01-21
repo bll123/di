@@ -74,6 +74,7 @@
 #include "dizone.h"
 #include "diquota.h"
 #include "dioptions.h"
+#include "distrutils.h"
 #include "version.h"
 
 #if defined (__cplusplus) || defined (c_plusplus)
@@ -600,7 +601,7 @@ checkFileInfo (di_data_t *di_data)
       int             found = false;
       int             inpool = false;
       Size_t          lastpoollen = 0;
-      char            lastpool [DI_FILESYSTEM_LEN + 1];
+      char            lastpool [DI_FILESYSTEM_LEN];
 
       saveIdx = 0;  /* should get overridden below */
       for (j = 0; j < di_data->fscount; ++j) {
@@ -617,7 +618,7 @@ checkFileInfo (di_data_t *di_data)
         if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
           if (lastpoollen == 0 ||
               strncmp (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], lastpoollen) != 0) {
-            strncpy (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], DI_FILESYSTEM_LEN);
+            stpecpy (lastpool, lastpool + DI_FILESYSTEM_LEN, dinfo->strdata [DI_DISP_FILESYSTEM]);
             lastpoollen = di_mungePoolName (lastpool);
             inpool = false;
           }
@@ -793,9 +794,12 @@ getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
 
         rc = lstat (dinfo->strdata [DI_DISP_FILESYSTEM], &tstatBuf);
         if (rc == 0 && S_ISLNK (tstatBuf.st_mode)) {
-          char tspecial [DI_FILESYSTEM_LEN + 1];
+          char tspecial [DI_FILESYSTEM_LEN];
+
           if (realpath (dinfo->strdata [DI_DISP_FILESYSTEM], tspecial) != (char *) NULL) {
-            strncpy (dinfo->strdata [DI_DISP_FILESYSTEM], tspecial, DI_FILESYSTEM_LEN);
+            stpecpy (dinfo->strdata [DI_DISP_FILESYSTEM],
+                dinfo->strdata [DI_DISP_FILESYSTEM] + DI_FILESYSTEM_LEN,
+                tspecial);
           }
         }
       }
@@ -1149,9 +1153,7 @@ preCheckDiskInfo (di_data_t *di_data)
 {
   int           i;
   di_opt_t      *diopts;
-  int           hasLoop;
 
-  hasLoop = false;
   diopts = (di_opt_t *) di_data->options;
   for (i = 0; i < di_data->fscount; ++i) {
     di_disk_info_t        *dinfo;
@@ -1522,6 +1524,7 @@ diCompare (const di_opt_t *diopts, const char *sortType,
       case DI_SORT_OPT_TOTAL: {
         int   temp;
 
+// ### FIX
         temp = 0;
         switch (*ptr) {
           case DI_SORT_OPT_AVAIL: {
@@ -1654,7 +1657,7 @@ processTotals (di_data_t *di_data)
 {
   int               i;
   Size_t            lastpoollen = 0;
-  char              lastpool [DI_FILESYSTEM_LEN + 1];
+  char              lastpool [DI_FILESYSTEM_LEN];
   int               inpool = 0;
   di_disk_info_t    *totals;
 
@@ -1667,20 +1670,18 @@ processTotals (di_data_t *di_data)
   for (i = 0; i < di_data->fscount; ++i) {
     di_disk_info_t  *dinfo;
     int             sortidx;
-    int             ispooled;
     int             startpool;
 
-    ispooled = false;
     startpool = false;
     sortidx = di_data->diskInfo [i].sortIndex [DI_SORT_TOTAL];
     dinfo = & (di_data->diskInfo [sortidx]);
 
     /* is it a pooled filesystem type? */
     if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
-      ispooled = true;
       if (lastpoollen == 0 ||
           strncmp (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], lastpoollen) != 0) {
-        strncpy (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], DI_FILESYSTEM_LEN);
+        stpecpy (lastpool, lastpool + DI_FILESYSTEM_LEN,
+            dinfo->strdata [DI_DISP_FILESYSTEM]);
         lastpoollen = di_mungePoolName (lastpool);
         inpool = false;
         startpool = true;

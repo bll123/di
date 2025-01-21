@@ -399,6 +399,7 @@ check_include_file (mnttab.h _hdr_mnttab)
 check_include_file (quota.h _hdr_quota)
 
 set (CMAKE_REQUIRED_INCLUDES ${TIRPC_INCLUDE_DIRS})
+check_include_file (rpc/auth.h _hdr_rpc_auth)
 check_include_file (rpc/rpc.h _hdr_rpc_rpc)
 # Linux: rquota.h includes rpc/rpc.h
 check_include_file (rpcsvc/rquota.h _hdr_rpcsvc_rquota)
@@ -589,7 +590,6 @@ endif()
 
 check_type_size ("gid_t" _typ_gid_t)
 check_type_size ("size_t" _typ_size_t)
-check_type_size ("uint_t" _typ_uint_t)
 check_type_size ("uid_t" _typ_uid_t)
 check_type_size ("double" _siz_double)
 check_type_size ("long double" _siz_long_double)
@@ -825,6 +825,10 @@ endmacro()
 
 #### libraries
 
+add_library (objdistrutils OBJECT
+  distrutils.c
+)
+
 add_library (${DI_LIBNAME}
   didiskutil.c
   digetentries.c
@@ -834,7 +838,9 @@ add_library (${DI_LIBNAME}
   dizone.c
   getoptn.c
   dioptions.c
-  distrutils.c
+)
+target_link_libraries (${DI_LIBNAME} PRIVATE
+  objdistrutils
 )
 # cmake's auto prefixing is annoying
 set_target_properties (${DI_LIBNAME} PROPERTIES PREFIX "")
@@ -913,6 +919,9 @@ add_executable (getoptn_test
 )
 target_compile_options (getoptn_test PRIVATE
   -DTEST_GETOPTN
+)
+target_link_libraries (getoptn_test PRIVATE
+  objdistrutils
 )
 
 # di.pc

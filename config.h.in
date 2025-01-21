@@ -31,6 +31,7 @@
 #cmakedefine01 _hdr_mntent
 #cmakedefine01 _hdr_mnttab
 #cmakedefine01 _hdr_quota
+#cmakedefine01 _hdr_rpc_auth
 #cmakedefine01 _hdr_rpc_rpc
 #cmakedefine01 _hdr_rpcsvc_rquota
 #cmakedefine01 _hdr_stdbool
@@ -94,7 +95,6 @@
 #cmakedefine01 _typ_gid_t
 #cmakedefine01 _typ_statvfs_t
 #cmakedefine01 _typ_size_t
-#cmakedefine01 _typ_uint_t
 #cmakedefine01 _typ_uid_t
 
 #define _siz_long_double ${_siz_long_double}
