@@ -580,12 +580,11 @@ checkFileInfo (di_data_t *di_data)
 
   rc = 0;
   diopts = (di_opt_t *) di_data->options;
-
   diskInfo = di_data->diskInfo;
 
   for (i = diopts->optidx; i < diopts->argc; ++i) {
     int fd;
-    int src;
+    int src = -1;
 
     /* do this to automount devices.                    */
     /* stat () will not necessarily cause an automount.  */
@@ -598,9 +597,9 @@ checkFileInfo (di_data_t *di_data)
 
     if (src == 0) {
       int             saveIdx;
-      int             found = { false };
-      int             inpool = { false };
-      Size_t          lastpoollen = { 0 };
+      int             found = false;
+      int             inpool = false;
+      Size_t          lastpoollen = 0;
       char            lastpool [DI_FILESYSTEM_LEN + 1];
 
       saveIdx = 0;  /* should get overridden below */
@@ -646,9 +645,13 @@ checkFileInfo (di_data_t *di_data)
           }
         }
 
-        if (dinfo->st_dev != (unsigned long) DI_UNKNOWN_DEV &&
+        /* when the filesystem name is specified on the command line */
+        /* report for that filesystem, not devfs or / */
+        if (strcmp (dinfo->strdata [DI_DISP_FILESYSTEM],
+                diopts->argv [i]) == 0 ||
+            (dinfo->st_dev != (unsigned long) DI_UNKNOWN_DEV &&
             (unsigned long) statBuf.st_dev == dinfo->st_dev &&
-            ! dinfo->isLoopback) {
+            ! dinfo->isLoopback)) {
           int foundnew = 0;
 
           ++foundnew;
@@ -664,9 +667,9 @@ checkFileInfo (di_data_t *di_data)
           }
 
           if (debug > 2) {
-            printf ("file %s specified: found device %ld : %d (%s %s)\n",
-                    diopts->argv [i], dinfo->st_dev, foundnew,
-                    dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
+            printf ("file %s: found device or fs-match %ld : %d (%s %s)\n",
+                diopts->argv [i], dinfo->st_dev, foundnew,
+                dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
           }
 
           if (inpool) {

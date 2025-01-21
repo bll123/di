@@ -3,7 +3,7 @@ di Version 5.x beta
 Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
 
-Version 5 beta
+Version 5.x beta
 
 - re-worked to have a library and proper api
 - cmake configuration
@@ -14,14 +14,14 @@ Version 5 Roadmap (more or less)
 
 - done: move the totals processing into the main library.
 - done: finish the api, there's still a couple of routines to write
-- done: linux tirpc library
+- done: linux tirpc library (nfs quotas)
 - get all the basics working
 - wiki documentation for the api
 - make the beta available to download
 - work on the test suite
 - get basic di working on all platforms I have access to.
 - check the cmake configuration against mkconfig.  check again. re-check.
-- i have macos now, test quotas and nfs quotas there
+- I have macos now, test quotas and nfs quotas there
 - write the manual page for the library
 - re-write the readme, get ready for production release
 - wiki page updates and rewrite
@@ -40,7 +40,8 @@ the calculations.  The basic code structure hasn't changed.
 Version 5 beta Notes
 
 GMP and libtommath work fine.  But long doubles seem to be quite
-capable (where long doubles are supported).
+capable (where long doubles are supported).  If you have long double
+support, it seems reasonable to not use the multi-precision libraries.
 
 I have a *lot* of VMs.  These are mostly old Linux and old *BSD,
 though there are a couple of others.

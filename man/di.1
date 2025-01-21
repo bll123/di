@@ -53,16 +53,15 @@ Print all fields (used for debugging).
 .B \-a
 (compatibility: \fB\-\-all\fP)
 .br
-Prints all mounted devices (normally, those with 0 total space are not
-printed \- e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
+Prints all mounted devices (normally, those with a total space of zero
+are not printed e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .TP
 .B \-B
 .I block\-size
 (compatibility: \fB\-\-block\-size\fP, \fB\-b\fP)
 .br
 Change the base block size from 1024 (default) to the size specified.
-\fIblock\-size\fP may be one of: k\ \-\ 1024 bytes, si\ \-\ 1000 bytes,
-or a specific size.
+\fIblock\-size\fP may be either: k\ \-\ 1024 bytes or si\ \-\ 1000 bytes.
 .TP
 .B \-c
 (alias: \fB\-\-csv\-output\fP)
@@ -81,12 +80,12 @@ See also the \-c option.
 (alias: \fB\-\-display\-size\fP)
 .br
 Display the usage in units specified by \fIdisplay\-size\fP.
-Note that if the base block size is SI units of 1000 bytes, the
-display size is calculated using those units.
+The display size is calculated based on the block size (\-B).
 \fIdisplay\-size\fP
-may be one of: 512\ \-\ POSIX, k\ \-\ kilobytes,
+may be one of: k\ \-\ kilobytes (POSIX),
 m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, p\ \-\ petabytes,
-e\ \-\ exabytes, z\ \-\ zettabytes, y\ \-\ yottabytes,
+e\ \-\ exabytes, z\ \-\ zettabytes, y\ \-\ yottabytes, r\ \-\ ronnabytes,
+q\ \-\ quetta,
 h\ \-\ human readable, H\ \-\ human readable alternative.
 .IP
 The human readable format scales the sizes displayed and
@@ -95,6 +94,9 @@ line may scale to different units.
 .IP
 The human readable alternative scales all the sizes in each individual line
 to the same unit size (the largest needed).
+.IP
+If \fIdi\fP is compiled without large number support, the larger
+units may not work correctly or may be inaccurate.
 .TP
 .B \-f
 .I format
@@ -171,7 +173,7 @@ Ignored.
 (compatibility: \fB\-\-portability\fP)
 .br
 Output format is POSIX standard.
-512 byte block size is the default.  The \-k option may be used.
+A 1024 byte block size and a display size of kilobytes (\-d\ k) is the default.
 .TP
 .B \-\-print\-type
 Ignored.  Use the \-f option.
@@ -193,7 +195,7 @@ sort flags may be used to change the sort order:
 \fBm\fP \- by mount point (default);
 \fBn\fP \- leave unsorted (as it appears in
 the mount table);
-\fBs\fP \- by device name;
+\fBs\fP \- by filesystem;
 \fBT\fP \- by total space;
 \fBf\fP \- by free space;
 \fBa\fP \- by available space;
@@ -237,9 +239,13 @@ Ignored.
 Display the di version.
 .TP
 .B \-w
+(backwards compatibility)
+.br
 Ignored.  The following argument is ignored.
 .TP
 .B \-W
+(backwards compatibility)
+.br
 Ignored.  The following argument is ignored.
 .TP
 .B \-x
@@ -383,14 +389,17 @@ miUFP\[aq]
 .RE
 will print two lines of data for each filesystem.
 .SH Examples
+As of version 5.0.0, \fIdi\fP no longer supports 512-byte blocks.
+There may not be an exact match to 512-byte block output.
+.PP
 Various \fIdf\fP
 equivalent format strings for System V release 4 are:
 .RS
 \fI/usr/bin/df \-v\fP     di \-P \-f msbuf1
 .br
-\fI/usr/bin/df \-k\fP     di \-dk \-f sbcvpm
+\fI/usr/bin/df \-k\fP     di \-d k \-f sbcvpm
 .br
-\fI/usr/ucb/df\fP        di \-dk \-f sbuv2m
+\fI/usr/ucb/df\fP        di \-d k \-f sbuv2m
 .RE
 GNU df:
 .RS
@@ -402,11 +411,11 @@ GNU df:
 .RE
 AIX df:
 .RS
-\fIdf\fP                 di \-d 512 \-f Sbf1UPM
+\fIdf\fP                 di \-d k \-f Sbf1UPM
 .br
-\fIdf \-I\fP              di -d 512 \-f Sbuf1M
+\fIdf \-I\fP              di -d k \-f Sbuf1M
 .br
-\fIdf \-I \-M\fP           di \-d 512 \-f SMbuf1
+\fIdf \-I \-M\fP           di \-d k \-f SMbuf1
 .RE
 HP-UX bdf:
 .RS
@@ -414,10 +423,18 @@ HP-UX bdf:
 .br
 \fIbdf \-i\fP             di \-d k \-f Sbuv2UFPM
 .RE
+.RE
+MacOS df:
+.RS
+\fIbdf \-k\fP                di \-d k \-f Sbuv2UFPM
+.br
+\fIbdf \-I \-h\fP                di \-d h \-B si \-f Sbuv2M
+.br
+\fIbdf \-Y \-I \-h\fP                di \-d h \-B si \-f STbuv2M
+.RE
 .PP
 If you like your numbers to add up/calculate the percentage
-correctly, try one
-of the following format strings:
+correctly, try one of the following format strings:
 .PP
 .RS
 di \-f SMbuf1T

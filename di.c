@@ -120,25 +120,25 @@ typedef struct {
 } di_disp_info_t;
 
 typedef struct {
-  char    *uc;
-  char    *lc;
+  char    *si_suffix;
   char    *si_name;
+  char    *suffix;
   char    *name;
 } di_disp_text_t;
 
 static di_disp_text_t disptext [] =
 {
-  { "",  "",  "Byte", "Byte" },
-  { "K", "k", "Kilo", "Kibi" },
-  { "M", "m", "Mega", "Mebi" },
-  { "G", "g", "Giga", "Gibi" },
-  { "T", "t", "Tera", "Tebi" },
-  { "P", "p", "Peta", "Pebi" },
-  { "E", "e", "Exa", "Exbi" },
-  { "Z", "z", "Zetta", "Zebi" },
-  { "Y", "y", "Yotta", "Yobi" },
-  { "R", "r", "Ronna", "Ronni" },
-  { "Q", "q", "Quetta", "Quetti" }
+  { "",  "Byte", "",  "Byte" },
+  { "k", "Kilo", "ki", "Kibi" },
+  { "M", "Mega", "Mi", "Mebi" },
+  { "G", "Giga", "Gi", "Gibi" },
+  { "T", "Tera", "Ti", "Tebi" },
+  { "P", "Peta", "Pi", "Pebi" },
+  { "E", "Exa", "Ei", "Exbi" },
+  { "Z", "Zetta", "Zi", "Zebi" },
+  { "Y", "Yotta", "Yi", "Yobi" },
+  { "R", "Ronna", "Ri", "Ronni" },
+  { "Q", "Quetta", "Qi", "Quetti" }
 };
 #define DI_DISPTEXT_SZ ( (int) (sizeof (disptext) / sizeof (di_disp_text_t)))
 
@@ -292,9 +292,9 @@ di_display_data (void *di_data)
     if (scalehr) {
       fprintf (stdout, "  \"scaling\" : \"human\",\n");
     } else {
-      fprintf (stdout, "  \"scaling\" : \"%s\"\n", disptext [scaleidx].uc);
+      fprintf (stdout, "  \"scaling\" : \"%s\",\n", disptext [scaleidx].si_suffix);
     }
-    fprintf (stdout, "  \"blocksize\" : %d\n", blksz);
+    fprintf (stdout, "  \"blocksize\" : \"%d\",\n", blksz);
     fprintf (stdout, "  \"partitions\" : [\n");
   }
 
@@ -367,7 +367,7 @@ di_display_data (void *di_data)
           dispinfo.jsonident [fmtcount] = "size";
           if (scalehr) {
             dispinfo.suffix [dataidx] =
-                disptext [dispinfo.scaleidx [dataidx]].uc;
+                disptext [dispinfo.scaleidx [dataidx]].si_suffix;
           }
           di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
               dispinfo.scaleidx [dataidx],
@@ -379,7 +379,7 @@ di_display_data (void *di_data)
           dispinfo.jsonident [fmtcount] = "size";
           if (scalehr) {
             dispinfo.suffix [dataidx] =
-                disptext [dispinfo.scaleidx [dataidx]].uc;
+                disptext [dispinfo.scaleidx [dataidx]].si_suffix;
           }
           di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
               dispinfo.scaleidx [dataidx],
@@ -391,7 +391,7 @@ di_display_data (void *di_data)
           dispinfo.jsonident [fmtcount] = "used";
           if (scalehr) {
             dispinfo.suffix [dataidx] =
-                disptext [dispinfo.scaleidx [dataidx]].uc;
+                disptext [dispinfo.scaleidx [dataidx]].si_suffix;
           }
           di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
               dispinfo.scaleidx [dataidx],
@@ -403,7 +403,7 @@ di_display_data (void *di_data)
           dispinfo.jsonident [fmtcount] = "used";
           if (scalehr) {
             dispinfo.suffix [dataidx] =
-                disptext [dispinfo.scaleidx [dataidx]].uc;
+                disptext [dispinfo.scaleidx [dataidx]].si_suffix;
           }
           di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
               dispinfo.scaleidx [dataidx],
@@ -415,7 +415,7 @@ di_display_data (void *di_data)
           dispinfo.jsonident [fmtcount] = "free";
           if (scalehr) {
             dispinfo.suffix [dataidx] =
-                disptext [dispinfo.scaleidx [dataidx]].uc;
+                disptext [dispinfo.scaleidx [dataidx]].si_suffix;
           }
           di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
               dispinfo.scaleidx [dataidx],
@@ -427,7 +427,7 @@ di_display_data (void *di_data)
           dispinfo.jsonident [fmtcount] = "available";
           if (scalehr) {
             dispinfo.suffix [dataidx] =
-                disptext [dispinfo.scaleidx [dataidx]].uc;
+                disptext [dispinfo.scaleidx [dataidx]].si_suffix;
           }
           di_disp_scaled (di_data, temp, sizeof (temp), pub->index,
               dispinfo.scaleidx [dataidx],
@@ -542,6 +542,8 @@ di_display_data (void *di_data)
         dataidx = i * fmtstrlen + j;
         if (strdata [dataidx] != NULL) {
           len = istrlen (strdata [dataidx]);
+          /* this is an assumption */
+          /* if the non-si suffixes are implemented, this needs to change */
           if (* (dispinfo.suffix [dataidx])) {
             ++len;
           }
@@ -600,10 +602,14 @@ di_display_data (void *di_data)
         if (*dispinfo.suffix [dataidx]) {
           --len;
         }
-        if (dispinfo.leftjust [j]) {
-          fprintf (stdout, "%-*s%s", len, tmp, dispinfo.suffix [dataidx]);
+        if (j == fmtstrlen - 1 && dispinfo.leftjust [j]) {
+          fprintf (stdout, "%s%s", tmp, dispinfo.suffix [dataidx]);
         } else {
-          fprintf (stdout, "%*s%s", len, tmp, dispinfo.suffix [dataidx]);
+          if (dispinfo.leftjust [j]) {
+            fprintf (stdout, "%-*s%s", len, tmp, dispinfo.suffix [dataidx]);
+          } else {
+            fprintf (stdout, "%*s%s", len, tmp, dispinfo.suffix [dataidx]);
+          }
         }
       }
 
@@ -670,10 +676,12 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
   int         csvout;
   int         scaleidx;
   int         scalehr;
+  int         posixcompat;
   char        **strdata = dispinfo->strdata;
 
   csvout = di_check_option (di_data, DI_OPT_DISP_CSV);
   fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
+  posixcompat = di_check_option (di_data, DI_OPT_POSIX_COMPAT);
   fmtcount = 0;
   scaleidx = di_check_option (di_data, DI_OPT_SCALE);
   scalehr = 0;
@@ -700,7 +708,11 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
         /* string values */
         case DI_FMT_MOUNT:
         case DI_FMT_MOUNT_FULL: {
-          temp = DI_GT ("Mount");
+          if (posixcompat) {
+            temp = DI_GT ("Mounted On");
+          } else {
+            temp = DI_GT ("Mount");
+          }
           break;
         }
         case DI_FMT_FILESYSTEM:
@@ -723,15 +735,15 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
           int   blksz;
 
           blksz = di_check_option (di_data, DI_OPT_BLOCK_SZ);
-          if (scalehr || blksz == 1) {
+          if (posixcompat) {
+            temp = DI_GT ("1024-blocks");
+          } else if (scalehr || blksz == 1) {
             temp = DI_GT ("Size");
           } else {
             if (blksz == 1000) {
               temp = disptext [scaleidx].si_name;
             } else if (blksz == 1024) {
               temp = disptext [scaleidx].name;
-            } else if (blksz == 512) {
-              temp = DI_GT ("512-Blocks");
             }
           }
           break;
@@ -753,21 +765,37 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
           break;
         }
         case DI_FMT_BAVAIL: {
-          temp = DI_GT ("Avail");
+          if (posixcompat) {
+            temp = DI_GT ("Available");
+          } else {
+            temp = DI_GT ("Avail");
+          }
           break;
         }
 
         /* disk space percentages */
         case DI_FMT_BPERC_NAVAIL: {
-          temp = DI_GT ("%Used");
+          if (posixcompat) {
+            temp = DI_GT ("Capacity");
+          } else {
+            temp = DI_GT ("%Used");
+          }
           break;
         }
         case DI_FMT_BPERC_USED: {
-          temp = DI_GT ("%Used");
+          if (posixcompat) {
+            temp = DI_GT ("Capacity");
+          } else {
+            temp = DI_GT ("%Used");
+          }
           break;
         }
         case DI_FMT_BPERC_BSD: {
-          temp = DI_GT ("%Used");
+          if (posixcompat) {
+            temp = DI_GT ("Capacity");
+          } else {
+            temp = DI_GT ("%Used");
+          }
           break;
         }
         case DI_FMT_BPERC_AVAIL: {

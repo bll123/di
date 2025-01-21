@@ -74,7 +74,7 @@ static di_valid_scale_t validscale [] =
 #define DI_MAX_ARGV             50
 #define DI_LIST_SEP             ","
 
-#define DI_POSIX_FORMAT         "SbuvpM"
+#define DI_POSIX_FORMAT         "sbuvpm"
 #define DI_ALL_FORMAT           "mts\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 
 extern int debug;
@@ -243,7 +243,8 @@ di_get_options (int argc, char * argv [], di_opt_t *diopts)
       printf (" %s", argv [j]);
     }
     printf ("\n");
-    printf ("# blocksize: %s\n", scalestr);
+    printf ("# blocksize: %s\n", diopts->blockSize);
+    printf ("# scale: %s\n", scalestr);
 
     if ( (ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL) {
       printf ("# POSIXLY_CORRECT: %s\n", ptr);
@@ -729,11 +730,12 @@ processOptions (const char *arg, char *valptr)
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     setExitFlag (padata->diopts, DI_EXIT_HELP);
   } else if (strcmp (arg, "-P") == 0) {
-    /* always use -k option */
+    /* always use -k option, 512 is not supported */
     strncpy (padata->scalestr, "k", padata->scalestrsz - 1);
     padata->diopts->formatString = DI_POSIX_FORMAT;
     padata->diopts->optval [DI_OPT_POSIX_COMPAT] = true;
     padata->diopts->optval [DI_OPT_DISP_CSV] = false;
+    padata->diopts->optval [DI_OPT_DISP_JSON] = false;
   } else if (strcmp (arg, "--si") == 0) {
     strncpy (padata->scalestr, "H", padata->scalestrsz - 1);
   } else if (strcmp (arg, "--version") == 0) {
@@ -758,8 +760,7 @@ processOptionsVal (const char *arg, pvoid *valptr, char *value)
       int     val;
 
       val = atoi (value);
-      if (val == DI_BLKSZ_1 ||
-          val == DI_BLKSZ_1000 || val == DI_BLKSZ_1024 ) {
+      if (val == DI_BLKSZ_1000 || val == DI_BLKSZ_1024 ) {
         padata->diopts->blockSize = val;
       }
     } else if (strcmp (value, "k") == 0) {
@@ -873,8 +874,13 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
     if (val == DI_BLKSZ_1) {
       diopts->scale = DI_SCALE_BYTE;
     }
-    if (val == DI_BLKSZ_1000 || val == DI_BLKSZ_1024) {
+    if (val == DI_BLKSZ_1000) {
       diopts->scale = DI_SCALE_KILO;
+      diopts->blockSize = DI_BLKSZ_1000;
+    }
+    if (val == DI_BLKSZ_1024) {
+      diopts->scale = DI_SCALE_KILO;
+      diopts->blockSize = DI_BLKSZ_1024;
     }
   }
 
