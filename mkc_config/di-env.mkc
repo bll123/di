@@ -85,14 +85,6 @@ if not_have_pkg_gmp ! _pkg_libs_gmp
  pkg libs libtommath /opt/local/lib/pkgconfig
 endif
 
-option _use_math DI_INTERNAL
-if have_gmp _pkg_libs_gmp
- option _use_math DI_GMP
-endif
-if have_tommath _pkg_libs_libtommath
- option _use_math DI_TOMMATH
-endif
-
 libs
 shared_flags
 

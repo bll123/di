@@ -257,8 +257,8 @@ _loadoptions () {
       eval "mkc_c_opt_${topt}=\"${tval}\""
     done
     exec <&6 6<&-
-    optionsloaded=T
   fi
+  optionsloaded=T
 }
 
 check_command () {
@@ -510,9 +510,7 @@ check_option () {
 
   printyesno_actual $nm "$oval"
   # options always have a null prefix
-set -x
   setdata ${_MKCONFIG_PREFIX} ${nm} "${oval}"
-set +x
 }
 
 check_echo () {

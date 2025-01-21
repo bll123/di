@@ -259,16 +259,6 @@ else
   setint _has_std_nfs_quotas 0
 endif
 
-ifnotoption NLS
-  set _lib_bindtextdomain 0
-  set _lib_gettext 0
-  set _lib_setlocale 0
-  set _lib_textdomain 0
-  set _hdr_libintl 0
-  set _hdr_locale 0
-  set _command_msgfmt 0
-endif
-
 if hasnls _lib_bindtextdomain && _lib_gettext && _lib_setlocale && \
     _lib_textdomain && _hdr_libintl && _hdr_locale
   setint _enable_nls 1
@@ -295,11 +285,16 @@ ifnotoption WINAPI
   set _lib_GetVolumeInformation 0
 endif
 
+option DI_USE_MATH
+
 include
 
 #define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
+#if defined (DI_USE_MATH)
+# define _use_math DI_USE_MATH
+#endif
 
 #if _typ_statvfs_t
 # define Statvfs_t statvfs_t

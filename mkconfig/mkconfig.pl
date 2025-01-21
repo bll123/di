@@ -1476,8 +1476,8 @@ create_output
     From: ${configfile}
     Using: mkconfig-${_MKCONFIG_VERSION} (perl) */
 
-#ifndef MKC_INC_${CONFHTAGUC}_H
-#define MKC_INC_${CONFHTAGUC}_H 1
+#ifndef INC_${CONFHTAGUC}_H
+#define INC_${CONFHTAGUC}_H 1
 
 _HERE_
 
@@ -1488,17 +1488,23 @@ _HERE_
     }
     my $tval = 0;
     if ($r_config->{$val} ne "0") {
-        $tval = 1;
+      $tval = 1;
     }
     if ($val =~ m#^_setint_#o) {
       $tnm = $val;
       $tnm =~ s/^_setint_//;
       print CCOFH "#define $tnm " . $r_config->{$val} . "\n";
     } elsif ($val =~ m#^(_setstr_|_opt_|_cmd_loc_)#o) {
+      my $isopt = 0;
+      if ($val =~ m#^_opt_#o) {
+        $isopt = 1;
+      }
       $tnm = $val;
       $tnm =~ s/^_setstr_//;
       $tnm =~ s/^_opt_//;
-      print CCOFH "#define $tnm \"" . $r_config->{$val} . "\"\n";
+      if (! $isopt || ($isopt && $r_config->{$val} != "")) {
+        print CCOFH "#define $tnm \"" . $r_config->{$val} . "\"\n";
+      }
     } elsif ($val =~ m#^(_hdr|_sys|_command)#o) {
       print CCOFH "#define $val $tval\n";
     } else {
@@ -1530,7 +1536,7 @@ _HERE_
 
   print CCOFH <<"_HERE_";
 
-#endif /* MKC_INC_${CONFHTAGUC}_H */
+#endif /* INC_${CONFHTAGUC}_H */
 _HERE_
   close CCOFH;
 }

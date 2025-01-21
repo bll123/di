@@ -83,8 +83,8 @@ preconfigfile () {
   puts "    From: ${configfile}"
   puts "    Using: mkconfig-${_MKCONFIG_VERSION} */"
   puts ''
-  puts "#ifndef MKC_INC_${CONFHTAGUC}_H
-#define MKC_INC_${CONFHTAGUC}_H 1
+  puts "#ifndef INC_${CONFHTAGUC}_H
+#define INC_${CONFHTAGUC}_H 1
 "
 }
 
@@ -111,7 +111,7 @@ stdconfigfile () {
 postconfigfile () {
   pc_configfile=$1
   puts "
-#endif /* MKC_INC_${CONFHTAGUC}_H */"
+#endif /* INC_${CONFHTAGUC}_H */"
 }
 
 standard_checks () {
@@ -889,9 +889,16 @@ output_item () {
       dosubst tname '_setint_' ''
       puts "#define ${tname} ${val}"
       ;;
+    _opt_*)
+      tname=$name
+      dosubst tname '_opt_' ''
+      if [ "x${val}" != x ]; then
+        puts "#define ${tname} \"${val}\""
+      fi
+      ;;
     _setstr_*|_opt_*|_cmd_loc_*)
       tname=$name
-      dosubst tname '_setstr_' '' '_opt_' ''
+      dosubst tname '_setstr_' ''
       puts "#define ${tname} \"${val}\""
       ;;
     _hdr_*|_sys_*|_command_*)
