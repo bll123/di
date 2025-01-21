@@ -212,7 +212,7 @@ di_get_options (int argc, char * argv [], di_opt_t *diopts)
 
   /* gnu df */
   if ( (ptr = getenv ("POSIXLY_CORRECT")) != (char *) NULL) {
-    strncpy (scalestr, "512", sizeof (scalestr) - 1);
+    strncpy (scalestr, "k", sizeof (scalestr) - 1);
     diopts->formatString = DI_POSIX_FORMAT;
     diopts->optval [DI_OPT_POSIX_COMPAT] = true;
     diopts->optval [DI_OPT_DISP_CSV] = false;
@@ -307,6 +307,9 @@ di_opt_check_option (di_opt_t *diopts, int optidx)
   }
   if (optidx == DI_OPT_SCALE) {
     return diopts->scale;
+  }
+  if (optidx == DI_OPT_BLOCK_SZ) {
+    return diopts->blockSize;
   }
 
   if (optidx < 0 || optidx >= DI_OPT_MAX) {
@@ -726,10 +729,8 @@ processOptions (const char *arg, char *valptr)
   } else if (strcmp (arg, "--help") == 0 || strcmp (arg, "-?") == 0) {
     setExitFlag (padata->diopts, DI_EXIT_HELP);
   } else if (strcmp (arg, "-P") == 0) {
-    /* don't override -k option */
-    if (strcmp (padata->scalestr, "k") != 0) {
-      strncpy (padata->scalestr, "512", padata->scalestrsz - 1);
-    }
+    /* always use -k option */
+    strncpy (padata->scalestr, "k", padata->scalestrsz - 1);
     padata->diopts->formatString = DI_POSIX_FORMAT;
     padata->diopts->optval [DI_OPT_POSIX_COMPAT] = true;
     padata->diopts->optval [DI_OPT_DISP_CSV] = false;
@@ -757,7 +758,7 @@ processOptionsVal (const char *arg, pvoid *valptr, char *value)
       int     val;
 
       val = atoi (value);
-      if (val == DI_BLKSZ_1 || val == DI_BLKSZ_512 ||
+      if (val == DI_BLKSZ_1 ||
           val == DI_BLKSZ_1000 || val == DI_BLKSZ_1024 ) {
         padata->diopts->blockSize = val;
       }
@@ -775,12 +776,12 @@ processOptionsVal (const char *arg, pvoid *valptr, char *value)
     }
   } else if (strcmp (arg, "-s") == 0) {
     strncpy (padata->diopts->sortType, value, DI_SORT_TYPE_MAX);
-      /* for backwards compatibility                       */
-      /* reverse by itself - change to reverse mount point */
+    /* for backwards compatibility                       */
+    /* reverse by itself - change to reverse mount point */
     if (strcmp (padata->diopts->sortType, "r") == 0) {
         strncpy (padata->diopts->sortType, "rm", DI_SORT_TYPE_MAX);
     }
-        /* add some sense to the sort order */
+    /* add some sense to the sort order */
     if (strcmp (padata->diopts->sortType, "t") == 0) {
         strncpy (padata->diopts->sortType, "tm", DI_SORT_TYPE_MAX);
     }
@@ -863,18 +864,23 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
   int             val;
   char            *tptr;
 
-  val = DI_BLKSZ_1024;
-  if (isdigit ( (int) (*ptr))) {
+  if (isdigit (*ptr)) {
     val = atoi (ptr);
-    if (val != DI_BLKSZ_1 && val != DI_BLKSZ_512 &&
+    if (val != DI_BLKSZ_1 &&
         val != DI_BLKSZ_1000 && val != DI_BLKSZ_1024) {
       val = DI_BLKSZ_1024;
+    }
+    if (val == DI_BLKSZ_1) {
+      diopts->scale = DI_SCALE_BYTE;
+    }
+    if (val == DI_BLKSZ_1000 || val == DI_BLKSZ_1024) {
+      diopts->scale = DI_SCALE_KILO;
     }
   }
 
   tptr = ptr;
   len = (unsigned int) strlen (ptr);
-  if (! isdigit ( (int) *tptr)) {
+  if (! isdigit (*tptr)) {
     int             idx;
 
     idx = -1;
@@ -913,10 +919,6 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
     } /* known size multiplier */
 
     diopts->scale = idx;
-
-    if (idx == -1) {
-// ### convert the value to a scale value...
-    }
   }
 }
 

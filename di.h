@@ -81,6 +81,7 @@ extern "C" {
 #define DI_OPT_MAX              12
 #define DI_OPT_FMT_STR_LEN      13
 #define DI_OPT_SCALE            14
+#define DI_OPT_BLOCK_SZ         15
 
 #define DI_FMT_ITER_STOP        -1
 

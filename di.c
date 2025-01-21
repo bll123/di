@@ -10,13 +10,17 @@
  *           You will in all likelihood break your installation procedures.
  *
  *  Display sizes:
+ *      1 - bytes
  *      512 - posix (512 bytes)
- *      k - kilobytes
- *      m - megabytes
- *      g - gigabytes
- *      t - terabytes
- *      P - petabytes
- *      E - exabytes
+ *      k - kilo
+ *      m - mega
+ *      g - giga
+ *      t - tera
+ *      p - peta
+ *      e - exa
+ *      z - zetta
+ *      r - ronna
+ *      q - quetta
  *      h - "human readable" scaled alternative 1
  *      H - "human readable" scaled alternative 2
  *
@@ -42,7 +46,7 @@
  *      c - calculated number of kbytes used [ (tot - avail) ]
  *      f - kbytes free
  *      v - kbytes available
- *  Disk Space Percentages
+ *    Disk Space Percentages
  *      p - percentage not available for use.
  *          (space not available for use / total disk space)
  *             [ (tot - avail) / tot ]
@@ -53,7 +57,7 @@
  *          Note that values over 100% are possible.
  *          (actual space used / disk space available to user)
  *             [ (tot - free) / (tot - (free - avail)) ]
- *  Inodes
+ *    Inodes
  *      i - total i-nodes (files)
  *      U - used i-nodes
  *      F - free i-nodes
@@ -118,13 +122,13 @@ typedef struct {
 typedef struct {
   char    *uc;
   char    *lc;
+  char    *si_name;
   char    *name;
-  char    *nameb;
 } di_disp_text_t;
 
 static di_disp_text_t disptext [] =
 {
-  { " ", " ", "Byte", "Byte" },
+  { "",  "",  "Byte", "Byte" },
   { "K", "k", "Kilo", "Kibi" },
   { "M", "m", "Mega", "Mebi" },
   { "G", "g", "Giga", "Gibi" },
@@ -225,6 +229,7 @@ di_display_data (void *di_data)
   int                 jsonout;
   int                 scaleidx;
   int                 scalehr;
+  int                 blksz;
   char                temp [MAXPATHLEN * 2];
   di_disp_info_t      dispinfo;
   char                **strdata;
@@ -233,6 +238,7 @@ di_display_data (void *di_data)
   csvtabs = di_check_option (di_data, DI_OPT_DISP_CSV_TAB);
   jsonout = di_check_option (di_data, DI_OPT_DISP_JSON);
   fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
+  blksz = di_check_option (di_data, DI_OPT_BLOCK_SZ);
   scaleidx = di_check_option (di_data, DI_OPT_SCALE);
   scalehr = 0;
   if (scaleidx == DI_SCALE_HR || scaleidx == DI_SCALE_HR_ALT) {
@@ -288,6 +294,7 @@ di_display_data (void *di_data)
     } else {
       fprintf (stdout, "  \"scaling\" : \"%s\"\n", disptext [scaleidx].uc);
     }
+    fprintf (stdout, "  \"blocksize\" : %d\n", blksz);
     fprintf (stdout, "  \"partitions\" : [\n");
   }
 
@@ -661,11 +668,18 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
   int         fmtcount;
   int         fmtstrlen;
   int         csvout;
+  int         scaleidx;
+  int         scalehr;
   char        **strdata = dispinfo->strdata;
 
   csvout = di_check_option (di_data, DI_OPT_DISP_CSV);
   fmtstrlen = di_check_option (di_data, DI_OPT_FMT_STR_LEN);
   fmtcount = 0;
+  scaleidx = di_check_option (di_data, DI_OPT_SCALE);
+  scalehr = 0;
+  if (scaleidx == DI_SCALE_HR || scaleidx == DI_SCALE_HR_ALT) {
+    scalehr = 1;
+  }
 
   di_format_iter_init (di_data);
   while ( (fmt = di_format_iterate (di_data)) != DI_FMT_ITER_STOP) {
@@ -706,7 +720,20 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
 
         /* disk space values */
         case DI_FMT_BTOT: {
-          temp = DI_GT ("Size");
+          int   blksz;
+
+          blksz = di_check_option (di_data, DI_OPT_BLOCK_SZ);
+          if (scalehr || blksz == 1) {
+            temp = DI_GT ("Size");
+          } else {
+            if (blksz == 1000) {
+              temp = disptext [scaleidx].si_name;
+            } else if (blksz == 1024) {
+              temp = disptext [scaleidx].name;
+            } else if (blksz == 512) {
+              temp = DI_GT ("512-Blocks");
+            }
+          }
           break;
         }
         case DI_FMT_BTOT_AVAIL: {

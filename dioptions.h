@@ -12,10 +12,9 @@ extern "C" {
 # endif
 
 #define DI_BLKSZ_1                1
-#define DI_BLKSZ_512              512
 #define DI_BLKSZ_1000             1000
 #define DI_BLKSZ_1024             1024
-// ### need to check these
+// ### need to check these, I don't think they are used
 #define DI_DISP_1000_IDX        0
 #define DI_DISP_1024_IDX        1
 
