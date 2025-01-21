@@ -130,290 +130,290 @@ void
 convertMountOptions (unsigned long flags, di_disk_info_t *diptr)
 {
 #if defined (MNT_RDONLY)
-    if ( (flags & MNT_RDONLY) == MNT_RDONLY)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "ro,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
-    else
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "rw,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_RDONLY) == MNT_RDONLY)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "ro,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
+  else
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "rw,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_EXRDONLY)
-    if ( (flags & MNT_EXRDONLY) == MNT_EXRDONLY)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "expro,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_EXRDONLY) == MNT_EXRDONLY)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "expro,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_DEFEXPORTED)
-    if ( (flags & MNT_DEFEXPORTED) == MNT_DEFEXPORTED)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "exprwany,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_DEFEXPORTED) == MNT_DEFEXPORTED)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "exprwany,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_EXPORTANON)
-    if ( (flags & MNT_EXPORTANON) == MNT_EXPORTANON)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "expanon,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_EXPORTANON) == MNT_EXPORTANON)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "expanon,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_EXKERB)
-    if ( (flags & MNT_EXKERB) == MNT_EXKERB)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "expkerb,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_EXKERB) == MNT_EXKERB)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "expkerb,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_FORCE)
-    if ( (flags & MNT_FORCE) == MNT_FORCE)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "force,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_FORCE) == MNT_FORCE)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "force,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_GRPID)
-    if ( (flags & MNT_GRPID) == MNT_GRPID)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "grpid,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_GRPID) == MNT_GRPID)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "grpid,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_MAGICLINKS)
-    if ( (flags & MNT_MAGICLINKS) == MNT_MAGICLINKS)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "magiclinks,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_MAGICLINKS) == MNT_MAGICLINKS)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "magiclinks,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_MLSD)
-    if ( (flags & MNT_MLSD) == MNT_MLSD)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "mlsd,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_MLSD) == MNT_MLSD)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "mlsd,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_NOATIMES)
-    if ( (flags & MNT_NOATIMES) == MNT_NOATIMES)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "noatime,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_NOATIMES) == MNT_NOATIMES)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "noatime,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_NOCACHE)
-    if ( (flags & MNT_NOCACHE) == MNT_NOCACHE)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nocache,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_NOCACHE) == MNT_NOCACHE)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nocache,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_NOCOREDUMP)
-    if ( (flags & MNT_NOCOREDUMP) == MNT_NOCOREDUMP)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nocoredump,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_NOCOREDUMP) == MNT_NOCOREDUMP)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nocoredump,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_NODEV)
-    if ( (flags & MNT_NODEV) == MNT_NODEV)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nodev,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_NODEV) == MNT_NODEV)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nodev,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_NODEVMTIME)
-    if ( (flags & MNT_NODEVMTIME) == MNT_NODEVMTIME)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nodevmtime,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_NODEVMTIME) == MNT_NODEVMTIME)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nodevmtime,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_NOEXEC)
-    if ( (flags & MNT_NOEXEC) == MNT_NOEXEC)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "noexec,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_NOEXEC) == MNT_NOEXEC)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "noexec,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_NOSUID)
-    if ( (flags & MNT_NOSUID) == MNT_NOSUID)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nosuid,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_NOSUID) == MNT_NOSUID)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "nosuid,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_QUOTA)
-    if ( (flags & MNT_QUOTA) == MNT_QUOTA)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "quota,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_QUOTA) == MNT_QUOTA)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "quota,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_SECURE)
-    if ( (flags & MNT_SECURE) == MNT_SECURE)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "secure,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_SECURE) == MNT_SECURE)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "secure,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_SMSYNC2)
-    if ( (flags & MNT_SMSYNC2) == MNT_SMSYNC2)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "smsync2,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_SMSYNC2) == MNT_SMSYNC2)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "smsync2,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_SOFTDEP)
-    if ( (flags & MNT_SOFTDEP) == MNT_SOFTDEP)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "softdep,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_SOFTDEP) == MNT_SOFTDEP)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "softdep,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_SYMPERM)
-    if ( (flags & MNT_SYMPERM) == MNT_SYMPERM)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "symperm,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_SYMPERM) == MNT_SYMPERM)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "symperm,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_SYNC)
-    if ( (flags & MNT_SYNC) == MNT_SYNC)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "sync,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_SYNC) == MNT_SYNC)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "sync,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_SYNCHRONOUS)
-    if ( (flags & MNT_SYNCHRONOUS) == MNT_SYNCHRONOUS)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "sync,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_SYNCHRONOUS) == MNT_SYNCHRONOUS)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "sync,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_THROTTLE)
-    if ( (flags & MNT_THROTTLE) == MNT_THROTTLE)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "throttle,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_THROTTLE) == MNT_THROTTLE)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "throttle,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_UNION)
-    if ( (flags & MNT_UNION) == MNT_UNION)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "union,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_UNION) == MNT_UNION)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "union,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_UNION)
-    if ( (flags & MNT_UNION) == MNT_UNION)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "union,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_UNION) == MNT_UNION)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "union,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_REMOVABLE)
-    if ( (flags & MNT_REMOVABLE) == MNT_REMOVABLE)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "removable,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_REMOVABLE) == MNT_REMOVABLE)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "removable,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_PERSISTENT)
-    if ( (flags & MNT_PERSISTENT) == MNT_PERSISTENT)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "persistent,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_PERSISTENT) == MNT_PERSISTENT)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "persistent,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_SHARED)
-    if ( (flags & MNT_SHARED) == MNT_SHARED)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "shared,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_SHARED) == MNT_SHARED)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "shared,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_BLOCKBASED)
-    if ( (flags & MNT_BLOCKBASED) == MNT_BLOCKBASED)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "blockbased,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_BLOCKBASED) == MNT_BLOCKBASED)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "blockbased,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_HAS_MIME)
-    if ( (flags & MNT_HAS_MIME) == MNT_HAS_MIME)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "mime,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_HAS_MIME) == MNT_HAS_MIME)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "mime,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_HAS_QUERY)
-    if ( (flags & MNT_HAS_QUERY) == MNT_HAS_QUERY)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "query,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_HAS_QUERY) == MNT_HAS_QUERY)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "query,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (MNT_HAS_ATTR)
-    if ( (flags & MNT_HAS_ATTR) == MNT_HAS_ATTR)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "attr,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & MNT_HAS_ATTR) == MNT_HAS_ATTR)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "attr,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
-    return;
+  return;
 }
 
 void
 convertNFSMountOptions (long flags, long wsize, long rsize, di_disk_info_t *diptr)
 {
 #if defined (NFSMNT_SOFT)
-    if ( (flags & NFSMNT_SOFT) != NFSMNT_SOFT)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "hard,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & NFSMNT_SOFT) != NFSMNT_SOFT)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "hard,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (NFSMNT_WSIZE)
-    if ( (flags & NFSMNT_WSIZE) == NFSMNT_WSIZE)
-    {
-        char          tmp [64];
+  if ((flags & NFSMNT_WSIZE) == NFSMNT_WSIZE)
+  {
+    char          tmp [64];
 
-        Snprintf1 (tmp, sizeof (tmp), "wsize=%ld,", wsize);
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], tmp,
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+    Snprintf1 (tmp, sizeof (tmp), "wsize=%ld,", wsize);
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], tmp,
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (NFSMNT_RSIZE)
-    if ( (flags & NFSMNT_RSIZE) == NFSMNT_RSIZE)
-    {
-        char          tmp [64];
+  if ((flags & NFSMNT_RSIZE) == NFSMNT_RSIZE)
+  {
+    char          tmp [64];
 
-        Snprintf1 (tmp, sizeof (tmp), "rsize=%ld,", rsize);
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], tmp,
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+    Snprintf1 (tmp, sizeof (tmp), "rsize=%ld,", rsize);
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], tmp,
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (NFSMNT_INT) && defined (NFSMNT_SOFT)
-    if ( (flags & NFSMNT_SOFT) != NFSMNT_SOFT &&
-        (flags & NFSMNT_INT) == NFSMNT_INT)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "intr,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & NFSMNT_SOFT) != NFSMNT_SOFT &&
+      (flags & NFSMNT_INT) == NFSMNT_INT)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "intr,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
 #if defined (NFSMNT_TCP)
-    if ( (flags & NFSMNT_TCP) != NFSMNT_TCP)
-    {
-        strncat (diptr->strdata [DI_DISP_MOUNTOPT], "udp,",
-                DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
-    }
+  if ((flags & NFSMNT_TCP) != NFSMNT_TCP)
+  {
+    strncat (diptr->strdata [DI_DISP_MOUNTOPT], "udp,",
+        DI_MOUNT_OPT_LEN - strlen (diptr->strdata [DI_DISP_MOUNTOPT]) - 1);
+  }
 #endif
-    return;
+  return;
 }
 
 
@@ -427,27 +427,24 @@ convertNFSMountOptions (long flags, long wsize, long rsize, di_disk_info_t *dipt
 char *
 chkMountOptions (const char *mntopts, const char *str)
 {
-    char    *ptr;
-    char    *tstr;
+  char    *ptr;
+  char    *tstr;
 
-    tstr = strdup (mntopts);
-    if (tstr == (char *) NULL)
-    {
-        fprintf (stderr, "strdup failed in chkMountOptions (1).  errno %d\n", errno);
-        exit (1);
+  tstr = strdup (mntopts);
+  if (tstr == (char *) NULL) {
+    fprintf (stderr, "strdup failed in chkMountOptions (1).  errno %d\n", errno);
+    exit (1);
+  }
+  ptr = strtok (tstr, ",");
+  while (ptr != (char *) NULL) {
+    if (strcmp (ptr, str) == 0) {
+      free (tstr);
+      return ptr;
     }
-    ptr = strtok (tstr, ",");
-    while (ptr != (char *) NULL)
-    {
-        if (strcmp (ptr, str) == 0)
-        {
-            free (tstr);
-            return ptr;
-        }
-        ptr = strtok ( (char *) NULL, ",");
-    }
-    free (tstr);
-    return (char *) NULL;
+    ptr = strtok ((char *) NULL, ",");
+  }
+  free (tstr);
+  return (char *) NULL;
 }
 
 #endif /* _lib_getmntent */
@@ -455,8 +452,7 @@ chkMountOptions (const char *mntopts, const char *str)
 void
 di_is_remote_disk (di_disk_info_t *diskInfo)
 {
-  if (strncmp (diskInfo->strdata [DI_DISP_FSTYPE], "nfs", 3) == 0)
-  {
+  if (strncmp (diskInfo->strdata [DI_DISP_FSTYPE], "nfs", 3) == 0) {
     diskInfo->isLocal = false;
   }
 }
@@ -477,7 +473,7 @@ di_isPooledFs (di_disk_info_t *diskInfo)
 int
 di_isLoopbackFs (di_disk_info_t *diskInfo)
 {
-  if ( (strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "lofs") == 0 && diskInfo->sp_rdev != 0) ||
+  if ((strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "lofs") == 0 && diskInfo->sp_rdev != 0) ||
       (strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "nullfs") == 0 &&
        strstr (diskInfo->strdata [DI_DISP_FILESYSTEM], "/@@-") == (char *) NULL) ||
       strcmp (diskInfo->strdata [DI_DISP_FSTYPE], "none") == 0) {

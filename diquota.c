@@ -584,105 +584,105 @@ xdr_quota_rslt (XDR *xp, struct getquota_rslt *rslt)
 static void
 diquota_nfs (di_quota_t *diqinfo)
 {
-    CLIENT                  *rqclnt;
-    enum clnt_stat          clnt_stat;
-    struct timeval          timeout;
-    char                    host [DI_FILESYSTEM_LEN + 1];
-    char                    *ptr;
-    char                    *path;
-    struct getquota_args    args;
-    struct getquota_rslt    result;
-    struct rquota           *rptr;
-    int                     quotastat;
-    dinum_t                 tsize;
+  CLIENT                  *rqclnt;
+  enum clnt_stat          clnt_stat;
+  struct timeval          timeout;
+  char                    host [DI_FILESYSTEM_LEN + 1];
+  char                    *ptr;
+  char                    *path;
+  struct getquota_args    args;
+  struct getquota_rslt    result;
+  struct rquota           *rptr;
+  int                     quotastat;
+  dinum_t                 tsize;
 
-    dinum_init (&tsize);
+  dinum_init (&tsize);
 
-    if (debug > 5) {
-      printf ("quota: diquota_nfs\n");
-    }
-    timeout.tv_sec = 2;
-    timeout.tv_usec = 0;
+  if (debug > 5) {
+    printf ("quota: diquota_nfs\n");
+  }
+  timeout.tv_sec = 2;
+  timeout.tv_usec = 0;
 
-    strncpy (host, diqinfo->filesystem, DI_FILESYSTEM_LEN);
-    path = host;
-    ptr = strchr (host, ':');
-    if (ptr != (char *) NULL) {
-      *ptr = '\0';
-      path = ptr + 1;
-    }
+  strncpy (host, diqinfo->filesystem, DI_FILESYSTEM_LEN);
+  path = host;
+  ptr = strchr (host, ':');
+  if (ptr != (char *) NULL) {
+    *ptr = '\0';
+    path = ptr + 1;
+  }
+  if (debug > 2) {
+    printf ("quota: nfs: host: %s path: %s\n", host, path);
+  }
+  args.gqa_pathp = path;
+  args.gqa_uid = (int) diqinfo->uid;
+
+  rqclnt = clnt_create (host, (unsigned long) RQUOTAPROG,
+      (unsigned long) RQUOTAVERS, "udp");
+  if (rqclnt == (CLIENT *) NULL) {
     if (debug > 2) {
-      printf ("quota: nfs: host: %s path: %s\n", host, path);
+      printf ("quota: nfs: create failed %d\n", errno);
     }
-    args.gqa_pathp = path;
-    args.gqa_uid = (int) diqinfo->uid;
-
-    rqclnt = clnt_create (host, (unsigned long) RQUOTAPROG,
-        (unsigned long) RQUOTAVERS, "udp");
-    if (rqclnt == (CLIENT *) NULL) {
-      if (debug > 2) {
-        printf ("quota: nfs: create failed %d\n", errno);
-      }
-      return;
+    return;
+  }
+  rqclnt->cl_auth = authunix_create_default ();
+  clnt_stat = clnt_call (rqclnt, (unsigned long) RQUOTAPROC_GETQUOTA,
+      (xdrproc_t) xdr_quota_get, (caddr_t) &args,
+      (xdrproc_t) xdr_quota_rslt, (caddr_t) &result, timeout);
+  if (clnt_stat != RPC_SUCCESS) {
+    if (debug > 2) {
+      printf ("quota: nfs: not success\n");
     }
-    rqclnt->cl_auth = authunix_create_default ();
-    clnt_stat = clnt_call (rqclnt, (unsigned long) RQUOTAPROC_GETQUOTA,
-        (xdrproc_t) xdr_quota_get, (caddr_t) &args,
-        (xdrproc_t) xdr_quota_rslt, (caddr_t) &result, timeout);
-    if (clnt_stat != RPC_SUCCESS) {
-      if (debug > 2) {
-        printf ("quota: nfs: not success\n");
-      }
-      if (rqclnt->cl_auth) {
-        auth_destroy (rqclnt->cl_auth);
-      }
-      clnt_destroy (rqclnt);
-      return;
-    }
-
-# if _mem_struct_getquota_rslt_gqr_status
-    quotastat = (int) result.gqr_status;
-# else
-    quotastat = (int) result.status;
-# endif
-    if (quotastat == 1) {
-# if _mem_struct_getquota_rslt_gqr_rquota
-      rptr = &result.gqr_rquota;
-# else
-      rptr = &result.getquota_rslt_u.gqr_rquota;
-# endif
-
-      if (debug > 2) {
-        printf ("quota: nfs: status 1\n");
-        printf ("quota: nfs: rq_bsize: %d\n", rptr->rq_bsize);
-        printf ("quota: nfs: rq_active: %d\n", rptr->rq_active);
-      }
-
-      dinum_mul_uu (&diqinfo->values [DI_QUOTA_LIMIT], rptr->rq_bhardlimit, rptr->rq_bsize);
-      dinum_mul_uu (&tsize, rptr->rq_bsoftlimit, rptr->rq_bsize);
-      if (dinum_cmp_s (&tsize, 0) != 0 &&
-          dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_LIMIT]) < 0) {
-        dinum_set (&diqinfo->values [DI_QUOTA_LIMIT], &tsize);
-      }
-      if (dinum_cmp_s (&diqinfo->values [DI_QUOTA_LIMIT], 0) != 0) {
-        dinum_mul_uu (&diqinfo->values [DI_QUOTA_USED], rptr->rq_curblocks, rptr->rq_bsize);
-      }
-
-      dinum_set_u (&diqinfo->values [DI_QUOTA_ILIMIT], rptr->rq_fhardlimit);
-      dinum_set_s (&tsize, rptr->rq_fsoftlimit);
-      if (dinum_cmp_s (&tsize, 0) != 0 &&
-          dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_ILIMIT]) < 0) {
-        dinum_set (&diqinfo->values [DI_QUOTA_ILIMIT], &tsize);
-      }
-      if (dinum_cmp_s (&diqinfo->values [DI_QUOTA_ILIMIT], 0) != 0) {
-        dinum_set_u (&diqinfo->values [DI_QUOTA_IUSED], rptr->rq_curfiles);
-      }
-    }
-
     if (rqclnt->cl_auth) {
       auth_destroy (rqclnt->cl_auth);
     }
     clnt_destroy (rqclnt);
+    return;
+  }
+
+# if _mem_struct_getquota_rslt_gqr_status
+  quotastat = (int) result.gqr_status;
+# else
+  quotastat = (int) result.status;
+# endif
+  if (quotastat == 1) {
+# if _mem_struct_getquota_rslt_gqr_rquota
+    rptr = &result.gqr_rquota;
+# else
+    rptr = &result.getquota_rslt_u.gqr_rquota;
+# endif
+
+    if (debug > 2) {
+      printf ("quota: nfs: status 1\n");
+      printf ("quota: nfs: rq_bsize: %d\n", rptr->rq_bsize);
+      printf ("quota: nfs: rq_active: %d\n", rptr->rq_active);
+    }
+
+    dinum_mul_uu (&diqinfo->values [DI_QUOTA_LIMIT], rptr->rq_bhardlimit, rptr->rq_bsize);
+    dinum_mul_uu (&tsize, rptr->rq_bsoftlimit, rptr->rq_bsize);
+    if (dinum_cmp_s (&tsize, 0) != 0 &&
+        dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_LIMIT]) < 0) {
+      dinum_set (&diqinfo->values [DI_QUOTA_LIMIT], &tsize);
+    }
+    if (dinum_cmp_s (&diqinfo->values [DI_QUOTA_LIMIT], 0) != 0) {
+      dinum_mul_uu (&diqinfo->values [DI_QUOTA_USED], rptr->rq_curblocks, rptr->rq_bsize);
+    }
+
+    dinum_set_u (&diqinfo->values [DI_QUOTA_ILIMIT], rptr->rq_fhardlimit);
+    dinum_set_s (&tsize, rptr->rq_fsoftlimit);
+    if (dinum_cmp_s (&tsize, 0) != 0 &&
+        dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_ILIMIT]) < 0) {
+      dinum_set (&diqinfo->values [DI_QUOTA_ILIMIT], &tsize);
+    }
+    if (dinum_cmp_s (&diqinfo->values [DI_QUOTA_ILIMIT], 0) != 0) {
+      dinum_set_u (&diqinfo->values [DI_QUOTA_IUSED], rptr->rq_curfiles);
+    }
+  }
+
+  if (rqclnt->cl_auth) {
+    auth_destroy (rqclnt->cl_auth);
+  }
+  clnt_destroy (rqclnt);
 
   dinum_clear (&tsize);
 }

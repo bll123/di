@@ -49,25 +49,25 @@
 #include "getoptn.h"
 
 typedef struct {
-    Size_t      optionlen;
-    int         idx;
+  Size_t      optionlen;
+  int         idx;
 } getoptn_optinfo_t;
 
 typedef struct {
-    int                 style;
-    int                 optidx;
-    Size_t              optcount;
-    getoptn_opt_t       *opts;
-    getoptn_optinfo_t   *optinfo;
-    int                 argc;
-    char                **argv;
-    const char          *arg;       /* current arg we're processing         */
-    Size_t              arglen;     /* and the length of it                 */
-    int                 hasvalue;   /* does this arg have a value attached? */
-    Size_t              argidx;     /* index to the value                   */
-    Size_t              optionlen;  /* length of the option for this arg    */
-    Size_t              reprocess;  /* -ab legacy form? must be 0 or 1      */
-    Size_t              offset;     /* reprocessing offset                  */
+  int                 style;
+  int                 optidx;
+  Size_t              optcount;
+  getoptn_opt_t       *opts;
+  getoptn_optinfo_t   *optinfo;
+  int                 argc;
+  char                **argv;
+  const char          *arg;       /* current arg we're processing         */
+  Size_t              arglen;     /* and the length of it                 */
+  int                 hasvalue;   /* does this arg have a value attached? */
+  Size_t              argidx;     /* index to the value                   */
+  Size_t              optionlen;  /* length of the option for this arg    */
+  Size_t              reprocess;  /* -ab legacy form? must be 0 or 1      */
+  Size_t              offset;     /* reprocessing offset                  */
 } getoptn_info_t;
 
 typedef void (*getoptn_func_bool_t) (const char *option, void *valptr);

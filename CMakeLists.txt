@@ -369,6 +369,9 @@ int main (int argc, char *argv []) {
     set (${varnm} 1)
   endif()
   file (REMOVE tinc.c)
+  if (EXISTS tinc.o)
+    file (REMOVE tinc.o)
+  endif()
 endmacro()
 
 check_include_file (ctype.h _hdr_ctype)
@@ -637,7 +640,6 @@ if (DEFINED SETMNTENT_HDR)
 endif()
 
 if (_hdr_rpcsvc_rquota)
-message ("== have rpcsvc rquota")
   # linux rpcsvc/rquota.h includes rpc/rpc.h
   set (CMAKE_REQUIRED_INCLUDES ${TIRPC_INCLUDE_DIRS})
   check_struct_has_member ("struct getquota_rslt" gqr_status
@@ -781,24 +783,8 @@ set (_inc_conflict__sys_quota__hdr_linux_quota 1)
 
 checkIncludeConflict (time.h sys/time.h _inc_conflict__hdr_time__sys_time)
 checkIncludeConflict (sys/quota.h linux/quota.h _inc_conflict__sys_quota__hdr_linux_quota)
-# check_source_compiles (C
-# "#include <time.h>
-# #include <sys/time.h>
-# int main (int argc, char *argv []) { return 0; }"
-#   _inc_conflict__hdr_time__sys_time)
-#
-# check_source_compiles (C
-# "#include <sys/quota.h>
-# #include <linux/quota.h>
-# int main (int argc, char *argv []) { return 0; }"
-#   _inc_conflict__sys_quota__hdr_linux_quota)
 
 check_symbol_exists (O_NOCTTY fcntl.h _const_O_NOCTTY)
-#if (_hdr_fcntl)
-#  set (CMAKE_EXTRA_INCLUDE_FILES <fcntl.h>)
-#endif()
-#const   O_NOCTTY
-#unset (CMAKE_EXTRA_INCLUDE_FILES)
 
 check_symbol_exists (IOCTL_STORAGE_CHECK_VERIFY2 winioctl.h
     _define_IOCTL_STORAGE_CHECK_VERIFY2)
@@ -872,15 +858,15 @@ if (_use_math STREQUAL "DI_TOMMATH")
     ${TOMMATH_LDFLAGS}
   )
 endif()
+set_target_properties (${DI_LIBNAME} PROPERTIES
+  VERSION ${CMAKE_PROJECT_VERSION}
+  SOVERSION ${CMAKE_PROJECT_VERSION}
+)
 
 # I don't know if this is needed.  windows works fine for me.
 if (WIN32)
   set_target_properties (${DI_LIBNAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
-set_target_properties (${DI_LIBNAME} PROPERTIES
-  VERSION ${CMAKE_PROJECT_VERSION}
-  SOVERSION ${CMAKE_PROJECT_VERSION}
-)
 
 #### executables
 

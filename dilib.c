@@ -1032,8 +1032,7 @@ checkDiskQuotas (di_data_t *di_data)
   gid = getegid ();
 #endif
 
-  for (i = 0; i < di_data->fscount; ++i)
-  {
+  for (i = 0; i < di_data->fscount; ++i) {
     di_disk_info_t        *dinfo;
 
     dinfo = &di_data->diskInfo [i];
@@ -1472,95 +1471,84 @@ static int
 diCompare (const di_opt_t *diopts, const char *sortType,
     const di_disk_info_t *data, unsigned int idx1, unsigned int idx2)
 {
-    int             rc;
-    int             sortOrder;
-    const char            *ptr;
-    const di_disk_info_t    *d1;
-    const di_disk_info_t    *d2;
+  int             rc;
+  int             sortOrder;
+  const char            *ptr;
+  const di_disk_info_t    *d1;
+  const di_disk_info_t    *d2;
 
-        /* reset sort order to the default start value */
-    sortOrder = DI_SORT_OPT_ASCENDING;
-    rc = 0;
+  /* reset sort order to the default start value */
+  sortOrder = DI_SORT_OPT_ASCENDING;
+  rc = 0;
 
-    d1 = & (data [idx1]);
-    d2 = & (data [idx2]);
+  d1 = & (data [idx1]);
+  d2 = & (data [idx2]);
 
-    ptr = sortType;
-    while (*ptr)
-    {
-      switch (*ptr)
-      {
-        case DI_SORT_OPT_NONE:
-        {
-            break;
-        }
-
-        case DI_SORT_OPT_MOUNT:
-        {
-            rc = strcoll (d1->strdata [DI_DISP_MOUNTPT], d2->strdata [DI_DISP_MOUNTPT]);
-            rc *= sortOrder;
-            break;
-        }
-
-        case DI_SORT_OPT_REVERSE:
-        {
-            sortOrder *= -1;
-            break;
-        }
-
-        case DI_SORT_OPT_FILESYSTEM:
-        {
-            rc = strcoll (d1->strdata [DI_DISP_FILESYSTEM], d2->strdata [DI_DISP_FILESYSTEM]);
-            rc *= sortOrder;
-            break;
-        }
-
-        case DI_SORT_OPT_TYPE:
-        {
-            rc = strcoll (d1->strdata [DI_DISP_FSTYPE], d2->strdata [DI_DISP_FSTYPE]);
-            rc *= sortOrder;
-            break;
-        }
-
-        case DI_SORT_OPT_AVAIL:
-        case DI_SORT_OPT_FREE:
-        case DI_SORT_OPT_TOTAL:
-        {
-          int   temp;
-
-          temp = 0;
-          switch (*ptr) {
-            case DI_SORT_OPT_AVAIL:
-            {
-              temp = dinum_cmp (&d1->values [DI_SPACE_AVAIL], &d2->values [DI_SPACE_AVAIL]);
-              break;
-            }
-            case DI_SORT_OPT_FREE:
-            {
-              temp = dinum_cmp (&d1->values [DI_SPACE_FREE], &d2->values [DI_SPACE_FREE]);
-              break;
-            }
-            case DI_SORT_OPT_TOTAL:
-            {
-              temp = dinum_cmp (&d1->values [DI_SPACE_TOTAL], &d2->values [DI_SPACE_TOTAL]);
-              break;
-            }
-          }
-
-          rc *= sortOrder;
+  ptr = sortType;
+  while (*ptr) {
+    switch (*ptr) {
+      case DI_SORT_OPT_NONE: {
           break;
-        }
-      } /* switch on sort type */
-
-      if (rc != 0)
-      {
-        return rc;
       }
 
-      ++ptr;
+      case DI_SORT_OPT_MOUNT: {
+          rc = strcoll (d1->strdata [DI_DISP_MOUNTPT], d2->strdata [DI_DISP_MOUNTPT]);
+          rc *= sortOrder;
+          break;
+      }
+
+      case DI_SORT_OPT_REVERSE: {
+          sortOrder *= -1;
+          break;
+      }
+
+      case DI_SORT_OPT_FILESYSTEM: {
+          rc = strcoll (d1->strdata [DI_DISP_FILESYSTEM], d2->strdata [DI_DISP_FILESYSTEM]);
+          rc *= sortOrder;
+          break;
+      }
+
+      case DI_SORT_OPT_TYPE: {
+          rc = strcoll (d1->strdata [DI_DISP_FSTYPE], d2->strdata [DI_DISP_FSTYPE]);
+          rc *= sortOrder;
+          break;
+      }
+
+      case DI_SORT_OPT_AVAIL:
+      case DI_SORT_OPT_FREE:
+      case DI_SORT_OPT_TOTAL: {
+        int   temp;
+
+        temp = 0;
+        switch (*ptr) {
+          case DI_SORT_OPT_AVAIL: {
+            temp = dinum_cmp (&d1->values [DI_SPACE_AVAIL], &d2->values [DI_SPACE_AVAIL]);
+            break;
+          }
+          case DI_SORT_OPT_FREE: {
+            temp = dinum_cmp (&d1->values [DI_SPACE_FREE], &d2->values [DI_SPACE_FREE]);
+            break;
+          }
+          case DI_SORT_OPT_TOTAL: {
+            temp = dinum_cmp (&d1->values [DI_SPACE_TOTAL], &d2->values [DI_SPACE_TOTAL]);
+            break;
+          }
+        }
+
+        rc *= sortOrder;
+        break;
+      }
+    } /* switch on sort type */
+
+    if (rc != 0)
+    {
+      return rc;
     }
 
-    return rc;
+    ++ptr;
+  }
+
+  return rc;
 }
 
 static void

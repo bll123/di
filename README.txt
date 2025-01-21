@@ -13,24 +13,29 @@ Version 5 beta
 Version 5 Roadmap (more or less)
 
 - done: move the totals processing into the main library.
+- done: finish the api, there's still a couple of routines to write
+- done: linux tirpc library
 - get all the basics working
-- finish the api, there's still a couple of routines to write
 - wiki documentation for the api
 - make the beta available to download
+- work on the test suite
 - get basic di working on all platforms I have access to.
 - check the cmake configuration against mkconfig.  check again. re-check.
-- apfs testing on macos
 - i have macos now, test quotas and nfs quotas there
-- test quota handling
-- test nfs quota handling
-- linux tirpc library
-- xfs quotas
-- dragonflybsd quotas
-- zfs testing on solaris
 - write the manual page for the library
 - re-write the readme, get ready for production release
 - wiki page updates and rewrite
 - production release
+
+Most of the following _should_ work...but I may have easily messed up
+the calculations.  The basic code structure hasn't changed.
+
+- apfs testing on macos
+- test quota handling
+- test nfs quota handling
+- xfs quotas
+- dragonflybsd quotas
+- zfs testing on solaris
 
 Version 5 beta Notes
 
