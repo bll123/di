@@ -1,5 +1,3 @@
-option-file dioptions.dat
-
 loadunit env-main
 loadunit env-systype
 loadunit env-cc
@@ -44,34 +42,26 @@ addldflag -fPIC
 # solaris will not link w/-fstack-protector, so it
 # can only be set when the gnu linker is in use.
 if UsingGNU_LD == _MKCONFIG_USING_GNU_LD Y && == _MKCONFIG_USING_GCC Y
- ifnotoption NO_PIE
-  # gcc hardening
-  # reference: wiki.debian.org/Hardening
-  addcflag -D_FORTIFY_SOURCE=2
-  addcflag -fstack-protector-strong
-  addcflag -fstack-protector-all
-  addldflag -fstack-protector-strong
-  addldflag -fstack-protector-all
-  addldflag -Wl,-z,relro
-  addldflag -Wl,-z,now
- else
-  addcflag -D_FORTIFY_SOURCE=0
- endif
+ # gcc hardening
+ # reference: wiki.debian.org/Hardening
+ addcflag -D_FORTIFY_SOURCE=2
+ addcflag -fstack-protector-strong
+ addcflag -fstack-protector-all
+ addldflag -fstack-protector-strong
+ addldflag -fstack-protector-all
+ addldflag -Wl,-z,relro
+ addldflag -Wl,-z,now
 endif
 # these confuse other compilers...make them CLANG only
 if UsingCLANG == _MKCONFIG_USING_CLANG Y
  addcflag -Werror,-Wunused-command-line-argument
- ifnotoption NO_PIE
-  # gcc hardening
-  # reference: wiki.debian.org/Hardening
-  addcflag -D_FORTIFY_SOURCE=2
-  addcflag -fstack-protector-strong
-  addcflag -fstack-protector-all
-  addldflag -fstack-protector-strong
-  addldflag -fstack-protector-all
- else
-  addcflag -D_FORTIFY_SOURCE=0
- endif
+ # gcc hardening
+ # reference: wiki.debian.org/Hardening
+ addcflag -D_FORTIFY_SOURCE=2
+ addcflag -fstack-protector-strong
+ addcflag -fstack-protector-all
+ addldflag -fstack-protector-strong
+ addldflag -fstack-protector-all
 endif
 
 pkg cflags libtirpc

@@ -2,8 +2,6 @@
 # Copyright 2006-2018 Brad Lanam, Walnut Creek, California USA
 # Copyright 2025 Brad Lanam, Pleasnt Hill, California USA
 #
-option-file dioptions.dat
-
 loadunit c-main
 loadunit c-include-conflict
 
@@ -273,19 +271,19 @@ else
   setint _enable_nls 0
 endif
 
-ifnotoption WINAPI
-  set _hdr_windows 0
-  set _hdr_winioctl 0
-  set _lib_CreateFile 0
-  set _lib_DeviceIoControl 0
-  set _lib_GetDiskFreeSpace 0
-  set _lib_GetDiskFreeSpaceEx 0
-  set _lib_GetDriveType 0
-  set _lib_GetLogicalDriveStrings 0
-  set _lib_GetVolumeInformation 0
-endif
+# ifnotoption WINAPI
+#   set _hdr_windows 0
+#   set _hdr_winioctl 0
+#   set _lib_CreateFile 0
+#   set _lib_DeviceIoControl 0
+#   set _lib_GetDiskFreeSpace 0
+#   set _lib_GetDiskFreeSpaceEx 0
+#   set _lib_GetDriveType 0
+#   set _lib_GetLogicalDriveStrings 0
+#   set _lib_GetVolumeInformation 0
+# endif
 
-option DI_USE_MATH
+# option DI_USE_MATH
 
 include
 

@@ -241,61 +241,6 @@ $(MKC_ENV_SHR):	$(MKC_ENV_SHR_CONF)
 ###
 # specific builds
 
-# This was tested using vc
-# Use:
-#     nmake MAKE=nmake windows
-#
-.PHONY: windows
-windows:
-	copy /y NUL: $(MKC_ENV)
-	-del config.h
-	copy /y /b NUL:+configs\config.ms.cl config.h
-	copy /y NUL: $(MKC_REQLIB)
-	$(MAKE) \
-		MAKE=nmake CC=cl LD=cl EXE_EXT=".exe" OBJ_EXT=".obj" \
-		DI_CFLAGS="$(DI_CFLAGS) -nologo -O2" \
-		LDFLAGS="-nologo -O2" di-programs
-
-# This was tested using cygwin
-.PHONY: windows-gcc
-windows-gcc:
-	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
-	@-$(RM) -f config.h mkconfig.cache mkc*.vars tests.done
-	$(CP) -f configs/config.cygwin.gcc config.h
-	@echo '-lintl' > $(MKC_REQLIB)
-	$(MAKE) \
-		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
-		LDFLAGS="-g -O2" di-programs
-
-.PHONY: windows-msys
-windows-msys:
-	MAKE=mingw32-make
-	> $(MKC_ENV)
-	-rm config.h
-	cp configs/config.mingw config.h
-	> $(MKC_REQLIB)
-	$(MAKE) \
-		MAKE=$(MAKE) \
-		CC=gcc \
-		EXE_EXT=".exe" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
-		LDFLAGS="-g -O2" di-programs
-
-.PHONY: windows-mingw
-windows-mingw:
-	MAKE=mingw32-make
-	copy /y NUL: $(MKC_ENV)
-	-del config.h
-	copy /y /b NUL:+configs\config.mingw config.h
-	copy /y NUL: $(MKC_REQLIB)
-	$(MAKE) \
-		MAKE=$(MAKE) \
-		CC=gcc LD=gcc \
-		EXE_EXT=".exe" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
-		LDFLAGS="-g -O2" mingw-di.exe
-
 .PHONY: os2-gcc
 os2-gcc:
 	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
