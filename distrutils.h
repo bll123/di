@@ -12,7 +12,7 @@ extern "C" {
 
 extern void * di_realloc (void *, Size_t);
 extern void di_trimchar (char *, int);
-char * stpecpy (char *dst, char end [0], const char *src);
+char * stpecpy (char *dst, char *end, const char *src);
 
 # if ! _lib_strdup
 extern char * strdup (const char *);

@@ -111,10 +111,10 @@
 #include "version.h"
 
 typedef struct {
-  unsigned int    *maxlen;
-  unsigned int    *scaleidx;
+  int             *maxlen;
+  int             *scaleidx;
   const char      **suffix;
-  unsigned int    *leftjust;
+  int             *leftjust;
   const char      **jsonident;
   char            **strdata;
 } di_disp_info_t;
@@ -254,12 +254,12 @@ di_display_data (void *di_data)
     totline = displinecount - 1;
   }
 
-  dispinfo.maxlen = malloc (sizeof (unsigned int) * fmtstrlen);
-  dispinfo.scaleidx = malloc (sizeof (unsigned int) * displinecount * fmtstrlen);
-  dispinfo.suffix = malloc (sizeof (char *) * displinecount * fmtstrlen);
-  dispinfo.leftjust = malloc (sizeof (unsigned int) * fmtstrlen);
-  dispinfo.jsonident = malloc (sizeof (char *) * fmtstrlen);
-  dispinfo.strdata = malloc (sizeof (char *) * displinecount * fmtstrlen);
+  dispinfo.maxlen = malloc (sizeof (int) * (Size_t) fmtstrlen);
+  dispinfo.scaleidx = malloc (sizeof (int) * (Size_t) displinecount * (Size_t) fmtstrlen);
+  dispinfo.suffix = malloc (sizeof (char *) * (Size_t) displinecount * (Size_t) fmtstrlen);
+  dispinfo.leftjust = malloc (sizeof (int) * (Size_t) fmtstrlen);
+  dispinfo.jsonident = malloc (sizeof (char *) * (Size_t) fmtstrlen);
+  dispinfo.strdata = malloc (sizeof (char *) * (Size_t) displinecount * (Size_t) fmtstrlen);
   strdata = dispinfo.strdata;
 
   for (i = 0; i < fmtstrlen; ++i) {
@@ -517,7 +517,7 @@ di_display_data (void *di_data)
         default: {
           dispinfo.leftjust [fmtcount] = 1;
           dispinfo.jsonident [fmtcount] = NULL;
-          temp [0] = fmt;
+          temp [0] = (char) fmt;
           temp [1] = '\0';
           strdata [dataidx] = strdup (temp);
           dispinfo.suffix [dataidx] = "";
@@ -547,8 +547,8 @@ di_display_data (void *di_data)
           if (* (dispinfo.suffix [dataidx])) {
             ++len;
           }
-          if (len > dispinfo.maxlen [j]) {
-            dispinfo.maxlen [j] = len;
+          if ((int) len > dispinfo.maxlen [j]) {
+            dispinfo.maxlen [j] = (int) len;
           }
         }
       }
@@ -696,7 +696,7 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
     temp = "";
     dataidx = fmtcount;
     if (csvout) {
-      tbuff [0] = fmt;
+      tbuff [0] = (char) fmt;
       tbuff [1] = '\0';
       temp = tbuff;
     }
@@ -823,7 +823,7 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
           break;
         }
         default: {
-          tbuff [0] = fmt;
+          tbuff [0] = (char) fmt;
           tbuff [1] = '\0';
           temp = tbuff;
           break;

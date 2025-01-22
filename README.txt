@@ -3,6 +3,8 @@ di Version 5.x beta
 Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
 
+The README will be replaced once 5.x reaches production status.
+
 Version 5.x beta
 
 - re-worked to have a library and proper api

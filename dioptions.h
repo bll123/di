@@ -32,13 +32,12 @@ typedef struct di_opt {
   di_strarr_t     ignore_list;
   di_strarr_t     include_list;
   char            zoneDisplay [MAXPATHLEN];
-  /* should always be <= 1024 */
-  /* should be 1, 512, 1000 or 1024 */
-  unsigned int    blockSize;
+  /* will be either 1000 or 1024 */
+  int             blockSize;
   int             scale;
   char            sortType [DI_SORT_TYPE_MAX];
   int             optval [DI_OPT_MAX];
-  unsigned int    exitFlag;
+  int             exitFlag;
   int             formatLen;
   int             errorCount;
   int             optidx;

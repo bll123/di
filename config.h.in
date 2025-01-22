@@ -199,6 +199,16 @@
 #cmakedefine01 _has_std_nfs_quotas
 #cmakedefine01 _enable_nls
 
+#define PREFIX "${PREFIX}"
+#define DI_USE_MATH ${DI_USE_MATH}
+
+#define DI_INTERNAL 0
+#define DI_GMP 1
+#define DI_TOMMATH 2
+/* _use_math can be over-ridden with DI_USE_MATH */
+#define _use_math ${_use_math}
+#define DI_LOCALE_DIR PREFIX "/share/locale"
+
 #ifndef MKC_STANDARD_DEFS
 # define MKC_STANDARD_DEFS 1
 # if ! _key_void
@@ -210,14 +220,7 @@
 # if ! _key_const
 #  define const
 # endif
-
 #endif /* MKC_STANDARD_DEFS */
-
-#define DI_INTERNAL 0
-#define DI_GMP 1
-#define DI_TOMMATH 2
-/* _use_math can be over-ridden with DI_USE_MATH */
-#define _use_math ${_use_math}
 
 #if _typ_statvfs_t
 # define Statvfs_t statvfs_t
@@ -284,9 +287,4 @@
 # endif
 #endif
 
-#define DI_LOCALE_DIR "${PREFIX}/share/locale"
-
-
 #endif /* INC_CONFIG_H */
-
-

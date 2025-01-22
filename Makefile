@@ -20,15 +20,9 @@ MKC_CONFDIR = mkc_config
 MKC_FILES = mkc_files
 MKC_OUTPUT = config.h
 MKC_ENV = $(MKC_PREFIX).env
-MKC_ENV_SHR = $(MKC_PREFIX)-shared.env
 
 MKC_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX).mkc
 MKC_ENV_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX)-env.mkc
-MKC_ENV_SHR_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX)-env-shared.mkc
-MKC_CONF_GETOPTN = $(MKC_CONFDIR)/$(MKC_PREFIX)-getoptn.mkc
-
-# for tests.done
-DC = gdc
 
 OBJ_EXT = .o
 EXE_EXT =
@@ -47,17 +41,25 @@ MV = mv
 RM = rm
 SED = sed
 TEST = test
+MSGFMT = msgfmt
 
 ###
 # installation options
 #
-prefix = /usr/local
-PREFIX = $(prefix)
+PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
+LIBDIR = $(PREFIX)/lib
 DATADIR = $(PREFIX)/share
 MANDIR = $(DATADIR)/man
 LOCALEDIR = $(DATADIR)/locale
 DI_VERSION = 5.0.0-beta-1
+
+INST_DIR = $(DESTDIR)$(PREFIX)
+INST_BINDIR = $(DESTDIR)$(BINDIR)
+INST_LIBDIR = $(DESTDIR)$(LIBDIR)
+INST_DATADIR = $(DESTDIR)$(DATADIR)
+INST_MANDIR = $(DESTDIR)$(MANDIR)
+INST_LOCALEDIR = $(DESTDIR)$(LOCALEDIR)
 
 ###
 # additional flags/libraries
@@ -103,6 +105,46 @@ switcher:
 	else \
 	  $(MAKE) mkc-$(TARGET); \
 	fi
+
+###
+# cleaning
+
+# clean temporary files
+.PHONY: clean
+tclean:
+	@-$(RM) -f w ww asan.* *.orig >/dev/null 2>&1; exit 0
+	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
+
+# leaves config.h
+.PHONY: clean
+clean:
+	@$(MAKE) tclean
+	@-$(RM) -f \
+		di libdi.* dimathtest getoptn_test \
+		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
+		$(MKC_ENV) config.h \
+		*.o *.obj $(MKC_FILES)/mkconfig.log \
+		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
+		$(MKC_FILES)/mkconfig.cache mkc*.vars \
+		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
+		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
+	@-test -d build && cmake --build build --target clean
+
+# mkc tests use this
+.PHONY: realclean
+realclean:
+	@$(MAKE) clean >/dev/null 2>&1
+	@-$(RM) -rf config.h \
+		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) \
+		>/dev/null 2>&1; exit 0
+
+.PHONY: distclean
+distclean:
+	@$(MAKE) clean >/dev/null 2>&1
+	@-$(RM) -rf tests.done test_di _mkconfig_runtests \
+		$(MKC_FILES) \
+		build \
+		>/dev/null 2>&1; exit 0
 
 ###
 # cmake
@@ -174,6 +216,7 @@ cmake-unix:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
+		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-S . -B $(BUILDDIR) -Werror=deprecated
 
@@ -185,6 +228,7 @@ cmake-windows:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
+		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-G "MSYS Makefiles" \
 		-S . -B $(BUILDDIR) -Werror=deprecated
@@ -226,17 +270,54 @@ mkc-test:		tests.done
 	./dimathtest
 	./getoptn_test
 
+.PHONY: mkc-install
+mkc-install:
+	$(MAKE) mkc-all
+	. ./$(MKC_ENV);$(MAKE) -e PREFIX=$(PREFIX) install-prog install-man
+
 ###
-# environment
+# installation
+
+.PHONY: build.po
+build-po:
+	-. ./$(MKC_ENV); \
+		(cd po >/dev/null && for i in *.po; do \
+		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
+		$(MSGFMT) -o $$j.mo $$i; \
+	done)
+
+.PHONY: install-po
+install-po: 	build-po
+	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
+	-(cd po >/dev/null && for i in *.po; do \
+		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
+		$(TEST) -d $(INST_LOCALEDIR)/$$j || \
+			$(MKDIR) $(INST_LOCALEDIR)/$$j; \
+		$(TEST) -d $(INST_LOCALEDIR)/$$j/LC_MESSAGES || \
+			$(MKDIR) $(INST_LOCALEDIR)/$$j/LC_MESSAGES; \
+		$(CP) -f $$j.mo $(INST_LOCALEDIR)/$$j/LC_MESSAGES/di.mo; \
+		$(RM) -f $$j.mo; \
+		done)
+
+.PHONY: install-prog
+install-prog:
+	$(TEST) -d $(INST_BINDIR) || $(MKDIR) -p $(INST_BINDIR)
+	$(TEST) -d $(INST_LIBDIR) || $(MKDIR) -p $(INST_LIBDIR)
+	$(CP) -f di$(EXE_EXT) $(INST_BINDIR)
+	$(CP) -f libdi$(SHLIB_EXT) $(INST_LIBDIR)
+	-$(MAKE) install-po
+
+.PHONY: install-man
+install-man:
+	-$(TEST) -d $(INST_MANDIR)/man1 || $(MKDIR) -p $(INST_MANDIR)/man1
+	$(CP) -f man/di.1 $(INST_MANDIR)/man1/$(MAN_TARGET)
+
+###
+# mkc environment
 
 $(MKC_ENV):	$(MKC_ENV_CONF)
 	@-$(RM) -f $(MKC_ENV) tests.done
 	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
-
-$(MKC_ENV_SHR):	$(MKC_ENV_SHR_CONF)
-	@-$(RM) -f $(MKC_ENV_SHR) tests.done
-	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh \
-		$(MKC_ENV_SHR_CONF)
 
 ###
 # specific builds
@@ -248,55 +329,6 @@ os2-gcc:
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
 		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
 		LDFLAGS="-g -O2 -Zexe" di.exe
-
-###
-# cleaning
-
-# clean temporary files
-.PHONY: clean
-tclean:
-	@-$(RM) -f w ww asan.* *.orig >/dev/null 2>&1; exit 0
-	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
-
-# leaves config.h
-.PHONY: clean
-clean:
-	@$(MAKE) tclean
-	@-$(RM) -f \
-		di libdi.* dimathtest getoptn_test \
-		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
-		$(MKC_ENV) config.h \
-		*.o *.obj $(MKC_FILES)/mkconfig.log \
-		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
-		$(MKC_FILES)/mkconfig.cache mkc*.vars \
-		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
-		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
-	@-test -d build && cmake --build build --target clean
-
-# mkc tests use this
-.PHONY: realclean
-realclean:
-	@$(MAKE) clean >/dev/null 2>&1
-	@-$(RM) -rf config.h \
-		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) \
-		>/dev/null 2>&1; exit 0
-
-.PHONY: distclean
-distclean:
-	@$(MAKE) clean >/dev/null 2>&1
-	@-$(RM) -rf tests.done test_di _mkconfig_runtests \
-		$(MKC_FILES) \
-		build \
-		>/dev/null 2>&1; exit 0
-
-###
-# installation
-
-.PHONY: install
-install-mkc:
-	$(MAKE) all
-#	. ./$(MKC_ENV);$(MAKE) -e PREFIX=$(PREFIX) \
-#		LOCALEDIR=$(LOCALEDIR) install
 
 ###
 # programs
@@ -345,7 +377,8 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 		-r $(MKC_REQLIB) \
 		-o di$(EXE_EXT) \
 		$(MAINOBJECTS) \
-		libdi$(SHLIB_EXT)
+		libdi$(SHLIB_EXT) \
+		-R $(LIBDIR)
 
 dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \

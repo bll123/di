@@ -85,7 +85,7 @@ static int  parseList (di_strarr_t *, char *);
 static void parseScaleValue (di_opt_t *diopts, char *ptr);
 static void processOptions (const char *, char *);
 static void processOptionsVal (const char *, void *, char *);
-static void setExitFlag (di_opt_t *, unsigned int);
+static void setExitFlag (di_opt_t *, int);
 
 static void
 processStringArgs (const char *progname, char *ptr, di_opt_t *diopts,
@@ -144,7 +144,7 @@ di_init_options (void)
   }
 
   diopts->formatString = DI_DEFAULT_FORMAT;
-  diopts->formatLen = strlen (diopts->formatString);
+  diopts->formatLen = (int) strlen (diopts->formatString);
   diopts->zoneDisplay [0] = '\0';
   diopts->ignore_list.count = 0;
   diopts->ignore_list.list = (char **) NULL;
@@ -261,7 +261,7 @@ di_get_options (int argc, char * argv [], di_opt_t *diopts)
 
   parseScaleValue (diopts, scalestr);
 
-  diopts->formatLen = strlen (diopts->formatString);
+  diopts->formatLen = (int) strlen (diopts->formatString);
   diopts->optidx = optidx;
 
   return diopts->exitFlag;
@@ -934,7 +934,7 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
 
 
 static void
-setExitFlag (di_opt_t *diopts, unsigned int exitFlag)
+setExitFlag (di_opt_t *diopts, int exitFlag)
 {
   if (exitFlag > diopts->exitFlag) {
     diopts->exitFlag = exitFlag;

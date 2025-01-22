@@ -110,7 +110,7 @@ static dinum_t scale_values [DI_SCALE_MAX];
 static void checkDiskInfo       (di_data_t *, int);
 static void checkDiskQuotas     (di_data_t *);
 static int  checkFileInfo       (di_data_t *);
-static int  getDiskSpecialInfo  (di_data_t *, unsigned int);
+static int  getDiskSpecialInfo  (di_data_t *, int);
 static void getDiskStatInfo     (di_data_t *);
 static void preCheckDiskInfo    (di_data_t *);
 
@@ -120,7 +120,7 @@ static int  isIgnoreFSType      (const char *);
 static int  isIgnoreSpecial     (const char *);
 static int  isIgnoreFS          (const char *, const char *);
 static int  checkForUUID        (const char *);
-static int  diCompare           (const di_opt_t *, const char *sortType, const di_disk_info_t *, unsigned int, unsigned int);
+static int  diCompare           (const di_opt_t *, const char *sortType, const di_disk_info_t *, int, int);
 static void checkZone (di_disk_info_t *, di_zone_info_t *, di_opt_t *);
 static void di_sort_disk_info (di_opt_t *, di_disk_info_t *, int, const char *, int);
 static void init_scale_values (di_opt_t *);
@@ -519,9 +519,9 @@ di_disp_scaled (void *tdi_data, char *buff, long sz, int infoidx,
 
   dval = di_get_scaled (di_data, infoidx, scaleidx, validxA, validxB, validxC);
   if (scaleidx == DI_SCALE_BYTE) {
-    Snprintf1 (buff, sz, "%.0f", dval);
+    Snprintf1 (buff, (Size_t) sz, "%.0f", dval);
   } else {
-    Snprintf1 (buff, sz, "%.1f", dval);
+    Snprintf1 (buff, (Size_t) sz, "%.1f", dval);
   }
 }
 
@@ -565,7 +565,7 @@ di_disp_perc (void *tdi_data, char *buff, long sz, int infoidx,
   }
 
   dval = di_get_perc (di_data, infoidx, validxA, validxB, validxC, validxD, validxE);
-  Snprintf1 (buff, sz, "%.0f", dval);
+  Snprintf1 (buff, (Size_t) sz, "%.0f", dval);
 }
 
 extern int
@@ -771,7 +771,7 @@ getDiskStatInfo (di_data_t *di_data)
  */
 
 static int
-getDiskSpecialInfo (di_data_t *di_data, unsigned int dontResolveSymlink)
+getDiskSpecialInfo (di_data_t *di_data, int dontResolveSymlink)
 {
   int         i;
   struct stat statBuf;
@@ -1440,10 +1440,10 @@ void
 di_sort_disk_info (di_opt_t *diopts, di_disk_info_t *data, int count,
     const char *sortType, int sidx)
 {
-  unsigned int  tempIndex;
-  int           gap;
-  int           j;
-  int           i;
+  int     tempIndex;
+  int     gap;
+  int     j;
+  int     i;
 
   if (count <= 1) {
     return;
@@ -1474,7 +1474,7 @@ di_sort_disk_info (di_opt_t *diopts, di_disk_info_t *data, int count,
 
 static int
 diCompare (const di_opt_t *diopts, const char *sortType,
-    const di_disk_info_t *data, unsigned int idx1, unsigned int idx2)
+    const di_disk_info_t *data, int idx1, int idx2)
 {
   int             rc;
   int             sortOrder;

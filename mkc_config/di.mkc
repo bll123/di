@@ -283,16 +283,26 @@ endif
 #   set _lib_GetVolumeInformation 0
 # endif
 
-# option DI_USE_MATH
+env PREFIX quote
+env DI_USE_MATH
+
 
 include
 
 #define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
-#if defined (DI_USE_MATH)
-# define _use_math DI_USE_MATH
+#if ! defined (DI_USE_MATH)
+# define DI_USE_MATH DI_INTERNAL
+# if defined (_pkg_libs_libtommath)
+#  define DI_USE_MATH DI_TOMMATH
+# endif
+# if defined (_pkg_libs_gmp)
+#  define DI_USE_MATH DI_GMP
+# endif
 #endif
+#define _use_math DI_USE_MATH
+#define DI_LOCALE_DIR PREFIX "/share/locale"
 
 #if _typ_statvfs_t
 # define Statvfs_t statvfs_t

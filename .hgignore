@@ -9,7 +9,7 @@ Archive
 \.cache$
 ^build
 ^config\.h$
-^di
+^di$
 ^di\.env
 ^di\.reqlibs
 \.dylib$
