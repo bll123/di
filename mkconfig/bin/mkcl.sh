@@ -192,7 +192,8 @@ for f in $@ $olibs; do
       tf=$f
       dosubst tf '-L' ''
       if [ ! -d "$tf" ]; then
-        puts "## unable to locate dir $tf"
+        # puts "## unable to locate dir $tf (-L)"
+        :
       else
         addlibpath $tf
       fi
@@ -205,7 +206,8 @@ for f in $@ $olibs; do
       dosubst tf '-R' ''
       dosubst tf '-rpath' ''
       if [ ! -d "$tf" ]; then
-        puts "## unable to locate dir $tf"
+        # puts "## unable to locate dir $tf (-R)"
+        :
       else
         addrunpath $tf
       fi
@@ -250,14 +252,15 @@ for f in $@ $olibs; do
         addlib "-l$f"
       elif [ $isrpath -eq 1 ]; then
         if [ ! -d "$f" ]; then
-          puts "## unable to locate dir $f"
-          grc=1
+          # puts "## unable to locate dir $f (isrpath)"
+          :
+          # grc=1
         else
           addrunpath $f
         fi
       elif [ $ispath -eq 1 ]; then
         if [ ! -d "$f" ]; then
-          puts "## unable to locate dir $f"
+          puts "## unable to locate dir $f (ispath)"
           grc=1
         else
           addlibpath $f

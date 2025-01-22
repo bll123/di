@@ -3,7 +3,7 @@ di Version 5.x beta
 Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
 
-The README will be replaced once 5.x reaches production status.
+This README will be replaced once 5.x reaches production status.
 
 Version 5.x beta
 
@@ -18,7 +18,7 @@ Version 5 Roadmap (more or less)
 - done: finish the api, there's still a couple of routines to write
 - done: linux tirpc library (nfs quotas)
 - get all the basics working
-- get installation working
+- done: get installation working
 - wiki documentation for the api
 - make the beta available to download
 - work on the test suite

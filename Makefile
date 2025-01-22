@@ -122,11 +122,9 @@ clean:
 	@-$(RM) -f \
 		di libdi.* dimathtest getoptn_test \
 		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
-		$(MKC_ENV) config.h \
-		*.o *.obj $(MKC_FILES)/mkconfig.log \
-		tests.done $(MKC_FILES)/_tmp_mkconfig tests.d/chksh* \
-		$(MKC_FILES)/mkconfig.cache mkc*.vars \
-		$(MKC_FILES)/mkconfig.reqlibs $(MKC_FILES)/mkc_compile.log \
+		*.o *.obj \
+		$(MKC_FILES)/mkc_compile.log \
+		tests.done tests.d/chksh* \
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
 	@-test -d build && cmake --build build --target clean
 
@@ -135,7 +133,8 @@ clean:
 realclean:
 	@$(MAKE) clean >/dev/null 2>&1
 	@-$(RM) -rf config.h \
-		$(MKC_ENV) $(MKC_ENV_SHR) $(MKC_REQLIB) \
+		$(MKC_ENV) $(MKC_REQLIB) \
+		$(MKC_FILES) tests.d/chksh* \
 		>/dev/null 2>&1; exit 0
 
 .PHONY: distclean
