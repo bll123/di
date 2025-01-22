@@ -2,7 +2,7 @@
 #  di makefile - C
 #
 #  Copyright 2001-2018 Brad Lanam Walnut Creek CA, USA
-#  Copyright 2023 Brad Lanam, Pleasant Hill, CA
+#  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
 DI_VERSION = 4.99.0
@@ -20,13 +20,11 @@ BUILDDIR = build
 # DI_USE_MATH = DI_INTERNAL
 
 # for mkconfig
-MKC_PREFIX = di
 MKC_CONFDIR = mkc_config
 MKC_FILES = mkc_files
-MKC_ENV = $(MKC_PREFIX).env
-
-MKC_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX).mkc
-MKC_ENV_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX)-env.mkc
+MKC_ENV = di.env
+MKC_CONF = $(MKC_CONFDIR)/di.mkc
+MKC_ENV_CONF = $(MKC_CONFDIR)/di-env.mkc
 
 OBJ_EXT = .o
 EXE_EXT =
@@ -69,12 +67,6 @@ INST_SHAREDIR = $(DESTDIR)$(SHAREDIR)
 INST_PKGCDIR = $(DESTDIR)$(PKGCDIR)
 INST_MANDIR = $(DESTDIR)$(MANDIR)
 INST_LOCALEDIR = $(DESTDIR)$(LOCALEDIR)
-
-###
-# additional flags/libraries
-#
-DI_SHARED =
-DI_CFLAGS =
 
 ###
 # mkconfig variables
@@ -378,7 +370,7 @@ os2-gcc:
 	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
 	$(MAKE) MKCONFIG_TYPE=perl \
 		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
-		DI_CFLAGS="$(DI_CFLAGS) -g -O2" \
+		CFLAGS="$(CFLAGS) -g -O2" \
 		LDFLAGS="-g -O2 -Zexe" di.exe
 
 ###
@@ -445,24 +437,11 @@ getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT) distrutils$(OBJ_EXT)
 		getoptn_test$(OBJ_EXT) \
 		distrutils$(OBJ_EXT)
 
-# for ms cl
-#di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
-#	$(LD) -Fedi$(EXE_EXT) $(MAINOBJECTS) $(LIBOBJECTS)
-
-mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
-	$(CC) -o mingw-di$(EXE_EXT) \
-		$(DI_CFLAGS) $(LDFLAGS) $(LIBOBJECTS) $(LIBS)
-
 ###
 # objects
 
 .c$(OBJ_EXT):
-	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile $(MKC_ECHO) \
-		$(DI_SHARED) $(DI_CFLAGS) $<
-
-# for ms cl
-#.c$(OBJ_EXT):
-#	$(CC) -c $(DI_SHARED) $(DI_CFLAGS) $<
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile $(MKC_ECHO) $<
 
 di$(OBJ_EXT):		di.c
 
@@ -489,7 +468,7 @@ getoptn$(OBJ_EXT):	getoptn.c
 getoptn_test$(OBJ_EXT):	getoptn.c
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-compile $(MKC_ECHO) \
-		-DTEST_GETOPTN=1 $(DI_CFLAGS) \
+		-DTEST_GETOPTN=1 \
 		-o getoptn_test$(OBJ_EXT) getoptn.c
 
 ###

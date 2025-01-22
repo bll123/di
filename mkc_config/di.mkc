@@ -288,7 +288,6 @@ env DI_VERSION quote
 env DI_RELEASE_STATUS quote
 env DI_USE_MATH
 
-
 include
 
 #define DI_LOCALE_DIR PREFIX "/share/locale"

@@ -1,6 +1,4 @@
-/*
- * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
- */
+/* Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA */
 
 #ifndef INC_OPTIONS_H
 #define INC_OPTIONS_H

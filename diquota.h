@@ -1,3 +1,5 @@
+/* Copyright 2025 Brad Lanam Pleasant Hill CA */
+
 #ifndef INC_DIQUOTA_H
 #define INC_DIQUOTA_H
 

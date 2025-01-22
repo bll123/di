@@ -1,3 +1,5 @@
+/* Copyright 2025 Brad Lanam Pleasant Hill CA */
+
 #ifndef INC_DIINTERNAL_H
 #define INC_DIINTERNAL_H
 
