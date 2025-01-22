@@ -7,9 +7,7 @@ cmake_minimum_required (VERSION 3.10)
 set (CMAKE_C_COMPILER_WORKS 1)
 set (CMAKE_CXX_COMPILER_WORKS 1)
 
-set (DI_BUILD_VERS "5.0.0")
-project (DI VERSION ${DI_BUILD_VERS})
-
+project (DI VERSION ${DI_VERSION})
 option (BUILD_SHARED_LIBS "Build dynamic library" ON)
 
 set (default_build_type "Release")
@@ -125,6 +123,7 @@ endif()
 #### system specific compile options
 
 if (NOT WIN32)
+  SET (CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR} ${CMAKE_INSTLAL_LIBDIR})
   if (NOT APPLE)
 #    SET (CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR} "\${ORIGIN}")
   endif()
@@ -869,8 +868,8 @@ if (_use_math STREQUAL "DI_TOMMATH")
   )
 endif()
 set_target_properties (${DI_LIBNAME} PROPERTIES
-  VERSION ${CMAKE_PROJECT_VERSION}
-  SOVERSION ${CMAKE_PROJECT_VERSION}
+  VERSION ${DI_LIBVERSION}
+  SOVERSION ${DI_SOVERSION}
 )
 
 # I don't know if this is needed.  windows works fine for me.
@@ -932,6 +931,9 @@ target_link_libraries (getoptn_test PRIVATE
 
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 
+# need to build the .mo files
+
+
 #### install
 
 install (TARGETS ${DI_LIBNAME}
@@ -952,11 +954,14 @@ install (FILES di.h
 install (FILES man/di.1
   DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
 )
-install (FILES man/libdi.3
-  DESTINATION "${CMAKE_INSTALL_MANDIR}/man3"
-)
+# does not yet exist
+#install (FILES man/libdi.3
+#  DESTINATION "${CMAKE_INSTALL_MANDIR}/man3"
+#)
 
 install (FILES
   ${CMAKE_BINARY_DIR}/di.pc
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )
+
+# need to install the .mo files

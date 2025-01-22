@@ -200,14 +200,17 @@
 #cmakedefine01 _enable_nls
 
 #define PREFIX "${PREFIX}"
+#define DI_VERSION "${DI_VERSION}"
+#define DI_RELEASE_STATUS "${DI_RELEASE_STATUS}"
 #define DI_USE_MATH ${DI_USE_MATH}
+
+#define DI_LOCALE_DIR PREFIX "/share/locale"
 
 #define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
 /* _use_math can be over-ridden with DI_USE_MATH */
 #define _use_math ${_use_math}
-#define DI_LOCALE_DIR PREFIX "/share/locale"
 
 #ifndef MKC_STANDARD_DEFS
 # define MKC_STANDARD_DEFS 1

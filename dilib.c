@@ -75,7 +75,6 @@
 #include "diquota.h"
 #include "dioptions.h"
 #include "distrutils.h"
-#include "version.h"
 
 #if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
@@ -249,7 +248,7 @@ di_get_all_disk_info (void *tdi_data)
   di_data->zoneInfo = di_initialize_zones ();
 
   if (debug > 0) {
-    printf ("di version %s\n", DI_VERSION);
+    printf ("di version %s %s\n", DI_VERSION, DI_RELEASE_STATUS);
   }
 
   /* main processing */

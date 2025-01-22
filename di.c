@@ -108,7 +108,6 @@
 #include "di.h"
 #include "disystem.h"
 #include "distrutils.h"
-#include "version.h"
 
 typedef struct {
   int             *maxlen;
@@ -169,7 +168,8 @@ main (int argc, char * argv [])
         usage ();
       }
       if (exitflag == DI_EXIT_VERS) {
-        fprintf (stdout, DI_GT ("di version %s\n"), DI_VERSION);
+        fprintf (stdout, DI_GT ("di version %s %s\n"),
+            DI_VERSION, DI_RELEASE_STATUS);
       }
       di_cleanup (di_data);
       exit (0);

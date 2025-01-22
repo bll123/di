@@ -284,10 +284,14 @@ endif
 # endif
 
 env PREFIX quote
+env DI_VERSION quote
+env DI_RELEASE_STATUS quote
 env DI_USE_MATH
 
 
 include
+
+#define DI_LOCALE_DIR PREFIX "/share/locale"
 
 #define DI_INTERNAL 0
 #define DI_GMP 1
@@ -302,7 +306,6 @@ include
 # endif
 #endif
 #define _use_math DI_USE_MATH
-#define DI_LOCALE_DIR PREFIX "/share/locale"
 
 #if _typ_statvfs_t
 # define Statvfs_t statvfs_t

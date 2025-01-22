@@ -5,6 +5,11 @@
 #  Copyright 2023 Brad Lanam, Pleasant Hill, CA
 #
 
+DI_VERSION = 4.99.0
+DI_LIBVERSION = 4.99.0
+DI_SOVERSION = 4
+DI_RELEASE_STATUS = beta
+
 # for cmake
 CMAKE_REQ_MAJ_VERSION=3
 CMAKE_REQ_MIN_VERSION=10
@@ -18,7 +23,6 @@ BUILDDIR = build
 MKC_PREFIX = di
 MKC_CONFDIR = mkc_config
 MKC_FILES = mkc_files
-MKC_OUTPUT = config.h
 MKC_ENV = $(MKC_PREFIX).env
 
 MKC_CONF = $(MKC_CONFDIR)/$(MKC_PREFIX).mkc
@@ -44,20 +48,25 @@ TEST = test
 MSGFMT = msgfmt
 
 ###
-# installation options
+# installation locations
+#  the cmake install only uses PREFIX
 #
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
-LIBDIR = $(PREFIX)/lib
-DATADIR = $(PREFIX)/share
-MANDIR = $(DATADIR)/man
-LOCALEDIR = $(DATADIR)/locale
-DI_VERSION = 5.0.0-beta-1
+LIBNM = lib
+LIBDIR = $(PREFIX)/$(LIBNM)
+INCDIR = $(PREFIX)/include
+PKGCDIR = $(LIBDIR)/pkgconfig
+SHAREDIR = $(PREFIX)/share
+MANDIR = $(SHAREDIR)/man
+LOCALEDIR = $(SHAREDIR)/locale
 
 INST_DIR = $(DESTDIR)$(PREFIX)
+INST_INCDIR = $(DESTDIR)$(INCDIR)
 INST_BINDIR = $(DESTDIR)$(BINDIR)
 INST_LIBDIR = $(DESTDIR)$(LIBDIR)
-INST_DATADIR = $(DESTDIR)$(DATADIR)
+INST_SHAREDIR = $(DESTDIR)$(SHAREDIR)
+INST_PKGCDIR = $(DESTDIR)$(PKGCDIR)
 INST_MANDIR = $(DESTDIR)$(MANDIR)
 INST_LOCALEDIR = $(DESTDIR)$(LOCALEDIR)
 
@@ -139,7 +148,7 @@ realclean:
 
 .PHONY: distclean
 distclean:
-	@$(MAKE) clean >/dev/null 2>&1
+	@$(MAKE) realclean >/dev/null 2>&1
 	@-$(RM) -rf tests.done test_di _mkconfig_runtests \
 		$(MKC_FILES) \
 		build \
@@ -215,6 +224,10 @@ cmake-unix:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
+		-DDI_VERSION:STATIC=$(DI_VERSION) \
+		-DDI_LIBVERSION:STATIC=$(DI_LIBVERSION) \
+		-DDI_SOVERSION:STATIC=$(DI_SOVERSION) \
+		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
 		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-S . -B $(BUILDDIR) -Werror=deprecated
@@ -227,6 +240,10 @@ cmake-windows:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
+		-DDI_VERSION:STATIC=$(DI_VERSION) \
+		-DDI_LIBVERSION:STATIC=$(DI_LIBVERSION) \
+		-DDI_SOVERSION:STATIC=$(DI_SOVERSION) \
+		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
 		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-G "MSYS Makefiles" \
@@ -258,11 +275,21 @@ mkc-all: mkc-sh
 
 .PHONY: mkc-sh
 mkc-sh:	$(MKC_ENV)
-	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=sh di-programs
+	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=sh \
+		DI_VERSION=$(DI_VERSION) \
+		DI_LIBVERSION=$(DI_LIBVERSION) \
+		DI_SOVERSION=$(DI_SOVERSION) \
+		DI_RELEASE_STATUS=$(DI_RELEASE_STATUS) \
+                di-programs
 
 .PHONY: mkc-perl
 mkc-perl:	$(MKC_ENV)
-	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=perl di-programs
+	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=perl \
+		DI_VERSION=$(DI_VERSION) \
+		DI_LIBVERSION=$(DI_LIBVERSION) \
+		DI_SOVERSION=$(DI_SOVERSION) \
+		DI_RELEASE_STATUS=$(DI_RELEASE_STATUS) \
+                di-programs
 
 .PHONY: test
 mkc-test:		tests.done
@@ -272,7 +299,7 @@ mkc-test:		tests.done
 .PHONY: mkc-install
 mkc-install:
 	$(MAKE) mkc-all
-	. ./$(MKC_ENV);$(MAKE) -e PREFIX=$(PREFIX) install-prog install-man
+	. ./$(MKC_ENV);$(MAKE) -e PREFIX=$(PREFIX) install-di install-man
 
 ###
 # installation
@@ -298,13 +325,41 @@ install-po: 	build-po
 		$(RM) -f $$j.mo; \
 		done)
 
-.PHONY: install-prog
-install-prog:
+.PHONY: install-pc
+installpc:
+	$(TEST) -d $(INST_PKGCDIR) || $(MKDIR) -p $(INST_PKGCDIR)
+	$(CAT) di.pc.in | \
+	  sed -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
+	      -e 's,@CMAKE_INSTALL_FULL_INCLUDEDIR@,$(INCLUDEDIR),g' \
+	      -e 's,@CMAKE_INSTALL_FULL_LIBDIR@,$(LIBDIR),g' \
+	  > $(INST_PKGCDIR)/di.pc
+
+.PHONY: install-di
+install-di:
 	$(TEST) -d $(INST_BINDIR) || $(MKDIR) -p $(INST_BINDIR)
 	$(TEST) -d $(INST_LIBDIR) || $(MKDIR) -p $(INST_LIBDIR)
+	$(TEST) -d $(INST_INCDIR) || $(MKDIR) -p $(INST_INCDIR)
 	$(CP) -f di$(EXE_EXT) $(INST_BINDIR)
-	$(CP) -f libdi$(SHLIB_EXT) $(INST_LIBDIR)
+	$(CP) -f di.h $(INST_INCDIR)
 	-$(MAKE) install-po
+	$(MAKE) install-man
+	@sym=T ; \
+	case `uname -s` in \
+	  Darwin) \
+            libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
+            ;; \
+          CYGWIN*|MINGW*) \
+	    libnm=libdi$(SHLIB_EXT) ; \
+	    sym=F ; \
+	    ;; \
+	  *) \
+            libnm=libdi$(SHLIB_EXT).$(DI_LIBVERSION) ; \
+            ;; \
+	esac ; \
+	$(CP) -f libdi$(SHLIB_EXT) $(INST_LIBDIR)/$${libnm} ; \
+	if [ $$sym = T ]; then \
+	  (cd $(INST_LIBDIR); $(LN) -sf $${libnm} libdi$(SHLIB_EXT)) ; \
+	fi
 
 .PHONY: install-man
 install-man:
@@ -412,47 +467,29 @@ mingw-di$(EXE_EXT):	$(MAINOBJECTS) $(LIBOBJECTS)
 #.c$(OBJ_EXT):
 #	$(CC) -c $(DI_SHARED) $(DI_CFLAGS) $<
 
-# diinternal.h: config.h disystem.h di.h dimath.h dioptions.h
-# dioptions.h: disystem.h
-# diquota.h: disystem.h dimath.h
-# dizone.h: disystem.h
+di$(OBJ_EXT):		di.c
 
-di$(OBJ_EXT):		di.c config.h di.h disystem.h distrutils.h version.h
+didiskutil$(OBJ_EXT):	didiskutil.c
 
-didiskutil$(OBJ_EXT):	didiskutil.c config.h di.h disystem.h diinternal.h \
-				distrutils.h dimath.h dimntopt.h \
-				dioptions.h
+digetentries$(OBJ_EXT):	digetentries.c
 
-digetentries$(OBJ_EXT):	digetentries.c config.h di.h disystem.h diinternal.h \
-				distrutils.h dimntopt.h \
-				dimath.h dioptions.h
+digetinfo$(OBJ_EXT):	digetinfo.c
 
-digetinfo$(OBJ_EXT):	digetinfo.c config.h di.h disystem.h diinternal.h \
-				dimntopt.h \
-				dimath.h dioptions.h
+dilib$(OBJ_EXT):	dilib.c
 
-dilib$(OBJ_EXT):	dilib.c config.h di.h disystem.h diinternal.h \
-				dizone.h diquota.h dioptions.h version.h \
-                                dimath.h
+dimathtest$(OBJ_EXT):	dimathtest.c
 
-dimathtest$(OBJ_EXT):	dimathtest.c config.h dimath.h
+dioptions$(OBJ_EXT):	dioptions.c
 
-dioptions$(OBJ_EXT):	dioptions.c config.h di.h diinternal.h distrutils.h \
-				getoptn.h dioptions.h version.h \
-				disystem.h dimath.h
+diquota$(OBJ_EXT):	diquota.c
 
-diquota$(OBJ_EXT):	diquota.c config.h di.h diquota.h \
-				dimath.h diinternal.h \
-				disystem.h dioptions.h
+distrutils$(OBJ_EXT):	distrutils.c
 
-distrutils$(OBJ_EXT):	distrutils.c config.h distrutils.h
+dizone$(OBJ_EXT):	dizone.c
 
-dizone$(OBJ_EXT):	dizone.c config.h di.h dizone.h \
-				disystem.h
+getoptn$(OBJ_EXT):	getoptn.c
 
-getoptn$(OBJ_EXT):	getoptn.c config.h distrutils.h getoptn.h
-
-getoptn_test$(OBJ_EXT):	getoptn.c config.h distrutils.h getoptn.h
+getoptn_test$(OBJ_EXT):	getoptn.c
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-compile $(MKC_ECHO) \
 		-DTEST_GETOPTN=1 $(DI_CFLAGS) \
@@ -491,3 +528,41 @@ test-env:
 	@echo "make: $(MAKE)"
 
 # DO NOT DELETE
+
+di$(OBJ_EXT): config.h
+di$(OBJ_EXT):   di.h disystem.h
+di$(OBJ_EXT):   distrutils.h
+didiskutil$(OBJ_EXT): config.h
+didiskutil$(OBJ_EXT):   di.h disystem.h
+didiskutil$(OBJ_EXT):   diinternal.h
+didiskutil$(OBJ_EXT): dimath.h  dioptions.h distrutils.h
+didiskutil$(OBJ_EXT): dimntopt.h
+digetentries$(OBJ_EXT): config.h
+digetentries$(OBJ_EXT):  di.h disystem.h
+digetentries$(OBJ_EXT):  diinternal.h dimath.h
+digetentries$(OBJ_EXT):  dioptions.h distrutils.h dimntopt.h
+digetinfo$(OBJ_EXT): config.h
+digetinfo$(OBJ_EXT):   di.h disystem.h
+digetinfo$(OBJ_EXT):   diinternal.h
+digetinfo$(OBJ_EXT): dimath.h  dioptions.h dimntopt.h
+dilib$(OBJ_EXT): config.h
+dilib$(OBJ_EXT): di.h disystem.h   dimath.h
+dilib$(OBJ_EXT):  diinternal.h dioptions.h dizone.h diquota.h
+dilib$(OBJ_EXT): distrutils.h
+dimathtest$(OBJ_EXT): config.h
+dimathtest$(OBJ_EXT):   dimath.h
+dioptions$(OBJ_EXT): config.h
+dioptions$(OBJ_EXT):   di.h diinternal.h
+dioptions$(OBJ_EXT): disystem.h   dimath.h
+dioptions$(OBJ_EXT):  dioptions.h distrutils.h getoptn.h
+diquota$(OBJ_EXT): config.h
+diquota$(OBJ_EXT):   di.h
+diquota$(OBJ_EXT): dimath.h   diquota.h
+diquota$(OBJ_EXT): disystem.h  diinternal.h dioptions.h
+diquota$(OBJ_EXT): distrutils.h
+distrutils$(OBJ_EXT): config.h
+distrutils$(OBJ_EXT):  distrutils.h
+dizone$(OBJ_EXT): config.h di.h dizone.h disystem.h
+dizone$(OBJ_EXT):  distrutils.h
+getoptn$(OBJ_EXT): config.h
+getoptn$(OBJ_EXT):  distrutils.h getoptn.h

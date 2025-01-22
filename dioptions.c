@@ -40,7 +40,6 @@
 #include "distrutils.h"
 #include "getoptn.h"
 #include "dioptions.h"
-#include "version.h"
 
 struct pa_tmp {
   di_opt_t        *diopts;
