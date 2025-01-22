@@ -174,12 +174,7 @@ cmake-sanitize:
 .PHONY: cmake-all
 cmake-all:
 	@case $$(uname -s) in \
-	  CYGWIN*) \
-	    COMP=$(CC) \
-	    $(MAKE) cmake-windows; \
-	    $(MAKE) cmake-build; \
-            ;; \
-	  MINGW*) \
+	  CYGWIN*|MSYS*|MINGW*) \
 	    COMP=$(CC) \
 	    $(MAKE) cmake-windows; \
 	    $(MAKE) cmake-build; \
@@ -326,12 +321,13 @@ install-po: 	build-po
 		done)
 
 .PHONY: install-pc
-installpc:
+install-pc:
 	$(TEST) -d $(INST_PKGCDIR) || $(MKDIR) -p $(INST_PKGCDIR)
 	$(CAT) di.pc.in | \
 	  sed -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
-	      -e 's,@CMAKE_INSTALL_FULL_INCLUDEDIR@,$(INCLUDEDIR),g' \
+	      -e 's,@CMAKE_INSTALL_FULL_INCLUDEDIR@,$(INCDIR),g' \
 	      -e 's,@CMAKE_INSTALL_FULL_LIBDIR@,$(LIBDIR),g' \
+	      -e 's,@DI_VERSION@,$(DI_VERSION),g' \
 	  > $(INST_PKGCDIR)/di.pc
 
 .PHONY: install-di
@@ -343,12 +339,13 @@ install-di:
 	$(CP) -f di.h $(INST_INCDIR)
 	-$(MAKE) install-po
 	$(MAKE) install-man
+	$(MAKE) install-pc
 	@sym=T ; \
 	case `uname -s` in \
 	  Darwin) \
             libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
             ;; \
-          CYGWIN*|MINGW*) \
+          CYGWIN*|MSYS*|MINGW*) \
 	    libnm=libdi$(SHLIB_EXT) ; \
 	    sym=F ; \
 	    ;; \

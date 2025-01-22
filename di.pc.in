@@ -4,7 +4,7 @@ libdir=@CMAKE_INSTALL_FULL_LIBDIR@
 
 Name: libdi
 Description: Disk Information Library
-Version: @DI_BUILD_VERS@
+Version: @DI_VERSION@
 URL: https://sourceforge.net/project/di/
 Libs: -L${libdir} -ldi
 Cflags: -I${includedir}
