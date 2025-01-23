@@ -22,8 +22,8 @@ DESCRIPTION
 
 DOCUMENTATION
 
-  wiki: https://sourceforge.net/p/di-diskinfo/wiki/Home/
-  Change Log: https://sourceforge.net/p/di-diskinfo/wiki/ChangeLog
+  wiki: https://sourceforge.net/p/diskinfo-di/wiki/Home/
+  Change Log: https://sourceforge.net/p/diskinfo-di/wiki/ChangeLog
 
 INSTALLATION
 
@@ -57,7 +57,7 @@ BUG REPORTS
       mkconfig: mkc_files/mkconfig.log, mkc_files/mkconfig_env.log,
                 mkc_files/mkc_compile.log, di.env, and config.h
 
-    Open a ticket at : https://sourceforge.net/p/di-diskinfo/tickets/
+    Open a ticket at : https://sourceforge.net/p/diskinfo-di/tickets/
     Or e-mail : brad.lanam.di_at_gmail.com
 
 REQUIREMENTS

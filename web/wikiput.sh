@@ -4,10 +4,10 @@
 #
 
 sfuser=bll123
-project=di-diskinfo
+project=diskinfo-di
 baseurl=https://sourceforge.net/rest/p/${project}/wiki
 accessurl=${baseurl}/has_access
-useragent=libmp4tag-wikiput.sh
+useragent=di-wikiput.sh
 cookiejar=tmp/cookiejar.txt
 bearer=""
 tmpfile=tmp/wiki-tmp.txt
@@ -217,5 +217,5 @@ case $1 in
     ;;
 esac
 
-rm -f ${tmpfile} ${filelist} ${cookiejar}
+# rm -f ${tmpfile} ${filelist} ${cookiejar}
 exit 0

@@ -18,7 +18,6 @@ currently be retrieved are defined in `di.h`.
     #include "di.h"
 
     int   optval;
-    int   option
 
     optval = di_check_option (void *di_data, int option)
 

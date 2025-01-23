@@ -20,11 +20,11 @@ RCS, and now Mercurial.  My standard desktop system was at first
 System&nbsp;V.4, then Solaris, then Linux.
 
 At first, the makefile used the methods of the time.  There was a
-target for each platform and the code had #if statements based on
+target for each platform and the code had `#if` statements based on
 which system was being coded for.
 
-I received quite a few contributions for various systems (thanks to
-all!) and integrated those into di.
+I received quite a few contributions for various systems
+and integrated those into di.
 
 ###### Capability Based Configuration
 
@@ -59,7 +59,7 @@ the slowest shells.  Removing the useless use of quotation marks
 speeds up bash quite a bit.  Opening the various files using the
 static file descriptors is much, much faster, though this makes the
 shell scripts much harder to read and maintain.  Other speed-ups are
-testing for _\+\=_, internal _expr_ handling, and _typeset_.
+testing for __&#43;=__, internal _expr_ handling, and _typeset_.
 
 The other thing to note with the various shells is that though their
 quoting and backslash handling is internally consistent, it is not
@@ -111,11 +111,11 @@ _di_ has used either doubles or long doubles to hold the disk space
 values (as a long double has a mantissa of approximately 34 digits).
 
 In 2025, I decided that in order to support the very large disk sizes
-that modern systems have, _di_ should use one of the big number
-libraries.  Version&nbsp;5.0 supports either the use of GMP or
-libtommath for big number support.  If neither of these are available,
-the value is stored in the largest supported type: long double,
-double, uint64_t, long long, or long.
+that modern systems have, and to future-proof _di_, _di_ should use
+one of the big number libraries.  Version&nbsp;5.0 supports either the
+use of GMP or libtommath for big number support.  If neither of these
+are available, the value is stored in the largest supported type: long
+double, double, uint64_t, long long, or long.
 
 Big number support will ensure that _di_ works with very large disks
 in the future, and will also ensure that the number calculations are
@@ -126,7 +126,7 @@ capable.
 
 At the same time, there has been something I've been wanting to do
 with _di_ for a long time.  Create a proper library and API.  The main
-`di.c` program uses the new shared library and API to create the output.
+_di_ program uses the new shared library and API to create the output.
 
 ###### Acknowledgements
 
