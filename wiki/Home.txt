@@ -15,6 +15,7 @@ This documentation was created for the upcoming version 5.x.
 
 [Change Log](ChangeLog)
 <br>[Known Issues](KnownIssues)
+<br>[Testing](Testing)
 <br>[History](History)
 
 </div>
