@@ -1,0 +1,254 @@
+[Wiki Home](Home)
+
+This documentation was created for the upcoming version 5.x.
+
+[TOC]
+
+### Getting Data
+
+-------------
+##### di_get_all_disk_info
+
+Fetches all of the disk information using the options specified.
+
+    #include "di.h"
+
+    void *di_data;
+
+    di_get_all_disk_info (di_data);
+
+-------------
+##### di_iterate_init
+
+Initializes the disk information iterator.
+
+    #include "di.h"
+
+    int     count;
+    int     iteroption = DI_ITER_PRINTABLE;
+
+    count = di_iterate_init (di_data, iteroption)
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+__iteroption__ : One of `DI_ITER_PRINTABLE` or `DI_ITER_ALL`.  If the
+printable iteration option is used, only the partitions that were
+determined to be printable according to the criteria outline in the
+manual page are returned.
+
+Returns: The number of items to process, depending on the options and
+the value of `iteroption`.
+
+-------------
+##### The di_pub_disk_info_t Structure
+
+    typedef struct
+    {
+      const char    *strdata [DI_DISP_MAX];
+      int           index;
+      int           doPrint;
+      int           printFlag;
+      int           isLocal;
+      int           isReadOnly;
+      int           isLoopback;
+    } di_pub_disk_info_t;
+
+__strdata__ : Holds the string values for the disk partition.
+
+    DI_DISP_MOUNTPT       // the mount point
+    DI_DISP_FILESYSTEM    // the filesystem (device name)
+    DI_DISP_FSTYPE        // the filesystem type
+    DI_DISP_MOUNTOPT      // mount options
+
+__index__ : The internal index value.  Used when fetching numeric data.
+
+__doPrint__ : Indicates that this partition was determined to be
+printable by _di_.
+
+__printFlag__ : Indicates the printable state for the partition.
+The values are defined in `di.h`.  Not necessarily useful.
+
+__isLocal__ : Indicates that the partition is a local
+partition.
+
+__isReadonly__ : Indicates that the partition is mounted read-only.
+
+__isLoopback__ : Indicates that the partition is a loopback partition.
+
+-------------
+##### di_iterate
+
+Iterates through the disk partitions, returning a `di_pub_disk_info_t`
+structure for each.
+
+    #include "di.h"
+
+    di_pub_disk_info_t  *pub;
+
+    pub = di_iterate (di_data);
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+Returns: A pointer to the `di_pub_disk_info_t` structure for each
+partition.
+
+-------------
+##### di_get_scale_max
+
+Determines the maximum scaling unit for the space value.
+
+    #include "di.h"
+
+    scaleidx = di_get_scale_max (void *di_data,
+        int index,
+        int valueidxA, int valueidxB, int valueidxC);
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+__index__ : The index from the `di_pub_disk_info_t` structure.
+
+__valueidx__ : The value indexes indicate which disk space values to use to
+calculate the space value.  The formula is : A - (B - C).
+Note that is very possible to create non-sensical return values, and
+_di_ does not check for invalid combinations.
+
+Valid combinations are:
+
+    DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE    // total
+    DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_AVAIL   // used
+    DI_SPACE_TOTAL, DI_SPACE_FREE, DI_VALUE_NONE    // used
+    DI_SPACE_TOTAL, DI_SPACE_AVAIL, DI_VALUE_NONE   // used
+    DI_SPACE_FREE, DI_VALUE_NONE, DI_VALUE_NONE     // free
+    DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE    // free
+    DI_INODE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE    // inode total
+    DI_INODE_TOTAL, DI_INODE_FREE, DI_VALUE_NONE    // inodes used
+    DI_INODE_FREE, DI_VALUE_NONE, DI_VALUE_NONE     // inodes free
+
+Returns: The scaling index that corresponds to the maximum scale unit
+that the space value can be displayed in.  The scale indexes are
+defined in `di.h`.
+
+-------------
+##### di_get_scaled
+
+Gets the disk space value scaled according the scaling unit.
+
+    #include "di.h"
+
+    double    val;
+
+    val = di_get_scaled (void *di_data,
+        int index, int scaleidx,
+        int valueidxA, int valueidxB, int valueidxC);
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+__index__ : The index from the `di_pub_disk_info_t` structure.
+
+__scaleidx__ : The scaling index to use.  Use the scaling index
+returned from `di_get_scale_max` or choose a specific value from `di.h`.
+
+__valueidx__ : The value indexes indicate which disk space values to use to
+calculate the space value.  The formula is : A - (B - C).  See
+`di_get_scale_max` for valid combinations.
+
+Returns: The disk space value scaled to the scale unit specified.
+
+-------------
+##### di_disp_scaled
+
+Gets the disk space value scaled according the scaling unit, and
+creates a string that can be printed. Based on the _di_ options.
+
+    #include "di.h"
+
+    double    val;
+
+    val = di_disp_scaled (void *di_data,
+        char *buff, long buffsize,
+        int index, int scaleidx,
+        int valueidxA, int valueidxB, int valueidxC);
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+__buff__ : The buffer to store the printable string in.
+
+__buffsize__ : The size of the buffer.
+
+__index__ : The index from the `di_pub_disk_info_t` structure.
+
+__scaleidx__ : The scaling index to use.  Use the scaling index
+returned from `di_get_scale_max` or choose a specific value from `di.h`.
+
+__valueidx__ : The value indexes indicate which disk space values to use to
+calculate the space value.  The formula is : A - (B - C).  See
+`di_get_scale_max` for valid combinations.
+
+-------------
+##### di_get_perc
+
+Gets the disk space value as a percentage.
+
+    #include "di.h"
+
+    double    val;
+
+    val = di_get_perc (void *di_data,
+        int index,
+        int valueidxA, int valueidxB,
+        int valueidxC, int valueidxD, int valueidxE);
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+__index__ : The index from the `di_pub_disk_info_t` structure.
+
+__valueidx__ : The value indexes indicate which disk space values to
+use to calculate the percentage.  The formula is (A - B) / (C - (D - E)).
+Note that is very possible to create non-sensical return values, and
+_di_ does not check for invalid combinations.
+
+Valid combinations are:
+
+    /* percent used */
+    DI_SPACE_TOTAL, DI_SPACE_AVAIL, DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE
+    /* percent used */
+    DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE
+    /* percent used, BSD style */
+    DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_TOTAL, DI_VALUE_FREE, DI_VALUE_AVAIL
+    /* percent free */
+    DI_SPACE_AVAIL, DI_VALUE_NONE, DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE,
+    /* percent free */
+    DI_SPACE_FREE, DI_VALUE_NONE, DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE,
+    /* inodes used */
+    DI_INODE_TOTAL, DI_INODE_AVAIL, DI_INODE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE
+
+-------------
+##### di_disp_perc
+
+Gets the disk space value as a percentage and creates a string that
+can be printed.  Based on the _di_ options.
+
+    #include "di.h"
+
+    double    val;
+
+    val = di_disp_perc (void *di_data,
+        char *buff, long buffsize,
+        int index,
+        int valueidxA, int valueidxB,
+        int valueidxC, int valueidxD, int valueidxE);
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+__buff__ : The buffer to store the printable string in.
+
+__buffsize__ : The size of the buffer.
+
+__index__ : The index from the `di_pub_disk_info_t` structure.
+
+__valueidx__ : The value indexes indicate which disk space values to
+use to calculate the percentage.  The formula is (A - B) / (C - (D - E)).
+See `di_get_perc` for valid combinations.
+
+[Wiki Home](Home)
+

@@ -83,15 +83,15 @@ MKC_ECHO =
 # checks the cmake version, and runs the
 .PHONY: all
 all:
-	@$(MAKE) TARGET=$@ switcher
+	@$(MAKE) -e TARGET=$@ switcher
 
 .PHONY: install
 install:
-	@$(MAKE) TARGET=$@ switcher
+	@$(MAKE) -e TARGET=$@ switcher
 
 .PHONY: test
 test:
-	@$(MAKE) TARGET=$@ switcher
+	@$(MAKE) -e TARGET=$@ switcher
 
 .PHONY: switcher
 switcher:
@@ -104,7 +104,7 @@ switcher:
 	    "$${cmminv}" -ge $(CMAKE_REQ_MIN_VERSION) ]; then \
 	  $(MAKE) cmake-$(TARGET); \
 	else \
-	  $(MAKE) mkc-$(TARGET); \
+	  $(MAKE) -e mkc-$(TARGET); \
 	fi
 
 ###
@@ -135,7 +135,7 @@ realclean:
 	@$(MAKE) clean >/dev/null 2>&1
 	@-$(RM) -rf config.h \
 		$(MKC_ENV) $(MKC_REQLIB) \
-		$(MKC_FILES) tests.d/chksh* \
+                _mkconfig_runtests \
 		>/dev/null 2>&1; exit 0
 
 .PHONY: distclean
@@ -263,6 +263,7 @@ mkc-all: mkc-sh
 .PHONY: mkc-sh
 mkc-sh:	$(MKC_ENV)
 	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=sh \
+		DI_PREFIX=$(PREFIX) \
 		DI_VERSION=$(DI_VERSION) \
 		DI_LIBVERSION=$(DI_LIBVERSION) \
 		DI_SOVERSION=$(DI_SOVERSION) \
@@ -271,11 +272,13 @@ mkc-sh:	$(MKC_ENV)
 
 .PHONY: mkc-perl
 mkc-perl:	$(MKC_ENV)
-	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=perl \
+	. ./$(MKC_ENV) ; \
+		DI_PREFIX=$(PREFIX) \
 		DI_VERSION=$(DI_VERSION) \
 		DI_LIBVERSION=$(DI_LIBVERSION) \
 		DI_SOVERSION=$(DI_SOVERSION) \
 		DI_RELEASE_STATUS=$(DI_RELEASE_STATUS) \
+		$(MAKE) -e MKCONFIG_TYPE=perl \
                 di-programs
 
 .PHONY: test
@@ -285,8 +288,10 @@ mkc-test:		tests.done
 
 .PHONY: mkc-install
 mkc-install:
-	$(MAKE) mkc-all
-	. ./$(MKC_ENV);$(MAKE) -e PREFIX=$(PREFIX) install-di install-man
+	$(MAKE) -e mkc-all
+	. ./$(MKC_ENV);$(MAKE) -e \
+		PREFIX=$(PREFIX) \
+		install-di install-man
 
 ###
 # installation
@@ -316,7 +321,7 @@ install-po: 	build-po
 install-pc:
 	$(TEST) -d $(INST_PKGCDIR) || $(MKDIR) -p $(INST_PKGCDIR)
 	$(CAT) di.pc.in | \
-	  sed -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
+	  $(SED) -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
 	      -e 's,@CMAKE_INSTALL_FULL_INCLUDEDIR@,$(INCDIR),g' \
 	      -e 's,@CMAKE_INSTALL_FULL_LIBDIR@,$(LIBDIR),g' \
 	      -e 's,@DI_VERSION@,$(DI_VERSION),g' \

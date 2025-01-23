@@ -152,13 +152,6 @@ di_initialize (void)
   return di_data;
 }
 
-/*
- * di_cleanup
- *
- * free up allocated memory
- *
- */
-
 void
 di_cleanup (void *tdi_data)
 {
@@ -202,6 +195,12 @@ di_cleanup (void *tdi_data)
   }
 }
 
+const char *
+di_version (void)
+{
+  return DI_VERSION;
+}
+
 int
 di_process_options (void *tdi_data, int argc, char * argv [])
 {
@@ -230,6 +229,54 @@ di_process_options (void *tdi_data, int argc, char * argv [])
 
   return exitflag;
 }
+
+/* option processing */
+
+int
+di_check_option (void *tdi_data, int optidx)
+{
+  di_data_t   *di_data = (di_data_t *) tdi_data;
+  di_opt_t    *diopts;
+
+  if (di_data == NULL) {
+    return 0;
+  }
+
+  diopts = (di_opt_t *) di_data->options;
+  return di_opt_check_option (diopts, optidx);
+}
+
+extern void
+di_format_iter_init (void *tdi_data)
+{
+  di_data_t   *di_data = (di_data_t *) tdi_data;
+  di_opt_t    *diopts;
+
+  if (di_data == NULL) {
+    return;
+  }
+
+  diopts = (di_opt_t *) di_data->options;
+
+  di_opt_format_iter_init (diopts);
+}
+
+extern int
+di_format_iterate (void *tdi_data)
+{
+  di_data_t   *di_data = (di_data_t *) tdi_data;
+  di_opt_t    *diopts;
+
+  if (di_data == NULL) {
+    return -1;
+  }
+
+  diopts = (di_opt_t *) di_data->options;
+
+  return di_opt_format_iterate (diopts);
+}
+
+/* data processing */
 
 void
 di_get_all_disk_info (void *tdi_data)
@@ -394,50 +441,6 @@ di_iterate (void *tdi_data)
 }
 
 int
-di_check_option (void *tdi_data, int optidx)
-{
-  di_data_t   *di_data = (di_data_t *) tdi_data;
-  di_opt_t    *diopts;
-
-  if (di_data == NULL) {
-    return 0;
-  }
-
-  diopts = (di_opt_t *) di_data->options;
-  return di_opt_check_option (diopts, optidx);
-}
-
-extern void
-di_format_iter_init (void *tdi_data)
-{
-  di_data_t   *di_data = (di_data_t *) tdi_data;
-  di_opt_t    *diopts;
-
-  if (di_data == NULL) {
-    return;
-  }
-
-  diopts = (di_opt_t *) di_data->options;
-
-  di_opt_format_iter_init (diopts);
-}
-
-extern int
-di_format_iterate (void *tdi_data)
-{
-  di_data_t   *di_data = (di_data_t *) tdi_data;
-  di_opt_t    *diopts;
-
-  if (di_data == NULL) {
-    return -1;
-  }
-
-  diopts = (di_opt_t *) di_data->options;
-
-  return di_opt_format_iterate (diopts);
-}
-
-int
 di_get_scale_max (void *tdi_data, int infoidx,
     int validxA, int validxB, int validxC)
 {
@@ -567,7 +570,9 @@ di_disp_perc (void *tdi_data, char *buff, long sz, int infoidx,
   Snprintf1 (buff, (Size_t) sz, "%.0f", dval);
 }
 
-extern int
+/* internal routines */
+
+static int
 checkFileInfo (di_data_t *di_data)
 {
   int                 rc;
@@ -894,11 +899,11 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
     }
 
     {
-      dinum_t      temp;
+      dinum_t     temp;
 
       dinum_init (&temp);
 
-      dinum_set_u (&temp, ~0);
+      dinum_set_u (&temp, (di_ui_t) ~0);
       if (dinum_cmp (&dinfo->values [DI_INODE_TOTAL], &temp) == 0) {
         dinum_set_u (&dinfo->values [DI_INODE_TOTAL], 0);
         dinum_set_u (&dinfo->values [DI_INODE_FREE], 0);
@@ -1570,7 +1575,7 @@ init_scale_values (di_opt_t *diopts)
     dinum_init (&scale_values [i]);
   }
   dinum_init (&base);
-  dinum_set_u (&base, diopts->blockSize);
+  dinum_set_u (&base, (di_ui_t) diopts->blockSize);
   dinum_set_u (&scale_values [DI_SCALE_BYTE], 1);
   for (i = DI_SCALE_KILO; i < DI_SCALE_MAX; ++i) {
     dinum_set (&scale_values [i], &base);

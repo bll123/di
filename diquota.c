@@ -663,14 +663,17 @@ diquota_nfs (di_quota_t *diqinfo)
       printf ("quota: nfs: rq_active: %d\n", rptr->rq_active);
     }
 
-    dinum_mul_uu (&diqinfo->values [DI_QUOTA_LIMIT], rptr->rq_bhardlimit, rptr->rq_bsize);
-    dinum_mul_uu (&tsize, rptr->rq_bsoftlimit, rptr->rq_bsize);
+    dinum_mul_uu (&diqinfo->values [DI_QUOTA_LIMIT],
+        (di_ui_t) rptr->rq_bhardlimit, (di_ui_t) rptr->rq_bsize);
+    dinum_mul_uu (&tsize, (di_ui_t) rptr->rq_bsoftlimit,
+        (di_ui_t) rptr->rq_bsize);
     if (dinum_cmp_s (&tsize, 0) != 0 &&
         dinum_cmp (&tsize, &diqinfo->values [DI_QUOTA_LIMIT]) < 0) {
       dinum_set (&diqinfo->values [DI_QUOTA_LIMIT], &tsize);
     }
     if (dinum_cmp_s (&diqinfo->values [DI_QUOTA_LIMIT], 0) != 0) {
-      dinum_mul_uu (&diqinfo->values [DI_QUOTA_USED], rptr->rq_curblocks, rptr->rq_bsize);
+      dinum_mul_uu (&diqinfo->values [DI_QUOTA_USED],
+          (di_ui_t) rptr->rq_curblocks, (di_ui_t) rptr->rq_bsize);
     }
 
     dinum_set_u (&diqinfo->values [DI_QUOTA_ILIMIT], rptr->rq_fhardlimit);

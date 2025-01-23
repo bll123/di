@@ -283,14 +283,18 @@ endif
 #   set _lib_GetVolumeInformation 0
 # endif
 
-env PREFIX quote
+env DI_PREFIX quote
 env DI_VERSION quote
 env DI_RELEASE_STATUS quote
 env DI_USE_MATH
 
 include
 
-#define DI_LOCALE_DIR PREFIX "/share/locale"
+#if ! defined (DI_PREFIX)
+# error "PREFIX is not set"
+#endif
+
+#define DI_LOCALE_DIR DI_PREFIX "/share/locale"
 
 #define DI_INTERNAL 0
 #define DI_GMP 1

@@ -1,0 +1,81 @@
+[Wiki Home](Home)
+
+This documentation was created for the upcoming version 5.x.
+
+[TOC]
+
+### Initializing
+
+-------------
+##### di_initialize
+
+Create the `di_data` structure and returns it.  The `di_data` structure
+is required for all subsequent calls to the _di_ library.
+
+    #include "di.h"
+
+    void * di_data;
+
+    di_data = di_initialize (void)
+
+Returns: A pointer to an allocated `di_data` structure.  This
+structure must be freed in a call to `di_cleanup`.
+
+-------------
+##### di_process_options
+
+Processes the arguments to _di_.  These are passed as strings via an
+`argv` structure as if on the command line.  If no call to
+`di_process_options` is made, _di_ will use the defaults, and will not
+process the `DI_ARGS` environment variable.
+
+    #include "di.h"
+
+    int   exitflag;
+    int   targc;
+    char  *targv [10];
+
+    targc = 2;
+    targv [0] = "-d";
+    targv [1] = "g";
+    targv [2] = NULL;
+    exitflag = di_process_options (void *di_data, int targc, char *targv [])
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+__targc__ : The number of items in the targv array.
+
+__targv__ : An array of character strings.
+
+Returns: A return value indicating the status of processing the
+options.
+
+    DI_EXIT_NORM  // normal exit
+    DI_EXIT_HELP  // --help was specified as an argument
+    DI_EXIT_VERS  // --version was specified as an argument
+    DI_EXIT_WARN  // invalid data was found in the arguments
+    DI_EXIT_FAIL  // a very serious error occurred.
+
+-------------
+##### di_cleanup
+
+Frees all allocated data.
+
+    #include "di.h"
+
+    di_cleanup (void *di_data);
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+-------------
+##### di_version
+
+Returns the _di_ version string.
+
+    #include "di.h"
+
+    const char *str;
+
+    str = di_version (void)
+
+[Wiki Home](Home)

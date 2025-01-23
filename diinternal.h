@@ -83,8 +83,8 @@ extern void di_get_disk_info (di_disk_info_t **, int *);
 /* didiskutil.c */
 extern void di_initialize_disk_info (di_disk_info_t *, int);
 extern void di_free_disk_info (di_disk_info_t *);
-extern void di_save_block_sizes (di_disk_info_t *, di_unum_t, di_unum_t, di_unum_t, di_unum_t);
-extern void di_save_inode_sizes (di_disk_info_t *, di_unum_t, di_unum_t, di_unum_t);
+extern void di_save_block_sizes (di_disk_info_t *, di_ui_t, di_ui_t, di_ui_t, di_ui_t);
+extern void di_save_inode_sizes (di_disk_info_t *, di_ui_t, di_ui_t, di_ui_t);
 #if _lib_getmntent \
     && ! _lib_getmntinfo \
     && ! _lib_getfsstat \

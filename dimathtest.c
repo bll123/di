@@ -19,6 +19,7 @@ main (int argc, char *argv [])
   dinum_t   b;
   dinum_t   r;
   double    dval;
+  di_ui_t   ival;
   char      buff [200];
   int       tcount = 0;
   int       ecount = 0;
@@ -266,8 +267,8 @@ main (int argc, char *argv [])
   }
 
   /* percentage tests */
-  dval = 1024 * 1024 * 0.01;
-  dinum_set_u (&a, (di_unum_t) dval);
+  ival = 1024 * 1024 / 10;
+  dinum_set_u (&a, ival);
   dinum_set_u (&b, 1024 * 1024);
   dval = dinum_perc (&a, &b);
   ++tcount;
@@ -276,8 +277,8 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dval = 1024 * 1024 * 0.5;
-  dinum_set_u (&a, (di_unum_t) dval);
+  ival = 1024 * 1024 / 2;
+  dinum_set_u (&a, ival);
   dinum_set_u (&b, 1024 * 1024);
   dval = dinum_perc (&a, &b);
   ++tcount;

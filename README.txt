@@ -3,7 +3,9 @@ di Version 5.x beta
 Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
 
-This README will be replaced with README-new.txt 5.x reaches production status.
+See: README-new.txt
+This README will be replaced with README-new.txt
+when 5.x reaches production status.
 
 Version 5.x beta
 

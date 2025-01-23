@@ -128,4 +128,4 @@ At the same time, there has been something I've been wanting to do
 with _di_ for a long time.  Create a proper library and API.  The main
 `di.c` program uses the new shared library and API to create the output.
 
-
+[Wiki Home](Home)

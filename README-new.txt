@@ -28,8 +28,8 @@ DOCUMENTATION
 INSTALLATION
 
   To build:
-    make PREFIX=$HOME/local
-    make PREFIX=$HOME/local install
+    make -e PREFIX=$HOME/local
+    make -e PREFIX=$HOME/local install
 
     The build will use cmake if it is available and recent enough,
     otherwise the mkconfig configuration tool will be used.
@@ -39,39 +39,14 @@ INSTALLATION
     (long double, double, etc.).
 
     To turn off the use of the multi-precision libraries;
-      make PREFIX=$HOME/local DI_USE_MATH=DI_INTERNAL
+      make -e PREFIX=$HOME/local DI_USE_MATH=DI_INTERNAL
 
       Long doubles are quite capable, there's nothing wrong with
       building it this way.
     To force GMP:
-      make PREFIX=$HOME/local DI_USE_MATH=DI_GMP
+      make -e PREFIX=$HOME/local DI_USE_MATH=DI_GMP
     To force libtommath:
-      make PREFIX=$HOME/local DI_USE_MATH=DI_TOMMATH
-
-BUGS AND KNOWN ISSUES
-
-  - DragonFly BSD:
-    If quotas are not turned on in the kernel (/boot/loader.conf),
-    the vquotactl interface will not be configured into di.  The
-    default build available from DragonFly dports does not have
-    the vquotactl interface turned on.
-  - quotas:
-    - Solaris ufs requires the quotas file to be readable, or make
-      the di program setuid.  Neither recommended.
-    - Linux 2.4 - not working
-    - HP-UX
-      - quotactl() isn't declared. See HP-UX section above.
-    - NetBSD 6
-      - group quotas can't be fetched by ordinary users (EPERM).
-        If the account is limited by a group quota, it won't be reported.
-    - AIX 7
-      - Unlike AIX 5, AIX 7 gives a permission
-        denied error when a user tries to get their quota.
-        Could make di suid, but that's not a good idea.
-  - pooled filesystems:
-    - hammer: the usage reported for pseudo-filesystems is the usage
-      for the main pool.  Therefore the total used and size will be wrong.
-    - btrfs: there's no way to identify the pools.
+      make -e PREFIX=$HOME/local DI_USE_MATH=DI_TOMMATH
 
 BUG REPORTS
 
@@ -88,26 +63,14 @@ BUG REPORTS
 REQUIREMENTS
 
   cmake build
-
-
+    make cmake sed msgfmt grep tr
+    C or C++ compiler
+  mkconfig build
+    make msgfmt cat chmod ln mkdir mv rm sed test
+        cat egrep expr grep rm sed sort test
     bourne/ksh/bash shell
     C compiler
     awk (mawk/nawk/gawk)
-    make
-        cat chmod ln mkdir mv rm sed test
-    mkconfig.sh:
-        a bourne compatible shell that supports shell functions,
-          standard output from 'set'.
-        cat egrep expr grep rm sed sort test
-    mkconfig.pl:
-        cat perl rm
-    mksetopt.sh:
-        mv rm sed test
-    NLS:
-        msgfmt sed
-
-    runtests.sh (not a requirement for building or installing):
-        ar cat cp dc diff env expr egrep mv rm sed sort test tr
 
 PORTING
 

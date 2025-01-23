@@ -177,6 +177,9 @@ include (CheckTypeSize)
 include (CheckVariableExists)
 include (CheckPrototypeDefinition)
 
+###
+# macros for capability testing
+
 macro (checkPrototype_quotactl hdr)
   check_prototype_definition (quotactl
     "int quotactl (const char * a, int b, int c, caddr_t d)"
@@ -374,6 +377,23 @@ int main (int argc, char *argv []) {
   file (REMOVE tinc.c)
   if (EXISTS tinc.o)
     file (REMOVE tinc.o)
+  endif()
+endmacro()
+
+macro (checkvquotactlenabled)
+  message ("-- Check if vquotactl is enabled")
+  set (tvquotactl 0)
+  if (_lib_vquotactl)
+    execute_process (
+      OUTPUT_QUIET
+      ERROR_QUIET
+      RESULT_VARIABLE tvquotactl
+      COMMAND grep vfs.quota_enabled=.*1 /boot/loader.conf
+    )
+  endif()
+  if (NOT tvquotactl)
+    set (_lib_vquotactl 0)
+    set (_lib_prop_dictionary_create 0)
   endif()
 endmacro()
 
@@ -752,6 +772,8 @@ check_symbol_exists (errno errno.h _dcl_errno)
 # which include files?
 check_symbol_exists (mnt_names ${STATFS_HDR} _dcl_mnt_names)
 
+checkvquotactlenabled ()
+
 set (_has_std_quotas 0)
 if (_lib_quotactl OR _lib_quota_open OR _lib_vquotactl OR
     _typ_struct_dqblk OR _typ_struct_ufs_dqblk)
@@ -816,6 +838,9 @@ endif()
 message ("math-library: ${_use_math}")
 
 configure_file (config.h.in config.h)
+
+###
+# macros for building
 
 macro (addIntlLibrary name)
   if (Intl_LIBRARY)

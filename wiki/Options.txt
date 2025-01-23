@@ -1,0 +1,60 @@
+[Wiki Home](Home)
+
+This documentation was created for the upcoming version 5.x.
+
+[TOC]
+
+### Option Processing
+
+Note that not all options are accessible.  If you want access to other
+options, please contact the developers.
+
+-------------
+##### di_check_option
+
+Fetches the value of an option.  The various options that can
+currently be retrieved are defined in `di.h`.
+
+    #include "di.h"
+
+    int   optval;
+    int   option
+
+    optval = di_check_option (void *di_data, int option)
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+__option__ : One of the option defines from `di.h`.
+
+Returns: The option value.  All options are boolean except for
+`DI_OPT_FMT_STR_LEN`, `DI_OPT_SCALE`, and `DI_OPT_BLOCK_SZ`.
+
+-------------
+##### di_format_iter_init
+
+Initializes the format string iterator.
+
+    #include "di.h"
+
+    di_format_iter_init (di_data);
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+-------------
+##### di_format_iterate
+
+Iterates through the format string.
+
+    #include "di.h"
+
+    int     fmt;
+
+    fmt = di_format_iterate (di_data);
+
+__di_data__ : The di_data structure returned from `di_initialize`.
+
+Returns each format string character.  The valid format string options
+are defined in `di.h`.  _di_ allows other characters to be included in
+the format string.
+
+[Wiki Home](Home)

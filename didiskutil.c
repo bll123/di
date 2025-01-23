@@ -112,8 +112,8 @@ di_free_disk_info (di_disk_info_t *diptr)
 }
 
 void
-di_save_block_sizes (di_disk_info_t *diptr, di_unum_t block_size,
-    di_unum_t total_blocks, di_unum_t free_blocks, di_unum_t avail_blocks)
+di_save_block_sizes (di_disk_info_t *diptr, di_ui_t block_size,
+    di_ui_t total_blocks, di_ui_t free_blocks, di_ui_t avail_blocks)
 {
   dinum_mul_uu (&diptr->values [DI_SPACE_TOTAL], total_blocks, block_size);
   dinum_mul_uu (&diptr->values [DI_SPACE_FREE], free_blocks, block_size);
@@ -121,8 +121,8 @@ di_save_block_sizes (di_disk_info_t *diptr, di_unum_t block_size,
 }
 
 void
-di_save_inode_sizes (di_disk_info_t *diptr, di_unum_t total_nodes,
-    di_unum_t free_nodes, di_unum_t avail_nodes)
+di_save_inode_sizes (di_disk_info_t *diptr, di_ui_t total_nodes,
+    di_ui_t free_nodes, di_ui_t avail_nodes)
 {
   dinum_set_u (&diptr->values [DI_INODE_TOTAL], total_nodes);
   dinum_set_u (&diptr->values [DI_INODE_FREE], free_nodes);

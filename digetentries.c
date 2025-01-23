@@ -681,7 +681,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
   memset ( (char *) *diskInfo, '\0', sizeof (di_disk_info_t) * (Size_t) count);
 
   for (idx = 0; idx < count; idx++) {
-    di_unum_t      tblocksz;
+    di_ui_t      tblocksz;
 
     diptr = *diskInfo + idx;
     di_initialize_disk_info (diptr, idx);
@@ -825,7 +825,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
   }
 
   for (idx = 0; idx < count; idx++) {
-    di_unum_t    tblocksz;
+    di_ui_t    tblocksz;
 
     diptr = *diskInfo + idx;
     di_initialize_disk_info (diptr, idx);
@@ -1108,7 +1108,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
     for (idx = 0; idx < count; idx++)
     {
-        di_unum_t    tblocksz;
+        di_ui_t    tblocksz;
 
         diptr = *diskInfo + idx;
         di_initialize_disk_info (diptr, idx);

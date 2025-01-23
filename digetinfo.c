@@ -129,7 +129,7 @@ di_get_disk_info (di_disk_info_t **diskInfo, int *diCount)
             diptr->printFlag == DI_PRNT_SKIP ||
             diptr->printFlag == DI_PRNT_FORCE)
         {
-            di_unum_t    tblocksz;
+            di_ui_t    tblocksz;
 
             if (statvfs (diptr->strdata [DI_DISP_MOUNTPT], &statBuf) == 0) {
               /* data general DG/UX 5.4R3.00 sometime returns 0   */

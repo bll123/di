@@ -678,14 +678,13 @@ check_env
     printlabel $name, "env: $envvar";
     # do not check cache
 
-    setlist $r_clist, $name;
     if ($ENV{$envvar} ne '') {
       $val = $ENV{$envvar};
     }
     $val =~ s/^"//;
     $val =~ s/"$//;
     if ($val ne "") {
-      setclist $r_clist, $name;
+      setlist $r_clist, $name;
       $r_config->{$name} = $val;
     }
 

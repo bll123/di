@@ -199,10 +199,14 @@
 #cmakedefine01 _has_std_nfs_quotas
 #cmakedefine01 _enable_nls
 
-#define PREFIX "${PREFIX}"
+#define DI_PREFIX "${PREFIX}"
 #define DI_VERSION "${DI_VERSION}"
 #define DI_RELEASE_STATUS "${DI_RELEASE_STATUS}"
 #define DI_USE_MATH ${DI_USE_MATH}
+
+#if ! defined (DI_PREFIX)
+# error "PREFIX is not set"
+#endif
 
 #define DI_LOCALE_DIR PREFIX "/share/locale"
 

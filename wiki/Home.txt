@@ -1,17 +1,33 @@
 <div markdown style="float: left; margin-right: 20px;">
 
+This documentation was created for the upcoming version 5.x.
+
 ### di
 
 <div markdown style="float: left; margin-right: 20px;">
 
-[Introduction](Introduction)
-
-[libdi](libdi)
+[libdi - Initializing](Initializing)
+[libdi - Option Processing](Options)
+[libdi - Getting the Data](GettingData)
 
 </div>
 <div markdown style="float: left; margin-right: 20px;">
 
 [Change Log](ChangeLog)
+<br>[Known Issues](KnownIssues)
 <br>[History](History)
 
 </div>
+
+### Bug Reporting
+
+I want to see the output from 'di -A -a -X 5',
+output from your standard df command (as verbose as possible),
+and:
+    * cmake: build/config.h
+    * mkconfig: mkc_files/mkconfig.log, mkc_files/mkconfig_env.log,
+      mkc_files/mkc_compile.log, di.env, and config.h
+
+Open a ticket at [SourceForge](https://sourceforge.net/p/di-diskinfo/tickets/)
+<br>
+Or e-mail : brad.lanam.di / gmail.com

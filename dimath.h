@@ -45,10 +45,23 @@
   typedef long di_snum_t;
 # define DI_INTERNAL_INT
 #else
-  /* unknown, this can't happen */
-  typedef unsigned long di_unum_t;
-  typedef long di_snum_t;
-# define DI_INTERNAL_INT
+# error "unable to locate a valid type"
+#endif
+
+#if _siz_uint64_t == 8
+  typedef uint64_t di_ui_t;
+  typedef int64_t di_si_t;
+#elif _siz_long == 8
+  typedef unsigned long di_ui_t;
+  typedef long di_si_t;
+#elif _siz_long_long == 8
+  typedef unsigned long long di_ui_t;
+  typedef long long di_si_t;
+#elif _siz_long == 4
+  typedef unsigned long di_ui_t;
+  typedef long di_si_t;
+#else
+# error "unable to locate a valid type"
 #endif
 
 #if _use_math == DI_GMP
@@ -141,7 +154,7 @@ dinum_set (dinum_t *r, const dinum_t *val)
 }
 
 static inline void
-dinum_set_u (dinum_t *r, di_unum_t val)
+dinum_set_u (dinum_t *r, di_ui_t val)
 {
 #if _use_math == DI_GMP
   mpz_set_ui (*r, val);
@@ -153,7 +166,7 @@ dinum_set_u (dinum_t *r, di_unum_t val)
 }
 
 static inline void
-dinum_set_s (dinum_t *r, di_snum_t val)
+dinum_set_s (dinum_t *r, di_si_t val)
 {
 #if _use_math == DI_GMP
   mpz_set_si (*r, val);
@@ -165,7 +178,7 @@ dinum_set_s (dinum_t *r, di_snum_t val)
 }
 
 static inline void
-dinum_add_u (dinum_t *r, di_unum_t val)
+dinum_add_u (dinum_t *r, di_ui_t val)
 {
 #if _use_math == DI_GMP
   mpz_t     v;
@@ -189,7 +202,7 @@ dinum_add_u (dinum_t *r, di_unum_t val)
 }
 
 static inline void
-dinum_sub_u (dinum_t *r, di_unum_t val)
+dinum_sub_u (dinum_t *r, di_ui_t val)
 {
 #if _use_math == DI_GMP
   mpz_t     v;
@@ -266,7 +279,7 @@ dinum_cmp (const dinum_t *r, const dinum_t *val)
 }
 
 static inline int
-dinum_cmp_s (const dinum_t *r, di_snum_t val)
+dinum_cmp_s (const dinum_t *r, di_si_t val)
 {
 #if _use_math == DI_GMP
   return mpz_cmp_si (*r, val);
@@ -306,7 +319,7 @@ dinum_mul (dinum_t *r, const dinum_t *val)
 }
 
 static inline void
-dinum_mul_u (dinum_t *r, di_unum_t val)
+dinum_mul_u (dinum_t *r, di_ui_t val)
 {
 #if _use_math == DI_GMP
   mpz_mul_ui (*r, *r, val);
@@ -321,9 +334,8 @@ dinum_mul_u (dinum_t *r, di_unum_t val)
   *r *= val;
 #endif
 }
-
 static inline void
-dinum_mul_uu (dinum_t *r, di_unum_t vala, di_unum_t valb)
+dinum_mul_uu (dinum_t *r, di_ui_t vala, di_ui_t valb)
 {
 #if _use_math == DI_GMP
   mpz_set_ui (*r, 1);
