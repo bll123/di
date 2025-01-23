@@ -3,7 +3,7 @@ di Version 5.x beta
 Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
 
-This README will be replaced once 5.x reaches production status.
+This README will be replaced with README-new.txt 5.x reaches production status.
 
 Version 5.x beta
 
@@ -17,8 +17,8 @@ Version 5 Roadmap (more or less)
 - done: move the totals processing into the main library.
 - done: finish the api, there's still a couple of routines to write
 - done: linux tirpc library (nfs quotas)
-- get all the basics working
 - done: get installation working
+- get all the basics working
 - wiki documentation for the api
 - make the beta available to download
 - work on the test suite
@@ -30,8 +30,8 @@ Version 5 Roadmap (more or less)
 - wiki page updates and rewrite
 - production release
 
-Most of the following _should_ work...but I may have easily messed up
-the calculations.  The basic code structure hasn't changed.
+Most of the following _should_ work...but I may have easily added
+a typo or copy/paste error.  The basic code structure hasn't changed.
 
 - apfs testing on macos
 - test quota handling
@@ -42,7 +42,7 @@ the calculations.  The basic code structure hasn't changed.
 
 Version 5 beta Notes
 
-GMP and libtommath work fine.  But long doubles seem to be quite
+GMP and libtommath work fine.  Long doubles seem to be quite
 capable (where long doubles are supported).  If you have long double
 support, it seems reasonable to not use the multi-precision libraries.
 

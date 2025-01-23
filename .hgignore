@@ -10,6 +10,7 @@ Archive
 ^build
 ^config\.h$
 ^di$
+^dimathtest$
 ^di\.env
 ^di\.reqlibs
 \.dylib$
@@ -18,9 +19,10 @@ TODO
 \.vars$
 # dioptions.dat
 ^dev
+^getoptn_test$
 ^w$
 ^ww$
-^w\.*
+^www$
 ^mkconfig\.link$
 ^mkconfig\.old$
 ^mkc_files/

@@ -1,0 +1,131 @@
+[Wiki Home](Home)
+
+[TOC]
+
+### di History
+
+###### The Beginning
+
+An acquaintance worked with HP-UX, AIX and SunOS machines and was
+complaining that the _df/bdf_ command worked differently everywhere.
+So I wrote the _di_ program.
+
+The _di_ program was started in 1994. As of 2025, that is 31 years of
+programming and maintenance. The
+[original&nbsp;release&nbsp;notice](https://groups.google.com/g/alt.sources/c/SbaSAKJHGj4/m/WxMUUgUN8fkJ)
+was posted on 1994-02-27 to the _alt.sources_ Usenet group.
+
+In the beginning I used SCCS as the source code control system, then
+RCS, and now Mercurial.  My standard desktop system was at first
+System&nbsp;V.4, then Solaris, then Linux.
+
+At first, the makefile used the methods of the time.  There was a
+target for each platform and the code had #if statements based on
+which system was being coded for.
+
+I received quite a few contributions for various systems (thanks to
+all!) and integrated those into di.
+
+###### Capability Based Configuration
+
+For version&nbsp;2.0 in 1999, I switched to using perl's _metadist_
+configuration tool, and the code was re-written to use capability
+based testing.
+
+###### Changing Configuration Systems
+
+Version&nbsp;3.0 in 2001 switched to _iffe_ (ksh's configuration tool)
+as the configuration tool, and version&nbsp;4.0 in 2005 dropped
+support for perl's _metadist_.  _iffe's_ license required the AT&amp;T
+logo to be displayed, so very soon afterwards, I created a perl script
+to do the configuration. _iffe_ was removed in version&nbsp;4.17.
+
+###### mkconfig Build Configuration System
+
+For Version&nbsp;4.18, I created a shell script to do the
+configuration in addition to the perl script.
+
+In version&nbsp;4.20, the configuration scripts were moved to their
+own package, [mkconfig](https://sourceforge.net/projects/mkconfig/).
+
+The _mkconfig_ package was enhanced and improved over time to be
+compatible with a variety of Bourne shell compliant shells: ash, dash,
+bash&nbsp;2,&nbsp;3,&nbsp;4,&nbsp;5, ksh&nbsp;88,&nbsp;93, mksh, pdksh,
+AIX&nbsp;sh, HP-UX&nbsp;sh, Solaris&nbsp;sh, Tru64&nbsp;sh,
+modern&nbsp;yash, and osh&nbsp;(oil-shell).
+
+One interesting find in writing _mkconfig_ was that _bash_ was one of
+the slowest shells.  Removing the useless use of quotation marks
+speeds up bash quite a bit.  Opening the various files using the
+static file descriptors is much, much faster, though this makes the
+shell scripts much harder to read and maintain.  Other speed-ups are
+testing for _\+\=_, internal _expr_ handling, and _typeset_.
+
+The other thing to note with the various shells is that though their
+quoting and backslash handling is internally consistent, it is not
+consistent with other shells.  Single quotes mixed with backslashes
+can be interpolated very differently and _echo_ and _printf_ may
+handle them differently.  I was lucky, and didn't run into this issue
+for quite a while.  For portability, just stay away from backslashes
+within single quotes.
+
+There are various other quirks and crashes in the various
+shells that had to be worked around.
+
+There are also a lot of myths and misinformation about shell scripting
+and portability issues to be found on the internet.
+
+mkconfig allowed me to make _di_ very portable and execute on some
+very old systems.
+
+In order to test _di_ on various machines (in order to ensure
+portability), I created many virtual machines with older Linux,
+FreeBSD, NetBSD, and Solaris.  I also used polarhome (Thanks!) as
+their service had many very old operating systems.
+
+###### Quota Support
+
+Version 4.35 introduced support for checking quotas.  It seemed to me
+that if an account was limited by quotas, the disk space reported
+should be the quota limits, not the actual disk space.
+
+Quotas are a bit of a pain to work with, since every type of
+filesystem may have its own quota interface.  The exception is
+Dragonfly&nbsp;BSD, which added a virtual quota interface (nice!).
+
+###### Portability
+
+di has been ported to the following systems in the past.  Version 5.x
+drops support for Syllable and VMS.
+
+A/UX, AIX, BeOS, BSD, BSDI, Convex, Cray UNICOS, Cray UNICOS/mk,
+DragonFly&nbsp;BSD, FreeBSD, Haiku, HP/UX, Linux, MacOS, MirOS, NetBSD,
+Next, OpenBSD, OS/2, OSF/1, Pyramid, SCO OpenServer, SCO Unix,
+Sequent Dynix and PT/x, SGI&nbsp;Irix, Solaris, SunOS, Syllable,
+System&nbsp;V.3, System&nbsp;V.4, Tru64, ULTRIX, UnixWare, VMS,
+Windows, Xenix
+
+###### Version 5.0.0
+
+_di_ has used either doubles or long doubles to hold the disk space
+values (as a long double has a mantissa of approximately 34 digits).
+
+In 2025, I decided that in order to support the very large disk sizes
+that modern systems have, _di_ should use one of the big number
+libraries.  Version&nbsp;5.0 supports either the use of GMP or
+libtommath for big number support.  If neither of these are available,
+the value is stored in the largest supported type: long double,
+double, uint64_t, long long, or long.
+
+Big number support will ensure that _di_ works with very large disks
+in the future, and will also ensure that the number calculations are
+accurate.
+
+Use of the big number libraries is optional, as long doubles are quite
+capable.
+
+At the same time, there has been something I've been wanting to do
+with _di_ for a long time.  Create a proper library and API.  The main
+`di.c` program uses the new shared library and API to create the output.
+
+
