@@ -5,8 +5,8 @@
 #  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
-DI_VERSION = 4.99.0
-DI_LIBVERSION = 4.99.0
+DI_VERSION = 4.99.1
+DI_LIBVERSION = 4.99.1
 DI_SOVERSION = 4
 DI_RELEASE_STATUS = beta
 
