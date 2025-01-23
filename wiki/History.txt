@@ -80,7 +80,7 @@ very old systems.
 
 In order to test _di_ on various machines (in order to ensure
 portability), I created many virtual machines with older Linux,
-FreeBSD, NetBSD, and Solaris.  I also used polarhome (Thanks!) as
+FreeBSD, NetBSD, and Solaris.  I also used polarhome as
 their service had many very old operating systems.
 
 ###### Quota Support
@@ -127,5 +127,11 @@ capable.
 At the same time, there has been something I've been wanting to do
 with _di_ for a long time.  Create a proper library and API.  The main
 `di.c` program uses the new shared library and API to create the output.
+
+###### Acknowledgements
+
+The README lists many contributors from the early days.  In addition,
+polarhome and gcc deserve many thanks for making various systems
+available for cross-platform testing.
 
 [Wiki Home](Home)

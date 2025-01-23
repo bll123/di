@@ -7,6 +7,13 @@ See: README-new.txt
 This README will be replaced with README-new.txt
 when 5.x reaches production status.
 
+Version 5 beta Timeline
+
+2025-1-20 Very early days, wrote this readme...
+2025-1-23 Releasing a very early beta version.  Still a very long road ahead.
+          The wiki is a bit raw.  Almost no cross-platform testing has
+          been done.  The mkconfig tests are currently broken.
+
 Version 5.x beta
 
 - re-worked to have a library and proper api
@@ -20,8 +27,8 @@ Version 5 Roadmap (more or less)
 - done: finish the api, there's still a couple of routines to write
 - done: linux tirpc library (nfs quotas)
 - done: get installation working
+- started: wiki documentation for the api
 - get all the basics working
-- wiki documentation for the api
 - make the beta available to download
 - work on the test suite
 - get basic di working on all platforms I have access to.
@@ -46,7 +53,8 @@ Version 5 beta Notes
 
 GMP and libtommath work fine.  Long doubles seem to be quite
 capable (where long doubles are supported).  If you have long double
-support, it seems reasonable to not use the multi-precision libraries.
+support, it seems reasonable to not use the multi-precision libraries
+(in 2025).
 
 I have a *lot* of VMs.  These are mostly old Linux and old *BSD,
 though there are a couple of others.
@@ -57,9 +65,9 @@ still have access to a Tru64 machine (so slow), QNX and SCO Openserver
 
 For MacOS, I removed some of my older versions (no disk space).  I
 have Big Sur, Ventura, Sonoma and Sequoia.  I did something wrong and
-apparently removed the Monterey partitions.  I don't think that will
-be an issue.  Someone tell the Mac people to fix the damned audiomxd
-bug.
+apparently removed or overwrote the Monterey partitions.  I don't
+think that will be an issue.  Someone tell the Mac people to fix the
+damned audiomxd bug.
 
 I don't have access to the old Solaris machines.  OpenCSW appears to
 be up, but I don't remember my password (the problem with using ssh
@@ -67,13 +75,5 @@ keys, sometimes they get changed).  I have a few VMs with Solaris.
 
 I do not have access to any HP-UX machine.
 
-I should have (or be able to get) access to modern AIX on the gcc farm.
-
-I think that there is no need to maintain 'mkconfig' for modern
-systems. If a system has cmake 3.10 or later, I will ignore
-'mkconfig', though it will work to some extent (e.g. Linux tirpc will
-not work).  This will save a good deal of trouble.
-
-Version 5 beta Timeline
-
-2025-1-20 Very early days, wrote this readme...
+I should have (or be able to get) access to modern AIX on the gcc
+farm. I no longer have access to AIX 5.

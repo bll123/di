@@ -147,6 +147,13 @@ distclean:
 		>/dev/null 2>&1; exit 0
 
 ###
+# utility
+
+.PHONY: tar
+tar:
+	./utils/mktar.sh
+
+###
 # cmake
 
 .PHONY: cmake-release
