@@ -147,14 +147,22 @@ endif()
 
 include_directories (
   SYSTEM
+  # for macos
   /opt/local/include
+  # for freebsd
+  /usr/local/include
   "${CMAKE_BINARY_DIR}"
   "${PROJECT_SOURCE_DIR}/include"
 )
 
-set (CMAKE_REQUIRED_INCLUDES
+set (required_includes
+  # for macos
   /opt/local/include
+  # for freebsd
+  /usr/local/include
 )
+
+set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 
 #### configuration
 
@@ -168,6 +176,7 @@ pkg_check_modules (TIRPC libtirpc)
 
 include (CheckFunctionExists)
 include (CheckIncludeFile)
+include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckLinkerFlag)
 include (CheckSourceCompiles)
@@ -182,17 +191,26 @@ include (CheckPrototypeDefinition)
 
 macro (checkPrototype_quotactl hdr)
   check_prototype_definition (quotactl
+    "int quotactl (const char * a, int b, int c, void * d)"
+    0
+    "${hdr}"
+    _quotactl_pos_1a
+    )
+  check_prototype_definition (quotactl
     "int quotactl (const char * a, int b, int c, caddr_t d)"
     0
-    ${hdr}
-    _quotactl_pos_1
+    "${hdr}"
+    _quotactl_pos_1b
     )
   check_prototype_definition (quotactl
     "int quotactl (int a, const char * b, int c, caddr_t d)"
     0
-    ${hdr}
+    "${hdr}"
     _quotactl_pos_2
     )
+  if (_quotactl_pos_1a OR _quotactl_pos_1b)
+    set (_quotactl_pos_1 1)
+  endif()
   if (_quotactl_pos_1)
     set (_c_arg_2_quotactl "int")
     set (_args_quotactl 4)
@@ -235,21 +253,21 @@ endmacro()
 
 macro (checkMember_statfs hdr)
   check_struct_has_member ("struct statfs" f_bsize
-      ${hdr} _mem_struct_statfs_f_bsize)
+      "${hdr}" _mem_struct_statfs_f_bsize)
   check_struct_has_member ("struct statfs" f_fsize
-      ${hdr} _mem_struct_statfs_f_fsize)
+      "${hdr}" _mem_struct_statfs_f_fsize)
   check_struct_has_member ("struct statfs" f_fstyp
-      ${hdr} _mem_struct_statfs_f_fstyp)
+      "${hdr}" _mem_struct_statfs_f_fstyp)
   check_struct_has_member ("struct statfs" f_iosize
-      ${hdr} _mem_struct_statfs_f_iosize)
+      "${hdr}" _mem_struct_statfs_f_iosize)
   check_struct_has_member ("struct statfs" f_frsize
-      ${hdr} _mem_struct_statfs_f_frsize)
+      "${hdr}" _mem_struct_statfs_f_frsize)
   check_struct_has_member ("struct statfs" f_fstypename
-      ${hdr} _mem_struct_statfs_f_fstypename)
+      "${hdr}" _mem_struct_statfs_f_fstypename)
   check_struct_has_member ("struct statfs" mount_info
-      ${hdr} _mem_struct_statfs_mount_info)
+      "${hdr}" _mem_struct_statfs_mount_info)
   check_struct_has_member ("struct statfs" f_type
-      ${hdr} _mem_struct_statfs_f_type)
+      "${hdr}" _mem_struct_statfs_f_type)
 endmacro()
 
 macro (checkPrototype_setmntent hdr)
@@ -308,76 +326,83 @@ endmacro()
 
 macro (checkdqblk hdr)
   # the calls to checkdqblk do not include the angle brackets
-  set (CMAKE_EXTRA_INCLUDE_FILES ${hdr})
+  set (CMAKE_EXTRA_INCLUDE_FILES "${hdr}")
   check_type_size ("struct dqblk" _typ_struct_dqblk)
   check_type_size ("struct quotaval" _typ_struct_quotaval)
   check_type_size ("struct ufs_dqblk" _typ_struct_ufs_dqblk)
   check_struct_has_member ("struct dqblk" dqb_curspace
-      ${hdr} _mem_struct_dqblk_dqb_curspace)
+      "${hdr}" _mem_struct_dqblk_dqb_curspace)
   check_struct_has_member ("struct dqblk" dqb_curblocks
-      ${hdr} _mem_struct_dqblk_dqb_curblocks)
+      "${hdr}" _mem_struct_dqblk_dqb_curblocks)
   check_struct_has_member ("struct dqblk" dqb_fhardlimit
-      ${hdr} _mem_struct_dqblk_dqb_fhardlimit)
+      "${hdr}" _mem_struct_dqblk_dqb_fhardlimit)
   check_struct_has_member ("struct dqblk" dqb_fsoftlimit
-      ${hdr} _mem_struct_dqblk_dqb_fsoftlimit)
+      "${hdr}" _mem_struct_dqblk_dqb_fsoftlimit)
   check_struct_has_member ("struct dqblk" dqb_curfiles
-      ${hdr} _mem_struct_dqblk_dqb_curfiles)
+      "${hdr}" _mem_struct_dqblk_dqb_curfiles)
   unset (CMAKE_EXTRA_INCLUDE_FILES)
 endmacro ()
 
 macro (memberxdr structnm membernm)
   message ("-- Determining ${structnm} ${membernm} xdr type")
-  file (WRITE txdr.c "#include <rpcsvc/rquota.h>")
+  file (WRITE ${membernm}.c "#include <rpcsvc/rquota.h>
+int main (int argc, char *argv []) { return 0; }
+")
   set (tinc ".")
   if (NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
     set (tinc ${TIRPC_INCLUDE_DIRS})
   endif()
   execute_process (
-    OUTPUT_FILE txdr.out
+    OUTPUT_FILE ${membernm}.out
     ERROR_QUIET
-    COMMAND ${CMAKE_C_COMPILER} -I ${tinc} -E txdr.c
+    COMMAND ${CMAKE_C_COMPILER} -I ${tinc} -E ${membernm}.c
   )
   unset (tinc)
-  if (EXISTS txdr.out)
+  if (EXISTS ${membernm}.out)
     execute_process (
       OUTPUT_VARIABLE xdr_out
-      COMMAND grep "^ *[a-z_][a-z_]* *${membernm};" txdr.out
+      # unfortunately, the sed command will find other matches
+      # we'll try this and see how it works out.
+      # probably will switch to awk in the future.
+      COMMAND sed -n -e "/struct *${structnm}/,/^ *};/ p" ${membernm}.out
+      COMMAND grep "^ *[a-z_][a-z_]* *${membernm};"
       COMMAND sed -e "s,^ *,," -e "s, .*,,"
       COMMAND tr -d "\n"
     )
     set (xdr_${membernm} xdr_${xdr_out})
   endif()
-  file (REMOVE txdr.c)
-  if (EXISTS txdr.out)
-    file (REMOVE txdr.out)
+  file (REMOVE ${membernm}.c)
+  if (EXISTS ${membernm}.out)
+    file (REMOVE ${membernm}.out)
   endif()
-  unset (CMAKE_REQUIRED_INCLUDES)
+  set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 endmacro()
 
 macro (checkIncludeConflict hdra hdrb varnm)
   message ("-- Check for include conflict ${hdra} ${hdrb}")
-  # use execute_process rather than check_source_compiles
-  # so that earlier versions of cmake can be used.
-  file (WRITE tinc.c "#include <${hdra}>
-#include <${hdrb}>
-int main (int argc, char *argv []) {
-  return 0;
-}"
-  )
-  execute_process (
-    OUTPUT_QUIET
-    ERROR_QUIET
-    RESULT_VARIABLE tincres
-    COMMAND ${CMAKE_C_COMPILER} -c tinc.c
-  )
-  set (${varnm} 0)
-  if (tincres EQUAL 0)
-    set (${varnm} 1)
-  endif()
-  file (REMOVE tinc.c)
-  if (EXISTS tinc.o)
-    file (REMOVE tinc.o)
-  endif()
+  check_include_files ("${hdra};${hdrb}" ${varnm})
+#  # use execute_process rather than check_source_compiles
+#  # so that earlier versions of cmake can be used.
+#  file (WRITE tinc.c "#include <${hdra}>
+##include <${hdrb}>
+#int main (int argc, char *argv []) {
+#  return 0;
+#}"
+#  )
+#  execute_process (
+#    OUTPUT_QUIET
+#    ERROR_QUIET
+#    RESULT_VARIABLE tincres
+#    COMMAND ${CMAKE_C_COMPILER} -c tinc.c
+#  )
+#  set (${varnm} 0)
+#  if (tincres EQUAL 0)
+#    set (${varnm} 1)
+#  endif()
+#  file (REMOVE tinc.c)
+#  if (EXISTS tinc.o)
+#    file (REMOVE tinc.o)
+#  endif()
 endmacro()
 
 macro (checkvquotactlenabled)
@@ -421,12 +446,12 @@ check_include_file (mnttab.h _hdr_mnttab)
 # NetBSD
 check_include_file (quota.h _hdr_quota)
 
-set (CMAKE_REQUIRED_INCLUDES ${TIRPC_INCLUDE_DIRS})
+set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${TIRPC_INCLUDE_DIRS})
 check_include_file (rpc/auth.h _hdr_rpc_auth)
 check_include_file (rpc/rpc.h _hdr_rpc_rpc)
 # Linux: rquota.h includes rpc/rpc.h
 check_include_file (rpcsvc/rquota.h _hdr_rpcsvc_rquota)
-unset (CMAKE_REQUIRED_INCLUDES)
+set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 
 check_include_file (storage/Directory.h _hdr_storage_Directory)
 check_include_file (storage/Entry.h _hdr_storage_Entry)
@@ -442,7 +467,8 @@ check_include_file (time.h _hdr_time)
 check_include_file (tommath.h _hdr_tommath)
 check_include_file (libtommath/tommath.h _hdr_libtommath_tommath)
 check_include_file (ufs/quota.h _hdr_ufs_quota)
-check_include_file (ufs/ufs/quota.h _hdr_ufs_ufs_quota)
+# FreeBSD ufs/ufs/quota.h does not include its dependencies
+check_include_files ("sys/types.h;ufs/ufs/quota.h" _hdr_ufs_ufs_quota)
 check_include_file (unistd.h _hdr_unistd)
 check_include_file (util/string.h _hdr_util_string)
 check_include_file (wchar.h _hdr_wchar)
@@ -465,10 +491,10 @@ check_include_file (sys/types.h _sys_types)
 # SCO OpenServer/UnixWare require sys/mnttab.h for struct mnttab declaration.
 check_include_file (sys/mnttab.h _sys_mnttab)
 if (_sys_mnttab)
-  set (CMAKE_EXTRA_INCLUDE_FILES <sys/mnttab.h>)
+  check_include_files ("sys/mnttab.h;sys/mntent.h" _sys_mntent)
+else()
+  check_include_file ("sys/mntent.h" _sys_mntent)
 endif()
-check_include_file (sys/mntent.h _sys_mntent)
-unset (CMAKE_EXTRA_INCLUDE_FILES)
 
 check_include_file (sys/mount.h _sys_mount)
 check_include_file (sys/quota.h _sys_quota)
@@ -630,16 +656,17 @@ if (_hdr_ufs_quota)
   set (QUOTA_HDR "ufs/quota.h")
 endif()
 if (_hdr_ufs_ufs_quota)
-  set (QUOTA_HDR "ufs/ufs/quota.h")
+  # FreeBSD ufs/ufs/quota.h does not include its dependencies
+  set (QUOTA_HDR "sys/types.h;ufs/ufs/quota.h")
 endif()
 if (_sys_fs_ufs_quota)
   set (QUOTA_HDR "sys/fs/ufs_quota.h")
 endif()
 if (DEFINED QUOTA_HDR)
   message ("quota header: ${QUOTA_HDR}")
-  checkdqblk (${QUOTA_HDR})
-  checkPrototype_quotactl (${QUOTA_HDR})
-  check_symbol_exists (QCMD ${QUOTA_HDR} _define_QCMD)
+  checkdqblk ("${QUOTA_HDR}")
+  checkPrototype_quotactl ("${QUOTA_HDR}")
+  check_symbol_exists (QCMD "${QUOTA_HDR}" _define_QCMD)
 
   if (_hdr_linux_dqblk_xfs)
     # cmake doesn't properly handle the angle brackets when
@@ -664,7 +691,7 @@ endif()
 
 if (_hdr_rpcsvc_rquota)
   # linux rpcsvc/rquota.h includes rpc/rpc.h
-  set (CMAKE_REQUIRED_INCLUDES ${TIRPC_INCLUDE_DIRS})
+  set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${TIRPC_INCLUDE_DIRS})
   check_struct_has_member ("struct getquota_rslt" gqr_status
       rpcsvc/rquota.h _mem_struct_getquota_rslt_gqr_status)
   check_struct_has_member ("struct getquota_rslt" gqr_rquota
@@ -673,7 +700,7 @@ if (_hdr_rpcsvc_rquota)
       rpcsvc/rquota.h _mem_struct_rquota_rq_bhardlimit)
   check_struct_has_member ("struct getquota_args" gqa_uid
       rpcsvc/rquota.h _mem_struct_getquota_args_gqa_uid)
-  unset (CMAKE_REQUIRED_INCLUDES)
+  set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 
   memberxdr (rquota rq_bhardlimit)
   memberxdr (rquota rq_bsoftlimit)
@@ -753,7 +780,7 @@ else()
 endif()
 
 # HP-UX
-if (NOT _quotactl_pos_1 AND NOT _quotactl_pos_2)
+if (NOT _quotactl_pos_1 AND NOT _quotactl_pos_2 AND NOT _lib_vquotactl)
   check_prototype_definition (quotactl
       "int quotactl (int a, const char * b, uid_t c, void * d)"
       0
@@ -803,8 +830,8 @@ endif()
 
 # check_source_compiles requires a fairly recent version of cmake (3.19).
 # instead, assume that anything with cmake doesn't have broken headers
-set (_inc_conflict__hdr_time__sys_time 1)
-set (_inc_conflict__sys_quota__hdr_linux_quota 1)
+# set (_inc_conflict__hdr_time__sys_time 1)
+# set (_inc_conflict__sys_quota__hdr_linux_quota 1)
 
 checkIncludeConflict (time.h sys/time.h _inc_conflict__hdr_time__sys_time)
 checkIncludeConflict (sys/quota.h linux/quota.h _inc_conflict__sys_quota__hdr_linux_quota)
@@ -828,8 +855,8 @@ if (NOT DEFINED _use_math)
     set (_use_math DI_TOMMATH)
   endif()
   if (_hdr_gmp AND (_hdr_tommath OR _hdr_libtommath_tommath))
-    # use the more popular library if both are present
-    set (_use_math DI_GMP)
+    # use the library that can handle uint64.
+    set (_use_math DI_TOMMATH)
   endif()
 endif()
 if (NOT DEFINED _use_math)

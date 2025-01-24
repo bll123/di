@@ -13,6 +13,7 @@ Version 5 beta Timeline
 2025-1-23 Releasing a very early beta version.  Still a very long road ahead.
           The wiki is a bit raw.  Almost no cross-platform testing has
           been done.  The mkconfig tests are currently broken.
+2025-1-24 FreeBSD is now compiling w/cmake.  This fixes a lot of cmake issues.
 
 Version 5.x beta
 

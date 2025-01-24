@@ -742,9 +742,10 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 # if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
     tblocksz = sp->f_bsize;
 # endif
-    di_save_block_sizes (diptr, tblocksz, sp->f_blocks,
-        sp->f_bfree, sp->f_bavail);
-    di_save_inode_sizes (diptr, sp->f_files, sp->f_ffree, sp->f_ffree);
+    di_save_block_sizes (diptr, tblocksz, (di_ui_t) sp->f_blocks,
+        (di_ui_t) sp->f_bfree, (di_ui_t) sp->f_bavail);
+    di_save_inode_sizes (diptr, (di_ui_t) sp->f_files,
+        (di_ui_t) sp->f_ffree, (di_ui_t) sp->f_ffree);
 # if _mem_struct_statfs_f_fstypename
     stpecpy (diptr->strdata [DI_DISP_FSTYPE],
         diptr->strdata [DI_DISP_FSTYPE] + DI_FSTYPE_LEN,
@@ -850,10 +851,10 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 # if _mem_struct_statfs_f_bsize /* OSF 2.x */
     tblocksz = mntbufp [idx].f_bsize;
 # endif
-    di_save_block_sizes (diptr, tblocksz, mntbufp [idx].f_blocks,
-        mntbufp [idx].f_bfree, mntbufp [idx].f_bavail);
-    di_save_inode_sizes (diptr, mntbufp [idx].f_files,
-        mntbufp [idx].f_ffree, mntbufp [idx].f_ffree);
+    di_save_block_sizes (diptr, tblocksz, (di_ui_t) mntbufp [idx].f_blocks,
+        (di_ui_t) mntbufp [idx].f_bfree, (di_ui_t) mntbufp [idx].f_bavail);
+    di_save_inode_sizes (diptr, (di_ui_t) mntbufp [idx].f_files,
+        (di_ui_t) mntbufp [idx].f_ffree, (di_ui_t) mntbufp [idx].f_ffree);
 
     fstype = mntbufp [idx].f_type;
 # if ! _sys_fs_types && ! defined (INITMOUNTNAMES) \
@@ -1136,10 +1137,10 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
             tblocksz = sp->f_frsize;
         }
 
-        di_save_block_sizes (diptr, tblocksz, sp->f_blocks,
-            sp->f_bfree, sp->f_bavail);
-        di_save_inode_sizes (diptr, sp->f_files,
-            sp->f_ffree, sp->f_ffree);
+        di_save_block_sizes (diptr, tblocksz, (di_ui_t) sp->f_blocks,
+            (di_ui_t) sp->f_bfree, (di_ui_t) sp->f_bavail);
+        di_save_inode_sizes (diptr, (di_ui_t) sp->f_files,
+            (di_ui_t) sp->f_ffree, (di_ui_t) sp->f_ffree);
 
         stpecpy (diptr->strdata [DI_DISP_FILESYSTEM],
             diptr->strdata [DI_DISP_FILESYSTEM] + DI_FILESYSTEM_LEN,
@@ -1249,10 +1250,10 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         fsdbuf [idx].fd_path);
 
     /* ULTRIX keeps these fields in units of 1K byte */
-    di_save_block_sizes (diptr, 1024, fsdbuf [idx].fd_btot,
-        fsdbuf [idx].fd_bfree, fsdbuf [idx].fd_bfreen);
-    di_save_inode_sizes (diptr, fsdbuf [idx].fd_gtot,
-        fsdbuf [idx].fd_gfree, fsdbuf [idx].fd_gfree);
+    di_save_block_sizes (diptr, 1024, (di_ui_t) fsdbuf [idx].fd_btot,
+        (di_ui_t) fsdbuf [idx].fd_bfree, (di_ui_t) fsdbuf [idx].fd_bfreen);
+    di_save_inode_sizes (diptr, (di_ui_t) fsdbuf [idx].fd_gtot,
+        (di_ui_t) fsdbuf [idx].fd_gfree, (di_ui_t) fsdbuf [idx].fd_gfree);
 
     fstype = fsdbuf [idx].fd_fstype;
     if (fstype == GT_UNKWN) {
@@ -1606,9 +1607,10 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         diptr->strdata [DI_DISP_FSTYPE] + DI_FSTYPE_LEN,
         fsinfo.fsh_name);
     di_save_block_sizes (diptr, fsinfo.values [DI_QUOTA_BLOCK_SZ],
-        fsinfo.total_blocks, fsinfo.free_blocks, fsinfo.free_blocks);
-    di_save_inode_sizes (diptr, fsinfo.total_nodes,
-        fsinfo.free_nodes, fsinfo.free_nodes);
+        (di_ui_t) fsinfo.total_blocks, (di_ui_t) fsinfo.free_blocks,
+        (di_ui_t) fsinfo.free_blocks);
+    di_save_inode_sizes (diptr, (di_ui_t) fsinfo.total_nodes,
+        (di_ui_t) fsinfo.free_nodes, (di_ui_t) fsinfo.free_nodes);
 # if defined (MNT_RDONLY)
     if ( (fsinfo.flags & MNT_RDONLY) == MNT_RDONLY)
     {

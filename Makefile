@@ -95,7 +95,7 @@ test:
 
 .PHONY: switcher
 switcher:
-	@cmvers=`cmake --version 2>/dev/null`; \
+	@-cmvers=`cmake --version 2>/dev/null`; \
 	cmmajv=`echo $${cmvers} | \
 	  $(SED) -n -e '/version/ s,[^0-9]*\([0-9]*\)\..*,\1, p'` ; \
 	cmminv=`echo $${cmvers} | \
@@ -170,6 +170,7 @@ cmake-sanitize:
 
 # parallel doesn't seem to work under msys2
 # cmake doesn't seem to support parallel under *BSD
+#   (passing -j w/o arguments, and *BSD complains)
 .PHONY: cmake-all
 cmake-all:
 	@case $$(uname -s) in \
@@ -178,7 +179,7 @@ cmake-all:
 	    $(MAKE) cmake-windows; \
 	    $(MAKE) cmake-build; \
             ;; \
-	  BSD*) \
+	  *BSD*) \
 	    COMP=$(CC) \
 	    $(MAKE) cmake-unix; \
 	    $(MAKE) cmake-build; \
@@ -193,7 +194,7 @@ cmake-all:
 .PHONY: cmakeclang
 cmakeclang:
 	case $$(uname -s) in \
-	  BSD*) \
+	  *BSD*) \
 	    COMP=$(CC) \
 	    $(MAKE) cmake-unix; \
 	    $(MAKE) cmake-build; \
@@ -224,7 +225,7 @@ cmake-unix:
 		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
 		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
-		-S . -B $(BUILDDIR) -Werror=deprecated
+		-S . -B $(BUILDDIR) -Werror=deprecated 
 
 # internal use
 .PHONY: cmake-windows

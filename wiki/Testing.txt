@@ -23,6 +23,9 @@ This documentation was created for the upcoming version 5.x.
  FreeBSD 9.1 | - | - | - | - | -
  FreeBSD 10.3 | - | - | - | - | -
  FreeBSD 11 | - | - | - | - | -
+ FreeBSD 13 | - | - | - | - | -
+ FreeBSD 13.4 | - | - | - | - | -
+ FreeBSD 14.2 | 4.99.1<br>2025-1-24 | - | - | - | -
  MirBSD 10 | - | - | - | - | -
  NetBSD 1.62 | - | - | - | - | -
  NetBSD 2.0 | - | - | - | - | -
@@ -33,6 +36,7 @@ This documentation was created for the upcoming version 5.x.
  NetBSD 6.0 | - | - | - | - | -
  NetBSD 7.0.1 | - | - | - | - | -
  NetBSD 9.0 | - | - | - | - | -
+ NetBSD 10.1 | - | - | - | - | -
  OpenBSD 4.4 | - | - | - | - | -
  OpenBSD 4.5 | - | - | - | - | -
  OpenBSD 4.6 | - | - | - | - | -
@@ -43,6 +47,7 @@ This documentation was created for the upcoming version 5.x.
  OpenBSD 5.2 | - | - | - | - | -
  OpenBSD 6.1 | - | - | - | - | -
  OpenBSD 6.3 | - | - | - | - | -
+ OpenBSD 7.6 | - | - | - | - | -
  __Linux: Arch Based__| | | | | -
  Manjaro 23 | - | - | - | - | -
  __Linux: Debian Based__ | | | | |
@@ -112,7 +117,5 @@ This documentation was created for the upcoming version 5.x.
  __Windows:__| | | | | -
  Cygwin | - | - | - | - | -
  MSys 2| - | - | - | - | -
- Windows 10 | - | - | - | - | -
- Windows 11 | - | - | - | - | -
 
 [Wiki Home](Home)

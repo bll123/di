@@ -34,9 +34,13 @@ INSTALLATION
     The build will use cmake if it is available and recent enough,
     otherwise the mkconfig configuration tool will be used.
 
-    If GMP or libtommath is found, they will be used (GMP as priority),
+    If GMP or libtommath is found, they will be used,
     otherwise the numerics will be handled using standard C data types
     (long double, double, etc.).
+
+    The GMP library only seems to accept 'unsigned long', and there may
+    be a loss of precision on some systems.  For this reason, if both
+    libraries are found, libtommath will be used by preference.
 
     To turn off the use of the multi-precision libraries;
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_INTERNAL
@@ -63,11 +67,11 @@ BUG REPORTS
 REQUIREMENTS
 
   cmake build
-    make cmake sed msgfmt grep tr
+    make cmake sed msgfmt grep tr pkg-config
     C or C++ compiler
   mkconfig build
-    make msgfmt cat chmod ln mkdir mv rm sed test
-        cat egrep expr grep rm sed sort test
+    make msgfmt cat chmod ln mkdir mv rm sed test pkg-config
+        cat expr grep rm sed sort test
     bourne/ksh/bash shell
     C compiler
     awk (mawk/nawk/gawk)
