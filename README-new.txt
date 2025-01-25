@@ -54,12 +54,18 @@ INSTALLATION
 
 BUG REPORTS
 
-    I want to see the output from 'di -A -a -X 5',
+    For build issues, capture the output from `make`, and the files
+    listed below.
+
+    For runtime issues, I want to see the output from 'di -A -a -X 5',
     output from your standard df command (as verbose as possible),
-    and:
-      cmake: build/config.h
-      mkconfig: mkc_files/mkconfig.log, mkc_files/mkconfig_env.log,
-                mkc_files/mkc_compile.log, di.env, and config.h
+
+    Files to include in your report:
+
+    cmake: build/config.h, build/CMakeOutput.log,
+           build/CMakeError.log
+    mkconfig: mkc_files/mkconfig.log, mkc_files/mkconfig_env.log,
+              mkc_files/mkc_compile.log, di.env, and config.h
 
     Open a ticket at : https://sourceforge.net/p/diskinfo-di/tickets/
     Or e-mail : brad.lanam.di_at_gmail.com

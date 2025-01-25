@@ -17,7 +17,8 @@ was posted on 1994-02-27 to the _alt.sources_ Usenet group.
 
 In the beginning I used SCCS as the source code control system, then
 RCS, and now Mercurial.  My standard desktop system was at first
-System&nbsp;V.4, then Solaris, then Linux.
+System&nbsp;V.4, then Solaris (2.4-8), then Linux (Debian, Linux Mint,
+MX Linux (IIRC)).
 
 At first, the makefile used the methods of the time.  There was a
 target for each platform and the code had `#if` statements based on
@@ -126,7 +127,7 @@ capable.
 
 At the same time, there has been something I've been wanting to do
 with _di_ for a long time.  Create a proper library and API.  The main
-_di_ program uses the new shared library and API to create the output.
+_di_ program now uses the new shared library and API to create the output.
 
 ###### Acknowledgements
 
