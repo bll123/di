@@ -1,0 +1,8 @@
+# debian hosts
+bll-g7 local bll-g7
+mxlinux21 vm 192.168.2.27
+# BSD hosts
+freebsd142 vm 192.168.2.23
+# MacOS hosts
+bll-mac.local remote bll-mac.local
+bll-mac-m1.local remote bll-mac-m1.local

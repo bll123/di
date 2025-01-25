@@ -6,9 +6,6 @@
 #include "config.h"
 
 /* first some system stuff to get various sizes */
-//#if _hdr_stdlib
-//# include <stdlib.h>
-//#endif
 #if _hdr_stddef
 # include <stddef.h>
 #endif
@@ -21,10 +18,6 @@
 #if _hdr_strings
 # include <strings.h>
 #endif
-//#if _hdr_fcntl && ! defined (DI_INC_FCNTL_H)  /* xenix */
-//# define DI_INC_FCNTL_H
-//# include <fcntl.h>
-//#endif
 #if _sys_file
 # include <sys/file.h>
 #endif

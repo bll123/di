@@ -26,3 +26,4 @@ TODO
 ^mkconfig\.link$
 ^mkconfig\.old$
 ^mkc_files/
+^test_results/

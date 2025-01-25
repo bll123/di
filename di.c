@@ -139,7 +139,6 @@ static di_disp_text_t disptext [] =
   { "R", "Ronna", "Ri", "Ronni" },
   { "Q", "Quetta", "Qi", "Quetti" }
 };
-#define DI_DISPTEXT_SZ ( (int) (sizeof (disptext) / sizeof (di_disp_text_t)))
 
 static void di_display_data (void *);
 static void di_display_header (void *, di_disp_info_t *);
@@ -175,6 +174,9 @@ main (int argc, char * argv [])
       exit (0);
     }
     case DI_EXIT_NORM: {
+      break;
+    }
+    default: {
       break;
     }
   }

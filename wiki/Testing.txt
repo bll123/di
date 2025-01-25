@@ -4,6 +4,10 @@ This documentation was created for the upcoming version 5.x.
 
 ### Testing
 
+4.99.x : 2025-1 : At this time, an entry means that _di_ compiles and
+runs.  No rigorous tests have been run.
+
+
  Platform | cmake | mkconfig | quotas | NFS quotas | Notes
  -------- | ----- | -------- | ------ | ---------- | -----
  __BSD:__| | | | |
@@ -25,7 +29,7 @@ This documentation was created for the upcoming version 5.x.
  FreeBSD 11 | - | - | - | - | -
  FreeBSD 13 | - | - | - | - | -
  FreeBSD 13.4 | - | - | - | - | -
- FreeBSD 14.2 | 4.99.1<br>2025-1-24 | - | - | - | -
+ FreeBSD 14.2 | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | -
  MirBSD 10 | - | - | - | - | -
  NetBSD 1.62 | - | - | - | - | -
  NetBSD 2.0 | - | - | - | - | -
@@ -61,8 +65,8 @@ This documentation was created for the upcoming version 5.x.
  Linux Mint 18.2 | - | - | - | - | -
  Linux Mint 19 | - | - | - | - | -
  Linux Mint 21 | - | - | - | - | -
- MX Linux 21<br>(Debian 11)| - | - | - | - | -
- MX Linux 23<br>(Debian 12)| 4.99.0<br>2025-1-23 | 4.99.0<br>2025-1-23 | - | - | Primary Development
+ MX Linux 21<br>(Debian 11)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | -
+ MX Linux 23<br>(Debian 12)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | Primary Development
  Ubuntu 14.04<br>(32-bit) | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | - | - | - | - | -
@@ -101,7 +105,8 @@ This documentation was created for the upcoming version 5.x.
  MacOS Big Sur | - | - | - | - | -
  MacOS Ventura | - | - | - | - | -
  MacOS Sonoma | - | - | - | - | -
- MacOS Sequoia | - | - | - | - | -
+ MacOS Sequoia (intel) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | -
+ MacOS Sequoia (m1) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | -
  __Other:__ | | | | |
  Haiku r1a3 | - | - | - | - | -
  Tru64 5.1B | - | - | - | - | polarhome

@@ -156,8 +156,6 @@ static bool_t xdr_quota_rslt (XDR *, struct getquota_rslt *);
 static void diquota_nfs (di_quota_t *);
 #endif
 
-extern int debug;
-
 #ifdef BLOCK_SIZE           /* linux */
 # define DI_QUOT_BLOCK_SIZE BLOCK_SIZE
 #else
@@ -631,15 +629,25 @@ diquota_nfs (di_quota_t *diqinfo)
     return;
   }
   rqclnt->cl_auth = authunix_create_default ();
+#pragma clang diagnostic push
+/* how many ways does clang complain about valid code? */
+#pragma clang diagnostic ignored "-Wincompatible-function-pointer-types"
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#pragma clang diagnostic ignored "-Wcast-function-type"
   clnt_stat = clnt_call (rqclnt, (unsigned long) RQUOTAPROC_GETQUOTA,
       (xdrproc_t) xdr_quota_get, (caddr_t) &args,
       (xdrproc_t) xdr_quota_rslt, (caddr_t) &result, timeout);
+#pragma clang diagnostic pop
   if (clnt_stat != RPC_SUCCESS) {
     if (debug > 2) {
       printf ("quota: nfs: not success\n");
     }
     if (rqclnt->cl_auth) {
+/* MacOS does not declare ah_destroy with modern function signatures */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-non-prototype"
       auth_destroy (rqclnt->cl_auth);
+#pragma clang diagnostic pop
     }
     clnt_destroy (rqclnt);
     return;
@@ -688,7 +696,11 @@ diquota_nfs (di_quota_t *diqinfo)
   }
 
   if (rqclnt->cl_auth) {
+/* MacOS does not declare ah_destroy with modern function signatures */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-non-prototype"
     auth_destroy (rqclnt->cl_auth);
+#pragma clang diagnostic pop
   }
   clnt_destroy (rqclnt);
 

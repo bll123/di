@@ -49,6 +49,9 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   add_compile_options (-Wno-format-truncation)
 endif()
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+  add_compile_options (-Wno-extra-semi-stmt)
+  # unsafe buffer usage print way too many incorrect warnings.
+  add_compile_options (-Wno-unsafe-buffer-usage)
   add_compile_options (-Wno-poison-system-directories)
   add_compile_options (-Wno-shift-sign-overflow)
   add_compile_options (-Wno-pragma-pack)
@@ -179,7 +182,6 @@ include (CheckIncludeFile)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckLinkerFlag)
-include (CheckSourceCompiles)
 include (CheckStructHasMember)
 include (CheckSymbolExists)
 include (CheckTypeSize)
@@ -843,25 +845,31 @@ check_symbol_exists (IOCTL_STORAGE_CHECK_VERIFY2 winioctl.h
 check_symbol_exists (MCTL_QUERY sys/mntctl.h _define_MCTL_QUERY)
 check_symbol_exists (S_ISLNK sys/stat.h _define_S_ISLNK)
 
-if (DEFINED DI_USE_MATH AND NOT DI_USE_MATH STREQUAL "")
-  # must be one of DI_INTERNAL, DI_GMP, DI_TOMMATH
-  set (_use_math ${DI_USE_MATH})
-endif()
-if (NOT DEFINED _use_math)
-  if (_hdr_gmp AND NOT (_hdr_tommath OR _hdr_libtommath_tommath))
-    set (_use_math DI_GMP)
+if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
+  if (_hdr_gmp AND
+      NOT (_hdr_tommath OR _hdr_libtommath_tommath))
+    set (DI_USE_MATH DI_GMP)
   endif()
-  if ((_hdr_tommath OR _hdr_libtommath_tommath) AND NOT _hdr_gmp)
-    set (_use_math DI_TOMMATH)
+  # at the moment, libtommath in macports has a broken pkg-config
+  if ((_hdr_tommath OR _hdr_libtommath_tommath) AND
+      NOT _hdr_gmp AND
+      NOT APPLE)
+    set (DI_USE_MATH DI_TOMMATH)
   endif()
   if (_hdr_gmp AND (_hdr_tommath OR _hdr_libtommath_tommath))
     # use the library that can handle uint64.
-    set (_use_math DI_TOMMATH)
+    if (APPLE)
+      # at the moment, libtommath in macports has a broken pkg-config
+      set (DI_USE_MATH DI_GMP)
+    else()
+      set (DI_USE_MATH DI_TOMMATH)
+    endif()
   endif()
 endif()
-if (NOT DEFINED _use_math)
-  set (_use_math DI_INTERNAL)
+if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
+  set (DI_USE_MATH DI_INTERNAL)
 endif()
+set (_use_math ${DI_USE_MATH})
 message ("math-library: ${_use_math}")
 
 configure_file (config.h.in config.h)
@@ -984,7 +992,6 @@ target_link_libraries (getoptn_test PRIVATE
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 
 # need to build the .mo files
-
 
 #### install
 

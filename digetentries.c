@@ -121,9 +121,6 @@
 #if _hdr_gui_window                 /* Syllable */
 # include <gui/window.h>            /* gack! */
 #endif
-#if _hdr_storage_volumes            /* Syllable */
-# include <storage/volumes.h>       /* class os::Volumes */
-#endif
 #if _hdr_util_string                /* Syllable */
 # include <util/string.h>           /* os::String - to get mount name */
 #endif
@@ -180,8 +177,6 @@ extern "C" {
 #if defined (__QNX__)
 static int di_getQNXDiskEntries (char *ipath, di_disk_info_t **diskInfo, int *diCount);
 #endif
-
-extern int debug;
 
 /********************************************************/
 

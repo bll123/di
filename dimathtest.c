@@ -267,7 +267,7 @@ main (int argc, char *argv [])
   }
 
   /* percentage tests */
-  ival = 1024 * 1024 / 10;
+  ival = 1024 * 1024 / 100;
   dinum_set_u (&a, ival);
   dinum_set_u (&b, 1024 * 1024);
   dval = dinum_perc (&a, &b);

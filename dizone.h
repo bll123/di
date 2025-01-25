@@ -41,8 +41,8 @@ typedef struct {
 typedef struct {
   Uid_t           uid;
   zoneid_t        myzoneid;
-  di_zone_summ_t   *zones;
-  Uint_t          zoneCount;
+  di_zone_summ_t  *zones;
+  unsigned int    zoneCount;
   int             globalIdx;
 } di_zone_info_t;
 

@@ -5,8 +5,8 @@
 #  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
-DI_VERSION = 4.99.1
-DI_LIBVERSION = 4.99.1
+DI_VERSION = 4.99.2
+DI_LIBVERSION = 4.99.2
 DI_SOVERSION = 4
 DI_RELEASE_STATUS = beta
 
@@ -80,7 +80,6 @@ MKC_ECHO =
 ###
 # generic targets
 
-# checks the cmake version, and runs the
 .PHONY: all
 all:
 	@$(MAKE) -e TARGET=$@ switcher
@@ -93,8 +92,10 @@ install:
 test:
 	@$(MAKE) -e TARGET=$@ switcher
 
+# checks the cmake version, and builds using either cmake or mkconfig
 .PHONY: switcher
 switcher:
+	@if [ "$(PREFIX)" = "" ]; then echo "No prefix set"; exit 1; fi
 	@-cmvers=`cmake --version 2>/dev/null`; \
 	cmmajv=`echo $${cmvers} | \
 	  $(SED) -n -e '/version/ s,[^0-9]*\([0-9]*\)\..*,\1, p'` ; \
@@ -225,7 +226,7 @@ cmake-unix:
 		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
 		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
-		-S . -B $(BUILDDIR) -Werror=deprecated 
+		-S . -B $(BUILDDIR) -Werror=deprecated
 
 # internal use
 .PHONY: cmake-windows
@@ -276,7 +277,7 @@ mkc-sh:	$(MKC_ENV)
 		DI_LIBVERSION=$(DI_LIBVERSION) \
 		DI_SOVERSION=$(DI_SOVERSION) \
 		DI_RELEASE_STATUS=$(DI_RELEASE_STATUS) \
-                di-programs
+                mkc-di-programs
 
 .PHONY: mkc-perl
 mkc-perl:	$(MKC_ENV)
@@ -287,7 +288,7 @@ mkc-perl:	$(MKC_ENV)
 		DI_SOVERSION=$(DI_SOVERSION) \
 		DI_RELEASE_STATUS=$(DI_RELEASE_STATUS) \
 		$(MAKE) -e MKCONFIG_TYPE=perl \
-                di-programs
+                mkc-di-programs
 
 .PHONY: test
 mkc-test:		tests.done
@@ -299,21 +300,28 @@ mkc-install:
 	$(MAKE) -e mkc-all
 	. ./$(MKC_ENV);$(MAKE) -e \
 		PREFIX=$(PREFIX) \
-		install-di install-man
+		mkc-install-di mkc-install-man
+
+.PHONY: mkc-install-test
+mkc-install-test:
+	$(MAKE) -e mkc-all
+	. ./$(MKC_ENV);$(MAKE) -e \
+		PREFIX=$(PREFIX) \
+		mkc-install-di mkc-install-man mkc-install-ditest
 
 ###
 # installation
 
 .PHONY: build.po
-build-po:
+mkc-build-po:
 	-. ./$(MKC_ENV); \
 		(cd po >/dev/null && for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
 		$(MSGFMT) -o $$j.mo $$i; \
 	done)
 
-.PHONY: install-po
-install-po: 	build-po
+.PHONY: mkc-install-po
+mkc-install-po: 	mkc-build-po
 	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
 	-(cd po >/dev/null && for i in *.po; do \
 		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
@@ -325,8 +333,8 @@ install-po: 	build-po
 		$(RM) -f $$j.mo; \
 		done)
 
-.PHONY: install-pc
-install-pc:
+.PHONY: mkc-install-pc
+mkc-install-pc:
 	$(TEST) -d $(INST_PKGCDIR) || $(MKDIR) -p $(INST_PKGCDIR)
 	$(CAT) di.pc.in | \
 	  $(SED) -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
@@ -335,16 +343,16 @@ install-pc:
 	      -e 's,@DI_VERSION@,$(DI_VERSION),g' \
 	  > $(INST_PKGCDIR)/di.pc
 
-.PHONY: install-di
-install-di:
+.PHONY: mkc-install-di
+mkc-install-di:
 	$(TEST) -d $(INST_BINDIR) || $(MKDIR) -p $(INST_BINDIR)
 	$(TEST) -d $(INST_LIBDIR) || $(MKDIR) -p $(INST_LIBDIR)
 	$(TEST) -d $(INST_INCDIR) || $(MKDIR) -p $(INST_INCDIR)
 	$(CP) -f di$(EXE_EXT) $(INST_BINDIR)
 	$(CP) -f di.h $(INST_INCDIR)
-	-$(MAKE) install-po
-	$(MAKE) install-man
-	$(MAKE) install-pc
+	-$(MAKE) mkc-install-po
+	$(MAKE) mkc-install-man
+	$(MAKE) mkc-install-pc
 	@sym=T ; \
 	case `uname -s` in \
 	  Darwin) \
@@ -363,10 +371,16 @@ install-di:
 	  (cd $(INST_LIBDIR); $(LN) -sf $${libnm} libdi$(SHLIB_EXT)) ; \
 	fi
 
-.PHONY: install-man
-install-man:
+.PHONY: mkc-install-man
+mkc-install-man:
 	-$(TEST) -d $(INST_MANDIR)/man1 || $(MKDIR) -p $(INST_MANDIR)/man1
 	$(CP) -f man/di.1 $(INST_MANDIR)/man1/$(MAN_TARGET)
+
+.PHONY: mkc-install-ditest
+mkc-install-ditest:
+	$(TEST) -d $(INST_BINDIR) || $(MKDIR) -p $(INST_BINDIR)
+	$(CP) -f dimathtest$(EXE_EXT) $(INST_BINDIR)
+	$(CP) -f getoptn_test$(EXE_EXT) $(INST_BINDIR)
 
 ###
 # mkc environment
@@ -389,8 +403,8 @@ os2-gcc:
 ###
 # programs
 
-.PHONY: di-programs
-di-programs:	di$(EXE_EXT) dimathtest$(EXE_EXT) getoptn_test$(EXE_EXT)
+.PHONY: mkc-di-programs
+mkc-di-programs:	di$(EXE_EXT) dimathtest$(EXE_EXT) getoptn_test$(EXE_EXT)
 
 ###
 # configuration file
@@ -433,7 +447,7 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 		-r $(MKC_REQLIB) \
 		-o di$(EXE_EXT) \
 		$(MAINOBJECTS) \
-		libdi$(SHLIB_EXT) \
+		-L . -ldi \
 		-R $(LIBDIR)
 
 dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
@@ -487,8 +501,8 @@ getoptn_test$(OBJ_EXT):	getoptn.c
 ###
 # regression testing
 
-.PHONY: all-test
-all-test:	tests.done
+.PHONY: mkc-test-all
+mkc-test-all:	tests.done
 
 tests.done: $(MKC_DIR)/runtests.sh
 	@echo "## running tests"
@@ -497,8 +511,8 @@ tests.done: $(MKC_DIR)/runtests.sh
 	touch tests.done
 
 # needs environment
-.PHONY: rtest-env
-rtest-env:
+.PHONY: mkc-r-test-env
+mkc-r-test-env:
 	@echo "$(_MKCONFIG_SYSTYPE)"
 	@echo "$(_MKCONFIG_SYSREV)"
 	@echo "$(_MKCONFIG_SYSARCH)"
@@ -511,8 +525,8 @@ rtest-env:
 	@echo "$(EXE_EXT)"
 	@echo "$(XMSGFMT)"
 
-.PHONY: test-env
-test-env:
+.PHONY: mkc-test-env
+mkc-test-env:
 	@echo "cc: $(CC)"
 	@echo "make: $(MAKE)"
 

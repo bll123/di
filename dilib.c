@@ -61,9 +61,8 @@
 #if _sys_file
 # include <sys/file.h>
 #endif
-#if _hdr_fcntl \
-    && ! defined (DI_INC_FCNTL_H)    /* xenix */
-# define DI_INC_FCNTL_H
+#if _hdr_fcntl && ! defined (DI_INC_FCNTL_H)    /* xenix */
+// # define DI_INC_FCNTL_H
 # include <fcntl.h>     /* O_RDONLY, O_NOCTTY */
 #endif
 
@@ -1543,9 +1542,16 @@ diCompare (const di_opt_t *diopts, const char *sortType,
             temp = dinum_cmp (&d1->values [DI_SPACE_TOTAL], &d2->values [DI_SPACE_TOTAL]);
             break;
           }
+          default: {
+            break;
+          }
         }
 
         rc *= sortOrder;
+        break;
+      }
+
+      default: {
         break;
       }
     } /* switch on sort type */

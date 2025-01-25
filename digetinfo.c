@@ -93,8 +93,6 @@ extern "C" {
 }
 #endif
 
-extern int debug;
-
 /********************************************************/
 
 #if _lib_statvfs \

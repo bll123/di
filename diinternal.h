@@ -71,7 +71,7 @@ typedef struct {
 } di_data_t;
 
 /* dilib.c */
-// ### should these be internal?
+extern int debug;
 extern const char *getPrintFlagText (int);
 
 /* digetentries.c */

@@ -4,8 +4,6 @@ This documentation was created for the upcoming version 5.x.
 
 ### Known Issues
 
-* MacOS: Compile warnings: The auth_destroy macro calls ah_destroy, which
-does not have a modern function signature.
 * MacOS: The libtommath library available via MacPorts currently has
 issues (see: https://trac.macports.org/ticket/71791 )
 * DragonFly BSD: If quotas are not turned on in the kernel

@@ -41,7 +41,7 @@
 # include <sys/types.h>
 #endif
 
-#if TEST_GETOPTN
+#if defined (TEST_GETOPTN)
 # include <math.h>
 #endif
 

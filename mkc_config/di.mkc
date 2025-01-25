@@ -300,12 +300,16 @@ include
 #define DI_GMP 1
 #define DI_TOMMATH 2
 #if ! defined (DI_USE_MATH)
-# define DI_USE_MATH DI_INTERNAL
-# if defined (_pkg_libs_libtommath)
-#  define DI_USE_MATH DI_TOMMATH
-# endif
 # if defined (_pkg_libs_gmp)
 #  define DI_USE_MATH DI_GMP
+# endif
+/* at the moment, libtommath in macports has a broken pkg-config */
+# if defined (_pkg_libs_libtommath) && ! __APPLE__
+#  undef DI_USE_MATH
+#  define DI_USE_MATH DI_TOMMATH
+# endif
+# if ! defined (DI_USE_MATH)
+#  define DI_USE_MATH DI_INTERNAL
 # endif
 #endif
 #define _use_math DI_USE_MATH
@@ -320,12 +324,6 @@ include
 # define Size_t size_t
 #else
 # define Size_t unsigned long
-#endif
-
-#if _typ_uint_t
-# define Uint_t uint_t
-#else
-# define Uint_t unsigned int
 #endif
 
 #if _typ_uid_t

@@ -76,8 +76,6 @@ static di_valid_scale_t validscale [] =
 #define DI_POSIX_FORMAT         "sbuvpm"
 #define DI_ALL_FORMAT           "mts\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 
-extern int debug;
-
 static void processStringArgs (const char *, char *, di_opt_t *, char *, Size_t);
 static int  processArgs (int, char * argv [], di_opt_t *, char *, Size_t);
 static int  parseList (di_strarr_t *, char *);
@@ -111,7 +109,11 @@ processStringArgs (const char *progname, char *ptr, di_opt_t *diopts,
 
     tptr = strtok (dptr, DI_ARGV_SEP);
     nargc = 1;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
+    /* sigh, why does the compiler think I put a cast in? */
     nargv [0] = (char *) progname;
+#pragma clang diagnostic pop
     while (tptr != (char *) NULL) {
       if (nargc >= DI_MAX_ARGV) {
         break;
@@ -327,7 +329,7 @@ processArgs (int argc, char * argv [], di_opt_t *diopts,
   int           errorCount;
   struct pa_tmp padata;
 
-    /* the really old compilers don't have automatic initialization */
+  /* the really old compilers don't have automatic initialization */
   static getoptn_opt_t opts [] = {
 /* 0 */
 #define OPT_INT_A 0
@@ -591,13 +593,13 @@ processArgs (int argc, char * argv [], di_opt_t *diopts,
         0,
         NULL  /*processOptions*/ },
 /* 47 */
-#define OPT_INT_w 47
+/* #define OPT_INT_w 47 */
     { "-w",     GETOPTN_IGNORE_ARG,
         NULL,
         0,
         NULL },
 /* 48 */
-#define OPT_INT_W 48
+/* #define OPT_INT_W 48 */
     { "-W",     GETOPTN_IGNORE_ARG,
         NULL,
         0,

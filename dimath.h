@@ -65,7 +65,10 @@
 #endif
 
 #if _use_math == DI_GMP
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wsign-conversion"
 # include <gmp.h>
+# pragma clang diagnostic pop
   typedef mpz_t dinum_t;
   typedef mpq_t didbl_t;
 #elif _use_math == DI_TOMMATH
@@ -414,8 +417,8 @@ dinum_scale (dinum_t *r, dinum_t *val)
   dval /= (double) DI_SCALE_PREC;
 # endif
 # if defined (DI_INTERNAL_DOUBLE)
-  if (*val == 0.0) {
-    return 0.0;
+  if (*val == (dinum_t) 0.0) {
+    return (dinum_t) 0.0;
   }
   dval = (double) (*r / *val);
 # endif
@@ -466,8 +469,13 @@ dinum_perc (dinum_t *r, dinum_t *val)
   mp_clear (&quot);
   mp_clear (&rem);
 #else
+# if defined (DI_INTERNAL_DOUBLE)
+  dval = (double) (*r / *val);
+# endif
+# if defined (DI_INTERNAL_INT)
   /* in the case of a uint, simply convert and divide */
   dval = (double) *r / (double) *val;
+# endif
   dval *= 100.0;
 #endif
 

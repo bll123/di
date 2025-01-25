@@ -241,12 +241,6 @@
 # define Size_t unsigned long
 #endif
 
-#if _typ_uint_t
-# define Uint_t uint_t
-#else
-# define Uint_t unsigned int
-#endif
-
 #if _typ_uid_t
 # define Uid_t uid_t
 #else

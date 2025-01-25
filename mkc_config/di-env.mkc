@@ -34,6 +34,8 @@ if UsingGCC == _MKCONFIG_USING_GCC Y
   addcflag -Wno-format-truncation
 endif
 if UsingCLANG == _MKCONFIG_USING_CLANG Y
+  addcflag -Wno-extra-semi-stmt
+  addcflag -Wno-unsafe-buffer-usage
   addcflag -Wno-poison-system-directories
   addcflag -Wno-shift-sign-overflow
   addcflag -Wno-pragma-pack

@@ -1,3 +1,4 @@
 
 * FreeBSD
-    * pkg install pkgconf gmp libtommath
+    * pkg install pkgconf gmp libtommath ksh bash mksh pdksh
+
