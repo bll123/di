@@ -12,6 +12,8 @@ LOCKB=test_results/VM_B
 LOCKC=test_results/VM_C
 locklist="${LOCKA} ${LOCKB}"
 
+rsltdir=$(pwd)/test_results/${host}
+
 function remotebldrun  {
   scp -q ${tarfn} tests/dibldrun.sh ${ipaddr}:
   ssh ${ipaddr} "chmod a+rx dibldrun.sh"
@@ -26,10 +28,6 @@ function remotebldrun  {
     ssh ${ipaddr} "rm -rf di-[45].*.tar.gz ${didir} dibldrun.sh"
   fi
 }
-
-rsltdir=$(pwd)/test_results/${host}
-test -d ${rsltdir} && rm -rf ${rsltdir}
-mkdir -p ${rsltdir}
 
 if [[ ${type} == local ]]; then
   test -d tmp || mkdir tmp

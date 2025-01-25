@@ -22,10 +22,12 @@ if [[ $type != vm ]];then
   exit 1
 fi
 
+stop=F
 echo -n "Start? "
 read answer
 case $answer in
   y*|Y*)
+    stop=T
     ./tests/startvm.sh ${host} ${ipaddr} F
     rc=$?
     if [[ $rc -ne 0 ]]; then
@@ -33,8 +35,11 @@ case $answer in
     fi
     ;;
 esac
+ssh ${ipaddr} "test -d .ssh || mkdir .ssh"
 scp $HOME/.ssh/authorized_keys ${ipaddr}:.ssh
 ssh -l root ${ipaddr} "test -d .ssh || mkdir .ssh"
 scp $HOME/.ssh/authorized_keys root@${ipaddr}:.ssh
-./tests/stopvm.sh ${host} ${ipaddr}
+if [[ $stop == T ]]; then
+  ./tests/stopvm.sh ${host} ${ipaddr}
+fi
 exit 0

@@ -203,6 +203,7 @@
 #define DI_VERSION "${DI_VERSION}"
 #define DI_RELEASE_STATUS "${DI_RELEASE_STATUS}"
 #define DI_USE_MATH ${DI_USE_MATH}
+#define DI_BUILD_SYS "cmake"
 
 #if ! defined (DI_PREFIX)
 # error "PREFIX is not set"

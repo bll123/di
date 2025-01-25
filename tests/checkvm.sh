@@ -46,6 +46,6 @@ fi
 
 ./tests/stopvm.sh ${host} ${ipaddr}
 if [[ $grc -eq 0 ]]; then
-  echO "${host}: OK"
+  echo "${host}: OK"
 fi
 exit $grc

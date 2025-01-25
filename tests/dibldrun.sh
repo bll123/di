@@ -35,12 +35,12 @@ bldrun () {
 
   echo "-- $(date +%T) ${host}: build, install and run with ${tag}"
   make distclean
-  make PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
+  make -e PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
   c=`grep -E '(warning|error)' di-${tag}-bld.out | grep -v 'error[=,]' | wc -l`
   if [ $c -gt 0 ]; then
     echo "== $(date +%T) ${host}: ${tag}: warnings or errors found"
   fi
-  make PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
+  make -e PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
   ./x/bin/di -a -d g -f stbuf1cvpB2m -t > di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
@@ -79,4 +79,3 @@ fi
 echo "-- $(date +%T) ${host}: finish"
 echo "done $(date +%T)" > di-finish.out
 exit 0
-

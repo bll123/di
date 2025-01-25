@@ -294,6 +294,7 @@ include
 # error "PREFIX is not set"
 #endif
 
+#define DI_BUILD_SYS "mkconfig"
 #define DI_LOCALE_DIR DI_PREFIX "/share/locale"
 
 #define DI_INTERNAL 0

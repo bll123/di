@@ -1,8 +1,38 @@
+###
+# https://portal.cfarm.net/machines/list/
+###
 # debian hosts
 bll-g7 local bll-g7
 mxlinux21 vm 192.168.2.27
+ubuntu2204 vm 192.168.2.183
+cfarm117.cfram.net remote cfarm117.cfram.net      # debian 9.13
+###
+# red hat linux hosts
+fedora38-clean vm 192.168.2.90
+cfarm110.cfarm.net remote cfarm110.cfarm.net      # centos-7
+###
+# arch hosts
+manjaro-xfce-23-clean vm 192.168.2.80
+###
+# other linux hosts
+# opensuse-leap-15.6 vm 192.168.2.17   # can't connect w/ssh
+# opensuse-leap-15.6-clean vm 192.168.2.33
+cfarm188.cfarm.net remote cfarm188.cfarm.net      # opensuse 15.5
+###
 # BSD hosts
 freebsd142 vm 192.168.2.23
+cfarm220.cfarm.net remote cfarm220.cfarm.net      # openbsd 7.6
+cfarm428.cfarm.net remote cfarm428.cfarm.net      # netbsd 10.0
+###
 # MacOS hosts
 bll-mac.local remote bll-mac.local
 bll-mac-m1.local remote bll-mac-m1.local
+cfarm104.cfarm.net remote cfarm104.cfarm.net          # MacOS Monterey 12.6
+###
+# AIX
+cfarm111.cfarm.net remote cfarm111.cfarm.net          # AIX 7.2
+cfarm119.cfarm.net remote cfarm119.cfarm.net          # AIX 7.3
+###
+# Solaris
+cfarm215.cfarm.net remote cfarm215.cfarm.net          # solaris 11.4
+cfarm216.cfarm.net remote cfarm216.cfarm.net          # solaris 11.4 (BE)

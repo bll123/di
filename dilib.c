@@ -215,6 +215,7 @@ di_process_options (void *tdi_data, int argc, char * argv [])
   exitflag = di_get_options (argc, argv, diopts);
 
   if (debug > 0) {
+    fprintf (stdout, "# BUILD: %s\n", DI_BUILD_SYS);
 #if _use_math == DI_GMP
     fprintf (stdout, "# GMP:\n");
 #elif _use_math == DI_TOMMATH

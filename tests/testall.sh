@@ -53,10 +53,17 @@ for host in ${hostlist}; do
   set ${hdata}
   type=$2
   ipaddr=$3
+
+  rsltdir=$(pwd)/test_results/${host}
+  test -d ${rsltdir} && rm -rf ${rsltdir}
+  mkdir -p ${rsltdir}
+
   if [[ $bg == T ]]; then
-    nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} ${ipaddr} ${keep} &
+    nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} ${ipaddr} ${keep} \
+        2>&1 | tee ${rsltdir}/w
   else
-    ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} ${ipaddr} ${keep}
+    ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} ${ipaddr} ${keep}  \
+        2>&1 | tee ${rsltdir}/w
   fi
 done
 
