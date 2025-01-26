@@ -15,7 +15,7 @@ di_initialize_zones (void)
 {
   di_zone_info_t  *zinfo;
 
-  zinfo = malloc (sizeof (di_zone_info_t));
+  zinfo = (di_zone_info_t *) malloc (sizeof (di_zone_info_t));
   zinfo->zoneCount = 0;
   zinfo->zones = (di_zone_summ_t *) NULL;
 
@@ -30,14 +30,14 @@ di_initialize_zones (void)
 
     if (zone_list (zids, &zinfo->zoneCount) == 0) {
       if (zinfo->zoneCount > 0) {
-        zids = malloc (sizeof (zoneid_t) * zinfo->zoneCount);
+        zids = (zoneid_t *) malloc (sizeof (zoneid_t) * zinfo->zoneCount);
         if (zids == (zoneid_t *) NULL) {
           fprintf (stderr, "malloc failed in main () (1).  errno %d\n", errno);
           diopts->exitFlag = DI_EXIT_FAIL;
           return zinfo;
         }
         zone_list (zids, &zinfo->zoneCount);
-        zinfo->zones = malloc (sizeof (di_zone_summ_t) *
+        zinfo->zones = (di_zone_summ_t *) malloc (sizeof (di_zone_summ_t) *
                 zinfo->zoneCount);
         if (zinfo->zones == (di_zone_summ_t *) NULL) {
           fprintf (stderr, "malloc failed in main () (2).  errno %d\n", errno);

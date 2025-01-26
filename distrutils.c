@@ -75,7 +75,7 @@ stpecpy (char *dst, char *end, const char *src)
     return end;
   }
 
-  p = memccpy (dst, src, '\0', (Size_t) (end - dst));
+  p = (char *) memccpy (dst, src, '\0', (Size_t) (end - dst));
   if (p != NULL) {
     return p - 1;
   }
@@ -100,7 +100,7 @@ strdup (const char *ptr)
   }
 
   len = strlen (ptr);
-  nptr = malloc (len + 1);
+  nptr = (char *) malloc (len + 1);
   stpecpy (nptr, nptr + len + 1, ptr);
   return nptr;
 }

@@ -123,10 +123,10 @@ typedef struct {
 } di_disp_info_t;
 
 typedef struct {
-  char    *si_suffix;
-  char    *si_name;
-  char    *suffix;
-  char    *name;
+  const char    *si_suffix;
+  const char    *si_name;
+  const char    *suffix;
+  const char    *name;
 } di_disp_text_t;
 
 static di_disp_text_t disptext [] =
@@ -153,7 +153,7 @@ static void determineMaxScaleValue (void *di_data, int iterval, di_disp_info_t *
 static void initLocale (void);
 
 int
-main (int argc, char * argv [])
+main (int argc, const char * argv [])
 {
   void      *di_data;
   int       exitflag;
@@ -288,13 +288,13 @@ di_display_data (void *di_data)
     totline = displinecount - 1;
   }
 
-  dispinfo.maxlen = malloc (sizeof (int) * (Size_t) fmtstrlen);
-  dispinfo.printdiff = malloc (sizeof (int) * (Size_t) displinecount * (Size_t) fmtstrlen);
-  dispinfo.scaleidx = malloc (sizeof (int) * (Size_t) displinecount * (Size_t) fmtstrlen);
-  dispinfo.suffix = malloc (sizeof (char *) * (Size_t) displinecount * (Size_t) fmtstrlen);
-  dispinfo.leftjust = malloc (sizeof (int) * (Size_t) fmtstrlen);
-  dispinfo.jsonident = malloc (sizeof (char *) * (Size_t) fmtstrlen);
-  dispinfo.strdata = malloc (sizeof (char *) * (Size_t) displinecount * (Size_t) fmtstrlen);
+  dispinfo.maxlen = (int *) malloc (sizeof (int) * (Size_t) fmtstrlen);
+  dispinfo.printdiff = (int *) malloc (sizeof (int) * (Size_t) displinecount * (Size_t) fmtstrlen);
+  dispinfo.scaleidx = (int *) malloc (sizeof (int) * (Size_t) displinecount * (Size_t) fmtstrlen);
+  dispinfo.suffix = (const char **) malloc (sizeof (char *) * (Size_t) displinecount * (Size_t) fmtstrlen);
+  dispinfo.leftjust = (int *) malloc (sizeof (int) * (Size_t) fmtstrlen);
+  dispinfo.jsonident = (const char **) malloc (sizeof (char *) * (Size_t) fmtstrlen);
+  dispinfo.strdata = (char **) malloc (sizeof (char *) * (Size_t) displinecount * (Size_t) fmtstrlen);
   strdata = dispinfo.strdata;
 
   for (i = 0; i < fmtstrlen; ++i) {

@@ -77,7 +77,7 @@ static di_valid_scale_t validscale [] =
 #define DI_ALL_FORMAT           "mts\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 
 static void processStringArgs (const char *, char *, di_opt_t *, char *, Size_t);
-static int  processArgs (int, char * argv [], di_opt_t *, char *, Size_t);
+static int  processArgs (int, const char * argv [], di_opt_t *, char *, Size_t);
 static int  parseList (di_strarr_t *, char *);
 static void parseScaleValue (di_opt_t *diopts, char *ptr);
 static void processOptions (const char *, char *);
@@ -121,7 +121,8 @@ processStringArgs (const char *progname, char *ptr, di_opt_t *diopts,
       nargv [nargc++] = tptr;
       tptr = strtok ( (char *) NULL, DI_ARGV_SEP);
     }
-    optidx = processArgs (nargc, nargv, diopts, scalestr, scalestrsz);
+    optidx = processArgs (nargc, (const char **) nargv,
+        diopts, scalestr, scalestrsz);
     if (optidx < nargc) {
       fprintf (stderr, "%s: unknown data found in DI_ARGS: %s\n",
           progname, nargv [optidx]);
@@ -139,7 +140,7 @@ di_init_options (void)
 {
   di_opt_t    *diopts;
 
-  diopts = malloc (sizeof (di_opt_t));
+  diopts = (di_opt_t *) malloc (sizeof (di_opt_t));
   if (diopts == NULL) {
     return diopts;
   }
@@ -196,7 +197,7 @@ di_opt_cleanup (di_opt_t *diopts)
 }
 
 int
-di_get_options (int argc, char * argv [], di_opt_t *diopts)
+di_get_options (int argc, const char * argv [], di_opt_t *diopts)
 {
   char *            ptr;
   char              scalestr [30];
@@ -321,7 +322,7 @@ di_opt_check_option (di_opt_t *diopts, int optidx)
 }
 
 static int
-processArgs (int argc, char * argv [], di_opt_t *diopts,
+processArgs (int argc, const char * argv [], di_opt_t *diopts,
     char *scalestr, Size_t scalestrsz)
 {
   int           i;

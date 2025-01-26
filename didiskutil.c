@@ -76,10 +76,10 @@ di_initialize_disk_info (di_disk_info_t *diptr, int idx)
   diptr->isLocal = true;
   diptr->isReadOnly = false;
   diptr->isLoopback = false;
-  diptr->strdata [DI_DISP_MOUNTPT] = malloc (DI_MOUNTPT_LEN);
-  diptr->strdata [DI_DISP_FILESYSTEM] = malloc (DI_FILESYSTEM_LEN);
-  diptr->strdata [DI_DISP_MOUNTOPT] = malloc (DI_MOUNT_OPT_LEN);
-  diptr->strdata [DI_DISP_FSTYPE] = malloc (DI_FSTYPE_LEN);
+  diptr->strdata [DI_DISP_MOUNTPT] = (char *) malloc (DI_MOUNTPT_LEN);
+  diptr->strdata [DI_DISP_FILESYSTEM] = (char *) malloc (DI_FILESYSTEM_LEN);
+  diptr->strdata [DI_DISP_MOUNTOPT] = (char *) malloc (DI_MOUNT_OPT_LEN);
+  diptr->strdata [DI_DISP_FSTYPE] = (char *) malloc (DI_FSTYPE_LEN);
   for (i = 0; i < DI_DISP_MAX; ++i) {
     diptr->strdata [i][0] = '\0';
   }
@@ -358,8 +358,7 @@ convertNFSMountOptions (long flags, long wsize, long rsize, di_disk_info_t *dipt
     && ! _lib_getmntinfo \
     && ! _lib_getfsstat \
     && ! _lib_getvfsstat \
-	&& ! _lib_mntctl \
-	&& ! _class_os__Volumes
+	&& ! _lib_mntctl
 
 char *
 chkMountOptions (const char *mntopts, const char *str)

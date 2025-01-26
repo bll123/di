@@ -2,7 +2,7 @@
 # https://portal.cfarm.net/machines/list/
 ###
 # debian hosts
-bll-g7 local bll-g7                               # mx linux 23
+bll-g7 local bll-g7 gcc clang                     # mx linux 23
 mxlinux21 vm 192.168.2.27
 ubuntu2204 vm 192.168.2.183
 cfarm117.cfram.net remote cfarm117.cfram.net      # debian 9.13

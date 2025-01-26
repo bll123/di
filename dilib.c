@@ -126,7 +126,7 @@ di_initialize (void)
 {
   di_data_t   *di_data;
 
-  di_data = malloc (sizeof (di_data_t));
+  di_data = (di_data_t *) malloc (sizeof (di_data_t));
 
   di_data->fscount = 0;
   di_data->dispcount = 0;
@@ -195,7 +195,7 @@ di_version (void)
 }
 
 int
-di_process_options (void *tdi_data, int argc, char * argv [])
+di_process_options (void *tdi_data, int argc, const char * argv [])
 {
   di_data_t   *di_data = (di_data_t *) tdi_data;
   di_opt_t    *diopts;
@@ -359,7 +359,7 @@ di_iterate_init (void *tdi_data, int iteropt)
   int             count;
 
   if (di_data->pub == NULL) {
-    di_data->pub = malloc (sizeof (di_pub_disk_info_t));
+    di_data->pub = (di_pub_disk_info_t *) malloc (sizeof (di_pub_disk_info_t));
   }
   di_data->iteridx = 0;
   di_data->iteropt = iteropt;
@@ -395,7 +395,7 @@ di_iterate (void *tdi_data)
     return NULL;
   }
 
-  pub = di_data->pub;
+  pub = (di_pub_disk_info_t *) di_data->pub;
   if (pub == NULL) {
     return NULL;
   }

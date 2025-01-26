@@ -30,14 +30,17 @@ add_compile_options (-Wno-unused-but-set-variable)
 add_compile_options (-Wno-unused-parameter)
 add_compile_options (-Wno-unknown-pragmas)
 add_compile_options (-Wno-float-equal)
-add_compile_options (-Wdeclaration-after-statement)
-add_compile_options (-Wmissing-prototypes)
 add_compile_options (-Wformat)
 add_compile_options (-Wformat-security)
 add_compile_options (-Werror=format-security)
 add_compile_options (-Werror=return-type)
 add_compile_options (-Wdeprecated-declarations)
 add_compile_options (-Wunreachable-code)
+
+if (NOT CMAKE_C_COMPILER MATCHES "c\\+\\+")
+  add_compile_options (-Wdeclaration-after-statement)
+  add_compile_options (-Wmissing-prototypes)
+endif()
 
 #### compiler-specific compile options
 
@@ -192,6 +195,9 @@ include (CheckPrototypeDefinition)
 # macros for capability testing
 
 macro (checkPrototype_quotactl hdr)
+  # this fails when using the c++ compiler.
+  # the c++ compiler is only needed on Haiku,
+  # but it would be nice to be able to test it elsewhere
   check_prototype_definition (quotactl
     "int quotactl (const char * a, int b, int c, void * d)"
     0

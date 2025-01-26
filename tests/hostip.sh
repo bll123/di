@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright 2025 Brad Lanam Pleasant Hill CA
+#
 
 HOSTLIST=tests/hostlist.txt
 
@@ -9,10 +12,9 @@ if [[ x$host == x ]]; then
   exit 1
 fi
 
-hdata=$(grep "^${host} " ${HOSTLIST})
-set ${hdata}
-type=$2
-ipaddr=$3
+. ./tests/util.sh
+
+gethostdata ${host}
 
 echo $ipaddr
 

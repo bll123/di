@@ -60,7 +60,7 @@ typedef struct {
   getoptn_opt_t       *opts;
   getoptn_optinfo_t   *optinfo;
   int                 argc;
-  char                **argv;
+  const char          **argv;
   const char          *arg;       /* current arg we're processing         */
   Size_t              arglen;     /* and the length of it                 */
   int                 hasvalue;   /* does this arg have a value attached? */
@@ -275,7 +275,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
 
 
 int
-getoptn (int style, int argc, char * argv [],
+getoptn (int style, int argc, const char * argv [],
          Size_t optcount, getoptn_opt_t opts [], int *errorCount)
 {
   int               i;
@@ -367,19 +367,19 @@ getoptn (int style, int argc, char * argv [],
 int
 main (int argc, char * argv [])
 {
-  char      tmp [40];
-  char      s [40];
-  char      s2 [5];
-  char      *sp;
-  long      l;
-  double    d;
-  int       i;
-  int       j;
-  int       k;
-  int       ec;
-  int       optidx;
-  int       ac;
-  char      *av [20];
+  char        tmp [40];
+  char        s [40];
+  char        s2 [5];
+  const char  *sp;
+  long        l;
+  double      d;
+  int         i;
+  int         j;
+  int         k;
+  int         ec;
+  int         optidx;
+  int         ac;
+  const char  *av [20];
 
   int  grc = 0;
   int  testno = 0;

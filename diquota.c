@@ -78,7 +78,11 @@
 # include <linux/quota.h>
 #endif
 #if _hdr_rpc_rpc
+/* tirpc is a separate library, but defines reserved symbols */
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wreserved-identifier"
 # include <rpc/rpc.h>
+# pragma clang diagnostic pop
 #endif
 #if _hdr_rpc_auth
 # include <rpc/auth.h>
@@ -630,6 +634,7 @@ diquota_nfs (di_quota_t *diqinfo)
   }
   rqclnt->cl_auth = authunix_create_default ();
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
 /* how many ways does clang complain about valid code? */
 #pragma clang diagnostic ignored "-Wincompatible-function-pointer-types"
 #pragma clang diagnostic ignored "-Wcast-function-type-strict"
@@ -645,6 +650,7 @@ diquota_nfs (di_quota_t *diqinfo)
     if (rqclnt->cl_auth) {
 /* MacOS does not declare ah_destroy with modern function signatures */
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma clang diagnostic ignored "-Wdeprecated-non-prototype"
       auth_destroy (rqclnt->cl_auth);
 #pragma clang diagnostic pop
@@ -698,6 +704,7 @@ diquota_nfs (di_quota_t *diqinfo)
   if (rqclnt->cl_auth) {
 /* MacOS does not declare ah_destroy with modern function signatures */
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma clang diagnostic ignored "-Wdeprecated-non-prototype"
     auth_destroy (rqclnt->cl_auth);
 #pragma clang diagnostic pop

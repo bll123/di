@@ -25,7 +25,7 @@ typedef struct
 } di_strarr_t;
 
 typedef struct di_opt {
-  char            ** argv;
+  const char      ** argv;
   const char      *formatString;
   di_strarr_t     ignore_list;
   di_strarr_t     include_list;
@@ -45,7 +45,7 @@ typedef struct di_opt {
 
 extern di_opt_t * di_init_options (void);
 extern void di_opt_cleanup (di_opt_t *);
-extern int di_get_options (int, char * argv [], di_opt_t *);
+extern int di_get_options (int, const char * argv [], di_opt_t *);
 extern void di_opt_format_iter_init (di_opt_t *);
 extern int di_opt_format_iterate (di_opt_t *);
 int di_opt_check_option (di_opt_t *, int);

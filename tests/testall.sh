@@ -1,6 +1,9 @@
 #!/bin/bash
+#
+# Copyright 2025 Brad Lanam Pleasant Hill CA
+#
 
-HOSTLIST=tests/hostlist.txt
+. ./tests/util.sh
 
 hostlist=""
 
@@ -45,25 +48,18 @@ tarfn=$(echo di-*.tar.gz)
 didir=$(echo ${tarfn} | sed 's,\.tar.gz$,,')
 
 for host in ${hostlist}; do
-  hdata=$(grep "^${host} " ${HOSTLIST})
-  rc=$?
-  if [[ $rc -ne 0 ]]; then
-    continue
-  fi
-  set ${hdata}
-  type=$2
-  ipaddr=$3
+  gethostdata ${host}
 
   rsltdir=$(pwd)/test_results/${host}
   test -d ${rsltdir} && rm -rf ${rsltdir}
   mkdir -p ${rsltdir}
 
   if [[ $bg == T ]]; then
-    nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} ${ipaddr} ${keep} \
-        2>&1 | tee ${rsltdir}/w
+    nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
+        ${ipaddr} ${keep} ${complist} 2>&1 | tee ${rsltdir}/w &
   else
-    ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} ${ipaddr} ${keep}  \
-        2>&1 | tee ${rsltdir}/w
+    ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
+        ${ipaddr} ${keep} ${complist} 2>&1 | tee ${rsltdir}/w
   fi
 done
 

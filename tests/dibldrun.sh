@@ -1,5 +1,7 @@
 #!/bin/sh
-
+#
+# Copyright 2025 Brad Lanam Pleasant Hill CA
+#
 
 CMAKE_REQ_MAJ_VERSION=3
 CMAKE_REQ_MIN_VERSION=13
@@ -7,7 +9,7 @@ CMAKE_REQ_MIN_VERSION=13
 host=$1
 tarfn=$2
 didir=$3
-quiet=$4
+comp=$4
 
 havecmake=F
 # add paths for macos and *BSD
@@ -22,9 +24,12 @@ if [ x${didir} = x ]; then
   exit 1
 fi
 
-test -d ${didir} && rm -rf ${didir}
+testdir=${didir}_${comp}
+test -d ${testdir} && rm -rf ${testdir}
 tar xf ${tarfn}
-cd ${didir}
+mv ${didir} ${testdir}
+
+cd ${testdir}
 rc=$?
 if [ $rc -ne 0 ]; then
   exit 1
@@ -35,14 +40,32 @@ loc=`pwd`
 bldrun () {
   tag=$1
 
-  echo "-- $(date +%T) ${host}: build, install and run with ${tag}"
+  echo "-- $(date +%T) ${host}: build, install and run with ${tag}/${comp}"
   make distclean
-  make -e PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
-  c=`grep -E '(warning|error)' di-${tag}-bld.out | grep -v 'error[=,]' | wc -l`
+  make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
+  c=`grep -E '(warning|error)' di-${tag}-bld.out |
+      grep -E -v '(pragma|error[=,])' |
+      wc -l`
   if [ $c -gt 0 ]; then
     echo "== $(date +%T) ${host}: ${tag}: warnings or errors found"
   fi
-  make -e PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
+  if [ $tag = cmake ]; then
+    for f in build/CMakeFiles/CMakeOutput.log build/CMakeFiles/CMakeError.log; do
+      if [ -f $f ]; then
+        cp $f di-${tag}-out.out
+        cp $f di-${tag}-err.out
+      fi
+    done
+  fi
+  if [ $tag = mkc ]; then
+    for f in mkc_files/mkc_compile.log mkc_files/mkconfig.log; do
+      if [ -f $f ]; then
+        cp $f di-${tag}-comp.out
+        cp $f di-${tag}-conf.out
+      fi
+    done
+  fi
+  make -e CC=${comp} PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
   ./x/bin/di -a -d g -f stbuf1cvpB2m -t > di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
@@ -51,7 +74,6 @@ bldrun () {
   fi
 }
 
-echo "start $(date +%T)" > di-start.out
 if [ -f /usr/bin/cmake -o \
     -f /usr/local/bin/cmake -o \
     -f /opt/local/bin/cmake ]; then
@@ -78,6 +100,4 @@ if [ $havecmake = T ]; then
     exit 1
   fi
 fi
-echo "-- $(date +%T) ${host}: finish"
-echo "done $(date +%T)" > di-finish.out
 exit 0

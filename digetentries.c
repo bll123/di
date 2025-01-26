@@ -659,7 +659,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     return -1;
   }
   bufsize = (_c_arg_2_getfsstat) (sizeof (struct statfs) * (Size_t) count);
-  mntbufp = malloc ( (Size_t) bufsize);
+  mntbufp = (struct statfs *) malloc ( (Size_t) bufsize);
   if (mntbufp == (struct statfs *) NULL) {
     fprintf (stderr, "malloc failed for mntbufp. errno %d\n", errno);
     return -1;
@@ -1086,7 +1086,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
         return -1;
     }
     bufsize = sizeof (struct statvfs) * (Size_t) count;
-    mntbufp = malloc ( (Size_t) bufsize);
+    mntbufp = (struct statvfs *) malloc ( (Size_t) bufsize);
     if (mntbufp == (struct statvfs *) NULL) {
       fprintf (stderr, "malloc failed for mntbufp. errno %d\n", errno);
       return -1;

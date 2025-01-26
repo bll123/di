@@ -209,7 +209,7 @@
 # error "PREFIX is not set"
 #endif
 
-#define DI_LOCALE_DIR PREFIX "/share/locale"
+#define DI_LOCALE_DIR DI_PREFIX "/share/locale"
 
 #define DI_INTERNAL 0
 #define DI_GMP 1

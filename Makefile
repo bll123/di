@@ -143,6 +143,7 @@ realclean:
 distclean:
 	@$(MAKE) realclean >/dev/null 2>&1
 	@-$(RM) -rf tests.done test_di _mkconfig_runtests \
+		test_results \
 		$(MKC_FILES) \
 		$(BUILDDIR) \
 		>/dev/null 2>&1; exit 0

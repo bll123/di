@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# Copyright 2025 Brad Lanam Pleasant Hill CA
+#
 
 host=$1
 
@@ -7,15 +10,9 @@ if [[ x$host == x ]]; then
   exit 1
 fi
 
-hdata=$(grep "^${host} " tests/hostlist.txt)
-rc=$?
-if [[ $rc -ne 0 ]]; then
-  echo "${host}: not in hostlist.txt"
-  exit 1
-fi
-set ${hdata}
-type=$2
-ipaddr=$3
+. ./tests/util.sh
+
+gethostdata $host
 
 if [[ $type != vm ]];then
   echo "${host}: type is not vm"

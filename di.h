@@ -136,7 +136,7 @@ typedef struct
 /* dilib.c */
 extern void * di_initialize (void);
 extern void di_cleanup (void *);
-extern int di_process_options (void *, int, char * []);
+extern int di_process_options (void *, int, const char * []);
 extern const char * di_version (void);
 
 extern int di_check_option (void *, int);
