@@ -22,7 +22,7 @@ if [[ $type != vm ]];then
   exit 1
 fi
 
-./tests/startvm.sh ${host} ${ipaddr} F
+./tests/startvm.sh ${host} F
 rc=$?
 if [[ $rc -ne 0 ]]; then
   exit 1
@@ -44,7 +44,7 @@ if [[ $rc -ne 0 ]]; then
   grc=1
 fi
 
-./tests/stopvm.sh ${host} ${ipaddr}
+./tests/stopvm.sh ${host}
 if [[ $grc -eq 0 ]]; then
   echo "${host}: OK"
 fi

@@ -1,8 +1,22 @@
 #!/bin/bash
 
 host=$1
-ipaddr=$2
-validate=$3
+validate=${2:-T}
+
+if [[ x$host == x ]]; then
+  echo "host must be specified."
+  exit 1
+fi
+
+hdata=$(grep "^${host} " tests/hostlist.txt)
+rc=$?
+if [[ $rc -ne 0 ]]; then
+  echo "${host}: not in hostlist.txt"
+  exit 1
+fi
+set ${hdata}
+type=$2
+ipaddr=$3
 
 nohup VBoxManage startvm ${host} > /dev/null 2>&1 &
 sleep 10

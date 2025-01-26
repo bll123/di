@@ -1,7 +1,9 @@
 #!/bin/sh
 
+
 CMAKE_REQ_MAJ_VERSION=3
-CMAKE_REQ_MIN_VERSION=10
+CMAKE_REQ_MIN_VERSION=13
+
 host=$1
 tarfn=$2
 didir=$3

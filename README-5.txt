@@ -17,6 +17,7 @@ Version 5 beta Timeline
 2025-1-25 More cmake issues fixed, mkconfig issues fixed.  Everything is
           a lot cleaner now, and very basic build/run testing
           should go more smoothly.
+2025-1-25 Had to bump the required cmake version to 3.13.
 
 Version 5.x beta
 
@@ -31,9 +32,9 @@ Version 5 Roadmap (more or less)
 - done: finish the api, there's still a couple of routines to write
 - done: linux tirpc library (nfs quotas)
 - done: get installation working
+- done: make the beta available to download
 - started: wiki documentation for the api
 - get all the basics working
-- make the beta available to download
 - work on the test suite
 - get basic di working on all platforms I have access to.
 - check the cmake configuration against mkconfig.  check again. re-check.

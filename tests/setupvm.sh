@@ -28,18 +28,18 @@ read answer
 case $answer in
   y*|Y*)
     stop=T
-    ./tests/startvm.sh ${host} ${ipaddr} F
+    ./tests/startvm.sh ${host} F
     rc=$?
     if [[ $rc -ne 0 ]]; then
       exit 1
     fi
     ;;
 esac
-ssh ${ipaddr} "test -d .ssh || mkdir .ssh"
+ssh ${ipaddr} "test -d .ssh || mkdir .ssh; chmod 700 .ssh"
 scp $HOME/.ssh/authorized_keys ${ipaddr}:.ssh
-ssh -l root ${ipaddr} "test -d .ssh || mkdir .ssh"
+ssh -l root ${ipaddr} "test -d .ssh || mkdir .ssh; chmod 700 .ssh"
 scp $HOME/.ssh/authorized_keys root@${ipaddr}:.ssh
 if [[ $stop == T ]]; then
-  ./tests/stopvm.sh ${host} ${ipaddr}
+  ./tests/stopvm.sh ${host}
 fi
 exit 0

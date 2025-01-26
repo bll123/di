@@ -2,20 +2,25 @@
 # https://portal.cfarm.net/machines/list/
 ###
 # debian hosts
-bll-g7 local bll-g7
+bll-g7 local bll-g7                               # mx linux 23
 mxlinux21 vm 192.168.2.27
 ubuntu2204 vm 192.168.2.183
 cfarm117.cfram.net remote cfarm117.cfram.net      # debian 9.13
+linuxmint21-cinnamon vm 192.168.2.38
+# ubuntu1404-32 vm 192.168.2.30                   # cannot connect w/ssh
+ubuntu1604-32 vm 192.168.2.29
+ubuntu1804-32 vm 192.168.2.28
+ubuntu2004 vm 192.168.2.182
 ###
 # red hat linux hosts
 fedora38-clean vm 192.168.2.90
 cfarm110.cfarm.net remote cfarm110.cfarm.net      # centos-7
 ###
 # arch hosts
-manjaro-xfce-23-clean vm 192.168.2.80
+# manjaro-xfce-23-clean vm 192.168.2.80           # unable to upgrade
 ###
 # other linux hosts
-# opensuse-leap-15.6 vm 192.168.2.17   # can't connect w/ssh
+# opensuse-leap-15.6 vm 192.168.2.17              # can't connect w/ssh
 # opensuse-leap-15.6-clean vm 192.168.2.33
 cfarm188.cfarm.net remote cfarm188.cfarm.net      # opensuse 15.5
 ###
@@ -23,6 +28,7 @@ cfarm188.cfarm.net remote cfarm188.cfarm.net      # opensuse 15.5
 freebsd142 vm 192.168.2.23
 cfarm220.cfarm.net remote cfarm220.cfarm.net      # openbsd 7.6
 cfarm428.cfarm.net remote cfarm428.cfarm.net      # netbsd 10.0
+netbsd20 vm 192.168.217
 ###
 # MacOS hosts
 bll-mac.local remote bll-mac.local

@@ -132,7 +132,7 @@ _di_ program now uses the new shared library and API to create the output.
 ###### Acknowledgements
 
 The README lists many contributors from the early days.  In addition,
-polarhome and gcc deserve many thanks for making various systems
+polarhome and SPI deserve many thanks for making various systems
 available for cross-platform testing.
 
 [Wiki Home](Home)

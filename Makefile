@@ -11,8 +11,8 @@ DI_SOVERSION = 4
 DI_RELEASE_STATUS = beta
 
 # for cmake
-CMAKE_REQ_MAJ_VERSION=3
-CMAKE_REQ_MIN_VERSION=10
+CMAKE_REQ_MAJ_VERSION = 3
+CMAKE_REQ_MIN_VERSION = 13
 BUILDDIR = build
 
 # DI_USE_MATH = DI_GMP
@@ -128,7 +128,7 @@ clean:
 		$(MKC_FILES)/mkc_compile.log \
 		tests.done tests.d/chksh* \
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
-	@-test -d build && cmake --build build --target clean
+	@-test -d $(BUILDDIR) && cmake --build $(BUILDDIR) --target clean
 
 # mkc tests use this
 .PHONY: realclean
@@ -144,7 +144,7 @@ distclean:
 	@$(MAKE) realclean >/dev/null 2>&1
 	@-$(RM) -rf tests.done test_di _mkconfig_runtests \
 		$(MKC_FILES) \
-		build \
+		$(BUILDDIR) \
 		>/dev/null 2>&1; exit 0
 
 ###
@@ -232,6 +232,7 @@ cmake-unix:
 .PHONY: cmake-windows
 cmake-windows:
 	@if [ "$(PREFIX)" = "" ]; then echo "No prefix set"; exit 1; fi
+	@test -d $(BUILDDIR) || mkdir $(BUILDDIR)
 	cmake \
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \

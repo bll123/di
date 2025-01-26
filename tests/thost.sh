@@ -52,7 +52,7 @@ elif [[ ${type} == vm ]]; then
   lockfn=F
   while : ; do
     for fn in ${locklist}; do
-      lockfile-create ${fn} -r 2
+      lockfile-create ${fn} -r 1
       rc=$?
       if [[ $rc -eq 0 ]]; then
         lockfile-touch ${fn} &
@@ -66,14 +66,14 @@ elif [[ ${type} == vm ]]; then
     fi
   done
   echo "-- $(date '+%T') ${host}: starting vm"
-  ./tests/startvm.sh ${host} ${ipaddr} T
+  ./tests/startvm.sh ${host} T
   rc=$?
   if [[ $rc -ne 0 ]]; then
     exit 1
   fi
   remotebldrun $ipaddr
   echo "-- $(date '+%T') ${host}: stopping"
-  ./tests/stopvm.sh ${host} ${ipaddr}
+  ./tests/stopvm.sh ${host}
   kill ${lockpid}
   lockfile-remove ${lockfn}
 else
