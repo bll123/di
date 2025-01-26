@@ -27,7 +27,7 @@ typedef struct
 typedef struct di_opt {
   const char      ** argv;
   const char      *formatString;
-  di_strarr_t     ignore_list;
+  di_strarr_t     exclude_list;
   di_strarr_t     include_list;
   char            zoneDisplay [MAXPATHLEN];
   /* will be either 1000 or 1024 */

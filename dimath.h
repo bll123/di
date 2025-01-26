@@ -164,7 +164,7 @@ dinum_set_u (dinum_t *r, di_ui_t val)
 #elif _use_math == DI_TOMMATH
   mp_set_u64 (r, val);
 #else
-  *r = val;
+  *r = (dinum_t) val;
 #endif
 }
 
@@ -176,7 +176,7 @@ dinum_set_s (dinum_t *r, di_si_t val)
 #elif _use_math == DI_TOMMATH
   mp_set_i64 (r, val);
 #else
-  *r = val;
+  *r = (dinum_t) val;
 #endif
 }
 
@@ -200,7 +200,7 @@ dinum_add_u (dinum_t *r, di_ui_t val)
   mp_add (r, &v, r);
   mp_clear (&v);
 #else
-  *r += val;
+  *r += (dinum_t) val;
 #endif
 }
 
@@ -224,7 +224,7 @@ dinum_sub_u (dinum_t *r, di_ui_t val)
   mp_sub (r, &v, r);
   mp_clear (&v);
 #else
-  *r -= val;
+  *r -= (dinum_t) val;
 #endif
 }
 
@@ -334,7 +334,7 @@ dinum_mul_u (dinum_t *r, di_ui_t val)
   mp_mul (r, &v, r);
   mp_clear (&v);
 #else
-  *r *= val;
+  *r *= (dinum_t) val;
 #endif
 }
 static inline void
@@ -357,7 +357,8 @@ dinum_mul_uu (dinum_t *r, di_ui_t vala, di_ui_t valb)
   mp_clear (&t);
   mp_clear (&v);
 #else
-  *r = vala * valb;
+  *r = (dinum_t) vala;
+  *r *= (dinum_t) valb;
 #endif
 }
 

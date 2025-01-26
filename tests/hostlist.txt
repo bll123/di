@@ -5,7 +5,7 @@
 bll-g7 local bll-g7 gcc clang                     # mx linux 23
 mxlinux21 vm 192.168.2.27
 ubuntu2204 vm 192.168.2.183
-cfarm117.cfram.net remote cfarm117.cfram.net      # debian 9.13
+cf-debian913 remote cfarm117.cfram.net
 linuxmint21-cinnamon vm 192.168.2.38
 # ubuntu1404-32 vm 192.168.2.30                   # cannot connect w/ssh
 ubuntu1604-32 vm 192.168.2.29
@@ -14,7 +14,7 @@ ubuntu2004 vm 192.168.2.182
 ###
 # red hat linux hosts
 fedora38-clean vm 192.168.2.90
-cfarm110.cfarm.net remote cfarm110.cfarm.net      # centos-7
+cf-centos7 remote cfarm110.cfarm.net
 ###
 # arch hosts
 # manjaro-xfce-23-clean vm 192.168.2.80           # unable to upgrade
@@ -22,23 +22,23 @@ cfarm110.cfarm.net remote cfarm110.cfarm.net      # centos-7
 # other linux hosts
 # opensuse-leap-15.6 vm 192.168.2.17              # can't connect w/ssh
 # opensuse-leap-15.6-clean vm 192.168.2.33
-cfarm188.cfarm.net remote cfarm188.cfarm.net      # opensuse 15.5
+cf-opensuse155 remote cfarm188.cfarm.net
 ###
 # BSD hosts
 freebsd142 vm 192.168.2.23
-cfarm220.cfarm.net remote cfarm220.cfarm.net      # openbsd 7.6
-cfarm428.cfarm.net remote cfarm428.cfarm.net      # netbsd 10.0
+cf-openbsd76 remote cfarm220.cfarm.net
+cf-netbsd10 remote cfarm428.cfarm.net
 netbsd20 vm 192.168.217
 ###
 # MacOS hosts
 bll-mac.local remote bll-mac.local
 bll-mac-m1.local remote bll-mac-m1.local
-cfarm104.cfarm.net remote cfarm104.cfarm.net          # MacOS Monterey 12.6
+cf-macos-monterey remote cfarm104.cfarm.net
 ###
 # AIX
-cfarm111.cfarm.net remote cfarm111.cfarm.net          # AIX 7.2
-cfarm119.cfarm.net remote cfarm119.cfarm.net          # AIX 7.3
+cf-aix71 remote cfarm111.cfarm.net gcc xlc
+# cf-aix73 remote cfarm119.cfarm.net              # no compilers
 ###
 # Solaris
-cfarm215.cfarm.net remote cfarm215.cfarm.net          # solaris 11.4
-cfarm216.cfarm.net remote cfarm216.cfarm.net          # solaris 11.4 (BE)
+cf-sol11 remote cfarm215.cfarm.net
+cf-sol11-be remote cfarm216.cfarm.net          # big-endian

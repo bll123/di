@@ -102,7 +102,7 @@ static int  getDiskSpecialInfo  (di_data_t *, int);
 static void getDiskStatInfo     (di_data_t *);
 static void preCheckDiskInfo    (di_data_t *);
 
-static void checkIgnoreList     (di_disk_info_t *, di_strarr_t *);
+static void checkExcludeList     (di_disk_info_t *, di_strarr_t *);
 static void checkIncludeList    (di_disk_info_t *, di_strarr_t *);
 static int  isIgnoreFSType      (const char *);
 static int  isIgnoreSpecial     (const char *);
@@ -711,7 +711,7 @@ checkFileInfo (di_data_t *di_data)
 
   /* also turn off the -I and -x lists */
   diopts->include_list.count = 0;
-  diopts->ignore_list.count = 0;
+  diopts->exclude_list.count = 0;
   return rc;
 }
 
@@ -1181,22 +1181,22 @@ preCheckDiskInfo (di_data_t *di_data)
     if (dinfo->printFlag == DI_PRNT_OK ||
         dinfo->printFlag == DI_PRNT_IGNORE) {
       /* do these checks to override the all flag */
-      checkIgnoreList (dinfo, &diopts->ignore_list);
+      checkExcludeList (dinfo, &diopts->exclude_list);
       checkIncludeList (dinfo, &diopts->include_list);
     }
   } /* for all disks */
 }
 
 static void
-checkIgnoreList (di_disk_info_t *dinfo, di_strarr_t *ignore_list)
+checkExcludeList (di_disk_info_t *dinfo, di_strarr_t *exclude_list)
 {
   char            *ptr;
   int             i;
 
   /* if the file system type is in the ignore list, skip it */
-  if (ignore_list->count > 0) {
-    for (i = 0; i < ignore_list->count; ++i) {
-      ptr = ignore_list->list [i];
+  if (exclude_list->count > 0) {
+    for (i = 0; i < exclude_list->count; ++i) {
+      ptr = exclude_list->list [i];
       if (debug > 2) {
         printf ("chkign: test: fstype %s/%s : %s\n", ptr,
             dinfo->strdata [DI_DISP_FSTYPE], dinfo->strdata [DI_DISP_MOUNTPT]);

@@ -32,7 +32,7 @@ runs.  No rigorous tests have been run.
  FreeBSD 14.2 | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | -
  MirBSD 10 | - | - | - | - | - | - | -
  NetBSD 1.62 | - | - | - | - | - | - | -
- NetBSD 2.0 | n/a | 4.99.3<br>2025-1-25 | - | - | - | - | many warnings
+ NetBSD 2.0 | n/a | 4.99.3<br>2025-1-25 | - | - | - | - | many odd warnings
  NetBSD 3.0.1 | - | - | - | - | - | - | -
  NetBSD 4.0.1 | - | - | - | - | - | - | -
  NetBSD 5.0.1 | - | - | - | - | - | - | -
@@ -67,7 +67,7 @@ runs.  No rigorous tests have been run.
  Linux Mint 19 | - | - | - | - | - | - | -
  Linux Mint 21 | 4.99.3<br>2025-1-25 | 4.99.3<br>2025-1-25 | - | - | - | - | -
  MX Linux 21<br>(Debian 11)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | -
- MX Linux 23<br>(Debian 12)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | ok | ok | - | - | Primary Development
+ MX Linux 23<br>(Debian 12)| 4.99.2<br>2025-1-25<br>gcc clang | 4.99.2<br>2025-1-25<br>gcc clang | ok | ok | - | - | Primary Development
  Ubuntu 14.04<br>(32-bit) | - | - | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | - | - | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | - | 4.99.3<br>2025-1-25 | - | - | - | - | -
@@ -114,8 +114,7 @@ runs.  No rigorous tests have been run.
  Tru64 5.1B | - | - | - | - | - | - | polarhome
  QNX 6.3 | - | - | - | - | - | - | polarhome
  SCO OpenServer 6.0.0 | - | - | - | - | - | - | polarhome
- AIX 7.2 | - | - | - | - | - | - | cfarm
- AIX 7.3 | - | - | - | - | - | - | cfarm
+ AIX 7.1 | - | 4.99.3<br>2025-1-26<br>gcc xlc  | - | - | - | - | cfarm<br>gcc link warning
  __Solaris:__ | | | | | | |
  Nexenta 1.0.1 | - | - | - | - | - | - | -
  Nexenta 2.0 | - | - | - | - | - | - | -

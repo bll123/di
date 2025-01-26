@@ -15,7 +15,7 @@ while test $# -gt 0; do
       keep=T
       shift
       ;;
-    --foreground)
+    --fg)
       bg=F
       shift
       ;;

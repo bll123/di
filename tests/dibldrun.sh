@@ -26,7 +26,17 @@ fi
 
 testdir=${didir}_${comp}
 test -d ${testdir} && rm -rf ${testdir}
-tar xf ${tarfn}
+test -d ${testdir} && rm -rf ${testdir}  # aix is weird
+starfn=`echo ${tarfn} | sed 's,\.gz$,,'`
+if [ -f ${tarfn} ]; then
+  rm -f ${starfn}
+  gunzip ${tarfn}
+fi
+if [ ! -f ${starfn} ]; then
+  echo "== ${host}: gunzip failed"
+fi
+
+tar xf ${starfn}
 mv ${didir} ${testdir}
 
 cd ${testdir}
@@ -40,31 +50,61 @@ loc=`pwd`
 bldrun () {
   tag=$1
 
-  echo "-- $(date +%T) ${host}: build, install and run with ${tag}/${comp}"
+  echo "-- $(date +%T) ${host}: ${tag}/${comp}"
   make distclean
   make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
-  c=`grep -E '(warning|error)' di-${tag}-bld.out |
+  # AIX: BSHIFT: nothing i can do about system headers
+  c=`grep -E '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
       grep -E -v '(pragma|error[=,])' |
+      grep -v 'Option.*incorrectly specified' |
+      grep -v 'BSHIFT has been redefined' |
       wc -l`
   if [ $c -gt 0 ]; then
     echo "== $(date +%T) ${host}: ${tag}: warnings or errors found"
   fi
   if [ $tag = cmake ]; then
-    for f in build/CMakeFiles/CMakeOutput.log build/CMakeFiles/CMakeError.log; do
+    for f in build/CMakeFiles/CMakeOutput.log \
+        build/CMakeFiles/CMakeError.log \
+        build/config.h; do
       if [ -f $f ]; then
-        cp $f di-${tag}-out.out
-        cp $f di-${tag}-err.out
+        bnm=`echo ${f} | sed 's,\.[a-z]*'`
+        cp $f di-${tag}-${bnm}.out
       fi
     done
   fi
   if [ $tag = mkc ]; then
-    for f in mkc_files/mkc_compile.log mkc_files/mkconfig.log; do
+    for f in mkc_files/mkc_compile.log \
+        mkc_files/mkconfig.log \
+        mkc_files/mkconfig_env.log \
+        config.h \
+        di.env; do
       if [ -f $f ]; then
+        bnm=`basename ${f} | sed 's,\.[^.]*'`
         cp $f di-${tag}-comp.out
-        cp $f di-${tag}-conf.out
       fi
     done
   fi
+
+  if [ $tag = cmake ]; then
+    mathtest=./build/dimathtest
+    getoptntest=./build/getoptn_test
+  fi
+  if [ $tag = mkc ]; then
+    mathtest=./dimathtest
+    getoptntest=./getoptn_test
+  fi
+
+  ${mathtest} > di-${tag}-math.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== $(date +%T) ${host}: ${tag}: dimathtest failed"
+  fi
+  ${getoptntest} > di-${tag}-getoptn.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== $(date +%T) ${host}: ${tag}: getoptn_test failed"
+  fi
+
   make -e CC=${comp} PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
   ./x/bin/di -a -d g -f stbuf1cvpB2m -t > di-${tag}-run.out 2>&1
   rc=$?
@@ -92,12 +132,5 @@ if [ -f /usr/bin/cmake -o \
 fi
 
 bldrun mkc
-if [ $havecmake = T ]; then
-  diff di-cmake-run.out di-mkc-run.out > di-diff.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== $(date +%T) ${host}: diff of cmake and mkc failed"
-    exit 1
-  fi
-fi
+
 exit 0

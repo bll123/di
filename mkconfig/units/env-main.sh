@@ -182,6 +182,13 @@ int main () { return 0; }" > t.c
   if [ $rc -eq 0 ]; then
     flag=0
   fi
+  # AIX
+  grep -i "Option.*incorrectly specified" $TMPF > /dev/null 2>&1
+  rc=$?
+  if [ $rc -eq 0 ]; then
+    flag=0
+  fi
+
   cat $TMPF >&9
   rm -f $TMPF > /dev/null 2>&1
 }

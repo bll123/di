@@ -121,8 +121,11 @@ processStringArgs (const char *progname, char *ptr, di_opt_t *diopts,
       nargv [nargc++] = tptr;
       tptr = strtok ( (char *) NULL, DI_ARGV_SEP);
     }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-qual"
     optidx = processArgs (nargc, (const char **) nargv,
         diopts, scalestr, scalestrsz);
+#pragma clang diagnostic pop
     if (optidx < nargc) {
       fprintf (stderr, "%s: unknown data found in DI_ARGS: %s\n",
           progname, nargv [optidx]);
@@ -131,7 +134,7 @@ processStringArgs (const char *progname, char *ptr, di_opt_t *diopts,
         setExitFlag (diopts, DI_EXIT_WARN);
       }
     }
-    free ( (char *) dptr);
+    free ((char *) dptr);
   }
 }
 
@@ -148,8 +151,8 @@ di_init_options (void)
   diopts->formatString = DI_DEFAULT_FORMAT;
   diopts->formatLen = (int) strlen (diopts->formatString);
   diopts->zoneDisplay [0] = '\0';
-  diopts->ignore_list.count = 0;
-  diopts->ignore_list.list = (char **) NULL;
+  diopts->exclude_list.count = 0;
+  diopts->exclude_list.list = (char **) NULL;
   diopts->include_list.count = 0;
   diopts->include_list.list = (char **) NULL;
   diopts->scale = DI_SCALE_GIGA;
@@ -182,10 +185,10 @@ di_opt_cleanup (di_opt_t *diopts)
     return;
   }
 
-  if (diopts->ignore_list.count > 0 &&
-      diopts->ignore_list.list != (char **) NULL) {
-    free ( (void *) diopts->ignore_list.list);
-    diopts->ignore_list.count = 0;
+  if (diopts->exclude_list.count > 0 &&
+      diopts->exclude_list.list != (char **) NULL) {
+    free ( (void *) diopts->exclude_list.list);
+    diopts->exclude_list.count = 0;
   }
 
   if (diopts->include_list.count > 0 &&
@@ -793,7 +796,7 @@ processOptionsVal (const char *arg, void *valptr, char *value)
       stpecpy (padata->diopts->sortType, stend, "tm");
     }
   } else if (strcmp (arg, "-x") == 0) {
-    parseList (&padata->diopts->ignore_list, value);
+    parseList (&padata->diopts->exclude_list, value);
   } else if (strcmp (arg, "-X") == 0) {
     debug = atoi (value);
     padata->diopts->optval [DI_OPT_DISP_DBG_HEADER] = true;

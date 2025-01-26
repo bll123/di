@@ -550,6 +550,7 @@ digetinfo$(OBJ_EXT): config.h
 digetinfo$(OBJ_EXT):   di.h disystem.h
 digetinfo$(OBJ_EXT):   diinternal.h
 digetinfo$(OBJ_EXT): dimath.h  dioptions.h dimntopt.h
+digetinfo$(OBJ_EXT):   distrutils.h
 dilib$(OBJ_EXT): config.h
 dilib$(OBJ_EXT): di.h disystem.h   dimath.h
 dilib$(OBJ_EXT):  diinternal.h dioptions.h dizone.h diquota.h

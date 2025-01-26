@@ -68,6 +68,7 @@
 #include "disystem.h"
 #include "diinternal.h"
 #include "dimntopt.h"
+#include "distrutils.h"
 
 /********************************************************/
 

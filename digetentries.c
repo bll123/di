@@ -1325,7 +1325,7 @@ static char *AIX_fstype [NUM_AIX_FSTYPES] =
 int
 di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 {
-  di_disk_info_t     *diptr;
+  di_disk_info_t  *diptr = NULL;
   int             num;        /* number of vmount structs returned    */
   char            *vmbuf;     /* buffer for vmount structs returned   */
   Size_t          vmbufsz;    /* size in bytes of vmbuf               */
@@ -1387,11 +1387,14 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 
   bufp = vmbuf;
   for (i = 0; i < num; i++) {
-    char    *p = diptr->strdata [DI_DISP_FILESYSTEM];
-    char    *end = diptr->strdata [DI_DISP_FILESYSTEM] + DI_FILESYSTEM_LEN,
+    char    *p;
+    char    *end;
 
-    diptr = *diskInfo + i;
+    diptr = (*diskInfo) + i;
     di_initialize_disk_info (diptr, i);
+
+    p = diptr->strdata [DI_DISP_FILESYSTEM];
+    end = diptr->strdata [DI_DISP_FILESYSTEM] + DI_FILESYSTEM_LEN;
 
     vmtp = (struct vmount *) bufp;
     if ( (vmtp->vmt_flags & MNT_REMOTE) == MNT_REMOTE) {
