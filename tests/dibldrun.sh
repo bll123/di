@@ -67,7 +67,7 @@ bldrun () {
         build/CMakeFiles/CMakeError.log \
         build/config.h; do
       if [ -f $f ]; then
-        bnm=`echo ${f} | sed 's,\.[a-z]*'`
+        bnm=`basename ${f} | sed 's,\.[a-z]*,,'`
         cp $f di-${tag}-${bnm}.out
       fi
     done
@@ -79,7 +79,7 @@ bldrun () {
         config.h \
         di.env; do
       if [ -f $f ]; then
-        bnm=`basename ${f} | sed 's,\.[^.]*'`
+        bnm=`basename ${f} | sed 's,\.[a-z]*,,'`
         cp $f di-${tag}-comp.out
       fi
     done

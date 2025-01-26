@@ -1390,7 +1390,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     char    *p;
     char    *end;
 
-    diptr = (*diskInfo) + i;
+    diptr = *diskInfo + i;
     di_initialize_disk_info (diptr, i);
 
     p = diptr->strdata [DI_DISP_FILESYSTEM];
@@ -1587,7 +1587,7 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
       return -1;
     }
     diptr = *diskInfo + idx;
-    di_initialize_disk_info (diptr, i);
+    di_initialize_disk_info (diptr, idx);
 
     *buff = '\0';
     nref.device = dev;
@@ -1604,21 +1604,19 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
     stpecpy (diptr->strdata [DI_DISP_FSTYPE],
         diptr->strdata [DI_DISP_FSTYPE] + DI_FSTYPE_LEN,
         fsinfo.fsh_name);
-    di_save_block_sizes (diptr, fsinfo.values [DI_QUOTA_BLOCK_SZ],
+    di_save_block_sizes (diptr, (di_ui_t) fsinfo.block_size,
         (di_ui_t) fsinfo.total_blocks, (di_ui_t) fsinfo.free_blocks,
         (di_ui_t) fsinfo.free_blocks);
     di_save_inode_sizes (diptr, (di_ui_t) fsinfo.total_nodes,
         (di_ui_t) fsinfo.free_nodes, (di_ui_t) fsinfo.free_nodes);
 # if defined (MNT_RDONLY)
-    if ( (fsinfo.flags & MNT_RDONLY) == MNT_RDONLY)
-    {
-       diptr->isReadOnly = true;
+    if ( (fsinfo.flags & MNT_RDONLY) == MNT_RDONLY) {
+      diptr->isReadOnly = true;
     }
 # endif
 # if defined (MNT_PERSISTENT)
-    if ( (fsinfo.flags & MNT_PERSISTENT) != MNT_PERSISTENT)
-    {
-       diptr->printFlag = DI_PRNT_IGNORE;
+    if ( (fsinfo.flags & MNT_PERSISTENT) != MNT_PERSISTENT) {
+      diptr->printFlag = DI_PRNT_IGNORE;
     }
 # endif
     convertMountOptions ( (unsigned long) fsinfo.flags, diptr);
@@ -1638,6 +1636,3 @@ di_get_disk_entries (di_disk_info_t **diskInfo, int *diCount)
 }
 
 #endif
-
-
-

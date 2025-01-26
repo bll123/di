@@ -42,3 +42,7 @@ cf-aix71 remote cfarm111.cfarm.net gcc xlc
 # Solaris
 cf-sol11 remote cfarm215.cfarm.net
 cf-sol11-be remote cfarm216.cfarm.net          # big-endian
+###
+# Other
+# haiku-r1a3 vm
+# haiku-r1b5 vm

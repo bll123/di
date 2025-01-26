@@ -110,7 +110,7 @@ runs.  No rigorous tests have been run.
  MacOS Sequoia (intel) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | -
  MacOS Sequoia (m1) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | -
  __Other:__ | | | | | | |
- Haiku r1a3 | - | - | - | - | - | - | -
+ Haiku r1b5 | - | 4.99.3<br>2025-1-26 | - | - | - | - | ramfs used value err
  Tru64 5.1B | - | - | - | - | - | - | polarhome
  QNX 6.3 | - | - | - | - | - | - | polarhome
  SCO OpenServer 6.0.0 | - | - | - | - | - | - | polarhome
