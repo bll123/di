@@ -118,7 +118,7 @@ static int  isIgnoreFSType      (const char *);
 static int  isIgnoreSpecial     (const char *);
 static int  isIgnoreFS          (const char *, const char *);
 static int  checkForUUID        (const char *);
-static int  diCompare           (const di_opt_t *, const char *sortType, const di_disk_info_t *, int, int);
+static int  di_sort_compare           (const di_opt_t *, const char *sortType, const di_disk_info_t *, int, int);
 static void checkZone (di_disk_info_t *, di_zone_info_t *, di_opt_t *);
 static void di_sort_disk_info (di_opt_t *, di_disk_info_t *, int, const char *, int);
 static void init_scale_values (di_opt_t *);
@@ -1463,7 +1463,7 @@ di_sort_disk_info (di_opt_t *diopts, di_disk_info_t *data, int count,
       tempIndex = data [i].sortIndex [sidx];
       j = i - gap;
 
-      while (j >= 0 && diCompare (diopts, sortType, data, data [j].sortIndex [sidx], tempIndex) > 0) {
+      while (j >= 0 && di_sort_compare (diopts, sortType, data, data [j].sortIndex [sidx], tempIndex) > 0) {
         data [j + gap].sortIndex [sidx] = data [j].sortIndex [sidx];
         j -= gap;
       }
@@ -1477,14 +1477,14 @@ di_sort_disk_info (di_opt_t *diopts, di_disk_info_t *data, int count,
 }
 
 static int
-diCompare (const di_opt_t *diopts, const char *sortType,
+di_sort_compare (const di_opt_t *diopts, const char *sortType,
     const di_disk_info_t *data, int idx1, int idx2)
 {
-  int             rc;
-  int             sortOrder;
+  int                   rc;
+  int                   sortOrder;
   const char            *ptr;
-  const di_disk_info_t    *d1;
-  const di_disk_info_t    *d2;
+  const di_disk_info_t  *d1;
+  const di_disk_info_t  *d2;
 
   /* reset sort order to the default start value */
   sortOrder = DI_SORT_OPT_ASCENDING;
@@ -1526,21 +1526,17 @@ diCompare (const di_opt_t *diopts, const char *sortType,
       case DI_SORT_OPT_AVAIL:
       case DI_SORT_OPT_FREE:
       case DI_SORT_OPT_TOTAL: {
-        int   temp;
-
-// ### FIX
-        temp = 0;
         switch (*ptr) {
           case DI_SORT_OPT_AVAIL: {
-            temp = dinum_cmp (&d1->values [DI_SPACE_AVAIL], &d2->values [DI_SPACE_AVAIL]);
+            rc = dinum_cmp (&d1->values [DI_SPACE_AVAIL], &d2->values [DI_SPACE_AVAIL]);
             break;
           }
           case DI_SORT_OPT_FREE: {
-            temp = dinum_cmp (&d1->values [DI_SPACE_FREE], &d2->values [DI_SPACE_FREE]);
+            rc = dinum_cmp (&d1->values [DI_SPACE_FREE], &d2->values [DI_SPACE_FREE]);
             break;
           }
           case DI_SORT_OPT_TOTAL: {
-            temp = dinum_cmp (&d1->values [DI_SPACE_TOTAL], &d2->values [DI_SPACE_TOTAL]);
+            rc = dinum_cmp (&d1->values [DI_SPACE_TOTAL], &d2->values [DI_SPACE_TOTAL]);
             break;
           }
           default: {

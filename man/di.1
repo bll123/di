@@ -193,16 +193,26 @@ Do not resolve symlinks (for mount points that have a trailing UUID).
 Use \fIsort\-type\fP to sort the output.
 The output of \fIdi\fP is normally sorted by mount point.  The following
 sort flags may be used to change the sort order:
-\fBm\fP \- by mount point (default);
+.IP
+.RS
+\fBm\fP \- by mount point (default)
+.br
 \fBn\fP \- leave unsorted (as it appears in
-the mount table);
-\fBs\fP \- by filesystem;
-\fBT\fP \- by total space;
-\fBf\fP \- by free space;
-\fBa\fP \- by available space;
-\fBt\fP \- by filesystem type;
+the mount table)
+.br
+\fBs\fP \- by filesystem
+.br
+\fBT\fP \- by total space
+.br
+\fBf\fP \- by free space
+.br
+\fBa\fP \- by available space
+.br
+\fBt\fP \- by filesystem type
+.br
 \fBr\fP \- reverse the sort order; This will apply to all sort flags
 following this sort flag.
+.RE
 .IP
 These sort options may be combined in any order.  e.g.:
 .RS

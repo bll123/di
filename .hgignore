@@ -9,21 +9,20 @@ syntax: regex
 \.cache$
 ^build
 ^config\.h$
+^dev
 ^di$
 ^dimathtest$
 ^di\.env$
 ^di\.reqlibs$
 \.dylib$
 \.so$
-TODO
-# dioptions.dat
-^dev
 ^getoptn_test$
-^tmp/
-^w$
-^ww$
-^www$
 ^mkconfig\.link$
 ^mkconfig\.old$
 ^mkc_files/
 ^test_results/
+^tmp/
+^w$
+^ww$
+^www$
+^x/
