@@ -301,13 +301,13 @@ include
 #define DI_GMP 1
 #define DI_TOMMATH 2
 #if ! defined (DI_USE_MATH)
-# if defined (_pkg_libs_gmp)
-#  define DI_USE_MATH DI_GMP
-# endif
 /* at the moment, libtommath in macports has a broken pkg-config */
 # if defined (_pkg_libs_libtommath) && ! __APPLE__
 #  undef DI_USE_MATH
 #  define DI_USE_MATH DI_TOMMATH
+# endif
+# if defined (_pkg_libs_gmp)
+#  define DI_USE_MATH DI_GMP
 # endif
 # if ! defined (DI_USE_MATH)
 #  define DI_USE_MATH DI_INTERNAL

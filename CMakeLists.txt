@@ -198,6 +198,7 @@ macro (checkPrototype_quotactl hdr)
   # this fails when using the c++ compiler.
   # the c++ compiler is only needed on Haiku,
   # but it would be nice to be able to test it elsewhere
+  # the mkconfig suite can be used to test c++.
   check_prototype_definition (quotactl
     "int quotactl (const char * a, int b, int c, void * d)"
     0
@@ -389,28 +390,6 @@ endmacro()
 macro (checkIncludeConflict hdra hdrb varnm)
   message ("-- Check for include conflict ${hdra} ${hdrb}")
   check_include_files ("${hdra};${hdrb}" ${varnm})
-#  # use execute_process rather than check_source_compiles
-#  # so that earlier versions of cmake can be used.
-#  file (WRITE tinc.c "#include <${hdra}>
-##include <${hdrb}>
-#int main (int argc, char *argv []) {
-#  return 0;
-#}"
-#  )
-#  execute_process (
-#    OUTPUT_QUIET
-#    ERROR_QUIET
-#    RESULT_VARIABLE tincres
-#    COMMAND ${CMAKE_C_COMPILER} -c tinc.c
-#  )
-#  set (${varnm} 0)
-#  if (tincres EQUAL 0)
-#    set (${varnm} 1)
-#  endif()
-#  file (REMOVE tinc.c)
-#  if (EXISTS tinc.o)
-#    file (REMOVE tinc.o)
-#  endif()
 endmacro()
 
 macro (checkvquotactlenabled)
@@ -863,13 +842,8 @@ if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
     set (DI_USE_MATH DI_TOMMATH)
   endif()
   if (_hdr_gmp AND (_hdr_tommath OR _hdr_libtommath_tommath))
-    # use the library that can handle uint64.
-    if (APPLE)
-      # at the moment, libtommath in macports has a broken pkg-config
-      set (DI_USE_MATH DI_GMP)
-    else()
-      set (DI_USE_MATH DI_TOMMATH)
-    endif()
+    # use the most common library
+    set (DI_USE_MATH DI_GMP)
   endif()
 endif()
 if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")

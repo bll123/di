@@ -54,11 +54,13 @@ typedef struct
 } di_disk_info_t;
 
 typedef struct {
+  dinum_t         scale_values [DI_SCALE_MAX];
   void            *options;
   di_disk_info_t  *diskInfo;
   di_disk_info_t  totals;
   void            *zoneInfo;
   void            *pub;
+  int             scale_values_init;
   /* fscount is the number of partitions */
   /* the allocation count is one greater to hold the totals bucket */
   int             fscount;

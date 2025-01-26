@@ -49,9 +49,10 @@ if UsingCLANG == _MKCONFIG_USING_CLANG Y
   addcflag -Wno-documentation
 endif
 
-if UsingGNU_LD == _MKCONFIG_USING_GNU_LD Y && == _MKCONFIG_USING_CPLUSPLUS Y
- addcflag -fpermissive
-endif
+# turn this off for now, re-visit after haiku update
+#if UsingGNU_LD == _MKCONFIG_USING_GNU_LD Y && == _MKCONFIG_USING_CPLUSPLUS Y
+# addcflag -fpermissive
+#endif
 
 # these confuse other compilers...make them GCC only
 # solaris will not link w/-fstack-protector, so it

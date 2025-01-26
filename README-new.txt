@@ -7,8 +7,8 @@ CONTENTS
   Description
   Documentation
   Installation
-  Bugs and Known Issues
   Requirements
+  Bugs and Known Issues
   Acknowledgements
   Copyright
 
@@ -38,19 +38,39 @@ INSTALLATION
     otherwise the numerics will be handled using standard C data types
     (long double, double, etc.).
 
-    The GMP library only seems to accept 'unsigned long', and there may
-    be a loss of precision on some systems.  For this reason, if both
-    libraries are found, libtommath will be used by preference.
+    Be aware that the GMP library only accepts 'unsigned long', and
+    if 'unsigned long' has a size < 8, there may be a loss of precision
+    on some systems.
 
     To turn off the use of the multi-precision libraries;
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_INTERNAL
 
       Long doubles are quite capable, there's nothing wrong with
-      building it this way.
+      building it this way (as of 2025).
     To force GMP:
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_GMP
     To force libtommath:
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_TOMMATH
+
+REQUIREMENTS
+
+  cmake build
+    make
+    cmake
+    sed grep tr
+    msgfmt
+    pkg-config
+    libintl/libiconv (gettext)
+    C compiler
+  mkconfig build
+    make
+    msgfmt
+    cat chmod ln mkdir mv rm sed test expr grep sort
+    pkg-config
+    bourne/ksh/bash shell
+    C compiler
+    awk (mawk/nawk/gawk)
+    C compiler
 
 BUG REPORTS
 
@@ -69,49 +89,6 @@ BUG REPORTS
 
     Open a ticket at : https://sourceforge.net/p/diskinfo-di/tickets/
     Or e-mail : brad.lanam.di_at_gmail.com
-
-REQUIREMENTS
-
-  cmake build
-    make cmake sed msgfmt grep tr pkg-config
-    C or C++ compiler
-  mkconfig build
-    make msgfmt cat chmod ln mkdir mv rm sed test pkg-config
-        cat expr grep rm sed sort test
-    bourne/ksh/bash shell
-    C compiler
-    awk (mawk/nawk/gawk)
-
-PORTING
-
-    di 4.47 has been tested on the following platforms:
-      Linux
-        RedHat 7.3 (gcc)
-        CentOS 3.9 (gcc)
-        Fedora 7 (gcc)
-        Fedora 27 (gcc)
-        MX Linux 17.1 (gcc, clang)
-      BSD
-        DragonflyBSD 4.4 (gcc)
-        FreeBSD 7.0 (cc)
-        FreeBSD 11.0 (clang)
-        NetBSD 1.62 (cc)
-        NetBSD 2.0 (cc)
-        NetBSD 7.0.1 (gcc)
-        OpenBSD 4.4 (gcc)
-      Windows
-        Msys2 (gcc)
-        Cygwin (gcc)
-      Other
-        AIX 7.1 (gcc)
-        Mac OS X 10.12.6 (clang)
-        QNX 6.5 (cc)
-        SCO SV 6.0.0 (cc)
-        Solaris 11/x86 (cc12.3)
-        Solaris 10/sparc (cc12.3)
-        Solaris 9/x86 (gcc3)
-        Tru64 5.1B (cc)
-        UnixWare 7.1.4 (cc)
 
 ACKNOWLEDGEMENTS
 

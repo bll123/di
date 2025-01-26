@@ -72,7 +72,6 @@
 #if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
 #endif
-
 #if _npt_getenv
   extern char *getenv (const char *);
 #endif
@@ -96,9 +95,6 @@ int debug = 0;
 #define DI_SORT_OPT_TYPE            't'
 #define DI_SORT_OPT_ASCENDING       1
 
-static int scale_values_init = 0;
-static dinum_t scale_values [DI_SCALE_MAX];
-
 static void checkDiskInfo       (di_data_t *, int);
 static void checkDiskQuotas     (di_data_t *);
 static int  checkFileInfo       (di_data_t *);
@@ -115,7 +111,7 @@ static int  checkForUUID        (const char *);
 static int  di_sort_compare           (const di_opt_t *, const char *sortType, const di_disk_info_t *, int, int);
 static void checkZone (di_disk_info_t *, di_zone_info_t *, di_opt_t *);
 static void di_sort_disk_info (di_opt_t *, di_disk_info_t *, int, const char *, int);
-static void init_scale_values (di_opt_t *);
+static void init_scale_values (di_data_t *, di_opt_t *);
 static void di_calc_space (di_data_t *di_data, int infoidx, int validxA, int validxB, int validxC, dinum_t *val);
 static double di_calc_perc (di_data_t *di_data, int infoidx, int validxA, int validxB, int validxC, int validxD, int validxE);
 static void processTotals (di_data_t *di_data);
@@ -128,6 +124,7 @@ di_initialize (void)
 
   di_data = (di_data_t *) malloc (sizeof (di_data_t));
 
+  di_data->scale_values_init = false;
   di_data->fscount = 0;
   di_data->dispcount = 0;
   di_data->haspooledfs = false;
@@ -178,14 +175,13 @@ di_cleanup (void *tdi_data)
   zinfo = (di_zone_info_t *) di_data->zoneInfo;
   di_free_zones (zinfo);
 
-  free (di_data);
-
-  if (scale_values_init) {
+  if (di_data->scale_values_init) {
     for (i = 0; i < DI_SCALE_MAX; ++i) {
-      dinum_clear (&scale_values [i]);
+      dinum_clear (&di_data->scale_values [i]);
     }
-    scale_values_init = 0;
   }
+
+  free (di_data);
 }
 
 const char *
@@ -219,7 +215,7 @@ di_process_options (void *tdi_data, int argc, const char * argv [])
 #endif
   }
 
-  init_scale_values (diopts);
+  init_scale_values (di_data, diopts);
 
   return exitflag;
 }
@@ -453,7 +449,7 @@ di_get_scale_max (void *tdi_data, int infoidx,
   }
 
   diopts = (di_opt_t *) di_data->options;
-  init_scale_values (diopts);
+  init_scale_values (di_data, diopts);
 
   dinum_init (&val);
   di_calc_space (di_data, infoidx, validxA, validxB, validxC, &val);
@@ -461,7 +457,7 @@ di_get_scale_max (void *tdi_data, int infoidx,
   /* if the comparison loop doesn't find it, it's a large number */
   scaleidx = DI_SCALE_MAX - 1;
   for (i = DI_SCALE_KILO; i < DI_SCALE_MAX; ++i) {
-    if (dinum_cmp (&val, &scale_values [i]) < 0) {
+    if (dinum_cmp (&val, &di_data->scale_values [i]) < 0) {
       scaleidx = i - 1;
       break;
     }
@@ -489,11 +485,11 @@ di_get_scaled (void *tdi_data, int infoidx,
   }
 
   diopts = (di_opt_t *) di_data->options;
-  init_scale_values (diopts);
+  init_scale_values (di_data, diopts);
 
   dinum_init (&val);
   di_calc_space (di_data, infoidx, validxA, validxB, validxC, &val);
-  dval = dinum_scale (&val, &scale_values [scaleidx]);
+  dval = dinum_scale (&val, &di_data->scale_values [scaleidx]);
   return dval;
 }
 
@@ -538,7 +534,7 @@ di_get_perc (void *tdi_data, int infoidx,
   }
 
   diopts = (di_opt_t *) di_data->options;
-  init_scale_values (diopts);
+  init_scale_values (di_data, diopts);
 
   dval = di_calc_perc (di_data, infoidx, validxA, validxB, validxC, validxD, validxE);
   return dval;
@@ -1559,27 +1555,27 @@ di_sort_compare (const di_opt_t *diopts, const char *sortType,
 }
 
 static void
-init_scale_values (di_opt_t *diopts)
+init_scale_values (di_data_t *di_data, di_opt_t *diopts)
 {
   int       i;
   dinum_t   base;
 
-  if (scale_values_init) {
+  if (di_data->scale_values_init) {
     return;
   }
 
   for (i = 0; i < DI_SCALE_MAX; ++i) {
-    dinum_init (&scale_values [i]);
+    dinum_init (&di_data->scale_values [i]);
   }
   dinum_init (&base);
   dinum_set_u (&base, (di_ui_t) diopts->blockSize);
-  dinum_set_u (&scale_values [DI_SCALE_BYTE], 1);
+  dinum_set_u (&di_data->scale_values [DI_SCALE_BYTE], 1);
   for (i = DI_SCALE_KILO; i < DI_SCALE_MAX; ++i) {
-    dinum_set (&scale_values [i], &base);
-    dinum_mul (&scale_values [i], &scale_values [i - 1]);
+    dinum_set (&di_data->scale_values [i], &base);
+    dinum_mul (&di_data->scale_values [i], &di_data->scale_values [i - 1]);
   }
 
-  scale_values_init = 1;
+  di_data->scale_values_init = 1;
   dinum_clear (&base);
 }
 
