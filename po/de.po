@@ -1,0 +1,149 @@
+# English
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: di 4.99.3\n"
+"Report-Msgid-Bugs-To: brad.lanam.di@gmail.com\n"
+"POT-Creation-Date: 2025-01-25\n"
+"PO-Revision-Date: 2025-01-25\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: english\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
+msgid "          h - human readable."
+msgstr "          h - lesbar"
+
+msgid "       [-I include-fstype-list] [file [...]]"
+msgstr "       [-I include-fstyp-list] [Datei [...]]"
+
+msgid "    2 - percentage of user-available space in use."
+msgstr "    2 - Prozent des benutzten verfügbaren Platzes."
+
+msgid "    F - free file slots                 P - percentage file slots used"
+msgstr "    F - Dateislots freigeben            P - Prozent der benutzten Dateislots"
+
+msgid "    b - total space                     B - space available for use"
+msgstr ""
+
+msgid "    f - space free                     v - space available"
+msgstr ""
+
+msgid "    i - total file slots (i-nodes)      U - used file slots"
+msgstr "    i - Dateislots gesamt (i-nodes)     U - benutzte Dateislots"
+
+msgid "    m - mount point"
+msgstr "    m - Mountpunkt"
+
+msgid "    p - percentage not avail. for use   1 - percentage used"
+msgstr "    p - Prozent nicht benutzbar         1 - Prozent benutzt"
+
+msgid "    s - filesystem"
+msgstr "    s - Dateisystemname"
+
+msgid "    t - filesystem type"
+msgstr "    t - Dateisystemtyp"
+
+msgid "    u - used space                      c - calculated space in use"
+msgstr ""
+
+msgid "   -I x : include only file system types in <x>"
+msgstr "   -I x : nur Dateisystemtypen in <x> einfügen"
+
+msgid "   -a   : print all mounted devices"
+msgstr "   -a   : alle eingehängten Geräte auflisten"
+
+msgid "   -d x : size to print blocks in (k,m,g,t,...)"
+msgstr "   -d x : Größe der angezeigten Blöcke (k,m,g,t,...)"
+
+msgid "   -f x : use format string <x>"
+msgstr "   -f x : benutze Formatzeichen <x>"
+
+msgid "   -j : output JSON format"
+msgstr ""
+
+msgid "   -l   : display local filesystems only"
+msgstr "   -l   : nur lokale Dateisysteme anzeigen"
+
+msgid "   -n   : do not print header"
+msgstr "   -n   : keine Kopf drucken"
+
+msgid "   -t   : print totals"
+msgstr "   -t   : Summen drucken"
+
+msgid "   -x x : exclude file system types in <x>"
+msgstr "   -x x : Dateisystemtyp in <x> ignorieren"
+
+msgid " Format string values:"
+msgstr " Formatzeichenkette:"
+
+#, c-format
+msgid "%Free"
+msgstr "%Frei"
+
+msgid "%IUsed"
+msgstr "%IBen."
+
+msgid "%Used"
+msgstr "%Ben."
+
+msgid "1024-blocks"
+msgstr "1024-Blöcke"
+
+msgid "Avail"
+msgstr "Verfügb."
+
+msgid "Available"
+msgstr "Verfübar"
+
+msgid "Capacity"
+msgstr "Benutzt%"
+
+msgid "Filesystem"
+msgstr "Dateisystem"
+
+msgid "Free"
+msgstr "Frei"
+
+msgid "IFree"
+msgstr "IFrei"
+
+msgid "IUsed"
+msgstr "IBenutzt"
+
+msgid "Inodes"
+msgstr ""
+
+msgid "Mount"
+msgstr "Mountpunkt"
+
+msgid "Mounted On"
+msgstr "Eingehängt auf"
+
+msgid "Options"
+msgstr "Optionen"
+
+msgid "See manual page for more options."
+msgstr "Siehe man-Seite für weitere Optionen."
+
+msgid "Size"
+msgstr "Größe"
+
+msgid "Total"
+msgstr "Gesamt"
+
+msgid "Type"
+msgstr ""
+
+msgid ""
+"Usage: di [-ajnt] [-d display-size] [-f format] [-x exclude-fstype-list]"
+msgstr ""
+
+msgid "Used"
+msgstr "Benutzt"
+
+msgid "di version"
+msgstr ""
