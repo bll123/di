@@ -39,13 +39,13 @@
  *      t - disk partition type
  *      O - mount options.
  *    Disk Space
- *      b - total kbytes
- *      B - total kbytes available for use by the user.
+ *      b - total space
+ *      B - total space available for use by the user.
  *             [ (tot - (free - avail)) ]
- *      u - kbytes used (actual number of kbytes used) [ (tot - free) ]
- *      c - calculated number of kbytes used [ (tot - avail) ]
- *      f - kbytes free
- *      v - kbytes available
+ *      u - space used (actual number of space used) [ (tot - free) ]
+ *      c - calculated number of space used [ (tot - avail) ]
+ *      f - space free
+ *      v - space available
  *    Disk Space Percentages
  *      p - percentage not available for use.
  *          (space not available for use / total disk space)
@@ -101,6 +101,9 @@
 #if _hdr_libintl
 # include <libintl.h>
 #endif
+#if _hdr_locale
+# include <locale.h>
+#endif
 #if _hdr_wchar
 # include <wchar.h>
 #endif
@@ -111,6 +114,7 @@
 
 typedef struct {
   int             *maxlen;
+  int             *printdiff;
   int             *scaleidx;
   const char      **suffix;
   int             *leftjust;
@@ -146,6 +150,7 @@ static void usage (void);
 static Size_t istrlen (const char *str);
 static void updateScaleValues (void *di_data, int iterval, di_disp_info_t *dispinfo);
 static void determineMaxScaleValue (void *di_data, int iterval, di_disp_info_t *dispinfo);
+static void initLocale (void);
 
 int
 main (int argc, char * argv [])
@@ -153,6 +158,7 @@ main (int argc, char * argv [])
   void      *di_data;
   int       exitflag;
 
+  initLocale ();
   di_data = di_initialize ();
   exitflag = di_process_options (di_data, argc, argv);
   switch (exitflag) {
@@ -167,7 +173,7 @@ main (int argc, char * argv [])
         usage ();
       }
       if (exitflag == DI_EXIT_VERS) {
-        fprintf (stdout, DI_GT ("di version %s %s\n"),
+        fprintf (stdout, "%s %s %s\n", DI_GT ("di version"),
             DI_VERSION, DI_RELEASE_STATUS);
       }
       di_cleanup (di_data);
@@ -189,31 +195,57 @@ main (int argc, char * argv [])
 static void
 usage (void)
 {
-  fprintf (stdout, DI_GT ("di version %s\n"), DI_VERSION);
-             /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
-  fprintf (stdout, DI_GT ("Usage: di [-ant] [-d display-size] [-f format] [-x exclude-fstyp-list]\n"));
-  fprintf (stdout, DI_GT ("       [-I include-fstyp-list] [file [...]]\n"));
-  fprintf (stdout, DI_GT ("   -a   : print all mounted devices\n"));
-  fprintf (stdout, DI_GT ("   -d x : size to print blocks in (k,m,g,t,etc.)\n"));
-  fprintf (stdout, DI_GT ("          h - human readable.\n"));
-  fprintf (stdout, DI_GT ("   -f x : use format string <x>\n"));
-  fprintf (stdout, DI_GT ("   -I x : include only file system types in <x>\n"));
-  fprintf (stdout, DI_GT ("   -x x : exclude file system types in <x>\n"));
-  fprintf (stdout, DI_GT ("   -l   : display local filesystems only\n"));
-  fprintf (stdout, DI_GT ("   -n   : don't print header\n"));
-  fprintf (stdout, DI_GT ("   -t   : print totals\n"));
-  fprintf (stdout, DI_GT (" Format string values:\n"));
-  fprintf (stdout, DI_GT ("    m - mount point\n"));
-  fprintf (stdout, DI_GT ("    d - device name\n"));
-  fprintf (stdout, DI_GT ("    t - file-system type\n"));
-  fprintf (stdout, DI_GT ("    b - total kbytes                    B - kbytes available for use\n"));
-  fprintf (stdout, DI_GT ("    u - used kbytes                     c - calculated kbytes in use\n"));
-  fprintf (stdout, DI_GT ("    f - kbytes free                     v - kbytes available\n"));
-  fprintf (stdout, DI_GT ("    p - percentage not avail. for use   1 - percentage used\n"));
-  fprintf (stdout, DI_GT ("    2 - percentage of user-available space in use.\n"));
-  fprintf (stdout, DI_GT ("    i - total file slots (i-nodes)      U - used file slots\n"));
-  fprintf (stdout, DI_GT ("    F - free file slots                 P - percentage file slots used\n"));
-  fprintf (stdout, DI_GT ("See manual page for more options.\n"));
+  fprintf (stdout, "%s %s\n",
+      DI_GT ("di version"), DI_VERSION);
+          /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
+  fprintf (stdout, "%s\n",
+      DI_GT ("Usage: di [-ajnt] [-d display-size] [-f format] [-x exclude-fstype-list]"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("       [-I include-fstype-list] [file [...]]"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("   -a   : print all mounted devices"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("   -d x : size to print blocks in (k,m,g,t,...)"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("          h - human readable."));
+  fprintf (stdout, "%s\n",
+      DI_GT ("   -j : output JSON format"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("   -f x : use format string <x>"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("   -I x : include only file system types in <x>"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("   -x x : exclude file system types in <x>"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("   -l   : display local filesystems only"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("   -n   : do not print header"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("   -t   : print totals"));
+  fprintf (stdout, "%s\n",
+      DI_GT (" Format string values:"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    m - mount point"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    s - filesystem"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    t - filesystem type"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    b - total space                     B - space available for use"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    u - used space                      c - calculated space in use"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    f - space free                     v - space available"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    p - percentage not avail. for use   1 - percentage used"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    2 - percentage of user-available space in use."));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    i - total file slots (i-nodes)      U - used file slots"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("    F - free file slots                 P - percentage file slots used"));
+  fprintf (stdout, "%s\n",
+      DI_GT ("See manual page for more options."));
 }
 
 static void
@@ -257,6 +289,7 @@ di_display_data (void *di_data)
   }
 
   dispinfo.maxlen = malloc (sizeof (int) * (Size_t) fmtstrlen);
+  dispinfo.printdiff = malloc (sizeof (int) * (Size_t) displinecount * (Size_t) fmtstrlen);
   dispinfo.scaleidx = malloc (sizeof (int) * (Size_t) displinecount * (Size_t) fmtstrlen);
   dispinfo.suffix = malloc (sizeof (char *) * (Size_t) displinecount * (Size_t) fmtstrlen);
   dispinfo.leftjust = malloc (sizeof (int) * (Size_t) fmtstrlen);
@@ -265,7 +298,8 @@ di_display_data (void *di_data)
   strdata = dispinfo.strdata;
 
   for (i = 0; i < fmtstrlen; ++i) {
-    dispinfo.maxlen [i] = DI_SCALE_GIGA;
+    dispinfo.maxlen [i] = 0;
+    dispinfo.printdiff [i] = 0;
     dispinfo.leftjust [i] = 0;
     dispinfo.jsonident [i] = NULL;
   }
@@ -325,7 +359,7 @@ di_display_data (void *di_data)
           dispinfo.jsonident [fmtcount] = "mount";
           dispinfo.leftjust [fmtcount] = 1;
           if (dispcount == totline) {
-            strdata [dataidx] = strdup (DI_GT ("Totals"));
+            strdata [dataidx] = strdup (DI_GT ("Total"));
           } else {
             strdata [dataidx] = strdup (pub->strdata [DI_DISP_MOUNTPT]);
           }
@@ -540,10 +574,14 @@ di_display_data (void *di_data)
       for (j = 0; j < fmtstrlen; ++j) {
         int     dataidx;
         Size_t  len;
+        Size_t  printdiff;
+        Size_t  clen;
 
         dataidx = i * fmtstrlen + j;
         if (strdata [dataidx] != NULL) {
+          clen = strlen (strdata [dataidx]);
           len = istrlen (strdata [dataidx]);
+          printdiff = clen - len;
           /* this is an assumption */
           /* if the non-si suffixes are implemented, this needs to change */
           if (* (dispinfo.suffix [dataidx])) {
@@ -552,6 +590,7 @@ di_display_data (void *di_data)
           if ((int) len > dispinfo.maxlen [j]) {
             dispinfo.maxlen [j] = (int) len;
           }
+          dispinfo.printdiff [dataidx] = (int) printdiff;
         }
       }
     }
@@ -599,14 +638,17 @@ di_display_data (void *di_data)
       }
       if (! csvout && ! jsonout) {
         int       len;
+        int       printdiff;
 
         len = dispinfo.maxlen [j];
+        printdiff = dispinfo.printdiff [dataidx];
         if (*dispinfo.suffix [dataidx]) {
           --len;
         }
         if (j == fmtstrlen - 1 && dispinfo.leftjust [j]) {
           fprintf (stdout, "%s%s", tmp, dispinfo.suffix [dataidx]);
         } else {
+          len += printdiff;
           if (dispinfo.leftjust [j]) {
             fprintf (stdout, "%-*s%s", len, tmp, dispinfo.suffix [dataidx]);
           } else {
@@ -662,6 +704,7 @@ di_display_data (void *di_data)
   }
 
   free (dispinfo.maxlen);
+  free (dispinfo.printdiff);
   free (dispinfo.scaleidx);
   free (dispinfo.suffix);
   free (dispinfo.leftjust);
@@ -1021,4 +1064,23 @@ determineMaxScaleValue (void *di_data, int iterval,
 
     ++dispcount;
   }
+}
+
+static void
+initLocale (void)
+{
+#if _enable_nls
+  const char      *localeptr;
+#endif
+
+#if _lib_setlocale && defined (LC_ALL)
+  setlocale (LC_ALL, "");
+#endif
+#if _enable_nls
+  if ( (localeptr = getenv ("DI_LOCALE_DIR")) == (char *) NULL) {
+    localeptr = DI_LOCALE_DIR;
+  }
+  bindtextdomain ("di", localeptr);
+  textdomain ("di");
+#endif
 }

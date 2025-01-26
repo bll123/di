@@ -37,12 +37,6 @@
 #if _hdr_strings
 # include <strings.h>
 #endif
-#if _hdr_libintl
-# include <libintl.h>
-#endif
-#if _hdr_locale
-# include <locale.h>
-#endif
 #if _sys_stat
 # include <sys/stat.h>
 #endif
