@@ -10,8 +10,13 @@ host=$1
 type=$2
 shift;shift
 ipaddr=$1
-keep=$2
-shift;shift
+shift
+remuser=$1
+remport=$2
+rempath=$3
+shift;shift;shift
+keep=${1:=F}
+shift
 complist=$*
 
 LOCKA=test_results/VM_A
@@ -20,10 +25,19 @@ LOCKC=test_results/VM_C
 locklist="${LOCKA} ${LOCKB}"
 
 function remotebldrun  {
-  ssh ${ipaddr} "./dibldrun.sh ${host} ${tarfn} ${didir} ${comp}"
+  ssh ${rempssh} ${remussh} ${ipaddr} "./dibldrun.sh ${host} ${tarfn} ${didir} ${comp}"
   testdir=${didir}_${comp}
-  scp -q ${ipaddr}:${testdir}/*.out ${rsltdir}
+  scp ${rempscp} -q ${remuscp}${ipaddr}:${testdir}/*.out ${rsltdir}
 }
+
+if [[ ${remuser} != - ]]; then
+  remussh="-l ${remuser}"
+  remuscp="${remuser}@"
+fi
+if [[ ${remport} != - ]]; then
+  rempssh="-p ${remport}"
+  rempscp="-P ${remport}"
+fi
 
 topdir=$(pwd)
 if [[ ${type} == local ]]; then
@@ -33,8 +47,8 @@ if [[ ${type} == local ]]; then
   chmod a+rx dibldrun.sh
 fi
 if [[ ${type} == remote || ${type} == vm ]]; then
-  scp -q ${tarfn} tests/dibldrun.sh ${ipaddr}:
-  ssh ${ipaddr} "chmod a+rx dibldrun.sh"
+  scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
+  ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
 fi
 
 for comp in ${complist}; do
@@ -90,7 +104,7 @@ if [ $keep = F ]; then
       rm -rf di-[45].*.tar.gz ${testdir} dibldrun.sh
     fi
     if [[ $type == remote || $type == vm ]]; then
-      ssh ${ipaddr} "rm -rf di-[45].*.tar.gz ${testdir} dibldrun.sh"
+      ssh ${rempssh} ${remussh} ${ipaddr} "rm -rf di-[45].*.tar.gz ${testdir} dibldrun.sh"
     fi
   done
 fi

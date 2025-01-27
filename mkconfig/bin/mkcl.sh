@@ -309,9 +309,6 @@ if [ $havesource = T ]; then
       doappend allcflags " ${CFLAGS_SYSTEM}"       # needed for this system
     fi
   fi
-  if [ $d = T ];then
-    doappend allcflags " ${DFLAGS}"
-  fi
 fi
 
 allldflags=

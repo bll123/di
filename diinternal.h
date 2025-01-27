@@ -17,7 +17,7 @@ extern "C" {
 
 #define DI_MOUNTPT_LEN         MAXPATHLEN
 #define DI_FILESYSTEM_LEN         MAXPATHLEN
-#define DI_MOUNT_OPT_LEN             MAXPATHLEN
+#define DI_MOUNTOPT_LEN             MAXPATHLEN
 #define DI_MNT_TIME_LEN        24
 #ifndef DI_DEFAULT_DISP_SIZE
 # define DI_DEFAULT_DISP_SIZE "H"
@@ -72,15 +72,11 @@ typedef struct {
   int             totsorted;
 } di_data_t;
 
-/* dilib.c */
-extern int debug;
-extern const char *getPrintFlagText (int);
-
 /* digetentries.c */
-extern int  di_get_disk_entries (di_disk_info_t **, int *);
+extern int  di_get_disk_entries (di_data_t *di_data, int *);
 
 /* digetinfo.c */
-extern void di_get_disk_info (di_disk_info_t **, int *);
+extern void di_get_disk_info (di_data_t *di_data, int *);
 
 /* didiskutil.c */
 extern void di_initialize_disk_info (di_disk_info_t *, int);

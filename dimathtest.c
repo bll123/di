@@ -38,20 +38,20 @@ main (int argc, char *argv [])
   dinum_init (&r);
 
   /* set */
-  dinum_set_u (&a, 1);
+  dinum_set_u (&a, (di_ui_t) 1);
   ++tcount;
-  if (dinum_cmp_s (&a, 1) != 0) {
-    fprintf (stderr, "%d: cmp-s 1 != 0 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) 1) != 0) {
+    fprintf (stderr, "%d: cmp-s 1 != 0 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
   ++tcount;
-  if (dinum_cmp_s (&a, 0) <= 0) {
-    fprintf (stderr, "%d: cmp-s 1 > 0 fail %d\n", tcount, dinum_cmp_s (&a, 0));
+  if (dinum_cmp_s (&a, (di_si_t) 0) <= 0) {
+    fprintf (stderr, "%d: cmp-s 1 > 0 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 0));
     ++ecount;
   }
   ++tcount;
-  if (dinum_cmp_s (&a, 2) >= 0) {
-    fprintf (stderr, "%d: cmp-s 1 < 2 fail %d\n", tcount, dinum_cmp_s (&a, 2));
+  if (dinum_cmp_s (&a, (di_si_t) 2) >= 0) {
+    fprintf (stderr, "%d: cmp-s 1 < 2 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 2));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -62,29 +62,29 @@ main (int argc, char *argv [])
   }
 
   /* set negative, must use _s suffix */
-  dinum_set_s (&a, -1);
+  dinum_set_s (&a, (di_si_t) -1);
   ++tcount;
-  if (dinum_cmp_s (&a, -1) != 0) {
-    fprintf (stderr, "%d: set-s -1 != 0 fail %d\n", tcount, dinum_cmp_s (&a, -1));
+  if (dinum_cmp_s (&a, (di_si_t) -1) != 0) {
+    fprintf (stderr, "%d: set-s -1 != 0 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) -1));
     ++ecount;
   }
   ++tcount;
-  if (dinum_cmp_s (&a, 0) >= 0) {
-    fprintf (stderr, "%d: set-s -1 >= 0 fail %d\n", tcount, dinum_cmp_s (&a, 0));
+  if (dinum_cmp_s (&a, (di_si_t) 0) >= 0) {
+    fprintf (stderr, "%d: set-s -1 >= 0 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 0));
     ++ecount;
   }
 
   /* add */
-  dinum_set_u (&a, 0);
-  dinum_add_u (&a, 1);
+  dinum_set_u (&a, (di_ui_t) 0);
+  dinum_add_u (&a, (di_ui_t) 1);
   ++tcount;
-  if (dinum_cmp_s (&a, 1) != 0) {
-    fprintf (stderr, "%d: add-u 1 != 0 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) 1) != 0) {
+    fprintf (stderr, "%d: add-u 1 != 0 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
   ++tcount;
-  if (dinum_cmp_s (&a, 0) <= 0) {
-    fprintf (stderr, "%d: add-u 1 <= 0 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) 0) <= 0) {
+    fprintf (stderr, "%d: add-u 1 <= 0 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -94,10 +94,10 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_add_u (&a, 1);
+  dinum_add_u (&a, (di_ui_t) 1);
   ++tcount;
-  if (dinum_cmp_s (&a, 2) != 0) {
-    fprintf (stderr, "%d: add-u 0 fail %d\n", tcount, dinum_cmp_s (&a, 0));
+  if (dinum_cmp_s (&a, (di_si_t) 2) != 0) {
+    fprintf (stderr, "%d: add-u 0 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 0));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -107,10 +107,10 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_add_u (&a, 1);
+  dinum_add_u (&a, (di_ui_t) 1);
   ++tcount;
-  if (dinum_cmp_s (&a, 3) != 0) {
-    fprintf (stderr, "%d: add-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) 3) != 0) {
+    fprintf (stderr, "%d: add-u 1 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -120,11 +120,11 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_set_u (&b, 1);
+  dinum_set_u (&b, (di_ui_t) 1);
   dinum_add (&a, &b);
   ++tcount;
-  if (dinum_cmp_s (&a, 4) != 0) {
-    fprintf (stderr, "%d: add 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) 4) != 0) {
+    fprintf (stderr, "%d: add 1 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -135,10 +135,10 @@ main (int argc, char *argv [])
   }
 
   /* subtract */
-  dinum_sub_u (&a, 1);
+  dinum_sub_u (&a, (di_ui_t) 1);
   ++tcount;
-  if (dinum_cmp_s (&a, 3) != 0) {
-    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) 3) != 0) {
+    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -150,8 +150,8 @@ main (int argc, char *argv [])
 
   dinum_sub (&a, &b);
   ++tcount;
-  if (dinum_cmp_s (&a, 2) != 0) {
-    fprintf (stderr, "%d: sub 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) 2) != 0) {
+    fprintf (stderr, "%d: sub 1 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -161,10 +161,10 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_sub_u (&a, 1);
+  dinum_sub_u (&a, (di_ui_t) 1);
   ++tcount;
-  if (dinum_cmp_s (&a, 1) != 0) {
-    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) 1) != 0) {
+    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -174,10 +174,10 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_sub_u (&a, 1);
+  dinum_sub_u (&a, (di_ui_t) 1);
   ++tcount;
-  if (dinum_cmp_s (&a, 0) != 0) {
-    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) 0) != 0) {
+    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -187,18 +187,18 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_sub_u (&a, 1);
+  dinum_sub_u (&a, (di_ui_t) 1);
   ++tcount;
-  if (dinum_cmp_s (&a, -1) != 0) {
-    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, 1));
+  if (dinum_cmp_s (&a, (di_si_t) -1) != 0) {
+    fprintf (stderr, "%d: sub-u 1 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1));
     ++ecount;
   }
 
   /* multiply */
-  dinum_mul_uu (&a, 1, 1024);
+  dinum_mul_uu (&a, (di_ui_t) 1, (di_ui_t) 1024);
   ++tcount;
-  if (dinum_cmp_s (&a, 1024) != 0) {
-    fprintf (stderr, "%d: mul-uu 1024 fail %d\n", tcount, dinum_cmp_s (&a, 1024));
+  if (dinum_cmp_s (&a, (di_si_t) 1024) != 0) {
+    fprintf (stderr, "%d: mul-uu 1024 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) 1024));
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -208,11 +208,11 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_set_u (&b, 1024);
+  dinum_set_u (&b, (di_ui_t) 1024);
   dinum_mul (&a, &b);
   ++tcount;
-  if (dinum_cmp_s (&a, 1024 * 1024) != 0) {
-    fprintf (stderr, "%d: mul 1024*1024 fail %d\n", tcount, dinum_cmp_s (&a, 1024 * 1024) );
+  if (dinum_cmp_s (&a, (di_si_t) (1024 * 1024)) != 0) {
+    fprintf (stderr, "%d: mul 1024*1024 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) (1024 * 1024)) );
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -222,10 +222,10 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_mul_u (&a, 1024);
+  dinum_mul_u (&a, (di_ui_t) 1024);
   ++tcount;
-  if (dinum_cmp_s (&a, 1024 * 1024 * 1024) != 0) {
-    fprintf (stderr, "%d: mul-u 1024*1024*1024 fail %d\n", tcount, dinum_cmp_s (&a, 1024*1024*1024) );
+  if (dinum_cmp_s (&a, (di_si_t) (1024 * 1024 * 1024)) != 0) {
+    fprintf (stderr, "%d: mul-u 1024*1024*1024 fail %d\n", tcount, dinum_cmp_s (&a, (di_si_t) (1024*1024*1024)) );
     ++ecount;
   }
   dinum_str (&a, buff, sizeof (buff));
@@ -236,8 +236,8 @@ main (int argc, char *argv [])
   }
 
   /* scaled value tests */
-  dinum_set_u (&a, 1024 * 1024);
-  dinum_set_u (&b, 1024);
+  dinum_set_u (&a, (di_ui_t) (1024 * 1024));
+  dinum_set_u (&b, (di_ui_t) 1024);
   dval = dinum_scale (&a, &b);
   ++tcount;
   if (dval != 1024.0) {
@@ -246,8 +246,8 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_set_u (&a, 1024 * 1024 + 2);
-  dinum_set_u (&b, 1024);
+  dinum_set_u (&a, (di_ui_t) (1024 * 1024 + 2));
+  dinum_set_u (&b, (di_ui_t) 1024);
   dval = dinum_scale (&a, &b);
   ++tcount;
   if (dval > 1025.0) {
@@ -256,8 +256,8 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_set_u (&a, 1024 * 1024 + 512);
-  dinum_set_u (&b, 1024);
+  dinum_set_u (&a, (di_ui_t) (1024 * 1024 + 512));
+  dinum_set_u (&b, (di_ui_t) 1024);
   dval = dinum_scale (&a, &b);
   ++tcount;
   if (dval > 1025.0) {
@@ -268,8 +268,8 @@ main (int argc, char *argv [])
 
   /* percentage tests */
   ival = 1024 * 1024 / 100;
-  dinum_set_u (&a, ival);
-  dinum_set_u (&b, 1024 * 1024);
+  dinum_set_u (&a, (di_ui_t) ival);
+  dinum_set_u (&b, (di_ui_t) (1024 * 1024));
   dval = dinum_perc (&a, &b);
   ++tcount;
   if (fabs (dval - 1.0) > 0.0001) {
@@ -278,8 +278,8 @@ main (int argc, char *argv [])
   }
 
   ival = 1024 * 1024 / 2;
-  dinum_set_u (&a, ival);
-  dinum_set_u (&b, 1024 * 1024);
+  dinum_set_u (&a, (di_ui_t) ival);
+  dinum_set_u (&b, (di_ui_t) (1024 * 1024));
   dval = dinum_perc (&a, &b);
   ++tcount;
   if (fabs (dval - 50.0) > 0.0001) {
@@ -287,8 +287,8 @@ main (int argc, char *argv [])
     ++ecount;
   }
 
-  dinum_set_u (&a, 1024 * 1024);
-  dinum_set_u (&b, 1024 * 1024);
+  dinum_set_u (&a, (di_ui_t) (1024 * 1024));
+  dinum_set_u (&b, (di_ui_t) (1024 * 1024));
   dval = dinum_perc (&a, &b);
   ++tcount;
   if (fabs (dval - 100.0) > 0.0001) {

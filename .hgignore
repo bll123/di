@@ -21,6 +21,8 @@ syntax: regex
 ^mkconfig\.old$
 ^mkc_files/
 ^test_results/
+^tests/hostlist\.txt$
+^tests/hostlist\.txt\.bak$
 ^tmp/
 ^w$
 ^ww$

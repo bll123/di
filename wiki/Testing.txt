@@ -17,7 +17,7 @@ runs.  No rigorous tests have been run.
  DragonFly BSD 4.5 | - | - | - | - | - | - | -
  DragonFly BSD 4.6 | - | - | - | - | - | - | -
  DragonFly BSD 5.2.2 | - | - | - | - | - | - | -
- DragonFly BSD 5.8.1 | - | - | - | - | - | - | -
+ DragonFly BSD 5.8.1 | - | - | - | - | - | - | getfsstat
  FreeBSD 1.3 | - | - | - | - | - | - | -
  FreeBSD 4.9 | - | - | - | - | - | - | -
  FreeBSD 5.1 | - | - | - | - | - | - | -
@@ -27,9 +27,8 @@ runs.  No rigorous tests have been run.
  FreeBSD 9.1 | - | - | - | - | - | - | -
  FreeBSD 10.3 | - | - | - | - | - | - | -
  FreeBSD 11 | - | - | - | - | - | - | -
- FreeBSD 13 | - | - | - | - | - | - | -
  FreeBSD 13.4 | - | - | - | - | - | - | -
- FreeBSD 14.2 | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | -
+ FreeBSD 14.2 | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | getfsstat
  MirBSD 10 | - | - | - | - | - | - | -
  NetBSD 1.62 | - | - | - | - | - | - | -
  NetBSD 2.0 | n/a | 4.99.3<br>2025-1-25 | - | - | - | - | many odd warnings
@@ -66,8 +65,8 @@ runs.  No rigorous tests have been run.
  Linux Mint 18.2 | - | - | - | - | - | - | -
  Linux Mint 19 | - | - | - | - | - | - | -
  Linux Mint 21 | 4.99.3<br>2025-1-25 | 4.99.3<br>2025-1-25 | - | - | - | - | -
- MX Linux 21<br>(Debian 11)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | -
- MX Linux 23<br>(Debian 12)| 4.99.2<br>2025-1-25<br>gcc clang | 4.99.2<br>2025-1-25<br>gcc clang | ok | ok | - | - | Primary Development
+ MX Linux 21<br>(Debian 11)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | get/set/endmntent/statvfs
+ MX Linux 23<br>(Debian 12)| 4.99.2<br>2025-1-25<br>gcc clang | 4.99.2<br>2025-1-25<br>gcc clang | ok | ok | - | - | get/set/endmntent/statvfs<br>Primary Development
  Ubuntu 14.04<br>(32-bit) | - | - | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | - | - | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | - | 4.99.3<br>2025-1-25 | - | - | - | - | -
@@ -90,7 +89,7 @@ runs.  No rigorous tests have been run.
  Solus | - | - | - | - | - | - | -
  Void Linux | - | - | - | - | - | - | -
  __Linux: Red Hat Based__| | | | | | |
- CentOS 3.9 | - | - | - | - | - | - | -
+ CentOS 3.9 | - | - | - | - | - | - | get/set/endmntent statvfs
  CentOS 5.5 | - | - | - | - | - | - | -
  CentOS 6.3 | - | - | - | - | - | - | -
  CentOS 7 | - | - | - | - | - | - | -
@@ -103,28 +102,28 @@ runs.  No rigorous tests have been run.
  Red Hat 7.1<br>(not RHEL)| - | - | - | - | - | - | -
  Red Hat 7.3<br>(not RHEL)| - | - | - | - | - | - | -
  __MacOS:__ | | | | | | | -
- MacOS Big Sur | - | - | - | - | - | - | -
- MacOS Ventura | - | - | - | - | - | - | -
- MacOS Monterey | - | - | - | - | - | - | cfarm
- MacOS Sonoma | - | - | - | - | - | - | -
- MacOS Sequoia (intel) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | -
- MacOS Sequoia (m1) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | -
+ MacOS Big Sur | - | - | - | - | - | - | getfsstat
+ MacOS Ventura | - | - | - | - | - | - | getfsstat
+ MacOS Monterey | - | 4.99.3<br>2025-1-27 | - | - | - | - | getfsstat<br>cfarm
+ MacOS Sonoma | - | - | - | - | - | - | getfsstat
+ MacOS Sequoia (intel) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | getfsstat
+ MacOS Sequoia (m1) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | getfsstat
  __Other:__ | | | | | | |
- Haiku r1b5 | - | 4.99.3<br>2025-1-26 | - | - | - | - | ramfs used value err
+ AIX 7.1 | - | 4.99.3<br>2025-1-26<br>gcc xlc  | - | - | - | - | mntctl/statvfs<br>cfarm<br>gcc link warning
+ Haiku r1b5 | - | 4.99.3<br>2025-1-26 | - | - | - | - | haiku-specific<br>ramfs used value err
+ SCO OpenServer 6.0.0 | - | 4.99.3<br>2025-1-27<br>gcc cc | - | - | - | - | getmntent/statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | polarhome
- QNX 6.3 | - | - | - | - | - | - | polarhome
- SCO OpenServer 6.0.0 | - | - | - | - | - | - | polarhome
- AIX 7.1 | - | 4.99.3<br>2025-1-26<br>gcc xlc  | - | - | - | - | cfarm<br>gcc link warning
+ QNX 6.5 | - | FAIL | - | - | - | - | statvfs<br>polarhome
  __Solaris:__ | | | | | | |
- Nexenta 1.0.1 | - | - | - | - | - | - | -
- Nexenta 2.0 | - | - | - | - | - | - | -
- Open Solaris 200805 | - | - | - | - | - | - | -
- Open Solaris 200906 | - | - | - | - | - | - | -
- Solaris 10 | - | - | - | - | - | - | -
- Solaris 11.4 | - | - | - | - | - | - | cfarm
- Solaris 11.4 (BE) | - | - | - | - | - | - | cfarm
+ Nexenta 1.0.1 | - | - | - | - | - | - | getmntent statvfs
+ Nexenta 2.0 | - | - | - | - | - | - | getmntent statvfs
+ Open Solaris 200805 | - | - | - | - | - | - | getmntent statvfs
+ Open Solaris 200906 | - | - | - | - | - | - | getmntent statvfs
+ Solaris 10 | - | - | - | - | - | - | getmntent statvfs
+ Solaris 11.4 | - | - | - | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 (BE) | - | - | - | - | - | - | getmntent statvfs<br>cfarm
  __Windows:__| | | | | | | -
- Cygwin | - | - | - | - | - | - | -
+ Cygwin | - | - | - | - | - | - | get/set/endmntent statvfs?
  MSys 2| - | - | - | - | - | - | -
 
 [Wiki Home](Home)

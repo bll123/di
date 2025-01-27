@@ -65,7 +65,8 @@ preconfigfile () {
 
   # log all of the compiler and linker options
   for nm in CC CFLAGS_OPTIMIZE CFLAGS_DEBUG CFLAGS_INCLUDE CFLAGS_USER \
-      CFLAGS_APPLICATION CFLAGS_COMPILER CFLAGS_SYSTEM CFLAGS_SHARED \
+      CFLAGS_APPLICATION CFLAGS_COMPILER \
+      CFLAGS_SYSTEM CFLAGS_SHARED \
       CFLAGS_SHARED_USER LDFLAGS_OPTIMIZE LDFLAGS_DEBUG LDFLAGS_USER \
       LDFLAGS_APPLICATION LDFLAGS_COMPILER LDFLAGS_SYSTEM \
       LDFLAGS_SHARED LDFLAGS_SHARED_LIBLINK LDFLAGS_SHARED_USER \
@@ -309,7 +310,7 @@ printf (\"mkc_defined ${def}\");
   _c_chk_cpp "$name" "$code" all
   rc=$?
   if [ $rc -eq 0 ]; then
-    egrep -l "mkc_defined" $name.out >/dev/null 2>&1
+    ${grepcmd} -l "mkc_defined" $name.out >/dev/null 2>&1
     rc=$?
     if [ $rc -eq 0 ]; then
       trc=1
@@ -584,7 +585,7 @@ $asmdef
   precc="${oldprecc}"
 
   if [ $rc -eq 0 ]; then
-    egrep -l "[	 *]${funcnm}[	 ]*\(" $name.out >/dev/null 2>&1
+    ${grepcmd} -l "[	 *]${funcnm}[	 ]*\(" $name.out >/dev/null 2>&1
     rc=$?
     if [ $rc -eq 0 ]; then
       trc=1
@@ -743,10 +744,10 @@ CPP_EXTERNS_BEG
 #undef $rfunc
 typedef char (*_TEST_fun_)();
 char $rfunc();
-_TEST_fun_ f = $rfunc;
+_TEST_fun_ f = (_TEST_fun_) $rfunc;
 CPP_EXTERNS_END
 int main () {
-if (f == $rfunc) { return 0; }
+if (f == (_TEST_fun_) $rfunc) { return 0; }
 return 1;
 }
 "

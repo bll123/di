@@ -15,7 +15,13 @@ fi
 . ./tests/util.sh
 
 gethostdata ${host}
+if [[ ${remuser} != - ]]; then
+  remussh="-l ${remuser}"
+fi
+if [[ ${remport} != - ]]; then
+  rempssh="-p ${remport}"
+fi
 
-echo $ipaddr
+echo ${rempssh} ${remussh} $ipaddr
 
 exit 0

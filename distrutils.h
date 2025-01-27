@@ -1,7 +1,7 @@
 /* Copyright 2025 Brad Lanam Pleasant Hill CA */
 
-#ifndef INC_STRUTILS_H
-#define INC_STRUTILS_H
+#ifndef INC_DISTRUTILS_H
+#define INC_DISTRUTILS_H
 
 #include "config.h"
 #if _hdr_stddef
@@ -28,4 +28,4 @@ extern char * strstr (const char *, const char *);
 }
 # endif
 
-#endif /* INC_STRUTILS_H */
+#endif /* INC_DISTRUTILS_H */

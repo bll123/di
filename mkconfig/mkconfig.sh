@@ -656,7 +656,7 @@ main_process () {
         case ${tdatline} in
           \#*)
             ;;
-          ^$)
+          "")
             ;;
           command*)
             _chkconfigfname

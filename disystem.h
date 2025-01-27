@@ -66,7 +66,8 @@
 #  define DI_FSTYPE_LEN       MFSNAMELEN
 # endif
 #endif
-#if _sys_vfstab                         /* ??? */
+#if _sys_vfstab                         /* FSTYPSZ sco open server */
+# include <stdio.h>
 # include <sys/vfstab.h>
 # if ! defined (DI_FSTYPE_LEN) && defined (FSTYPSZ)
 #  define DI_FSTYPE_LEN       FSTYPSZ

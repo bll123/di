@@ -67,7 +67,7 @@ static di_valid_scale_t validscale [] =
   { 'R', 'r' },  /* "Ronna", "Ronni" */
   { 'Q', 'q' }   /* "Quetta", "Quetti" */
 };
-#define DI_VALID_SCALE_SZ ( (int) (sizeof (validscale) / sizeof (di_valid_scale_t)))
+#define DI_VALID_SCALE_SZ ((int) (sizeof (validscale) / sizeof (di_valid_scale_t)))
 
 #define DI_ARGV_SEP             " 	"  /* space, tab */
 #define DI_MAX_ARGV             50
@@ -239,7 +239,7 @@ di_get_options (int argc, const char * argv [], di_opt_t *diopts)
 
   optidx = processArgs (argc, argv, diopts, scalestr, sizeof (scalestr));
 
-  if (debug > 0) {
+  if (diopts->optval [DI_OPT_DEBUG] > 0) {
     int j;
 
     printf ("# ARGS:");
@@ -762,7 +762,7 @@ processOptionsVal (const char *arg, void *valptr, char *value)
   padata = (struct pa_tmp *) valptr;
 
   if (strcmp (arg, "-B") == 0) {
-    if (isdigit ( (int) (*value))) {
+    if (isdigit ((int) (*value))) {
       int     val;
 
       val = atoi (value);
@@ -798,7 +798,7 @@ processOptionsVal (const char *arg, void *valptr, char *value)
   } else if (strcmp (arg, "-x") == 0) {
     parseList (&padata->diopts->exclude_list, value);
   } else if (strcmp (arg, "-X") == 0) {
-    debug = atoi (value);
+    padata->diopts->optval [DI_OPT_DEBUG] = atoi (value);
     padata->diopts->optval [DI_OPT_DISP_DBG_HEADER] = true;
     padata->diopts->optval [DI_OPT_DISP_TOTALS] = true;
     padata->diopts->optval [DI_OPT_DISP_HEADER] = true;
@@ -874,7 +874,7 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
   int             val;
   char            *tptr;
 
-  if (isdigit (*ptr)) {
+  if (isdigit ((int) *ptr)) {
     val = atoi (ptr);
     if (val != DI_BLKSZ_1 &&
         val != DI_BLKSZ_1000 && val != DI_BLKSZ_1024) {
@@ -895,7 +895,7 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
 
   tptr = ptr;
   len = (unsigned int) strlen (ptr);
-  if (! isdigit (*tptr)) {
+  if (! isdigit ((int) *tptr)) {
     int             idx;
 
     idx = -1;

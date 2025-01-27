@@ -78,10 +78,11 @@ extern "C" {
 #define DI_OPT_DISP_ALL         9
 #define DI_OPT_LOCAL_ONLY       10
 #define DI_OPT_NO_SYMLINK       11
-#define DI_OPT_MAX              12
-#define DI_OPT_FMT_STR_LEN      13
-#define DI_OPT_SCALE            14
-#define DI_OPT_BLOCK_SZ         15
+#define DI_OPT_DEBUG            12
+#define DI_OPT_MAX              13
+#define DI_OPT_FMT_STR_LEN      14
+#define DI_OPT_SCALE            15
+#define DI_OPT_BLOCK_SZ         16
 
 #define DI_FMT_ITER_STOP        -1
 

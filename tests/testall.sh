@@ -33,6 +33,9 @@ if [[ "x$hostlist" == x ]]; then
         ;;
       "")
         ;;
+      noauto)
+        break
+        ;;
       *)
         set ${line}
         hostlist+="$1 "
@@ -56,10 +59,12 @@ for host in ${hostlist}; do
 
   if [[ $bg == T ]]; then
     nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
-        ${ipaddr} ${keep} ${complist} 2>&1 | tee ${rsltdir}/w &
+        ${ipaddr} ${remuser} ${remport} ${rempath} \
+        ${keep} ${complist} 2>&1 | tee ${rsltdir}/w &
   else
     ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
-        ${ipaddr} ${keep} ${complist} 2>&1 | tee ${rsltdir}/w
+        ${ipaddr} ${remuser} ${remport} ${rempath} \
+        ${keep} ${complist} 2>&1 | tee ${rsltdir}/w
   fi
 done
 

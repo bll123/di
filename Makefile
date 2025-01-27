@@ -96,16 +96,13 @@ test:
 .PHONY: switcher
 switcher:
 	@if [ "$(PREFIX)" = "" ]; then echo "No prefix set"; exit 1; fi
-	@-cmvers=`cmake --version 2>/dev/null`; \
-	cmmajv=`echo $${cmvers} | \
-	  $(SED) -n -e '/version/ s,[^0-9]*\([0-9]*\)\..*,\1, p'` ; \
-	cmminv=`echo $${cmvers} | \
-	  $(SED) -n -e '/version/ s,[^0-9]*3\.\([0-9]*\).*,\1, p'` ; \
-	if [ "$${cmmajv}" -ge $(CMAKE_REQ_MAJ_VERSION) -a \
-	    "$${cmminv}" -ge $(CMAKE_REQ_MIN_VERSION) ]; then \
-	  $(MAKE) cmake-$(TARGET); \
+	@-./utils/chkcmake.sh \
+	    $(CMAKE_REQ_MAJ_VERSION) $(CMAKE_REQ_MIN_VERSION) ; \
+	rc=$$? ; \
+	if [ $$rc -eq 0 ]; then \
+	  $(MAKE) cmake-$(TARGET) ; \
 	else \
-	  $(MAKE) -e mkc-$(TARGET); \
+	  $(MAKE) -e mkc-$(TARGET) ; \
 	fi
 
 ###
@@ -114,7 +111,8 @@ switcher:
 # clean temporary files
 .PHONY: clean
 tclean:
-	@-$(RM) -f w ww asan.* *.orig >/dev/null 2>&1; exit 0
+	@-$(RM) -f w ww asan.* *.orig \
+		dep-*.txt >/dev/null 2>&1; exit 0
 	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 
 # leaves config.h
@@ -294,8 +292,9 @@ mkc-perl:	$(MKC_ENV)
 
 .PHONY: test
 mkc-test:		tests.done
-	./dimathtest
-	./getoptn_test
+	. ./$(MKC_ENV); \
+	    ./dimathtest$(EXE_EXT); \
+	    ./getoptn_test$(EXE_EXT)
 
 .PHONY: mkc-install
 mkc-install:
@@ -303,13 +302,6 @@ mkc-install:
 	. ./$(MKC_ENV);$(MAKE) -e \
 		PREFIX=$(PREFIX) \
 		mkc-install-di mkc-install-man
-
-.PHONY: mkc-install-test
-mkc-install-test:
-	$(MAKE) -e mkc-all
-	. ./$(MKC_ENV);$(MAKE) -e \
-		PREFIX=$(PREFIX) \
-		mkc-install-di mkc-install-man mkc-install-ditest
 
 ###
 # installation
@@ -457,20 +449,22 @@ dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
 		-link -exec $(MKC_ECHO) \
 		-r $(MKC_REQLIB) \
 		-o dimathtest$(EXE_EXT) \
-		dimathtest$(OBJ_EXT)
+		dimathtest$(OBJ_EXT) \
+                -l m
 
 getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT) distrutils$(OBJ_EXT)
 	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
 		-o getoptn_test$(EXE_EXT) \
 		getoptn_test$(OBJ_EXT) \
-		distrutils$(OBJ_EXT)
+		distrutils$(OBJ_EXT) \
+                -l m
 
 ###
 # objects
 
 .c$(OBJ_EXT):
-	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile $(MKC_ECHO) $<
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -compile -shared $(MKC_ECHO) $<
 
 di$(OBJ_EXT):		di.c
 

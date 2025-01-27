@@ -5,18 +5,10 @@
 
 #include "config.h"
 #include "disystem.h"
+#include "dioptions.h"
 
-#if _hdr_stdlib
-# include <stdlib.h>
-#endif
-#if _hdr_stddef
-# include <stddef.h>
-#endif
-#if _hdr_string
-# include <string.h>
-#endif
-#if _hdr_strings
-# include <strings.h>
+#if _hdr_unistd
+# include <unistd.h>
 #endif
 #if _hdr_zone
 # include <zone.h>
@@ -46,7 +38,7 @@ typedef struct {
   int             globalIdx;
 } di_zone_info_t;
 
-di_zone_info_t *di_initialize_zones (void);
+di_zone_info_t *di_initialize_zones (di_opt_t *diopts);
 void di_free_zones (di_zone_info_t *);
 
 # if defined (__cplusplus) || defined (c_plusplus)

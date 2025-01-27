@@ -243,6 +243,7 @@ _c_chk_link () {
   if [ $rc -eq 0 ]; then
     if [ ! -x "${clname}.exe" ]; then  # not executable
       rc=1
+      puts "##      _link test: not executable $rc" >&9
     fi
   fi
   return $rc

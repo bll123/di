@@ -11,9 +11,109 @@ tarfn=$2
 didir=$3
 comp=$4
 
+# snarfed from mkconfig
+test_egrep () {
+  tfn=egreptest
+  echo "a b c" > ${tfn}
+  # use grep -E by preference
+  (eval 'grep -E "a|b" ${tfn}') >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    grepcmd="grep -E"
+  else
+    (eval 'egrep "a|b" ${tfn}') >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      grepcmd="egrep"
+    fi
+  fi
+  rm -f ${tfn}
+}
+
+bldrun () {
+  tag=$1
+
+  grc=0
+
+  echo "-- `date +%T` ${host}: ${tag}/${comp}"
+  make distclean
+  make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
+  # AIX: BSHIFT: nothing i can do about system headers
+  c=`${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
+      ${grepcmd} -v '(pragma|error[=,])' |
+      ${grepcmd} -v 'BSHIFT has been redefined' |
+      ${grepcmd} -v '\.h:.*warning' |
+      ${grepcmd} -v 'unrecognized command line option' |
+      ${grepcmd} -v '^COMPILE' |
+      wc -l`
+  if [ $c -gt 0 ]; then
+    echo "== `date +%T` ${host}: ${tag}/${comp}: warnings or errors found"
+    ${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
+        ${grepcmd} -v '(pragma|error[=,])' |
+        ${grepcmd} -v 'BSHIFT has been redefined' |
+        ${grepcmd} -v '\.h:.*warning' |
+        ${grepcmd} -v 'unrecognized command line option' |
+        ${grepcmd} -v '^COMPILE'
+    grc=1
+  fi
+  if [ $tag = cmake ]; then
+    for f in build/CMakeFiles/CMakeOutput.log \
+        build/CMakeFiles/CMakeError.log \
+        build/config.h; do
+      if [ -f $f ]; then
+        bnm=`basename ${f} | sed 's,\.[a-z]*,,'`
+        cp $f di-${tag}-${bnm}.out
+      fi
+    done
+  fi
+  if [ $tag = mkc ]; then
+    for f in mkc_files/mkc_compile.log \
+        mkc_files/mkconfig.log \
+        mkc_files/mkconfig_env.log \
+        config.h \
+        di.env; do
+      if [ -f $f ]; then
+        bnm=`basename ${f} | sed 's,\.[a-z]*,,'`
+        cp $f di-${tag}-${bnm}.out
+      fi
+    done
+  fi
+
+  if [ $tag = cmake ]; then
+    mathtest=./build/dimathtest
+    getoptntest=./build/getoptn_test
+  fi
+  if [ $tag = mkc ]; then
+    mathtest=./dimathtest
+    getoptntest=./getoptn_test
+  fi
+
+  ${mathtest} > di-${tag}-math.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date +%T` ${host}: ${tag}/${comp}: dimathtest failed"
+    grc=1
+  fi
+  ${getoptntest} > di-${tag}-getoptn.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date +%T` ${host}: ${tag}/${comp}: getoptn_test failed"
+    grc=1
+  fi
+
+  make -e CC=${comp} PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
+  ./x/bin/di -a -d g -f stbuf1cvpB2m -t > di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date +%T` ${host}: ${tag}/${comp}: execution of di failed"
+  fi
+  if [ $grc -ne 0 ]; then
+    exit 1
+  fi
+}
+
 havecmake=F
 # add paths for macos and *BSD
 PATH="$PATH:/opt/local/bin:/usr/local/bin"
+test_egrep
 
 if [ x${tarfn} = x ]; then
   echo "== ${host}: No tar filename"
@@ -47,88 +147,11 @@ fi
 
 loc=`pwd`
 
-bldrun () {
-  tag=$1
-
-  echo "-- $(date +%T) ${host}: ${tag}/${comp}"
-  make distclean
-  make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
-  # AIX: BSHIFT: nothing i can do about system headers
-  c=`grep -E '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
-      grep -E -v '(pragma|error[=,])' |
-      grep -v 'Option.*incorrectly specified' |
-      grep -v 'BSHIFT has been redefined' |
-      wc -l`
-  if [ $c -gt 0 ]; then
-    echo "== $(date +%T) ${host}: ${tag}: warnings or errors found"
-  fi
-  if [ $tag = cmake ]; then
-    for f in build/CMakeFiles/CMakeOutput.log \
-        build/CMakeFiles/CMakeError.log \
-        build/config.h; do
-      if [ -f $f ]; then
-        bnm=`basename ${f} | sed 's,\.[a-z]*,,'`
-        cp $f di-${tag}-${bnm}.out
-      fi
-    done
-  fi
-  if [ $tag = mkc ]; then
-    for f in mkc_files/mkc_compile.log \
-        mkc_files/mkconfig.log \
-        mkc_files/mkconfig_env.log \
-        config.h \
-        di.env; do
-      if [ -f $f ]; then
-        bnm=`basename ${f} | sed 's,\.[a-z]*,,'`
-        cp $f di-${tag}-comp.out
-      fi
-    done
-  fi
-
-  if [ $tag = cmake ]; then
-    mathtest=./build/dimathtest
-    getoptntest=./build/getoptn_test
-  fi
-  if [ $tag = mkc ]; then
-    mathtest=./dimathtest
-    getoptntest=./getoptn_test
-  fi
-
-  ${mathtest} > di-${tag}-math.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== $(date +%T) ${host}: ${tag}: dimathtest failed"
-  fi
-  ${getoptntest} > di-${tag}-getoptn.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== $(date +%T) ${host}: ${tag}: getoptn_test failed"
-  fi
-
-  make -e CC=${comp} PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
-  ./x/bin/di -a -d g -f stbuf1cvpB2m -t > di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== $(date +%T) ${host}: ${tag}: execution of di failed"
-    exit 1
-  fi
-}
-
-if [ -f /usr/bin/cmake -o \
-    -f /usr/local/bin/cmake -o \
-    -f /opt/local/bin/cmake ]; then
-  cmvers=`cmake --version 2>/dev/null`
-  cmmajv=`echo ${cmvers} | \
-      sed -n -e '/version/ s,[^0-9]*\([0-9]*\)\..*,\1, p'` ; \
-  cmminv=`echo ${cmvers} | \
-      sed -n -e '/version/ s,[^0-9]*3\.\([0-9]*\).*,\1, p'` ; \
-  if [ x${cmmajv} = x ]; then cmmajv=0; fi
-  if [ x${cmminv} = x ]; then cmminv=0; fi
-  if [ "${cmmajv}" -ge ${CMAKE_REQ_MAJ_VERSION} -a \
-      "${cmminv}" -ge ${CMAKE_REQ_MIN_VERSION} ]; then \
-    havecmake=T
-    bldrun cmake
-  fi
+./utils/chkcmake.sh ${CMAKE_REQ_MAJ_VERSION} ${CMAKE_REQ_MIN_VERSION}
+rc=$?
+if [ $rc -eq 0 ] ;then
+  havecmake=T
+  bldrun cmake
 fi
 
 bldrun mkc

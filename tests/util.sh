@@ -17,8 +17,11 @@ function gethostdata {
   set ${hdata}
   type=$2
   ipaddr=$3
+  remuser=$4
+  remport=$5
+  rempath=$6
   complist=cc
-  shift; shift; shift
+  shift; shift; shift; shift; shift; shift
   while test $# -gt 0; do
     case $1 in
       \#*)

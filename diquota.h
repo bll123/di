@@ -6,6 +6,7 @@
 #include "config.h"
 #include "disystem.h"
 #include "dimath.h"
+#include "diinternal.h"
 
 # if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
@@ -29,7 +30,7 @@ typedef struct
   dinum_t      values [DI_QVAL_MAX];
 } di_quota_t;
 
-extern void diquota (di_quota_t *);
+extern void diquota (di_data_t *di_data, di_quota_t *);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }

@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# Copyright 2025 Brad Lanam Pleasant Hill CA
+#
 # requirements: sshpass, groff
 #
 

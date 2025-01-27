@@ -11,11 +11,13 @@ chmod 755 $dir
 
 make distclean
 
-cp -f *.c *.h *.in $dir
-cp -f CMakeLists.txt LICENSE.txt Makefile $dir
-cp -f README.txt README-new.txt $dir
+cp -pf *.c *.h *.in $dir
+cp -pf CMakeLists.txt LICENSE.txt Makefile $dir
+cp -pf README.txt README-new.txt $dir
+mkdir $dir/utils
+cp -pf utils/chkcmake.sh $dir/utils
 for d in mkconfig mkc_config man po; do
-  cp -rf ${d} $dir
+  cp -p -rf ${d} $dir
 done
 
 chmod -R a+r $dir

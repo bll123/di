@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# Copyright 2025 Brad Lanam Pleasant Hill CA
+#
 
 . $_MKCONFIG_DIR/bin/testfuncs.sh
 . $_MKCONFIG_DIR/bin/shellfuncs.sh

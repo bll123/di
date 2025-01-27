@@ -32,8 +32,9 @@ hdr     mntent.h
 hdr     mnttab.h
 # NetBSD
 hdr     quota.h
-hdr     rpc/auth.h
 hdr     rpc/rpc.h
+# SCO OpenServer requires rpc.h first
+hdr     rpc/auth.h rpc/rpc.h
 # Linux rquota.h includes rpc/rpc.h which is in the tirpc dir
 hdr     rpcsvc/rquota.h rpc/rpc.h
 hdr     stdbool.h
@@ -89,8 +90,6 @@ const   O_NOCTTY
 
 define  IOCTL_STORAGE_CHECK_VERIFY2
 define  MCTL_QUERY
-define  memcpy
-define  memset
 define  QCMD
 define  S_ISLNK
 

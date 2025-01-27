@@ -78,7 +78,7 @@ di_initialize_disk_info (di_disk_info_t *diptr, int idx)
   diptr->isLoopback = false;
   diptr->strdata [DI_DISP_MOUNTPT] = (char *) malloc (DI_MOUNTPT_LEN);
   diptr->strdata [DI_DISP_FILESYSTEM] = (char *) malloc (DI_FILESYSTEM_LEN);
-  diptr->strdata [DI_DISP_MOUNTOPT] = (char *) malloc (DI_MOUNT_OPT_LEN);
+  diptr->strdata [DI_DISP_MOUNTOPT] = (char *) malloc (DI_MOUNTOPT_LEN);
   diptr->strdata [DI_DISP_FSTYPE] = (char *) malloc (DI_FSTYPE_LEN);
   for (i = 0; i < DI_DISP_MAX; ++i) {
     diptr->strdata [i][0] = '\0';
@@ -136,7 +136,7 @@ convertMountOptions (unsigned long flags, di_disk_info_t *diptr)
   char    *end;
 
   p = diptr->strdata [DI_DISP_MOUNTOPT];
-  end = diptr->strdata [DI_DISP_MOUNTOPT] + DI_MOUNT_OPT_LEN;
+  end = diptr->strdata [DI_DISP_MOUNTOPT] + DI_MOUNTOPT_LEN;
 #if defined (MNT_RDONLY)
   if ((flags & MNT_RDONLY) == MNT_RDONLY) {
     p = stpecpy (p, end, "ro,");
@@ -316,7 +316,7 @@ convertNFSMountOptions (long flags, long wsize, long rsize, di_disk_info_t *dipt
   char    *end;
 
   p = diptr->strdata [DI_DISP_MOUNTOPT];
-  end = diptr->strdata [DI_DISP_MOUNTOPT] + DI_MOUNT_OPT_LEN;
+  end = diptr->strdata [DI_DISP_MOUNTOPT] + DI_MOUNTOPT_LEN;
 #pragma clang diagnostic pop
 #if defined (NFSMNT_SOFT)
   if ((flags & NFSMNT_SOFT) != NFSMNT_SOFT) {

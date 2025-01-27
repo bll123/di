@@ -1,6 +1,6 @@
 CHANGES
 
-    2.6.4                                   --
+    2.6.4                                   2025-x-x
       CC: Added 'staticlib' directive.
       CC: Added 'header_reset' directive.
       Env: Added 'addincpath' and 'addldsrchpath' directives.
@@ -8,10 +8,14 @@ CHANGES
       Env: Added 'sharedliblinkflag' and 'staticliblinkflag'.
       Env: Added 'shared_flags' directive that runs all shared options.
       Env: Remove non-working cache checks.
+      New directive: 'env' : environment variable check.
       Options: Removed.
       mkcl.sh: Handle runpath.
       mkcl.sh: Fix ldpaths/runpath generation.
       units/c-main.sh: Remove define of _ for ancient C compilers.
+      units/env-cc.sh: AIX: Correctly check cflags.
+      units/env-cc.sh: New directive: addcflagcomp
+      capabilities: test for grep -E / egrep.
       Remove D language.
 
     2.6.3                                   2021-1-30

@@ -2,6 +2,24 @@
 
 #include "config.h"
 
+#if _hdr_stdlib
+# include <stdlib.h>
+#endif
+#if _hdr_string
+# include <string.h>
+#endif
+#if _hdr_strings
+# include <strings.h>
+#endif
+#if _hdr_memory
+# include <memory.h>
+#endif
+#if _hdr_errno
+# include <errno.h>
+#endif
+#if _hdr_unistd
+# include <unistd.h>
+#endif
 #if _hdr_zone
 # include <zone.h>
 #endif
@@ -9,9 +27,10 @@
 #include "di.h"
 #include "dizone.h"
 #include "distrutils.h"
+#include "dioptions.h"
 
 di_zone_info_t *
-di_initialize_zones (void)
+di_initialize_zones (di_opt_t *diopts)
 {
   di_zone_info_t  *zinfo;
 
@@ -33,7 +52,6 @@ di_initialize_zones (void)
         zids = (zoneid_t *) malloc (sizeof (zoneid_t) * zinfo->zoneCount);
         if (zids == (zoneid_t *) NULL) {
           fprintf (stderr, "malloc failed in main () (1).  errno %d\n", errno);
-          diopts->exitFlag = DI_EXIT_FAIL;
           return zinfo;
         }
         zone_list (zids, &zinfo->zoneCount);
@@ -41,7 +59,6 @@ di_initialize_zones (void)
                 zinfo->zoneCount);
         if (zinfo->zones == (di_zone_summ_t *) NULL) {
           fprintf (stderr, "malloc failed in main () (2).  errno %d\n", errno);
-          diopts->exitFlag = DI_EXIT_FAIL;
           return zinfo;
         }
       }
@@ -52,7 +69,7 @@ di_initialize_zones (void)
       int     len;
 
       zinfo->zones [i].zoneid = zids [i];
-      len = zone_getattr (zids [i], ZONE_ATTR_ROOT,
+      len = (int) zone_getattr (zids [i], ZONE_ATTR_ROOT,
           zinfo->zones [i].rootpath, MAXPATHLEN);
       if (len >= 0) {
         zinfo->zones [i].rootpathlen = (Size_t) len;
@@ -61,14 +78,14 @@ di_initialize_zones (void)
           zinfo->globalIdx = i;
         }
 
-        len = zone_getattr (zids [i], ZONE_ATTR_NAME,
+        len = (int) zone_getattr (zids [i], ZONE_ATTR_NAME,
             zinfo->zones [i].name, ZONENAME_MAX);
         if (*diopts->zoneDisplay == '\0' &&
             zinfo->myzoneid == zinfo->zones [i].zoneid) {
           stpecpy (diopts->zoneDisplay,
               diopts->zoneDisplay + MAXPATHLEN, zinfo->zones [i].name);
         }
-        if (debug > 4) {
+        if (diopts->optval [DI_OPT_DEBUG] > 4) {
           printf ("zone:%d:%s:%s:\n", (int) zinfo->zones [i].zoneid,
               zinfo->zones [i].name, zinfo->zones [i].rootpath);
         }
@@ -78,9 +95,9 @@ di_initialize_zones (void)
     free ( (void *) zids);
   }
 
-  if (debug > 4) {
+  if (diopts->optval [DI_OPT_DEBUG] > 4) {
     printf ("zone:my:%d:%s:glob:%d:\n", (int) zinfo->myzoneid,
-        zinfo->zoneDisplay, zinfo->globalIdx);
+        diopts->zoneDisplay, zinfo->globalIdx);
   }
 #endif
 
