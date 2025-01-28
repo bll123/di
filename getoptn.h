@@ -50,7 +50,7 @@ extern "C" {
 typedef struct {
   const char    *option;
   int           option_type;
-  void *         valptr;
+  void *        valptr;
   Size_t        valsiz;
   void          *value2;
 } getoptn_opt_t;

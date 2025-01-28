@@ -235,7 +235,7 @@ usage (void)
   fprintf (stdout, "%s\n",
       DI_GT ("    u - used space                      c - calculated space in use"));
   fprintf (stdout, "%s\n",
-      DI_GT ("    f - space free                     v - space available"));
+      DI_GT ("    f - space free                      v - space available"));
   fprintf (stdout, "%s\n",
       DI_GT ("    p - percentage not avail. for use   1 - percentage used"));
   fprintf (stdout, "%s\n",

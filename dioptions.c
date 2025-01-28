@@ -231,6 +231,11 @@ di_opt_cleanup (di_opt_t *diopts)
     free (diopts->include_list.list);
     diopts->include_list.count = 0;
   }
+
+  if (diopts->opts != NULL) {
+    free (diopts->opts);
+  }
+
   free (diopts);
 }
 

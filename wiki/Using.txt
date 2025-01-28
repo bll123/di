@@ -14,6 +14,7 @@ Instead, specify a filename or directory name. _di_ will resolve any
 symbolic links and determine the actual partition where the file
 resides.
 
+    /* this code is in the public domain */
     #include <stdio.h>
     #include <stdlib.h>
     #include <stdbool.h>
