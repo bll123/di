@@ -325,12 +325,18 @@ endmacro()
 
 macro (checkPrototype_getvfsstat hdr)
   check_prototype_definition (getvfsstat
-    "int getvfsstat (struct statvfs * a, int b, int c)"
+    "int getvfsstat (struct statvfs *buf, size_t bufsize, int flags)"
     0
     "stdio.h;stddef.h;${hdr}"
-    _args_getvfsstat_3
+    _args_getvfsstat_3a
     )
-  if (_args_getvfsstat_3)
+  check_prototype_definition (getvfsstat
+    "int getvfsstat (struct statvfs *buf, int bufsize, int flags)"
+    0
+    "stdio.h;stddef.h;${hdr}"
+    _args_getvfsstat_3b
+    )
+  if (_args_getvfsstat_3a OR _args_getvfsstat_3b)
     set (_args_getvfsstat 3)
   endif()
 endmacro()
@@ -638,8 +644,9 @@ check_type_size ("uint64_t" _siz_uint64_t)
 check_type_size ("long" _siz_long)
 check_type_size ("long long" _siz_long_long)
 
-if (_hdr_quota)
-  set (QUOTA_HDR "quota.h")
+if (_hdr_ufs_ufs_quota)
+  # FreeBSD ufs/ufs/quota.h does not include its dependencies
+  set (QUOTA_HDR "sys/types.h;ufs/ufs/quota.h")
 endif()
 if (_sys_quota)
   set (QUOTA_HDR "sys/quota.h")
@@ -647,12 +654,13 @@ endif()
 if (_hdr_ufs_quota)
   set (QUOTA_HDR "ufs/quota.h")
 endif()
-if (_hdr_ufs_ufs_quota)
-  # FreeBSD ufs/ufs/quota.h does not include its dependencies
-  set (QUOTA_HDR "sys/types.h;ufs/ufs/quota.h")
-endif()
 if (_sys_fs_ufs_quota)
+  # solaris
   set (QUOTA_HDR "sys/types.h;sys/fs/ufs_quota.h")
+endif()
+if (_hdr_quota)
+  # NetBSD : put this after ufs/ufs/quota.h and sys/quota.h
+  set (QUOTA_HDR "quota.h")
 endif()
 set (_args_quotactl 0)
 if (DEFINED QUOTA_HDR)
@@ -866,8 +874,12 @@ configure_file (config.h.in config.h)
 macro (addIntlLibrary name)
   if (Intl_LIBRARY)
     target_link_libraries (${name} PRIVATE
-      ${Intl_LIBRARY}
-      ${Iconv_LIBRARY}
+      -lintl
+    )
+  endif()
+  if (Iconv_LIBRARY)
+    target_link_libraries (${name} PRIVATE
+      -liconv
     )
   endif()
 endmacro()
@@ -888,6 +900,10 @@ add_library (${DI_LIBNAME}
   getoptn.c
   dioptions.c
 )
+target_include_directories (${DI_LIBNAME} PRIVATE
+  ${TIRPC_INCLUDE_DIRS}
+)
+
 target_link_libraries (${DI_LIBNAME} PRIVATE
   objdistrutils
 )
@@ -897,12 +913,16 @@ if (WIN32)
   set (CMAKE_SHARED_LIBRARY_PREFIX "lib")
   set (CMAKE_STATIC_LIBRARY_PREFIX "lib")
 endif()
-target_include_directories (${DI_LIBNAME} PRIVATE
-  ${TIRPC_INCLUDE_DIRS}
-)
+if (_lib_quota_open)
+  # NetBSD
+  target_link_libraries (${DI_LIBNAME} PRIVATE
+    -lquota -lrpcsvc
+  )
+endif()
 target_link_libraries (${DI_LIBNAME} PRIVATE
   ${TIRPC_LDFLAGS}
 )
+addIntlLibrary (${DI_LIBNAME})
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (${DI_LIBNAME} PRIVATE
     ${GMP_LDFLAGS}

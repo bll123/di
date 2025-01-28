@@ -20,6 +20,11 @@ while test $# -gt 0; do
       bg=F
       shift
       ;;
+    --list)
+      flag=L
+      bg=F
+      shift
+      ;;
     --fg)
       bg=F
       shift
@@ -39,7 +44,9 @@ if [[ "x$hostlist" == x ]]; then
       "")
         ;;
       noauto)
-        break
+        if [[ $flag != L ]]; then
+          break
+        fi
         ;;
       *)
         set ${line}
@@ -47,6 +54,13 @@ if [[ "x$hostlist" == x ]]; then
         ;;
     esac
   done < ${HOSTLIST}
+fi
+
+if [[ $flag == L ]]; then
+  echo $hostlist |
+      sed 's, ,\n,g' |
+      sort
+  exit 0
 fi
 
 make distclean

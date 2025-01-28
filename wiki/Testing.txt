@@ -38,8 +38,8 @@ runs.  No rigorous tests have been run.
  NetBSD 5.1 | - | - | - | - | - | - | -
  NetBSD 6.0 | - | - | - | - | - | - | -
  NetBSD 7.0.1 | - | - | - | - | - | - | -
- NetBSD 9.0 | - | - | - | - | - | - | -
- NetBSD 10.1 | - | - | - | - | - | - | cfarm
+ NetBSD 9.0 | - | 4.99.5<br>2025-1-28 | - | - | - | - | -
+ NetBSD 10.1 | - | 4.99.5<br>2025-1-28 | - | - | - | - | cfarm
  NetBSD 10.1 | - | - | - | - | - | - | -
  OpenBSD 4.4 | - | - | - | - | - | - | -
  OpenBSD 4.5 | - | - | - | - | - | - | -
@@ -120,7 +120,7 @@ runs.  No rigorous tests have been run.
  Open Solaris 200805 | - | - | - | - | - | - | getmntent statvfs
  Open Solaris 200906 | - | - | - | - | - | - | getmntent statvfs
  Solaris 10 | - | - | - | - | - | - | getmntent statvfs
- Solaris 11.4 | 4.99.3<br>2025-1-27<br>gcc clang | 4.99.3<br>2025-1-27<br>gcc clang | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
+ Solaris 11.4 | 4.99.5<br>2025-1-28<br>gcc clang cc | 4.99.5<br>2025-1-28<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
  Solaris 11.4 (BE) | - | - | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
  __Windows:__| | | | | | | -
  Cygwin | - | - | - | - | - | - | get/set/endmntent statvfs?

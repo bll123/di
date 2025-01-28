@@ -63,7 +63,7 @@
 # include <mntent.h>            /* hasmntopt (); _PATH_MNTTAB */
 #endif                          /* HP-UX: set/get/endmntent (); hasmntopt () */
 
-/* FreeBSD, OpenBSD, NetBSD, HP-UX, MacOS */
+/* FreeBSD, OpenBSD, old NetBSD, HP-UX, MacOS */
 #if _sys_mount && ! defined (DI_INC_SYS_MOUNT)
 # define DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>         /* getmntinfo (); struct statfs */
@@ -144,7 +144,7 @@ extern "C" {
 #if (_lib_getmntent \
     || _args_statfs > 0) \
     && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
+    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
     && ! _lib_getvfsstat \
     && ! _lib_mntctl \
     && ! _lib_getmnt
@@ -281,7 +281,7 @@ checkMountOptions (struct mnttab *mntEntry, char *str)
     && _lib_setmntent \
     && _lib_endmntent \
     && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
+    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
     && ! _lib_getvfsstat \
     && ! _lib_mntctl \
     && ! _lib_GetDriveType \
@@ -388,7 +388,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
 #if ! _lib_getmntent \
     && ! _lib_mntctl \
     && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
+    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
     && ! _lib_getvfsstat \
     && ! _lib_getmnt \
     && ! _lib_GetDriveType \
@@ -543,7 +543,7 @@ di_getQNXDiskEntries (di_data_t *di_data, char *ipath, int *diCount)
 #if ! _lib_getmntent \
     && ! _lib_mntctl \
     && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
+    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
     && ! _lib_getvfsstat \
     && ! _lib_getmnt \
     && ! _lib_GetDriveType \
@@ -632,8 +632,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
  * All of the following routines also replace di_get_disk_info ()
  */
 
-
-#if _lib_getfsstat \
+#if _lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long) \
     && ! (_lib_getvfsstat && _args_getvfsstat == 3)
 
 /*
@@ -1167,17 +1166,12 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
       printf ("%s: %s\n", diptr->strdata [DI_DISP_MOUNTPT], diptr->strdata [DI_DISP_FSTYPE]);
       printf ("\tbsize:%ld  frsize:%ld\n", (long) sp->f_bsize,
           (long) sp->f_frsize);
-#if _siz_long_long >= 8
-      printf ("\tblocks: tot:%llu free:%lld avail:%llu\n",
-          sp->f_blocks, sp->f_bfree, sp->f_bavail);
-      printf ("\tinodes: tot:%llu free:%llu avail:%llu\n",
-          sp->f_files, sp->f_ffree, sp->f_favail);
-#else
-      printf ("\tblocks: tot:%lu free:%lu avail:%lu\n",
-          sp->f_blocks, sp->f_bfree, sp->f_bavail);
+      printf ("\tblocks: tot:%lu free:%ld avail:%ld\n",
+          (unsigned long) sp->f_blocks, (unsigned long) sp->f_bfree,
+          (unsigned long) sp->f_bavail);
       printf ("\tinodes: tot:%lu free:%lu avail:%lu\n",
-          sp->f_files, sp->f_ffree, sp->f_favail);
-#endif
+          (unsigned long) sp->f_files, (unsigned long) sp->f_ffree,
+          (unsigned long) sp->f_favail);
     }
   }
 

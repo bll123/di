@@ -22,8 +22,9 @@ DESCRIPTION
 
 DOCUMENTATION
 
-  wiki: https://sourceforge.net/p/diskinfo-di/wiki/Home/
-  Change Log: https://sourceforge.net/p/diskinfo-di/wiki/ChangeLog
+  wiki:         https://sourceforge.net/p/diskinfo-di/wiki/Home/
+  Change Log:   https://sourceforge.net/p/diskinfo-di/wiki/ChangeLog
+  Test Results: https://sourceforge.net/p/diskinfo-di/wiki/Testing
 
 INSTALLATION
 

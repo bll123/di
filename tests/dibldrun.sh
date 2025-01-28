@@ -38,11 +38,13 @@ bldrun () {
   make distclean
   make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
   # AIX: BSHIFT: nothing i can do about system headers
+  # NetBSD: rpcsvc: deprecated and buggy (why do they complain when there is no alternative?)
   c=`${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
       ${grepcmd} -v '(pragma|error[=,])' |
       ${grepcmd} -v 'BSHIFT has been redefined' |
       ${grepcmd} -v '\.h:.*warning' |
       ${grepcmd} -v 'unrecognized command line option' |
+      ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
       ${grepcmd} -v '^COMPILE' |
       wc -l`
   if [ $c -gt 0 ]; then
@@ -52,6 +54,7 @@ bldrun () {
         ${grepcmd} -v 'BSHIFT has been redefined' |
         ${grepcmd} -v '\.h:.*warning' |
         ${grepcmd} -v 'unrecognized command line option' |
+        ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
         ${grepcmd} -v '^COMPILE'
     grc=1
   fi

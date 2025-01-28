@@ -41,7 +41,7 @@
 # include <strings.h>
 #endif
 
-/* FreeBSD, OpenBSD, NetBSD, HP-UX, MacOS */
+/* FreeBSD, OpenBSD, old NetBSD, HP-UX, MacOS */
 #if _sys_mount && ! defined (DI_INC_SYS_MOUNT)
 # define DI_INC_SYS_MOUNT 1
 # include <sys/mount.h>         /* statfs (); struct statfs; getfsstat () */
@@ -97,7 +97,7 @@ extern "C" {
 #if _lib_statvfs \
     && ! _lib_fs_stat_dev \
     && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
+    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
     && ! _lib_getvfsstat \
     && ! _lib_GetVolumeInformation
 
@@ -197,7 +197,7 @@ di_get_disk_info (di_data_t *di_data, int *diCount)
 #if _lib_statfs && _args_statfs == 4 \
     && ! _lib_statvfs \
     && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
+    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
     && ! _lib_getvfsstat \
     && ! _lib_getmnt
 
@@ -290,12 +290,12 @@ di_get_disk_info (di_data_t *di_data, int *diCount)
 #endif /* _args_statfs == 4 */
 
 #if _lib_statfs && (_args_statfs == 2 || _args_statfs == 3) \
-        && ! _lib_statvfs \
-        && ! _lib_getmntinfo \
-        && ! _lib_getfsstat \
-        && ! _lib_getmnt \
-        && ! _lib_GetDiskFreeSpace \
-        && ! _lib_GetDiskFreeSpaceEx
+    && ! _lib_statvfs \
+    && ! _lib_getmntinfo \
+    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
+    && ! _lib_getmnt \
+    && ! _lib_GetDiskFreeSpace \
+    && ! _lib_GetDiskFreeSpaceEx
 
 /*
  * di_get_disk_info

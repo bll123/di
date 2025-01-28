@@ -909,7 +909,7 @@ di_process_quotas (di_data_t *di_data, const char *tag, di_quota_t *diqinfo,
       ;
     } else {
 #  if _typ_struct_quotaval
-      dinum_set_U (&tsize, (di_ui_t) qdata->qval.qival.qv_hardlimit);
+      dinum_set_u (&tsize, (di_ui_t) qdata->qval.qival.qv_hardlimit);
 #  endif
 #  if _typ_struct_dqblk && ! _lib_vquotactl
       dinum_set_u (&tsize, (di_ui_t) qdata->qinfo.dqb_ihardlimit);

@@ -774,7 +774,8 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
         }
 
         /* disk space values */
-        case DI_FMT_BTOT: {
+        case DI_FMT_BTOT:
+        case DI_FMT_BTOT_AVAIL: {
           int   blksz;
 
           blksz = di_check_option (di_data, DI_OPT_BLOCK_SZ);
@@ -791,14 +792,7 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
           }
           break;
         }
-        case DI_FMT_BTOT_AVAIL: {
-          temp = DI_GT ("Size");
-          break;
-        }
-        case DI_FMT_BUSED: {
-          temp = DI_GT ("Used");
-          break;
-        }
+        case DI_FMT_BUSED:
         case DI_FMT_BCUSED: {
           temp = DI_GT ("Used");
           break;
@@ -817,22 +811,8 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
         }
 
         /* disk space percentages */
-        case DI_FMT_BPERC_NAVAIL: {
-          if (posixcompat) {
-            temp = DI_GT ("Capacity");
-          } else {
-            temp = DI_GT ("%Used");
-          }
-          break;
-        }
-        case DI_FMT_BPERC_USED: {
-          if (posixcompat) {
-            temp = DI_GT ("Capacity");
-          } else {
-            temp = DI_GT ("%Used");
-          }
-          break;
-        }
+        case DI_FMT_BPERC_NAVAIL:
+        case DI_FMT_BPERC_USED:
         case DI_FMT_BPERC_BSD: {
           if (posixcompat) {
             temp = DI_GT ("Capacity");
@@ -841,10 +821,7 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
           }
           break;
         }
-        case DI_FMT_BPERC_AVAIL: {
-          temp = DI_GT ("%Free");
-          break;
-        }
+        case DI_FMT_BPERC_AVAIL:
         case DI_FMT_BPERC_FREE: {
           temp = DI_GT ("%Free");
           break;
