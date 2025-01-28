@@ -1040,10 +1040,9 @@ install (FILES di.h
 install (FILES man/di.1
   DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
 )
-# does not yet exist
-#install (FILES man/libdi.3
-#  DESTINATION "${CMAKE_INSTALL_MANDIR}/man3"
-#)
+install (FILES man/libdi.3
+  DESTINATION "${CMAKE_INSTALL_MANDIR}/man3"
+)
 
 install (FILES
   ${CMAKE_BINARY_DIR}/di.pc

@@ -1,0 +1,386 @@
+'\"
+.\"
+.\" libdi.3
+.\"
+.\" Copyright 2025 Brad Lanam Pleasant Hill CA USA
+.\"
+.\" brad.lanam.di_at_gmail.com
+.\"
+.TH libdi 3 "28 Jan 2025"
+.SH Name
+\fBlibdi\fP - disk information library
+.SH Synopsis
+.SS Initialization
+#include <di.h>
+.PP
+void * \fBdi_initialize\fP (void);
+.br
+int \fBdi_process_options\fP (void *\fIdi_data\fP, int \fItargc\fP, const char *\fItargv\fP [], int \fIoffset\fP);
+.br
+void \fBdi_cleanup\fP (void *\fIdi_data\fP);
+.br
+const char *\fBdi_version\fP (void);
+.SS Options
+.PP
+int \fBdi_check_option\fP (void *\fIdi_data\fP, int \fIoption\fP);
+.br
+void \fBdi_format_iter_init\fP (void *\fIdi_data\fP);
+.br
+int \fBdi_format_iterate\fP (void *\fIdi_data\fP);
+.br
+.SS Getting data
+.PP
+void \fBdi_get_all_disk_info\fP (void *\fIdi_data\fP);
+.br
+int \fBdi_iterate_init\fP (void *\fIdi_data\fP, int \fIiteroption\fP);
+.br
+.EX
+.B "typedef struct {"
+.BR "  const char   *strdata [DI_DISP_MAX];" "   /* string data */"
+.BR "  int          index;" "          /* internal index value */"
+.BR "  int          doPrint;" "        /* printable flag based on options */"
+.BR "  int          printFlag;" "      /* print result flag */"
+.BR "  int          isLocal;" "        /* filesystem is local */"
+.BR "  int          isReadOnly;" "     /* filesystem is read-only */"
+.BR "  int          isLoopback;" "     /* filesystme is a loopback filesystem */"
+.BR "} di_pub_disk_info_t;
+.EE
+.PP
+const di_pub_disk_info_t * \fBdi_iterate\fP (void *\fIdi_data\fP);
+.br
+int \fBdi_get_scale_max\fP (void *\fIdi_data\fP, int \fIindex\fP,
+.br
+    int \fIvalueidxA\fP, int \fIvalueidxB\fP, int \fIvalueidxC\fP);
+.br
+double \fBdi_get_scaled\fP (void *\fIdi_data\fP, int \fIindex\fP,
+.br
+    int \fIscaleidx\fP, int \fIvalueidxA\fP, int \fIvalueidxB\fP, int \fIvalueidxC\fP);
+.br
+void \fBdi_disp_scaled\fP (void *\fIdi_data\fP, char *\fIbuff\fP, long \fIbuffsz\fP,
+.br
+    int \fIindex\fP, int \fIscaleidx\fP,
+.br
+    int \fIvalueidxA\fP, int \fIvalueidxB\fP, int \fIvalueidxC\fP);
+.br
+double \fBdi_get_perc\fP (void *\fIdi_data\fP, int \fIindex\fP,
+.br
+    int \fIvalueidxA\fP, int \fIvalueidxB\fP,
+.br
+    int \fIvalueidxC\fP, int \fIvalueidxB\fP\fD, int \fIvalueidxE\fP);
+.br
+void \fBdi_disp_perc\fP (void *\fIdi_data\fP, char *\fIbuff\fP, long \fIbuffsz\fP,
+.br
+    int \fIindex\fP,
+.br
+    int \fIvalueidxA\fP, int \fIvalueidxB\fP,
+.br
+    int \fIvalueidxC\fP, int \fIvalueidxB\fP\fD, int \fIvalueidxE\fP);
+.SH Overview
+.SS Initialization
+\fBdi_initialize\fP returns a pointer to a
+\fIdi_data\fP structure, used in all of the other library calls.
+The returned pointer must be freed with \fBdi_cleanup\fP.
+.PP
+\fBdi_process_options\fP processes the arguments to \fIdi\fP.
+These are passed as strings via an \fIargv\fP structure as if on the
+command line.  If no call to \fBdi_process_options\fP is made, \fIdi\fP
+will use the defaults and the \fIDI_ARGS\fP environment variable
+will not be processed.
+.PP
+\fBdi_cleanup\fP frees all allocated data.
+.SS Options
+\fBdi_check_option\fP returns the value of the specified option. All
+options will return a boolean value, excepting:
+DI_OPT_DEBUG, DI_OPT_FMT_STR_LEN, DI_OPT_SCALE and DI_OPT_BLOCK_SZ.
+.PP
+\fIoption\fP may be one of:
+.IP
+DI_OPT_POSIX_COMPAT
+.br
+DI_OPT_QUOTA_CHECK
+.br
+DI_OPT_DISP_CSV
+.br
+DI_OPT_DISP_CSV_TAB
+.br
+DI_OPT_EXCL_LOOPBACK
+.br
+DI_OPT_DISP_JSON
+.br
+DI_OPT_DISP_TOTALS
+.br
+DI_OPT_DISP_HEADER
+.br
+DI_OPT_DISP_ALL
+.br
+DI_OPT_LOCAL_ONLY
+.br
+DI_OPT_NO_SYMLINK
+.br
+DI_OPT_DEBUG
+.br
+DI_OPT_FMT_STR_LEN
+.br
+DI_OPT_SCALE
+.br
+DI_OPT_BLOCK_SZ
+.PP
+\fBdi_format_iter_init\fP initializes the format string iterator.
+.PP
+\fBdi_format_iterate\fP iterates through each format character in the format
+string.  Note that \fIdi\fP allows unrecognized format characters.  In the
+main \fIdi\fP program, these are printed as-is.
+.SS Getting Data
+\fBdi_get_all_disk_info\fP retrieves and processes all of the disk
+information from the operating system.
+.PP
+\fBdi_iterate_init\fP initializes the disk information iterator.
+\fIiteroption\fP is one of DI_ITER_PRINTABLE or DI_ITER_ALL.
+If DI_ITER_PRINTABLE is specified, only the partitions with the \fIdoPrint\fP
+flag set will be returned by the iterator.
+.PP
+\fBdi_iterate\fP iterates through the filesystems, returning a
+\fIdi_pub_disk_info_t\fP structure for each filesystem.  If the
+\fI\-\-totals\fP flag was specified as an option, the totals will be
+the last item returned by the iterator.
+.PP
+\fBdi_get_scale_max\fP gets the maximum scaling unit for the space value.
+.PP
+\fIindex\fP is the index from the \fIdi_pub_disk_info_t\fP structure.
+.PP
+The \fIvalueidx\fP arguments indicate which disk space values to use to
+calculate the the space value.  The formula is: \fBA\~-\~(B\~-\~C)\fP.
+Valid combinations are:
+.IP
+DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE    // total
+.br
+DI_SPACE_TOTAL, DI_SPACE_FREE, DI_SPACE_AVAIL   // used
+.br
+DI_SPACE_TOTAL, DI_SPACE_FREE, DI_VALUE_NONE    // used
+.br
+DI_SPACE_TOTAL, DI_SPACE_AVAIL, DI_VALUE_NONE   // used
+.br
+DI_SPACE_FREE, DI_VALUE_NONE, DI_VALUE_NONE     // free
+.br
+DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE    // free
+.br
+DI_INODE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE    // inode total
+.br
+DI_INODE_TOTAL, DI_INODE_FREE, DI_VALUE_NONE    // inodes used
+.br
+DI_INODE_FREE, DI_VALUE_NONE, DI_VALUE_NONE     // inodes free
+.PP
+\fBdi_get_scaled\fP gets a space value scaled according to the scaling unit.
+.PP
+\fIindex\fP is the index from the \fIdi_pub_disk_info_t\fP structure.
+.PP
+\fIscaleidx\fP is the scaling index to use.  Use a scaling index returned
+from \fBdi_get_scale_max\fP or use one of the following values:
+.IP
+DI_SCALE_BYTE
+.br
+DI_SCALE_KILO
+.br
+DI_SCALE_MEGA
+.br
+DI_SCALE_GIGA
+.br
+DI_SCALE_TERA
+.br
+DI_SCALE_PETA
+.br
+DI_SCALE_EXA
+.br
+DI_SCALE_ZETTA
+.br
+DI_SCALE_YOTTA
+.br
+DI_SCALE_RONNA
+.br
+DI_SCALE_QUETTA
+.PP
+The \fIvalueidx\fP arguments indicate which disk space values to use to
+calculate the the space value.  The formula is: \fBA\~-\~(B\~-\~C)\fP.
+See \fBdi_get_scale_max\fP for a list of valid combinations.
+.PP
+\fBdi_disp_scaled\fP gets a space value scaled according to the scaling unit,
+and creates a string that can be printed.
+.PP
+\fBbuff\fP is the character string where the string will be stored.
+.PP
+\fBbuffsz\fP is the size of the character string.
+.PP
+\fIindex\fP is the index from the \fIdi_pub_disk_info_t\fP structure.
+.PP
+\fIscaleidx\fP is the scaling index to use.  Use a scaling index returned
+from \fBdi_get_scale_max\fP or one of the values as listed in
+\fBdi_get_scaled\fP.
+.PP
+The \fIvalueidx\fP arguments indicate which disk space values to use to
+calculate the the space value.  The formula is: \fBA\~\-\~(B\~\-\~C)\fP.
+See \fBdi_get_scale_max\fP for a list of valid combinations.
+.PP
+\fBdi_get_perc\fP retrieves the disk space value as a percentage.
+.PP
+\fIindex\fP is the index from the \fIdi_pub_disk_info_t\fP structure.
+.PP
+The \fIvalueidx\fP arguments indicate which disk space values to use to
+calculate the percentage.  The formula is:
+\fB(A\~\-\~B)\~/\~(C\~\-\~(D\~\-\~E))\fP.
+.PP
+Valid combinations are:
+.IP
+/* percent used */
+.br
+DI_SPACE_TOTAL, DI_SPACE_AVAIL,
+.br
+DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE
+.br
+/* percent used */
+.br
+DI_SPACE_TOTAL, DI_SPACE_FREE,
+.br
+DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE
+.br
+/* percent used, BSD style */
+.br
+DI_SPACE_TOTAL, DI_SPACE_FREE,
+.br
+DI_SPACE_TOTAL, DI_VALUE_FREE, DI_VALUE_AVAIL
+.br
+/* percent free */
+.br
+DI_SPACE_AVAIL, DI_VALUE_NONE,
+.br
+DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE,
+.br
+/* percent free */
+.br
+DI_SPACE_FREE, DI_VALUE_NONE,
+.br
+DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE,
+.br
+/* inodes used */
+.br
+DI_INODE_TOTAL, DI_INODE_AVAIL,
+.br
+DI_INODE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE
+.br
+.PP
+\fBdi_disp_perc\fP retrieves the disk space value as a percentage and
+creates a string that can be printed.
+.PP
+\fBbuff\fP is the character string where the string will be stored.
+.PP
+\fBbuffsz\fP is the size of the character string.
+.PP
+\fIindex\fP is the index from the \fIdi_pub_disk_info_t\fP structure.
+.PP
+The \fIvalueidx\fP arguments indicate which disk space values to use to
+calculate the percentage.  The formula is:
+\fB(A\~\-\~B)\~/\~(C\~\-\~(D\~\-\~E))\fP.  See \fBdi_get_perc\fP for valid
+combinations.
+.SH Example
+.EX
+.BR "    /* this code is in the public domain */  "
+.BR "    #include <stdio.h>  "
+.BR "    #include <stdlib.h>  "
+.BR "    #include <stdbool.h>  "
+.BR "    #include <math.h>  "
+.BR "  "
+.BR "    #include <di.h>  "
+.BR "  "
+.BR "    enum {  "
+.BR "      HAVE_SPACE = 0,  "
+.BR "      NO_SPACE = 1,  "
+.BR "    };  "
+.BR "  "
+.BR "    int  "
+.BR "    check_space (const char *fn, double space_wanted) {  "
+.BR "      void        *di_data;  "
+.BR "      int         targc;  "
+.BR "      const char  *targv [10];  "
+.BR "      int         exitflag;  "
+.BR "      const di_pub_disk_info_t  *pub;  "
+.BR "      int         rval = NO_SPACE;  "
+.BR "      int         count;  "
+.BR "  "
+.BR "      targc = 1;  "
+.BR "      targv [0] = fn;  "
+.BR "      targv [1] = NULL;  "
+.BR "  "
+.BR "      di_data = di_initialize ();  "
+.BR "      exitflag = di_process_options (di_data, targc, targv, 0);  "
+.BR "      if (exitflag != DI_EXIT_NORM) {  "
+.BR "        di_cleanup (di_data);  "
+.BR "        exit (exitflag);  "
+.BR "      }  "
+.BR "      di_get_all_disk_info (di_data);  "
+.BR "      count = di_iterate_init (di_data, DI_ITER_PRINTABLE);  "
+.BR "      while ((pub = di_iterate (di_data)) != NULL) {  "
+.BR "        double    dval;  "
+.BR "  "
+.BR "        /* compare terabytes available */  "
+.BR "        dval = di_get_scaled (di_data, pub->index, DI_SCALE_TERA,  "
+.BR "            DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE);  "
+.BR "        if (dval >= space_wanted) {  "
+.BR "          rval = HAVE_SPACE;  "
+.BR "        }  "
+.BR "      }  "
+.BR "      di_cleanup (di_data);  "
+.BR "  "
+.BR "      return rval;  "
+.BR "    }  "
+.BR "  "
+.BR "    int  "
+.BR "    main (int argc, char *argv []) {  "
+.BR "      const char  *fn = "/home/bll/s/di";  "
+.BR "      double      spwant = 0.2;   /* terabytes */  "
+.BR "      bool        rval;  "
+.BR "  "
+.BR "      if (argc > 1) {  "
+.BR "        fn = argv [1];  "
+.BR "      }  "
+.BR "      if (argc > 2) {  "
+.BR "        spwant = atof (argv [2]);  "
+.BR "      }  "
+.BR "  "
+.BR "      rval = check_space (fn, spwant);  "
+.BR "      if (rval == NO_SPACE) {  "
+.BR "        fprintf (stdout, "Not enough disk space\n");  "
+.BR "      }  "
+.BR "      if (rval == HAVE_SPACE) {  "
+.BR "        fprintf (stdout, "Enough disk space\n");  "
+.BR "      }  "
+.BR "  "
+.BR "      return rval;  "
+.BR "    }  "
+.EE
+.PP
+.SS Compile and Link
+.EX
+.BR "    cc -o tt tt.c -L$HOME/local/lib -Wl,-R$HOME/local/lib -ldi  "
+.EE
+.SS Example Run
+.PP
+.EX
+.BR "    bll-g7:bll$ ./tt /home/bll 0.5  "
+.BR "    Not enough disk space  "
+.BR "    bll-g7:bll$ ./tt /home/bll 0.1  "
+.BR "    Enough disk space  "
+.EE
+.SH See Also
+df(1), di(1)
+.SH Bugs
+Open a ticket at https://sourceforge.net/p/diskinfo-di/tickets/
+.br
+Send bug reports to: brad.lanam.di @ gmail.com
+.PP
+.SH Links
+Home Page: https://diskinfo-di.sourceforge.io/
+.br
+Wiki: https://sourceforge.net/p/diskinfo-di/wiki/Home/
+.br
+Change Log: https://sourceforge.net/p/diskinfo-di/wiki/ChangeLog/
+.SH Author
+Copyright 1994-2025 by Brad Lanam Pleasant Hill, CA

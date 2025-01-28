@@ -352,6 +352,8 @@ mkc-install-di:
 mkc-install-man:
 	-$(TEST) -d $(INST_MANDIR)/man1 || $(MKDIR) -p $(INST_MANDIR)/man1
 	$(CP) -f man/di.1 $(INST_MANDIR)/man1/$(MAN_TARGET)
+	-$(TEST) -d $(INST_MANDIR)/man3 || $(MKDIR) -p $(INST_MANDIR)/man3
+	$(CP) -f man/libdi.3 $(INST_MANDIR)/man3/$(MAN_TARGET)
 
 .PHONY: mkc-install-ditest
 mkc-install-ditest:

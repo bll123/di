@@ -11,11 +11,11 @@ This documentation was created for the upcoming version 5.x.
 
 Fetches all of the disk information using the options specified.
 
-    #include "di.h"
+    #include &lt;di.h&gt;
 
     void *di_data;
 
-    di_get_all_disk_info (di_data);
+    void di_get_all_disk_info (di_data);
 
 __di_data__ : The di_data structure returned from `di_initialize`.
 
@@ -24,12 +24,11 @@ __di_data__ : The di_data structure returned from `di_initialize`.
 
 Initializes the disk information iterator.
 
-    #include "di.h"
+    #include &lt;di.h&gt;
 
     int     count;
-    int     iteroption = DI_ITER_PRINTABLE;
 
-    count = di_iterate_init (di_data, iteroption)
+    count = di_iterate_init (void *di_data, int iteroption)
 
 __di_data__ : The di_data structure returned from `di_initialize`.
 
@@ -44,8 +43,7 @@ the value of `iteroption`.
 -------------
 ##### The di_pub_disk_info_t Structure
 
-    typedef struct
-    {
+    typedef struct {
       const char    *strdata [DI_DISP_MAX];
       int           index;
       int           doPrint;
@@ -86,7 +84,7 @@ structure for each.
 If the `--totals` option was specified, the totals will always be in
 the last `di_pub_disk_info_t` structure returned.
 
-    #include "di.h"
+    #include &lt;di.h&gt;
 
     const di_pub_disk_info_t  *pub;
 
@@ -102,7 +100,7 @@ partition.
 
 Determines the maximum scaling unit for the space value.
 
-    #include "di.h"
+    #include &lt;di.h&gt;
 
     scaleidx = di_get_scale_max (void *di_data,
         int index,
@@ -113,7 +111,7 @@ __di_data__ : The di_data structure returned from `di_initialize`.
 __index__ : The index from the `di_pub_disk_info_t` structure.
 
 __valueidx__ : The value indexes indicate which disk space values to use to
-calculate the space value.  The formula is : A - (B - C).
+calculate the space value.  The formula is : A&nbsp;-&nbsp;(B&nbsp;-&nbsp;C).
 Note that is very possible to create non-sensical return values, and
 _di_ does not check for invalid combinations.
 
@@ -138,7 +136,7 @@ defined in `di.h`.
 
 Gets the disk space value scaled according the scaling unit.
 
-    #include "di.h"
+    #include &lt;di.h&gt;
 
     double    val;
 
@@ -168,8 +166,8 @@ returned from `di_get_scale_max` or choose a specific value from `di.h`.
 Note that DI_SCALE_HR and DI_SCALE_HR_ALT are not valid.
 
 __valueidx__ : The value indexes indicate which disk space values to use to
-calculate the space value.  The formula is : A - (B - C).  See
-`di_get_scale_max` for valid combinations.
+calculate the space value.  The formula is : A&nbsp;-&nbsp;(B&nbsp;-&nbsp;C).
+See `di_get_scale_max` for valid combinations.
 
 Returns: The disk space value scaled to the scale unit specified.
 
@@ -179,11 +177,9 @@ Returns: The disk space value scaled to the scale unit specified.
 Gets the disk space value scaled according the scaling unit, and
 creates a string that can be printed. Based on the _di_ options.
 
-    #include "di.h"
+    #include &lt;di.h&gt;
 
-    double    val;
-
-    val = di_disp_scaled (void *di_data,
+    void di_disp_scaled (void *di_data,
         char *buff, long buffsize,
         int index, int scaleidx,
         int valueidxA, int valueidxB, int valueidxC);
@@ -201,7 +197,8 @@ returned from `di_get_scale_max` or choose a specific value from `di.h`.
 See `di_get_scaled` for a list of valid scale index values.
 
 __valueidx__ : The value indexes indicate which disk space values to use to
-calculate the space value.  The formula is : A - (B - C).  See
+calculate the space value.  The formula is:
+A&nbsp;-&nbsp;(B&nbsp;-&nbsp;C).  See
 `di_get_scale_max` for valid combinations.
 
 -------------
@@ -209,7 +206,7 @@ calculate the space value.  The formula is : A - (B - C).  See
 
 Gets the disk space value as a percentage.
 
-    #include "di.h"
+    #include &lt;di.h&gt;
 
     double    val;
 
@@ -223,7 +220,8 @@ __di_data__ : The di_data structure returned from `di_initialize`.
 __index__ : The index from the `di_pub_disk_info_t` structure.
 
 __valueidx__ : The value indexes indicate which disk space values to
-use to calculate the percentage.  The formula is (A - B) / (C - (D - E)).
+use to calculate the percentage.  The formula is
+(A&nbsp;-&nbsp;B)&nbsp;/&nbsp;(C&nbsp;-&nbsp;(D&nbsp;-&nbsp;E)).
 Note that is very possible to create non-sensical return values, and
 _di_ does not check for invalid combinations.
 
@@ -248,11 +246,9 @@ Valid combinations are:
 Gets the disk space value as a percentage and creates a string that
 can be printed.  Based on the _di_ options.
 
-    #include "di.h"
+    #include &lt;di.h&gt;
 
-    double    val;
-
-    val = di_disp_perc (void *di_data,
+    void di_disp_perc (void *di_data,
         char *buff, long buffsize,
         int index,
         int valueidxA, int valueidxB,
@@ -267,7 +263,8 @@ __buffsize__ : The size of the buffer.
 __index__ : The index from the `di_pub_disk_info_t` structure.
 
 __valueidx__ : The value indexes indicate which disk space values to
-use to calculate the percentage.  The formula is (A - B) / (C - (D - E)).
+use to calculate the percentage.  The formula is
+(A&nbsp;-&nbsp;B)&nbsp;/&nbsp;(C&nbsp;-&nbsp;(D&nbsp;-&nbsp;E)).
 See `di_get_perc` for valid combinations.
 
 [Wiki Home](Home)

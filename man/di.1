@@ -114,7 +114,8 @@ Display sizes in gigabytes.
 .B \-h
 (alias for: \fB\-dh\fP)
 .br
-Display partition sizes in scaled alternative 1 format.
+Display partition sizes in human readable format.  Sizes within a line
+may scale to different unit sizes.
 .TP
 .B \-\-help
 .br
@@ -123,7 +124,8 @@ Display some basic usage information.
 .B \-H
 (alias for: \fB\-dH\fP; compatibility: \fB\-\-human\-readable\fP)
 .br
-Display partition sizes in scaled alternative 2 format.
+Display partition sizes in human readable alternative format.  All
+sizes in each individual line are scaled to the same unit size.
 .TP
 .B \-I
 .I include\-fstype\-list
@@ -224,7 +226,7 @@ di \-strsrm # by type, reversed device-name, mount.
 .RE
 .TP
 .B \-\-si
-An alias for \fB-dH -Bsi\fP.
+An alias for \fB-dh -Bsi\fP.
 .TP
 .B \-\-sync
 Ignored.
@@ -463,7 +465,7 @@ will override the DI_ARGS environment variable.
 The GNU df POSIXLY_CORRECT, and DF_BLOCK_SIZE and the BSD BLOCKSIZE
 environment variables are honored when possible.
 .SH See Also
-df(1)
+df(1), libdi(3)
 .SH Bugs
 Open a ticket at https://sourceforge.net/p/diskinfo-di/tickets/
 .br

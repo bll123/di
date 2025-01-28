@@ -413,9 +413,6 @@ processArgs (int argc, const char * argv [], di_opt_t *diopts,
   if (diopts->optval [DI_OPT_DISP_CSV_TAB]) {
     diopts->optval [DI_OPT_DISP_CSV] = true;
   }
-  if (diopts->optval [DI_OPT_DISP_CSV] || diopts->optval [DI_OPT_DISP_JSON]) {
-    diopts->optval [DI_OPT_DISP_TOTALS] = false;
-  }
   if (diopts->optval [DI_OPT_DISP_JSON]) {
     diopts->optval [DI_OPT_DISP_HEADER] = false;
   }
@@ -500,7 +497,6 @@ processOptionsVal (const char *arg, void *valptr, char *value)
     parseList (&padata->diopts->exclude_list, value);
   } else if (strcmp (arg, "-X") == 0) {
     padata->diopts->optval [DI_OPT_DEBUG] = atoi (value);
-    padata->diopts->optval [DI_OPT_DISP_DBG_HEADER] = true;
     padata->diopts->optval [DI_OPT_DISP_HEADER] = true;
   } else {
     fprintf (stderr, "di_panic: bad option setup\n");

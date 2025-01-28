@@ -10,6 +10,7 @@
     * Do not print trailing spaces when the last field is a string display.
     * If a filesystem is specified on the command line, report for that filesystem, not where the device name is located.
     * Fixed Sorting by filesystem space.
+    * CSV and JSON output will now include the totals if requested.
 * Changes
     * Drop syllable and VMS support.
     * All format strings options (mstO) no longer truncate the output.
