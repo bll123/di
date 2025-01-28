@@ -160,7 +160,7 @@ main (int argc, const char * argv [])
 
   initLocale ();
   di_data = di_initialize ();
-  exitflag = di_process_options (di_data, argc, argv);
+  exitflag = di_process_options (di_data, argc, argv, 1);
   switch (exitflag) {
     case DI_EXIT_FAIL:
     case DI_EXIT_WARN: {
@@ -251,7 +251,7 @@ usage (void)
 static void
 di_display_data (void *di_data)
 {
-  di_pub_disk_info_t  *pub;
+  const di_pub_disk_info_t  *pub;
   int                 i;
   int                 iterval;
   int                 fmtstrlen;
@@ -916,7 +916,7 @@ static void
 updateScaleValues (void *di_data, int iterval,
     di_disp_info_t *dispinfo)
 {
-  di_pub_disk_info_t  *pub;
+  const di_pub_disk_info_t  *pub;
   int                 dispcount;
   int                 fmtstrlen;
 
@@ -987,7 +987,7 @@ static void
 determineMaxScaleValue (void *di_data, int iterval,
     di_disp_info_t *dispinfo)
 {
-  di_pub_disk_info_t  *pub;
+  const di_pub_disk_info_t  *pub;
   int                 dispcount;
   int                 fmtstrlen;
 

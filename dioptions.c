@@ -69,6 +69,46 @@ static di_valid_scale_t validscale [] =
 };
 #define DI_VALID_SCALE_SZ ((int) (sizeof (validscale) / sizeof (di_valid_scale_t)))
 
+#define OPT_IDX_A         0
+#define OPT_IDX_a         1
+#define OPT_IDX_B         2
+#define OPT_IDX_c         3
+#define OPT_IDX_C         4
+#define OPT_IDX_d         5
+#define OPT_IDX_f         6
+#define OPT_IDX_g         7
+#define OPT_IDX_h         8
+#define OPT_IDX_H         9
+#define OPT_IDX_help      10
+#define OPT_IDX_I         11
+#define OPT_IDX_j         12
+#define OPT_IDX_k         13
+#define OPT_IDX_l         14
+#define OPT_IDX_L         15
+#define OPT_IDX_m         16
+#define OPT_IDX_n         17
+#define OPT_IDX_P         18
+#define OPT_IDX_q         19
+#define OPT_IDX_R         20
+#define OPT_IDX_s         21
+#define OPT_IDX_si        22
+#define OPT_IDX_t         23
+#define OPT_IDX_version   24
+#define OPT_IDX_x         25
+#define OPT_IDX_X         26
+#define OPT_IDX_z         27
+#define OPT_IDX_Z         28
+#define OPT_IDX_MAX_NAMED 29
+#define OPT_IDX_MAX       54
+
+
+static int scaleids [] =
+  { OPT_IDX_d, OPT_IDX_g, OPT_IDX_h, OPT_IDX_H, OPT_IDX_k, OPT_IDX_m };
+static int paidb [] =
+  { OPT_IDX_a, OPT_IDX_help, OPT_IDX_P, OPT_IDX_si, OPT_IDX_version };
+static int paidv [] =
+  { OPT_IDX_B, OPT_IDX_I, OPT_IDX_s, OPT_IDX_x, OPT_IDX_X };
+
 #define DI_ARGV_SEP             " 	"  /* space, tab */
 #define DI_MAX_ARGV             50
 #define DI_LIST_SEP             ","
@@ -76,17 +116,18 @@ static di_valid_scale_t validscale [] =
 #define DI_POSIX_FORMAT         "sbuvpm"
 #define DI_ALL_FORMAT           "mts\n\tO\n\tbuf13\n\tbcvpa\n\tBuv2\n\tiUFP"
 
-static void processStringArgs (const char *, char *, di_opt_t *, char *, Size_t);
-static int  processArgs (int, const char * argv [], di_opt_t *, char *, Size_t);
+static void processStringArgs (char *, di_opt_t *, int offset, char *, Size_t);
+static int  processArgs (int, const char * argv [], di_opt_t *, int offset, char *, Size_t);
 static int  parseList (di_strarr_t *, char *);
 static void parseScaleValue (di_opt_t *diopts, char *ptr);
 static void processOptions (const char *, char *);
 static void processOptionsVal (const char *, void *, char *);
 static void setExitFlag (di_opt_t *, int);
+static void diopt_init (di_opt_t *diopts, struct pa_tmp *);
 
 static void
-processStringArgs (const char *progname, char *ptr, di_opt_t *diopts,
-    char *scalestr, Size_t scalestrsz)
+processStringArgs (char *ptr, di_opt_t *diopts,
+    int offset, char *scalestr, Size_t scalestrsz)
 {
   char        *dptr;
   char        *tptr;
@@ -108,12 +149,7 @@ processStringArgs (const char *progname, char *ptr, di_opt_t *diopts,
     int optidx;
 
     tptr = strtok (dptr, DI_ARGV_SEP);
-    nargc = 1;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wcast-qual"
-    /* sigh, why does the compiler think I put a cast in? */
-    nargv [0] = (char *) progname;
-#pragma clang diagnostic pop
+    nargc = 0;
     while (tptr != (char *) NULL) {
       if (nargc >= DI_MAX_ARGV) {
         break;
@@ -124,11 +160,11 @@ processStringArgs (const char *progname, char *ptr, di_opt_t *diopts,
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-qual"
     optidx = processArgs (nargc, (const char **) nargv,
-        diopts, scalestr, scalestrsz);
+        diopts, 0, scalestr, scalestrsz);
 #pragma clang diagnostic pop
     if (optidx < nargc) {
-      fprintf (stderr, "%s: unknown data found in DI_ARGS: %s\n",
-          progname, nargv [optidx]);
+      fprintf (stderr, "unknown data found in DI_ARGS %s\n",
+          nargv [optidx]);
       diopts->errorCount += 1;
       if (diopts->errorCount > 0) {
         setExitFlag (diopts, DI_EXIT_WARN);
@@ -142,11 +178,15 @@ di_opt_t *
 di_init_options (void)
 {
   di_opt_t    *diopts;
+  int         i;
 
   diopts = (di_opt_t *) malloc (sizeof (di_opt_t));
   if (diopts == NULL) {
     return diopts;
   }
+
+  diopts->opts = NULL;
+  diopts->optinit = false;
 
   diopts->formatString = DI_DEFAULT_FORMAT;
   diopts->formatLen = (int) strlen (diopts->formatString);
@@ -157,23 +197,18 @@ di_init_options (void)
   diopts->include_list.list = (char **) NULL;
   diopts->scale = DI_SCALE_GIGA;
   diopts->blockSize = DI_BLKSZ_1024;
-  diopts->optval [DI_OPT_DISP_TOTALS] = false;
-  diopts->optval [DI_OPT_DISP_DBG_HEADER] = false;
+  for (i = 0; i < DI_OPT_MAX; ++i) {
+    diopts->optval [i] = false;
+  }
   diopts->optval [DI_OPT_DISP_HEADER] = true;
-  diopts->optval [DI_OPT_LOCAL_ONLY] = false;
-  diopts->optval [DI_OPT_DISP_ALL] = false;
-  diopts->optval [DI_OPT_NO_SYMLINK] = false;
   diopts->optval [DI_OPT_EXCL_LOOPBACK] = true;
+  diopts->optval [DI_OPT_QUOTA_CHECK] = true;
+  diopts->optval [DI_OPT_DEBUG] = 0;
 
   /* default - by mount point*/
   stpecpy (diopts->sortType, diopts->sortType + sizeof (diopts->sortType), "m");
-  diopts->optval [DI_OPT_POSIX_COMPAT] = false;
-  diopts->optval [DI_OPT_QUOTA_CHECK] = true;
-  diopts->optval [DI_OPT_DISP_CSV] = false;
-  diopts->optval [DI_OPT_DISP_CSV_TAB] = false;
   diopts->exitFlag = DI_EXIT_NORM;
   diopts->errorCount = 0;
-  diopts->optval [DI_OPT_DISP_JSON] = false;
 
   return diopts;
 }
@@ -200,7 +235,7 @@ di_opt_cleanup (di_opt_t *diopts)
 }
 
 int
-di_get_options (int argc, const char * argv [], di_opt_t *diopts)
+di_get_options (int argc, const char * argv [], di_opt_t *diopts, int offset)
 {
   char *            ptr;
   char              scalestr [30];
@@ -234,10 +269,10 @@ di_get_options (int argc, const char * argv [], di_opt_t *diopts)
   }
 
   if ( (ptr = getenv ("DI_ARGS")) != (char *) NULL) {
-    processStringArgs (argv [0], ptr, diopts, scalestr, sizeof (scalestr));
+    processStringArgs (ptr, diopts, offset, scalestr, sizeof (scalestr));
   }
 
-  optidx = processArgs (argc, argv, diopts, scalestr, sizeof (scalestr));
+  optidx = processArgs (argc, argv, diopts, offset, scalestr, sizeof (scalestr));
 
   if (diopts->optval [DI_OPT_DEBUG] > 0) {
     int j;
@@ -326,371 +361,32 @@ di_opt_check_option (di_opt_t *diopts, int optidx)
 
 static int
 processArgs (int argc, const char * argv [], di_opt_t *diopts,
-    char *scalestr, Size_t scalestrsz)
+    int offset, char *scalestr, Size_t scalestrsz)
 {
   int           i;
   int           optidx;
   int           errorCount;
   struct pa_tmp padata;
 
-  /* the really old compilers don't have automatic initialization */
-  static getoptn_opt_t opts [] = {
-/* 0 */
-#define OPT_INT_A 0
-    { "-A",     GETOPTN_STRPTR,
-        NULL  /*&diopts->formatString*/,
-        0,
-        (void *) DI_ALL_FORMAT },
-/* 1 */
-#define OPT_INT_a 1
-    { "-a",     GETOPTN_FUNC_BOOL,
-        NULL  /*&padata*/,
-        0,
-        NULL  /*processOptions*/ },
-/* 2 */
-    { "--all",  GETOPTN_ALIAS,
-        (void *) "-a",
-        0,
-        NULL },
-/* 3 */
-#define OPT_INT_B 3
-    { "-B",     GETOPTN_FUNC_VALUE,
-        NULL  /*&padata*/,
-        0,
-        NULL  /*processOptionsVal*/ },
-/* 4 */
-    { "-b",     GETOPTN_ALIAS,
-        (void *) "-B",
-        0,
-        NULL },
-/* 5 */
-    { "--block-size",   GETOPTN_ALIAS,
-        (void *) "-B",
-        0,
-        NULL },
-/* 6 */
-#define OPT_INT_c 6
-    { "-c",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_DISP_CSV]*/,
-        0     /*sizeof (diopts->optval [DI_OPT_DISP_CSV])*/,
-        NULL },
-/* 7 */
-#define OPT_INT_C 7
-    { "-C",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_DISP_CSV_TAB]*/,
-        0     /*sizeof (diopts->optval [DI_OPT_DISP_CSV_TAB])*/,
-        NULL },
-/* 8 */
-    { "--csv-output", GETOPTN_ALIAS,
-        (void *) "-c",
-        0,
-        NULL },
-/* 9 */
-    { "--csv-tabs", GETOPTN_ALIAS,
-        (void *) "-C",
-        0,
-        NULL },
-/* 10 */
-#define OPT_INT_d 10
-    { "-d",     GETOPTN_STRING,
-        NULL  /* scalestr */,
-        0  /* scalestrsz */,
-        NULL },
-/* 11 */
-    { "--display-size",     GETOPTN_ALIAS,
-        (void *) "-d",
-        0,
-        NULL },
-/* 12 */
-    { "--dont-resolve-symlink",     GETOPTN_ALIAS,
-        (void *) "-R",
-        0,
-        NULL },
-/* 13 */
-#define OPT_INT_f 13
-    { "-f",     GETOPTN_STRPTR,
-        NULL  /*&diopts->formatString*/,
-        0,
-        NULL },
-/* 14 */
-    { "--format-string",    GETOPTN_ALIAS,
-        (void *) "-f",
-        0,
-        NULL },
-/* 15 */
-    { "-F",     GETOPTN_ALIAS,
-        (void *) "-I",
-        0,
-        NULL },
-/* 16 */
-#define OPT_INT_g 16
-    { "-g",     GETOPTN_STRING,
-        NULL  /* scalestr */,
-        0  /* scalestrsz */,
-        (void *) "g" },
-/* 17 */
-#define OPT_INT_h 17
-    { "-h",     GETOPTN_STRING,
-        NULL  /* scalestr */,
-        0  /* scalestrsz */,
-        (void *) "h" },
-/* 18 */
-#define OPT_INT_H 18
-    { "-H",     GETOPTN_STRING,
-        NULL  /* scalestr */,
-        0  /* scalestrsz */,
-        (void *) "H" },
-/* 19 */
-#define OPT_INT_help 19
-    { "--help", GETOPTN_FUNC_BOOL,
-        NULL,
-        0,
-        NULL  /*processOptions*/ },
-/* 20 */
-    { "--human-readable",   GETOPTN_ALIAS,
-        (void *) "-H",
-        0,
-        NULL },
-/* 21 */
-#define OPT_INT_qmark 21
-    { "-?",     GETOPTN_FUNC_BOOL,
-        NULL,
-        0,
-        NULL  /*processOptions*/ },
-/* 22 */
-    { "-i",     GETOPTN_ALIAS,
-        (void *) "-x",
-        0,
-        NULL },
-/* 23 */
-#define OPT_INT_I 23
-    { "-I",     GETOPTN_FUNC_VALUE,
-        NULL  /*&padata*/,
-        0,
-        NULL  /*processOptionsVal*/ },
-/* 24 */
-    { "--inodes",GETOPTN_IGNORE,
-        NULL,
-        0,
-        NULL },
-/* 25 */
-#define OPT_INT_j 25
-    { "-j",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_DISP_JSON]*/,
-        0     /*sizeof (diopts->optval [DI_OPT_DISP_JSON])*/,
-        NULL },
-/* 26 */
-    { "--json-output", GETOPTN_ALIAS,
-        (void *) "-j",
-        0,
-        NULL },
-/* 27 */
-#define OPT_INT_k 27
-    { "-k",     GETOPTN_STRING,
-        NULL  /* scalestr */,
-        0  /* scalestrsz */,
-        (void *) "k" },
-/* 28 */
-#define OPT_INT_l 28
-    { "-l",     GETOPTN_BOOL,
-        NULL  /* &diopts->optval [DI_OPT_LOCAL_ONLY] */,
-        0  /* sizeof (diopts->optval [DI_OPT_LOCAL_ONLY]) */,
-        NULL },
-/* 29 */
-    { "--local",GETOPTN_ALIAS,
-        (void *) "-l",
-        0,
-        NULL },
-/* 30 */
-#define OPT_INT_L 30
-    { "-L",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_EXCL_LOOPBACK]*/,
-        0  /*sizeof (diopts->optval [DI_OPT_EXCL_LOOPBACK])*/,
-        NULL },
-/* 31 */
-#define OPT_INT_m 31
-    { "-m",     GETOPTN_STRING,
-        NULL  /* scalestr */,
-        0  /* scalestrsz */,
-        (void *) "m" },
-/* 32 */
-#define OPT_INT_n 32
-    { "-n",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_DISP_HEADER]*/,
-        0  /*sizeof (diopts->optval [DI_OPT_DISP_HEADER])*/,
-        NULL },
-/* 33 */
-    { "--no-sync",  GETOPTN_IGNORE,
-        NULL,
-        0,
-        NULL },
-/* 34 */
-#define OPT_INT_P 34
-    { "-P",     GETOPTN_FUNC_BOOL,
-        NULL  /*&padata*/,
-        0,
-        NULL  /*processOptions*/ },
-/* 35 */
-    { "--portability",  GETOPTN_ALIAS,
-        (void *) "-P",
-        0,
-        NULL },
-/* 36 */
-    { "--print-type",   GETOPTN_IGNORE,
-        NULL,
-        0,
-        NULL },
-/* 37 */
-#define OPT_INT_q 37
-    { "-q",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_QUOTA_CHECK]*/,
-        0  /*sizeof (diopts->optval [DI_OPT_QUOTA_CHECK])*/,
-        NULL },
-/* 38 */
-#define OPT_INT_R 38
-    { "-R",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_NO_SYMLINK]*/,
-        0  /*sizeof (diopts->optval [DI_OPT_NO_SYMLINK])*/,
-        NULL },
-/* 39 */
-#define OPT_INT_s 39
-    { "-s",     GETOPTN_FUNC_VALUE,
-        NULL  /*&padata*/,
-        0,
-        NULL  /*processOptionsVal*/ },
-/* 40 */
-#define OPT_INT_si 40
-    { "--si",   GETOPTN_FUNC_BOOL,
-        NULL  /*&padata*/,
-        0,
-        NULL  /*processOptions*/ },
-/* 41 */
-    { "--sync", GETOPTN_IGNORE,
-        NULL,
-        0,
-        NULL },
-/* 42 */
-#define OPT_INT_t 42
-    { "-t",     GETOPTN_BOOL,
-        NULL  /*&diopts->optval [DI_OPT_DISP_TOTALS] */,
-        0  /*sizeof (diopts->optval [DI_OPT_DISP_TOTALS])*/,
-        NULL },
-/* 43 */
-    { "--total",GETOPTN_ALIAS,
-        (void *) "-t",
-        0,
-        NULL },
-/* 44 */
-    { "--type", GETOPTN_ALIAS,
-        (void *) "-I",
-        0,
-        NULL },
-/* 45 */
-    { "-v",     GETOPTN_IGNORE,
-        NULL,
-        0,
-        NULL },
-/* 46 */
-#define OPT_INT_version 46
-    { "--version", GETOPTN_FUNC_BOOL,
-        NULL,
-        0,
-        NULL  /*processOptions*/ },
-/* 47 */
-/* #define OPT_INT_w 47 */
-    { "-w",     GETOPTN_IGNORE_ARG,
-        NULL,
-        0,
-        NULL },
-/* 48 */
-/* #define OPT_INT_W 48 */
-    { "-W",     GETOPTN_IGNORE_ARG,
-        NULL,
-        0,
-        NULL },
-/* 49 */
-#define OPT_INT_x 49
-    { "-x",     GETOPTN_FUNC_VALUE,
-        NULL  /*&padata*/,
-        0,
-        NULL  /*processOptionsVal*/ },
-/* 50 */
-    { "--exclude-type",     GETOPTN_ALIAS,
-        (void *) "-x",
-        0,
-        NULL },
-/* 51 */
-#define OPT_INT_X 51
-    { "-X",     GETOPTN_FUNC_VALUE,
-        NULL  /*&padata*/,
-        0,
-        NULL  /*processOptionsVal*/ },
-/* 52 */
-#define OPT_INT_z 52
-    { "-z",     GETOPTN_STRING,
-        NULL  /*diopts->zoneDisplay*/,
-        0  /*sizeof (diopts->zoneDisplay)*/,
-        NULL },
-/* 53 */
-#define OPT_INT_Z 53
-    { "-Z",     GETOPTN_STRING,
-        NULL  /*diopts->.zoneDisplay*/,
-        0  /*sizeof (diopts->zoneDisplay)*/,
-        (void *) "all" }
-  };
-  static int scaleids [] =
-    { OPT_INT_d, OPT_INT_g, OPT_INT_h, OPT_INT_H, OPT_INT_k, OPT_INT_m };
-  static int paidb [] =
-    { OPT_INT_a, OPT_INT_help, OPT_INT_qmark, OPT_INT_P,
-      OPT_INT_si, OPT_INT_version };
-  static int paidv [] =
-    { OPT_INT_B, OPT_INT_I, OPT_INT_s, OPT_INT_x, OPT_INT_X };
-
-  /* this is seriously gross, but the old compilers don't have    */
-  /* automatic aggregate initialization                           */
-  /* don't forget to change scaleids, paidb and paidv above also    */
-  opts [OPT_INT_A].valptr = (void *) &diopts->formatString;   /* -A */
-  opts [OPT_INT_c].valptr = (void *) &diopts->optval [DI_OPT_DISP_CSV];     /* -c */
-  opts [OPT_INT_c].valsiz = sizeof (diopts->optval [DI_OPT_DISP_CSV]);
-  opts [OPT_INT_C].valptr = (void *) &diopts->optval [DI_OPT_DISP_CSV_TAB];     /* -C */
-  opts [OPT_INT_C].valsiz = sizeof (diopts->optval [DI_OPT_DISP_CSV_TAB]);
-  opts [OPT_INT_f].valptr = (void *) &diopts->formatString;  /* -f */
-  opts [OPT_INT_j].valptr = (void *) &diopts->optval [DI_OPT_DISP_JSON];     /* -j */
-  opts [OPT_INT_j].valsiz = sizeof (diopts->optval [DI_OPT_DISP_JSON]);
-  opts [OPT_INT_l].valptr = (void *) &diopts->optval [DI_OPT_LOCAL_ONLY];     /* -l */
-  opts [OPT_INT_l].valsiz = sizeof (diopts->optval [DI_OPT_LOCAL_ONLY]);
-  opts [OPT_INT_L].valptr = (void *) &diopts->optval [DI_OPT_EXCL_LOOPBACK]; /* -L */
-  opts [OPT_INT_L].valsiz = sizeof (diopts->optval [DI_OPT_EXCL_LOOPBACK]);
-  opts [OPT_INT_n].valptr = (void *) &diopts->optval [DI_OPT_DISP_HEADER];   /* -n */
-  opts [OPT_INT_n].valsiz = sizeof (diopts->optval [DI_OPT_DISP_HEADER]);
-  opts [OPT_INT_q].valptr = (void *) &diopts->optval [DI_OPT_QUOTA_CHECK];    /* -q */
-  opts [OPT_INT_q].valsiz = sizeof (diopts->optval [DI_OPT_QUOTA_CHECK]);
-  opts [OPT_INT_R].valptr = (void *) &diopts->optval [DI_OPT_NO_SYMLINK];    /* -R */
-  opts [OPT_INT_R].valsiz = sizeof (diopts->optval [DI_OPT_NO_SYMLINK]);
-  opts [OPT_INT_t].valptr = (void *) &diopts->optval [DI_OPT_DISP_TOTALS];    /* -t */
-  opts [OPT_INT_t].valsiz = sizeof (diopts->optval [DI_OPT_DISP_TOTALS]);
-  opts [OPT_INT_z].valptr = (void *) diopts->zoneDisplay;  /* -z */
-  opts [OPT_INT_z].valsiz = sizeof (diopts->zoneDisplay);
-  opts [OPT_INT_Z].valptr = (void *) diopts->zoneDisplay;  /* -Z */
-  opts [OPT_INT_Z].valsiz = sizeof (diopts->zoneDisplay);
+  diopt_init (diopts, &padata);
 
   for (i = 0; i < (int) (sizeof (scaleids) / sizeof (int)); ++i) {
-    opts [scaleids [i]].valptr = (void *) scalestr;
-    opts [scaleids [i]].valsiz = scalestrsz - 1;
+    diopts->opts [scaleids [i]].valptr = (void *) scalestr;
+    diopts->opts [scaleids [i]].valsiz = scalestrsz;
   }
   for (i = 0; i < (int) (sizeof (paidb) / sizeof (int)); ++i) {
-    opts [paidb [i]].valptr = (void *) &padata;
-    opts [paidb [i]].value2 = (void *) processOptions;
     if (diopts->exitFlag != DI_EXIT_NORM) {
       break;
     }
+    diopts->opts [paidb [i]].valptr = (void *) &padata;
+    diopts->opts [paidb [i]].value2 = (void *) processOptions;
   }
   for (i = 0; i < (int) (sizeof (paidv) / sizeof (int)); ++i) {
-    opts [paidv [i]].valptr = (void *) &padata;
-    opts [paidv [i]].value2 = (void *) processOptionsVal;
     if (diopts->exitFlag != DI_EXIT_NORM) {
       break;
     }
+    diopts->opts [paidv [i]].valptr = (void *) &padata;
+    diopts->opts [paidv [i]].value2 = (void *) processOptionsVal;
   }
 
   optidx = -1;
@@ -703,7 +399,7 @@ processArgs (int argc, const char * argv [], di_opt_t *diopts,
   padata.scalestrsz = scalestrsz;
 
   optidx = getoptn (GETOPTN_LEGACY, argc, argv,
-       sizeof (opts) / sizeof (getoptn_opt_t), opts, &errorCount);
+       OPT_IDX_MAX, diopts->opts, offset, &errorCount);
   diopts->errorCount += errorCount;
   if (diopts->errorCount > 0) {
     setExitFlag (diopts, DI_EXIT_WARN);
@@ -800,7 +496,6 @@ processOptionsVal (const char *arg, void *valptr, char *value)
   } else if (strcmp (arg, "-X") == 0) {
     padata->diopts->optval [DI_OPT_DEBUG] = atoi (value);
     padata->diopts->optval [DI_OPT_DISP_DBG_HEADER] = true;
-    padata->diopts->optval [DI_OPT_DISP_TOTALS] = true;
     padata->diopts->optval [DI_OPT_DISP_HEADER] = true;
   } else {
     fprintf (stderr, "di_panic: bad option setup\n");
@@ -944,4 +639,302 @@ setExitFlag (di_opt_t *diopts, int exitFlag)
   if (exitFlag > diopts->exitFlag) {
     diopts->exitFlag = exitFlag;
   }
+}
+
+static void
+diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
+{
+  int       i;
+  int       c;
+
+  if (diopts->optinit) {
+    return;
+  }
+
+  diopts->opts = (getoptn_opt_t *) malloc (sizeof (getoptn_opt_t) * OPT_IDX_MAX);
+  if (diopts->opts == NULL) {
+    fprintf (stderr, "malloc failed in diopt_init.  errno %d\n", errno);
+    exit (1);
+  }
+  for (i = 0; i < OPT_IDX_MAX; ++i) {
+    diopts->opts [i].option = NULL;
+    diopts->opts [i].option_type = GETOPTN_BOOL;
+    diopts->opts [i].valptr = NULL;
+    diopts->opts [i].valsiz = 0;
+    diopts->opts [i].value2 = NULL;
+  }
+
+  diopts->opts [OPT_IDX_A].option = "-A";
+  diopts->opts [OPT_IDX_A].option_type = GETOPTN_STRPTR;
+  diopts->opts [OPT_IDX_A].valptr = &diopts->formatString;
+  diopts->opts [OPT_IDX_A].value2 = (void *) DI_ALL_FORMAT;
+
+  diopts->opts [OPT_IDX_a].option = "-a";
+  diopts->opts [OPT_IDX_a].option_type = GETOPTN_FUNC_BOOL;
+  /* valptr : padata */
+  /* value2 : processOptions */
+
+  diopts->opts [OPT_IDX_B].option = "-B";
+  diopts->opts [OPT_IDX_B].option_type = GETOPTN_FUNC_VALUE;
+  /* valptr : padata */
+  /* value2 : processOptionsVal */
+
+  diopts->opts [OPT_IDX_c].option = "-c";
+  diopts->opts [OPT_IDX_c].option_type = GETOPTN_BOOL;
+  diopts->opts [OPT_IDX_c].valptr = &diopts->optval [DI_OPT_DISP_CSV];
+  diopts->opts [OPT_IDX_c].valsiz = sizeof (diopts->optval [DI_OPT_DISP_CSV]);
+
+  diopts->opts [OPT_IDX_C].option = "-C";
+  diopts->opts [OPT_IDX_C].option_type = GETOPTN_BOOL;
+  diopts->opts [OPT_IDX_C].valptr = &diopts->optval [DI_OPT_DISP_CSV_TAB];
+  diopts->opts [OPT_IDX_C].valsiz = sizeof (diopts->optval [DI_OPT_DISP_CSV_TAB]);
+
+  diopts->opts [OPT_IDX_d].option = "-d";
+  diopts->opts [OPT_IDX_d].option_type = GETOPTN_STRING;
+  /* valptr :  scalestr  */
+  /* valsiz :  scalestrsz  */
+
+  diopts->opts [OPT_IDX_f].option = "-f";
+  diopts->opts [OPT_IDX_f].option_type = GETOPTN_STRPTR;
+  diopts->opts [OPT_IDX_f].valptr = &diopts->formatString;
+
+  diopts->opts [OPT_IDX_g].option = "-g";
+  diopts->opts [OPT_IDX_g].option_type = GETOPTN_STRING;
+  /* valptr :  scalestr  */
+  /* valsiz :  scalestrsz  */
+  diopts->opts [OPT_IDX_g].value2 = (void *) "g";
+
+  diopts->opts [OPT_IDX_h].option = "-h";
+  diopts->opts [OPT_IDX_h].option_type = GETOPTN_STRING;
+  /* valptr :  scalestr  */
+  /* valsiz :  scalestrsz  */
+  diopts->opts [OPT_IDX_h].value2 = (void *) "h";
+
+  diopts->opts [OPT_IDX_H].option = "-H";
+  diopts->opts [OPT_IDX_H].option_type = GETOPTN_STRING;
+  /* valptr :  scalestr  */
+  /* valsiz :  scalestrsz  */
+  diopts->opts [OPT_IDX_H].value2 = (void *) "H";
+
+  diopts->opts [OPT_IDX_help].option = "--help";
+  diopts->opts [OPT_IDX_help].option_type = GETOPTN_FUNC_BOOL;
+  /* value2 : processOptions */
+
+  diopts->opts [OPT_IDX_I].option = "-I";
+  diopts->opts [OPT_IDX_I].option_type = GETOPTN_FUNC_VALUE;
+  /* valptr : padata */
+  /* value2 : processOptionsVal */
+
+  diopts->opts [OPT_IDX_j].option = "-j";
+  diopts->opts [OPT_IDX_j].option_type = GETOPTN_BOOL;
+  diopts->opts [OPT_IDX_j].valptr = &diopts->optval [DI_OPT_DISP_JSON];
+  diopts->opts [OPT_IDX_j].valsiz = sizeof (diopts->optval [DI_OPT_DISP_JSON]);
+
+  diopts->opts [OPT_IDX_k].option = "-k";
+  diopts->opts [OPT_IDX_k].option_type = GETOPTN_STRING;
+  /* valptr :  scalestr  */
+  /* valsiz :  scalestrsz  */
+  diopts->opts [OPT_IDX_k].value2 = (void *) "k";
+
+  diopts->opts [OPT_IDX_l].option = "-l";
+  diopts->opts [OPT_IDX_l].option_type = GETOPTN_BOOL;
+  diopts->opts [OPT_IDX_l].valptr =  &diopts->optval [DI_OPT_LOCAL_ONLY];
+  diopts->opts [OPT_IDX_l].valsiz =  sizeof (diopts->optval [DI_OPT_LOCAL_ONLY]);
+
+  diopts->opts [OPT_IDX_L].option  = "-L";
+  diopts->opts [OPT_IDX_L].option_type = GETOPTN_BOOL;
+  diopts->opts [OPT_IDX_L].valptr = &diopts->optval [DI_OPT_EXCL_LOOPBACK];
+  diopts->opts [OPT_IDX_L].valsiz = sizeof (diopts->optval [DI_OPT_EXCL_LOOPBACK]);
+
+  diopts->opts [OPT_IDX_m].option = "-m";
+  diopts->opts [OPT_IDX_m].option_type = GETOPTN_STRING;
+  /* valptr :  scalestr  */
+  /* valsiz :  scalestrsz  */
+  diopts->opts [OPT_IDX_m].value2 = (void *) "m";
+
+  diopts->opts [OPT_IDX_n].option = "-n";
+  diopts->opts [OPT_IDX_n].option_type = GETOPTN_BOOL;
+  diopts->opts [OPT_IDX_n].valptr = &diopts->optval [DI_OPT_DISP_HEADER];
+  diopts->opts [OPT_IDX_n].valsiz = sizeof (diopts->optval [DI_OPT_DISP_HEADER]);
+
+  diopts->opts [OPT_IDX_P].option = "-P";
+  diopts->opts [OPT_IDX_P].option_type = GETOPTN_FUNC_BOOL;
+  /* valptr : padata */
+  /* value2 : processOptions */
+
+  diopts->opts [OPT_IDX_q].option = "-q";
+  diopts->opts [OPT_IDX_q].option_type = GETOPTN_BOOL;
+  diopts->opts [OPT_IDX_q].valptr = &diopts->optval [DI_OPT_QUOTA_CHECK];
+  diopts->opts [OPT_IDX_q].valsiz = sizeof (diopts->optval [DI_OPT_QUOTA_CHECK]);
+
+  diopts->opts [OPT_IDX_R].option = "-R";
+  diopts->opts [OPT_IDX_R].option_type = GETOPTN_BOOL;
+  diopts->opts [OPT_IDX_R].valptr = &diopts->optval [DI_OPT_NO_SYMLINK];
+  diopts->opts [OPT_IDX_R].valsiz = sizeof (diopts->optval [DI_OPT_NO_SYMLINK]);
+
+  diopts->opts [OPT_IDX_s].option = "-s";
+  diopts->opts [OPT_IDX_s].option_type = GETOPTN_FUNC_VALUE;
+  /* valptr : padata */
+  /* value2 : processOptionsVal */
+
+  diopts->opts [OPT_IDX_si].option = "--si";
+  diopts->opts [OPT_IDX_si].option_type = GETOPTN_FUNC_BOOL;
+  /* valptr : padata */
+  /* value2 : processOptions */
+
+  diopts->opts [OPT_IDX_t].option = "-t";
+  diopts->opts [OPT_IDX_t].option_type = GETOPTN_BOOL;
+  diopts->opts [OPT_IDX_t].valptr = &diopts->optval [DI_OPT_DISP_TOTALS] ;
+  diopts->opts [OPT_IDX_t].valsiz = sizeof (diopts->optval [DI_OPT_DISP_TOTALS]);
+
+  diopts->opts [OPT_IDX_version].option = "--version";
+  diopts->opts [OPT_IDX_version].option_type = GETOPTN_FUNC_BOOL;
+  /* value2 : processOptions */
+
+  diopts->opts [OPT_IDX_x].option = "-x";
+  diopts->opts [OPT_IDX_x].option_type = GETOPTN_FUNC_VALUE;
+  /* valptr : padata */
+  /* value2 : processOptionsVal */
+
+  diopts->opts [50].option = "--exclude-type";
+  diopts->opts [50].option_type = GETOPTN_ALIAS;
+  diopts->opts [50].valptr = (void *) "-x";
+
+  diopts->opts [OPT_IDX_X].option = "-X";
+  diopts->opts [OPT_IDX_X].option_type = GETOPTN_FUNC_VALUE;
+  /* valptr : padata */
+  /* value2 : processOptionsVal */
+
+  diopts->opts [OPT_IDX_z].option = "-z";
+  diopts->opts [OPT_IDX_z].option_type = GETOPTN_STRING;
+  diopts->opts [OPT_IDX_z].valptr = (void *) diopts->zoneDisplay;
+  diopts->opts [OPT_IDX_z].valsiz = sizeof (diopts->zoneDisplay);
+
+  diopts->opts [OPT_IDX_Z].option = "-Z";
+  diopts->opts [OPT_IDX_Z].option_type = GETOPTN_STRING;
+  diopts->opts [OPT_IDX_Z].valptr = (void *) diopts->zoneDisplay;
+  diopts->opts [OPT_IDX_Z].valsiz = sizeof (diopts->zoneDisplay);
+  diopts->opts [OPT_IDX_Z].value2 = (void *) "all";
+
+  c = OPT_IDX_MAX_NAMED;
+
+  diopts->opts [c].option = "--all";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-a";
+  ++c;
+
+  diopts->opts [c].option = "-b";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-B";
+  ++c;
+
+  diopts->opts [c].option = "--block-size";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-B";
+  ++c;
+
+  diopts->opts [c].option = "--display-size";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-d";
+  ++c;
+
+  diopts->opts [c].option = "--dont-resolve-symlink";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-R";
+  ++c;
+
+  diopts->opts [c].option = "--csv-output";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-c";
+  ++c;
+
+  diopts->opts [c].option = "--csv-tabs";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-C";
+  ++c;
+
+  diopts->opts [c].option = "--format-string";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-f";
+  ++c;
+
+  diopts->opts [c].option = "-F";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-I";
+  ++c;
+
+  diopts->opts [c].option = "--human-readable";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-H";
+  ++c;
+
+  diopts->opts [c].option = "-?";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "--help";
+  ++c;
+
+  diopts->opts [c].option = "-i";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-x";
+  ++c;
+
+  diopts->opts [c].option = "--inodes";
+  diopts->opts [c].option_type = GETOPTN_IGNORE;
+  ++c;
+
+  diopts->opts [c].option = "--json-output";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-j";
+  ++c;
+
+  diopts->opts [c].option = "--local";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-l";
+  ++c;
+
+  diopts->opts [c].option = "--no-sync";
+  diopts->opts [c].option_type = GETOPTN_IGNORE;
+  ++c;
+
+  diopts->opts [c].option = "--portability";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-P";
+  ++c;
+
+  diopts->opts [c].option = "--print-type";
+  diopts->opts [c].option_type = GETOPTN_IGNORE;
+  ++c;
+
+  diopts->opts [c].option = "--sync";
+  diopts->opts [c].option_type = GETOPTN_IGNORE;
+  ++c;
+
+  diopts->opts [c].option = "--total";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-t";
+  ++c;
+
+  diopts->opts [c].option = "--type";
+  diopts->opts [c].option_type = GETOPTN_ALIAS;
+  diopts->opts [c].valptr = (void *) "-I";
+  ++c;
+
+  diopts->opts [c].option = "-v";
+  diopts->opts [c].option_type = GETOPTN_IGNORE;
+  ++c;
+
+  diopts->opts [c].option = "-w";
+  diopts->opts [c].option_type = GETOPTN_IGNORE_ARG;
+  ++c;
+
+  diopts->opts [c].option = "-W";
+  diopts->opts [c].option_type = GETOPTN_IGNORE_ARG;
+  ++c;
+
+  if (c + 1 != OPT_IDX_MAX) {
+    fprintf (stderr, "incorrect option initialization %d/%d\n",
+        c + 1, OPT_IDX_MAX);
+    exit (1);
+  }
+  diopts->optinit = true;
 }

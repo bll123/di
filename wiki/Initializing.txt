@@ -16,7 +16,7 @@ is required for all subsequent calls to the _di_ library.
 
     void * di_data;
 
-    di_data = di_initialize (void)
+    di_data = di_initialize (void);
 
 Returns: A pointer to an allocated `di_data` structure.  This
 structure must be freed in a call to `di_cleanup`.
@@ -35,17 +35,16 @@ process the `DI_ARGS` environment variable.
     int   targc;
     char  *targv [10];
 
-    targc = 2;
-    targv [0] = "-d";
-    targv [1] = "g";
-    targv [2] = NULL;
-    exitflag = di_process_options (void *di_data, int targc, char *targv [])
+    exitflag = di_process_options (void *di_data, int targc, char *targv [], int offset)
 
 __di_data__ : The di_data structure returned from `di_initialize`.
 
 __targc__ : The number of items in the targv array.
 
 __targv__ : An array of character strings.
+
+__offset__ : The starting offset in the argv array.  This will be `0`
+for most cases, `1`, if the argv array is from the command line.
 
 Returns: A return value indicating the status of processing the
 options.

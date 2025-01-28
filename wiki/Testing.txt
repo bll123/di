@@ -65,8 +65,8 @@ runs.  No rigorous tests have been run.
  Linux Mint 18.2 | - | - | - | - | - | - | -
  Linux Mint 19 | - | - | - | - | - | - | -
  Linux Mint 21 | 4.99.3<br>2025-1-25 | 4.99.3<br>2025-1-25 | - | - | - | - | -
- MX Linux 21<br>(Debian 11)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | get/set/endmntent/statvfs
- MX Linux 23<br>(Debian 12)| 4.99.2<br>2025-1-25<br>gcc clang | 4.99.2<br>2025-1-25<br>gcc clang | ok | ok | - | - | get/set/endmntent/statvfs<br>Primary Development
+ MX Linux 21<br>(Debian 11)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | get/set/endmntent statvfs
+ MX Linux 23<br>(Debian 12)| 4.99.2<br>2025-1-25<br>gcc clang | 4.99.2<br>2025-1-25<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
  Ubuntu 14.04<br>(32-bit) | - | - | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | - | - | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | - | 4.99.3<br>2025-1-25 | - | - | - | - | -
@@ -109,9 +109,9 @@ runs.  No rigorous tests have been run.
  MacOS Sequoia (intel) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | getfsstat
  MacOS Sequoia (m1) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | getfsstat
  __Other:__ | | | | | | |
- AIX 7.1 | - | 4.99.3<br>2025-1-26<br>gcc xlc  | - | - | - | - | mntctl/statvfs<br>cfarm<br>gcc link warning
- Haiku r1b5 | - | 4.99.3<br>2025-1-26 | - | - | - | - | haiku-specific<br>ramfs used value err
- SCO OpenServer 6.0.0 | - | 4.99.3<br>2025-1-27<br>gcc cc | - | - | - | - | getmntent/statvfs<br>polarhome
+ AIX 7.1 | - | 4.99.3<br>2025-1-26<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
+ Haiku r1b5 | - | 4.99.3<br>2025-1-26 | - | - | - | - | haiku<br>ramfs used value err
+ SCO OpenServer 6.0.0 | - | 4.99.3<br>2025-1-27<br>gcc cc | - | - | - | - | getmntent statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | polarhome
  QNX 6.5 | - | FAIL | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | | | |

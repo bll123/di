@@ -190,7 +190,7 @@ di_version (void)
 }
 
 int
-di_process_options (void *tdi_data, int argc, const char * argv [])
+di_process_options (void *tdi_data, int argc, const char * argv [], int offset)
 {
   di_data_t   *di_data = (di_data_t *) tdi_data;
   di_opt_t    *diopts;
@@ -201,7 +201,7 @@ di_process_options (void *tdi_data, int argc, const char * argv [])
   }
 
   diopts = (di_opt_t *) di_data->options;
-  exitflag = di_get_options (argc, argv, diopts);
+  exitflag = di_get_options (argc, argv, diopts, offset);
 
   if (diopts->optval [DI_OPT_DEBUG] > 0) {
     fprintf (stdout, "# BUILD: %s\n", DI_BUILD_SYS);
@@ -373,7 +373,7 @@ di_iterate_init (void *tdi_data, int iteropt)
   return count;
 }
 
-di_pub_disk_info_t *
+const di_pub_disk_info_t *
 di_iterate (void *tdi_data)
 {
   di_data_t           *di_data = (di_data_t *) tdi_data;

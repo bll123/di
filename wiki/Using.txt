@@ -1,0 +1,101 @@
+[Wiki Home](Home)
+
+This documentation was created for the upcoming version 5.x.
+
+[TOC]
+
+### Notes on Using the Library
+
+If you want to check the disk space for a particular partition, do not
+grab all of the partition data and try to figure out which parition is
+the correct one.
+
+Instead, specify a filename or directory name. _di_ will resolve any
+symbolic links and determine the actual partition where the file
+resides.
+
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <stdbool.h>
+    #include <math.h>
+
+    #include "di.h"
+
+    enum {
+      HAVE_SPACE = 0,
+      NO_SPACE = 1,
+    };
+
+    int
+    check_space (const char *fn, double space_wanted) {
+      void        *di_data;
+      int         targc;
+      const char  *targv [10];
+      int         exitflag;
+      const di_pub_disk_info_t  *pub;
+      int         rval = NO_SPACE;
+      int         count;
+
+      targc = 1;
+      targv [0] = fn;
+      targv [1] = NULL;
+
+      di_data = di_initialize ();
+      exitflag = di_process_options (di_data, targc, targv, 0);
+      if (exitflag != DI_EXIT_NORM) {
+        di_cleanup (di_data);
+        exit (exitflag);
+      }
+      di_get_all_disk_info (di_data);
+      count = di_iterate_init (di_data, DI_ITER_PRINTABLE);
+      while ((pub = di_iterate (di_data)) != NULL) {
+        double    dval;
+
+        dval = di_get_perc (di_data, pub->index,
+            DI_SPACE_AVAIL, DI_VALUE_NONE,
+            DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+        if (dval >= space_wanted) {
+          rval = HAVE_SPACE;
+        }
+      }
+      di_cleanup (di_data);
+
+      return rval;
+    }
+
+    int
+    main (int argc, char *argv []) {
+      const char  *fn = "/home/bll/s/di";
+      double      spwant = 5.0;
+      bool        rval;
+
+      if (argc > 1) {
+        fn = argv [1];
+      }
+      if (argc > 2) {
+        spwant = atof (argv [2]);
+      }
+
+      rval = check_space (fn, spwant);
+      if (rval == NO_SPACE) {
+        fprintf (stdout, "Not enough disk space\n");
+      }
+      if (rval == HAVE_SPACE) {
+        fprintf (stdout, "Enough disk space\n");
+      }
+
+      return rval;
+    }
+
+Compile and Link:
+
+    cc -o tt tt.c -L$HOME/local/lib -Wl,-R$HOME/local/lib -ldl
+
+Example run:
+
+    bll-g7:bll$ ./tt /home/bll 10
+    Enough disk space
+    bll-g7:bll$ ./tt /home/bll 95
+    Not enough disk space
+
+[Wiki Home](Home)

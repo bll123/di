@@ -136,17 +136,17 @@ typedef struct
 
 /* dilib.c */
 extern void * di_initialize (void);
-extern void di_cleanup (void *);
-extern int di_process_options (void *, int, const char * []);
+extern void di_cleanup (void *di_data);
+extern int di_process_options (void *di_data, int argc, const char * argv[], int offset);
 extern const char * di_version (void);
 
-extern int di_check_option (void *, int);
-extern void di_format_iter_init (void *);
-extern int di_format_iterate (void *);
+extern int di_check_option (void *di_data, int optidx);
+extern void di_format_iter_init (void *di_data);
+extern int di_format_iterate (void *di_data);
 
-extern void di_get_all_disk_info (void *);
-extern int di_iterate_init (void *, int);
-extern di_pub_disk_info_t *di_iterate (void *);
+extern void di_get_all_disk_info (void *di_data);
+extern int di_iterate_init (void *di_data, int itertype);
+extern const di_pub_disk_info_t *di_iterate (void *di_data);
 extern int di_get_scale_max (void *, int, int, int, int);
 extern double di_get_scaled (void *, int, int, int, int, int);
 extern void di_disp_scaled (void *, char *, long, int, int, int, int, int);

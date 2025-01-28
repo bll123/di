@@ -29,8 +29,9 @@ extern "C" {
    * GETOPTN_MODERN:
    *    -ab  processes -ab flag.
    */
-#define GETOPTN_LEGACY      'l'
-#define GETOPTN_MODERN      'm'
+#define GETOPTN_LEGACY      (1 >> 0)
+#define GETOPTN_MODERN      (1 >> 1)
+#define GETOPTN_HAS_ARGV0   (1 >> 2)
 
   /* option types */
 #define GETOPTN_BOOL        0    /* flips the value */
@@ -55,7 +56,7 @@ typedef struct {
 } getoptn_opt_t;
 
 extern int getoptn (int style, int argc, const char * argv [],
-      Size_t optcount, getoptn_opt_t opts [], int *errorCount);
+      Size_t optcount, getoptn_opt_t opts [], int offset, int *errorCount);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }

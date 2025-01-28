@@ -9,6 +9,7 @@ This documentation was created for the upcoming version 5.x.
 [Initializing](Initializing)
 <br>[Option Processing](Options)
 <br>[Getting the Data](GettingData)
+<br>[Notes on Using the Library](Using)
 
 </div>
 <div markdown style="float: left; margin-right: 20px;">
@@ -41,3 +42,4 @@ Open a ticket at [SourceForge](https://sourceforge.net/p/diskinfo-di/tickets/)
 <br>
 Or e-mail : brad.lanam.di / gmail.com
 
+</div>

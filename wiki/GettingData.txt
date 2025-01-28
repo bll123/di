@@ -17,6 +17,8 @@ Fetches all of the disk information using the options specified.
 
     di_get_all_disk_info (di_data);
 
+__di_data__ : The di_data structure returned from `di_initialize`.
+
 -------------
 ##### di_iterate_init
 
@@ -81,9 +83,12 @@ __isLoopback__ : Indicates that the partition is a loopback partition.
 Iterates through the disk partitions, returning a `di_pub_disk_info_t`
 structure for each.
 
+If the `--totals` option was specified, the totals will always be in
+the last `di_pub_disk_info_t` structure returned.
+
     #include "di.h"
 
-    di_pub_disk_info_t  *pub;
+    const di_pub_disk_info_t  *pub;
 
     pub = di_iterate (di_data);
 
@@ -148,6 +153,20 @@ __index__ : The index from the `di_pub_disk_info_t` structure.
 __scaleidx__ : The scaling index to use.  Use the scaling index
 returned from `di_get_scale_max` or choose a specific value from `di.h`.
 
+ * DI_SCALE_BYTE
+ * DI_SCALE_KILO
+ * DI_SCALE_MEGA
+ * DI_SCALE_GIGA
+ * DI_SCALE_TERA
+ * DI_SCALE_PETA
+ * DI_SCALE_EXA
+ * DI_SCALE_ZETTA
+ * DI_SCALE_YOTTA
+ * DI_SCALE_RONNA
+ * DI_SCALE_QUETTA
+
+Note that DI_SCALE_HR and DI_SCALE_HR_ALT are not valid.
+
 __valueidx__ : The value indexes indicate which disk space values to use to
 calculate the space value.  The formula is : A - (B - C).  See
 `di_get_scale_max` for valid combinations.
@@ -179,6 +198,7 @@ __index__ : The index from the `di_pub_disk_info_t` structure.
 
 __scaleidx__ : The scaling index to use.  Use the scaling index
 returned from `di_get_scale_max` or choose a specific value from `di.h`.
+See `di_get_scaled` for a list of valid scale index values.
 
 __valueidx__ : The value indexes indicate which disk space values to use to
 calculate the space value.  The formula is : A - (B - C).  See
