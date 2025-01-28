@@ -113,15 +113,15 @@ runs.  No rigorous tests have been run.
  Haiku r1b5 | - | 4.99.3<br>2025-1-26 | - | - | - | - | haiku-specific<br>ramfs used value err
  SCO OpenServer 6.0.0 | - | 4.99.3<br>2025-1-27<br>gcc cc | - | - | - | - | getmntent/statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | polarhome
- QNX 6.5 | - | FAIL | - | - | - | - | statvfs<br>polarhome
+ QNX 6.5 | - | FAIL | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | | | |
  Nexenta 1.0.1 | - | - | - | - | - | - | getmntent statvfs
  Nexenta 2.0 | - | - | - | - | - | - | getmntent statvfs
  Open Solaris 200805 | - | - | - | - | - | - | getmntent statvfs
  Open Solaris 200906 | - | - | - | - | - | - | getmntent statvfs
  Solaris 10 | - | - | - | - | - | - | getmntent statvfs
- Solaris 11.4 | - | - | - | - | - | - | getmntent statvfs<br>cfarm
- Solaris 11.4 (BE) | - | - | - | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 | 4.99.3<br>2025-1-27<br>gcc clang | 4.99.3<br>2025-1-27<br>gcc clang | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
+ Solaris 11.4 (BE) | - | - | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
  __Windows:__| | | | | | | -
  Cygwin | - | - | - | - | - | - | get/set/endmntent statvfs?
  MSys 2| - | - | - | - | - | - | -

@@ -84,9 +84,9 @@ endif()
 
 add_compile_options (-g)
 add_link_options (-g)
-if (NOT WIN32)
-  add_link_options (-rdynamic)
-endif()
+#if (NOT WIN32)
+#  add_link_options (-rdynamic)
+#endif()
 
 #### more compile options: fortification/address sanitizer
 
@@ -112,7 +112,8 @@ if (DI_BUILD STREQUAL "SanitizeAddress")
   endif()
 endif()
 
-if (DI_FORTIFY STREQUAL T)
+# solaris may not be using the gnu/clang loader
+if (DI_FORTIFY STREQUAL T AND NOT CMAKE_HOST_SOLARIS)
   # hardening
   add_compile_options (-fstack-protector-strong)
   add_compile_options (-fstack-protector-all)
@@ -375,7 +376,7 @@ int main (int argc, char *argv []) { return 0; }
       # we'll try this and see how it works out.
       # probably will switch to awk in the future.
       COMMAND sed -n -e "/struct *${structnm}/,/^ *};/ p" ${membernm}.out
-      COMMAND grep "^ *[a-z_][a-z_]* *${membernm};"
+      COMMAND grep "^ *[a-z0-9_][a-z0-9_]* *${membernm};"
       COMMAND sed -e "s,^ *,," -e "s, .*,,"
       COMMAND tr -d "\n"
     )
@@ -929,6 +930,11 @@ addIntlLibrary (di)
 target_include_directories (di PRIVATE
   ${TIRPC_INCLUDE_DIRS}
 )
+if (CMAKE_HOST_SOLARIS)
+  target_link_options (di PRIVATE
+    "-Wl,-R${CMAKE_INSTALL_FULL_LIBDIR}"
+  )
+endif()
 target_link_libraries (di PRIVATE
   ${TIRPC_LDFLAGS}
 )
@@ -1006,4 +1012,4 @@ install (FILES
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )
 
-# need to install the .mo files
+# ./utils/instpo.sh ${CMAKE_INSTALL_LOCALE}

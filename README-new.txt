@@ -38,10 +38,6 @@ INSTALLATION
     otherwise the numerics will be handled using standard C data types
     (long double, double, etc.).
 
-    Be aware that the GMP library only accepts 'unsigned long', and
-    if 'unsigned long' has a size < 8, there may be a loss of precision
-    on some systems.
-
     To turn off the use of the multi-precision libraries;
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_INTERNAL
 

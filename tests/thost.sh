@@ -101,7 +101,7 @@ if [ $keep = F ]; then
   for comp in ${complist}; do
     testdir=${didir}_${comp}
     if [[ $type == local ]]; then
-      rm -rf di-[45].*.tar.gz ${testdir} dibldrun.sh
+      rm -rf di-[45].*.tar.gz di-[45].*.tar ${testdir} dibldrun.sh
     fi
     if [[ $type == remote || $type == vm ]]; then
       ssh ${rempssh} ${remussh} ${ipaddr} "rm -rf di-[45].*.tar.gz ${testdir} dibldrun.sh"

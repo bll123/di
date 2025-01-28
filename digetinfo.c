@@ -3,19 +3,17 @@
  * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
  */
 
-/********************************************************/
 /*
-
-    In the cases where di_get_disk_entries () does not
-    get the volume information, di_get_disk_info () is used
-    to fetch the info.
-
-    di_get_disk_info ()
-        Gets the disk space used/available on the
-        partitions we want displayed.
-
-*/
-/********************************************************/
+ *
+ *    In the cases where di_get_disk_entries () does not
+ *    get the volume information, di_get_disk_info () is used
+ *    to fetch the info.
+ *
+ *    di_get_disk_info ()
+ *        Gets the disk space used/available on the
+ *        partitions we want displayed.
+ *
+ */
 
 #include "config.h"
 
@@ -141,7 +139,7 @@ di_get_disk_info (di_data_t *di_data, int *diCount)
         }
 /* Linux! statvfs () returns values in f_bsize rather f_frsize.  Bleah.  */
 /* Non-POSIX!  Linux manual pages are incorrect.                        */
-#  if linux
+#  if defined (linux)
         tblocksz = statBuf.f_bsize;
 #  endif /* linux */
 
@@ -492,7 +490,7 @@ di_get_disk_info (di_data_t *di_data, int *diCount)
   di_opt_t        *diopts;
 
   diopts = (di_opt_t *) di_data->options;
-  if (debug > 0) { printf ("# di_get_disk_info: empty\n"); }
+  if (diopts->optval [DI_OPT_DEBUG] > 0) { printf ("# di_get_disk_info: empty\n"); }
   return;
 }
 #endif

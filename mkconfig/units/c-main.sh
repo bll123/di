@@ -756,10 +756,10 @@ return 1;
     code="
 CPP_EXTERNS_BEG
 typedef char (*_TEST_fun_)();
-_TEST_fun_ f = $rfunc;
+_TEST_fun_ f = (_TEST_fun_) $rfunc;
 CPP_EXTERNS_END
 int main () {
-f(); if (f == $rfunc) { return 0; }
+f(); if (f == (_TEST_fun_) $rfunc) { return 0; }
 return 1;
 }
 "
@@ -790,10 +790,10 @@ CPP_EXTERNS_BEG
 #undef $rfunc
 typedef char (*_TEST_fun_)();
 char $rfunc();
-_TEST_fun_ f = $rfunc;
+_TEST_fun_ f = (_TEST_fun_) $rfunc;
 CPP_EXTERNS_END
 int main () {
-if (f == $rfunc) { return 0; }
+if (f == (_TEST_fun_) $rfunc) { return 0; }
 return 1;
 }
 "
@@ -809,10 +809,10 @@ On modern systems, this simply isn't necessary.
 */
 extern int ${func}();
 typedef char (*_TEST_fun_)();
-_TEST_fun_ f = $rfunc;
+_TEST_fun_ f = (_TEST_fun_) $rfunc;
 CPP_EXTERNS_END
 int main () {
-f(); if (f == $rfunc) { return 0; }
+f(); if (f == (_TEST_fun_) $rfunc) { return 0; }
 return 1;
 }
 "

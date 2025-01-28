@@ -306,26 +306,9 @@ mkc-install:
 ###
 # installation
 
-.PHONY: build.po
-mkc-build-po:
-	-. ./$(MKC_ENV); \
-		(cd po >/dev/null && for i in *.po; do \
-		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
-		$(MSGFMT) -o $$j.mo $$i; \
-	done)
-
 .PHONY: mkc-install-po
-mkc-install-po: 	mkc-build-po
-	-$(TEST) -d $(INST_LOCALEDIR) || $(MKDIR) -p $(INST_LOCALEDIR)
-	-(cd po >/dev/null && for i in *.po; do \
-		j=`echo $$i | $(SED) 's,\\.po$$,,'`; \
-		$(TEST) -d $(INST_LOCALEDIR)/$$j || \
-			$(MKDIR) $(INST_LOCALEDIR)/$$j; \
-		$(TEST) -d $(INST_LOCALEDIR)/$$j/LC_MESSAGES || \
-			$(MKDIR) $(INST_LOCALEDIR)/$$j/LC_MESSAGES; \
-		$(CP) -f $$j.mo $(INST_LOCALEDIR)/$$j/LC_MESSAGES/di.mo; \
-		$(RM) -f $$j.mo; \
-		done)
+mkc-install-po:
+	./utils/instpo.sh $(INST_LOCALEDIR)
 
 .PHONY: mkc-install-pc
 mkc-install-pc:

@@ -619,7 +619,7 @@ check_cflags_shared () {
 
   cflags_shared=""
 
-  if [ "$_MKCONFIG_USING_GCC" != Y ]; then
+  if [ "$_MKCONFIG_USING_GCC" != Y -a "$_MKCONFIG_USING_CLANG" != Y ]; then
     case ${_MKCONFIG_SYSTYPE} in
       CYGWIN*|MSYS*|MINGW*)
         # apparently, clang does not need this any more.
@@ -673,7 +673,7 @@ check_shldflags () {
 check_ldflags_shared () {
   printlabel LDFLAGS_SHARED_LIBLINK "shared library ldflags"
 
-  if [ "$_MKCONFIG_USING_GCC" != Y ]; then
+  if [ "$_MKCONFIG_USING_GCC" != Y -a "$_MKCONFIG_USING_CLANG" != Y ]; then
     case ${_MKCONFIG_SYSTYPE} in
       AIX)
         doappend ldflags_shared_liblink " -G"
@@ -770,7 +770,7 @@ check_sharedliblinkflag () {
         LDFLAGS_SHARED_LIB_LINK=""
         ;;
     esac
-    if [ "$_MKCONFIG_USING_GCC" = Y ]; then
+    if [ "$_MKCONFIG_USING_GCC" = Y -o "$_MKCONFIG_USING_CLANG" = Y ]; then
       LDFLAGS_SHARED_LIB_LINK=`echo "$LDFLAGS_SHARED_LIB_LINK" |
           sed -e 's/^-/-Wl,-/' -e 's/^\+/-Wl,+/' -e 's/  */ -Wl,/g'`
     fi
@@ -802,7 +802,7 @@ check_staticliblinkflag () {
         LDFLAGS_STATIC_LIB_LINK=""
         ;;
     esac
-    if [ "$_MKCONFIG_USING_GCC" = Y ]; then
+    if [ "$_MKCONFIG_USING_GCC" = Y -o "$_MKCONFIG_USING_CLANG" = Y ]; then
       LDFLAGS_STATIC_LIB_LINK=`echo "$LDFLAGS_STATIC_LIB_LINK" |
           sed -e 's/^-/-Wl,-/' -e 's/^\+/-Wl,+/' -e 's/  */ -Wl,/g'`
     fi
@@ -834,7 +834,7 @@ check_shareexeclinkflag () {
         LDFLAGS_EXEC_LINK=""
         ;;
     esac
-    if [ "$_MKCONFIG_USING_GCC" = Y ]; then
+    if [ "$_MKCONFIG_USING_GCC" = Y -o "$_MKCONFIG_USING_CLANG" = Y ]; then
       LDFLAGS_EXEC_LINK=`echo "$LDFLAGS_EXEC_LINK" |
           sed -e 's/^-/-Wl,-/' -e 's/^\+/-Wl,+/' -e 's/  */ -Wl,/g'`
     fi
@@ -872,7 +872,7 @@ check_sharerunpathflag () {
         LDFLAGS_RUNPATH=""
         ;;
     esac
-    if [ "$_MKCONFIG_USING_GCC" = Y ]; then
+    if [ "$_MKCONFIG_USING_GCC" = Y -o "$_MKCONFIG_USING_CLANG" = Y ]; then
       # the trailing space will be converted to ' -Wl,' and
       # the library runpath will be appended by mkcl.sh
       LDFLAGS_RUNPATH=`echo "$LDFLAGS_RUNPATH" |

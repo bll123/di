@@ -44,6 +44,8 @@ di_initialize_zones (di_opt_t *diopts)
   {
     int             i;
     zoneid_t        *zids = (zoneid_t *) NULL;
+    char            *rpp;
+    char            *rpend;
 
     zinfo->myzoneid = getzoneid ();
 
@@ -71,9 +73,15 @@ di_initialize_zones (di_opt_t *diopts)
       zinfo->zones [i].zoneid = zids [i];
       len = (int) zone_getattr (zids [i], ZONE_ATTR_ROOT,
           zinfo->zones [i].rootpath, MAXPATHLEN);
+      /* solaris: the length returned includes the null byte */
       if (len >= 0) {
+        len -= 1;
         zinfo->zones [i].rootpathlen = (Size_t) len;
-        strncat (zinfo->zones [i].rootpath, "/", MAXPATHLEN);
+        if (zinfo->zones [i].zoneid != 0) {
+          rpp = zinfo->zones [i].rootpath + len;
+          rpend = zinfo->zones [i].rootpath + MAXPATHLEN;
+          rpp = stpecpy (rpp, rpend, "/");
+        }
         if (zinfo->zones [i].zoneid == 0) {
           zinfo->globalIdx = i;
         }
@@ -86,13 +94,14 @@ di_initialize_zones (di_opt_t *diopts)
               diopts->zoneDisplay + MAXPATHLEN, zinfo->zones [i].name);
         }
         if (diopts->optval [DI_OPT_DEBUG] > 4) {
-          printf ("zone:%d:%s:%s:\n", (int) zinfo->zones [i].zoneid,
-              zinfo->zones [i].name, zinfo->zones [i].rootpath);
+          printf ("zone:%d:%s:%s:%d\n", (int) zinfo->zones [i].zoneid,
+              zinfo->zones [i].name, zinfo->zones [i].rootpath,
+              (int) zinfo->zones [i].rootpathlen);
         }
       }
     }
 
-    free ( (void *) zids);
+    free ((void *) zids);
   }
 
   if (diopts->optval [DI_OPT_DEBUG] > 4) {

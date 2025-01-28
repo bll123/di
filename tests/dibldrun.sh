@@ -37,12 +37,14 @@ bldrun () {
   make distclean
   make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
   # AIX: BSHIFT: nothing i can do about system headers
+  # cmake on solaris tries to use -rdynamic with non gnu loader
   c=`${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
       ${grepcmd} -v '(pragma|error[=,])' |
       ${grepcmd} -v 'BSHIFT has been redefined' |
       ${grepcmd} -v '\.h:.*warning' |
       ${grepcmd} -v 'unrecognized command line option' |
       ${grepcmd} -v '^COMPILE' |
+      ${grepcmd} -v "argument unused during compilation: '-rdynamic'" |
       wc -l`
   if [ $c -gt 0 ]; then
     echo "== `date +%T` ${host}: ${tag}/${comp}: warnings or errors found"
@@ -51,7 +53,8 @@ bldrun () {
         ${grepcmd} -v 'BSHIFT has been redefined' |
         ${grepcmd} -v '\.h:.*warning' |
         ${grepcmd} -v 'unrecognized command line option' |
-        ${grepcmd} -v '^COMPILE'
+        ${grepcmd} -v '^COMPILE' |
+        ${grepcmd} -v "argument unused during compilation: '-rdynamic'" |
     grc=1
   fi
   if [ $tag = cmake ]; then

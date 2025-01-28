@@ -51,7 +51,7 @@ if have_pkg_libtommath _pkg_libs_tommath
  hdr     libtommath/tommath.h
 endif
 hdr     ufs/quota.h
-hdr     ufs/ufs/quota.h
+hdr     ufs/ufs/quota.h sys/types.h
 hdr     unistd.h
 hdr     util/string.h
 hdr     wchar.h
@@ -61,7 +61,7 @@ hdr     zone.h
 sys     dcmd_blk.h
 sys     file.h
 sys     fs_types.h
-sys     fs/ufs_quota.h
+sys     fs/ufs_quota.h sys/types.h
 sys     fstyp.h
 sys     fstypes.h
 sys     ftype.h

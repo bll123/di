@@ -18,6 +18,8 @@ Version 5 beta Timeline
           a lot cleaner now, and very basic build/run testing
           should go more smoothly.
 2025-1-25 Had to bump the required cmake version to 3.13.
+2025-1-27 AIX gcc xlc, Haiku, SCO OpenServer gcc cc, Solaris gcc,
+          clang are building. I will work on Solaris cc next.
 
 Version 5.x beta
 

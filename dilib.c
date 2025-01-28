@@ -1166,7 +1166,7 @@ preCheckDiskInfo (di_data_t *di_data)
     if (diopts->optval [DI_OPT_DEBUG] > 4) {
       printf ("## prechk:%s:\n", dinfo->strdata [DI_DISP_MOUNTPT]);
     }
-    checkZone (dinfo, (di_zone_info_t *) &di_data->zoneInfo, diopts);
+    checkZone (dinfo, (di_zone_info_t *) di_data->zoneInfo, diopts);
 
     if (di_isPooledFs (dinfo)) {
       di_data->haspooledfs = true;
@@ -1274,6 +1274,10 @@ checkZone (di_disk_info_t *dinfo, di_zone_info_t *zoneInfo, di_opt_t *diopts)
 #if _lib_zone_list && _lib_getzoneid && _lib_zone_getattr
   int         i;
   int         idx = -1;
+
+  if (zoneInfo == NULL) {
+    return;
+  }
 
   if (strcmp (diopts->zoneDisplay, "all") == 0 &&
       zoneInfo->uid == 0) {
