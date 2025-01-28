@@ -49,10 +49,6 @@ if [[ $flag != C ]]; then
     cd tmp
     chmod a+rx dibldrun.sh
   fi
-  if [[ ${type} == remote || ${type} == vm ]]; then
-    scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
-    ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
-  fi
 
   for comp in ${complist}; do
     rsltdir=${topdir}/test_results/${host}_${comp}
@@ -64,6 +60,8 @@ if [[ $flag != C ]]; then
       testdir=${didir}_${comp}
       cp -f ${testdir}/*.out ${rsltdir}
     elif [[ ${type} = remote ]]; then
+      scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
+      ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
       remotebldrun $ipaddr
     elif [[ ${type} == vm ]]; then
       echo "-- $(date '+%T') ${host}: waiting for vm lock"
@@ -90,6 +88,8 @@ if [[ $flag != C ]]; then
       if [[ $rc -ne 0 ]]; then
         exit 1
       fi
+      scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
+      ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
       remotebldrun $ipaddr
       echo "-- $(date '+%T') ${host}: stopping"
       ./tests/stopvm.sh ${host}

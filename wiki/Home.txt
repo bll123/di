@@ -33,8 +33,8 @@ output from your standard df command (as verbose as possible),
 
 Files to include in your report:
 
-* cmake: build/config.h, build/CMakeOutput.log,
-build/CMakeError.log
+* cmake: build/config.h, build/CMakeFiles/CMakeOutput.log,
+build/CMakeFiles/CMakeError.log, build/CMakeFiles/CMakeConfigureLog.yaml
 * mkconfig: mkc_files/mkconfig.log, mkc_files/mkconfig_env.log,
 mkc_files/mkc_compile.log, di.env, and config.h
 

@@ -9,6 +9,7 @@ CONTENTS
   Installation
   Requirements
   Bugs and Known Issues
+  Porting Help
   Acknowledgements
   Copyright
 
@@ -86,6 +87,17 @@ BUG REPORTS
 
     Open a ticket at : https://sourceforge.net/p/diskinfo-di/tickets/
     Or e-mail : brad.lanam.di_at_gmail.com
+
+PORTING HELP
+
+    I use my own set of virtual machines, the gcc compile farm, and
+    polarhome (which is now limited, and will probably die at some
+    point).
+
+    If you have a computer on the internet with a less common or older
+    operating system, I could use access for portability testing.
+
+    I need access to HP-UX.
 
 ACKNOWLEDGEMENTS
 

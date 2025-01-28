@@ -9,6 +9,7 @@ hostlist=""
 
 flag=R
 bg=T
+newtar=F
 while test $# -gt 0; do
   case $1 in
     --keep)
@@ -23,6 +24,10 @@ while test $# -gt 0; do
     --list)
       flag=L
       bg=F
+      shift
+      ;;
+    --newtar)
+      newtar=T
       shift
       ;;
     --fg)
@@ -63,9 +68,11 @@ if [[ $flag == L ]]; then
   exit 0
 fi
 
-make distclean
-rm -f *.tar.gz
-make tar
+if [[ $newtar == T ]]; then
+  make distclean
+  rm -f *.tar.gz
+  make tar
+fi
 tarfn=$(echo di-*.tar.gz)
 didir=$(echo ${tarfn} | sed 's,\.tar.gz$,,')
 

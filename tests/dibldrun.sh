@@ -61,6 +61,7 @@ bldrun () {
   if [ $tag = cmake ]; then
     for f in build/CMakeFiles/CMakeOutput.log \
         build/CMakeFiles/CMakeError.log \
+        build/CMakeFiles/CMakeConfigureLog.yaml \
         build/config.h; do
       if [ -f $f ]; then
         bnm=`basename ${f} | sed 's,\.[a-z]*,,'`

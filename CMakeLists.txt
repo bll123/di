@@ -214,12 +214,18 @@ macro (checkPrototype_quotactl hdr)
     _quotactl_pos_1b
     )
   check_prototype_definition (quotactl
+    "int quotactl (const char *path, int cmd, int id, char *addr)"
+    0
+    "${hdr}"
+    _quotactl_pos_1c
+    )
+  check_prototype_definition (quotactl
     "int quotactl (int a, const char * b, int c, caddr_t d)"
     0
     "${hdr}"
     _quotactl_pos_2
     )
-  if (_quotactl_pos_1a OR _quotactl_pos_1b)
+  if (_quotactl_pos_1a OR _quotactl_pos_1b OR _quotactl_pos_1c)
     set (_quotactl_pos_1 1)
   endif()
   if (_quotactl_pos_1)
@@ -315,11 +321,20 @@ macro (checkPrototype_getfsstat hdr)
     "stdio.h;stddef.h;${hdr}"
     _getfsstat_type_long
     )
+  check_prototype_definition (getfsstat
+    "int getfsstat(struct statfs *buf, size_t bufsize, int flags)"
+    0
+    "stdio.h;stddef.h;${hdr}"
+    _getfsstat_type_size_t
+    )
   if (_getfsstat_type_int)
     set (_c_arg_2_getfsstat int)
   endif()
   if (_getfsstat_type_long)
     set (_c_arg_2_getfsstat long)
+  endif()
+  if (_getfsstat_type_size_t)
+    set (_c_arg_2_getfsstat size_t)
   endif()
 endmacro()
 
@@ -646,7 +661,8 @@ check_type_size ("long long" _siz_long_long)
 
 if (_hdr_ufs_ufs_quota)
   # FreeBSD ufs/ufs/quota.h does not include its dependencies
-  set (QUOTA_HDR "sys/types.h;ufs/ufs/quota.h")
+  # OpenBSD declares quotactl in unistd.h
+  set (QUOTA_HDR "sys/types.h;sys/unistd.h;ufs/ufs/quota.h")
 endif()
 if (_sys_quota)
   set (QUOTA_HDR "sys/quota.h")
@@ -798,7 +814,7 @@ endif()
 check_symbol_exists (errno errno.h _dcl_errno)
 # *BSD
 # which include files?
-check_symbol_exists (mnt_names ${STATFS_HDR} _dcl_mnt_names)
+# check_symbol_exists (mnt_names ${STATFS_HDR} _dcl_mnt_names)
 
 checkvquotactlenabled ()
 

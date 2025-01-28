@@ -144,7 +144,7 @@ extern "C" {
 #if (_lib_getmntent \
     || _args_statfs > 0) \
     && ! _lib_getmntinfo \
-    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
+    && ! _lib_getfsstat \
     && ! _lib_getvfsstat \
     && ! _lib_mntctl \
     && ! _lib_getmnt
@@ -281,7 +281,7 @@ checkMountOptions (struct mnttab *mntEntry, char *str)
     && _lib_setmntent \
     && _lib_endmntent \
     && ! _lib_getmntinfo \
-    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
+    && ! _lib_getfsstat \
     && ! _lib_getvfsstat \
     && ! _lib_mntctl \
     && ! _lib_GetDriveType \
@@ -388,7 +388,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
 #if ! _lib_getmntent \
     && ! _lib_mntctl \
     && ! _lib_getmntinfo \
-    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
+    && ! _lib_getfsstat \
     && ! _lib_getvfsstat \
     && ! _lib_getmnt \
     && ! _lib_GetDriveType \
@@ -543,7 +543,7 @@ di_getQNXDiskEntries (di_data_t *di_data, char *ipath, int *diCount)
 #if ! _lib_getmntent \
     && ! _lib_mntctl \
     && ! _lib_getmntinfo \
-    && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
+    && ! _lib_getfsstat \
     && ! _lib_getvfsstat \
     && ! _lib_getmnt \
     && ! _lib_GetDriveType \
@@ -632,7 +632,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
  * All of the following routines also replace di_get_disk_info ()
  */
 
-#if _lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long) \
+#if _lib_getfsstat \
     && ! (_lib_getvfsstat && _args_getvfsstat == 3)
 
 /*

@@ -28,7 +28,7 @@ runs.  No rigorous tests have been run.
  FreeBSD 10.3 | - | - | - | - | - | - | -
  FreeBSD 11 | - | - | - | - | - | - | -
  FreeBSD 13.4 | - | - | - | - | - | - | -
- FreeBSD 14.2 | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | getfsstat
+ FreeBSD 14.2 | 4.99.5<br>2025-1-28 | 4.99.5<br>2025-1-28 | - | - | - | - | getfsstat
  MirBSD 10 | - | - | - | - | - | - | -
  NetBSD 1.62 | - | - | - | - | - | - | -
  NetBSD 2.0 | n/a | 4.99.3<br>2025-1-25 | - | - | - | - | many odd warnings
@@ -61,8 +61,8 @@ runs.  No rigorous tests have been run.
  Debian 8 | - | - | - | - | - | - | -
  Debian 10 | - | - | - | - | - | - | -
  Devuan 2 | - | - | - | - | - | - | -
- Linux Mint 17 | - | - | - | - | - | - | -
- Linux Mint 18.2 | - | - | - | - | - | - | -
+ Linux Mint 17 | - | 4.99.5<br>2025-1-28 | - | - | - | - | -
+ Linux Mint 18.2 | - | 4.99.5<br>2025-1-28 | - | - | - | - | -
  Linux Mint 19 | - | - | - | - | - | - | -
  Linux Mint 21 | 4.99.3<br>2025-1-25 | 4.99.3<br>2025-1-25 | - | - | - | - | -
  MX Linux 21<br>(Debian 11)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | get/set/endmntent statvfs

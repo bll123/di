@@ -63,6 +63,8 @@ are not printed e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .br
 Change the base block size from 1024 (default) to the size specified.
 \fIblock\-size\fP may be either: k\ \-\ 1024 bytes or si\ \-\ 1000 bytes.
+.PP
+Use the \fI\-d\fP option to change the scaling display.
 .TP
 .B \-c
 (alias: \fB\-\-csv\-output\fP)
@@ -310,6 +312,9 @@ Print the file system type.
 .B T (backwards compatibility)
 Print the file system type.
 .TP
+.B O
+Print the filesystem mount options.
+.TP
 .B Total Available
 .TP
 .B b
@@ -378,11 +383,6 @@ Print the number of file slots available.
 .TP
 .B P
 Print the percentage of file slots in use.
-.TP
-.B Mount Information
-.TP
-.B O
-Print the filesystem mount options.
 .RE
 .PP
 The default format string for \fIdi\fP is \fBsmbuvpT\fP.
@@ -460,30 +460,20 @@ line arguments.  e.g. If you always want gigabytes displayed, set
 DI_ARGS equal to "\-dg".  Any command line arguments specified
 will override the DI_ARGS environment variable.
 .PP
-The DI_LOCALE_DIR environment variable may be used to specify the
-location of the di program's locale message files.
-.PP
 The GNU df POSIXLY_CORRECT, and DF_BLOCK_SIZE and the BSD BLOCKSIZE
-environment variables are honored.
-.SH Note
-For filesystems that do not report available space (e.g. System V
-release 3), the number of available space is set to the free space.
-.SH WARNING
-Do not replace your system's \fIdf\fP command with this program.  You
-will in all likelihood break your installation procedures.
+environment variables are honored when possible.
 .SH See Also
-df(1), fstab(5), getmnt(2), getmntinfo(2), mnttab(4), mount(1M)
-statfs(2), statvfs(2)
+df(1)
 .SH Bugs
+Open a ticket at https://sourceforge.net/p/diskinfo-di/tickets/
+.br
 Send bug reports to: brad.lanam.di @ gmail.com
 .PP
-Known Issues:
-.PP
-di will probably not process a zettabyte or yottabyte sized filesystem
-properly due to overflow of a long long.
-.SH Website
-https://diskinfo-di.sourceforge.io/
+.SH Links
+Home Page: https://diskinfo-di.sourceforge.io/
+.br
+Wiki: https://sourceforge.net/p/diskinfo-di/wiki/Home/
+.br
+Change Log: https://sourceforge.net/p/diskinfo-di/wiki/ChangeLog/
 .SH Author
-This program is Copyright 1994-2024 by Brad Lanam.
-.PP
-Brad Lanam, Pleasant Hill, CA (brad.lanam.di @ gmail.com)
+Copyright 1994-2025 by Brad Lanam Pleasant Hill, CA
