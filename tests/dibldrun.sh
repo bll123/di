@@ -10,6 +10,7 @@ host=$1
 tarfn=$2
 didir=$3
 comp=$4
+rempath=$5
 
 # snarfed from mkconfig
 test_egrep () {
@@ -33,28 +34,25 @@ bldrun () {
 
   grc=0
 
-  echo "-- `date +%T` ${host}: ${tag}/${comp}"
+  echo "-- `date '+%T'` ${host}: ${tag}/${comp}"
   make distclean
   make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
   # AIX: BSHIFT: nothing i can do about system headers
-  # cmake on solaris tries to use -rdynamic with non gnu loader
   c=`${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
       ${grepcmd} -v '(pragma|error[=,])' |
       ${grepcmd} -v 'BSHIFT has been redefined' |
       ${grepcmd} -v '\.h:.*warning' |
       ${grepcmd} -v 'unrecognized command line option' |
       ${grepcmd} -v '^COMPILE' |
-      ${grepcmd} -v "argument unused during compilation: '-rdynamic'" |
       wc -l`
   if [ $c -gt 0 ]; then
-    echo "== `date +%T` ${host}: ${tag}/${comp}: warnings or errors found"
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: warnings or errors found"
     ${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
         ${grepcmd} -v '(pragma|error[=,])' |
         ${grepcmd} -v 'BSHIFT has been redefined' |
         ${grepcmd} -v '\.h:.*warning' |
         ${grepcmd} -v 'unrecognized command line option' |
-        ${grepcmd} -v '^COMPILE' |
-        ${grepcmd} -v "argument unused during compilation: '-rdynamic'" |
+        ${grepcmd} -v '^COMPILE'
     grc=1
   fi
   if [ $tag = cmake ]; then
@@ -92,13 +90,13 @@ bldrun () {
   ${mathtest} > di-${tag}-math.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date +%T` ${host}: ${tag}/${comp}: dimathtest failed"
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: dimathtest failed"
     grc=1
   fi
   ${getoptntest} > di-${tag}-getoptn.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date +%T` ${host}: ${tag}/${comp}: getoptn_test failed"
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: getoptn_test failed"
     grc=1
   fi
 
@@ -106,7 +104,7 @@ bldrun () {
   ./x/bin/di -a -d g -f stbuf1cvpB2m -t > di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date +%T` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
   fi
   if [ $grc -ne 0 ]; then
     exit 1
@@ -116,6 +114,9 @@ bldrun () {
 havecmake=F
 # add paths for macos and *BSD
 PATH="$PATH:/opt/local/bin:/usr/local/bin"
+if [ "${rempath}" != - ]; then
+  PATH="${rempath}:${PATH}"
+fi
 test_egrep
 
 if [ x${tarfn} = x ]; then

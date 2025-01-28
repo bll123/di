@@ -444,7 +444,7 @@ processOptions (const char *arg, char *valptr)
     padata->diopts->optval [DI_OPT_DISP_CSV] = false;
     padata->diopts->optval [DI_OPT_DISP_JSON] = false;
   } else if (strcmp (arg, "--si") == 0) {
-    stpecpy (padata->scalestr, padata->scalestr + padata->scalestrsz, "H");
+    stpecpy (padata->scalestr, padata->scalestr + padata->scalestrsz, "h");
   } else if (strcmp (arg, "--version") == 0) {
     setExitFlag (padata->diopts, DI_EXIT_VERS);
   } else {

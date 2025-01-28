@@ -52,9 +52,9 @@ resides.
       while ((pub = di_iterate (di_data)) != NULL) {
         double    dval;
 
-        dval = di_get_perc (di_data, pub->index,
-            DI_SPACE_AVAIL, DI_VALUE_NONE,
-            DI_SPACE_TOTAL, DI_VALUE_NONE, DI_VALUE_NONE);
+        /* compare terabytes available */
+        dval = di_get_scaled (di_data, pub->index, DI_SCALE_TERA,
+            DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE);
         if (dval >= space_wanted) {
           rval = HAVE_SPACE;
         }
@@ -67,7 +67,7 @@ resides.
     int
     main (int argc, char *argv []) {
       const char  *fn = "/home/bll/s/di";
-      double      spwant = 5.0;
+      double      spwant = 0.2;   /* terabytes */
       bool        rval;
 
       if (argc > 1) {
@@ -90,13 +90,14 @@ resides.
 
 Compile and Link:
 
-    cc -o tt tt.c -L$HOME/local/lib -Wl,-R$HOME/local/lib -ldl
+    cc -o tt tt.c -L$HOME/local/lib -Wl,-R$HOME/local/lib -ldi
 
 Example run:
 
-    bll-g7:bll$ ./tt /home/bll 10
-    Enough disk space
-    bll-g7:bll$ ./tt /home/bll 95
+    bll-g7:bll$ ./tt /home/bll 0.5
     Not enough disk space
+    bll-g7:bll$ ./tt /home/bll 0.1
+    Enough disk space
+    bll-g7:bll$
 
 [Wiki Home](Home)

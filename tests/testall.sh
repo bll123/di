@@ -7,12 +7,17 @@
 
 hostlist=""
 
-keep=F
+flag=R
 bg=T
 while test $# -gt 0; do
   case $1 in
     --keep)
-      keep=T
+      flag=K
+      shift
+      ;;
+    --clean)
+      flag=C
+      bg=F
       shift
       ;;
     --fg)
@@ -20,7 +25,7 @@ while test $# -gt 0; do
       shift
       ;;
     *)
-      hostlist="$1 "
+      hostlist+="$1 "
       shift
       ;;
   esac
@@ -60,11 +65,11 @@ for host in ${hostlist}; do
   if [[ $bg == T ]]; then
     nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
         ${ipaddr} ${remuser} ${remport} ${rempath} \
-        ${keep} ${complist} 2>&1 | tee ${rsltdir}/w &
+        ${flag} ${complist} 2>&1 | tee ${rsltdir}/w &
   else
     ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
         ${ipaddr} ${remuser} ${remport} ${rempath} \
-        ${keep} ${complist} 2>&1 | tee ${rsltdir}/w
+        ${flag} ${complist} 2>&1 | tee ${rsltdir}/w
   fi
 done
 

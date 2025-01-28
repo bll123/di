@@ -373,11 +373,13 @@ int main (int argc, char *argv []) { return 0; }
     execute_process (
       OUTPUT_VARIABLE xdr_out
       # unfortunately, the sed command will find other matches
-      # we'll try this and see how it works out.
-      # probably will switch to awk in the future.
+      # try this and see how it works out.
+      # possibly will switch to awk in the future.
+      # Some headers have tabs, use the [^a-z0-9_] to avoid putting
+      # them in here.
       COMMAND sed -n -e "/struct *${structnm}/,/^ *};/ p" ${membernm}.out
-      COMMAND grep "^ *[a-z0-9_][a-z0-9_]* *${membernm};"
-      COMMAND sed -e "s,^ *,," -e "s, .*,,"
+      COMMAND grep "^[^a-z0-9_]*[a-z0-9_][a-z0-9_]*[^a-z0-9_]*${membernm};"
+      COMMAND sed -e "s,^[^a-z0-9_]*,," -e "s,[^a-z0-9_].*,,"
       COMMAND tr -d "\n"
     )
     set (xdr_${membernm} xdr_${xdr_out})

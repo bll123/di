@@ -20,7 +20,7 @@ extern "C" {
 #define DI_MOUNTOPT_LEN             MAXPATHLEN
 #define DI_MNT_TIME_LEN        24
 #ifndef DI_DEFAULT_DISP_SIZE
-# define DI_DEFAULT_DISP_SIZE "H"
+# define DI_DEFAULT_DISP_SIZE "h"
 #endif
 #ifndef DI_DEFAULT_FORMAT
 # define DI_DEFAULT_FORMAT "smbuvpT"

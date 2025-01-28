@@ -16,6 +16,8 @@
     * -w and -W options are no longer supported and are now ignored.
     * Support for 512 byte block size has been dropped.
     * Removed old tcl and perl interfaces.
+    * The default scaling has been changed to use 'h' rather than 'H'.
+    * When the --si option is used the default scaling is changed to use 'h' rather than 'H'.
 * New Features
     * Use big number/multi precision libraries (GMP or libtommath) if available.
     * Split into a library with a proper API and main program.
