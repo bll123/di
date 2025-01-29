@@ -160,19 +160,19 @@
 #define xdr_rq_curfiles ${xdr_rq_curfiles}
 #define xdr_gqa_uid ${xdr_gqa_uid}
 
-#cmakedefine01 _quotactl_pos_1
-#cmakedefine01 _quotactl_pos_2
-#define _c_arg_2_quotactl ${_c_arg_2_quotactl}
-#define _args_quotactl ${_args_quotactl}
-#define _args_setmntent ${_args_setmntent}
-#define _args_statfs ${_args_statfs}
 #define _c_arg_2_getfsstat ${_c_arg_2_getfsstat}
 #define _args_getvfsstat ${_args_getvfsstat}
+#define _c_arg_2_quotactl ${_c_arg_2_quotactl}
+#define _args_quotactl ${_args_quotactl}
+#cmakedefine01 _quotactl_pos_1
+#cmakedefine01 _quotactl_pos_2
+#define _args_setmntent ${_args_setmntent}
+#define _args_statfs ${_args_statfs}
 
 #cmakedefine01 _npt_getenv
-#cmakedefine01 _npt_getmnt
 #cmakedefine01 _npt_mntctl
 #cmakedefine01 _npt_quotactl
+#cmakedefine01 _npt_statfs
 
 #cmakedefine01 _dcl_errno
 #cmakedefine01 _dcl_mnt_names
@@ -202,8 +202,6 @@
 #define DI_PREFIX "${PREFIX}"
 #define DI_VERSION "${DI_VERSION}"
 #define DI_RELEASE_STATUS "${DI_RELEASE_STATUS}"
-#define DI_USE_MATH ${DI_USE_MATH}
-#define DI_BUILD_SYS "cmake"
 
 #ifndef MKC_STANDARD_DEFS
 # define MKC_STANDARD_DEFS 1
@@ -211,7 +209,9 @@
 #  define void int
 # endif
 # if ! _key_void || ! _param_void_star
-   typedef char void;
+   typedef char *pvoid;
+# else
+   typedef void *pvoid;
 # endif
 # if ! _key_const
 #  define const
@@ -222,13 +222,14 @@
 # error "PREFIX is not set"
 #endif
 
+#define DI_BUILD_SYS "cmake"
 #define DI_LOCALE_DIR DI_PREFIX "/share/locale"
 
 #define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
-/* _use_math can be over-ridden with DI_USE_MATH */
-#define _use_math ${_use_math}
+#define DI_USE_MATH ${DI_USE_MATH}
+#define _use_math DI_USE_MATH
 
 #if _typ_statvfs_t
 # define Statvfs_t statvfs_t

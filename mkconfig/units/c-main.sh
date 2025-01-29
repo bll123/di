@@ -40,7 +40,6 @@
 
 require_unit c-support
 
-_MKCONFIG_PREFIX=c
 _MKCONFIG_HASEMPTY=F
 _MKCONFIG_EXPORT=F
 PH_PREFIX="mkc_ph."
@@ -164,7 +163,7 @@ check_hdr () {
   file=$hdr
 
   printlabel $name "header: ${file}"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code=""
@@ -193,7 +192,7 @@ int main () { return (0); }
     domath CPPCOUNTER "$CPPCOUNTER + 1"
   fi
   printyesno $name $val
-  setdata ${_MKCONFIG_PREFIX} ${name} ${val}
+  setdata ${name} ${val}
 }
 
 check_sys () {
@@ -209,7 +208,7 @@ check_const () {
   name=$nm
 
   printlabel $name "constant: ${constant}"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code=""
@@ -233,7 +232,7 @@ check_key () {
   name="_key_${keyword}"
 
   printlabel $name "keyword: ${keyword}"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code="int main () { int ${keyword}; ${keyword} = 1; return (0); }"
@@ -245,14 +244,14 @@ check_key () {
     trc=1
   fi
   printyesno $name $trc
-  setdata ${_MKCONFIG_PREFIX} ${name} ${trc}
+  setdata ${name} ${trc}
 }
 
 check_proto () {
   name=$1
 
   printlabel $name "supported: prototypes"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code='
@@ -274,7 +273,7 @@ check_typ () {
   dosubst type 'star' '*'
 
   printlabel $name "type: ${type}"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code="
@@ -294,7 +293,7 @@ check_define () {
   name=$nm
 
   printlabel $name "defined: ${def}"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code="int main () {
@@ -310,13 +309,13 @@ printf (\"mkc_defined ${def}\");
   _c_chk_cpp "$name" "$code" all
   rc=$?
   if [ $rc -eq 0 ]; then
-    ${grepcmd} -l "mkc_defined" $name.out >/dev/null 2>&1
+    ${grepcmd} -l mkc_defined $name.out >/dev/null 2>&1
     rc=$?
     if [ $rc -eq 0 ]; then
       trc=1
     fi
   fi
-  setdata ${_MKCONFIG_PREFIX} ${name} ${trc}
+  setdata ${name} ${trc}
   printyesno $name $trc
 }
 
@@ -324,7 +323,7 @@ check_param_void_star () {
   name="_param_void_star"
 
   printlabel $name "parameter: void *"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code="
@@ -338,40 +337,6 @@ tparamvs (ptr)
 "
 
   do_c_check_compile ${name} "${code}" all
-}
-
-check_printf_long_double () {
-  name="_printf_long_double"
-
-  otherlibs="-lintl"
-
-  printlabel $name "printf: long double printable"
-
-  code="int main (int argc, char *argv[]) {
-long double a;
-long double b;
-char t[40];
-a = 1.0;
-b = 2.0;
-a = a / b;
-sprintf (t, \"%.1Lf\", a);
-if (strcmp(t,\"0.5\") == 0) {
-return (0);
-}
-return (1);
-}"
-
-  _c_chk_run "$name" "$code" all
-  rc=$?
-  dlibs=$_retdlibs
-  if [ $rc -eq 0 -a "$dlibs" != "" ]; then
-    cmd="mkc_${_MKCONFIG_PREFIX}_lib_${name}=\"${dlibs}\""
-    eval $cmd
-  fi
-  if [ $rc -eq 0 ]; then trc=1; else trc=0; fi
-  otherlibs=""
-  setdata ${_MKCONFIG_PREFIX} ${name} ${trc}
-  printyesno $name $trc
 }
 
 check_member () {
@@ -393,7 +358,7 @@ check_member () {
   name=$nm
 
   printlabel $name "exists: ${struct}.${member}"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code="int main () { ${struct} s; int i; i = sizeof (s.${member}); }"
@@ -431,13 +396,13 @@ check_memberxdr () {
         mtype=`puts $tmem | sed -e "s/ *${member} *;$//" -e 's/^ *//'`
         puts "  type: ${mtype}" >&9
         trc=1
-        setdata ${_MKCONFIG_PREFIX} xdr_${member} xdr_${mtype}
+        setdata xdr_${member} xdr_${mtype}
       fi
     fi  # found the structure
   fi  # cpp worked
 
   printyesno $name $trc ""
-  setdata ${_MKCONFIG_PREFIX} ${name} ${trc}
+  setdata ${name} ${trc}
 }
 
 check_size () {
@@ -508,12 +473,12 @@ main () {
     val=0
   fi
   if [ $rc -eq 0 -a "$dlibs" != "" ]; then
-    cmd="mkc_${_MKCONFIG_PREFIX}_lib_${name}=\"${dlibs}\""
+    cmd="mkc_lnk_${name}=\"${dlibs}\""
     eval $cmd
   fi
   otherlibs=""
   printyesno_val $name $val
-  setdata ${_MKCONFIG_PREFIX} ${name} ${val}
+  setdata ${name} ${val}
 }
 
 check_dcl () {
@@ -629,7 +594,7 @@ $asmdef
         fi
         puts "## tmp(F): ${tmp}" >&9
         nm="_c_arg_${val}_${funcnm}"
-        setdata ${_MKCONFIG_PREFIX} ${nm} "${tmp}"
+        setdata ${nm} "${tmp}"
         domath val "$val + 1"
         c=`puts "${c}" | sed -e 's/^[^,]*//' -e 's/^[	 ,]*//'`
         puts "## c(G): ${c}" >&9
@@ -644,13 +609,13 @@ $asmdef
       fi
       puts "## c(T1): ${c}" >&9
       nm="_c_type_${funcnm}"
-      setdata ${_MKCONFIG_PREFIX} ${nm} "${c}"
+      setdata ${nm} "${c}"
     fi
   fi
 
   printyesno_val $name $ccount ""
   nm="_args_${funcnm}"
-  setdata ${_MKCONFIG_PREFIX} ${nm} ${ccount}
+  setdata ${nm} ${ccount}
 }
 
 check_int_declare () {
@@ -658,7 +623,7 @@ check_int_declare () {
   function=$2
 
   printlabel $name "declared: ${function}"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code="int main () { int x; x = ${function}; }"
@@ -670,7 +635,7 @@ check_ptr_declare () {
   function=$2
 
   printlabel $name "declared: ${function}"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   code="int main () { void *x; x = ${function}; }"
@@ -683,7 +648,7 @@ check_npt () {
 
   has=1
   if [ "${req}" != "" ]; then
-    getdata has ${_MKCONFIG_PREFIX} "${req}"
+    getdata has "${req}"
   fi
   nm="_npt_${func}"
 
@@ -691,11 +656,11 @@ check_npt () {
   proto=$func
 
   printlabel $name "need prototype: ${proto}"
-  checkcache ${_MKCONFIG_PREFIX} $name
+  checkcache $name
   if [ $rc -eq 0 ]; then return; fi
 
   if [ ${has} -eq 0 ]; then
-    setdata ${_MKCONFIG_PREFIX} ${name} 0
+    setdata ${name} 0
     printyesno $name 0
     return
   fi
@@ -730,7 +695,7 @@ check_lib () {
     # code to check the cache for which libraries are specified is not written
   else
     printlabel $name "function: ${rfunc}"
-    checkcache ${_MKCONFIG_PREFIX} $name
+    checkcache $name
     if [ $rc -eq 0 ]; then return; fi
   fi
 
@@ -742,12 +707,12 @@ check_lib () {
     code="
 CPP_EXTERNS_BEG
 #undef $rfunc
-typedef char (*_TEST_fun_)();
+typedef char (*test_func)();
 char $rfunc();
-_TEST_fun_ f = (_TEST_fun_) $rfunc;
+test_func f = (test_func) $rfunc;
 CPP_EXTERNS_END
 int main () {
-if (f == (_TEST_fun_) $rfunc) { return 0; }
+if (f == (test_func) $rfunc) { return 0; }
 return 1;
 }
 "
@@ -755,11 +720,11 @@ return 1;
     hinc=all
     code="
 CPP_EXTERNS_BEG
-typedef char (*_TEST_fun_)();
-_TEST_fun_ f = (_TEST_fun_) $rfunc;
+typedef char (*test_func)();
+test_func f = (test_func) $rfunc;
 CPP_EXTERNS_END
 int main () {
-f(); if (f == (_TEST_fun_) $rfunc) { return 0; }
+f(); if (f == (test_func) $rfunc) { return 0; }
 return 1;
 }
 "
@@ -778,7 +743,7 @@ return 1;
       dlibs="$LDFLAGS_STATIC_LIB_LINK $dlibs $LDFLAGS_SHARED_LIB_LINK"
     fi
     tag=" with ${dlibs}"
-    cmd="mkc_${_MKCONFIG_PREFIX}_lib_${name}=\"${dlibs}\""
+    cmd="mkc_lnk_${name}=\"${dlibs}\""
     eval $cmd
   fi
 
@@ -788,12 +753,12 @@ return 1;
       code="
 CPP_EXTERNS_BEG
 #undef $rfunc
-typedef char (*_TEST_fun_)();
+typedef char (*test_func)();
 char $rfunc();
-_TEST_fun_ f = (_TEST_fun_) $rfunc;
+test_func f = (test_func) $rfunc;
 CPP_EXTERNS_END
 int main () {
-if (f == (_TEST_fun_) $rfunc) { return 0; }
+if (f == (test_func) $rfunc) { return 0; }
 return 1;
 }
 "
@@ -808,11 +773,11 @@ where the lib does not exist and the link works!
 On modern systems, this simply isn't necessary.
 */
 extern int ${func}();
-typedef char (*_TEST_fun_)();
-_TEST_fun_ f = (_TEST_fun_) $rfunc;
+typedef char (*test_func)();
+test_func f = (test_func) $rfunc;
 CPP_EXTERNS_END
 int main () {
-f(); if (f == (_TEST_fun_) $rfunc) { return 0; }
+f(); if (f == (test_func) $rfunc) { return 0; }
 return 1;
 }
 "
@@ -827,14 +792,14 @@ return 1;
     tag=""
     if [ $rc -eq 0 -a "$dlibs" != "" ]; then
       tag=" with ${dlibs}"
-      cmd="mkc_${_MKCONFIG_PREFIX}_lib_${name}=\"${dlibs}\""
+      cmd="mkc_lnk_${name}=\"${dlibs}\""
       eval $cmd
     fi
   fi
 
   otherlibs=""
   printyesno $name $trc "$tag"
-  setdata ${_MKCONFIG_PREFIX} ${name} ${trc}
+  setdata ${name} ${trc}
   return $trc
 }
 
@@ -854,7 +819,7 @@ check_class () {
       printlabel $name "class: ${class} [${otherlibs}]"
   else
       printlabel $name "class: ${class}"
-      checkcache ${_MKCONFIG_PREFIX} $name
+      checkcache $name
       if [ $rc -eq 0 ]; then return; fi
   fi
 
@@ -866,13 +831,13 @@ check_class () {
   tag=""
   if [ $rc -eq 0 -a "${dlibs}" != "" ]; then
     tag=" with ${dlibs}"
-    cmd="mkc_${_MKCONFIG_PREFIX}_lib_${name}=\"${dlibs}\""
+    cmd="mkc_lnk_${name}=\"${dlibs}\""
     eval $cmd
   fi
 
   otherlibs=""
   printyesno $name $trc "$tag"
-  setdata ${_MKCONFIG_PREFIX} ${name} ${trc}
+  setdata ${name} ${trc}
 }
 
 output_item () {
@@ -896,7 +861,7 @@ output_item () {
       if [ "x${val}" != x ]; then
         tname=$name
         dosubst tname '_env_' ''
-        eval q=\${mkc_c__envquote_${tname}}
+        eval q=\${mkc__envquote_${tname}}
         if [ $q -eq 1 ]; then
           puts "#define ${tname} \"${val}\""
         else

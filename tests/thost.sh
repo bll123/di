@@ -48,6 +48,7 @@ if [[ $flag != C ]]; then
     cp -f ${tarfn} tests/dibldrun.sh tmp
     cd tmp
     chmod a+rx dibldrun.sh
+    cd ..
   fi
 
   for comp in ${complist}; do
@@ -56,9 +57,11 @@ if [[ $flag != C ]]; then
     mkdir -p ${rsltdir}
 
     if [[ ${type} == local ]]; then
+      cd tmp
       ./dibldrun.sh ${host} ${tarfn} ${didir} ${comp} ${rempath}
       testdir=${didir}_${comp}
       cp -f ${testdir}/*.out ${rsltdir}
+      cd ..
     elif [[ ${type} = remote ]]; then
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
@@ -104,13 +107,35 @@ fi
 if [[ $flag == R || $flag == C ]]; then
   for comp in ${complist}; do
     if [[ $type == local ]]; then
+      cd tmp
       rm -rf di-[45].*.tar.gz di-[45].*.tar di-[45].*_${comp} dibldrun.sh
+      cd ..
     fi
     if [[ $type == remote || $type == vm ]]; then
       ssh ${rempssh} ${remussh} ${ipaddr} "rm -rf di-[45].*.tar.gz di-[45].*.tar di-[45].*_${comp} dibldrun.sh"
     fi
   done
 fi
+
+for comp in ${complist}; do
+  rsltdir=${topdir}/test_results/${host}_${comp}
+  if [[ -f ${rsltdir}/di-cmake-config.out ]]; then
+    diff -b -B ${rsltdir}/di-mkc-config.out ${rsltdir}/di-cmake-config.out \
+        > ${rsltdir}/di-diff-a.out
+    awk -f ./tests/chkdiff.awk ${rsltdir}/di-diff-a.out \
+        > ${rsltdir}/di-diff.out
+    dlc=$(wc -l ${rsltdir}/di-diff.out)
+    if [[ $dlc != 0 ]]; then
+      echo "== $(date '+%T') config.h diff failed"
+    fi
+    diff -q -b -B ${rsltdir}/di-mkc-math.out ${rsltdir}/di-cmake-math.out
+    rc=$?
+    if [[ $rc != 0 ]]; then
+      echo "== $(date '+%T') dimathtest diff failed"
+    fi
+  fi
+done
+
 echo "-- $(date '+%T') ${host}: finish"
 
 exit 0

@@ -21,6 +21,7 @@ for d in mkconfig mkc_config man po; do
 done
 
 chmod -R a+r $dir
+rm -f *.tar.gz
 tar cf - $dir |
     gzip -9 > $dir.tar.gz
 

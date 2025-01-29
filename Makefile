@@ -5,8 +5,8 @@
 #  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
-DI_VERSION = 4.99.5
-DI_LIBVERSION = 4.99.5
+DI_VERSION = 4.99.6
+DI_LIBVERSION = 4.99.6
 DI_SOVERSION = 4
 DI_RELEASE_STATUS = beta
 
@@ -114,6 +114,7 @@ tclean:
 	@-$(RM) -f w ww asan.* *.orig \
 		dep-*.txt >/dev/null 2>&1; exit 0
 	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
+	@-find . -name '*.orig' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 
 # leaves config.h
 .PHONY: clean

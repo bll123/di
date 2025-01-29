@@ -380,6 +380,7 @@ int main (int argc, char *argv []) { return 0; }
   if (NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
     set (tinc ${TIRPC_INCLUDE_DIRS})
   endif()
+message ("tinc: $tinc")
   execute_process (
     OUTPUT_FILE ${membernm}.out
     ERROR_QUIET
@@ -387,6 +388,7 @@ int main (int argc, char *argv []) { return 0; }
   )
   unset (tinc)
   if (EXISTS ${membernm}.out)
+message ("have .out")
     execute_process (
       OUTPUT_VARIABLE xdr_out
       # unfortunately, the sed command will find other matches
@@ -803,6 +805,13 @@ if (NOT _quotactl_pos_1 AND NOT _quotactl_pos_2 AND NOT _lib_vquotactl)
   endif()
 else()
   set (_npt_quotactl 0)
+endif()
+
+if (_lib_statfs AND _args_statfs STREQUAL "0")
+  set (_npt_statfs 1)
+  set (_args_statfs 2)    # no idea which one...
+else()
+  set (_npt_statfs 0)
 endif()
 
 check_symbol_exists (errno errno.h _dcl_errno)

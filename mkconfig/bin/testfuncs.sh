@@ -163,3 +163,9 @@ testcleanup () {
     done
   fi
 }
+
+if [ x${grepcmd} = x ]; then
+  . $_MKCONFIG_DIR/bin/shellfuncs.sh
+  test_egrep
+fi
+

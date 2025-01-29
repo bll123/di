@@ -14,9 +14,10 @@ CHANGES
       mkcl.sh: Fix ldpaths/runpath generation.
       units/c-main.sh: Remove define of _ for ancient C compilers.
       units/env-cc.sh: AIX: Correctly check cflags.
-      units/env-cc.sh: New directive: addcflagcomp
+      units/env-cc.sh: Fixed clang issue for shared linking.
       capabilities: test for grep -E / egrep.
       Remove D language.
+      Merge env/c namespaces.
 
     2.6.3                                   2021-1-30
       Fix 'pkg libs' directive.

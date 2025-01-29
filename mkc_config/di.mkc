@@ -46,10 +46,8 @@ hdr     storage/Path.h
 hdr     string.h
 hdr     strings.h
 hdr     time.h
-if have_pkg_libtommath _pkg_libs_tommath
- hdr     tommath.h
- hdr     libtommath/tommath.h
-endif
+hdr     tommath.h
+hdr     libtommath/tommath.h
 hdr     ufs/quota.h
 hdr     ufs/ufs/quota.h sys/types.h
 hdr     unistd.h
@@ -179,23 +177,32 @@ memberxdr getquota_args gqa_uid
 
 # to prevent warnings
 # some systems are u_int, size_t, u_long
-args noconst getfsstat
-args noconst getvfsstat
-args noconst quotactl
+args getfsstat
+args getvfsstat
+args quotactl
 
 setint _quotactl_pos_1 0
 setint _quotactl_pos_2 0
+
 if quotactl_pos_1 == _c_arg_1_quotactl 'char *'
  setint _quotactl_pos_1 1
 endif
+if quotactl_pos_1 == _c_arg_1_quotactl 'const char *'
+ setint _quotactl_pos_1 1
+endif
+
 if quotactl_pos_2 == _c_arg_2_quotactl 'char *'
+ setint _quotactl_pos_2 1
+endif
+if quotactl_pos_2 == _c_arg_2_quotactl 'const char *'
  setint _quotactl_pos_2 1
 endif
 if quotactl_pos_2 == _c_arg_2_quotactl 'caddr_t'
  setint _quotactl_pos_2 1
 endif
-args noconst setmntent
-args noconst statfs
+
+args setmntent
+args statfs
 
 npt     getenv
 npt     mntctl
@@ -269,18 +276,6 @@ else
   setint _enable_nls 0
 endif
 
-# ifnotoption WINAPI
-#   set _hdr_windows 0
-#   set _hdr_winioctl 0
-#   set _lib_CreateFile 0
-#   set _lib_DeviceIoControl 0
-#   set _lib_GetDiskFreeSpace 0
-#   set _lib_GetDiskFreeSpaceEx 0
-#   set _lib_GetDriveType 0
-#   set _lib_GetLogicalDriveStrings 0
-#   set _lib_GetVolumeInformation 0
-# endif
-
 env DI_PREFIX quote
 env DI_VERSION quote
 env DI_RELEASE_STATUS quote
@@ -310,7 +305,7 @@ include
 # if ! defined (DI_USE_MATH)
 #  define DI_USE_MATH DI_INTERNAL
 # endif
-#endif
+#endif /* END DI_USE_MATH */
 #define _use_math DI_USE_MATH
 
 #if _typ_statvfs_t
