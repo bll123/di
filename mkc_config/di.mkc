@@ -281,6 +281,19 @@ env DI_VERSION quote
 env DI_RELEASE_STATUS quote
 env DI_USE_MATH
 
+if nousemath ! _env_DI_USE_MATH
+ if havegmp _pkg_libs_gmp
+   env DI_USE_MATH DI_GMP
+ endif
+ # at the moment, libtommath in macports has a broken pkg-config
+ if havetommath _pkg_libs_libtommath && ! == _MKCONFIG_SYSTYPE Darwin
+  env DI_USE_MATH DI_TOMMATH
+ endif
+ if nousemath ! _env_DI_USE_MATH
+  env DI_USE_MATH DI_INTERNAL
+ endif
+endif
+
 include
 
 #if ! defined (DI_PREFIX)
@@ -293,19 +306,6 @@ include
 #define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
-#if ! defined (DI_USE_MATH)
-# if defined (_pkg_libs_gmp)
-#  define DI_USE_MATH DI_GMP
-# endif
-  /* at the moment, libtommath in macports has a broken pkg-config */
-# if defined (_pkg_libs_libtommath) && ! __APPLE__
-#  undef DI_USE_MATH
-#  define DI_USE_MATH DI_TOMMATH
-# endif
-# if ! defined (DI_USE_MATH)
-#  define DI_USE_MATH DI_INTERNAL
-# endif
-#endif /* END DI_USE_MATH */
 #define _use_math DI_USE_MATH
 
 #if _typ_statvfs_t

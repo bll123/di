@@ -121,17 +121,17 @@ for comp in ${complist}; do
   rsltdir=${topdir}/test_results/${host}_${comp}
   if [[ -f ${rsltdir}/di-cmake-config.out ]]; then
     diff -b -B ${rsltdir}/di-mkc-config.out ${rsltdir}/di-cmake-config.out \
-        > ${rsltdir}/di-diff-a.out
-    awk -f ./tests/chkdiff.awk ${rsltdir}/di-diff-a.out \
+        > ${rsltdir}/di-tmpdiff.out
+    awk -f ./tests/chkdiff.awk ${rsltdir}/di-tmpdiff.out \
         > ${rsltdir}/di-diff.out
-    dlc=$(wc -l ${rsltdir}/di-diff.out)
+    dlc=$(cat ${rsltdir}/di-diff.out | wc -l)
     if [[ $dlc != 0 ]]; then
-      echo "== $(date '+%T') config.h diff failed"
+      echo "== $(date '+%T') ${host}/${comp}: config.h diff failed"
     fi
     diff -q -b -B ${rsltdir}/di-mkc-math.out ${rsltdir}/di-cmake-math.out
     rc=$?
     if [[ $rc != 0 ]]; then
-      echo "== $(date '+%T') dimathtest diff failed"
+      echo "== $(date '+%T') ${host}/${comp}: dimathtest diff failed"
     fi
   fi
 done

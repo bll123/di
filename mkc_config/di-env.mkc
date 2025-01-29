@@ -84,7 +84,7 @@ pkg libs libtirpc
 pkg cflags gmp /opt/local/lib/pkgconfig
 pkg libs gmp /opt/local/lib/pkgconfig
 
-if not_have_pkg_gmp ! _pkg_libs_gmp
+if nogmp ! _pkg_libs_gmp
  pkg cflags libtommath /opt/local/lib/pkgconfig
  pkg libs libtommath /opt/local/lib/pkgconfig
 endif
