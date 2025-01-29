@@ -33,7 +33,7 @@ hdr     mnttab.h
 # NetBSD
 hdr     quota.h
 hdr     rpc/rpc.h
-# SCO OpenServer requires rpc.h first
+# SCO OpenServer and OpenBSD requires rpc.h first
 hdr     rpc/auth.h rpc/rpc.h
 # Linux rquota.h includes rpc/rpc.h which is in the tirpc dir
 hdr     rpcsvc/rquota.h rpc/rpc.h
@@ -198,7 +198,6 @@ args noconst setmntent
 args noconst statfs
 
 npt     getenv
-npt     getmnt
 npt     mntctl
 npt     quotactl
 npt     statfs _lib_statfs

@@ -24,8 +24,7 @@
 #if _hdr_dirent
 # include <dirent.h>
 #endif
-#if _sys_types \
-    && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
+#if _sys_types && ! defined (DI_INC_SYS_TYPES_H) /* xenix */
 # define DI_INC_SYS_TYPES_H
 # include <sys/types.h>
 #endif
@@ -689,7 +688,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
   memset ((char *) di_data->diskInfo, '\0', sizeof (di_disk_info_t) * (Size_t) count);
 
   for (idx = 0; idx < count; idx++) {
-    di_ui_t      tblocksz;
+    di_ui_t      tblocksz = 0;
 
     diptr = di_data->diskInfo + idx;
     di_initialize_disk_info (diptr, idx);
@@ -745,10 +744,13 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
         sp->f_mntonname);
 
 # if _mem_struct_statfs_f_fsize
-    tblocksz = sp->f_fsize;
+    tblocksz = (di_ui_t) sp->f_fsize;
 # endif
 # if _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
-    tblocksz = sp->f_bsize;
+    tblocksz = (di_ui_t) sp->f_bsize;
+# endif
+# if ! _mem_struct_statfs_f_bsize && ! _mem_struct_statfs_f_fsize
+#  error "struct statfs location failure"
 # endif
     di_save_block_sizes (diptr, tblocksz, (di_ui_t) sp->f_blocks,
         (di_ui_t) sp->f_bfree, (di_ui_t) sp->f_bavail);

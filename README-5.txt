@@ -20,6 +20,9 @@ Version 5 beta Timeline
 2025-1-25 Had to bump the required cmake version to 3.13.
 2025-1-27 AIX gcc xlc, Haiku, SCO OpenServer gcc cc, Solaris gcc,
           clang are building. I will work on Solaris cc next.
+2025-1-29 Solaris cc, OpenBSD, DragonFly BSD are building.
+          gcc version 4 is a problem on older systems, emits lots of
+          code-not-reachable warnings.
 
 Version 5.x beta
 

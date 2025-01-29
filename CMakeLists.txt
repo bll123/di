@@ -207,6 +207,8 @@ macro (checkPrototype_quotactl hdr)
     "${hdr}"
     _quotactl_pos_1a
     )
+  # OpenBSD has, but caddr_t works...
+  #  "int quotactl (const char *path, int cmd, int id, char *addr)"
   check_prototype_definition (quotactl
     "int quotactl (const char * a, int b, int c, caddr_t d)"
     0
@@ -214,18 +216,12 @@ macro (checkPrototype_quotactl hdr)
     _quotactl_pos_1b
     )
   check_prototype_definition (quotactl
-    "int quotactl (const char *path, int cmd, int id, char *addr)"
-    0
-    "${hdr}"
-    _quotactl_pos_1c
-    )
-  check_prototype_definition (quotactl
     "int quotactl (int a, const char * b, int c, caddr_t d)"
     0
     "${hdr}"
     _quotactl_pos_2
     )
-  if (_quotactl_pos_1a OR _quotactl_pos_1b OR _quotactl_pos_1c)
+  if (_quotactl_pos_1a OR _quotactl_pos_1b)
     set (_quotactl_pos_1 1)
   endif()
   if (_quotactl_pos_1)
@@ -242,19 +238,19 @@ macro (checkPrototype_statfs hdr)
   check_prototype_definition (statfs
     "int statfs (const char * a, struct statfs * b)"
     0
-    ${hdr}
+    "${hdr}"
     _args_statfs_2
     )
   check_prototype_definition (statfs
     "int statfs (const char * a, struct statfs * b, int c)"
     0
-    ${hdr}
+    "${hdr}"
     _args_statfs_3
     )
   check_prototype_definition (statfs
     "int statfs (const char * a, struct statfs * b, int c, int d)"
     0
-    ${hdr}
+    "${hdr}"
     _args_statfs_4
     )
   if (_args_statfs_2)
@@ -459,7 +455,8 @@ check_include_file (mnttab.h _hdr_mnttab)
 check_include_file (quota.h _hdr_quota)
 
 set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${TIRPC_INCLUDE_DIRS})
-check_include_file (rpc/auth.h _hdr_rpc_auth)
+# OpenBSD rpc/auth requires rpc/rpc
+check_include_files ("rpc/rpc.h;rpc/auth.h" _hdr_rpc_auth)
 check_include_file (rpc/rpc.h _hdr_rpc_rpc)
 # Linux: rquota.h includes rpc/rpc.h
 check_include_file (rpcsvc/rquota.h _hdr_rpcsvc_rquota)
@@ -479,7 +476,7 @@ check_include_file (time.h _hdr_time)
 check_include_file (tommath.h _hdr_tommath)
 check_include_file (libtommath/tommath.h _hdr_libtommath_tommath)
 check_include_file (ufs/quota.h _hdr_ufs_quota)
-# FreeBSD ufs/ufs/quota.h does not include its dependencies
+# FreeBSD/OpenBSD ufs/ufs/quota.h does not include its dependencies
 check_include_files ("sys/types.h;ufs/ufs/quota.h" _hdr_ufs_ufs_quota)
 check_include_file (unistd.h _hdr_unistd)
 check_include_file (util/string.h _hdr_util_string)
@@ -508,7 +505,8 @@ else()
   check_include_file ("sys/mntent.h" _sys_mntent)
 endif()
 
-check_include_file (sys/mount.h _sys_mount)
+# broken OpenBSD headers
+check_include_files ("sys/types.h;sys/mount.h" _sys_mount)
 check_include_file (sys/quota.h _sys_quota)
 check_include_file (sys/stat.h _sys_stat)
 check_include_file (sys/statfs.h _sys_statfs)
@@ -662,7 +660,7 @@ check_type_size ("long long" _siz_long_long)
 if (_hdr_ufs_ufs_quota)
   # FreeBSD ufs/ufs/quota.h does not include its dependencies
   # OpenBSD declares quotactl in unistd.h
-  set (QUOTA_HDR "sys/types.h;sys/unistd.h;ufs/ufs/quota.h")
+  set (QUOTA_HDR "sys/types.h;unistd.h;ufs/ufs/quota.h")
 endif()
 if (_sys_quota)
   set (QUOTA_HDR "sys/quota.h")
@@ -703,7 +701,7 @@ endif()
 set (_args_setmntent 0)
 if (DEFINED SETMNTENT_HDR)
   message ("setmntent header: ${SETMNTENT_HDR}")
-  checkPrototype_setmntent (${SETMNTENT_HDR})
+  checkPrototype_setmntent ("${SETMNTENT_HDR}")
 endif()
 
 if (_hdr_rpcsvc_rquota)
@@ -729,7 +727,8 @@ if (_hdr_rpcsvc_rquota)
 endif()
 
 if ((_lib_statfs OR _lib_getfsstat) AND _sys_mount)
-  set (STATFS_HDR "sys/mount.h")
+  # OpenBSD has broken headers
+  set (STATFS_HDR "sys/types.h;sys/mount.h")
 endif()
 if ((_lib_statfs OR _lib_getfsstat) AND _sys_statfs)
   set (STATFS_HDR "sys/statfs.h")
@@ -740,60 +739,53 @@ endif()
 set (_args_statfs 0)
 if (DEFINED STATFS_HDR)
   message ("statfs header: ${STATFS_HDR}")
-  checkPrototype_statfs (${STATFS_HDR})
-  checkMember_statfs (${STATFS_HDR})
+  checkPrototype_statfs ("${STATFS_HDR}")
+  checkMember_statfs ("${STATFS_HDR}")
 endif()
 
 if (DEFINED STATFS_HDR AND _lib_getfsstat)
   message ("getfsstat header: ${STATFS_HDR}")
-  checkPrototype_getfsstat (${STATFS_HDR})
+  checkPrototype_getfsstat ("${STATFS_HDR}")
 endif()
 
 set (_args_getvfsstat 0)
-# ### needs fixing
 set (GETVFSSTAT_HDR "sys/mount.h")
 if (DEFINED GETVFSSTAT_HDR AND _lib_getvfsstat)
   message ("getvfsstat header: ${GETVFSSTAT_HDR}")
-  checkPrototype_getvfsstat (${GETVFSSTAT_HDR})
+  checkPrototype_getvfsstat ("${GETVFSSTAT_HDR}")
 endif()
 
-check_prototype_definition (getenv
-    "char * getenv (const char * a)"
-    "NULL"
-    stdlib.h
-    _npt_getenv
-    )
-if (_npt_getenv)
+if (_lib_getenv)
+  check_prototype_definition (getenv
+      "char * getenv (const char * a)"
+      "NULL"
+      stdlib.h
+      _npt_getenv
+      )
+  if (_npt_getenv)
+    set (_npt_getenv 0)
+  else()
+    set (_npt_getenv 1)
+  endif()
+else()
   set (_npt_getenv 0)
-else()
-  set (_npt_getenv 1)
 endif()
 
-# ultrix, which header should be checked?
-# this is so old, it can probably be removed.
-check_prototype_definition (getmnt
-    "int getmnt (int * a, struct fs_data * b, int c, int d, char * e)"
-    0
-    stdio.h
-    _npt_getmnt
-    )
-if (_npt_getmnt)
-  set (_npt_getmnt 0)
+if (_lib_mntctl)
+  # AIX
+  check_prototype_definition (mntctl
+      "int mntctl (int a, size_t b, char * c)"
+      0
+      sys/mntctl.h
+      _npt_mntctl
+      )
+  if (_npt_mntctl)
+    set (_npt_mntctl 0)
+  else()
+    set (_npt_mntctl 1)
+  endif()
 else()
-  set (_npt_getmnt 1)
-endif()
-
-# AIX
-check_prototype_definition (mntctl
-    "int mntctl (int a, size_t b, char * c)"
-    0
-    sys/mntctl.h
-    _npt_mntctl
-    )
-if (_npt_mntctl)
   set (_npt_mntctl 0)
-else()
-  set (_npt_mntctl 1)
 endif()
 
 # HP-UX
@@ -809,6 +801,8 @@ if (NOT _quotactl_pos_1 AND NOT _quotactl_pos_2 AND NOT _lib_vquotactl)
   else()
     set (_npt_quotactl 1)
   endif()
+else()
+  set (_npt_quotactl 0)
 endif()
 
 check_symbol_exists (errno errno.h _dcl_errno)

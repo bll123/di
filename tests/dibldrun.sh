@@ -109,6 +109,13 @@ bldrun () {
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    grc=1
+  fi
+  ./x/bin/di -d h -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    grc=1
   fi
   if [ $grc -ne 0 ]; then
     exit 1

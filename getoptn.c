@@ -420,7 +420,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s, '\0', sizeof (s));
   ac = 2;
-  sprintf (tmp, "test: %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test: %d", testno);
   av [0] = tmp;
   av [1] = "-D";
   av [2] = NULL;
@@ -436,7 +436,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-b";
   av [2] = NULL;
@@ -452,7 +452,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "--b";
   av [2] = NULL;
@@ -468,7 +468,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "--i=13";
   av [2] = NULL;
@@ -484,7 +484,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "--i";
   av [2] = "14";
@@ -502,7 +502,7 @@ main (int argc, char * argv [])
   i = 0;
   j = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-i15";
   av [2] = NULL;
@@ -518,7 +518,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-i";
   av [2] = "16";
@@ -536,7 +536,7 @@ main (int argc, char * argv [])
   i = 0;
   j = 0;
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-i17";
   av [2] = "5";
@@ -553,7 +553,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-i=17";
   av [2] = NULL;
@@ -569,7 +569,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-i7";
   av [2] = NULL;
@@ -585,7 +585,7 @@ main (int argc, char * argv [])
   ++testno;
   l = 0L;
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-l";
   av [2] = "19";
@@ -603,7 +603,7 @@ main (int argc, char * argv [])
   i = 0;
   j = 0;
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-b";
   av [2] = "-c";
@@ -622,7 +622,7 @@ main (int argc, char * argv [])
   j = 0;
   k = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-bc";
   av [2] = NULL;
@@ -640,7 +640,7 @@ main (int argc, char * argv [])
   j = 0;
   k = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-bc";
   av [2] = NULL;
@@ -656,7 +656,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s, '\0', sizeof (s));
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-s=abc";
   av [2] = NULL;
@@ -672,7 +672,7 @@ main (int argc, char * argv [])
   ++testno;
   d = 0.0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-d=1.2";
   av [2] = NULL;
@@ -689,7 +689,7 @@ main (int argc, char * argv [])
   memset (s, '\0', sizeof (s));
   i = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-sabcd";
   av [2] = NULL;
@@ -705,7 +705,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s, '\0', sizeof (s));
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-s=abcde";
   av [2] = NULL;
@@ -721,7 +721,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s, '\0', sizeof (s));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-s";
   av [2] = "abcdef";
@@ -738,7 +738,7 @@ main (int argc, char * argv [])
   ++testno;
   sp = "";
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-sp";
   av [2] = "0123";
@@ -755,7 +755,7 @@ main (int argc, char * argv [])
   ++testno;
   sp = "";
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-sp=01234";
   av [2] = NULL;
@@ -771,7 +771,7 @@ main (int argc, char * argv [])
   ++testno;
   sp = "";
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-p012345";
   av [2] = NULL;
@@ -787,7 +787,7 @@ main (int argc, char * argv [])
   ++testno;
   sp = "";
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-S";
   av [2] = NULL;
@@ -803,7 +803,7 @@ main (int argc, char * argv [])
   ++testno;
   sp = "";
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-p=0123456";
   av [2] = NULL;
@@ -820,7 +820,7 @@ main (int argc, char * argv [])
   memset (s, '\0', sizeof (s));
   i = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-sabcd";
   av [2] = NULL;
@@ -836,7 +836,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 1;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-b";
   av [2] = NULL;
@@ -852,7 +852,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 1;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "--b";
   av [2] = NULL;
@@ -869,7 +869,7 @@ main (int argc, char * argv [])
   i = 1;
   j = 1;
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-b";
   av [2] = "-c";
@@ -888,7 +888,7 @@ main (int argc, char * argv [])
   j = 1;
   k = 1;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-bc";
   av [2] = NULL;
@@ -906,7 +906,7 @@ main (int argc, char * argv [])
   j = 1;
   k = 1;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-bc";
   av [2] = NULL;
@@ -924,7 +924,7 @@ main (int argc, char * argv [])
   j = 0;
   k = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-i=";
   av [2] = NULL;
@@ -942,7 +942,7 @@ main (int argc, char * argv [])
   j = 0;
   k = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-i";
   av [2] = NULL;
@@ -962,7 +962,7 @@ main (int argc, char * argv [])
   k = 0;
   l = 0L;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-f1=7";
   av [2] = NULL;
@@ -982,7 +982,7 @@ main (int argc, char * argv [])
   k = 0;
   l = 0L;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-f2=7";
   av [2] = NULL;
@@ -1002,7 +1002,7 @@ main (int argc, char * argv [])
   k = 0;
   l = 0L;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-f3=7";
   av [2] = NULL;
@@ -1022,7 +1022,7 @@ main (int argc, char * argv [])
   k = 0;
   l = 0L;
   ac = 4;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-i=7";
   av [2] = "--";
@@ -1043,7 +1043,7 @@ main (int argc, char * argv [])
   k = 0;
   l = 0L;
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-i=7";
   av [2] = "abc";
@@ -1063,7 +1063,7 @@ main (int argc, char * argv [])
   k = 0;
   memset (s, '\0', sizeof (s));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-s";
   av [2] = "-s";
@@ -1083,7 +1083,7 @@ main (int argc, char * argv [])
   k = 0;
   memset (s, '\0', sizeof (s));
   ac = 5;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-b";
   av [2] = "-c";
@@ -1105,7 +1105,7 @@ main (int argc, char * argv [])
   k = 0;
   memset (s, '\0', sizeof (s));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-bcs";
   av [2] = "abc";
@@ -1122,7 +1122,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s2, '\0', sizeof (s2));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-s2";
   av [2] = "abc";
@@ -1139,7 +1139,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s2, '\0', sizeof (s2));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-s2";
   av [2] = "abcd";
@@ -1156,7 +1156,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s2, '\0', sizeof (s2));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-s2";
   av [2] = "abcde";
@@ -1173,7 +1173,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s2, '\0', sizeof (s2));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-s2";
   av [2] = "abcdef";
@@ -1190,7 +1190,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s2, '\0', sizeof (s2));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-np1";
   av [2] = "abcdef";
@@ -1208,7 +1208,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s2, '\0', sizeof (s2));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-np2";
   av [2] = "abcdef";
@@ -1226,7 +1226,7 @@ main (int argc, char * argv [])
   ++testno;
   memset (s2, '\0', sizeof (s2));
   ac = 3;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-np3";
   av [2] = "abcdef";
@@ -1247,7 +1247,7 @@ main (int argc, char * argv [])
   k = 0;
   memset (s2, '\0', sizeof (s2));
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-z3";
   av [2] = NULL;
@@ -1263,7 +1263,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-c";
   av [2] = NULL;
@@ -1279,7 +1279,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 2;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-w";
   av [2] = NULL;
@@ -1295,7 +1295,7 @@ main (int argc, char * argv [])
   ++testno;
   i = 0;
   ac = 4;
-  sprintf (tmp, "test %d", testno);
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
   av [1] = "-w";
   av [2] = "20";

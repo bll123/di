@@ -31,8 +31,8 @@
 #cmakedefine01 _hdr_mntent
 #cmakedefine01 _hdr_mnttab
 #cmakedefine01 _hdr_quota
-#cmakedefine01 _hdr_rpc_auth
 #cmakedefine01 _hdr_rpc_rpc
+#cmakedefine01 _hdr_rpc_auth
 #cmakedefine01 _hdr_rpcsvc_rquota
 #cmakedefine01 _hdr_stdbool
 #cmakedefine01 _hdr_stddef
@@ -79,7 +79,7 @@
 #cmakedefine01 _inc_conflict__sys_quota__hdr_linux_quota
 
 #cmakedefine01 _command_msgfmt
-#define _cmd_loc_msgfmt ${_command_msgfmt}
+#define _cmd_loc_msgfmt "${_command_msgfmt}"
 
 #cmakedefine01 _const_O_NOCTTY
 
@@ -205,18 +205,6 @@
 #define DI_USE_MATH ${DI_USE_MATH}
 #define DI_BUILD_SYS "cmake"
 
-#if ! defined (DI_PREFIX)
-# error "PREFIX is not set"
-#endif
-
-#define DI_LOCALE_DIR DI_PREFIX "/share/locale"
-
-#define DI_INTERNAL 0
-#define DI_GMP 1
-#define DI_TOMMATH 2
-/* _use_math can be over-ridden with DI_USE_MATH */
-#define _use_math ${_use_math}
-
 #ifndef MKC_STANDARD_DEFS
 # define MKC_STANDARD_DEFS 1
 # if ! _key_void
@@ -229,6 +217,18 @@
 #  define const
 # endif
 #endif /* MKC_STANDARD_DEFS */
+
+#if ! defined (DI_PREFIX)
+# error "PREFIX is not set"
+#endif
+
+#define DI_LOCALE_DIR DI_PREFIX "/share/locale"
+
+#define DI_INTERNAL 0
+#define DI_GMP 1
+#define DI_TOMMATH 2
+/* _use_math can be over-ridden with DI_USE_MATH */
+#define _use_math ${_use_math}
 
 #if _typ_statvfs_t
 # define Statvfs_t statvfs_t

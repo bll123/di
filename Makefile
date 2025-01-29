@@ -225,7 +225,7 @@ cmake-unix:
 		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
 		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
-		-S . -B $(BUILDDIR) -Werror=deprecated
+		-S . -B $(BUILDDIR) -Werror=deprecated --debug-trycompile
 
 # internal use
 .PHONY: cmake-windows
