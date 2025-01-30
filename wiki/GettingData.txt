@@ -11,7 +11,7 @@ This documentation was created for the upcoming version 5.x.
 
 Fetches all of the disk information using the options specified.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     void *di_data;
 
@@ -24,7 +24,7 @@ __di_data__ : The di_data structure returned from `di_initialize`.
 
 Initializes the disk information iterator.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     int     count;
 
@@ -84,7 +84,7 @@ structure for each.
 If the `--totals` option was specified, the totals will always be in
 the last `di_pub_disk_info_t` structure returned.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     const di_pub_disk_info_t  *pub;
 
@@ -100,7 +100,7 @@ partition.
 
 Determines the maximum scaling unit for the space value.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     scaleidx = di_get_scale_max (void *di_data,
         int index,
@@ -136,7 +136,7 @@ defined in `di.h`.
 
 Gets the disk space value scaled according the scaling unit.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     double    val;
 
@@ -177,7 +177,7 @@ Returns: The disk space value scaled to the scale unit specified.
 Gets the disk space value scaled according the scaling unit, and
 creates a string that can be printed. Based on the _di_ options.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     void di_disp_scaled (void *di_data,
         char *buff, long buffsize,
@@ -206,7 +206,7 @@ A&nbsp;-&nbsp;(B&nbsp;-&nbsp;C).  See
 
 Gets the disk space value as a percentage.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     double    val;
 
@@ -246,7 +246,7 @@ Valid combinations are:
 Gets the disk space value as a percentage and creates a string that
 can be printed.  Based on the _di_ options.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     void di_disp_perc (void *di_data,
         char *buff, long buffsize,

@@ -84,9 +84,6 @@ endif()
 
 add_compile_options (-g)
 add_link_options (-g)
-#if (NOT WIN32)
-#  add_link_options (-rdynamic)
-#endif()
 
 #### more compile options: fortification/address sanitizer
 
@@ -380,7 +377,6 @@ int main (int argc, char *argv []) { return 0; }
   if (NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
     set (tinc ${TIRPC_INCLUDE_DIRS})
   endif()
-message ("tinc: $tinc")
   execute_process (
     OUTPUT_FILE ${membernm}.out
     ERROR_QUIET
@@ -388,7 +384,6 @@ message ("tinc: $tinc")
   )
   unset (tinc)
   if (EXISTS ${membernm}.out)
-message ("have .out")
     execute_process (
       OUTPUT_VARIABLE xdr_out
       # unfortunately, the sed command will find other matches
@@ -436,7 +431,9 @@ check_include_file (ctype.h _hdr_ctype)
 check_include_file (dirent.h _hdr_dirent)
 check_include_file (errno.h _hdr_errno)
 check_include_file (fcntl.h _hdr_fcntl)
+set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${GMP_INCLUDE_DIRS})
 check_include_file (gmp.h _hdr_gmp)
+set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 check_include_file (fshelp.h _hdr_fshelp)
 check_include_file (gui/window.h _hdr_gui_window)
 check_include_file (inttypes.h _hdr_inttypes)
@@ -475,8 +472,10 @@ check_include_file (stdlib.h _hdr_stdlib)
 check_include_file (string.h _hdr_string)
 check_include_file (strings.h _hdr_strings)
 check_include_file (time.h _hdr_time)
+set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${TOMMATH_INCLUDE_DIRS})
 check_include_file (tommath.h _hdr_tommath)
 check_include_file (libtommath/tommath.h _hdr_libtommath_tommath)
+set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 check_include_file (ufs/quota.h _hdr_ufs_quota)
 # FreeBSD/OpenBSD ufs/ufs/quota.h does not include its dependencies
 check_include_files ("sys/types.h;ufs/ufs/quota.h" _hdr_ufs_ufs_quota)
@@ -492,7 +491,8 @@ check_include_file (sys/file.h _sys_file)
 check_include_file (sys/fs_types.h _sys_fs_types)
 check_include_files ("sys/types.h;sys/fs/ufs_quota.h" _sys_fs_ufs_quota)
 check_include_file (sys/fstyp.h _sys_fstyp)
-check_include_file (sys/fstypes.h _sys_fstypes)
+# NetBSD requires sys/types.h
+check_include_files ("sys/types.h;sys/fstypes.h" _sys_fstypes)
 check_include_file (sys/ftype.h _sys_ftype)
 check_include_file (sys/io.h _sys_io)
 check_include_file (sys/mntctl.h _sys_mntctl)
@@ -565,12 +565,17 @@ check_function_exists (prop_dictionary_create _lib_prop_dictionary_create)
 unset (CMAKE_REQUIRED_LIBRARIES)
 
 # quota_open is a new interface from NetBSD
+set (LIBQUOTACTL_REQUIRED 0)
 set (CMAKE_REQUIRED_LIBRARIES -lquota -lrpcsvc)
 check_function_exists (quota_open _lib_quota_open)
 unset (CMAKE_REQUIRED_LIBRARIES)
+if (_lib_quota_open)
+  set (LIBQUOTACTL_REQUIRED 1)
+endif()
 
 check_function_exists (quotactl _lib_quotactl)
 check_function_exists (realpath _lib_realpath)
+
 # unknown if -lsun, -lseq are needed (old irix, sequent)
 check_function_exists (setmntent _lib_setmntent)
 
@@ -848,11 +853,6 @@ if (_lib_bindtextdomain AND _lib_gettext AND _lib_setlocale AND
   set (_enable_nls 1)
 endif()
 
-# check_source_compiles requires a fairly recent version of cmake (3.19).
-# instead, assume that anything with cmake doesn't have broken headers
-# set (_inc_conflict__hdr_time__sys_time 1)
-# set (_inc_conflict__sys_quota__hdr_linux_quota 1)
-
 checkIncludeConflict (time.h sys/time.h _inc_conflict__hdr_time__sys_time)
 checkIncludeConflict (sys/quota.h linux/quota.h _inc_conflict__sys_quota__hdr_linux_quota)
 
@@ -921,6 +921,8 @@ add_library (${DI_LIBNAME}
 )
 target_include_directories (${DI_LIBNAME} PRIVATE
   ${TIRPC_INCLUDE_DIRS}
+  ${GMP_INCLUDE_DIRS}
+  ${TOMMATH_INCLUDE_DIRS}
 )
 
 target_link_libraries (${DI_LIBNAME} PRIVATE
@@ -932,16 +934,22 @@ if (WIN32)
   set (CMAKE_SHARED_LIBRARY_PREFIX "lib")
   set (CMAKE_STATIC_LIBRARY_PREFIX "lib")
 endif()
-if (_lib_quota_open)
+if (LIBQUOTACTL_REQUIRED)
   # NetBSD
   target_link_libraries (${DI_LIBNAME} PRIVATE
-    -lquota -lrpcsvc
+    -lquota
   )
 endif()
-target_link_libraries (${DI_LIBNAME} PRIVATE
-  ${TIRPC_LDFLAGS}
-)
-addIntlLibrary (${DI_LIBNAME})
+if (LIBNSL_REQUIRED)
+  target_link_libraries (${DI_LIBNAME} PRIVATE
+    -lnsl
+  )
+endif()
+if (LIBTIRPC_REQUIRED)
+  target_link_libraries (${DI_LIBNAME} PRIVATE
+    ${TIRPC_LDFLAGS}
+  )
+endif()
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (${DI_LIBNAME} PRIVATE
     ${GMP_LDFLAGS}
@@ -996,6 +1004,10 @@ endif()
 add_executable (dimathtest
   dimathtest.c
 )
+target_include_directories (dimathtest PRIVATE
+  ${GMP_INCLUDE_DIRS}
+  ${TOMMATH_INCLUDE_DIRS}
+)
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (dimathtest PRIVATE
     ${GMP_LDFLAGS}
@@ -1018,6 +1030,12 @@ target_link_libraries (getoptn_test PRIVATE
 )
 
 # di.pc
+
+# cmake puts 'general' in front of every item, and semicolons
+# are treated specially... weird
+# list join does not work
+set (DI_REQUIRED_LIBS ${${DI_LIBNAME}_LIB_DEPENDS})
+string (REPLACE "general" " " DI_REQUIRED_LIBS ${DI_REQUIRED_LIBS})
 
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 

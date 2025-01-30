@@ -14,7 +14,7 @@ options, please contact the developers.
 
 Fetches the value of an option.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     int   optval;
 
@@ -50,7 +50,7 @@ The value of DI_OPT_BLOCK_SZ will be either 1000 or 1024.
 
 Initializes the format string iterator.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     void di_format_iter_init (di_data);
 
@@ -61,7 +61,7 @@ __di_data__ : The di_data structure returned from `di_initialize`.
 
 Iterates through the format string.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     int     fmt;
 

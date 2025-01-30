@@ -29,6 +29,21 @@ test_egrep () {
   rm -f ${tfn}
 }
 
+preserveoutput () {
+  fn=$1
+
+  bnm=`basename ${fn}`
+  case $bnm in
+    di*)
+      bnm=`echo ${bnm} | sed 's,^di\.,,'`
+      ;;
+    *)
+      bnm=`echo ${bnm} | sed 's,\.[a-z]*,,'`
+      ;;
+  esac
+  cp $f di-${tag}-${bnm}.out
+}
+
 bldrun () {
   tag=$1
 
@@ -45,7 +60,7 @@ bldrun () {
       ${grepcmd} -v '\.h:.*warning' |
       ${grepcmd} -v 'unrecognized command line option' |
       ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
-      ${grepcmd} -v '^COMPILE' |
+      ${grepcmd} -v '^(COMPILE|LINK)' |
       wc -l`
   if [ $c -gt 0 ]; then
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: warnings or errors found"
@@ -55,31 +70,8 @@ bldrun () {
         ${grepcmd} -v '\.h:.*warning' |
         ${grepcmd} -v 'unrecognized command line option' |
         ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
-        ${grepcmd} -v '^COMPILE'
+        ${grepcmd} -v '^(COMPILE|LINK)'
     grc=1
-  fi
-  if [ $tag = cmake ]; then
-    for f in build/CMakeFiles/CMakeOutput.log \
-        build/CMakeFiles/CMakeError.log \
-        build/CMakeFiles/CMakeConfigureLog.yaml \
-        build/config.h; do
-      if [ -f $f ]; then
-        bnm=`basename ${f} | sed 's,\.[a-z]*,,'`
-        cp $f di-${tag}-${bnm}.out
-      fi
-    done
-  fi
-  if [ $tag = mkc ]; then
-    for f in mkc_files/mkc_compile.log \
-        mkc_files/mkconfig.log \
-        mkc_files/mkconfig_env.log \
-        config.h \
-        di.env; do
-      if [ -f $f ]; then
-        bnm=`basename ${f} | sed 's,\.[a-z]*,,'`
-        cp $f di-${tag}-${bnm}.out
-      fi
-    done
   fi
 
   if [ $tag = cmake ]; then
@@ -117,10 +109,40 @@ bldrun () {
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
+
+  if [ $tag = cmake ]; then
+    for f in build/CMakeFiles/CMakeOutput.log \
+        build/CMakeFiles/CMakeError.log \
+        build/CMakeFiles/CMakeConfigureLog.yaml \
+        build/config.h \
+        x/lib/pkgconfig/di.pc \
+        ; do
+      if [ -f $f ]; then
+        preserveoutput $f
+      fi
+    done
+  fi
+  if [ $tag = mkc ]; then
+    for f in mkc_files/mkc_compile.log \
+        mkc_files/mkconfig.log \
+        mkc_files/mkconfig_env.log \
+        config.h \
+        di.env \
+        di.reqlibs \
+        x/lib/pkgconfig/di.pc \
+        ; do
+      if [ -f $f ]; then
+        preserveoutput $f
+      fi
+    done
+  fi
+
   if [ $grc -ne 0 ]; then
     exit 1
   fi
 }
+
+systype=`uname -s`
 
 havecmake=F
 # add paths for macos and *BSD
@@ -170,5 +192,6 @@ if [ $rc -eq 0 ] ;then
 fi
 
 bldrun mkc
+echo ${systype} > di-systype.out
 
 exit 0

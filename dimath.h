@@ -67,8 +67,12 @@
 #if _use_math == DI_GMP
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wsign-conversion"
+# pragma clang diagnostic ignored "-Wreserved-identifier"
+# pragma gcc diagnostic push
+# pragma gcc diagnostic ignored "-Wsign-conversion"
 # include <gmp.h>
 # pragma clang diagnostic pop
+# pragma gcc diagnostic pop
   typedef mpz_t dinum_t;
   typedef mpq_t didbl_t;
 #elif _use_math == DI_TOMMATH

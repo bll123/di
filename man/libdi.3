@@ -359,7 +359,10 @@ combinations.
 .PP
 .SS Compile and Link
 .EX
-.BR "    cc -o tt tt.c -L$HOME/local/lib -Wl,-R$HOME/local/lib -ldi  "
+.BR "    dilibd=$HOME/local/lib  "
+.BR "    diinc=$(pkg-config --with-path ${dilibd}/pkgconfig --cflags di)  "
+.BR "    dilibs=$(pkg-config --with-path ${dilibd}/pkgconfig --libs di)  "
+.BR "    cc -o tt ${diinc} tt.c -Wl,-R${dilibd} ${dilibs})  "
 .EE
 .SS Example Run
 .PP

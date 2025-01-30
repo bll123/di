@@ -76,7 +76,7 @@ shells that had to be worked around.
 There are also a lot of myths and misinformation about shell scripting
 and portability issues to be found on the internet.
 
-mkconfig allowed me to make _di_ very portable and execute on some
+_mkconfig_ allowed me to make _di_ very portable and execute on some
 very old systems.
 
 In order to test _di_ on various machines (in order to ensure
@@ -133,6 +133,9 @@ capable (as of 2025).
 At the same time, there has been something I've been wanting to do
 with _di_ for a long time.  Create a proper library and API.  The main
 _di_ program now uses the new shared library and API to create the output.
+
+I also created a _cmake_ build and install process for modern systems.
+This will work better in the future than the _mkconfig_ configuration tool.
 
 ###### Acknowledgements
 

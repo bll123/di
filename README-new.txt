@@ -33,7 +33,7 @@ INSTALLATION
     make -e PREFIX=$HOME/local
     make -e PREFIX=$HOME/local install
 
-    The build will use cmake if it is available and recent enough,
+    The build will use cmake if it is available and recent enough (3.13),
     otherwise the mkconfig configuration tool will be used.
 
     If GMP or libtommath is found, they will be used,
@@ -58,7 +58,6 @@ REQUIREMENTS
     sed grep tr
     msgfmt
     pkg-config
-    libintl/libiconv (gettext)
     C compiler
   mkconfig build
     make
@@ -69,6 +68,9 @@ REQUIREMENTS
     C compiler
     awk (mawk/nawk/gawk)
     C compiler
+  libraries:
+    Linux: tirpc (nfs quotas)
+    MP Math: gmp or libtommath (optional)
 
 BUG REPORTS
 
@@ -81,7 +83,7 @@ BUG REPORTS
     Files to include in your report:
 
     cmake: build/config.h, build/CMakeOutput.log,
-           build/CMakeError.log
+           build/CMakeError.log, build/CMakeFiles/CMakeConfigureLog.yaml
     mkconfig: mkc_files/mkconfig.log, mkc_files/mkconfig_env.log,
               mkc_files/mkc_compile.log, di.env, and config.h
 

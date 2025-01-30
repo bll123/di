@@ -141,7 +141,7 @@ lib     next_dev
 # dragonflybsd; need this to get the library
 lib     prop_dictionary_create -lprop
 # quota_open is a new interface from NetBSD
-lib     quota_open -lquota -lrpcsvc
+lib     quota_open -lquota
 lib     quotactl
 lib     realpath
 lib     setlocale  -lintl, -lintl -liconv

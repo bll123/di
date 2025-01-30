@@ -68,7 +68,7 @@ runs.  No rigorous tests have been run.
  Linux Mint 19 | - | - | - | - | - | - | -
  Linux Mint 21 | 4.99.3<br>2025-1-25 | 4.99.3<br>2025-1-25 | - | - | - | - | -
  MX Linux 21<br>(Debian 11)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | get/set/endmntent statvfs
- MX Linux 23<br>(Debian 12)| 4.99.2<br>2025-1-25<br>gcc clang | 4.99.2<br>2025-1-25<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
+ MX Linux 23<br>(Debian 12)| 4.99.6<br>2025-1-29<br>gcc clang | 4.99.6<br>2025-1-29<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
  Ubuntu 14.04<br>(32-bit) | n/a | 4.99.5<br>2025-1-29 | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | n/a | 4.99.5<br>2025-1-29 | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | - | 4.99.3<br>2025-1-25 | - | - | - | - | -

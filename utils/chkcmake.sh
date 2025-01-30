@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# Copyright 2025 Brad Lanam Pleasant Hill CA
+#
 
 rc=1
 CMAKE_REQ_MAJ_VERSION=$1

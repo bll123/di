@@ -12,7 +12,7 @@ This documentation was created for the upcoming version 5.x.
 Create the `di_data` structure and returns it.  The `di_data` structure
 is required for all subsequent calls to the _di_ library.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     void * di_data;
 
@@ -29,7 +29,7 @@ Processes the arguments to _di_.  These are passed as strings via an
 `di_process_options` is made, _di_ will use the defaults, and
 the `DI_ARGS` environment variable will not be processed.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     int   exitflag;
 
@@ -58,7 +58,7 @@ options.
 
 Frees all allocated data.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     void di_cleanup (void *di_data);
 
@@ -69,7 +69,7 @@ __di_data__ : The di_data structure returned from `di_initialize`.
 
 Returns the _di_ version string.
 
-    #include &lt;di.h&gt;
+    #include <di.h>
 
     const char *str;
 

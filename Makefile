@@ -30,22 +30,6 @@ OBJ_EXT = .o
 EXE_EXT =
 
 ###
-# common programs
-#
-CAT = cat
-CHGRP = chgrp
-CHMOD = chmod
-CHOWN = chown
-CP = cp
-LN = ln
-MKDIR = mkdir
-MV = mv
-RM = rm
-SED = sed
-TEST = test
-MSGFMT = msgfmt
-
-###
 # installation locations
 #  the cmake install only uses PREFIX
 #
@@ -111,7 +95,7 @@ switcher:
 # clean temporary files
 .PHONY: clean
 tclean:
-	@-$(RM) -f w ww asan.* *.orig \
+	@-rm -f w ww asan.* *.orig \
 		dep-*.txt >/dev/null 2>&1; exit 0
 	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 	@-find . -name '*.orig' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
@@ -120,7 +104,7 @@ tclean:
 .PHONY: clean
 clean:
 	@$(MAKE) tclean
-	@-$(RM) -f \
+	@-rm -f \
 		di libdi.* dimathtest getoptn_test \
 		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
 		*.o *.obj \
@@ -133,7 +117,7 @@ clean:
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean >/dev/null 2>&1
-	@-$(RM) -rf config.h \
+	@-rm -rf config.h \
 		$(MKC_ENV) $(MKC_REQLIB) \
                 _mkconfig_runtests \
 		>/dev/null 2>&1; exit 0
@@ -141,7 +125,7 @@ realclean:
 .PHONY: distclean
 distclean:
 	@$(MAKE) realclean >/dev/null 2>&1
-	@-$(RM) -rf tests.done test_di _mkconfig_runtests \
+	@-rm -rf tests.done test_di _mkconfig_runtests \
 		test_results \
 		$(MKC_FILES) \
 		$(BUILDDIR) \
@@ -226,7 +210,7 @@ cmake-unix:
 		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
 		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
-		-S . -B $(BUILDDIR) -Werror=deprecated --debug-trycompile
+		-S . -B $(BUILDDIR) -Werror=deprecated
 
 # internal use
 .PHONY: cmake-windows
@@ -312,22 +296,27 @@ mkc-install-po:
 	./utils/instpo.sh $(INST_LOCALEDIR)
 
 .PHONY: mkc-install-pc
-mkc-install-pc:
-	$(TEST) -d $(INST_PKGCDIR) || $(MKDIR) -p $(INST_PKGCDIR)
-	$(CAT) di.pc.in | \
-	  $(SED) -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
+mkc-install-pc: $(MKC_REQLIB)
+	test -d $(INST_PKGCDIR) || mkdir -p $(INST_PKGCDIR)
+	dilibs="$${LDFLAGS_LIBS_APPLICATION} `cat $(MKC_REQLIB)`" ; \
+	dilibs="`echo $${dilibs} | \
+            sed -e 's,-lintl,,g' \
+            -e 's,-liconv,,g'`" ; \
+	cat di.pc.in | \
+	  sed -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
 	      -e 's,@CMAKE_INSTALL_FULL_INCLUDEDIR@,$(INCDIR),g' \
 	      -e 's,@CMAKE_INSTALL_FULL_LIBDIR@,$(LIBDIR),g' \
 	      -e 's,@DI_VERSION@,$(DI_VERSION),g' \
+	      -e "s~@DI_REQUIRED_LIBS@~$${dilibs}~" \
 	  > $(INST_PKGCDIR)/di.pc
 
 .PHONY: mkc-install-di
 mkc-install-di:
-	$(TEST) -d $(INST_BINDIR) || $(MKDIR) -p $(INST_BINDIR)
-	$(TEST) -d $(INST_LIBDIR) || $(MKDIR) -p $(INST_LIBDIR)
-	$(TEST) -d $(INST_INCDIR) || $(MKDIR) -p $(INST_INCDIR)
-	$(CP) -f di$(EXE_EXT) $(INST_BINDIR)
-	$(CP) -f di.h $(INST_INCDIR)
+	test -d $(INST_BINDIR) || mkdir -p $(INST_BINDIR)
+	test -d $(INST_LIBDIR) || mkdir -p $(INST_LIBDIR)
+	test -d $(INST_INCDIR) || mkdir -p $(INST_INCDIR)
+	cp -f di$(EXE_EXT) $(INST_BINDIR)
+	cp -f di.h $(INST_INCDIR)
 	-$(MAKE) mkc-install-po
 	$(MAKE) mkc-install-man
 	$(MAKE) mkc-install-pc
@@ -344,41 +333,30 @@ mkc-install-di:
             libnm=libdi$(SHLIB_EXT).$(DI_LIBVERSION) ; \
             ;; \
 	esac ; \
-	$(CP) -f libdi$(SHLIB_EXT) $(INST_LIBDIR)/$${libnm} ; \
+	cp -f libdi$(SHLIB_EXT) $(INST_LIBDIR)/$${libnm} ; \
 	if [ $$sym = T ]; then \
-	  (cd $(INST_LIBDIR); $(LN) -sf $${libnm} libdi$(SHLIB_EXT)) ; \
+	  (cd $(INST_LIBDIR); ln -sf $${libnm} libdi$(SHLIB_EXT)) ; \
 	fi
 
 .PHONY: mkc-install-man
 mkc-install-man:
-	-$(TEST) -d $(INST_MANDIR)/man1 || $(MKDIR) -p $(INST_MANDIR)/man1
-	$(CP) -f man/di.1 $(INST_MANDIR)/man1/$(MAN_TARGET)
-	-$(TEST) -d $(INST_MANDIR)/man3 || $(MKDIR) -p $(INST_MANDIR)/man3
-	$(CP) -f man/libdi.3 $(INST_MANDIR)/man3/$(MAN_TARGET)
+	-test -d $(INST_MANDIR)/man1 || mkdir -p $(INST_MANDIR)/man1
+	cp -f man/di.1 $(INST_MANDIR)/man1/$(MAN_TARGET)
+	-test -d $(INST_MANDIR)/man3 || mkdir -p $(INST_MANDIR)/man3
+	cp -f man/libdi.3 $(INST_MANDIR)/man3/$(MAN_TARGET)
 
 .PHONY: mkc-install-ditest
 mkc-install-ditest:
-	$(TEST) -d $(INST_BINDIR) || $(MKDIR) -p $(INST_BINDIR)
-	$(CP) -f dimathtest$(EXE_EXT) $(INST_BINDIR)
-	$(CP) -f getoptn_test$(EXE_EXT) $(INST_BINDIR)
+	test -d $(INST_BINDIR) || mkdir -p $(INST_BINDIR)
+	cp -f dimathtest$(EXE_EXT) $(INST_BINDIR)
+	cp -f getoptn_test$(EXE_EXT) $(INST_BINDIR)
 
 ###
 # mkc environment
 
 $(MKC_ENV):	$(MKC_ENV_CONF)
-	@-$(RM) -f $(MKC_ENV) tests.done
+	@-rm -f $(MKC_ENV) tests.done
 	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
-
-###
-# specific builds
-
-.PHONY: os2-gcc
-os2-gcc:
-	@echo ':' > $(MKC_ENV);chmod a+rx $(MKC_ENV)
-	$(MAKE) MKCONFIG_TYPE=perl \
-		CC=gcc LD=gcc EXE_EXT=".exe" OBJ_EXT=".o" \
-		CFLAGS="$(CFLAGS) -g -O2" \
-		LDFLAGS="-g -O2 -Zexe" di.exe
 
 ###
 # programs
@@ -390,7 +368,7 @@ mkc-di-programs:	di$(EXE_EXT) dimathtest$(EXE_EXT) getoptn_test$(EXE_EXT)
 # configuration file
 
 config.h:	$(MKC_ENV) $(MKC_CONF)
-	@-$(RM) -f config.h tests.done
+	@-rm -f config.h tests.done
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./$(MKC_ENV);$(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/mkconfig.sh \
@@ -433,13 +411,12 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
-		-r $(MKC_REQLIB) \
 		-o dimathtest$(EXE_EXT) \
 		dimathtest$(OBJ_EXT) \
                 -l m
 
 getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT) distrutils$(OBJ_EXT)
-	$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
 		-o getoptn_test$(EXE_EXT) \
 		getoptn_test$(OBJ_EXT) \
@@ -491,26 +468,6 @@ tests.done: $(MKC_DIR)/runtests.sh
 	CC=$(CC) DC=$(DC) $(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/runtests.sh ./tests.d
 	touch tests.done
-
-# needs environment
-.PHONY: mkc-r-test-env
-mkc-r-test-env:
-	@echo "$(_MKCONFIG_SYSTYPE)"
-	@echo "$(_MKCONFIG_SYSREV)"
-	@echo "$(_MKCONFIG_SYSARCH)"
-	@echo "$(CC)"
-	@echo "$(_MKCONFIG_USING_GCC)"
-	@echo "$(CFLAGS_OPTIMIZE)"
-	@echo "$(CFLAGS_COMPILER)"
-	@echo "$(LDFLAGS_COMPILER)"
-	@echo "$(OBJ_EXT)"
-	@echo "$(EXE_EXT)"
-	@echo "$(XMSGFMT)"
-
-.PHONY: mkc-test-env
-mkc-test-env:
-	@echo "cc: $(CC)"
-	@echo "make: $(MAKE)"
 
 # DO NOT DELETE
 

@@ -90,7 +90,10 @@ resides.
 
 Compile and Link:
 
-    cc -o tt tt.c -L$HOME/local/lib -Wl,-R$HOME/local/lib -ldi
+    dilibd=$HOME/local/lib
+    diinc=$(pkg-config --with-path ${dilibd}/pkgconfig --cflags di)
+    dilibs=$(pkg-config --with-path ${dilibd}/pkgconfig --libs di)
+    cc -o tt ${diinc} tt.c -Wl,-R${dilibd} ${dilibs})
 
 Example run:
 

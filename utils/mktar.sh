@@ -1,21 +1,22 @@
-#!/bin/sh
+#!/bin/bash
+#
+# Copyright 2025 Brad Lanam Pleasant Hill CA
+#
 
-ver=`grep "^DI_VERSION" Makefile | sed -e 's/.*= *//'`
+ver=$(grep "^DI_VERSION" Makefile | sed -e 's/.*= *//')
 
 PKG=di
-cwd=`pwd`
+cwd=$(pwd)
 dir="${PKG}-${ver}"
 rm -rf $dir > /dev/null 2>&1
 mkdir $dir
+mkdir $dir/utils
 chmod 755 $dir
-
-make distclean
 
 cp -pf *.c *.h *.in $dir
 cp -pf CMakeLists.txt LICENSE.txt Makefile $dir
 cp -pf README.txt README-new.txt $dir
-mkdir $dir/utils
-cp -pf utils/chkcmake.sh $dir/utils
+cp -pf utils/chkcmake.sh utils/instpo.sh $dir/utils
 for d in mkconfig mkc_config man po; do
   cp -p -rf ${d} $dir
 done

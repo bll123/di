@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# Copyright 2025 Brad Lanam Pleasant Hill CA
+#
+
 
 INST_LOCALEDIR=$1
 
