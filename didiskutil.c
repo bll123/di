@@ -37,28 +37,27 @@
 #include "dimath.h"
 #include "dimntopt.h"
 
-/********************************************************/
 /*
-    This module contains utility routines for conversion
-    and checking the data.
-
-    di_initialize_disk_info ()
-        initialize disk info structure
-    di_save_block_sizes ()
-        save the block sizes in the diskinfo structure.
-    di_save_inode_sizes ()
-        save the inode sizes in the diskinfo structure.
-    convertMountOptions ()
-        converts mount options to text format.
-    convertNFSMountOptions ()
-        converts NFS mount options to text format.
-    chkMountOptions ()
-        Checks to see if the mount option is set.
-        Used if hasmntopt () is not present.
-    di_is_remote_disk ()
-        test a disk to see if it is remote (nfs, nfs3).
-
-*/
+ *    This module contains utility routines for conversion
+ *    and checking the data.
+ *
+ *    di_initialize_disk_info ()
+ *        initialize disk info structure
+ *    di_save_block_sizes ()
+ *        save the block sizes in the diskinfo structure.
+ *    di_save_inode_sizes ()
+ *        save the inode sizes in the diskinfo structure.
+ *    convertMountOptions ()
+ *        converts mount options to text format.
+ *    convertNFSMountOptions ()
+ *        converts NFS mount options to text format.
+ *    chkMountOptions ()
+ *        Checks to see if the mount option is set.
+ *        Used if hasmntopt () is not present.
+ *    di_is_remote_disk ()
+ *        test a disk to see if it is remote (nfs, nfs3).
+ *
+ */
 
 void
 di_initialize_disk_info (di_disk_info_t *diptr, int idx)

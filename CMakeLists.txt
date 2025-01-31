@@ -58,8 +58,6 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 endif()
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
   add_compile_options (-Wno-extra-semi-stmt)
-  # unsafe buffer usage print way too many incorrect warnings.
-  add_compile_options (-Wno-unsafe-buffer-usage)
   add_compile_options (-Wno-poison-system-directories)
   add_compile_options (-Wno-shift-sign-overflow)
   add_compile_options (-Wno-pragma-pack)
@@ -74,9 +72,16 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
   add_compile_options (-Wno-documentation-deprecated-sync)
   add_compile_options (-Wno-documentation-unknown-command)
   add_compile_options (-Wno-documentation)
+  if (CMAKE_CLANG_COMPILER_VERSION VERSION_GREATER_EQUAL "16.0.0")
+    add_compile_options (-Wno-unsafe-buffer-usage)
+  endif()
 endif()
 
 #### build compile options
+
+if (DI_BUILD STREQUAL "")
+  set (DI_BUILD "Release")
+endif()
 
 if (DI_BUILD STREQUAL "Release")
   add_compile_options (-O2)
@@ -185,7 +190,6 @@ pkg_check_modules (GMP gmp)
 pkg_check_modules (TOMMATH libtommath)
 pkg_check_modules (TIRPC libtirpc)
 
-include (CheckFunctionExists)
 include (CheckIncludeFile)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
@@ -210,7 +214,7 @@ macro (checkPrototype_quotactl hdr)
     "${hdr}"
     _quotactl_pos_1a
     )
-  # OpenBSD has, but caddr_t works...
+  # OpenBSD has char *, but caddr_t works...
   #  "int quotactl (const char *path, int cmd, int id, char *addr)"
   check_prototype_definition (quotactl
     "int quotactl (const char * a, int b, int c, caddr_t d)"
@@ -537,7 +541,8 @@ check_symbol_exists (fs_stat_dev kernel/fs_info.h _lib_fs_stat_dev)  # haiku
 check_symbol_exists (fshelp fshelp.h _lib_fshelp)  # AIX
 # macos, freebsd, openbsd
 check_symbol_exists (getfsstat "sys/stat.h;sys/mount.h" _lib_getfsstat)
-check_symbol_exists (getmnt "" _lib_getmnt)
+# ultrix, .h file may be wrong
+check_symbol_exists (getmnt mntent.h _lib_getmnt)
 
 set (_lib_getmntent 0)
 check_symbol_exists (getmntent mntent.h  _lib_getmntent_a)
@@ -680,7 +685,12 @@ check_symbol_exists (GetDriveType windows.h _lib_GetDriveType)
 check_symbol_exists (GetLogicalDriveStrings windows.h _lib_GetLogicalDriveStrings)
 check_symbol_exists (GetVolumeInformation windows.h _lib_GetVolumeInformation)
 
-set (CMAKE_REQUIRED_LIBRARIES ${Intl_LIBRARY} ${Iconv_LIBRARY})
+if (Intl_LIBRARY AND NOT Intl_LIBRARY STREQUAL "NOTFOUND")
+  set (CMAKE_REQUIRED_LIBRARIES ${Intl_LIBRARY})
+endif()
+if (Iconv_LIBRARY AND NOT Iconv_LIBRARY STREQUAL "NOTFOUND")
+ set (CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES} ${Iconv_LIBRARY}")
+endif()
 check_symbol_exists (bindtextdomain libintl.h _lib_bindtextdomain)
 check_symbol_exists (gettext libintl.h _lib_gettext)
 check_symbol_exists (textdomain libintl.h _lib_textdomain)
@@ -895,12 +905,6 @@ if (_hdr_rpc_rpc AND
   set (_has_std_nfs_quotas 1)
 endif()
 
-find_program (_command_msgfmt msgfmt)
-find_program (_command_gmsgfmt gmsgfmt)
-if (_command_gmsgfmt)
-  set (_command_msgfmt ${_command_gmsgfmt})
-endif()
-
 set (_enable_nls 0)
 if (_lib_bindtextdomain AND _lib_gettext AND _lib_setlocale AND
     _lib_textdomain AND _hdr_libintl AND _hdr_locale)
@@ -920,17 +924,19 @@ check_symbol_exists (MCTL_QUERY sys/mntctl.h _define_MCTL_QUERY)
 check_symbol_exists (S_ISLNK sys/stat.h _define_S_ISLNK)
 
 if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
-  if (_hdr_gmp AND
+  if (_hdr_gmp AND GMP_LDFLAGS AND
       NOT (_hdr_tommath OR _hdr_libtommath_tommath))
     set (DI_USE_MATH DI_GMP)
   endif()
   # at the moment, libtommath in macports has a broken pkg-config
   if ((_hdr_tommath OR _hdr_libtommath_tommath) AND
+      TOMMATH_LDFLAGS AND
       NOT _hdr_gmp AND
       NOT APPLE)
     set (DI_USE_MATH DI_TOMMATH)
   endif()
-  if (_hdr_gmp AND (_hdr_tommath OR _hdr_libtommath_tommath))
+  if (_hdr_gmp AND GMP_LDFLAGS AND
+      (_hdr_tommath OR _hdr_libtommath_tommath))
     # use the most common library
     set (DI_USE_MATH DI_GMP)
   endif()
@@ -947,14 +953,20 @@ configure_file (config.h.in config.h)
 # macros for building
 
 macro (addIntlLibrary name)
-  if (Intl_LIBRARY)
+  if (Intl_LIBRARY AND NOT Intl_LIBRARY STREQUAL "NOTFOUND")
+    target_include_directories (${name} PRIVATE
+      ${Intl_INCLUDE_DIRS}
+    )
     target_link_libraries (${name} PRIVATE
-      -lintl
+      ${Intl_LIBRARY}
     )
   endif()
-  if (Iconv_LIBRARY)
+  if (Iconv_LIBRARY AND NOT Iconv_LIBRARY STREQUAL "NOTFOUND")
+    target_include_directories (${name} PRIVATE
+      ${Iconv_INCLUDE_DIRS}
+    )
     target_link_libraries (${name} PRIVATE
-      -liconv
+      ${Iconv_LIBRARY}
     )
   endif()
 endmacro()

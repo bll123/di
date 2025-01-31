@@ -120,8 +120,6 @@
 #include "distrutils.h"
 #include "dimntopt.h"
 
-/********************************************************/
-
 #if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
 #endif
@@ -165,8 +163,6 @@ extern "C" {
 #if defined (__QNX__)
 static int di_getQNXDiskEntries (di_data_t *di_data, char *ipath, int *diCount);
 #endif
-
-/********************************************************/
 
 #if _lib_getmntent \
     && ! _lib_setmntent \
@@ -787,7 +783,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
  *
  * Old OSF/1 system call.
  * OSF/1 does this with a system call and library routine.
- *                  [mogul@wrl.dec.com (Jeffrey Mogul)]
+ *                  [Jeffrey Mogul]
  *
  */
 
@@ -1189,7 +1185,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
  * looks a little tricky; I just allocate a huge buffer and do it in
  * one shot.
  *
- *                  [mogul@wrl.dec.com (Jeffrey Mogul)]
+ *                  [Jeffrey Mogul]
  */
 
 int

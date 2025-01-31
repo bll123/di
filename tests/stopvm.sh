@@ -21,7 +21,7 @@ fi
 
 cmd="shutdown -h now"
 case ${host} in
-  *solaris*|nexenta*)
+  *[sS]olaris*|nexenta*)
     cmd="init 5"
     ;;
   dragonflybsd*|freebsd*|netbsd*|openbsd*|mirbsd*)
@@ -29,13 +29,18 @@ case ${host} in
     ;;
 esac
 
-ssh -l root ${ipaddr} "${cmd}" > /dev/null 2>&1
+ssh -l root ${ipaddr} "${cmd}"
 # VBoxManage controlvm ${host} poweroff > /dev/null 2>&1
+count=0
 while : ; do
   ps -ef | grep "[c]omment ${host}" > /dev/null 2>&1
   rc=$?
   if [[ $rc -ne 0 ]]; then
-    break;
+    break
+  fi
+  count=$(($count+1))
+  if [[ $count -gt 20 ]]; then
+    break
   fi
   sleep 1
 done

@@ -24,9 +24,6 @@ BEGIN {
     if (scount == 2 && sarr[1] ~ "^---") {
       scount = 0;
     }
-    if (scount == 3 && sarr[2] ~ "^> #endif") {
-      scount = 0;
-    }
     if (scount == 1 && sarr[0] ~ "^[1-9]") {
       scount = 0;
     }
@@ -58,12 +55,6 @@ BEGIN {
 #print "-- next-getfsstat";
       next;
     }
-    if ($0 ~ /^> #if _command_msgfmt$/) {
-      next;
-    }
-    if ($0 ~ /_cmd_loc_msgfmt/) {
-      next;
-    }
 
     if ($0 ~ /^< #define _c_arg_[13-9]_quotactl/) {
       # mkconfig only
@@ -85,6 +76,11 @@ BEGIN {
     } else if ($0 ~ /^< #define _c_arg_[1-9]_/) {
       # mkconfig only
 #print "-- next-c-arg-";
+      next;
+    }
+
+    if ($0 ~ /^> #define xdr_[a-z_]* $/) {
+      # normal cmake output when no xdr
       next;
     }
 

@@ -15,6 +15,17 @@ fi
 
 gethostdata ${host}
 
+chkc=$(ps -ef | grep "[c]omment ${host}" | wc -l)
+if [[ $chkc -eq 1 ]]; then
+  (ssh -l bll ${ipaddr} "echo AAA" 2>&1 ) | grep '^AAA$' > /dev/null
+  rc=$?
+  if [[ $rc -eq 0 ]]; then
+    echo "-- $(date '+%T') ${host}: connected"
+    # already running
+    exit 255
+  fi
+fi
+
 nohup VBoxManage startvm ${host} > /dev/null 2>&1 &
 sleep 10
 count=0

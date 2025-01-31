@@ -68,8 +68,6 @@
 #include "dimntopt.h"
 #include "distrutils.h"
 
-/********************************************************/
-
 #if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
 #endif
@@ -91,8 +89,6 @@ extern "C" {
 #if defined (__cplusplus) || defined (c_plusplus)
 }
 #endif
-
-/********************************************************/
 
 #if _lib_statvfs \
     && ! _lib_fs_stat_dev \

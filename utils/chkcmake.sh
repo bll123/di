@@ -38,7 +38,8 @@ BEGIN {
   gsub (/^\./, "", min);
   gsub (/\..*$/, "", min);
   rc = 1;
-  if (maj >= reqmaj && min >= reqmin) {
+  # have to make sure it is a numeric comparison
+  if (maj+0 >= reqmaj+0 && min+0 >= reqmin+0) {
     rc = 0;
   }
   exit rc;

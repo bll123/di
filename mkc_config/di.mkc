@@ -80,8 +80,6 @@ sys     vmount.h
 include_conflict time.h sys/time.h
 include_conflict sys/quota.h linux/quota.h
 
-command msgfmt gmsgfmt
-
 const   O_NOCTTY
 
 define  IOCTL_STORAGE_CHECK_VERIFY2

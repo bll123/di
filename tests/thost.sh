@@ -41,6 +41,7 @@ if [[ ${remport} != - ]]; then
 fi
 
 topdir=$(pwd)
+already=F
 
 if [[ $flag != C ]]; then
   if [[ ${type} == local ]]; then
@@ -73,7 +74,7 @@ if [[ $flag != C ]]; then
       lockfn=F
       while : ; do
         for fn in ${locklist}; do
-          lockfile-create ${fn} -r 1
+          lockfile-create -r 1 ${fn}
           rc=$?
           if [[ $rc -eq 0 ]]; then
             lockfile-touch ${fn} &
@@ -89,17 +90,16 @@ if [[ $flag != C ]]; then
       echo "-- $(date '+%T') ${host}: starting vm"
       ./tests/startvm.sh ${host} T
       rc=$?
-      if [[ $rc -ne 0 ]]; then
+      if [[ $rc -ne 0 && $rc -ne 255 ]]; then
         exit 1
+      fi
+      if [[ $rc -eq 255 ]]; then
+        already=T
       fi
       echo "-- $(date '+%T') ${host}: copying files"
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
       remotebldrun $ipaddr
-      echo "-- $(date '+%T') ${host}: stopping"
-      ./tests/stopvm.sh ${host}
-      kill ${lockpid}
-      lockfile-remove ${lockfn}
     else
       echo "-- $(date '+%T') ${host}: unknown type ${type}"
     fi
@@ -117,6 +117,19 @@ if [[ $flag == R || $flag == C ]]; then
       ssh ${rempssh} ${remussh} ${ipaddr} "rm -rf di-[45].*.tar.gz di-[45].*.tar di-[45].*_${comp} dibldrun.sh"
     fi
   done
+fi
+
+if [[ $flag != C && $type == vm ]]; then
+  if [[ $already == F ]]; then
+    echo "-- $(date '+%T') ${host}: stopping"
+    ./tests/stopvm.sh ${host}
+  fi
+  if [[ $lockpid != F ]]; then
+    kill ${lockpid}
+  fi
+  if [[ $lockfn != F ]]; then
+    lockfile-remove ${lockfn}
+  fi
 fi
 
 # cmake/mkc comparison

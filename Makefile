@@ -9,6 +9,7 @@ DI_VERSION = 4.99.7
 DI_LIBVERSION = 4.99.7
 DI_SOVERSION = 4
 DI_RELEASE_STATUS = beta
+DI_BUILD = Release
 
 # for cmake
 CMAKE_REQ_MAJ_VERSION = 3
@@ -141,10 +142,6 @@ tar:
 ###
 # cmake
 
-.PHONY: cmake-release
-cmake-release:
-	$(MAKE) DI_BUILD=Release cmake-all
-
 .PHONY: cmake-debug
 cmake-debug:
 	$(MAKE) DI_BUILD=Debug cmake-all
@@ -205,6 +202,7 @@ cmakeclang:
 .PHONY: cmake-unix
 cmake-unix:
 	@if [ "$(PREFIX)" = "" ]; then echo "No prefix set"; exit 1; fi
+	@test -d $(BUILDDIR) || mkdir $(BUILDDIR)
 	cmake \
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
@@ -213,7 +211,6 @@ cmake-unix:
 		-DDI_LIBVERSION:STATIC=$(DI_LIBVERSION) \
 		-DDI_SOVERSION:STATIC=$(DI_SOVERSION) \
 		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
-		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-S . -B $(BUILDDIR) -Werror=deprecated --debug-trycompile
 
@@ -230,7 +227,6 @@ cmake-windows:
 		-DDI_LIBVERSION:STATIC=$(DI_LIBVERSION) \
 		-DDI_SOVERSION:STATIC=$(DI_SOVERSION) \
 		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
-		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-G "MSYS Makefiles" \
 		-S . -B $(BUILDDIR) -Werror=deprecated
