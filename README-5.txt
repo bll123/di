@@ -25,6 +25,8 @@ Version 5 beta Timeline
           code-not-reachable warnings.
 2025-1-30 Various fixes. pkgconfig file fix.
 2025-1-30 re-work the CMakeLists.txt file.
+2025-1-31 Everything seems to be in good shape.
+          cmake/mkconfig comparisons are working well.
 
 Version 5.x beta
 

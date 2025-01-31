@@ -53,6 +53,7 @@ if [[ $flag != C ]]; then
   fi
 
   for comp in ${complist}; do
+    echo "-- $(date '+%T') ${host}: start ${comp}"
     rsltdir=${topdir}/test_results/${host}_${comp}
     test -d ${rsltdir} && rm -rf ${rsltdir}
     mkdir -p ${rsltdir}

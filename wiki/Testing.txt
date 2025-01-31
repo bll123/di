@@ -114,8 +114,8 @@ runs.  No rigorous tests have been run.
  MacOS Sequoia (m1) | 4.99.7<br>2025-1-31 | 4.99.7<br>2025-1-31 | - | - | - | - | getfsstat
  __Other:__ | | | | | | |
  AIX 7.1 | - | 4.99.7<br>2025-1-31<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
- Haiku r1b5 | - | 4.99.3<br>2025-1-26 | - | - | - | - | fs_stat_dev<br>ramfs used value err
- SCO OpenServer 6.0.0 | - | 4.99.7<br>2025-1-30<br>gcc | - | - | - | - | getmntent statvfs<br>polarhome
+ Haiku r1b5 | - | 4.99.7<br>2025-1-31 | - | - | - | - | fs_stat_dev<br>ramfs used value err
+ SCO OpenServer 6.0.0 | - | 4.99.7<br>2025-1-31<br>cc gcc | - | - | - | - | getmntent statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | polarhome
  QNX 6.5 | - | FAIL | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | | | |
