@@ -5,9 +5,13 @@ cmake_minimum_required (VERSION 3.10)
 
 # avoid msys2/windows issue
 set (CMAKE_C_COMPILER_WORKS 1)
-set (CMAKE_CXX_COMPILER_WORKS 1)
 
-project (DI VERSION ${DI_VERSION})
+project (DI
+  VERSION ${DI_VERSION}
+  DESCRIPTION "di - disk information utility"
+  HOMEPAGE_URL "https://diskinfo-di.sourceforge.io"
+  LANGUAGES C
+)
 option (BUILD_SHARED_LIBS "Build dynamic library" ON)
 
 set (default_build_type "Release")
@@ -134,12 +138,13 @@ if (NOT WIN32)
   endif()
   if (APPLE)
 #    SET (CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR} "@loader_path")
+    # 10.10 = Yosemite, 10.11 = El Capitan
     # 10.12 = Sierra, 10.13 = High Sierra
     # 10.14 = Mojave, 10.15 = Catalina
     # 11 = Big Sur, 12 = Monterey, 13 = Ventura, 14 = Sonoma
     # 15 = Sequoia
-    add_compile_options (-mmacosx-version-min=10.12)
-    add_link_options (-mmacosx-version-min=10.12)
+    add_compile_options (-mmacosx-version-min=10.10)
+    add_link_options (-mmacosx-version-min=10.10)
     # not universal binary, I don't have universal libintl installed.
     # set (CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
   endif()
@@ -168,6 +173,7 @@ set (required_includes
 )
 
 set (CMAKE_REQUIRED_INCLUDES ${required_includes})
+add_compile_options (-DWIN32_LEAN_AND_MEAN=1)
 
 #### configuration
 
@@ -405,9 +411,13 @@ int main (int argc, char *argv []) { return 0; }
   set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 endmacro()
 
-macro (checkIncludeConflict hdra hdrb varnm)
+macro (checkIncludeConflict hdrvara hdra hdrvarb hdrb varnm)
   message ("-- Check for include conflict ${hdra} ${hdrb}")
-  check_include_files ("${hdra};${hdrb}" ${varnm})
+  if (NOT ${hdrvara} OR NOT ${hdrvarb})
+    set (${varnm} 1)
+  else()
+    check_include_files ("${hdra};${hdrb}" ${varnm})
+  endif()
 endmacro()
 
 macro (checkvquotactlenabled)
@@ -435,7 +445,6 @@ set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${GMP_INCLUDE_DIRS})
 check_include_file (gmp.h _hdr_gmp)
 set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 check_include_file (fshelp.h _hdr_fshelp)
-check_include_file (gui/window.h _hdr_gui_window)
 check_include_file (inttypes.h _hdr_inttypes)
 check_include_file (jfs/quota.h _hdr_jfs_quota)
 check_include_file (kernel/fs_info.h _hdr_kernel_fs_info)
@@ -480,7 +489,6 @@ check_include_file (ufs/quota.h _hdr_ufs_quota)
 # FreeBSD/OpenBSD ufs/ufs/quota.h does not include its dependencies
 check_include_files ("sys/types.h;ufs/ufs/quota.h" _hdr_ufs_ufs_quota)
 check_include_file (unistd.h _hdr_unistd)
-check_include_file (util/string.h _hdr_util_string)
 check_include_file (wchar.h _hdr_wchar)
 check_include_file (windows.h _hdr_windows)
 check_include_file (winioctl.h _hdr_winioctl)
@@ -490,7 +498,7 @@ check_include_file (sys/dcmd_blk.h _sys_dcmd_blk)
 check_include_file (sys/file.h _sys_file)
 check_include_file (sys/fs_types.h _sys_fs_types)
 check_include_files ("sys/types.h;sys/fs/ufs_quota.h" _sys_fs_ufs_quota)
-check_include_file (sys/fstyp.h _sys_fstyp)
+check_include_file (sys/fstyp.h _sys_fstyp)  # solaris
 # NetBSD requires sys/types.h
 check_include_files ("sys/types.h;sys/fstypes.h" _sys_fstypes)
 check_include_file (sys/ftype.h _sys_ftype)
@@ -500,6 +508,7 @@ check_include_file (sys/param.h _sys_param)
 check_include_file (sys/types.h _sys_types)
 
 # SCO OpenServer/UnixWare require sys/mnttab.h for struct mnttab declaration.
+# solaris
 check_include_file (sys/mnttab.h _sys_mnttab)
 if (_sys_mnttab)
   check_include_files ("sys/mnttab.h;sys/mntent.h" _sys_mntent)
@@ -507,7 +516,7 @@ else()
   check_include_file ("sys/mntent.h" _sys_mntent)
 endif()
 
-# broken OpenBSD headers
+# openbsd, dragonflybsd, freeb
 check_include_files ("sys/types.h;sys/mount.h" _sys_mount)
 check_include_file (sys/quota.h _sys_quota)
 check_include_file (sys/stat.h _sys_stat)
@@ -515,99 +524,135 @@ check_include_file (sys/statfs.h _sys_statfs)
 check_include_file (sys/statvfs.h _sys_statvfs)
 check_include_file (sys/time.h _sys_time)
 check_include_file (sys/vfs.h _sys_vfs)
-check_include_file (sys/vfs_quota.h _sys_vfs_quota)
+check_include_file (sys/vfs_quota.h _sys_vfs_quota)  # dfly-bsd
 # SCO OpenServer/UnixWare require stdio.h for sys/vfstab.h
 check_include_files ("stdio.h;sys/vfstab.h" _sys_vfstab)
-check_include_file (sys/vmount.h _sys_vmount)
+check_include_file (sys/vmount.h _sys_vmount)   # AIX
 
-check_function_exists (bcopy _lib_bcopy)
-check_function_exists (bzero _lib_bzero)
+check_symbol_exists (bcopy strings.h _lib_bcopy)
+check_symbol_exists (bzero strings.h _lib_bzero)
 # -lsun, -lseq
-check_function_exists (endmntent _lib_endmntent)
-check_function_exists (fs_stat_dev _lib_fs_stat_dev)
-check_function_exists (fshelp _lib_fshelp)
-check_function_exists (GetDiskFreeSpace _lib_GetDiskFreeSpace)
-check_function_exists (GetDiskFreeSpaceEx _lib_GetDiskFreeSpaceEx)
-check_function_exists (GetDriveType _lib_GetDriveType)
-check_function_exists (getfsstat _lib_getfsstat)
-check_function_exists (GetLogicalDriveStrings _lib_GetLogicalDriveStrings)
-check_function_exists (GetVolumeInformation _lib_GetVolumeInformation)
-check_function_exists (getmnt _lib_getmnt)
-# unixware put getmntent into libgen for some reason
-check_function_exists (getmntent _lib_getmntent)
+check_symbol_exists (endmntent mntent.h  _lib_endmntent)
+check_symbol_exists (fs_stat_dev kernel/fs_info.h _lib_fs_stat_dev)  # haiku
+check_symbol_exists (fshelp fshelp.h _lib_fshelp)  # AIX
+# macos, freebsd, openbsd
+check_symbol_exists (getfsstat "sys/stat.h;sys/mount.h" _lib_getfsstat)
+check_symbol_exists (getmnt "" _lib_getmnt)
+
+set (_lib_getmntent 0)
+check_symbol_exists (getmntent mntent.h  _lib_getmntent_a)
+check_symbol_exists (getmntent sys/mnttab.h _lib_getmntent_b)
 set (LIBGEN_REQUIRED 0)
-if (NOT _lib_getmntent)
+if (NOT _lib_getmntent_a)
+  # unixware put getmntent into libgen for some reason
   set (CMAKE_REQUIRED_LIBRARIES -lgen)
-  check_function_exists (getmntent _lib_getmntent)
+  check_symbol_exists (getmntent mntent.h  _lib_getmntent_c)
   if (_lib_getmntent)
     set (LIBGEN_REQUIRED 1)
   endif()
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
-check_function_exists (getmntinfo _lib_getmntinfo)
-check_function_exists (getvfsstat _lib_getvfsstat)
-check_function_exists (getzoneid _lib_getzoneid)
-check_function_exists (hasmntopt _lib_hasmntopt)
-check_function_exists (lstat _lib_lstat)
-check_function_exists (mbrlen _lib_mbrlen)
-check_function_exists (memcpy _lib_memcpy)
-check_function_exists (memset _lib_memset)
+if (_lib_getmntent_a OR _lib_getmntent_b OR _lib_getmntent_c)
+  set (_lib_getmntent 1)
+endif()
+
+set (_lib_getmntinfo 0)
+check_symbol_exists (getmntinfo sys/statvfs.h _lib_getmntinfo_a)  # netbsd
+# macos, openbsd (req sys/types.h)
+check_symbol_exists (getmntinfo "sys/types.h;sys/mount.h" _lib_getmntinfo_b)
+if (_lib_getmntinfo_a OR _lib_getmntinfo_b)
+  set (_lib_getmntinfo 1)
+endif()
+
+check_symbol_exists (getvfsstat sys/statvfs.h  _lib_getvfsstat)
+check_symbol_exists (getzoneid zone.h _lib_getzoneid)
+
+set (_lib_hasmntopt 0)
+check_symbol_exists (hasmntopt mntent.h  _lib_hasmntopt_a)
+check_symbol_exists (hasmntopt sys/mnttab.h _lib_hasmntopt_b)  # solaris
+if (_lib_hasmntopt_a OR _lib_hasmntopt_b)
+  set (_lib_hasmntopt 1)
+endif()
+
+check_symbol_exists (lstat sys/stat.h _lib_lstat)
+check_symbol_exists (mbrlen wchar.h _lib_mbrlen)
+check_symbol_exists (memcpy string.h _lib_memcpy)
+check_symbol_exists (memset string.h _lib_memset)
 
 # AIX doesn't declare this :(
 # Look for MCTL_QUERY (see below)
-check_function_exists (mntctl _lib_mntctl)
+check_symbol_exists (mntctl sys/mntctl.h _lib_mntctl)
 
-check_function_exists (next_dev _lib_next_dev)
+check_symbol_exists (next_dev kernel/fs_info.h _lib_next_dev)  # haiku
 
 # dragonflybsd; need this to get the library
 set (CMAKE_REQUIRED_LIBRARIES -lprop)
-check_function_exists (prop_dictionary_create _lib_prop_dictionary_create)
+check_symbol_exists (prop_dictionary_create libprop/proplib.h _lib_prop_dictionary_create)
 unset (CMAKE_REQUIRED_LIBRARIES)
 
 # quota_open is a new interface from NetBSD
 set (LIBQUOTACTL_REQUIRED 0)
-set (CMAKE_REQUIRED_LIBRARIES -lquota -lrpcsvc)
-check_function_exists (quota_open _lib_quota_open)
+set (CMAKE_REQUIRED_LIBRARIES -lquota)
+check_symbol_exists (quota_open quota.h _lib_quota_open)
 unset (CMAKE_REQUIRED_LIBRARIES)
 if (_lib_quota_open)
   set (LIBQUOTACTL_REQUIRED 1)
 endif()
 
-check_function_exists (quotactl _lib_quotactl)
-check_function_exists (realpath _lib_realpath)
+set (_lib_quotactl 0)
+check_symbol_exists (quotactl "unistd.h" _lib_quotactl_a)
+check_symbol_exists (quotactl "sys/types.h;sys/quota.h" _lib_quotactl_b)
+check_symbol_exists (quotactl "sys/types.h;ufs/ufs/quota.h" _lib_quotactl_c)
+if (_lib_quotactl_a OR _lib_quotactl_b OR _lib_quotactl_c)
+  set (_lib_quotactl 1)
+endif()
+
+check_symbol_exists (realpath stdlib.h _lib_realpath)
 
 # unknown if -lsun, -lseq are needed (old irix, sequent)
-check_function_exists (setmntent _lib_setmntent)
+check_symbol_exists (setmntent mntent.h _lib_setmntent)
 
-check_function_exists (snprintf _lib_snprintf)
+check_symbol_exists (snprintf stdio.h _lib_snprintf_a)
 set (LIBSNPRINTF_REQUIRED 0)
-if (NOT _lib_snprintf)
+if (NOT _lib_snprintf_a)
   set (CMAKE_REQUIRED_LIBRARIES -lsnprintf)
-  check_function_exists (snprintf _lib_snprintf)
-  if (_lib_snprintf)
+  check_symbol_exists (snprintf stdio.h _lib_snprintf_b)
+  if (_lib_snprintf_b)
     set (LIBSNPRINTF_REQUIRED 1)
   endif()
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
+if (_lib_snprintf_a OR _lib_snprintf_b)
+  set (_lib_snprintf 1)
+endif()
 
-check_function_exists (setlocale _lib_setlocale)
-check_function_exists (statfs _lib_statfs)
-check_function_exists (statvfs _lib_statvfs)
-check_function_exists (stpecpy _lib_stpecpy)
-check_function_exists (strcoll _lib_strcoll)
-check_function_exists (strdup _lib_strdup)
-check_function_exists (strstr _lib_strstr)
-check_function_exists (sysfs _lib_sysfs)
+check_symbol_exists (setlocale locale.h _lib_setlocale)
+
+set (_lib_statfs 0)
+check_symbol_exists (statfs "sys/statfs.h;sys/vfs.h" _lib_statfs_a)
+# openbsd (requires sys/types)
+check_symbol_exists (statfs "sys/types.h;sys/mount.h" _lib_statfs_b)
+if (_lib_statfs_a OR _lib_statfs_b)
+  set (_lib_statfs 1)
+endif()
+
+check_symbol_exists (statvfs sys/statvfs.h _lib_statvfs)
+check_symbol_exists (stpecpy string.h _lib_stpecpy)
+check_symbol_exists (strcoll string.h _lib_strcoll)
+check_symbol_exists (strdup string.h _lib_strdup)
+check_symbol_exists (strstr string.h _lib_strstr)
+check_symbol_exists (sysfs sys/fstyp.h _lib_sysfs)  # solaris
 # dragonflybsd
-check_function_exists (vquotactl _lib_vquotactl)
+check_symbol_exists (vquotactl sys/vfs_quota.h _lib_vquotactl)
 
-check_function_exists (xdr_int _lib_xdr_int)
+set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${TIRPC_INCLUDE_DIRS})
+check_symbol_exists (xdr_int rpc/rpc.h _lib_xdr_int)
 set (LIBNSL_REQUIRED 0)
 set (LIBTIRPC_REQUIRED 0)
 if (NOT _lib_xdr_int)
   # check with nsl library
   set (CMAKE_REQUIRED_LIBRARIES nsl)
-  check_function_exists (xdr_int _lib_xdr_int_nsl)
+  check_symbol_exists (xdr_int rpc/rpc.h _lib_xdr_int_nsl)
   if (_lib_xdr_int_nsl)
     set (_lib_xdr_int 1)
     set (LIBNSL_REQUIRED 1)
@@ -616,21 +661,29 @@ endif()
 if (NOT _lib_xdr_int)
   # check with tirpc library
   set (CMAKE_REQUIRED_LIBRARIES tirpc)
-  check_function_exists (xdr_int _lib_xdr_int_tirpc)
+  check_symbol_exists (xdr_int rpc/rpc.h _lib_xdr_int_tirpc)
   if (_lib_xdr_int_tirpc)
     set (_lib_xdr_int 1)
     set (LIBTIRPC_REQUIRED 1)
   endif()
 endif()
+set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 
 # solaris
-check_function_exists (zone_getattr _lib_zone_getattr)
-check_function_exists (zone_list _lib_zone_list)
+check_symbol_exists (zone_getattr zone.h _lib_zone_getattr)
+check_symbol_exists (zone_list zone.h _lib_zone_list)
+
+# windows routines
+check_symbol_exists (GetDiskFreeSpace windows.h _lib_GetDiskFreeSpace)
+check_symbol_exists (GetDiskFreeSpaceEx windows.h _lib_GetDiskFreeSpaceEx)
+check_symbol_exists (GetDriveType windows.h _lib_GetDriveType)
+check_symbol_exists (GetLogicalDriveStrings windows.h _lib_GetLogicalDriveStrings)
+check_symbol_exists (GetVolumeInformation windows.h _lib_GetVolumeInformation)
 
 set (CMAKE_REQUIRED_LIBRARIES ${Intl_LIBRARY} ${Iconv_LIBRARY})
-check_function_exists (bindtextdomain _lib_bindtextdomain)
-check_function_exists (gettext _lib_gettext)
-check_function_exists (textdomain _lib_textdomain)
+check_symbol_exists (bindtextdomain libintl.h _lib_bindtextdomain)
+check_symbol_exists (gettext libintl.h _lib_gettext)
+check_symbol_exists (textdomain libintl.h _lib_textdomain)
 unset (CMAKE_REQUIRED_LIBRARIES)
 
 if (_sys_mnttab)
@@ -737,11 +790,11 @@ if ((_lib_statfs OR _lib_getfsstat) AND _sys_mount)
   # OpenBSD has broken headers
   set (STATFS_HDR "sys/types.h;sys/mount.h")
 endif()
-if ((_lib_statfs OR _lib_getfsstat) AND _sys_statfs)
-  set (STATFS_HDR "sys/statfs.h")
-endif()
 if ((_lib_statfs OR _lib_getfsstat) AND _sys_vfs)
   set (STATFS_HDR "sys/vfs.h")
+endif()
+if ((_lib_statfs OR _lib_getfsstat) AND _sys_statfs)
+  set (STATFS_HDR "sys/statfs.h")
 endif()
 set (_args_statfs 0)
 if (DEFINED STATFS_HDR)
@@ -796,7 +849,8 @@ else()
 endif()
 
 # HP-UX
-if (NOT _quotactl_pos_1 AND NOT _quotactl_pos_2 AND NOT _lib_vquotactl)
+if (_lib_quotactl AND NOT _lib_vquotactl AND
+    NOT _quotactl_pos_1 AND NOT _quotactl_pos_2)
   check_prototype_definition (quotactl
       "int quotactl (int a, const char * b, uid_t c, void * d)"
       0
@@ -853,8 +907,10 @@ if (_lib_bindtextdomain AND _lib_gettext AND _lib_setlocale AND
   set (_enable_nls 1)
 endif()
 
-checkIncludeConflict (time.h sys/time.h _inc_conflict__hdr_time__sys_time)
-checkIncludeConflict (sys/quota.h linux/quota.h _inc_conflict__sys_quota__hdr_linux_quota)
+checkIncludeConflict (_hdr_time time.h _sys_time sys/time.h
+    _inc_conflict__hdr_time__sys_time)
+checkIncludeConflict (_sys_quota sys/quota.h _linux_quota linux/quota.h
+    _inc_conflict__sys_quota__hdr_linux_quota)
 
 check_symbol_exists (O_NOCTTY fcntl.h _const_O_NOCTTY)
 
@@ -940,6 +996,12 @@ if (LIBQUOTACTL_REQUIRED)
     -lquota
   )
 endif()
+if (LIBGEN_REQUIRED)
+  # Unixware
+  target_link_libraries (${DI_LIBNAME} PRIVATE
+    -lgen
+  )
+endif()
 if (LIBNSL_REQUIRED)
   target_link_libraries (${DI_LIBNAME} PRIVATE
     -lnsl
@@ -948,6 +1010,11 @@ endif()
 if (LIBTIRPC_REQUIRED)
   target_link_libraries (${DI_LIBNAME} PRIVATE
     ${TIRPC_LDFLAGS}
+  )
+endif()
+if (LIBSNPRINTF_REQUIRED)
+  target_link_libraries (${DI_LIBNAME} PRIVATE
+    -lsnprintf
   )
 endif()
 if (_use_math STREQUAL "DI_GMP")
@@ -1035,6 +1102,9 @@ target_link_libraries (getoptn_test PRIVATE
 # are treated specially... weird
 # list join does not work
 set (DI_REQUIRED_LIBS ${${DI_LIBNAME}_LIB_DEPENDS})
+if (NOT DEFINED DI_REQUIRED_LIBS OR DI_REQUIRED_LIBS STREQUAL "")
+  set (DI_REQUIRED_LIBS " ")
+endif()
 string (REPLACE "general" " " DI_REQUIRED_LIBS ${DI_REQUIRED_LIBS})
 
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)

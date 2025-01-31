@@ -15,7 +15,6 @@
 #cmakedefine01 _hdr_errno
 #cmakedefine01 _hdr_fcntl
 #cmakedefine01 _hdr_fshelp
-#cmakedefine01 _hdr_gui_window
 #cmakedefine01 _hdr_inttypes
 #cmakedefine01 _hdr_jfs_quota
 #cmakedefine01 _hdr_kernel_fs_info
@@ -48,7 +47,6 @@
 #cmakedefine01 _hdr_ufs_quota
 #cmakedefine01 _hdr_ufs_ufs_quota
 #cmakedefine01 _hdr_unistd
-#cmakedefine01 _hdr_util_string
 #cmakedefine01 _hdr_wchar
 #cmakedefine01 _hdr_windows
 #cmakedefine01 _hdr_winioctl
@@ -79,7 +77,9 @@
 #cmakedefine01 _inc_conflict__sys_quota__hdr_linux_quota
 
 #cmakedefine01 _command_msgfmt
-#define _cmd_loc_msgfmt "${_command_msgfmt}"
+#if _command_msgfmt
+# define _cmd_loc_msgfmt "${_command_msgfmt}"
+#endif
 
 #cmakedefine01 _const_O_NOCTTY
 

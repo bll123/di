@@ -786,10 +786,10 @@ getDiskSpecialInfo (di_data_t *di_data, int dontResolveSymlink)
     /* check for initial slash; otherwise we can pick up normal files */
     if (* (dinfo->strdata [DI_DISP_FILESYSTEM]) == '/' &&
         stat (dinfo->strdata [DI_DISP_FILESYSTEM], &statBuf) == 0) {
-      int                 rc;
-
       if (! dontResolveSymlink && checkForUUID (dinfo->strdata [DI_DISP_FILESYSTEM])) {
-        struct stat tstatBuf;
+#if _lib_realpath && _define_S_ISLNK && _lib_lstat
+        int           rc;
+        struct stat   tstatBuf;
 
         rc = lstat (dinfo->strdata [DI_DISP_FILESYSTEM], &tstatBuf);
         if (rc == 0 && S_ISLNK (tstatBuf.st_mode)) {
@@ -801,6 +801,7 @@ getDiskSpecialInfo (di_data_t *di_data, int dontResolveSymlink)
                 tspecial);
           }
         }
+#endif
       }
       dinfo->sp_dev = (unsigned long) statBuf.st_dev;
       dinfo->sp_rdev = (unsigned long) statBuf.st_rdev;

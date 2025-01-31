@@ -101,24 +101,17 @@
 #if _hdr_winioctl                   /* windows */
 # include <winioctl.h>
 #endif
-#if _hdr_kernel_fs_info             /* BeOS */
+#if _hdr_kernel_fs_info             /* haiku */
 # include <kernel/fs_info.h>
 #endif
-#if _hdr_storage_Directory          /* BeOS */
+#if _hdr_storage_Directory          /* haiku */
 # include <storage/Directory.h>
 #endif
-#if _hdr_storage_Entry              /* BeOS */
+#if _hdr_storage_Entry              /* haiku */
 # include <storage/Entry.h>
 #endif
-#if _hdr_storage_Path               /* BeOS */
+#if _hdr_storage_Path               /* haiku */
 # include <storage/Path.h>
-#endif
- /* bozo syllable volumes header requires gui/window */
-#if _hdr_gui_window                 /* Syllable */
-# include <gui/window.h>            /* gack! */
-#endif
-#if _hdr_util_string                /* Syllable */
-# include <util/string.h>           /* os::String - to get mount name */
 #endif
 
 #include "di.h"
@@ -140,15 +133,14 @@ extern "C" {
 }
 #endif
 
-#if (_lib_getmntent \
-    || _args_statfs > 0) \
-    && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
-    && ! _lib_getvfsstat \
-    && ! _lib_mntctl \
-    && ! _lib_getmnt
+#if (_lib_getmntent || _args_statfs > 0) && \
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_mntctl && \
+    ! _lib_getmnt
 # if defined (_PATH_MOUNTED)
-#  define DI_MOUNT_FILE        _PATH_MOUNTED
+#  define DI_MOUNT_FILE         _PATH_MOUNTED
 # else
 #  if defined (_PATH_MNTTAB)
 #   define DI_MOUNT_FILE        _PATH_MNTTAB
@@ -575,10 +567,10 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
   }
 
   while (fread ( (char *) &mntEntry, sizeof (struct mnttab), 1, f) == 1) {
-        /* xenix allows null mount table entries */
-        /* sco nfs background mounts are marked as "nothing" */
+    /* xenix allows null mount table entries */
+    /* sco nfs background mounts are marked as "nothing" */
     if (mntEntry.mt_filsys [0] &&
-            strcmp (mntEntry.mt_filsys, "nothing") != 0) {
+        strcmp (mntEntry.mt_filsys, "nothing") != 0) {
       idx = *diCount;
       ++*diCount;
       di_data->diskInfo = (di_disk_info_t *) di_realloc (
@@ -1391,7 +1383,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
     return -1;
   }
 
-      /* <num> vmount structs returned in vmbuf */
+  /* <num> vmount structs returned in vmbuf */
   *diCount = num;
   di_data->diskInfo = (di_disk_info_t *) malloc (sizeof (di_disk_info_t) *
       (Size_t) (*diCount + 1));
@@ -1462,15 +1454,9 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
 #endif  /* _lib_mntctl */
 
 
-#if _lib_GetDriveType \
-    && _lib_GetLogicalDriveStrings
+#if _lib_GetDriveType && _lib_GetLogicalDriveStrings
 
-/*
- * di_get_disk_info
- *
- * Windows
- *
- */
+/* windows */
 
 # define MSDOS_BUFFER_SIZE          256
 # define BYTES_PER_LOGICAL_DRIVE    4
@@ -1530,22 +1516,24 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
       hnp = stpecpy (hnp, hnend, "\\\\.\\");
       hnp = stpecpy (hnp, hnend, p);
 
+      {
 # if _define_IOCTL_STORAGE_CHECK_VERIFY2
-      HANDLE hDevice = CreateFile (handleName,
-          FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE,
-          NULL, OPEN_EXISTING, 0, NULL);
-      bSuccess = DeviceIoControl (hDevice,
-          IOCTL_STORAGE_CHECK_VERIFY2,
-          NULL, 0, NULL, 0, &br, (LPOVERLAPPED) NULL);
+        HANDLE hDevice = CreateFile (handleName,
+            FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL, OPEN_EXISTING, 0, NULL);
+        bSuccess = DeviceIoControl (hDevice,
+            IOCTL_STORAGE_CHECK_VERIFY2,
+            NULL, 0, NULL, 0, &br, (LPOVERLAPPED) NULL);
 # else
-      HANDLE hDevice = CreateFile (handleName,
-          GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
-          NULL, OPEN_EXISTING, 0, NULL);
-      bSuccess = DeviceIoControl (hDevice,
-          IOCTL_STORAGE_CHECK_VERIFY,
-          NULL, 0, NULL, 0, &br, (LPOVERLAPPED) NULL);
+        HANDLE hDevice = CreateFile (handleName,
+            GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+            NULL, OPEN_EXISTING, 0, NULL);
+        bSuccess = DeviceIoControl (hDevice,
+            IOCTL_STORAGE_CHECK_VERIFY,
+            NULL, 0, NULL, 0, &br, (LPOVERLAPPED) NULL);
 # endif
-      CloseHandle (hDevice);
+        CloseHandle (hDevice);
+      }
 
       if (! bSuccess) {
         diptr->printFlag = DI_PRNT_BAD;
@@ -1564,15 +1552,9 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
 
 #endif  /* _lib_GetDiskFreeSpace || _lib_GetDiskFreeSpaceEx */
 
-#if _lib_fs_stat_dev \
-    && _lib_next_dev
+#if _lib_fs_stat_dev && _lib_next_dev
 
-/*
- * di_get_disk_entries
- *
- * For BeOS / Haiku
- *
- */
+/* beos, haiku */
 
 int
 di_get_disk_entries (di_data_t *di_data, int *diCount)

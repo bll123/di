@@ -20,9 +20,9 @@ flag=${1:=R}
 shift
 complist=$*
 
-LOCKA=test_results/VM_A
-LOCKB=test_results/VM_B
-LOCKC=test_results/VM_C
+LOCKA=tmp/VM_A
+LOCKB=tmp/VM_B
+LOCKC=tmp/VM_C
 locklist="${LOCKA} ${LOCKB}"
 
 function remotebldrun  {
@@ -63,6 +63,7 @@ if [[ $flag != C ]]; then
       cp -f ${testdir}/*.out ${rsltdir}
       cd ..
     elif [[ ${type} = remote ]]; then
+      echo "-- $(date '+%T') ${host}: copying files"
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
       remotebldrun $ipaddr
@@ -91,6 +92,7 @@ if [[ $flag != C ]]; then
       if [[ $rc -ne 0 ]]; then
         exit 1
       fi
+      echo "-- $(date '+%T') ${host}: copying files"
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
       remotebldrun $ipaddr
@@ -117,6 +119,7 @@ if [[ $flag == R || $flag == C ]]; then
   done
 fi
 
+# cmake/mkc comparison
 for comp in ${complist}; do
   rsltdir=${topdir}/test_results/${host}_${comp}
   remsystype=$(cat ${rsltdir}/di-systype.out)
@@ -127,13 +130,6 @@ for comp in ${complist}; do
     awk -f ./tests/chkdiff.awk ${rsltdir}/di-tmpdiff.out \
         > ${rsltdir}/di-diff.out
     dlc=$(cat ${rsltdir}/di-diff.out | wc -l)
-    if [[ $remsystype == NetBSD && $dlc == 28 ]]; then
-      # cmake finds library routines that have been deprecated and
-      # are not declared.
-      # there is also an include conflict difference that needs to be
-      # researched
-      dlc=0
-    fi
     if [[ $dlc != 0 ]]; then
       echo "== $(date '+%T') ${host}/${comp}: config.h diff failed"
     fi
@@ -146,6 +142,29 @@ for comp in ${complist}; do
   fi
 done
 
+# different compilers should end up with the same data
+rsltdir=""
+for comp in ${complist}; do
+  if [[ x$rsltdir != x ]]; then
+    rsltdirb=${topdir}/test_results/${host}_${comp}
+    # do mkc first, always there
+    for bld in mkc cmake; do
+      if [[ ! -f ${rsltdir}/di-${bld}-config.out ||
+          ! -f ${rsltdirb}/di-${bld}-config.out ]]; then
+        break
+      fi
+      diff -b -B ${rsltdir}/di-${bld}-config.out ${rsltdirb}/di-${bld}-config.out \
+          > ${rsltdir}/di-tmp${bld}diff.out
+      awk -f ./tests/chkblddiff.awk ${rsltdir}/di-tmp${bld}diff.out \
+          > ${rsltdir}/di-${bld}diff.out
+      dlc=$(cat ${rsltdir}/di-${bld}diff.out | wc -l)
+      if [[ $dlc != 0 ]]; then
+        echo "== $(date '+%T') ${host}: ${bld} config.h diff failed"
+      fi
+    done
+  fi
+  rsltdir=${topdir}/test_results/${host}_${comp}
+done
 echo "-- $(date '+%T') ${host}: finish"
 
 exit 0

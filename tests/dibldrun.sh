@@ -109,6 +109,12 @@ bldrun () {
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
+  ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    grc=1
+  fi
 
   if [ $tag = cmake ]; then
     for f in build/CMakeFiles/CMakeOutput.log \
@@ -135,10 +141,6 @@ bldrun () {
         preserveoutput $f
       fi
     done
-  fi
-
-  if [ $grc -ne 0 ]; then
-    exit 1
   fi
 }
 
@@ -171,6 +173,7 @@ if [ -f ${tarfn} ]; then
 fi
 if [ ! -f ${starfn} ]; then
   echo "== ${host}: gunzip failed"
+  exit 1
 fi
 
 tar xf ${starfn}
@@ -179,6 +182,7 @@ mv ${didir} ${testdir}
 cd ${testdir}
 rc=$?
 if [ $rc -ne 0 ]; then
+  echo "Could no cd to ${testdir}"
   exit 1
 fi
 
@@ -194,4 +198,4 @@ fi
 bldrun mkc
 echo ${systype} > di-systype.out
 
-exit 0
+exit $grc

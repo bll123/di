@@ -29,7 +29,7 @@ runs.  No rigorous tests have been run.
  FreeBSD 10.3 | - | - | - | - | - | - | -
  FreeBSD 11 | - | - | - | - | - | - | -
  FreeBSD 13.4 | - | - | - | - | - | - | -
- FreeBSD 14.2 | 4.99.5<br>2025-1-28 | 4.99.5<br>2025-1-28 | - | - | - | - | getfsstat
+ FreeBSD 14.2 | 4.99.7<br>2025-1-30 | 4.99.7<br>2025-1-30 | - | - | - | - | getfsstat
  MirBSD 10 | - | - | - | - | - | - | -
  NetBSD 1.62 | - | - | - | - | - | - | -
  NetBSD 2.0 | n/a | 4.99.3<br>2025-1-25 | - | - | - | - | many odd warnings
@@ -40,7 +40,7 @@ runs.  No rigorous tests have been run.
  NetBSD 6.0 | - | - | - | - | - | - | -
  NetBSD 7.0.1 | - | - | - | - | - | - | -
  NetBSD 9.0 | - | 4.99.5<br>2025-1-28 | - | - | - | - | -
- NetBSD 10.1 | - | 4.99.5<br>2025-1-28 | - | - | - | - | cfarm
+ NetBSD 10.1 | 4.99.7<br>2025-1-30<br>gcc clang | 4.99.7<br>2025-1-30<br>gcc clang | - | - | - | - | getvfsstat<br>cfarm
  NetBSD 10.1 | - | - | - | - | - | - | -
  OpenBSD 4.4 | - | - | - | - | - | - | -
  OpenBSD 4.5 | - | - | - | - | - | - | -
@@ -67,8 +67,8 @@ runs.  No rigorous tests have been run.
  Linux Mint 18.2 | - | 4.99.5<br>2025-1-28 | - | - | - | - | -
  Linux Mint 19 | - | - | - | - | - | - | -
  Linux Mint 21 | 4.99.3<br>2025-1-25 | 4.99.3<br>2025-1-25 | - | - | - | - | -
- MX Linux 21<br>(Debian 11)| 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | get/set/endmntent statvfs
- MX Linux 23<br>(Debian 12)| 4.99.6<br>2025-1-29<br>gcc clang | 4.99.6<br>2025-1-29<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
+ MX Linux 21<br>(Debian 11)| 4.99.7<br>2025-1-30 | 4.99.7<br>2025-1-30 | - | - | - | - | get/set/endmntent statvfs
+ MX Linux 23<br>(Debian 12)| 4.99.6<br>2025-1-30<br>gcc clang | 4.99.7<br>2025-1-30<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
  Ubuntu 14.04<br>(32-bit) | n/a | 4.99.5<br>2025-1-29 | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | n/a | 4.99.5<br>2025-1-29 | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | - | 4.99.3<br>2025-1-25 | - | - | - | - | -
@@ -108,12 +108,12 @@ runs.  No rigorous tests have been run.
  MacOS Ventura | - | - | - | - | - | - | getfsstat
  MacOS Monterey | - | 4.99.3<br>2025-1-27 | - | - | - | - | getfsstat<br>cfarm
  MacOS Sonoma | - | - | - | - | - | - | getfsstat
- MacOS Sequoia (intel) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | getfsstat
+ MacOS Sequoia (intel) | 4.99.7<br>2025-1-30 | 4.99.7<br>2025-1-30 | - | - | - | - | getfsstat
  MacOS Sequoia (m1) | 4.99.2<br>2025-1-25 | 4.99.2<br>2025-1-25 | - | - | - | - | getfsstat
  __Other:__ | | | | | | |
  AIX 7.1 | - | 4.99.3<br>2025-1-26<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
- Haiku r1b5 | - | 4.99.3<br>2025-1-26 | - | - | - | - | haiku<br>ramfs used value err
- SCO OpenServer 6.0.0 | - | 4.99.3<br>2025-1-27<br>gcc cc | - | - | - | - | getmntent statvfs<br>polarhome
+ Haiku r1b5 | - | 4.99.3<br>2025-1-26 | - | - | - | - | fs_stat_dev<br>ramfs used value err
+ SCO OpenServer 6.0.0 | - | 4.99.7<br>2025-1-30<br>gcc | - | - | - | - | getmntent statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | polarhome
  QNX 6.5 | - | FAIL | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | | | |
@@ -123,7 +123,7 @@ runs.  No rigorous tests have been run.
  Open Solaris 200906 | - | - | - | - | - | - | getmntent statvfs
  Solaris 10 | - | - | - | - | - | - | getmntent statvfs
  Solaris 11.4 | 4.99.5<br>2025-1-28<br>gcc clang cc | 4.99.5<br>2025-1-28<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
- Solaris 11.4 (BE) | - | - | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
+ Solaris 11.4 (BE) | 4.99.7<br>2025-1-30<br>gcc clang | 4.99.7<br>2025-1-30<br>gcc clang | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
  __Windows:__| | | | | | | -
  Cygwin | - | - | - | - | - | - | get/set/endmntent statvfs?
  MSys 2| - | - | - | - | - | - | -

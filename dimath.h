@@ -102,7 +102,7 @@ static inline void
 dinum_init (dinum_t *r)
 {
 #if _use_math == DI_GMP
-  mpz_init_set_ui (*r, (mp_limb_t) 0);
+  mpz_init_set_ui (*r, (unsigned long) 0);
 #elif _use_math == DI_TOMMATH
   mp_init_u64 (r, 0);
 #else
@@ -164,7 +164,7 @@ static inline void
 dinum_set_u (dinum_t *r, di_ui_t val)
 {
 #if _use_math == DI_GMP
-  mpz_set_ui (*r, (mp_limb_t) val);
+  mpz_set_ui (*r, (unsigned long) val);
 #elif _use_math == DI_TOMMATH
   mp_set_u64 (r, val);
 #else
@@ -176,7 +176,7 @@ static inline void
 dinum_set_s (dinum_t *r, di_si_t val)
 {
 #if _use_math == DI_GMP
-  mpz_set_si (*r, (mp_limb_signed_t) val);
+  mpz_set_si (*r, (long) val);
 #elif _use_math == DI_TOMMATH
   mp_set_i64 (r, val);
 #else
@@ -191,7 +191,7 @@ dinum_add_u (dinum_t *r, di_ui_t val)
   mpz_t     v;
   mpz_t     t;
 
-  mpz_init_set_ui (v, (mp_limb_t) val);
+  mpz_init_set_ui (v, (unsigned long) val);
   mpz_init (t);
   mpz_set (t, *r);
   mpz_add (*r, t, v);
@@ -215,7 +215,7 @@ dinum_sub_u (dinum_t *r, di_ui_t val)
   mpz_t     v;
   mpz_t     t;
 
-  mpz_init_set_ui (v, (mp_limb_t) val);
+  mpz_init_set_ui (v, (unsigned long) val);
   mpz_init (t);
   mpz_set (t, *r);
   mpz_sub (*r, t, v);
@@ -289,7 +289,7 @@ static inline int
 dinum_cmp_s (const dinum_t *r, di_si_t val)
 {
 #if _use_math == DI_GMP
-  return mpz_cmp_si (*r, (mp_limb_signed_t) val);
+  return mpz_cmp_si (*r, (long) val);
 #elif _use_math == DI_TOMMATH
   mp_int      t;
   int         rv;
@@ -329,7 +329,7 @@ static inline void
 dinum_mul_u (dinum_t *r, di_ui_t val)
 {
 #if _use_math == DI_GMP
-  mpz_mul_ui (*r, *r, (mp_limb_t) val);
+  mpz_mul_ui (*r, *r, (unsigned long) val);
 #elif _use_math == DI_TOMMATH
   mp_int    v;
 
@@ -345,9 +345,9 @@ static inline void
 dinum_mul_uu (dinum_t *r, di_ui_t vala, di_ui_t valb)
 {
 #if _use_math == DI_GMP
-  mpz_set_ui (*r, (mp_limb_t) 1);
-  mpz_mul_ui (*r, *r, (mp_limb_t) vala);
-  mpz_mul_ui (*r, *r, (mp_limb_t) valb);
+  mpz_set_ui (*r, (unsigned long) 1);
+  mpz_mul_ui (*r, *r, (unsigned long) vala);
+  mpz_mul_ui (*r, *r, (unsigned long) valb);
 #elif _use_math == DI_TOMMATH
   mp_int    t;
   mp_int    v;
@@ -375,11 +375,11 @@ dinum_scale (dinum_t *r, dinum_t *val)
   mpz_t     t;
   mpz_t     result;
 
-  if (mpz_cmp_si (*val, (mp_limb_signed_t) 0) == 0) {
+  if (mpz_cmp_si (*val, (long) 0) == 0) {
     return 0.0;
   }
 
-  mpz_init_set_ui (t, (mp_limb_t) DI_SCALE_PREC);
+  mpz_init_set_ui (t, (unsigned long) DI_SCALE_PREC);
   mpz_init (result);
   mpz_mul (t, t, *r);
   mpz_cdiv_q (result, t, *val);
@@ -446,7 +446,7 @@ dinum_perc (dinum_t *r, dinum_t *val)
 
   /* multiply by a larger value */
   /* so that the double can get rounded appropriately */
-  mpz_mul_ui (t, *r, (mp_limb_t) DI_PERC_PRECISION);
+  mpz_mul_ui (t, *r, (unsigned long) DI_PERC_PRECISION);
   mpz_tdiv_q (quot, t, *val);
   dval = mpz_get_d (quot);
   dval /= DI_PERC_DIV;

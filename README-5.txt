@@ -23,6 +23,8 @@ Version 5 beta Timeline
 2025-1-29 Solaris cc, OpenBSD, DragonFly BSD are building.
           gcc version 4 is a problem on older systems, emits lots of
           code-not-reachable warnings.
+2025-1-30 Various fixes. pkgconfig file fix.
+2025-1-30 re-work the CMakeLists.txt file.
 
 Version 5.x beta
 

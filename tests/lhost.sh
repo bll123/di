@@ -9,6 +9,16 @@ PORT=166
 USER=bll
 comp=cc
 host=`uname -n`
+systype=`uname -s`
+
+case ${systype} in
+  CYGWIN*)
+    host=${host}_cygwin
+    ;;
+  MSYS*|MINGW*)
+    host=${host}_msys2
+    ;;
+esac
 
 flag=${1:-R}
 
@@ -18,9 +28,7 @@ if [ $flag != C ]; then
   chmod a+rx dibldrun.sh
   tarfn=`echo di-*.tar.gz`
   didir=`echo ${tarfn} | sed 's,\.tar.gz$,,'`
-
   rsltdir=test_results/${host}_${comp}
-
   ./dibldrun.sh ${host} ${tarfn} ${didir} ${comp}
   ssh -p ${PORT} -l ${USER} ${SRCHOST} \
       "test -d ${SRCDIR}/${rsltdir} || mkdir -p ${SRCDIR}/${rsltdir}"

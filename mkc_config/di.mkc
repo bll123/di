@@ -14,7 +14,6 @@ hdr     dirent.h
 hdr     errno.h
 hdr     fcntl.h
 hdr     fshelp.h
-hdr     gui/window.h
 hdr     inttypes.h
 hdr     jfs/quota.h
 hdr     kernel/fs_info.h
@@ -51,7 +50,6 @@ hdr     libtommath/tommath.h
 hdr     ufs/quota.h
 hdr     ufs/ufs/quota.h sys/types.h
 hdr     unistd.h
-hdr     util/string.h
 hdr     wchar.h
 hdr     windows.h
 hdr     winioctl.h windows.h

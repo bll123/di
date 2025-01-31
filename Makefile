@@ -5,8 +5,8 @@
 #  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
-DI_VERSION = 4.99.6
-DI_LIBVERSION = 4.99.6
+DI_VERSION = 4.99.7
+DI_LIBVERSION = 4.99.7
 DI_SOVERSION = 4
 DI_RELEASE_STATUS = beta
 
@@ -126,7 +126,7 @@ realclean:
 distclean:
 	@$(MAKE) realclean >/dev/null 2>&1
 	@-rm -rf tests.done test_di _mkconfig_runtests \
-		test_results \
+		test_results x \
 		$(MKC_FILES) \
 		$(BUILDDIR) \
 		>/dev/null 2>&1; exit 0
@@ -159,7 +159,12 @@ cmake-sanitize:
 .PHONY: cmake-all
 cmake-all:
 	@case $$(uname -s) in \
-	  CYGWIN*|MSYS*|MINGW*) \
+	  CYGWIN*) \
+	    COMP=$(CC) \
+	    $(MAKE) cmake-unix; \
+	    $(MAKE) cmake-build; \
+            ;; \
+	  MSYS*|MINGW*) \
 	    COMP=$(CC) \
 	    $(MAKE) cmake-windows; \
 	    $(MAKE) cmake-build; \
@@ -184,7 +189,7 @@ cmakeclang:
 	    $(MAKE) cmake-unix; \
 	    $(MAKE) cmake-build; \
             ;; \
-	  MINGW*) \
+	  MSYS*|MINGW*) \
 	    COMP=/ucrt64/bin/clang.exe \
 	    $(MAKE) cmake-windows; \
 	    $(MAKE) cmake-build; \
@@ -210,7 +215,7 @@ cmake-unix:
 		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
 		-DPREFIX:STATIC=$(PREFIX) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
-		-S . -B $(BUILDDIR) -Werror=deprecated
+		-S . -B $(BUILDDIR) -Werror=deprecated --debug-trycompile
 
 # internal use
 .PHONY: cmake-windows
@@ -321,11 +326,13 @@ mkc-install-di:
 	$(MAKE) mkc-install-man
 	$(MAKE) mkc-install-pc
 	@sym=T ; \
+	instdest=$(INST_LIBDIR) ; \
 	case `uname -s` in \
 	  Darwin) \
             libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
             ;; \
           CYGWIN*|MSYS*|MINGW*) \
+	    instdest=$(INST_BINDIR) ; \
 	    libnm=libdi$(SHLIB_EXT) ; \
 	    sym=F ; \
 	    ;; \
@@ -333,7 +340,7 @@ mkc-install-di:
             libnm=libdi$(SHLIB_EXT).$(DI_LIBVERSION) ; \
             ;; \
 	esac ; \
-	cp -f libdi$(SHLIB_EXT) $(INST_LIBDIR)/$${libnm} ; \
+	cp -f libdi$(SHLIB_EXT) $${instdest}/$${libnm} ; \
 	if [ $$sym = T ]; then \
 	  (cd $(INST_LIBDIR); ln -sf $${libnm} libdi$(SHLIB_EXT)) ; \
 	fi
