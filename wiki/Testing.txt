@@ -127,7 +127,7 @@ runs.  No rigorous tests have been run.
  Solaris 11.4 | 4.99.7<br>2025-1-31<br>gcc clang cc | 4.99.7<br>2025-1-31<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>gmp<br>cfarm
  Solaris 11.4 (BE) | 4.99.7<br>2025-1-31<br>gcc clang cc | 4.99.7<br>2025-1-31<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
  __Windows:__| | | | | | | -
- Cygwin | - | - | - | - | - | - | get/set/endmntent statvfs?
- MSys 2| - | - | - | - | - | - | -
+ Cygwin | 4.99.7<br>2025-1-31| - | - | - | - | - | get/set/endmntent statvfs?
+ MSys 2| - | 4.99.7<br>2025-1-31 | - | - | - | - | - | -
 
 [Wiki Home](Home)

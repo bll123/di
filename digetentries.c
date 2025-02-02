@@ -264,22 +264,13 @@ checkMountOptions (struct mnttab *mntEntry, char *str)
 
 #endif
 
-#if _lib_getmntent \
-    && _lib_setmntent \
-    && _lib_endmntent \
-    && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
-    && ! _lib_getvfsstat \
-    && ! _lib_mntctl \
-    && ! _lib_GetDriveType \
-    && ! _lib_GetLogicalDriveStrings
-
-/*
- * di_get_disk_entries
- *
- * SunOS supplies an open and close routine for the mount table.
- *
- */
+#if _lib_getmntent && \
+    _lib_setmntent && \
+    _lib_endmntent && \
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_mntctl
 
 #if ! defined (MNTTYPE_IGNORE)
 # define MNTTYPE_IGNORE "ignore"
@@ -372,16 +363,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
 #endif /* _lib_getmntent && _lib_setmntent && _lib_endmntent */
 
 /* QNX */
-#if ! _lib_getmntent \
-    && ! _lib_mntctl \
-    && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
-    && ! _lib_getvfsstat \
-    && ! _lib_getmnt \
-    && ! _lib_GetDriveType \
-    && ! _lib_GetLogicalDriveStrings \
-    && ! _lib_fs_stat_dev \
-    && defined (__QNX__)
+#if defined (__QNX__)
 
 /*
  * di_get_disk_entries
@@ -527,16 +509,16 @@ di_getQNXDiskEntries (di_data_t *di_data, char *ipath, int *diCount)
 #endif /* QNX */
 
 /* if nothing matches, assume a SysV.3 /etc/mnttab or similar */
-#if ! _lib_getmntent \
-    && ! _lib_mntctl \
-    && ! _lib_getmntinfo \
-    && ! _lib_getfsstat \
-    && ! _lib_getvfsstat \
-    && ! _lib_getmnt \
-    && ! _lib_GetDriveType \
-    && ! _lib_GetLogicalDriveStrings \
-    && ! _lib_fs_stat_dev \
-    && ! defined (__QNX__)
+#if ! _lib_getmntent && \
+    ! _lib_mntctl && \
+    ! _lib_getmntinfo && \
+    ! _lib_getfsstat && \
+    ! _lib_getvfsstat && \
+    ! _lib_getmnt && \
+    ! _lib_GetDriveType && \
+    ! _lib_GetLogicalDriveStrings && \
+    ! _lib_fs_stat_dev && \
+    ! defined (__QNX__)
 
 /*
  * di_get_disk_entries
@@ -571,7 +553,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
       ++*diCount;
       di_data->diskInfo = (di_disk_info_t *) di_realloc (
           (char *) di_data->diskInfo,
-          sizeof (di_disk_info_t) * (*diCount + 1));
+          sizeof (di_disk_info_t) * (Size_t) (*diCount + 1));
       if (di_data->diskInfo == (di_disk_info_t *) NULL) {
         fprintf (stderr, "malloc failed for diskInfo. errno %d\n", errno);
         return -1;
@@ -1450,7 +1432,9 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
 #endif  /* _lib_mntctl */
 
 
-#if _lib_GetDriveType && _lib_GetLogicalDriveStrings
+#if ! _lib_getmntent && \
+   _lib_GetDriveType && \
+   _lib_GetLogicalDriveStrings
 
 /* windows */
 

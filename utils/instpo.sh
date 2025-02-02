@@ -15,9 +15,31 @@ fi
 
 test -d "${INST_LOCALEDIR}" || mkdir -p "${INST_LOCALEDIR}"
 
+# try for xmsgfmt first, for older systems
+msgfmtcmd=$(which xmsgfmt 2>/dev/null)
+rc=$?
+if [ $rc -ne 0 -o "x$msgfmtcmd" != x ]; then
+  msgfmtcmd=$(which gmsgfmt 2>/dev/null)
+  rc=$?
+  if [ $rc -ne 0 -o "x$msgfmtcmd" != x ]; then
+    msgfmtcmd=$(which msgfmt 2>/dev/null)
+    rc=$?
+    if [ $rc -ne 0 -o "x$msgfmtcmd" != x ]; then
+      # maybe the which command is not there...
+      # try some common spots
+      if [ -f /usr/bin/xmsgfmt ]; then
+        msgfmtcmd=xmsgfmt
+      fi
+      if [ "x$msgfmtcmd" = x -f /usr/bin/msgfmt ]; then
+        msgfmtcmd=msgfmt
+      fi
+    fi
+  fi
+fi
+
 for i in *.po; do
   j=`echo $i | sed 's,\\.po$,,'`
-  msgfmt -o $j.mo $i 2> /dev/null
+  ${msgfmtcmd} -o $j.mo $i 2> /dev/null
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "msgfmt failed"
