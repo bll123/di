@@ -1,6 +1,6 @@
 
 * FreeBSD
-    * pkg install pkgconf gmp libtommath ksh bash mksh pdksh
+    * pkg install pkgconf gmp libtommath ksh bash mksh pdksh gettext
 * AIX
     * https://lzsiga.users.sourceforge.net/aix-linking.html
 * cmake

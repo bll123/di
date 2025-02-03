@@ -133,7 +133,7 @@ if [[ $flag != C && $type == vm ]]; then
   fi
 fi
 
-./tests/compare.sh ${host} ${complist}
+./tests/check.sh ${host} ${complist}
 
 echo "-- $(date '+%T') ${host}: finish"
 

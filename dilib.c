@@ -103,8 +103,8 @@ static void preCheckDiskInfo    (di_data_t *);
 static void checkExcludeList    (di_data_t *di_data, di_disk_info_t *, di_strarr_t *);
 static void checkIncludeList    (di_data_t *, di_disk_info_t *, di_strarr_t *);
 static int  isIgnoreFSType      (const char *);
-static int  isIgnoreSpecial     (const char *);
-static int  isIgnoreFS          (const char *, const char *);
+static int  isIgnoreFilesystem (const char *);
+static int  isIgnoreFS (const char *, const char *);
 static int  checkForUUID        (const char *);
 static int  di_sort_compare           (const di_opt_t *, const char *sortType, const di_disk_info_t *, int, int);
 static void checkZone (di_disk_info_t *, di_zone_info_t *, di_opt_t *);
@@ -206,11 +206,11 @@ di_process_options (void *tdi_data, int argc, const char * argv [], int offset)
   if (diopts->optval [DI_OPT_DEBUG] > 0) {
     fprintf (stdout, "# BUILD: %s\n", DI_BUILD_SYS);
 #if _use_math == DI_GMP
-    fprintf (stdout, "# GMP:\n");
+    fprintf (stdout, "# MATH: GMP\n");
 #elif _use_math == DI_TOMMATH
-    fprintf (stdout, "# TOMMATH:\n");
+    fprintf (stdout, "# MATH: TOMMATH\n");
 #else
-    fprintf (stdout, "# INTERNAL: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long, _siz_long_long);
+    fprintf (stdout, "# MATH: INTERNAL: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long, _siz_long_long);
 #endif
   }
 
@@ -923,11 +923,11 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
           printf ("chk: ignore-fstype: %s\n", dinfo->strdata [DI_DISP_FSTYPE]);
         }
       }
-      if (isIgnoreSpecial (dinfo->strdata [DI_DISP_FILESYSTEM])) {
+      if (isIgnoreFilesystem (dinfo->strdata [DI_DISP_FILESYSTEM])) {
         dinfo->printFlag = DI_PRNT_IGNORE;
         dinfo->doPrint = diopts->optval [DI_OPT_DISP_ALL];
         if (diopts->optval [DI_OPT_DEBUG] > 2) {
-          printf ("chk: ignore-special: %s\n", dinfo->strdata [DI_DISP_FILESYSTEM]);
+          printf ("chk: ignore-filesystem: %s\n", dinfo->strdata [DI_DISP_FILESYSTEM]);
         }
       }
       if (isIgnoreFS (dinfo->strdata [DI_DISP_FSTYPE], dinfo->strdata [DI_DISP_MOUNTPT])) {
@@ -1041,6 +1041,18 @@ checkDiskQuotas (di_data_t *di_data)
   uid = geteuid ();
   gid = getegid ();
 #endif
+
+  if (diopts->optval [DI_OPT_DEBUG] > 0) {
+    const char  *str;
+    int         pos;
+
+    str = _lib_quotactl ? "quotactl" : "";
+    str = _lib_vquotactl ? "vquotactl" : str;
+    str = _lib_quota_open ? "quota_open" : str;
+    pos = _quotactl_pos_1 ? 1 : _quotactl_pos_2 ? 2 : 0;
+
+    printf ("# QUOTA: %d:%s(%d) nfs:%d\n", _has_std_quotas, str, pos, _has_std_nfs_quotas);
+  }
 
   for (i = 0; i < di_data->fscount; ++i) {
     di_disk_info_t        *dinfo;
@@ -1362,16 +1374,11 @@ checkZone (di_disk_info_t *dinfo, di_zone_info_t *zoneInfo, di_opt_t *diopts)
 }
 
 static int
-isIgnoreSpecial (const char *special)
+isIgnoreFilesystem (const char *filesystem)
 {
   static const char   *appletimemachine = "com.apple.TimeMachine.";
 
-  /* solaris: swap */
-  /* linux: cgroup, tmpfs */
-  if (strncmp (special, appletimemachine, strlen (appletimemachine)) == 0 ||
-      strcmp (special, "tmpfs") == 0 ||
-      strcmp (special, "cgroup") == 0 ||
-      strcmp (special, "swap") == 0) {
+  if (strncmp (filesystem, appletimemachine, strlen (appletimemachine)) == 0) {
     return true;
   }
   return false;
@@ -1392,11 +1399,18 @@ isIgnoreFS (const char *fstype, const char *name)
 static int
 isIgnoreFSType (const char *fstype)
 {
+  /* solaris: swap */
+  /* linux: cgroup, tmpfs, squashfs, overlay */
   if (strcmp (fstype, "rootfs") == 0 ||
       strcmp (fstype, "procfs") == 0 ||
       strcmp (fstype, "ptyfs") == 0 ||
       strcmp (fstype, "kernfs") == 0 ||
       strcmp (fstype, "devfs") == 0 ||
+      strcmp (fstype, "tmpfs") == 0 ||
+      strcmp (fstype, "cgroup") == 0 ||
+      strcmp (fstype, "swap") == 0 ||
+      strcmp (fstype, "squashfs") == 0 ||
+      strcmp (fstype, "overlay") == 0 ||
       strcmp (fstype, "devtmpfs") == 0) {
     return true;
   }

@@ -92,6 +92,7 @@
 #endif
 
 #include "di.h"
+#include "disystem.h"
 #include "dimath.h"
 #include "diquota.h"
 #include "diinternal.h"
@@ -436,9 +437,6 @@ diquota (di_data_t *di_data, di_quota_t *diqinfo)
 
   diopts = (di_opt_t *) di_data->options;
 
-  if (diopts->optval [DI_OPT_DEBUG] > 5) {
-    printf ("# diquota\n");
-  }
   rc = -1;
   xfsflag = false;
 

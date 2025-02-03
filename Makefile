@@ -26,6 +26,13 @@ MKC_FILES = mkc_files
 MKC_ENV = di.env
 MKC_CONF = $(MKC_CONFDIR)/di.mkc
 MKC_ENV_CONF = $(MKC_CONFDIR)/di-env.mkc
+#
+#    To turn off stack fortification:
+#
+#      make -e DI_FORTIFY=N PREFIX=$HOME/local
+#      make -e DI_FORTIFY=N PREFIX=$HOME/local install
+#
+DI_FORTIFY = Y
 
 OBJ_EXT = .o
 EXE_EXT =
@@ -94,7 +101,7 @@ switcher:
 # cleaning
 
 # clean temporary files
-.PHONY: clean
+.PHONY: tclean
 tclean:
 	@-rm -f w ww asan.* *.orig \
 		dep-*.txt >/dev/null 2>&1; exit 0
@@ -114,7 +121,6 @@ clean:
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
 	@-test -d $(BUILDDIR) && cmake --build $(BUILDDIR) --target clean
 
-# mkc tests use this
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean >/dev/null 2>&1
@@ -276,8 +282,8 @@ mkc-perl:	$(MKC_ENV)
 		$(MAKE) -e MKCONFIG_TYPE=perl \
                 mkc-di-programs
 
-.PHONY: test
-mkc-test:		tests.done
+.PHONY: mkc-test
+mkc-test:
 	. ./$(MKC_ENV); \
 	    ./dimathtest$(EXE_EXT); \
 	    ./getoptn_test$(EXE_EXT)
@@ -294,7 +300,7 @@ mkc-install:
 
 .PHONY: mkc-install-po
 mkc-install-po:
-	./utils/instpo.sh $(INST_LOCALEDIR)
+	-./utils/instpo.sh $(INST_LOCALEDIR)
 
 .PHONY: mkc-install-pc
 mkc-install-pc: $(MKC_REQLIB)
@@ -311,6 +317,7 @@ mkc-install-pc: $(MKC_REQLIB)
 	      -e "s~@DI_REQUIRED_LIBS@~$${dilibs}~" \
 	  > $(INST_PKGCDIR)/di.pc
 
+# not sure about how the naming works on aix
 .PHONY: mkc-install-di
 mkc-install-di:
 	test -d $(INST_BINDIR) || mkdir -p $(INST_BINDIR)
@@ -324,11 +331,6 @@ mkc-install-di:
 	@sym=T ; \
 	instdest=$(INST_LIBDIR) ; \
 	case `uname -s` in \
-	  AIX) \
-	    # not sure about how the naming works on aix ; \
-            libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
-            libnmso=libdi.$(DI_SOVERSION)$(SHLIB_EXT) ; \
-            ;; \
 	  Darwin) \
             libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
             libnmso=libdi.$(DI_SOVERSION)$(SHLIB_EXT) ; \
@@ -359,18 +361,13 @@ mkc-install-man:
 	-test -d $(INST_MANDIR)/man3 || mkdir -p $(INST_MANDIR)/man3
 	cp -f man/libdi.3 $(INST_MANDIR)/man3/$(MAN_TARGET)
 
-.PHONY: mkc-install-ditest
-mkc-install-ditest:
-	test -d $(INST_BINDIR) || mkdir -p $(INST_BINDIR)
-	cp -f dimathtest$(EXE_EXT) $(INST_BINDIR)
-	cp -f getoptn_test$(EXE_EXT) $(INST_BINDIR)
-
 ###
 # mkc environment
 
 $(MKC_ENV):	$(MKC_ENV_CONF)
 	@-rm -f $(MKC_ENV) tests.done
-	CC=$(CC) $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
+	CC=$(CC) DI_FORTIFY=$(DI_FORTIFY) \
+	    $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
 
 ###
 # programs
@@ -471,55 +468,48 @@ getoptn_test$(OBJ_EXT):	getoptn.c
 		-DTEST_GETOPTN=1 \
 		-o getoptn_test$(OBJ_EXT) getoptn.c
 
-###
-# regression testing
-
-.PHONY: mkc-test-all
-mkc-test-all:	tests.done
-
-tests.done: $(MKC_DIR)/runtests.sh
-	@echo "## running tests"
-	CC=$(CC) DC=$(DC) $(_MKCONFIG_SHELL) \
-		$(MKC_DIR)/runtests.sh ./tests.d
-	touch tests.done
-
 # DO NOT DELETE
 
-di$(OBJ_EXT): config.h
-di$(OBJ_EXT):   di.h disystem.h
-di$(OBJ_EXT):   distrutils.h
-didiskutil$(OBJ_EXT): config.h
-didiskutil$(OBJ_EXT):   di.h disystem.h
-didiskutil$(OBJ_EXT):   diinternal.h
-didiskutil$(OBJ_EXT): dimath.h  dioptions.h distrutils.h
-didiskutil$(OBJ_EXT): dimntopt.h
-digetentries$(OBJ_EXT): config.h
-digetentries$(OBJ_EXT):  di.h disystem.h
-digetentries$(OBJ_EXT):  diinternal.h dimath.h
-digetentries$(OBJ_EXT):  dioptions.h distrutils.h dimntopt.h
-digetinfo$(OBJ_EXT): config.h
-digetinfo$(OBJ_EXT):   di.h disystem.h
-digetinfo$(OBJ_EXT):   diinternal.h
-digetinfo$(OBJ_EXT): dimath.h  dioptions.h dimntopt.h
-digetinfo$(OBJ_EXT):   distrutils.h
-dilib$(OBJ_EXT): config.h
-dilib$(OBJ_EXT): di.h disystem.h   dimath.h
-dilib$(OBJ_EXT):  diinternal.h dioptions.h dizone.h diquota.h
-dilib$(OBJ_EXT): distrutils.h
-dimathtest$(OBJ_EXT): config.h
-dimathtest$(OBJ_EXT):   dimath.h
-dioptions$(OBJ_EXT): config.h
-dioptions$(OBJ_EXT):   di.h diinternal.h
-dioptions$(OBJ_EXT): disystem.h   dimath.h
-dioptions$(OBJ_EXT):  dioptions.h distrutils.h getoptn.h
-diquota$(OBJ_EXT): config.h
-diquota$(OBJ_EXT):   di.h
-diquota$(OBJ_EXT): dimath.h   diquota.h
-diquota$(OBJ_EXT): disystem.h  diinternal.h dioptions.h
-diquota$(OBJ_EXT): distrutils.h
-distrutils$(OBJ_EXT): config.h
-distrutils$(OBJ_EXT):  distrutils.h
-dizone$(OBJ_EXT): config.h di.h dizone.h disystem.h
-dizone$(OBJ_EXT):  distrutils.h
-getoptn$(OBJ_EXT): config.h
-getoptn$(OBJ_EXT):  distrutils.h getoptn.h
+di.o: config.h 
+di.o: di.h
+di.o: disystem.h distrutils.h
+didiskutil.o: config.h 
+didiskutil.o: di.h disystem.h
+didiskutil.o: diinternal.h
+didiskutil.o: dimath.h dioptions.h getoptn.h
+didiskutil.o: distrutils.h dimntopt.h 
+digetentries.o: config.h 
+digetentries.o: di.h disystem.h 
+digetentries.o: diinternal.h dimath.h
+digetentries.o: dioptions.h getoptn.h distrutils.h
+digetentries.o: dimntopt.h
+digetinfo.o: config.h 
+digetinfo.o: di.h disystem.h
+digetinfo.o: diinternal.h
+digetinfo.o: dimath.h dioptions.h getoptn.h
+digetinfo.o: dimntopt.h 
+digetinfo.o: distrutils.h
+dilib.o: config.h 
+dilib.o: di.h disystem.h 
+dilib.o: dimath.h diinternal.h
+dilib.o: dioptions.h getoptn.h dizone.h diquota.h distrutils.h
+dimathtest.o: config.h 
+dimathtest.o: dimath.h
+dioptions.o: config.h 
+dioptions.o: di.h disystem.h
+dioptions.o: diinternal.h
+dioptions.o: dimath.h dioptions.h getoptn.h
+dioptions.o: distrutils.h
+diquota.o: config.h 
+diquota.o: di.h
+diquota.o: disystem.h dimath.h
+diquota.o: diquota.h diinternal.h dioptions.h
+diquota.o: getoptn.h distrutils.h
+distrutils.o: config.h 
+distrutils.o: distrutils.h
+dizone.o: config.h 
+dizone.o: di.h dizone.h disystem.h 
+dizone.o: dioptions.h getoptn.h distrutils.h
+getoptn.o: config.h 
+getoptn.o: disystem.h 
+getoptn.o: distrutils.h getoptn.h

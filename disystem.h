@@ -94,4 +94,13 @@
 # endif
 #endif
 
+#if ! _hdr_stdbool
+# ifndef false
+#  define false 0
+# endif
+# ifndef true
+#  define true 1
+# endif
+#endif
+
 #endif /* INC_DISYSTEM_H */

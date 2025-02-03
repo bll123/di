@@ -4,6 +4,8 @@ This documentation was created for the upcoming version 5.x.
 
 ### Known Issues
 
+* Configuring:  Some systems need an additional library (or something)
+for stack fortification.  mkconfig does not locate this.
 * MacOS: The libtommath library available via MacPorts currently has
 issues (see: https://trac.macports.org/ticket/71791 )
 * DragonFly BSD: If quotas are not turned on in the kernel

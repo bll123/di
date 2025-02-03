@@ -22,17 +22,37 @@ esac
 
 flag=${1:-R}
 
-if [ $flag != C ]; then
+localdir=""
+if [ x$1 != x -a -d "$1" ]; then
+  localdir=$1
+  flag=${2:-R}
+fi
+
+if [ x$localdir != x ]; then
+  cp $localdir/di-*.tar.gz .
+  cp $localdir/dibldrun.sh .
+else
   scp -P ${PORT} ${USER}@${SRCHOST}:${SRCDIR}/di-*.tar.gz \
       ${USER}@${SRCHOST}:${SRCDIR}/tests/dibldrun.sh .
+fi
+
+if [ $flag != C ]; then
   chmod a+rx dibldrun.sh
   tarfn=`echo di-*.tar.gz`
   didir=`echo ${tarfn} | sed 's,\.tar.gz$,,'`
-  rsltdir=test_results/${host}_${comp}
   ./dibldrun.sh ${host} ${tarfn} ${didir} ${comp}
+fi
+
+rsltdir=test_results/${host}_${comp}
+testdir=${didir}_${comp}
+
+if [ x$localdir != x ]; then
+  ldir=${localdir}/${rsltdir}
+  mkdir -p ${ldir}
+  cp -f ${testdir}/*.out ${ldir}
+else
   ssh -p ${PORT} -l ${USER} ${SRCHOST} \
       "test -d ${SRCDIR}/${rsltdir} || mkdir -p ${SRCDIR}/${rsltdir}"
-  testdir=${didir}_${comp}
   scp -q -P ${PORT} ${testdir}/*.out ${USER}@${SRCHOST}:${SRCDIR}/${rsltdir}
 fi
 

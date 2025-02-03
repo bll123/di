@@ -144,10 +144,33 @@ Ignored.  Use the \-f option.
 .B \-j
 (alias: \fB\-\-json\-output\fP)
 .br
-The data is output as an array of json objects.
+The data is output as an array of JSON objects.
 Totals are turned off.  Use of format specifiers that specify
 the same field will result in duplicated field names.
 (e.g. \fBp\fP, \fB1\fP, \fB2\fP)
+.IP
+Possible JSON identifiers are: scaling, blocksize, partitions,
+filesystem, mount, fstype, options, size, used, free, available,
+percused, percfree, inodes, inodesused, inodesfree, percinodesused.
+.IP
+.B Example Output:
+.EX
+    {
+      "scaling" : "human",
+      "blocksize" : "1024",
+      "partitions" : [
+        {
+          "filesystem" : "/dev/nvme0n1p7",
+          "mount" : "/",
+          "size" : "19.1G",
+          "used" : "11.0G",
+          "available" : "7.0G",
+          "percused" : "63%",
+          "fstype" : "ext4"
+        }
+      ]
+    }
+.EE
 .TP
 .B \-k
 (alias for: \fB\-dk\fP)

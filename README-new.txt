@@ -4,6 +4,7 @@ Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
 
 CONTENTS
+  Important: Version 5
   Description
   Documentation
   Installation
@@ -12,6 +13,14 @@ CONTENTS
   Porting Help
   Acknowledgements
   Copyright
+
+IMPORTANT: VERSION 5
+
+  Version 5's code base has changed.  The build process has changed and
+  optionally uses cmake (3.13+).
+
+  Version 5 installs a shared library that can be used to get the disk
+  space or percentages.
 
 DESCRIPTION
 
@@ -60,20 +69,19 @@ REQUIREMENTS
 
   cmake build
     make
-    cmake
-    sed grep tr test /bin/sh
-    msgfmt
+    cmake (3.13+)
     pkg-config
+    msgfmt
     C compiler
+    sed grep tr test /bin/sh
   mkconfig build
     make
-    msgfmt
-    cat chmod ln mkdir mv rm sed test expr grep sort
     pkg-config
+    msgfmt
+    C compiler
     bourne/ksh/bash shell
-    C compiler
     awk (mawk/nawk/gawk)
-    C compiler
+    cat chmod ln mkdir mv rm sed test expr grep sort
   libraries:
     Linux: tirpc (nfs quotas)
     MP Math: gmp or libtommath (optional)

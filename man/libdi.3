@@ -35,15 +35,15 @@ void \fBdi_get_all_disk_info\fP (void *\fIdi_data\fP);
 int \fBdi_iterate_init\fP (void *\fIdi_data\fP, int \fIiteroption\fP);
 .br
 .EX
-.B "typedef struct {"
-.BR "  const char   *strdata [DI_DISP_MAX];" "   /* string data */"
-.BR "  int          index;" "          /* internal index value */"
-.BR "  int          doPrint;" "        /* printable flag based on options */"
-.BR "  int          printFlag;" "      /* print result flag */"
-.BR "  int          isLocal;" "        /* filesystem is local */"
-.BR "  int          isReadOnly;" "     /* filesystem is read-only */"
-.BR "  int          isLoopback;" "     /* filesystme is a loopback filesystem */"
-.BR "} di_pub_disk_info_t;
+  typedef struct {
+    const char   *strdata [DI_DISP_MAX];      /* string data */
+    int          index;             /* internal index value */
+    int          doPrint;           /* printable flag based on options */
+    int          printFlag;         /* print result flag */
+    int          isLocal;           /* filesystem is local */
+    int          isReadOnly;        /* filesystem is read-only */
+    int          isLoopback;        /* filesystme is a loopback filesystem */
+  } di_pub_disk_info_t;
 .EE
 .PP
 const di_pub_disk_info_t * \fBdi_iterate\fP (void *\fIdi_data\fP);
@@ -282,95 +282,94 @@ calculate the percentage.  The formula is:
 combinations.
 .SH Example
 .EX
-.BR "    /* this code is in the public domain */  "
-.BR "    #include <stdio.h>  "
-.BR "    #include <stdlib.h>  "
-.BR "    #include <stdbool.h>  "
-.BR "    #include <math.h>  "
-.BR "  "
-.BR "    #include <di.h>  "
-.BR "  "
-.BR "    enum {  "
-.BR "      HAVE_SPACE = 0,  "
-.BR "      NO_SPACE = 1,  "
-.BR "    };  "
-.BR "  "
-.BR "    int  "
-.BR "    check_space (const char *fn, double space_wanted) {  "
-.BR "      void        *di_data;  "
-.BR "      int         targc;  "
-.BR "      const char  *targv [10];  "
-.BR "      int         exitflag;  "
-.BR "      const di_pub_disk_info_t  *pub;  "
-.BR "      int         rval = NO_SPACE;  "
-.BR "      int         count;  "
-.BR "  "
-.BR "      targc = 1;  "
-.BR "      targv [0] = fn;  "
-.BR "      targv [1] = NULL;  "
-.BR "  "
-.BR "      di_data = di_initialize ();  "
-.BR "      exitflag = di_process_options (di_data, targc, targv, 0);  "
-.BR "      if (exitflag != DI_EXIT_NORM) {  "
-.BR "        di_cleanup (di_data);  "
-.BR "        exit (exitflag);  "
-.BR "      }  "
-.BR "      di_get_all_disk_info (di_data);  "
-.BR "      count = di_iterate_init (di_data, DI_ITER_PRINTABLE);  "
-.BR "      while ((pub = di_iterate (di_data)) != NULL) {  "
-.BR "        double    dval;  "
-.BR "  "
-.BR "        /* compare terabytes available */  "
-.BR "        dval = di_get_scaled (di_data, pub->index, DI_SCALE_TERA,  "
-.BR "            DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE);  "
-.BR "        if (dval >= space_wanted) {  "
-.BR "          rval = HAVE_SPACE;  "
-.BR "        }  "
-.BR "      }  "
-.BR "      di_cleanup (di_data);  "
-.BR "  "
-.BR "      return rval;  "
-.BR "    }  "
-.BR "  "
-.BR "    int  "
-.BR "    main (int argc, char *argv []) {  "
-.BR "      const char  *fn = "/home/bll/s/di";  "
-.BR "      double      spwant = 0.2;   /* terabytes */  "
-.BR "      bool        rval;  "
-.BR "  "
-.BR "      if (argc > 1) {  "
-.BR "        fn = argv [1];  "
-.BR "      }  "
-.BR "      if (argc > 2) {  "
-.BR "        spwant = atof (argv [2]);  "
-.BR "      }  "
-.BR "  "
-.BR "      rval = check_space (fn, spwant);  "
-.BR "      if (rval == NO_SPACE) {  "
-.BR "        fprintf (stdout, "Not enough disk space\n");  "
-.BR "      }  "
-.BR "      if (rval == HAVE_SPACE) {  "
-.BR "        fprintf (stdout, "Enough disk space\n");  "
-.BR "      }  "
-.BR "  "
-.BR "      return rval;  "
-.BR "    }  "
+    /* this code is in the public domain */
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <stdbool.h>
+    #include <math.h>
+
+    #include <di.h>
+
+    enum {
+      HAVE_SPACE = 0,
+      NO_SPACE = 1,
+    };
+
+    int
+    check_space (const char *fn, double space_wanted) {
+      void        *di_data;
+      int         targc;
+      const char  *targv [10];
+      int         exitflag;
+      const di_pub_disk_info_t  *pub;
+      int         rval = NO_SPACE;
+      int         count;
+
+      targc = 1;
+      targv [0] = fn;
+      targv [1] = NULL;
+
+      di_data = di_initialize ();
+      exitflag = di_process_options (di_data, targc, targv, 0);
+      if (exitflag != DI_EXIT_NORM) {
+        di_cleanup (di_data);
+        exit (exitflag);
+      }
+      di_get_all_disk_info (di_data);
+      count = di_iterate_init (di_data, DI_ITER_PRINTABLE);
+      while ((pub = di_iterate (di_data)) != NULL) {
+        double    dval;
+
+        /* compare terabytes available */
+        dval = di_get_scaled (di_data, pub->index, DI_SCALE_TERA,
+            DI_SPACE_AVAIL, DI_VALUE_NONE, DI_VALUE_NONE);
+        if (dval >= space_wanted) {
+          rval = HAVE_SPACE;
+        }
+      }
+      di_cleanup (di_data);
+
+      return rval;
+    }
+
+    int
+    main (int argc, char *argv []) {
+      const char  *fn = "/home/bll/s/di";
+      double      spwant = 0.2;   /* terabytes */
+      bool        rval;
+
+      if (argc > 1) {
+        fn = argv [1];
+      }
+      if (argc > 2) {
+        spwant = atof (argv [2]);
+      }
+
+      rval = check_space (fn, spwant);
+      if (rval == NO_SPACE) {
+        fprintf (stdout, "Not enough disk space\n");
+      }
+      if (rval == HAVE_SPACE) {
+        fprintf (stdout, "Enough disk space\n");
+      }
+
+      return rval;
+    }
 .EE
-.PP
 .SS Compile and Link
 .EX
-.BR "    dilibd=$HOME/local/lib  "
-.BR "    diinc=$(pkg-config --with-path ${dilibd}/pkgconfig --cflags di)  "
-.BR "    dilibs=$(pkg-config --with-path ${dilibd}/pkgconfig --libs di)  "
-.BR "    cc -o tt ${diinc} tt.c -Wl,-R${dilibd} ${dilibs})  "
+    dilibd=$HOME/local/lib
+    diinc=$(pkg-config --with-path ${dilibd}/pkgconfig --cflags di)
+    dilibs=$(pkg-config --with-path ${dilibd}/pkgconfig --libs di)
+    cc -o tt ${diinc} tt.c -Wl,-R${dilibd} ${dilibs})
 .EE
 .SS Example Run
 .PP
 .EX
-.BR "    bll-g7:bll$ ./tt /home/bll 0.5  "
-.BR "    Not enough disk space  "
-.BR "    bll-g7:bll$ ./tt /home/bll 0.1  "
-.BR "    Enough disk space  "
+    bll-g7:bll$ ./tt /home/bll 0.5
+    Not enough disk space
+    bll-g7:bll$ ./tt /home/bll 0.1
+    Enough disk space
 .EE
 .SH See Also
 df(1), di(1)

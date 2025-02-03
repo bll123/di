@@ -57,7 +57,6 @@ bldrun () {
   c=`${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
       ${grepcmd} -v '(pragma|error[=,])' |
       ${grepcmd} -v 'BSHIFT has been redefined' |
-      ${grepcmd} -v '\.h:.*warning' |
       ${grepcmd} -v 'unrecognized command line option' |
       ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
       ${grepcmd} -v '^(COMPILE|LINK)' |
@@ -67,7 +66,6 @@ bldrun () {
     ${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
         ${grepcmd} -v '(pragma|error[=,])' |
         ${grepcmd} -v 'BSHIFT has been redefined' |
-        ${grepcmd} -v '\.h:.*warning' |
         ${grepcmd} -v 'unrecognized command line option' |
         ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
         ${grepcmd} -v '^(COMPILE|LINK)'
@@ -97,19 +95,42 @@ bldrun () {
   fi
 
   make -e CC=${comp} PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
-  ./x/bin/di -a -d g -f stbuf1cvpB2m -t > di-${tag}-run.out 2>&1
+
+  > di-${tag}-run.out
+
+  ./x/bin/di -a -d g -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
+
   ./x/bin/di -d h -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
+  echo "-- end" >> di-${tag}-run.out
+
+  # need a run with the basic debug info shown
   ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    grc=1
+  fi
+
+  # json output
+  ./x/bin/di -j >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    grc=1
+  fi
+
+  # csv output, no headers
+  ./x/bin/di -n -C >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"

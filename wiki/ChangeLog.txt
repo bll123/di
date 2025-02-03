@@ -11,6 +11,8 @@
     * If a filesystem is specified on the command line, report for that filesystem, not where the device name is located.
     * Fixed Sorting by filesystem space.
     * CSV and JSON output will now include the totals if requested.
+    * Fixed putting 'tmpfs', 'cgroup', 'swap' in the ignore list.
+    * Added 'squashfs', 'overlay' to the ignore list.
 * Changes
     * Drop syllable and VMS support.
     * All format strings options (mstO) no longer truncate the output.

@@ -36,6 +36,7 @@
 #endif
 
 #include "di.h"
+#include "disystem.h"
 #include "diinternal.h" // DI_DEFAULT_FORMAT
 #include "distrutils.h"
 #include "getoptn.h"

@@ -45,6 +45,7 @@
 # include <math.h>
 #endif
 
+#include "disystem.h"
 #include "distrutils.h"
 #include "getoptn.h"
 

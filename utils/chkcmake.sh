@@ -23,7 +23,30 @@ if [ x"$cmvers" = x ]; then
   exit $rc
 fi
 
-echo "$cmvers" | awk '
+# need a more modern version of awk...
+awkcmd=`which gawk 2>/dev/null`
+rc=$?
+if [ $rc -ne 0 -o "x$awkcmd" = x ]; then
+  awkcmd=`which nawk 2>/dev/null`
+  rc=$?
+  if [ $rc -ne 0 -o "x$awkcmd" = x ]; then
+    # maybe the which command is not there...
+    # try some common spots
+    if [ -f /usr/bin/gawk ]; then
+      awkcmd=gawk
+    fi
+    if [ "x$awkcmd" = x -a -f /usr/bin/nawk ]; then
+      awkcmd=nawk
+    fi
+  fi
+fi
+
+# no good awk, assume cmake is ng as well.
+if [ "x$awkcmd" = x ]; then
+  exit $rc
+fi
+
+echo "$cmvers" | ${awkcmd} '
 BEGIN {
   reqmaj = ENVIRON["CMAKE_REQ_MAJ_VERSION"];
   reqmin = ENVIRON["CMAKE_REQ_MIN_VERSION"];
@@ -31,8 +54,8 @@ BEGIN {
 /version/ {
   gsub (/^[^0-9]*/, "");
   gsub (/[^0-9.].*$/, "");
-  maj=$0
-  min=$0
+  maj = $0;
+  min = $0;
   gsub (/\..*$/, "", maj);
   gsub (/^[0-9]*/, "", min);
   gsub (/^\./, "", min);

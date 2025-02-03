@@ -655,7 +655,7 @@ check_symbol_exists (xdr_int rpc/rpc.h _lib_xdr_int)
 set (LIBNSL_REQUIRED 0)
 set (LIBTIRPC_REQUIRED 0)
 if (NOT _lib_xdr_int)
-  # check with nsl library
+  # check with nsl library (solaris 10)
   set (CMAKE_REQUIRED_LIBRARIES nsl)
   check_symbol_exists (xdr_int rpc/rpc.h _lib_xdr_int_nsl)
   if (_lib_xdr_int_nsl)
