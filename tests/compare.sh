@@ -31,6 +31,12 @@ for comp in ${complist}; do
     if [[ $rc != 0 ]]; then
       echo "== $(date '+%T') ${host}/${comp}: dimathtest diff failed"
     fi
+
+    diff -q -b -B ${rsltdir}/di-mkc-instdir.out ${rsltdir}/di-cmake-instdir.out
+    rc=$?
+    if [[ $rc != 0 ]]; then
+      echo "== $(date '+%T') ${host}/${comp}: installation dir diff failed"
+    fi
   fi
 done
 
@@ -53,7 +59,14 @@ for comp in ${complist}; do
       if [[ $dlc != 0 ]]; then
         echo "== $(date '+%T') ${host}: ${bld} config.h diff failed"
       fi
+
+      diff -q -b -B ${rsltdir}/di-mkc-instdir.out ${rsltdir}/di-cmake-instdir.out
+      rc=$?
+      if [[ $rc != 0 ]]; then
+        echo "== $(date '+%T') ${host}/${comp}: installation dir diff failed"
+      fi
     done
   fi
+
   rsltdir=${topdir}/test_results/${host}_${comp}
 done

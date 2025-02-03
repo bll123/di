@@ -7,12 +7,14 @@ This documentation was created for the upcoming version 5.x.
 ### Notes on Using the Library
 
 If you want to check the disk space for a particular partition, do not
-grab all of the partition data and try to figure out which parition is
-the correct one.
+search through all of the partitions and try to figure out which
+partition is the correct one.
 
 Instead, specify a filename or directory name. _di_ will resolve any
 symbolic links and determine the actual partition where the file
-resides.
+resides.  This works when your system administrator has moved a
+directory to a different partition and created a symlink to the new
+location.
 
     /* this code is in the public domain */
     #include <stdio.h>
@@ -20,7 +22,7 @@ resides.
     #include <stdbool.h>
     #include <math.h>
 
-    #include "di.h"
+    #include <di.h>
 
     enum {
       HAVE_SPACE = 0,

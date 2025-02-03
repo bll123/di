@@ -127,6 +127,7 @@ bldrun () {
         preserveoutput $f
       fi
     done
+    ls -1R x > di-cmake-instdir.out
   fi
   if [ $tag = mkc ]; then
     for f in mkc_files/mkc_compile.log \
@@ -141,6 +142,7 @@ bldrun () {
         preserveoutput $f
       fi
     done
+    ls -1R x > di-mkc-instdir.out
   fi
 }
 

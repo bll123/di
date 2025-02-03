@@ -1152,4 +1152,8 @@ install (FILES
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )
 
-# ./utils/instpo.sh ${CMAKE_INSTALL_LOCALE}
+install (CODE
+  "execute_process (
+    COMMAND utils/instpo.sh \"${CMAKE_INSTALL_FULL_LOCALEDIR}\"
+  )"
+)

@@ -9,11 +9,11 @@ CMAKE_REQ_MIN_VERSION=$2
 export CMAKE_REQ_MAJ_VERSION
 export CMAKE_REQ_MIN_VERSION
 if [ x"$CMAKE_REQ_MAJ_VERSION" = x ]; then
-  echo "no max version specified"
+  echo "chkcmake.sh: no max version specified"
   exit $rc
 fi
 if [ x"$CMAKE_REQ_MIN_VERSION" = x ]; then
-  echo "no min version specified"
+  echo "chkcmake.sh: no min version specified"
   exit $rc
 fi
 

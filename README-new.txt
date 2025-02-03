@@ -61,7 +61,7 @@ REQUIREMENTS
   cmake build
     make
     cmake
-    sed grep tr
+    sed grep tr test /bin/sh
     msgfmt
     pkg-config
     C compiler

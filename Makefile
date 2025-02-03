@@ -212,7 +212,7 @@ cmake-unix:
 		-DDI_SOVERSION:STATIC=$(DI_SOVERSION) \
 		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
 		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
-		-S . -B $(BUILDDIR) -Werror=deprecated --debug-trycompile
+		-S . -B $(BUILDDIR) -Werror=deprecated
 
 # internal use
 .PHONY: cmake-windows
@@ -324,8 +324,14 @@ mkc-install-di:
 	@sym=T ; \
 	instdest=$(INST_LIBDIR) ; \
 	case `uname -s` in \
+	  AIX) \
+	    # not sure about how the naming works on aix ; \
+            libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
+            libnmso=libdi.$(DI_SOVERSION)$(SHLIB_EXT) ; \
+            ;; \
 	  Darwin) \
             libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
+            libnmso=libdi.$(DI_SOVERSION)$(SHLIB_EXT) ; \
             ;; \
           CYGWIN*|MSYS*|MINGW*) \
 	    instdest=$(INST_BINDIR) ; \
@@ -334,11 +340,16 @@ mkc-install-di:
 	    ;; \
 	  *) \
             libnm=libdi$(SHLIB_EXT).$(DI_LIBVERSION) ; \
+            libnmso=libdi$(SHLIB_EXT).$(DI_SOVERSION) ; \
             ;; \
 	esac ; \
 	cp -f libdi$(SHLIB_EXT) $${instdest}/$${libnm} ; \
 	if [ $$sym = T ]; then \
-	  (cd $(INST_LIBDIR); ln -sf $${libnm} libdi$(SHLIB_EXT)) ; \
+	  ( \
+	    cd $(INST_LIBDIR) ; \
+	    ln -sf $${libnmso} libdi$(SHLIB_EXT) ; \
+	    ln -sf $${libnm} $${libnmso} ; \
+	  ) ; \
 	fi
 
 .PHONY: mkc-install-man
