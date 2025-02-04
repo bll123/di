@@ -5,8 +5,8 @@
 #  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
-DI_VERSION = 4.99.8
-DI_LIBVERSION = 4.99.8
+DI_VERSION = 4.99.9
+DI_LIBVERSION = 4.99.9
 DI_SOVERSION = 4
 DI_RELEASE_STATUS = beta
 DI_BUILD = Release
@@ -258,8 +258,16 @@ cmake-test:
 
 # have to get various environment variables set up.
 
+# don't know any good way to determine if lib64 is preferred
 .PHONY: mkc-all
-mkc-all: mkc-sh
+mkc-all:
+	@-grep -l openSUSE /etc/os-release > /dev/null 2>&1 ; \
+	rc=$$? ; \
+	if [ $$rc -eq 0 ]; then \
+	  $(MAKE) -e LIBNM=lib64 mkc-sh ; \
+	else \
+	  $(MAKE) -e mkc-sh ; \
+	fi ; \
 
 .PHONY: mkc-sh
 mkc-sh:	$(MKC_ENV)
@@ -289,23 +297,38 @@ mkc-test:
 	    ./getoptn_test$(EXE_EXT)
 
 .PHONY: mkc-install
-mkc-install:
-	$(MAKE) -e mkc-all
-	. ./$(MKC_ENV);$(MAKE) -e \
-		PREFIX=$(PREFIX) \
-		mkc-install-di mkc-install-man
+mkc-install: $(MKC_ENV) mkc-all
+	@-grep -l openSUSE /etc/os-release > /dev/null 2>&1 ; \
+	rc=$$? ; \
+	if [ $$rc -eq 0 ]; then \
+	  . ./$(MKC_ENV);$(MAKE) -e \
+	      PREFIX=$(PREFIX) LIBNM=lib64 mkc-install-all ; \
+	else \
+	  . ./$(MKC_ENV);$(MAKE) -e \
+	      PREFIX=$(PREFIX) mkc-install-all ; \
+	fi ; \
 
 ###
 # installation
 
+.PHONY: mkc-install-all
+mkc-install-all:
+	$(MAKE) mkc-install-di
+	$(MAKE) mkc-install-include
+	$(MAKE) mkc-install-libdi
+	-$(MAKE) mkc-install-po
+	$(MAKE) mkc-install-man
+	$(MAKE) mkc-install-pc
+
 .PHONY: mkc-install-po
 mkc-install-po:
+	test -d $(INST_LOCALEDIR) || mkdir -p $(INST_LOCALEDIR)
 	-./utils/instpo.sh $(INST_LOCALEDIR)
 
 .PHONY: mkc-install-pc
 mkc-install-pc: $(MKC_REQLIB)
 	test -d $(INST_PKGCDIR) || mkdir -p $(INST_PKGCDIR)
-	dilibs="$${LDFLAGS_LIBS_APPLICATION} `cat $(MKC_REQLIB)`" ; \
+	@dilibs="$${LDFLAGS_LIBS_APPLICATION} `cat $(MKC_REQLIB)`" ; \
 	dilibs="`echo $${dilibs} | \
             sed -e 's,-lintl,,g' \
             -e 's,-liconv,,g'`" ; \
@@ -317,40 +340,54 @@ mkc-install-pc: $(MKC_REQLIB)
 	      -e "s~@DI_REQUIRED_LIBS@~$${dilibs}~" \
 	  > $(INST_PKGCDIR)/di.pc
 
-# not sure about how the naming works on aix
 .PHONY: mkc-install-di
 mkc-install-di:
 	test -d $(INST_BINDIR) || mkdir -p $(INST_BINDIR)
-	test -d $(INST_LIBDIR) || mkdir -p $(INST_LIBDIR)
-	test -d $(INST_INCDIR) || mkdir -p $(INST_INCDIR)
 	cp -f di$(EXE_EXT) $(INST_BINDIR)
+
+.PHONY: mkc-install-include
+mkc-install-include:
+	test -d $(INST_INCDIR) || mkdir -p $(INST_INCDIR)
 	cp -f di.h $(INST_INCDIR)
-	-$(MAKE) mkc-install-po
-	$(MAKE) mkc-install-man
-	$(MAKE) mkc-install-pc
+
+# not sure about how the naming works on aix
+# OpenBSD only has the main version, no plain .so
+.PHONY: mkc-install-libdi
+mkc-install-libdi:
+	test -d $(INST_LIBDIR) || mkdir -p $(INST_LIBDIR)
 	@sym=T ; \
 	instdest=$(INST_LIBDIR) ; \
 	case `uname -s` in \
 	  Darwin) \
-            libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
-            libnmso=libdi.$(DI_SOVERSION)$(SHLIB_EXT) ; \
-            ;; \
-          CYGWIN*|MSYS*|MINGW*) \
+	    libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
+	    libnmso=libdi.$(DI_SOVERSION)$(SHLIB_EXT) ; \
+	    ;; \
+	  CYGWIN*|MSYS*|MINGW*) \
 	    instdest=$(INST_BINDIR) ; \
 	    libnm=libdi$(SHLIB_EXT) ; \
 	    sym=F ; \
 	    ;; \
+	  OpenBSD) \
+	    libnm=libdi$(SHLIB_EXT).$(DI_LIBVERSION) ; \
+	    libnmso=libdi$(SHLIB_EXT).$(DI_SOVERSION) ; \
+	    sym=O ; \
+	    ;; \
 	  *) \
-            libnm=libdi$(SHLIB_EXT).$(DI_LIBVERSION) ; \
-            libnmso=libdi$(SHLIB_EXT).$(DI_SOVERSION) ; \
-            ;; \
+	    libnm=libdi$(SHLIB_EXT).$(DI_LIBVERSION) ; \
+	    libnmso=libdi$(SHLIB_EXT).$(DI_SOVERSION) ; \
+	    ;; \
 	esac ; \
 	cp -f libdi$(SHLIB_EXT) $${instdest}/$${libnm} ; \
+	if [ $$sym = T -o $$sym = O ]; then \
+	  ( \
+	    cd $(INST_LIBDIR) ; \
+	    ln -sf $${libnm} $${libnmso} ; \
+	  ) ; \
+	fi ; \
 	if [ $$sym = T ]; then \
 	  ( \
 	    cd $(INST_LIBDIR) ; \
 	    ln -sf $${libnmso} libdi$(SHLIB_EXT) ; \
-	    ln -sf $${libnm} $${libnmso} ; \
 	  ) ; \
 	fi
 
@@ -470,46 +507,46 @@ getoptn_test$(OBJ_EXT):	getoptn.c
 
 # DO NOT DELETE
 
-di.o: config.h 
+di.o: config.h
 di.o: di.h
 di.o: disystem.h distrutils.h
-didiskutil.o: config.h 
+didiskutil.o: config.h
 didiskutil.o: di.h disystem.h
 didiskutil.o: diinternal.h
 didiskutil.o: dimath.h dioptions.h getoptn.h
-didiskutil.o: distrutils.h dimntopt.h 
-digetentries.o: config.h 
-digetentries.o: di.h disystem.h 
+didiskutil.o: distrutils.h dimntopt.h
+digetentries.o: config.h
+digetentries.o: di.h disystem.h
 digetentries.o: diinternal.h dimath.h
 digetentries.o: dioptions.h getoptn.h distrutils.h
 digetentries.o: dimntopt.h
-digetinfo.o: config.h 
+digetinfo.o: config.h
 digetinfo.o: di.h disystem.h
 digetinfo.o: diinternal.h
 digetinfo.o: dimath.h dioptions.h getoptn.h
-digetinfo.o: dimntopt.h 
+digetinfo.o: dimntopt.h
 digetinfo.o: distrutils.h
-dilib.o: config.h 
-dilib.o: di.h disystem.h 
+dilib.o: config.h
+dilib.o: di.h disystem.h
 dilib.o: dimath.h diinternal.h
 dilib.o: dioptions.h getoptn.h dizone.h diquota.h distrutils.h
-dimathtest.o: config.h 
+dimathtest.o: config.h
 dimathtest.o: dimath.h
-dioptions.o: config.h 
+dioptions.o: config.h
 dioptions.o: di.h disystem.h
 dioptions.o: diinternal.h
 dioptions.o: dimath.h dioptions.h getoptn.h
 dioptions.o: distrutils.h
-diquota.o: config.h 
+diquota.o: config.h
 diquota.o: di.h
 diquota.o: disystem.h dimath.h
 diquota.o: diquota.h diinternal.h dioptions.h
 diquota.o: getoptn.h distrutils.h
-distrutils.o: config.h 
+distrutils.o: config.h
 distrutils.o: distrutils.h
-dizone.o: config.h 
-dizone.o: di.h dizone.h disystem.h 
+dizone.o: config.h
+dizone.o: di.h dizone.h disystem.h
 dizone.o: dioptions.h getoptn.h distrutils.h
-getoptn.o: config.h 
-getoptn.o: disystem.h 
+getoptn.o: config.h
+getoptn.o: disystem.h
 getoptn.o: distrutils.h getoptn.h

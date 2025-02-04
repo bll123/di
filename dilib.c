@@ -662,7 +662,7 @@ checkFileInfo (di_data_t *di_data)
 
           if (diopts->optval [DI_OPT_DEBUG] > 2) {
             printf ("file %s: found device or fs-match %ld : %d (%s %s)\n",
-                diopts->argv [i], dinfo->st_dev, foundnew,
+                diopts->argv [i], (long) dinfo->st_dev, foundnew,
                 dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
           }
 
@@ -748,7 +748,8 @@ getDiskStatInfo (di_data_t *di_data)
     if (stat (dinfo->strdata [DI_DISP_MOUNTPT], &statBuf) == 0) {
       dinfo->st_dev = (unsigned long) statBuf.st_dev;
       if (diopts->optval [DI_OPT_DEBUG] > 2) {
-        printf ("dev: %s: %ld\n", dinfo->strdata [DI_DISP_MOUNTPT], dinfo->st_dev);
+        printf ("dev: %s: %ld\n", dinfo->strdata [DI_DISP_MOUNTPT],
+            (long) dinfo->st_dev);
       }
     } else {
       if (errno != EACCES && errno != EPERM) {
@@ -820,8 +821,10 @@ getDiskSpecialInfo (di_data_t *di_data, int dontResolveSymlink)
       }
       if (diopts->optval [DI_OPT_DEBUG] > 2) {
         printf ("special dev: %s %s: %ld rdev: %ld loopback: %d\n",
-            dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT], dinfo->sp_dev,
-            dinfo->sp_rdev, dinfo->isLoopback);
+            dinfo->strdata [DI_DISP_FILESYSTEM],
+            dinfo->strdata [DI_DISP_MOUNTPT],
+            (long) dinfo->sp_dev,
+            (long) dinfo->sp_rdev, dinfo->isLoopback);
       }
     } else {
       dinfo->sp_dev = 0;
@@ -979,7 +982,7 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
 
         if (diopts->optval [DI_OPT_DEBUG] > 2) {
           printf ("dup: chk: i: %s dev: %ld rdev: %ld\n",
-              dinfo->strdata [DI_DISP_MOUNTPT], sp_dev, sp_rdev);
+              dinfo->strdata [DI_DISP_MOUNTPT], (long) sp_dev, (long) sp_rdev);
         }
 
         for (j = 0; j < di_data->fscount; ++j) {
@@ -995,7 +998,8 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
             if (diopts->optval [DI_OPT_DEBUG] > 2)
             {
               printf ("dup: for %s %ld: found: %s %ld\n",
-                  dinfo->strdata [DI_DISP_MOUNTPT], sp_dev, dinfob->strdata [DI_DISP_MOUNTPT], dinfob->st_dev);
+                  dinfo->strdata [DI_DISP_MOUNTPT], (long) sp_dev,
+                  dinfob->strdata [DI_DISP_MOUNTPT], (long) dinfob->st_dev);
             }
 
             dinfo->printFlag = DI_PRNT_IGNORE;
@@ -1003,9 +1007,10 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
             if (diopts->optval [DI_OPT_DEBUG] > 2)
             {
               printf ("dup: chk: ignore: %s duplicate of %s\n",
-                  dinfo->strdata [DI_DISP_MOUNTPT], dinfob->strdata [DI_DISP_MOUNTPT]);
+                  dinfo->strdata [DI_DISP_MOUNTPT],
+                  dinfob->strdata [DI_DISP_MOUNTPT]);
               printf ("dup: j: dev: %ld rdev: %ld \n",
-                  dinfob->sp_dev, dinfob->sp_rdev);
+                  (long) dinfob->sp_dev, (long) dinfob->sp_rdev);
             }
           } /* if dup */
         }
@@ -1016,7 +1021,8 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
         {
           printf ("chk: dup: not checked: %s prnt: %d dev: %ld rdev: %ld %s\n",
               dinfo->strdata [DI_DISP_MOUNTPT], dinfo->printFlag,
-              dinfo->sp_dev, dinfo->sp_rdev, dinfo->strdata [DI_DISP_FSTYPE]);
+              (long) dinfo->sp_dev, (long) dinfo->sp_rdev,
+              dinfo->strdata [DI_DISP_FSTYPE]);
         }
       }
     } /* for each disk */

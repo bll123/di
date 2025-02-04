@@ -17,10 +17,12 @@ CONTENTS
 IMPORTANT: VERSION 5
 
   Version 5's code base has changed.  The build process has changed and
-  optionally uses cmake (3.13+).
+  optionally uses cmake (3.13+). The display processing is entirely new code.
 
   Version 5 installs a shared library that can be used to get the disk
   space or percentages.
+
+  Version 5.0.0 is very new, and there could still be errors.
 
 DESCRIPTION
 
@@ -87,6 +89,10 @@ REQUIREMENTS
     MP Math: gmp or libtommath (optional)
 
 BUG REPORTS
+
+    I need to know what operating system and what version of
+    operating system you are on.  Also which compiler, and the version
+    of the compiler.
 
     For build issues, capture the output from `make`, and the files
     listed below.

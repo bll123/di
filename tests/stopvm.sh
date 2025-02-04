@@ -27,6 +27,9 @@ case ${host} in
   dragonflybsd*|freebsd*|netbsd*|openbsd*|mirbsd*)
     cmd="/sbin/halt -p"
     ;;
+  alpine*)
+    cmd="/sbin/poweroff"
+    ;;
 esac
 
 ssh -l root ${ipaddr} "${cmd}"

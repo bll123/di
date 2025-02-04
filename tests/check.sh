@@ -53,6 +53,7 @@ rsltdir=""
 for comp in ${complist}; do
   if [[ x$rsltdir != x ]]; then
     rsltdirb=${topdir}/test_results/${host}_${comp}
+
     # do mkc first, always there
     for bld in mkc cmake; do
       if [[ ! -f ${rsltdir}/di-${bld}-config.out ||
@@ -72,7 +73,7 @@ for comp in ${complist}; do
       fi
 
       tcount=$(($tcount+1))
-      diff -q -b -B ${rsltdir}/di-mkc-instdir.out ${rsltdir}/di-cmake-instdir.out
+      diff -b -B ${rsltdir}/di-${bld}-instdir.out ${rsltdirb}/di-${bld}-instdir.out
       rc=$?
       if [[ $rc != 0 ]]; then
         echo "== $(date '+%T') ${host}/${comp}: installation dir diff failed"
@@ -104,7 +105,7 @@ for comp in ${complist}; do
     # check the installation files
     tcount=$(($tcount+1))
     trc=0
-    for d in bin include lib share pkgconfig locale man man1 man3; do
+    for d in bin include share pkgconfig locale man man1 man3; do
       grep -l "^${d}$" ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
       rc=$?
       if [[ $rc -ne 0 ]]; then
@@ -120,7 +121,7 @@ for comp in ${complist}; do
         trc=1
       fi
     done
-    grep -l '^libdi\.' ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
+    grep -l '^libdi\.[^3]' ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
     rc=$?
     if [[ $rc -ne 0 ]]; then
         echo "== $(date '+%T') ${host}: ${bld}: ${comp}: missing libdi"

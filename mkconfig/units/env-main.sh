@@ -205,7 +205,9 @@ test_ldflags () {
   setldflags
   setlibs
   puts "#include <stdio.h>
-int main (int argc, char *argv []) { return 0; }" > t.c
+int main (int argc, char *argv []) {
+  return 0;
+}" > t.c
   puts "# test ${flag}" >&9
   # need to set w/all cflags/ldflags; gcc doesn't always error out otherwise
   TMPF=t$$.txt
@@ -226,7 +228,7 @@ int main (int argc, char *argv []) { return 0; }" > t.c
   fi
   grep -i "error.*${flag}" $TMPF > /dev/null 2>&1
   rc=$?
-  if [ $rc -ne 0 ]; then
+  if [ $rc -eq 0 ]; then
     flag=0
   fi
   cat $TMPF >&9

@@ -5,3 +5,7 @@
     * https://lzsiga.users.sourceforge.net/aix-linking.html
 * cmake
     * Don't set PREFIX.   Mucks up the compiler identification code.
+* Alpine Linux
+    * apk add gcc clang cmake make nawk mandoc mandoc-dev mandoc-apropos
+    * apk add gettext
+    * setup-desktop

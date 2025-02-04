@@ -54,19 +54,21 @@ bldrun () {
   make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
   # AIX: BSHIFT: nothing i can do about system headers
   # NetBSD: rpcsvc: deprecated and buggy (why do they complain when there is no alternative?)
-  c=`${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
+  c=`${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
       ${grepcmd} -v '(pragma|error[=,])' |
       ${grepcmd} -v 'BSHIFT has been redefined' |
       ${grepcmd} -v 'unrecognized command line option' |
+      ${grepcmd} -v '/[^d][^i][^.]\.h:.*warning' |
       ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
       ${grepcmd} -v '^(COMPILE|LINK)' |
       wc -l`
   if [ $c -gt 0 ]; then
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: warnings or errors found"
-    ${grepcmd} '(\(W\)|\(E\)|warning|error)' di-${tag}-bld.out |
+    ${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
         ${grepcmd} -v '(pragma|error[=,])' |
         ${grepcmd} -v 'BSHIFT has been redefined' |
         ${grepcmd} -v 'unrecognized command line option' |
+        ${grepcmd} -v '/[^d][^i][^.]\.h:.*warning' |
         ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
         ${grepcmd} -v '^(COMPILE|LINK)'
     grc=1

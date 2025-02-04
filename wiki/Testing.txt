@@ -31,7 +31,7 @@ This documentation was created for the upcoming version 5.x.
  NetBSD 6.0 | - | - | - | - | - | - | -
  NetBSD 7.0.1 | - | - | - | - | - | - | -
  NetBSD 9.0 | - | 4.99.7<br>2025-1-31 | - | - | - | - | -
- NetBSD 10.1 | 4.99.7<br>2025-1-31<br>gcc clang | 4.99.7<br>2025-1-31<br>gcc clang | - | - | - | - | getvfsstat<br>cfarm
+ NetBSD 10.1 | 4.99.8<br>2025-2-3<br>gcc clang | 4.99.8<br>2025-2-3<br>gcc clang | - | - | - | - | getvfsstat<br>cfarm
  NetBSD 10.1 | - | - | - | - | - | - | -
  OpenBSD 4.4 | - | - | - | - | - | - | -
  OpenBSD 4.5 | - | - | - | - | - | - | -
@@ -60,7 +60,7 @@ This documentation was created for the upcoming version 5.x.
  Linux Mint 19 | - | 4.99.8<br>2025-2-3 | - | - | - | - | -
  Linux Mint 21 | 4.99.7<br>2025-1-31 | 4.99.7<br>2025-1-31 | - | - | - | - | -
  MX Linux 21<br>(Debian 11)| 4.99.7<br>2025-1-31 | 4.99.7<br>2025-1-31 | - | - | - | - | get/set/endmntent statvfs
- MX Linux 23<br>(Debian 12)| 4.99.7<br>2025-1-31<br>gcc clang | 4.99.7<br>2025-1-31<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
+ MX Linux 23<br>(Debian 12)| 4.99.8<br>2025-2-3<br>gcc clang | 4.99.8<br>2025-2-3<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
  Ubuntu 14.04<br>(32-bit) | n/a | 4.99.5<br>2025-1-29 | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | n/a | 4.99.7<br>2025-1-31 | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | n/a | 4.99.7<br>2025-1-31 | - | - | - | - | -
@@ -73,12 +73,11 @@ This documentation was created for the upcoming version 5.x.
  Calculate 2.0 | - | - | - | - | - | - | -
  Gentoo 20120710 | - | - | - | - | - | - | -
  __Linux: Other__| | | | | | |
- Mandrake 2011 | - | - | - | - | - | - | -
- Mandrake 92 | - | - | - | - | - | - | -
+ Alpine 3.21.2 | 4.99.8<br>2025-2-3<br>gcc clang | 4.99.8<br>2025-2-3<br>gcc clang | - | - | - | - | -
  NixOS 19.09 | - | - | - | - | - | - | -
- OpenSUSE Leap 15.1 | - | - | - | - | - | - | -
- OpenSUSE Leap 15.5 | 4.99.7<br>2025-1-31<br>gcc clang | 4.99.7<br>2025-1-31<br>gcc clang | - | - | - | - | get/set/endmntent statvfs<br>cfarm
- OpenSUSE Leap 15.6 | - | - | - | - | - | - | -
+ openSUSE Leap 15.1 | - | - | - | - | - | - | -
+ openSUSE Leap 15.5 | 4.99.8<br>2025-2-3<br>gcc clang | 4.99.8<br>2025-2-3<br>gcc clang | - | - | - | - | get/set/endmntent statvfs<br>cfarm
+ openSUSE Leap 15.6 | - | - | - | - | - | - | -
  Slackware 14.2 | - | - | - | - | - | - | -
  Solus | - | - | - | - | - | - | -
  Void Linux | - | - | - | - | - | - | -
@@ -104,18 +103,14 @@ This documentation was created for the upcoming version 5.x.
  MacOS Sequoia (intel) | 4.99.7<br>2025-1-31 | 4.99.7<br>2025-1-31 | - | - | - | - | getfsstat
  MacOS Sequoia (m1) | 4.99.7<br>2025-1-31 | 4.99.7<br>2025-1-31 | - | - | - | - | getfsstat
  __Other:__ | | | | | | |
- AIX 7.1 | - | 4.99.7<br>2025-1-31<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
+ AIX 7.1 | - | 4.99.8<br>2025-2-3<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
  Haiku r1b5 | - | 4.99.7<br>2025-1-31 | - | - | - | - | fs_stat_dev<br>ramfs used value err
  SCO OpenServer 6.0.0 | - | 4.99.7<br>2025-1-31<br>cc gcc | - | - | - | - | getmntent statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | polarhome
  QNX 6.5 | - | FAIL | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | | | |
- Nexenta 1.0.1 | - | - | - | - | - | - | getmntent statvfs
- Nexenta 2.0 | - | - | - | - | - | - | getmntent statvfs
- Open Solaris 200805 | - | - | - | - | - | - | getmntent statvfs
- Open Solaris 200906 | - | - | - | - | - | - | getmntent statvfs
  Solaris 10 | - | 4.99.8<br>2025-2-3 | - | - | - | - | getmntent statvfs
- Solaris 11.4 | 4.99.7<br>2025-1-31<br>gcc clang cc | 4.99.7<br>2025-1-31<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>gmp<br>cfarm
+ Solaris 11.4 | 4.99.8<br>2025-2-3<br>gcc clang cc | 4.99.8<br>2025-2-3<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>gmp<br>cfarm
  Solaris 11.4 (BE) | 4.99.7<br>2025-1-31<br>gcc clang cc | 4.99.7<br>2025-1-31<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
  __Windows:__| | | | | | | -
  Cygwin | 4.99.7<br>2025-1-31| - | - | - | - | - | get/set/endmntent statvfs?

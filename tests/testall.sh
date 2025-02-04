@@ -5,7 +5,42 @@
 
 . ./tests/util.sh
 
+function dovm {
+  vmhost=$1
+
+  ./tests/startvm.sh ${vmhost} T
+  rc=$?
+  if [[ $rc -ne 0 && $rc -ne 255 ]]; then
+    continue
+  fi
+  if [[ $rc -eq 255 ]]; then
+    already=T
+  fi
+  vmcount=$(($vmcount+1))
+
+  rsltdir=$(pwd)/test_results/${vmhost}
+  test -d ${rsltdir} && rm -rf ${rsltdir}
+  mkdir -p ${rsltdir}
+
+  if [[ $bg == T ]]; then
+    nohup ./tests/thost.sh ${tarfn} ${didir} ${vmhost} ${type} \
+        ${ipaddr} ${remuser} ${remport} ${rempath} \
+        ${flag} ${complist} 2>&1 | tee ${rsltdir}/w &
+  else
+    ./tests/thost.sh ${tarfn} ${didir} ${vmhost} ${type} \
+        ${ipaddr} ${remuser} ${remport} ${rempath} \
+        ${flag} ${complist} 2>&1 | tee ${rsltdir}/w
+  fi
+
+  if [[ $already == F ]]; then
+    echo "-- $(date '+%T') ${vmhost}: stopping"
+    ./tests/stopvm.sh ${vmhost}
+    vmcount=$(($vmcount-1))
+  fi
+}
+
 hostlist=""
+vmcount=0
 
 flag=R
 bg=T
@@ -76,8 +111,13 @@ fi
 tarfn=$(echo di-*.tar.gz)
 didir=$(echo ${tarfn} | sed 's,\.tar.gz$,,')
 
+# start all the non-vms
 for host in ${hostlist}; do
   gethostdata ${host}
+
+  if [[ ${type} == vm ]]; then
+    continue
+  fi
 
   rsltdir=$(pwd)/test_results/${host}
   test -d ${rsltdir} && rm -rf ${rsltdir}
@@ -92,6 +132,22 @@ for host in ${hostlist}; do
         ${ipaddr} ${remuser} ${remport} ${rempath} \
         ${flag} ${complist} 2>&1 | tee ${rsltdir}/w
   fi
+done
+
+# do the vms
+for host in ${hostlist}; do
+  gethostdata ${host}
+  already=F
+
+  if [[ ${type} != vm ]]; then
+    continue
+  fi
+
+  while test $vmcount -ge 2; do
+    sleep 1
+  done
+
+  dovm $host
 done
 
 exit 0

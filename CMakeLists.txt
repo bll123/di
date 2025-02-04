@@ -226,10 +226,20 @@ macro (checkPrototype_quotactl hdr)
     "int quotactl (int a, const char * b, int c, caddr_t d)"
     0
     "${hdr}"
-    _quotactl_pos_2
+    _quotactl_pos_2a
+    )
+  # alpine linux
+  check_prototype_definition (quotactl
+    "int quotactl (int a, const char * b, int c, char *d)"
+    0
+    "${hdr}"
+    _quotactl_pos_2b
     )
   if (_quotactl_pos_1a OR _quotactl_pos_1b)
     set (_quotactl_pos_1 1)
+  endif()
+  if (_quotactl_pos_2a OR _quotactl_pos_2b)
+    set (_quotactl_pos_2 1)
   endif()
   if (_quotactl_pos_1)
     set (_c_arg_2_quotactl "int")
@@ -662,6 +672,7 @@ if (NOT _lib_xdr_int)
     set (_lib_xdr_int 1)
     set (LIBNSL_REQUIRED 1)
   endif()
+  unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 if (NOT _lib_xdr_int)
   # check with tirpc library
@@ -671,6 +682,7 @@ if (NOT _lib_xdr_int)
     set (_lib_xdr_int 1)
     set (LIBTIRPC_REQUIRED 1)
   endif()
+  unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 
@@ -1140,11 +1152,12 @@ install (FILES di.h
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
+# gnu-install-dirs has an incorrect path for netbsd10
 install (FILES man/di.1
-  DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/man/man1"
 )
 install (FILES man/libdi.3
-  DESTINATION "${CMAKE_INSTALL_MANDIR}/man3"
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/man/man3"
 )
 
 install (FILES

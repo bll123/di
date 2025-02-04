@@ -20,11 +20,6 @@ flag=${1:=R}
 shift
 complist=$*
 
-LOCKA=tmp/VM_A
-LOCKB=tmp/VM_B
-LOCKC=tmp/VM_C
-locklist="${LOCKA} ${LOCKB}"
-
 function remotebldrun  {
   ssh ${rempssh} ${remussh} ${ipaddr} "./dibldrun.sh ${host} ${tarfn} ${didir} ${comp} ${rempath}"
   testdir=${didir}_${comp}
@@ -70,33 +65,6 @@ if [[ $flag != C ]]; then
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
       remotebldrun $ipaddr
     elif [[ ${type} == vm ]]; then
-      echo "-- $(date '+%T') ${host}: waiting for vm lock"
-      lockpid=F
-      lockfn=F
-      while : ; do
-        for fn in ${locklist}; do
-          lockfile-create -r 1 ${fn}
-          rc=$?
-          if [[ $rc -eq 0 ]]; then
-            lockfile-touch ${fn} &
-            lockpid=$!
-            lockfn=$fn
-            break
-          fi
-        done
-        if [[ $lockfn != F ]]; then
-          break
-        fi
-      done
-      echo "-- $(date '+%T') ${host}: starting vm"
-      ./tests/startvm.sh ${host} T
-      rc=$?
-      if [[ $rc -ne 0 && $rc -ne 255 ]]; then
-        exit 1
-      fi
-      if [[ $rc -eq 255 ]]; then
-        already=T
-      fi
       echo "-- $(date '+%T') ${host}: copying files"
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
@@ -118,19 +86,6 @@ if [[ $flag == R || $flag == C ]]; then
       ssh ${rempssh} ${remussh} ${ipaddr} "rm -rf di-[45].*.tar.gz di-[45].*.tar di-[45].*_${comp} dibldrun.sh"
     fi
   done
-fi
-
-if [[ $flag != C && $type == vm ]]; then
-  if [[ $already == F ]]; then
-    echo "-- $(date '+%T') ${host}: stopping"
-    ./tests/stopvm.sh ${host}
-  fi
-  if [[ $lockpid != F ]]; then
-    kill ${lockpid}
-  fi
-  if [[ $lockfn != F ]]; then
-    lockfile-remove ${lockfn}
-  fi
 fi
 
 ./tests/check.sh ${host} ${complist}
