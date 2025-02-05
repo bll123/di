@@ -6,12 +6,23 @@ This documentation was created for the upcoming version 5.x.
 
 <div markdown style="float: left; margin-right: 20px;">
 
+###### di program
+
+[Format Strings](FormatStrings)
+
+</div>
+
+<div markdown style="float: left; margin-right: 20px;">
+
+###### libdi
+
 [Initializing](Initializing)
 <br>[Option Processing](Options)
 <br>[Getting the Data](GettingData)
 <br>[Notes on Using the Library](Using)
 
 </div>
+
 <div markdown style="float: left; margin-right: 20px;">
 
 [Change Log](ChangeLog)

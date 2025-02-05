@@ -131,8 +131,8 @@ sizes in each individual line are scaled to the same unit size.
 .I include\-fstype\-list
 (compatibility: \fB\-F\fP, \fB\-\-type\fP)
 .br
-Include \fIonly\fP the file system types listed in \fIinclude\-fstyp\-list\fP.
-The list is a comma separated list of file system types.
+Include \fIonly\fP the filesystem types listed in \fIinclude\-fstyp\-list\fP.
+The list is a comma separated list of filesystem types.
 Multiple \-I options may be specified.  If the \[aq]fuse\[aq] filesystem type
 is specified, all fuse* filesystems will be included.
 .br
@@ -180,7 +180,7 @@ Display sizes in Kbytes.
 .B \-l
 (compatibility: \fB\-\-local\fP)
 .br
-Display only local file systems.
+Display only local filesystems.
 .TP
 .B \-L
 Turn off check for duplicate filesystems (loopback (lofs/none) mounts).
@@ -191,7 +191,7 @@ Turn off check for duplicate filesystems (loopback (lofs/none) mounts).
 Display sizes in megabytes.
 .TP
 .B \-n
-Do not print a header line above the list of file systems.  Useful when
+Do not print a header line above the list of filesystems.  Useful when
 parsing the output of \fIdi\fP.
 .TP
 .B \-\-no\-sync
@@ -257,7 +257,7 @@ Ignored.
 .B \-t
 (compatibility: \fB\-\-total\fP)
 .br
-Print a totals line below the list of file systems.
+Print a totals line below the list of filesystems.
 Only the main pool of pooled filesystems (zfs, advfs, apfs)
 are added to the total.
 Pooled filesystems that do not have pool information
@@ -290,8 +290,8 @@ Ignored.  The following argument is ignored.
 .I exclude\-fstype\-list
 (compatibility: \fB\-\-exclude\-type\fP)
 .br
-Exclude the file system types listed in \fIexclude\-fstyp\-list\fP.
-The list is a comma separated list of file system types.
+Exclude the filesystem types listed in \fIexclude\-fstyp\-list\fP.
+The list is a comma separated list of filesystem types.
 Multiple \-x options may be specified.  If the \[aq]fuse\[aq] filesystem
 type is excluded, all fuse* filesystems will be excluded.
 e.g. \-x nfs,tmpfs or \-x nfs \-x tmpfs.
@@ -332,10 +332,10 @@ Print the filesystem name (device name).
 Print the filesystem name.
 .TP
 .B t
-Print the file system type.
+Print the filesystem type.
 .TP
 .B T (backwards compatibility)
-Print the file system type.
+Print the filesystem type.
 .TP
 .B O
 Print the filesystem mount options.
@@ -343,16 +343,16 @@ Print the filesystem mount options.
 .B Total Available
 .TP
 .B b
-Print the total space on the file system.
+Print the total space on the filesystem.
 .TP
 .B B
-Print the total space on the file system available for use by normal
+Print the total space on the filesystem available for use by normal
 users.
 .TP
 .B In Use
 .TP
 .B u
-Print the space in use on the file system
+Print the space in use on the filesystem
 (actual space used = total \- free).
 .TP
 .B c
@@ -363,7 +363,7 @@ correctly on the \[aq]apfs\[aq] filesystem.
 .B Free
 .TP
 .B f
-Print the amount of free (unused) space on the file system.
+Print the amount of free (unused) space on the filesystem.
 .TP
 .B v
 Print the space available for use by normal users.
@@ -382,7 +382,7 @@ Print the percentage of space in use
 Print the percentage of space in use, BSD-style.  Represents the
 percentage of user-available space in use.  Note that values over 100%
 are possible
-(actual space used / disk space available to non-root users).
+(actual space used / disk space available to normal users).
 .TP
 .B Percentage Free
 .TP
@@ -397,8 +397,8 @@ Print the percentage of space free
 .B Inodes
 .TP
 .B i
-Print the total number of file slots (inodes) that can be created on the file
-system.
+Print the total number of file slots (inodes) that can be created on the
+filesystem.
 .TP
 .B U
 Print the number of file slots in use.
