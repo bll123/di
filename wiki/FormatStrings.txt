@@ -1,0 +1,47 @@
+[Wiki Home](Home)
+
+This documentation was created for the upcoming version 5.x.
+
+[TOC]
+
+### di Format Strings
+
+The `-f` option to _di_ specifies which values to output.
+
+ * __Strings__
+    * __m__ : Mount Point
+    * __s__ : Filesystem (device name)
+    * __t__ : Filesystem Type
+    * __O__ : Mount Options
+ * __Total Available__
+    * __b__ : Total space on the filesystem.
+    * __B__ : Total space on the filesystem available for use by
+normal users.
+ * __In Use__
+    * __u__ : The space in use on the filesystem.
+<br>(actual space used = total - free)
+    * __c__ : The space not available for use by normal users.
+<br>(total - available)
+ * __Free__
+    * __f__ : The amount of free (unused) space on the filesystem.
+    * __v__ : The space available for use by normal users.
+ * __Percentage Used__
+    * __p__ : The percentage of space in use.
+<br>(space not available for use / total disk space)
+    * __1__ : The percentage of space in use
+<br>(actual space used / total disk space)
+    * __2__ : The percentage of user-available space in use.
+<br>(actual space used / disk space available to normal users)
+ * __Percentage Free__
+    * __a__ : The percentage of space available for use by normal users.
+<br>(space available for use / total disk space)
+    * __3__ : The percentage of space free.
+<br>(actual space free / total disk space)
+ * __Inodes__
+    * __i__ : The total number of file slots (inodes) that can be created
+on the filesystem.
+    * __U__ : The number of file slots in use.
+    * __F__ : The number of file slots available.
+    * __P__ : The percentage of file slots in use.
+
+[Wiki Home](Home)

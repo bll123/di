@@ -1,20 +1,19 @@
-di - disk information utility (version 5.0.0)
+di - disk information utility
 
 Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
 
 CONTENTS
-  Important: Version 5
+  Important Notes: Version 5
   Description
   Documentation
   Installation
   Requirements
-  Bugs and Known Issues
   Porting Help
   Acknowledgements
   Copyright
 
-IMPORTANT: VERSION 5
+IMPORTANT: VERSION 5  (2025-2-5)
 
   Version 5's code base has changed.  The build process has changed and
   optionally uses cmake (3.13+). The display processing is entirely new code.
@@ -23,6 +22,9 @@ IMPORTANT: VERSION 5
   space or percentages.
 
   Version 5.0.0 is very new, and there could still be errors.
+
+  2025-2-5 :  I will be working on testing quota operations and pooled
+              filesystem operations (zfs, advs).
 
 DESCRIPTION
 
@@ -76,13 +78,14 @@ REQUIREMENTS
     msgfmt
     C compiler
     sed grep tr test /bin/sh
+    awk (gawk/nawk/awk)
   mkconfig build
     make
     pkg-config
     msgfmt
     C compiler
     bourne/ksh/bash shell
-    awk (mawk/nawk/gawk)
+    awk (gawk/nawk/awk)
     cat chmod ln mkdir mv rm sed test expr grep sort
   libraries:
     Linux: tirpc (nfs quotas)
