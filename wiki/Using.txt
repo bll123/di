@@ -1,7 +1,5 @@
 [Wiki Home](Home)
 
-This documentation was created for the upcoming version 5.x.
-
 [TOC]
 
 ### Notes on Using the Library

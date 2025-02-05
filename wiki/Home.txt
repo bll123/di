@@ -1,7 +1,5 @@
 <div markdown style="float: left; margin-right: 20px;">
 
-This documentation was created for the upcoming version 5.x.
-
 ### di
 
 <div markdown style="float: left; margin-right: 20px;">

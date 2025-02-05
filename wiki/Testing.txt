@@ -1,7 +1,5 @@
 [Wiki Home](Home)
 
-This documentation was created for the upcoming version 5.x.
-
 If there is a particular platform/build method/compiler combination
 that you want tested, please open a
 [ticket](https://sourceforge.net/p/diskinfo-di/tickets/) and let me

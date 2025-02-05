@@ -1,7 +1,5 @@
 [Wiki Home](Home)
 
-This documentation was created for the upcoming version 5.x.
-
 ### Known Issues
 
 * Configuring:  Some systems need an additional library (or something)

@@ -5,7 +5,7 @@
 # requirements: sshpass, groff
 #
 
-TMP=tmp
+TMP=tmpweb
 test -d $TMP || mkdir $TMP
 
 tserver=web.sourceforge.net
@@ -49,16 +49,15 @@ if [[ $ver != "" ]] ; then
   cp -pf web/index.html web/di-ss.png web/hpux-di118.png $TMP
   sed -i -e "s/#VERSION#/${ver}/g" $TMP/index.html
 
-  for f in ../*.1; do
+  for f in man/*.1; do
     groff -man -Thtml $f > $TMP/$(basename -s.1 $f).html
   done
 
-  cd tmp
-  files="di.html index.html di-ss.png hpux-di118.png"
+  cd $TMP
   sshpass -e rsync -e "$ssh" -aS --delete \
-      ${files} ${remuser}@${server}:${wwwpath}
-  rm -f di.html index.html di-ss.png hpux-di118.png
+      * ${remuser}@${server}:${wwwpath}
   cd ..
+  rm -rf $TMP
 fi
 
 unset SSHPASS

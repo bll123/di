@@ -2,7 +2,7 @@
 
 ### di Change Log
 
-**5.0.0 2025-xx-xx (not yet released)**
+**5.0.0 2025-2-5**
 
 * Bug Fixes
     * Fix some internal errors (string sizing).
