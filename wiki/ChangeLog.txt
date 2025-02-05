@@ -13,6 +13,7 @@
     * CSV and JSON output will now include the totals if requested.
     * Fixed putting 'tmpfs', 'cgroup', 'swap' in the ignore list.
     * Added 'squashfs', 'overlay' to the ignore list.
+    * Fix calculation of used space if total space is zero.
 * Changes
     * Drop syllable and VMS support.
     * All format strings options (mstO) no longer truncate the output.

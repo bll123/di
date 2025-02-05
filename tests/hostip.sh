@@ -15,6 +15,13 @@ fi
 . ./tests/util.sh
 
 gethostdata ${host}
+if [[ ${ipaddr} == "-" ]]; then
+  gethostip ${host}
+fi
+if [[ x${ipaddr} == "-" ]]; then
+  echo "${host}: Unable to get host ip"
+  exit 1
+fi
 if [[ ${remuser} != - ]]; then
   remussh="-l ${remuser}"
 fi

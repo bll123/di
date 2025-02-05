@@ -16,7 +16,7 @@ remport=$2
 rempath=$3
 shift;shift;shift
 # flag is R (build and remove), K (build and keep), C (clean only)
-flag=${1:=R}
+flag=${1:-R}
 shift
 complist=$*
 
@@ -36,7 +36,6 @@ if [[ ${remport} != - ]]; then
 fi
 
 topdir=$(pwd)
-already=F
 
 if [[ $flag != C ]]; then
   if [[ ${type} == local ]]; then

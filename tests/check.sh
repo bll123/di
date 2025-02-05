@@ -4,15 +4,29 @@
 #
 
 host=$1
-shift
-complist=$*
-if [[ $complist == "" ]]; then
-  complist="cc"
-fi
+
+. ./tests/util.sh
+
+gethostdata ${host}
+complist=${complist:-cc}
 
 topdir=$(pwd)
 tcount=0
 failcount=0
+havecmake=""
+havemkc="mkc"
+
+ok=0
+for comp in cc gcc clang; do
+  if [[ -d ${topdir}/test_results/${host}_${comp} ]]; then
+    ok=1
+    break
+  fi
+done
+if [[ $ok -eq 0 ]]; then
+  echo "== ${host}: Unable to locate results dir"
+  exit 1
+fi
 
 # cmake/mkc comparison
 for comp in ${complist}; do
@@ -45,6 +59,8 @@ for comp in ${complist}; do
       echo "== $(date '+%T') ${host}/${comp}: installation dir diff failed"
       failcount=$(($failcount+1))
     fi
+
+    havecmake=cmake
   fi
 done
 
@@ -143,7 +159,7 @@ for comp in ${complist}; do
   done
 done
 
-echo "-- $(date '+%T') ${host}: tests: $tcount failures: $failcount"
+echo "-- $(date '+%T') ${host}: ${havecmake} ${havemkc} ${complist} tests: $tcount failures: $failcount"
 if [[ $failcount -gt 0 ]]; then
   echo "-- $(date '+%T') ${host}: FAIL"
   exit 1

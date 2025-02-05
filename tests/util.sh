@@ -5,6 +5,27 @@
 
 HOSTLIST=tests/hostlist.txt
 
+function gethostip {
+  host=$1
+
+  count=0
+  ipaddr="-"
+  while : ; do
+    # Value: 192.168.56.3
+    # No value set!
+    ipdata=$(VBoxManage guestproperty get ${host} '/VirtualBox/GuestInfo/Net/0/V4/IP' 2>/dev/null)
+    ipaddr=$(echo $ipdata | sed -e 's,[^0-9]*,,')
+    if [[ "x$ipaddr" != x ]]; then
+      break
+    fi
+    count=$(($count + 1))
+    sleep 1
+    if [[ $count -gt 80 ]]; then
+      break
+    fi
+  done
+}
+
 function gethostdata {
   host=$1
 
@@ -12,7 +33,7 @@ function gethostdata {
   trc=$?
   if [[ $trc -ne 0 ]]; then
     echo "${host}: not in hostlist.txt"
-    exit 1
+    return 1
   fi
   set ${hdata}
   type=$2
@@ -40,4 +61,3 @@ function gethostdata {
     esac
   done
 }
-

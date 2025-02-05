@@ -1052,10 +1052,14 @@ checkDiskQuotas (di_data_t *di_data)
     const char  *str;
     int         pos;
 
+/* freebsd 10.3 */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
     str = _lib_quotactl ? "quotactl" : "";
     str = _lib_vquotactl ? "vquotactl" : str;
     str = _lib_quota_open ? "quota_open" : str;
     pos = _quotactl_pos_1 ? 1 : _quotactl_pos_2 ? 2 : 0;
+#pragma clang diagnostic pop
 
     printf ("# QUOTA: %d:%s(%d) nfs:%d\n", _has_std_quotas, str, pos, _has_std_nfs_quotas);
   }
@@ -1636,7 +1640,11 @@ di_calc_space (di_data_t *di_data, int infoidx,
     dinum_sub (&sub, &dinfo->values [validxC]);
   }
   dinum_set (val, &dinfo->values [validxA]);
-  dinum_sub (val, &sub);
+  if (dinum_cmp_s (val, 0) == 0) {
+    dinum_set_u (val, (di_ui_t) 0);
+  } else {
+    dinum_sub (val, &sub);
+  }
 
   dinum_clear (&sub);
 }

@@ -23,6 +23,8 @@ if [ x"$cmvers" = x ]; then
   exit $rc
 fi
 
+PATH=/opt/local/bin:/usr/local/bin:$PATH
+
 # need a more modern version of awk...
 awkcmd=`which gawk 2>/dev/null`
 rc=$?
@@ -30,13 +32,20 @@ if [ $rc -ne 0 -o "x$awkcmd" = x ]; then
   awkcmd=`which nawk 2>/dev/null`
   rc=$?
   if [ $rc -ne 0 -o "x$awkcmd" = x ]; then
-    # maybe the which command is not there...
-    # try some common spots
-    if [ -f /usr/bin/gawk ]; then
-      awkcmd=gawk
-    fi
-    if [ "x$awkcmd" = x -a -f /usr/bin/nawk ]; then
-      awkcmd=nawk
+    awkcmd=`which awk 2>/dev/null`
+    rc=$?
+    if [ $rc -ne 0 -o "x$awkcmd" = x ]; then
+      # maybe the which command is not there...
+      # try some common spots
+      if [ -f /usr/bin/gawk ]; then
+        awkcmd=gawk
+      fi
+      if [ "x$awkcmd" = x -a -f /usr/bin/nawk ]; then
+        awkcmd=nawk
+      fi
+      if [ "x$awkcmd" = x -a -f /usr/bin/awk ]; then
+        awkcmd=awk
+      fi
     fi
   fi
 fi

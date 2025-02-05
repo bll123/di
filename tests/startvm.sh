@@ -14,6 +14,13 @@ fi
 . ./tests/util.sh
 
 gethostdata ${host}
+if [[ ${ipaddr} == "-" ]]; then
+  gethostip ${host}
+fi
+if [[ x${ipaddr} == "-" ]]; then
+  echo "${host}: Unable to get ip address"
+  exti 1
+fi
 
 chkc=$(ps -ef | grep "[c]omment ${host}" | wc -l)
 if [[ $chkc -eq 1 ]]; then
@@ -26,11 +33,20 @@ if [[ $chkc -eq 1 ]]; then
   fi
 fi
 
+echo "-- $(date '+%T') ${host}: starting vm"
 nohup VBoxManage startvm ${host} > /dev/null 2>&1 &
-sleep 10
+sleep 5 # give time for vboxmanage to work...
 count=0
 ok=F
 if [[ $validate == T ]]; then
+  if [[ ${ipaddr} == "-" ]]; then
+    gethostip ${host}
+    if [[ x${ipaddr} == "-" ]]; then
+      echo "${host}: Unable to get host ip"
+      ./tests/stopvm.sh ${host}
+      exit 1
+    fi
+  fi
   while : ; do
     (ssh -l bll ${ipaddr} "echo AAA" 2>&1 ) | grep '^AAA$' > /dev/null
     rc=$?
@@ -42,8 +58,7 @@ if [[ $validate == T ]]; then
     count=$(($count + 1))
     if [[ $count -gt 40 ]]; then
       echo "== $(date '+%T') ${host}: unable to connect"
-      echo "-- $(date '+%T') ${host}: stopping"
-      ./tests/stopvm.sh ${host} ${ipaddr} &
+      ./tests/stopvm.sh ${host}
       exit 1
     fi
     sleep 5
@@ -51,6 +66,7 @@ if [[ $validate == T ]]; then
 else
   ok=T
 fi
+
 if [[ $ok == T ]]; then
   rc=0
 else

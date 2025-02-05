@@ -3,6 +3,14 @@
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
 
+function checkvm {
+  vmhost=$1
+
+  ps -ef | grep "[c]omment ${vmhost}" > /dev/null 2>&1
+  trc=$?
+  return $trc
+}
+
 host=$1
 
 if [[ x$host == x ]]; then
@@ -19,32 +27,54 @@ if [[ $type != vm ]]; then
   exit 1
 fi
 
-cmd="shutdown -h now"
-case ${host} in
-  *[sS]olaris*|nexenta*)
-    cmd="init 5"
-    ;;
-  dragonflybsd*|freebsd*|netbsd*|openbsd*|mirbsd*)
-    cmd="/sbin/halt -p"
-    ;;
-  alpine*)
-    cmd="/sbin/poweroff"
-    ;;
-esac
+checkvm ${host}
+rc=$?
+if [[ $rc -ne 0 ]]; then
+  echo "${host}: already stopped"
+  exit 1
+fi
 
-ssh -l root ${ipaddr} "${cmd}"
-# VBoxManage controlvm ${host} poweroff > /dev/null 2>&1
+if [[ $ipaddr == "-" ]]; then
+  gethostip ${host}
+fi
+
+if [[ x${ipaddr} != "-" ]]; then
+  cmd="shutdown -h now"
+  case ${host} in
+    *[sS]olaris*)
+      cmd="init 5"
+      ;;
+    dragonflybsd*|freebsd*|netbsd*|openbsd*|mirbsd*)
+      cmd="/sbin/halt -p"
+      ;;
+    alpine*)
+      cmd="/sbin/poweroff"
+      ;;
+  esac
+
+  ssh -l root ${ipaddr} "${cmd}"
+else
+  VBoxManage controlvm ${host} acpipowerbutton > /dev/null 2>&1
+fi
+
 count=0
 while : ; do
-  ps -ef | grep "[c]omment ${host}" > /dev/null 2>&1
+  checkvm ${host}
   rc=$?
   if [[ $rc -ne 0 ]]; then
     break
   fi
   count=$(($count+1))
-  if [[ $count -gt 20 ]]; then
+  if [[ $count -gt 40 ]]; then
     break
   fi
   sleep 1
 done
+
+checkvm ${host}
+rc=$?
+if [[ $rc -eq 0 ]]; then
+  VBoxManage controlvm ${host} poweroff > /dev/null 2>&1
+fi
+
 exit 0

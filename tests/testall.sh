@@ -5,46 +5,59 @@
 
 . ./tests/util.sh
 
+function countvm {
+  vmcount=0
+  for vmidx in $vmidxlist; do
+    pid=${vmpidlist[$vmidx]}
+    if [[ $pid -ne 0 ]]; then
+      kill -0 $pid 2>/dev/null
+      rc=$?
+      if [[ $rc -eq 0 ]]; then
+        vmcount=$(($vmcount+1))
+      else
+        vmpidlist[$vmidx]=0
+      fi
+    fi
+  done
+}
+
 function dovm {
   vmhost=$1
 
-  ./tests/startvm.sh ${vmhost} T
-  rc=$?
-  if [[ $rc -ne 0 && $rc -ne 255 ]]; then
-    continue
-  fi
-  if [[ $rc -eq 255 ]]; then
-    already=T
-  fi
-  vmcount=$(($vmcount+1))
-
-  rsltdir=$(pwd)/test_results/${vmhost}
-  test -d ${rsltdir} && rm -rf ${rsltdir}
-  mkdir -p ${rsltdir}
-
+  vmpid=0
   if [[ $bg == T ]]; then
-    nohup ./tests/thost.sh ${tarfn} ${didir} ${vmhost} ${type} \
-        ${ipaddr} ${remuser} ${remport} ${rempath} \
-        ${flag} ${complist} 2>&1 | tee ${rsltdir}/w &
+    ./tests/testvm.sh ${vmhost} ${flag} &
+    vmpid=$!
   else
-    ./tests/thost.sh ${tarfn} ${didir} ${vmhost} ${type} \
-        ${ipaddr} ${remuser} ${remport} ${rempath} \
-        ${flag} ${complist} 2>&1 | tee ${rsltdir}/w
+    ./tests/testvm.sh ${vmhost} ${flag}
   fi
-
-  if [[ $already == F ]]; then
-    echo "-- $(date '+%T') ${vmhost}: stopping"
-    ./tests/stopvm.sh ${vmhost}
-    vmcount=$(($vmcount-1))
+  if [[ $vmpid -ne 0 ]]; then
+    for vmidx in $vmidxlist; do
+      if [[ ${vmpidlist[$vmidx]} -eq 0 ]]; then
+        vmpidlist[$vmidx]=$vmpid
+        break
+      fi
+    done
   fi
 }
 
 hostlist=""
 vmcount=0
+declare -a vmpidlist
+vmmax=2
+vmidx=0
+vmidxlist=""
+while test $vmidx -lt $vmmax; do
+  vmpidlist[$vmidx]=0
+  vmidxlist+="$vmidx "
+  vmidx=$(($vmidx+1))
+done
 
 flag=R
 bg=T
 newtar=F
+procvm=T
+procnotvm=T
 while test $# -gt 0; do
   case $1 in
     --keep)
@@ -59,6 +72,14 @@ while test $# -gt 0; do
     --list)
       flag=L
       bg=F
+      shift
+      ;;
+    --notvm)
+      procvm=F
+      shift
+      ;;
+    --vm)
+      procnotvm=F
       shift
       ;;
     --newtar)
@@ -111,43 +132,49 @@ fi
 tarfn=$(echo di-*.tar.gz)
 didir=$(echo ${tarfn} | sed 's,\.tar.gz$,,')
 
-# start all the non-vms
-for host in ${hostlist}; do
-  gethostdata ${host}
+if [[ ${procnotvm} == T ]]; then
+  # start all the non-vms
+  for host in ${hostlist}; do
+    gethostdata ${host}
 
-  if [[ ${type} == vm ]]; then
-    continue
-  fi
+    if [[ ${type} == vm ]]; then
+      continue
+    fi
 
-  rsltdir=$(pwd)/test_results/${host}
-  test -d ${rsltdir} && rm -rf ${rsltdir}
-  mkdir -p ${rsltdir}
+    rsltdir=$(pwd)/test_results/${host}
+    test -d ${rsltdir} && rm -rf ${rsltdir}
+    mkdir -p ${rsltdir}
 
-  if [[ $bg == T ]]; then
-    nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
-        ${ipaddr} ${remuser} ${remport} ${rempath} \
-        ${flag} ${complist} 2>&1 | tee ${rsltdir}/w &
-  else
-    ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
-        ${ipaddr} ${remuser} ${remport} ${rempath} \
-        ${flag} ${complist} 2>&1 | tee ${rsltdir}/w
-  fi
-done
-
-# do the vms
-for host in ${hostlist}; do
-  gethostdata ${host}
-  already=F
-
-  if [[ ${type} != vm ]]; then
-    continue
-  fi
-
-  while test $vmcount -ge 2; do
-    sleep 1
+    if [[ $bg == T ]]; then
+      nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
+          ${ipaddr} ${remuser} ${remport} ${rempath} \
+          ${flag} ${complist} 2>&1 | tee ${rsltdir}/w &
+    else
+      ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
+          ${ipaddr} ${remuser} ${remport} ${rempath} \
+          ${flag} ${complist} 2>&1 | tee ${rsltdir}/w
+    fi
   done
+fi
 
-  dovm $host
-done
+if [[ ${procvm} == T ]]; then
+  # do the vms
+  for host in ${hostlist}; do
+    gethostdata ${host}
+    already=F
+
+    if [[ ${type} != vm ]]; then
+      continue
+    fi
+
+    countvm
+    while test $vmcount -ge $vmmax; do
+      sleep 1
+      countvm
+    done
+
+    dovm $host
+  done
+fi
 
 exit 0

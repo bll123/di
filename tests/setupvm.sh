@@ -13,7 +13,6 @@ fi
 . ./tests/util.sh
 
 gethostdata $host
-
 if [[ $type != vm ]];then
   echo "${host}: type is not vm"
   exit 1
@@ -32,6 +31,12 @@ case $answer in
     fi
     ;;
 esac
+
+if [[ x${ipaddr} == x ]]; then
+  echo "${host}: no host ip"
+  exit 1
+fi
+
 ssh ${ipaddr} "test -d .ssh || mkdir .ssh; chmod 700 .ssh"
 scp $HOME/.ssh/authorized_keys ${ipaddr}:.ssh
 ssh -l root ${ipaddr} "test -d .ssh || mkdir .ssh; chmod 700 .ssh"
