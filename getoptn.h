@@ -56,7 +56,7 @@ typedef struct {
 } getoptn_opt_t;
 
 extern int getoptn (int style, int argc, const char * argv [],
-      Size_t optcount, getoptn_opt_t opts [], int offset, int *errorCount);
+      int optcount, getoptn_opt_t opts [], int offset, int *errorCount);
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }

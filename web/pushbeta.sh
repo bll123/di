@@ -37,13 +37,9 @@ export SSHPASS
 ver=$(grep "^DI_VERSION" Makefile | sed -e 's/.*= *//')
 
 fn=di-${ver}.tar.gz
-mv README.txt README-old.txt
-mv README-5.txt README.txt
 sshpass -e rsync -e "$ssh" -aS \
     $fn README.txt \
-    ${remuser}@${server}:${wwwpath}/beta
-mv README.txt README-5.txt
-mv README-old.txt README.txt
+    ${remuser}@${server}:${wwwpath}/beta/
 
 unset SSHPASS
 exit 0

@@ -57,7 +57,7 @@ typedef struct {
 typedef struct {
   int                 style;
   int                 optidx;
-  Size_t              optcount;
+  int                 optcount;
   getoptn_opt_t       *opts;
   getoptn_optinfo_t   *optinfo;
   int                 argc;
@@ -80,11 +80,7 @@ find_option (getoptn_info_t *info, const char *arg, const char *oarg, Size_t *ar
   int       i;
   Size_t    junk;
 
-  for (i = 0; i < (int) info->optcount; ++i) {
-    if (info->optinfo [i].optionlen == 0) {
-      info->optinfo [i].optionlen = strlen (info->opts [i].option);
-      info->optinfo [i].idx = i;
-    }
+  for (i = 0; i < info->optcount; ++i) {
     if (strncmp (arg + info->offset, info->opts [i].option + info->reprocess,
              info->optinfo [i].optionlen - info->reprocess) == 0) {
       info->hasvalue = false;
@@ -277,7 +273,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
 
 int
 getoptn (int style, int argc, const char * argv [],
-         Size_t optcount, getoptn_opt_t opts [], int offset, int *errorCount)
+         int optcount, getoptn_opt_t opts [], int offset, int *errorCount)
 {
   int               i;
   int               rc;
@@ -297,9 +293,14 @@ getoptn (int style, int argc, const char * argv [],
 
   if (optcount > 0) {
     info.optinfo = (getoptn_optinfo_t *)
-          malloc (sizeof (getoptn_optinfo_t) * optcount);
-    for (i = 0; i < (int) info.optcount; ++i) {
-      info.optinfo [i].optionlen = 0;
+          malloc (sizeof (getoptn_optinfo_t) * (Size_t) optcount);
+    for (i = 0; i < info.optcount; ++i) {
+      if (info.opts [i].option == NULL) {
+        fprintf (stderr, "fatal error: null option\n");
+        exit (1);
+      }
+      info.optinfo [i].optionlen = strlen (info.opts [i].option);
+      info.optinfo [i].idx = i;
     }
   } else {
     return 1 < argc ? 1 : -1;
@@ -1306,6 +1307,23 @@ main (int argc, char * argv [])
   optidx = getoptn (GETOPTN_LEGACY, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts, 1, &ec);
   if (i != 0 || ec != 0) {
+    fprintf (stderr, "fail test %d\n", testno);
+    grc = 1;
+  }
+
+  /* test 52 - unknown argument */
+  ++testno;
+  i = 0;
+  ac = 2;
+  Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
+  av [0] = tmp;
+  av [1] = "-G";
+  av [2] = NULL;
+  ec = 0;
+  fprintf (stderr, "** expect unknown option\n");
+  optidx = getoptn (GETOPTN_LEGACY, ac, av,
+       sizeof (opts) / sizeof (getoptn_opt_t), opts, 1, &ec);
+  if (ec != 1) {
     fprintf (stderr, "fail test %d\n", testno);
     grc = 1;
   }

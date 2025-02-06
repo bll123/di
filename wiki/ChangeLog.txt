@@ -11,6 +11,8 @@
     * MacOS: Remove extraneous minimum macos version.
     * Fix libdi.3 manual page errors.
     * cmake: Check for CMAKE_SKIP_RPATH environment variable.
+    * po install: honor DESTDIR.
+    * Fix crash on unknown option.
 
 -->
 

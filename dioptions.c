@@ -100,7 +100,7 @@ static di_valid_scale_t validscale [] =
 #define OPT_IDX_z         27
 #define OPT_IDX_Z         28
 #define OPT_IDX_MAX_NAMED 29
-#define OPT_IDX_MAX       54
+#define OPT_IDX_MAX       53
 
 
 static int scaleids [] =
@@ -933,9 +933,9 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
   diopts->opts [c].option_type = GETOPTN_IGNORE_ARG;
   ++c;
 
-  if (c + 1 != OPT_IDX_MAX) {
+  if (c != OPT_IDX_MAX) {
     fprintf (stderr, "incorrect option initialization %d/%d\n",
-        c + 1, OPT_IDX_MAX);
+        c, OPT_IDX_MAX);
     exit (1);
   }
   diopts->optinit = true;
