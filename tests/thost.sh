@@ -63,7 +63,7 @@ if [[ $flag != C ]]; then
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
       remotebldrun $ipaddr
-    elif [[ ${type} == vm ]]; then
+    elif [[ ${type} == vm || ${type} == vmlocal ]]; then
       echo "-- $(date '+%T') ${host}: copying files"
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
@@ -81,7 +81,7 @@ if [[ $flag == R || $flag == C ]]; then
       rm -rf di-[45].*.tar.gz di-[45].*.tar di-[45].*_${comp} dibldrun.sh
       cd ..
     fi
-    if [[ $type == remote || $type == vm ]]; then
+    if [[ $type == remote || $type == vm || $type == vmlocal ]]; then
       ssh ${rempssh} ${remussh} ${ipaddr} "rm -rf di-[45].*.tar.gz di-[45].*.tar di-[45].*_${comp} dibldrun.sh"
     fi
   done

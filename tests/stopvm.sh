@@ -22,7 +22,7 @@ fi
 
 gethostdata ${host}
 
-if [[ $type != vm ]]; then
+if [[ $type != vm && $type != vmlocal ]]; then
   echo "${host}: not a vm"
   exit 1
 fi
@@ -62,6 +62,7 @@ while : ; do
   checkvm ${host}
   rc=$?
   if [[ $rc -ne 0 ]]; then
+    sleep 2   # give some time for virtualbox to reset
     break
   fi
   count=$(($count+1))

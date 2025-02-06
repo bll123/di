@@ -28,6 +28,7 @@ function dovm {
   if [[ $bg == T ]]; then
     ./tests/testvm.sh ${vmhost} ${flag} &
     vmpid=$!
+    sleep 2  # give time for virtualbox to settle down
   else
     ./tests/testvm.sh ${vmhost} ${flag}
   fi
@@ -57,6 +58,7 @@ flag=R
 bg=T
 newtar=F
 procvm=T
+procvmlocal=T
 procnotvm=T
 while test $# -gt 0; do
   case $1 in
@@ -76,10 +78,17 @@ while test $# -gt 0; do
       ;;
     --notvm)
       procvm=F
+      procvmlocal=F
       shift
       ;;
     --vm)
       procnotvm=F
+      shift
+      ;;
+    --vmlocal)
+      procnotvm=F
+      procvm=F
+      procvmlocal=T
       shift
       ;;
     --newtar)
@@ -137,7 +146,7 @@ if [[ ${procnotvm} == T ]]; then
   for host in ${hostlist}; do
     gethostdata ${host}
 
-    if [[ ${type} == vm ]]; then
+    if [[ ${type} == vm || $type == vmlocal ]]; then
       continue
     fi
 
@@ -157,13 +166,18 @@ if [[ ${procnotvm} == T ]]; then
   done
 fi
 
-if [[ ${procvm} == T ]]; then
+if [[ ${procvm} == T || ${procvmlocal} == T ]]; then
   # do the vms
   for host in ${hostlist}; do
     gethostdata ${host}
-    already=F
 
-    if [[ ${type} != vm ]]; then
+    if [[ ${type} != vm && $type != vmlocal ]]; then
+      continue
+    fi
+    if [[ ${type} == vm && ${procvm} == F ]]; then
+      continue
+    fi
+    if [[ ${type} == vmlocal && ${procvmlocal} == F ]]; then
       continue
     fi
 

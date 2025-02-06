@@ -10,7 +10,7 @@ flag=${2:-R}
 
 gethostdata ${host}
 
-if [[ ${type} != vm ]]; then
+if [[ ${type} != vm && $type != vmlocal ]]; then
   echo "-- $(date '+%T') ${host}: not a vm"
   exit 1
 fi

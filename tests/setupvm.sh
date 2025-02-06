@@ -13,7 +13,7 @@ fi
 . ./tests/util.sh
 
 gethostdata $host
-if [[ $type != vm ]];then
+if [[ $type != vm && $type != vmlocal ]];then
   echo "${host}: type is not vm"
   exit 1
 fi
