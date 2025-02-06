@@ -8,7 +8,7 @@
 DI_VERSION = 5.0.1
 DI_LIBVERSION = 5.0.1
 DI_SOVERSION = 5
-DI_RELEASE_STATUS = production
+DI_RELEASE_STATUS = beta
 
 # for cmake
 CMAKE_REQ_MAJ_VERSION = 3
@@ -41,7 +41,7 @@ EXE_EXT =
 # installation locations
 #  the cmake install only uses PREFIX
 #
-PREFIX = /usr/local
+PREFIX = 
 BINDIR = $(PREFIX)/bin
 LIBNM = lib
 LIBDIR = $(PREFIX)/$(LIBNM)

@@ -10,6 +10,7 @@
     * PENDING MacOS: Fix builds prior to version 10.11.
     * MacOS: Remove extraneous minimum macos version.
     * Fix libdi.3 manual page errors.
+    * cmake: Check for CMAKE_SKIP_RPATH environment variable.
 
 -->
 

@@ -23,6 +23,11 @@ set (DI_LIBNAME libdi)
 SET (CMAKE_SKIP_BUILD_RPATH FALSE)
 SET (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
+if (NOT ENV{CMAKE_SKIP_RPATH} STREQUAL "")
+  message ("-- Skip RPATH: $ENV{CMAKE_SKIP_RPATH}")
+  set (CMAKE_SKIP_RPATH "$ENV{CMAKE_SKIP_RPATH}")
+endif()
+
 #### compile options
 
 add_compile_options (-fPIC)
@@ -148,7 +153,7 @@ if (NOT WIN32)
     # 10.10 = Yosemite, 10.11 = El Capitan
     # 10.12 = Sierra, 10.13 = High Sierra
     # 10.14 = Mojave, 10.15 = Catalina
-    # 11 = Big Sur, 12 = Monterey, 
+    # 11 = Big Sur, 12 = Monterey,
     # 13 = Ventura, 14 = Sonoma
     # 15 = Sequoia
     # set (CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
