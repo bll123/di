@@ -10,6 +10,10 @@ if [ "x${INST_LOCALEDIR}" = x ]; then
   exit 1
 fi
 
+if [ ! "x${DESTDIR}" = x ]; then
+  INST_LOCALEDIR="${DESTDIR}/${INST_LOCALEDIR}"
+fi
+
 while test ! -f CMakeLists.txt -a ! -d man -a ! -d utils -a ! -d po; do
   cd ..
 done
