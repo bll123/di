@@ -143,14 +143,14 @@ if (NOT WIN32)
   endif()
   if (APPLE)
 #    SET (CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR} "@loader_path")
+    # 10.6 = Snow Leopard, 10.7 = Lion
+    # 10.8 = Mountain Lion, 10.9 = Mavericks
     # 10.10 = Yosemite, 10.11 = El Capitan
     # 10.12 = Sierra, 10.13 = High Sierra
     # 10.14 = Mojave, 10.15 = Catalina
-    # 11 = Big Sur, 12 = Monterey, 13 = Ventura, 14 = Sonoma
+    # 11 = Big Sur, 12 = Monterey, 
+    # 13 = Ventura, 14 = Sonoma
     # 15 = Sequoia
-    add_compile_options (-mmacosx-version-min=10.10)
-    add_link_options (-mmacosx-version-min=10.10)
-    # not universal binary, I don't have universal libintl installed.
     # set (CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
   endif()
 else()

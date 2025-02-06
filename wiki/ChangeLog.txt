@@ -2,6 +2,17 @@
 
 ### di Change Log
 
+<!--
+
+**5.0.1 2025-2---**
+
+* Bug Fixes
+    * PENDING MacOS: Fix builds prior to version 10.11.
+    * MacOS: Remove extraneous minimum macos version.
+    * Fix libdi.3 manual page errors.
+
+-->
+
 **5.0.0 2025-2-5**
 
 * Bug Fixes
