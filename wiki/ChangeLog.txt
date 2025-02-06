@@ -4,17 +4,25 @@
 
 <!--
 
-**5.0.1 2025-2---**
+**5.0.2 2025-2-6**
 
 * Bug Fixes
     * PENDING MacOS: Fix builds prior to version 10.11.
+
+-->
+
+**5.0.2 2025-2-6**
+
+* Bug Fixes
     * MacOS: Remove extraneous minimum macos version.
     * Fix libdi.3 manual page errors.
     * cmake: Check for CMAKE_SKIP_RPATH environment variable.
     * po install: honor DESTDIR.
     * Fix crash on unknown option.
 
--->
+**5.0.1 2025-2-6**
+
+* Not released.
 
 **5.0.0 2025-2-5**
 

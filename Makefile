@@ -5,10 +5,10 @@
 #  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
-DI_VERSION = 5.0.1
-DI_LIBVERSION = 5.0.1
+DI_VERSION = 5.0.2
+DI_LIBVERSION = 5.0.2
 DI_SOVERSION = 5
-DI_RELEASE_STATUS = beta
+DI_RELEASE_STATUS = production
 
 # for cmake
 CMAKE_REQ_MAJ_VERSION = 3
