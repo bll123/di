@@ -213,6 +213,10 @@ fi
 
 loc=`pwd`
 
+make -e PREFIX=${loc}/x chkswitcher |
+    grep -v 'ing directory' \
+    > di-chkswitcher.out 2>&1
+
 ./utils/chkcmake.sh ${CMAKE_REQ_MAJ_VERSION} ${CMAKE_REQ_MIN_VERSION}
 rc=$?
 if [ $rc -eq 0 ] ;then

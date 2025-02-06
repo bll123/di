@@ -5,8 +5,8 @@
 #  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
-DI_VERSION = 5.0.0
-DI_LIBVERSION = 5.0.0
+DI_VERSION = 5.0.1
+DI_LIBVERSION = 5.0.1
 DI_SOVERSION = 5
 DI_RELEASE_STATUS = production
 
@@ -82,6 +82,10 @@ install:
 
 .PHONY: test
 test:
+	@$(MAKE) -e TARGET=$@ switcher
+
+.PHONY: chkswitcher
+chkswitcher:
 	@$(MAKE) -e TARGET=$@ switcher
 
 # checks the cmake version, and builds using either cmake or mkconfig
@@ -253,6 +257,10 @@ cmake-test:
 	./build/dimathtest
 	./build/getoptn_test
 
+.PHONY: cmake-chkswitcher
+cmake-chkswitcher:
+	@echo "cmake"
+
 ###
 # main
 
@@ -295,6 +303,10 @@ mkc-test:
 	. ./$(MKC_ENV); \
 	    ./dimathtest$(EXE_EXT); \
 	    ./getoptn_test$(EXE_EXT)
+
+.PHONY: mkc-chkswitcher
+mkc-chkswitcher:
+	@echo "mkc"
 
 .PHONY: mkc-install
 mkc-install: $(MKC_ENV) mkc-all

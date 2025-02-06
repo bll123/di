@@ -28,6 +28,25 @@ if [[ $ok -eq 0 ]]; then
   exit 1
 fi
 
+# chkswitcher
+for comp in ${complist}; do
+  rsltdir=${topdir}/test_results/${host}_${comp}
+  tcount=$(($tcount+1))
+  tfn=${rsltdir}/di-chkswitcher.out
+  if [[ -f ${tfn} ]]; then
+    tcount=$(($tcount+1))
+    cdata=$(cat ${tfn})
+    if [[ $cdata != cmake && $cdata != mkc ]]; then
+      echo "== $(date '+%T') ${host}/${comp}: chkswitcher failed"
+      cat ${tfn}
+      failcount=$(($failcount+1))
+    fi
+  else
+    echo "== $(date '+%T') ${host}/${comp}: chkswitcher does not exist"
+    failcount=$(($failcount+1))
+  fi
+done
+
 # cmake/mkc comparison
 for comp in ${complist}; do
   rsltdir=${topdir}/test_results/${host}_${comp}
