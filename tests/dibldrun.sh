@@ -54,6 +54,8 @@ bldrun () {
   make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
   # AIX: BSHIFT: nothing i can do about system headers
   # NetBSD: rpcsvc: deprecated and buggy (why do they complain when there is no alternative?)
+  # SCO OpenServer: stdint.h:252: warning: `WCHAR_MAX' redefined
+  # SCO OpenServer: sys/mount.h:52: warning: `/*' within comment
   c=`${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
       ${grepcmd} -v '(pragma|error[=,])' |
       ${grepcmd} -v 'BSHIFT has been redefined' |

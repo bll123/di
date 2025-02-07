@@ -49,6 +49,11 @@ INSTALLATION
     The build will use cmake if it is available and recent enough (3.13),
     otherwise the mkconfig configuration tool will be used.
 
+    To use cmake in a stand-alone fashion (version 5.0.4):
+        cmake -DCMAKE_INSTALL_PREFIX=$HOME/local -S . -B build
+        cmake --build build
+        cmake --install build
+
     If GMP or libtommath is found, they will be used,
     otherwise the numerics will be handled using standard C data types
     (long double, double, etc.).

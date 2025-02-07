@@ -1,10 +1,42 @@
 #
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.13)
 
 # avoid msys2/windows issue
 set (CMAKE_C_COMPILER_WORKS 1)
+
+###
+# load the DI_* variables from VERSION.txt
+
+file (STRINGS VERSION.txt tdivars)
+foreach (tvar IN LISTS tdivars)
+  # the export lines are not needed
+  if (tvar MATCHES "=")
+    string (REGEX MATCH "^[^=]*" tnm ${tvar})
+    string (REGEX MATCH "=.*" tvala ${tvar})
+    string (REPLACE "=" "" tval ${tvala})
+    set (${tnm} ${tval})
+  endif()
+endforeach()
+
+###
+# also set DI_USE_MATH from the environment if there
+if (DEFINED ENV{DI_USE_MATH})
+  set (DI_USE_MATH $ENV{DI_USE_MATH})
+  # these are the only supported values as of 2025-2-6
+  if (NOT DI_USE_MATH STREQUAL "DI_INTERNAL" AND
+      NOT DI_USE_MATH STREQUAL "DI_GMP" AND
+      NOT DI_USE_MATH STREQUAL "DI_TOMMATH")
+    unset (DI_USE_MATH)
+  endif()
+endif()
+
+###
+# check to make sure cmake-install-prefix is set
+if (NOT DEFINED CMAKE_INSTALL_PREFIX OR CMAKE_INSTALL_PREFIX STREQUAL "")
+  message (FATAL_ERROR "CMAKE_INSTALL_PREFIX is not set")
+endif()
 
 project (DI
   VERSION ${DI_VERSION}
@@ -24,7 +56,6 @@ SET (CMAKE_SKIP_BUILD_RPATH FALSE)
 SET (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 if (DEFINED ENV{CMAKE_SKIP_RPATH} AND NOT ENV{CMAKE_SKIP_RPATH} STREQUAL "")
-  message ("-- Skip RPATH: $ENV{CMAKE_SKIP_RPATH}")
   set (CMAKE_SKIP_RPATH "$ENV{CMAKE_SKIP_RPATH}")
 endif()
 
@@ -128,13 +159,11 @@ endif()
 
 # solaris may not be using the gnu/clang loader
 if (DI_FORTIFY STREQUAL Y AND NOT CMAKE_HOST_SOLARIS)
-message ("== fortify is on")
   # hardening
   add_compile_options (-fstack-protector-strong)
   add_compile_options (-fstack-protector-all)
   add_compile_options (-D_FORTIFY_SOURCE=2)
 else()
-message ("== fortify is OFF")
   if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_compile_options (-Wno-macro-redefined)
   endif()

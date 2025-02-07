@@ -33,7 +33,8 @@ esac
 ssh="ssh -p $port"
 export ssh
 
-tver=$(grep "^DI_VERSION" Makefile| sed -e 's/.*= *//')
+. ./VERSION.txt
+tver=$DI_VERSION
 echo -n "Version [$tver]: "
 read ver
 if [[ $ver == "" ]]; then

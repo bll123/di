@@ -5,12 +5,7 @@
 #  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
-DI_VERSION = 5.0.3
-DI_LIBVERSION = 5.0.3
-DI_SOVERSION = 5
-DI_RELEASE_STATUS = production
-
-# for cmake
+# for checking cmake
 CMAKE_REQ_MAJ_VERSION = 3
 CMAKE_REQ_MIN_VERSION = 13
 BUILDDIR = build
@@ -96,7 +91,7 @@ switcher:
 	    $(CMAKE_REQ_MAJ_VERSION) $(CMAKE_REQ_MIN_VERSION) ; \
 	rc=$$? ; \
 	if [ $$rc -eq 0 ]; then \
-	  $(MAKE) cmake-$(TARGET) ; \
+	  $(MAKE) -e cmake-$(TARGET) ; \
 	else \
 	  $(MAKE) -e mkc-$(TARGET) ; \
 	fi
@@ -154,11 +149,11 @@ tar:
 
 .PHONY: cmake-debug
 cmake-debug:
-	$(MAKE) DI_BUILD=Debug cmake-all
+	$(MAKE) -e DI_BUILD=Debug cmake-all
 
 .PHONY: cmake-sanitize
 cmake-sanitize:
-	$(MAKE) DI_BUILD=SanitizeAddress cmake-all
+	$(MAKE) -e DI_BUILD=SanitizeAddress cmake-all
 
 # parallel doesn't seem to work under msys2
 # cmake doesn't seem to support parallel under *BSD
@@ -168,23 +163,23 @@ cmake-all:
 	@case $$(uname -s) in \
 	  CYGWIN*) \
 	    COMP=$(CC) \
-	    $(MAKE) cmake-unix; \
-	    $(MAKE) cmake-build; \
+	    $(MAKE) -e cmake-unix; \
+	    $(MAKE) -e cmake-build; \
             ;; \
 	  MSYS*|MINGW*) \
 	    COMP=$(CC) \
-	    $(MAKE) cmake-windows; \
-	    $(MAKE) cmake-build; \
+	    $(MAKE) -e cmake-windows; \
+	    $(MAKE) -e cmake-build; \
             ;; \
 	  *BSD*) \
 	    COMP=$(CC) \
-	    $(MAKE) cmake-unix; \
-	    $(MAKE) cmake-build; \
+	    $(MAKE) -e cmake-unix; \
+	    $(MAKE) -e cmake-build; \
             ;; \
 	  *) \
 	    COMP=$(CC) \
-	    $(MAKE) cmake-unix; \
-	    pmode=--parallel $(MAKE) cmake-build; \
+	    $(MAKE) -e cmake-unix; \
+	    pmode=--parallel $(MAKE) -e cmake-build; \
             ;; \
 	esac
 
@@ -193,17 +188,17 @@ cmakeclang:
 	case $$(uname -s) in \
 	  *BSD*) \
 	    COMP=$(CC) \
-	    $(MAKE) cmake-unix; \
-	    $(MAKE) cmake-build; \
+	    $(MAKE) -e cmake-unix; \
+	    $(MAKE) -e cmake-build; \
             ;; \
 	  MSYS*|MINGW*) \
 	    COMP=/ucrt64/bin/clang.exe \
-	    $(MAKE) cmake-windows; \
-	    $(MAKE) cmake-build; \
+	    $(MAKE) -e cmake-windows; \
+	    $(MAKE) -e cmake-build; \
             ;; \
 	  *) \
-	    $(MAKE) cmake-unix; \
-	    pmode=--parallel $(MAKE) cmake-build; \
+	    $(MAKE) -e cmake-unix; \
+	    pmode=--parallel $(MAKE) -e cmake-build; \
             ;; \
 	esac
 
@@ -217,11 +212,6 @@ cmake-unix:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
-		-DDI_VERSION:STATIC=$(DI_VERSION) \
-		-DDI_LIBVERSION:STATIC=$(DI_LIBVERSION) \
-		-DDI_SOVERSION:STATIC=$(DI_SOVERSION) \
-		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
-		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-S . -B $(BUILDDIR) -Werror=deprecated
 
 # internal use
@@ -233,11 +223,6 @@ cmake-windows:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
-		-DDI_VERSION:STATIC=$(DI_VERSION) \
-		-DDI_LIBVERSION:STATIC=$(DI_LIBVERSION) \
-		-DDI_SOVERSION:STATIC=$(DI_SOVERSION) \
-		-DDI_RELEASE_STATUS:STATIC=$(DI_RELEASE_STATUS) \
-		-DDI_USE_MATH:STATIC=$(DI_USE_MATH) \
 		-G "MSYS Makefiles" \
 		-S . -B $(BUILDDIR) -Werror=deprecated
 
@@ -269,7 +254,8 @@ cmake-chkswitcher:
 # don't know any good way to determine if lib64 is preferred
 .PHONY: mkc-all
 mkc-all:
-	@-grep -l openSUSE /etc/os-release > /dev/null 2>&1 ; \
+	@-. ./VERSION.txt ; \
+	grep -l openSUSE /etc/os-release > /dev/null 2>&1 ; \
 	rc=$$? ; \
 	if [ $$rc -eq 0 ]; then \
 	  $(MAKE) -e LIBNM=lib64 mkc-sh ; \
@@ -281,10 +267,6 @@ mkc-all:
 mkc-sh:	$(MKC_ENV)
 	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=sh \
 		DI_PREFIX=$(PREFIX) \
-		DI_VERSION=$(DI_VERSION) \
-		DI_LIBVERSION=$(DI_LIBVERSION) \
-		DI_SOVERSION=$(DI_SOVERSION) \
-		DI_RELEASE_STATUS=$(DI_RELEASE_STATUS) \
                 mkc-di-programs
 
 .PHONY: mkc-perl
@@ -310,7 +292,8 @@ mkc-chkswitcher:
 
 .PHONY: mkc-install
 mkc-install: $(MKC_ENV) mkc-all
-	@-grep -l openSUSE /etc/os-release > /dev/null 2>&1 ; \
+	@-. ./VERSION.txt ; \
+	grep -l openSUSE /etc/os-release > /dev/null 2>&1 ; \
 	rc=$$? ; \
 	if [ $$rc -eq 0 ]; then \
 	  . ./$(MKC_ENV);$(MAKE) -e \
@@ -325,12 +308,12 @@ mkc-install: $(MKC_ENV) mkc-all
 
 .PHONY: mkc-install-all
 mkc-install-all:
-	$(MAKE) mkc-install-di
-	$(MAKE) mkc-install-include
-	$(MAKE) mkc-install-libdi
-	-$(MAKE) mkc-install-po
-	$(MAKE) mkc-install-man
-	$(MAKE) mkc-install-pc
+	$(MAKE) -e mkc-install-di
+	$(MAKE) -e mkc-install-include
+	$(MAKE) -e mkc-install-libdi
+	-$(MAKE) -e mkc-install-po
+	$(MAKE) -e mkc-install-man
+	$(MAKE) -e mkc-install-pc
 
 .PHONY: mkc-install-po
 mkc-install-po:

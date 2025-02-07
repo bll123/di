@@ -3,7 +3,8 @@
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
 
-ver=$(grep "^DI_VERSION" Makefile | sed -e 's/.*= *//')
+. ./VERSION.txt
+ver=$DI_VERSION
 
 PKG=di
 cwd=$(pwd)
@@ -14,7 +15,7 @@ mkdir $dir/utils
 chmod 755 $dir
 
 cp -pf *.c *.h *.in $dir
-cp -pf CMakeLists.txt LICENSE.txt Makefile $dir
+cp -pf VERSION.txt CMakeLists.txt LICENSE.txt Makefile $dir
 cp -pf README.txt $dir
 cp -pf utils/chkcmake.sh utils/instpo.sh $dir/utils
 for d in mkconfig mkc_config man po; do

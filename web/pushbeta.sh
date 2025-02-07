@@ -34,7 +34,8 @@ read -s SSHPASS
 echo ""
 export SSHPASS
 
-ver=$(grep "^DI_VERSION" Makefile | sed -e 's/.*= *//')
+. ./VERSION.txt
+ver=$DI_VERSION
 
 fn=di-${ver}.tar.gz
 sshpass -e rsync -e "$ssh" -aS \
