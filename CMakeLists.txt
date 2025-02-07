@@ -23,7 +23,7 @@ set (DI_LIBNAME libdi)
 SET (CMAKE_SKIP_BUILD_RPATH FALSE)
 SET (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
-if (NOT ENV{CMAKE_SKIP_RPATH} STREQUAL "")
+if (DEFINED ENV{CMAKE_SKIP_RPATH} AND NOT ENV{CMAKE_SKIP_RPATH} STREQUAL "")
   message ("-- Skip RPATH: $ENV{CMAKE_SKIP_RPATH}")
   set (CMAKE_SKIP_RPATH "$ENV{CMAKE_SKIP_RPATH}")
 endif()
@@ -101,11 +101,14 @@ add_link_options (-g)
 
 #### more compile options: fortification/address sanitizer
 
-set (DI_FORTIFY T)
+set (DI_FORTIFY Y)
+if (DEFINED ENV{DI_FORTIFY} AND NOT ENV{DI_FORTIFY} STREQUAL "")
+  set (DI_FORTIFY $ENV{DI_FORTIFY})
+endif()
 
 # address sanitizer
 if (DI_BUILD STREQUAL "SanitizeAddress")
-  set (DI_FORTIFY F)
+  set (DI_FORTIFY N)
   add_compile_options (-O0)
   add_compile_options (-ggdb)
   add_link_options (-g)
@@ -124,14 +127,14 @@ if (DI_BUILD STREQUAL "SanitizeAddress")
 endif()
 
 # solaris may not be using the gnu/clang loader
-if (DI_FORTIFY STREQUAL T AND NOT CMAKE_HOST_SOLARIS)
+if (DI_FORTIFY STREQUAL Y AND NOT CMAKE_HOST_SOLARIS)
+message ("== fortify is on")
   # hardening
-  add_compile_options (-fstack-protector-strong)
-  add_compile_options (-fstack-protector-all)
   add_compile_options (-fstack-protector-strong)
   add_compile_options (-fstack-protector-all)
   add_compile_options (-D_FORTIFY_SOURCE=2)
 else()
+message ("== fortify is OFF")
   if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     add_compile_options (-Wno-macro-redefined)
   endif()
@@ -535,9 +538,9 @@ else()
   check_include_file ("sys/mntent.h" _sys_mntent)
 endif()
 
-# openbsd, dragonflybsd, freeb
+# openbsd, dragonflybsd, freebsd
 check_include_files ("sys/types.h;sys/mount.h" _sys_mount)
-check_include_file (sys/quota.h _sys_quota)
+check_include_files ("sys/types.h;sys/quota.h" _sys_quota)
 check_include_file (sys/stat.h _sys_stat)
 check_include_file (sys/statfs.h _sys_statfs)
 check_include_file (sys/statvfs.h _sys_statvfs)
@@ -750,7 +753,7 @@ if (_hdr_ufs_ufs_quota)
   set (QUOTA_HDR "sys/types.h;unistd.h;ufs/ufs/quota.h")
 endif()
 if (_sys_quota)
-  set (QUOTA_HDR "sys/quota.h")
+  set (QUOTA_HDR "sys/types.h;sys/quota.h")
 endif()
 if (_hdr_ufs_quota)
   set (QUOTA_HDR "ufs/quota.h")
@@ -881,7 +884,7 @@ if (_lib_quotactl AND NOT _lib_vquotactl AND
   check_prototype_definition (quotactl
       "int quotactl (int a, const char * b, uid_t c, void * d)"
       0
-      ${QUOTA_HDR}
+      "${QUOTA_HDR}"
       _npt_quotactl
       )
   if (_npt_quotactl)

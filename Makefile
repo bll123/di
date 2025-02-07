@@ -5,8 +5,8 @@
 #  Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
 #
 
-DI_VERSION = 5.0.2
-DI_LIBVERSION = 5.0.2
+DI_VERSION = 5.0.3
+DI_LIBVERSION = 5.0.3
 DI_SOVERSION = 5
 DI_RELEASE_STATUS = production
 
@@ -41,7 +41,7 @@ EXE_EXT =
 # installation locations
 #  the cmake install only uses PREFIX
 #
-PREFIX = 
+PREFIX =
 BINDIR = $(PREFIX)/bin
 LIBNM = lib
 LIBDIR = $(PREFIX)/$(LIBNM)

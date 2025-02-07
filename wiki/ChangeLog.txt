@@ -4,12 +4,15 @@
 
 <!--
 
-**5.0.2 2025-2-6**
-
-* Bug Fixes
-    * PENDING MacOS: Fix builds prior to version 10.11.
+**5.0.4 2025-2-0**
 
 -->
+
+**5.0.3 2025-2-6**
+
+* Bug Fixes
+    * MacOS: Fix builds prior to version 10.11.
+    * cmake: Honor DI_FORTIFY environment variable.
 
 **5.0.2 2025-2-6**
 
