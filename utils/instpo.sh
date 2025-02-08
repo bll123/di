@@ -28,13 +28,13 @@ fi
 test -d "${INST_LOCALEDIR}" || mkdir -p "${INST_LOCALEDIR}"
 
 # try for xmsgfmt first, for older systems
-msgfmtcmd=$(which xmsgfmt 2>/dev/null)
+msgfmtcmd=`which xmsgfmt 2>/dev/null`
 rc=$?
 if [ $rc -ne 0 -o "x$msgfmtcmd" = x ]; then
-  msgfmtcmd=$(which gmsgfmt 2>/dev/null)
+  msgfmtcmd=`which gmsgfmt 2>/dev/null`
   rc=$?
   if [ $rc -ne 0 -o "x$msgfmtcmd" = x ]; then
-    msgfmtcmd=$(which msgfmt 2>/dev/null)
+    msgfmtcmd=`which msgfmt 2>/dev/null`
     rc=$?
     if [ $rc -ne 0 -o "x$msgfmtcmd" = x ]; then
       # maybe the which command is not there...

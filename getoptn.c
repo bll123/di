@@ -1216,7 +1216,7 @@ main (int argc, char * argv [])
   av [2] = "abcdef";
   av [3] = NULL;
   ec = 0;
-  fprintf (stderr, "** expect invalid pointer\n");
+  fprintf (stderr, "** expect invalid function pointer\n");
   optidx = getoptn (GETOPTN_MODERN, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts, 1, &ec);
   if (strcmp (s2, "") != 0 || ec != 1) {
@@ -1234,7 +1234,7 @@ main (int argc, char * argv [])
   av [2] = "abcdef";
   av [3] = NULL;
   ec = 0;
-  fprintf (stderr, "** expect invalid pointer\n");
+  fprintf (stderr, "** expect invalid function pointer\n");
   optidx = getoptn (GETOPTN_MODERN, ac, av,
        sizeof (opts) / sizeof (getoptn_opt_t), opts, 1, &ec);
   if (strcmp (s2, "") != 0 || ec != 1) {

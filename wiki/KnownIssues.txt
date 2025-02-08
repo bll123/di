@@ -2,7 +2,7 @@
 
 ### Known Issues
 
-* Solaris: The native compiler with GMP fails.
+* Solaris: The native compiler combined with GMP fails.
 * Configuring:  Some systems need an additional library (or something)
 for stack fortification.  mkconfig does not locate this.
 * MacOS: The libtommath library available via MacPorts currently has

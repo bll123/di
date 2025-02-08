@@ -1640,7 +1640,7 @@ di_calc_space (di_data_t *di_data, int infoidx,
     dinum_sub (&sub, &dinfo->values [validxC]);
   }
   dinum_set (val, &dinfo->values [validxA]);
-  if (dinum_cmp_s (val, 0) == 0) {
+  if (dinum_cmp_s (val, (di_si_t) 0) == 0) {
     dinum_set_u (val, (di_ui_t) 0);
   } else {
     dinum_sub (val, &sub);
