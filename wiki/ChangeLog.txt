@@ -6,6 +6,15 @@
 
 **5.0.5 2025-2-**
 
+**5.0.5 2025-2-8**
+
+* Bug Fixes
+    * build: Fix the Makefile so that errors are not ignored.
+    * cmake: Do proper checks for compiler and linker options.
+    * Fix LFS 32-bit/64-bit flag processing.
+* Internal
+    * Upgrade mkconfig to version 2.6.5.
+
 -->
 
 **5.0.4 2025-2-7**

@@ -17,7 +17,7 @@ chmod 755 $dir
 cp -pf *.c *.h *.in $dir
 cp -pf VERSION.txt CMakeLists.txt LICENSE.txt Makefile $dir
 cp -pf README.txt $dir
-cp -pf utils/chkcmake.sh utils/instpo.sh $dir/utils
+cp -pf utils/chkcmake.sh utils/chklibnm.sh utils/instpo.sh $dir/utils
 for d in mkconfig mkc_config man po; do
   cp -p -rf ${d} $dir
 done

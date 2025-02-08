@@ -113,8 +113,8 @@ know.
  QNX 6.5 | - | FAIL | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | | | |
  Solaris 10 | - | 5.0.4<br>2025-2-7 | - | - | - | - | getmntent statvfs
- Solaris 11.4 | 5.0.4<br>2025-2-7<br>gcc clang cc | 5.0.4<br>2025-2-7<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>gmp<br>cfarm
- Solaris 11.4 (BE) | 5.0.4<br>2025-2-7<br>gcc clang cc | 5.0.4<br>2025-2-7<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>has gmp<br>cfarm
+ Solaris 11.4 | 5.0.4<br>2025-2-7<br>gcc clang cc | 5.0.4<br>2025-2-7<br>gcc clang cc | - | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 (BE) | 5.0.4<br>2025-2-7<br>gcc clang cc | 5.0.4<br>2025-2-7<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
  __Windows:__| | | | | | | -
  Cygwin | 4.99.7<br>2025-1-31| - | - | - | - | - | get/set/endmntent statvfs?
  MSys 2| - | 4.99.7<br>2025-1-31 | - | - | - | - | - | -

@@ -148,6 +148,15 @@ for comp in ${complist}; do
         trc=1
       fi
     done
+
+    tcount=$(($tcount+1))
+    grep -E -l "^lib(64)?$" ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
+    rc=$?
+    if [[ $rc -ne 0 ]]; then
+      echo "== $(date '+%T') ${host}: ${bld}: ${comp}: missing lib dir"
+      trc=1
+    fi
+
     for f in di di.h di.pc di.1 libdi.3; do
       grep -l "^${f}$" ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
       rc=$?
@@ -178,10 +187,12 @@ for comp in ${complist}; do
   done
 done
 
-echo "-- $(date '+%T') ${host}: ${havecmake} ${havemkc} ${complist} tests: $tcount failures: $failcount"
+grc=0
+fflag=""
 if [[ $failcount -gt 0 ]]; then
-  echo "-- $(date '+%T') ${host}: FAIL"
-  exit 1
+  fflag="FAIL"
+  grc=1
 fi
+echo "-- $(date '+%T') ${host}: ${havecmake} ${havemkc} ${complist} tests: $tcount failures: $failcount $fflag"
 
-exit 0
+exit $grc

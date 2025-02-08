@@ -101,6 +101,7 @@ extern "C" {
  * di_get_disk_info
  *
  * SysV.4.  statvfs () returns both the free and available blocks.
+ * Solaris, Linux
  *
  */
 

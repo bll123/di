@@ -634,19 +634,25 @@ diquota_nfs (di_data_t *di_data, di_quota_t *diqinfo)
     return;
   }
   rqclnt->cl_auth = authunix_create_default ();
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-warning-option"
-/* how many ways does clang complain about valid code? */
-#pragma clang diagnostic ignored "-Wincompatible-function-pointer-types"
-#pragma clang diagnostic ignored "-Wcast-function-type-strict"
-#pragma clang diagnostic ignored "-Wcast-function-type"
   if (diopts->optval [DI_OPT_DEBUG] > 5) {
     printf ("quota: xdr_quota_get/rslt\n");
   }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
+/* how many ways does clang complain about sort-of-valid code? */
+#pragma clang diagnostic ignored "-Wincompatible-function-pointer-types"
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#pragma clang diagnostic ignored "-Wcast-function-type"
+#pragma gcc diagnostic push
+#pragma gcc diagnostic ignored "-Wcast-function-type"  /* works? */
+/* gcc14 on macos complains also, but the pragma maybe does not work */
+/* it's an old interface and xdrproc_t isn't quite defined correctly */
+/* i will attempt to clean this up at a later date */
   clnt_stat = clnt_call (rqclnt, (unsigned long) RQUOTAPROC_GETQUOTA,
       (xdrproc_t) xdr_quota_get, (caddr_t) &args,
       (xdrproc_t) xdr_quota_rslt, (caddr_t) &result, timeout);
 #pragma clang diagnostic pop
+#pragma gcc diagnostic pop
   if (clnt_stat != RPC_SUCCESS) {
     if (diopts->optval [DI_OPT_DEBUG] > 2) {
       printf ("quota: nfs: not success\n");

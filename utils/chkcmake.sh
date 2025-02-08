@@ -3,24 +3,23 @@
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
 
-rc=1
 CMAKE_REQ_MAJ_VERSION=$1
 CMAKE_REQ_MIN_VERSION=$2
 export CMAKE_REQ_MAJ_VERSION
 export CMAKE_REQ_MIN_VERSION
 if [ x"$CMAKE_REQ_MAJ_VERSION" = x ]; then
   echo "chkcmake.sh: no max version specified"
-  exit $rc
+  exit 1
 fi
 if [ x"$CMAKE_REQ_MIN_VERSION" = x ]; then
   echo "chkcmake.sh: no min version specified"
-  exit $rc
+  exit 1
 fi
 
 cmvers=`cmake --version 2>/dev/null`
 if [ x"$cmvers" = x ]; then
-  # echo "no cmake"
-  exit $rc
+  echo "mkc"
+  exit 0
 fi
 
 PATH=/opt/local/bin:/usr/local/bin:$PATH
@@ -52,7 +51,8 @@ fi
 
 # no good awk, assume cmake is ng as well.
 if [ "x$awkcmd" = x ]; then
-  exit $rc
+  echo "mkc"
+  exit 0
 fi
 
 echo "$cmvers" | ${awkcmd} '
@@ -78,4 +78,8 @@ BEGIN {
 }
 '
 rc=$?
-exit $rc
+if [ $rc -eq 0 ]; then
+  echo "cmake"
+else
+  echo "mkc"
+fi

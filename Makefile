@@ -87,10 +87,9 @@ chkswitcher:
 .PHONY: switcher
 switcher:
 	@if [ "$(PREFIX)" = "" ]; then echo "No prefix set"; exit 1; fi
-	@-./utils/chkcmake.sh \
-	    $(CMAKE_REQ_MAJ_VERSION) $(CMAKE_REQ_MIN_VERSION) ; \
-	rc=$$? ; \
-	if [ $$rc -eq 0 ]; then \
+	@bldval=`./utils/chkcmake.sh \
+	    $(CMAKE_REQ_MAJ_VERSION) $(CMAKE_REQ_MIN_VERSION)` ; \
+	if [ $$bldval = cmake ]; then \
 	  $(MAKE) -e cmake-$(TARGET) ; \
 	else \
 	  $(MAKE) -e mkc-$(TARGET) ; \
@@ -116,7 +115,7 @@ clean:
 		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
 		*.o *.obj \
 		$(MKC_FILES)/mkc_compile.log \
-		tests.done tests.d/chksh* \
+		tests.d/chksh* \
 		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
 	@-test -d $(BUILDDIR) && cmake --build $(BUILDDIR) --target clean
 
@@ -125,13 +124,13 @@ realclean:
 	@$(MAKE) clean >/dev/null 2>&1
 	@-rm -rf config.h \
 		$(MKC_ENV) $(MKC_REQLIB) \
-                _mkconfig_runtests \
+		_mkconfig_runtests \
 		>/dev/null 2>&1; exit 0
 
 .PHONY: distclean
 distclean:
 	@$(MAKE) realclean >/dev/null 2>&1
-	@-rm -rf tests.done test_di _mkconfig_runtests \
+	@-rm -rf test_di _mkconfig_runtests \
 		test_results x \
 		$(MKC_FILES) \
 		$(BUILDDIR) \
@@ -165,22 +164,22 @@ cmake-all:
 	    COMP=$(CC) \
 	    $(MAKE) -e cmake-unix; \
 	    $(MAKE) -e cmake-build; \
-            ;; \
+	    ;; \
 	  MSYS*|MINGW*) \
 	    COMP=$(CC) \
 	    $(MAKE) -e cmake-windows; \
 	    $(MAKE) -e cmake-build; \
-            ;; \
+	    ;; \
 	  *BSD*) \
 	    COMP=$(CC) \
 	    $(MAKE) -e cmake-unix; \
 	    $(MAKE) -e cmake-build; \
-            ;; \
+	    ;; \
 	  *) \
 	    COMP=$(CC) \
 	    $(MAKE) -e cmake-unix; \
 	    pmode=--parallel $(MAKE) -e cmake-build; \
-            ;; \
+	    ;; \
 	esac
 
 .PHONY: cmakeclang
@@ -190,16 +189,16 @@ cmakeclang:
 	    COMP=$(CC) \
 	    $(MAKE) -e cmake-unix; \
 	    $(MAKE) -e cmake-build; \
-            ;; \
+	    ;; \
 	  MSYS*|MINGW*) \
 	    COMP=/ucrt64/bin/clang.exe \
 	    $(MAKE) -e cmake-windows; \
 	    $(MAKE) -e cmake-build; \
-            ;; \
+	    ;; \
 	  *) \
 	    $(MAKE) -e cmake-unix; \
 	    pmode=--parallel $(MAKE) -e cmake-build; \
-            ;; \
+	    ;; \
 	esac
 
 # --debug-trycompile
@@ -254,20 +253,15 @@ cmake-chkswitcher:
 # don't know any good way to determine if lib64 is preferred
 .PHONY: mkc-all
 mkc-all:
-	@-. ./VERSION.txt ; \
-	grep -l openSUSE /etc/os-release > /dev/null 2>&1 ; \
-	rc=$$? ; \
-	if [ $$rc -eq 0 ]; then \
-	  $(MAKE) -e LIBNM=lib64 mkc-sh ; \
-	else \
-	  $(MAKE) -e mkc-sh ; \
-	fi ; \
+	@. ./VERSION.txt ; \
+	libnm=`./utils/chklibnm.sh` ; \
+	$(MAKE) -e LIBNM=$$libnm mkc-sh
 
 .PHONY: mkc-sh
 mkc-sh:	$(MKC_ENV)
 	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=sh \
 		DI_PREFIX=$(PREFIX) \
-                mkc-di-programs
+		mkc-di-programs
 
 .PHONY: mkc-perl
 mkc-perl:	$(MKC_ENV)
@@ -278,7 +272,7 @@ mkc-perl:	$(MKC_ENV)
 		DI_SOVERSION=$(DI_SOVERSION) \
 		DI_RELEASE_STATUS=$(DI_RELEASE_STATUS) \
 		$(MAKE) -e MKCONFIG_TYPE=perl \
-                mkc-di-programs
+		mkc-di-programs
 
 .PHONY: mkc-test
 mkc-test:
@@ -292,16 +286,10 @@ mkc-chkswitcher:
 
 .PHONY: mkc-install
 mkc-install: $(MKC_ENV) mkc-all
-	@-. ./VERSION.txt ; \
-	grep -l openSUSE /etc/os-release > /dev/null 2>&1 ; \
-	rc=$$? ; \
-	if [ $$rc -eq 0 ]; then \
-	  . ./$(MKC_ENV);$(MAKE) -e \
-	      PREFIX=$(PREFIX) LIBNM=lib64 mkc-install-all ; \
-	else \
-	  . ./$(MKC_ENV);$(MAKE) -e \
-	      PREFIX=$(PREFIX) mkc-install-all ; \
-	fi ; \
+	@. ./VERSION.txt ; \
+	libnm=`./utils/chklibnm.sh` ; \
+	. ./$(MKC_ENV);$(MAKE) -e \
+	      PREFIX=$(PREFIX) LIBNM=$$libnm mkc-install-all
 
 ###
 # installation
@@ -325,8 +313,8 @@ mkc-install-pc: $(MKC_REQLIB)
 	test -d $(INST_PKGCDIR) || mkdir -p $(INST_PKGCDIR)
 	@dilibs="$${LDFLAGS_LIBS_APPLICATION} `cat $(MKC_REQLIB)`" ; \
 	dilibs="`echo $${dilibs} | \
-            sed -e 's,-lintl,,g' \
-            -e 's,-liconv,,g'`" ; \
+	    sed -e 's,-lintl,,g' \
+	    -e 's,-liconv,,g'`" ; \
 	cat di.pc.in | \
 	  sed -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
 	      -e 's,@CMAKE_INSTALL_FULL_INCLUDEDIR@,$(INCDIR),g' \
@@ -397,7 +385,7 @@ mkc-install-man:
 # mkc environment
 
 $(MKC_ENV):	$(MKC_ENV_CONF)
-	@-rm -f $(MKC_ENV) tests.done
+	@-rm -f $(MKC_ENV)
 	CC=$(CC) DI_FORTIFY=$(DI_FORTIFY) \
 	    $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
 
@@ -411,7 +399,7 @@ mkc-di-programs:	di$(EXE_EXT) dimathtest$(EXE_EXT) getoptn_test$(EXE_EXT)
 # configuration file
 
 config.h:	$(MKC_ENV) $(MKC_CONF)
-	@-rm -f config.h tests.done
+	@-rm -f config.h
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
 		. ./$(MKC_ENV);$(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/mkconfig.sh \
@@ -438,7 +426,7 @@ MAINOBJECTS = di$(OBJ_EXT)
 libdi$(SHLIB_EXT):	$(MKC_REQLIB) $(LIBOBJECTS)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -shared $(MKC_ECHO) \
-                -r $(MKC_REQLIB) \
+		-r $(MKC_REQLIB) \
 		-o libdi$(SHLIB_EXT) \
 		$(LIBOBJECTS)
 
@@ -456,7 +444,7 @@ dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
 		-link -exec $(MKC_ECHO) \
 		-o dimathtest$(EXE_EXT) \
 		dimathtest$(OBJ_EXT) \
-                -l m
+		-l m
 
 getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT) distrutils$(OBJ_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
@@ -464,7 +452,7 @@ getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT) distrutils$(OBJ_EXT)
 		-o getoptn_test$(EXE_EXT) \
 		getoptn_test$(OBJ_EXT) \
 		distrutils$(OBJ_EXT) \
-                -l m
+		-l m
 
 ###
 # objects
