@@ -64,6 +64,17 @@ for comp in ${complist}; do
     fi
 
     tcount=$(($tcount+1))
+    diff -b -B ${rsltdir}/di-cmake-config.out ${rsltdir}/di-pcmake-config.out \
+        > ${rsltdir}/di-tmppdiff.out
+    awk -f ./tests/chkdiff.awk ${rsltdir}/di-tmppdiff.out \
+        > ${rsltdir}/di-pdiff.out
+    dlc=$(cat ${rsltdir}/di-pdiff.out | wc -l)
+    if [[ $dlc != 0 ]]; then
+      echo "== $(date '+%T') ${host}/${comp}: config.h pure-cmake diff failed"
+      failcount=$(($failcount+1))
+    fi
+
+    tcount=$(($tcount+1))
     diff -q -b -B ${rsltdir}/di-mkc-math.out ${rsltdir}/di-cmake-math.out
     rc=$?
     if [[ $rc != 0 ]]; then
@@ -72,10 +83,26 @@ for comp in ${complist}; do
     fi
 
     tcount=$(($tcount+1))
+    diff -q -b -B ${rsltdir}/di-cmake-math.out ${rsltdir}/di-pcmake-math.out
+    rc=$?
+    if [[ $rc != 0 ]]; then
+      echo "== $(date '+%T') ${host}/${comp}: dimathtest pure-cmake diff failed"
+      failcount=$(($failcount+1))
+    fi
+
+    tcount=$(($tcount+1))
     diff -q -b -B ${rsltdir}/di-mkc-instdir.out ${rsltdir}/di-cmake-instdir.out
     rc=$?
     if [[ $rc != 0 ]]; then
       echo "== $(date '+%T') ${host}/${comp}: installation dir diff failed"
+      failcount=$(($failcount+1))
+    fi
+
+    tcount=$(($tcount+1))
+    diff -q -b -B ${rsltdir}/di-cmake-instdir.out ${rsltdir}/di-pcmake-instdir.out
+    rc=$?
+    if [[ $rc != 0 ]]; then
+      echo "== $(date '+%T') ${host}/${comp}: installation dir pure-cmake diff failed"
       failcount=$(($failcount+1))
     fi
 
@@ -90,7 +117,7 @@ for comp in ${complist}; do
     rsltdirb=${topdir}/test_results/${host}_${comp}
 
     # do mkc first, always there
-    for bld in mkc cmake; do
+    for bld in mkc cmake pcmake; do
       if [[ ! -f ${rsltdir}/di-${bld}-config.out ||
           ! -f ${rsltdirb}/di-${bld}-config.out ]]; then
         break
@@ -123,14 +150,14 @@ done
 for comp in ${complist}; do
   rsltdir=${topdir}/test_results/${host}_${comp}
 
-  for bld in mkc cmake; do
+  for bld in mkc cmake pcmake; do
     if [[ ! -f ${rsltdir}/di-${bld}-run.out ]]; then
       continue
     fi
 
     # test that the execution of di actually worked.
     tcount=$(($tcount+1))
-    grep -l "^# BUILD: ${bld}" ${rsltdir}/di-${bld}-run.out > /dev/null 2>&1
+    grep -l "^# BUILD: [cm]" ${rsltdir}/di-${bld}-run.out > /dev/null 2>&1
     rc=$?
     if [[ $rc != 0 ]]; then
       echo "== $(date '+%T') ${host}: ${bld}: ${comp}: no debug output in run file"

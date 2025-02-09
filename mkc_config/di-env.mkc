@@ -24,33 +24,28 @@ addcflag -Werror=format-security
 addcflag -Werror=return-type
 addcflag -Wunreachable-code
 
-if notusingcplusplus == _MKCONFIG_USING_GNU_LD Y && ! == _MKCONFIG_USING_CPLUSPLUS Y
-  addcflag -Wdeclaration-after-statement
-  addcflag -Wmissing-prototypes
-endif
+addcflag -Wdeclaration-after-statement
+addcflag -Wmissing-prototypes
 
-if UsingGCC == _MKCONFIG_USING_GCC Y
-  addcflag -Wmaybe-uninitialized
-  addcflag -Wno-unused-but-set-variable
-  addcflag -Wno-stringop-overflow
-  addcflag -Wno-stringop-truncation
-  addcflag -Wno-format-truncation
-endif
-if UsingCLANG == _MKCONFIG_USING_CLANG Y
-  addcflag -Wno-extra-semi-stmt
-  addcflag -Wno-unsafe-buffer-usage
-  addcflag -Wno-poison-system-directories
-  addcflag -Wno-shift-sign-overflow
-  addcflag -Wno-pragma-pack
-  addcflag -Wno-ignored-attributes
-  addcflag -Wno-reserved-id-macro
-  addcflag -Wno-implicit-int-conversion
-  addcflag -Wno-switch-enum
-  addcflag -Wno-gnu-zero-variadic-macro-arguments
-  addcflag -Wno-documentation-deprecated-sync
-  addcflag -Wno-documentation-unknown-command
-  addcflag -Wno-documentation
-endif
+addcflag -Wmaybe-uninitialized
+addcflag -Wno-unused-but-set-variable
+addcflag -Wno-stringop-overflow
+addcflag -Wno-stringop-truncation
+addcflag -Wno-format-truncation
+addcflag -Wno-extra-semi-stmt
+addcflag -Wno-unsafe-buffer-usage
+addcflag -Wno-poison-system-directories
+addcflag -Wno-shift-sign-overflow
+addcflag -Wno-pragma-pack
+addcflag -Wno-ignored-attributes
+addcflag -Wno-reserved-id-macro
+addcflag -Wno-implicit-int-conversion
+addcflag -Wno-switch-enum
+addcflag -Wno-gnu-zero-variadic-macro-arguments
+addcflag -Wno-documentation-deprecated-sync
+addcflag -Wno-documentation-unknown-command
+addcflag -Wno-documentation
+addcflag -Wno-used-but-marked-unused
 
 env DI_FORTIFY
 

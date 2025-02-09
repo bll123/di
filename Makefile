@@ -211,6 +211,7 @@ cmake-unix:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
+		-DDI_BUILD_SYS:STATIC=make-cmake \
 		-S . -B $(BUILDDIR) -Werror=deprecated
 
 # internal use
@@ -222,6 +223,7 @@ cmake-windows:
 		-DCMAKE_C_COMPILER=$(COMP) \
 		-DCMAKE_INSTALL_PREFIX="$(PREFIX)" \
 		-DDI_BUILD:STATIC=$(DI_BUILD) \
+		-DDI_BUILD_SYS:STATIC=make-cmake \
 		-G "MSYS Makefiles" \
 		-S . -B $(BUILDDIR) -Werror=deprecated
 

@@ -310,6 +310,7 @@ void
 convertNFSMountOptions (long flags, long wsize, long rsize, di_disk_info_t *diptr)
 {
 #pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunknown-warning-option"
 #pragma clang diagnostic ignored "-Wunused-but-set-variable"
   char    *p;
   char    *end;

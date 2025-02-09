@@ -51,7 +51,13 @@ bldrun () {
 
   echo "-- `date '+%T'` ${host}: ${tag}/${comp}"
   make distclean
-  make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
+  if [ $tag = pcmake ]; then
+    # pure cmake
+    cmake -DCMAKE_INSTALL_PREFIX=${loc}/x -S . -B build > di-${tag}-bld.out 2>&1
+    cmake --build build >> di-${tag}-bld.out 2>&1
+  else
+    make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
+  fi
   # AIX: BSHIFT: nothing i can do about system headers
   # NetBSD: rpcsvc: deprecated and buggy (why do they complain when there is no alternative?)
   # SCO OpenServer: stdint.h:252: warning: `WCHAR_MAX' redefined
@@ -76,7 +82,7 @@ bldrun () {
     grc=1
   fi
 
-  if [ $tag = cmake ]; then
+  if [ $tag = cmake -o $tag = pcmake ]; then
     mathtest=./build/dimathtest
     getoptntest=./build/getoptn_test
   fi
@@ -98,7 +104,11 @@ bldrun () {
     grc=1
   fi
 
-  make -e CC=${comp} PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
+  if [ $tag = pcmake ]; then
+    cmake --install build >> di-${tag}-inst.out 2>&1
+  else
+    make -e CC=${comp} PREFIX=${loc}/x ${tag}-install > di-${tag}-inst.out 2>&1
+  fi
 
   > di-${tag}-run.out
 
@@ -141,7 +151,7 @@ bldrun () {
     grc=1
   fi
 
-  if [ $tag = cmake ]; then
+  if [ $tag = cmake -o $tag = pcmake ]; then
     for f in build/CMakeFiles/CMakeOutput.log \
         build/CMakeFiles/CMakeError.log \
         build/CMakeFiles/CMakeConfigureLog.yaml \
@@ -152,7 +162,6 @@ bldrun () {
         preserveoutput $f
       fi
     done
-    ls -1R x > di-cmake-instdir.out
   fi
   if [ $tag = mkc ]; then
     for f in mkc_files/mkc_compile.log \
@@ -167,8 +176,8 @@ bldrun () {
         preserveoutput $f
       fi
     done
-    ls -1R x > di-mkc-instdir.out
   fi
+  ls -1R x > di-${tag}-instdir.out 2>&1
 }
 
 systype=`uname -s`
@@ -222,6 +231,7 @@ make -e PREFIX=${loc}/x chkswitcher |
 bldvar=`./utils/chkcmake.sh ${CMAKE_REQ_MAJ_VERSION} ${CMAKE_REQ_MIN_VERSION}`
 if [ $bldvar = cmake ] ;then
   havecmake=T
+  bldrun pcmake
   bldrun cmake
 fi
 

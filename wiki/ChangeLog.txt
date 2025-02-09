@@ -4,7 +4,14 @@
 
 <!--
 
-**5.0.5 2025-2-**
+**5.0.6 2025-2-**
+
+**5.0.6 2025-2-**
+
+* Bug Fixes
+    * build: MacOS: Fix the pure cmake build.
+    * build: Clean up some more warnings (Big Sur/13.2, llvm-19).
+    * build: mkconfig: Calculate Linux, Arch Linux: set proper lib path.
 
 -->
 

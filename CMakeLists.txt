@@ -32,6 +32,10 @@ if (DEFINED ENV{DI_USE_MATH})
   endif()
 endif()
 
+if (NOT DEFINED DI_BUILD_SYS OR DI_BUILD_SYS STREQUAL "")
+  set (DI_BUILD_SYS cmake)
+endif()
+
 ###
 # check to make sure cmake-install-prefix is set
 if (NOT DEFINED CMAKE_INSTALL_PREFIX OR CMAKE_INSTALL_PREFIX STREQUAL "")
@@ -70,6 +74,16 @@ include (CheckSymbolExists)
 include (CheckTypeSize)
 include (CheckVariableExists)
 include (CheckPrototypeDefinition)
+
+# /Library/Developer/CommandLineTools/usr/bin/cc
+# MacOS stupid cmake uses path for the compiler that doesn't
+# have the proper include paths built in.
+# I don't know what the path for the xcode compiler is, but it
+# probably starts with /Library/Developer
+set (MYCC ${CMAKE_C_COMPILER})
+if (APPLE AND ${CMAKE_C_COMPILER} MATCHES "^/Library/Developer/")
+  set (MYCC /usr/bin/clang)
+endif()
 
 #### compile options
 
@@ -131,6 +145,8 @@ checkAddCompileFlag ("-Wno-documentation-deprecated-sync")
 checkAddCompileFlag ("-Wno-documentation-unknown-command")
 checkAddCompileFlag ("-Wno-documentation")
 checkAddCompileFlag ("-Wno-unsafe-buffer-usage")
+# llvm-19 creating errors about *printf
+checkAddCompileFlag ("-Wno-used-but-marked-unused")
 
 ###
 # LFS_CFLAGS, LFS_LDFLAGS, LFS_LIBS
@@ -469,8 +485,14 @@ endmacro ()
 
 macro (memberxdr structnm membernm)
   message ("-- Determining ${structnm} ${membernm} xdr type")
-  file (WRITE ${membernm}.c "#include <rpcsvc/rquota.h>
-int main (int argc, char *argv []) { return 0; }
+  file (WRITE ${membernm}.c "
+#include <rpcsvc/rquota.h>
+
+int
+main (int argc, char *argv [])
+{
+  return 0;
+}
 ")
   set (tinc ".")
   if (NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
@@ -479,7 +501,7 @@ int main (int argc, char *argv []) { return 0; }
   execute_process (
     OUTPUT_FILE ${membernm}.out
     ERROR_QUIET
-    COMMAND ${CMAKE_C_COMPILER} -I ${tinc} -E ${membernm}.c
+    COMMAND ${MYCC} -I ${tinc} -E ${membernm}.c
   )
   unset (tinc)
   if (EXISTS ${membernm}.out)

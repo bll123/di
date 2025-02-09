@@ -100,6 +100,11 @@ function printarr() {
       next;
     }
 
+    if ($0 ~ /^. #define DI_BUILD_SYS /) {
+      # remove this as they can be different places.
+      next;
+    }
+
     sarr[scount] = $0;
     ++scount;
   }

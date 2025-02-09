@@ -80,6 +80,7 @@
 #if _hdr_rpc_rpc
 /* tirpc is a separate library, but defines reserved symbols */
 # pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wunknown-warning-option"
 # pragma clang diagnostic ignored "-Wreserved-identifier"
 # include <rpc/rpc.h>
 # pragma clang diagnostic pop

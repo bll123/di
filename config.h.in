@@ -214,10 +214,10 @@
 #endif /* MKC_STANDARD_DEFS */
 
 #if ! defined (DI_PREFIX)
-# error "PREFIX is not set"
+# error "DI_PREFIX is not set"
 #endif
 
-#define DI_BUILD_SYS "cmake"
+#define DI_BUILD_SYS "${DI_BUILD_SYS}"
 #define DI_LOCALE_DIR DI_PREFIX "/share/locale"
 
 #define DI_INTERNAL 0

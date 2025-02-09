@@ -49,7 +49,7 @@ know.
  OpenBSD 7.6 | 5.0.5<br>2025-2-8 | 5.0.5<br>2025-2-8 | - | - | - | - | getfsstat<br>cfarm
  OpenBSD 7.6 | - | - | - | - | - | - | -
  __Linux: Arch Based__| | | | | | | -
- Manjaro 23 | - | - | - | - | - | - | -
+ Manjaro 23 | 5.0.5<br>2025-2-9<br>gcc clang | 5.0.5<br>2025-2-9<br>gcc clang | - | - | - | - | -
  __Linux: Debian Based__ | | | | | | |
  Debian 4 | - | 4.99.8<br>2025-2-3  | - | - | - | - | get/set/endmntent statvfs
  Debian 5 | - | 5.0.5<br>2025-2-8 | - | - | - | - | -
@@ -73,17 +73,13 @@ know.
  Ubuntu 20.04 | - | 5.0.5<br>2025-2-8 | - | - | - | - | -
  Ubuntu 22.04 | 5.0.5<br>2025-2-8 | 5.0.5<br>2025-2-8 | - | - | - | - | -
  __Linux: Gentoo Based__| | | | | | | -
- Calculate 2.0 | - | - | - | - | - | - | -
- Gentoo 20120710 | - | - | - | - | - | - | -
+ Calculate 20250206 | 5.0.6<br>2025-2-9<br>gcc clang | 5.0.6<br>2025-2-9<br>gcc clang | - | - | - | - | -
  __Linux: Other__| | | | | | |
  Alpine 3.21.2 | 5.0.0<br>2025-2-5<br>gcc clang | 5.0.0<br>2025-2-5<br>gcc clang | - | - | - | - | -
- NixOS 19.09 | - | - | - | - | - | - | -
  openSUSE Leap 15.1 | - | - | - | - | - | - | -
- openSUSE Leap 15.5 | 5.0.5<br>2025-2-8<br>gcc clang | 5.0.5<br>2025-2-8<br>gcc clang | - | - | - | - | get/set/endmntent statvfs<br>cfarm
+ openSUSE Leap 15.5 | 5.0.5<br>2025-2-8<br>gcc clang | 5.0.5<br>2025-2-8<br>gcc clang | - | - | - | - | get/set/endmntent statvfs<br>lib64<br>cfarm
  openSUSE Leap 15.6 | - | - | - | - | - | - | -
  Slackware 14.2 | - | - | - | - | - | - | -
- Solus | - | - | - | - | - | - | -
- Void Linux | - | - | - | - | - | - | -
  __Linux: Red Hat Based__| | | | | | |
  CentOS 3.9 | - | - | - | - | - | - | get/set/endmntent statvfs
  CentOS 5.5 | - | - | - | - | - | - | -
@@ -99,7 +95,7 @@ know.
  Red Hat 7.1<br>(not RHEL)| - | - | - | - | - | - | -
  Red Hat 7.3<br>(not RHEL)| - | - | - | - | - | - | -
  __MacOS:__ | | | | | | | -
- MacOS Big Sur | - | - | - | - | - | - | getfsstat
+ MacOS Big Sur | - | 5.0.6<br>2025-2-9 | - | - | - | - | getfsstat
  MacOS Ventura | 5.0.2<br>2025-2-6 | 5.0.2<br>2025-2-6 | - | - | - | - | getfsstat
  MacOS Monterey | - | 5.0.5<br>2025-2-8 | - | - | - | - | getfsstat<br>cfarm
  MacOS Sonoma | 5.0.0<br>2025-2-6 | 5.0.0<br>2025-2-6 | - | - | - | - | getfsstat

@@ -1,11 +1,58 @@
 
-* FreeBSD
+===== FreeBSD
     * pkg install pkgconf gmp libtommath ksh bash mksh pdksh gettext
-* AIX
+===== AIX
     * https://lzsiga.users.sourceforge.net/aix-linking.html
-* cmake
+===== cmake
     * Don't set PREFIX.   Mucks up the compiler identification code.
-* Alpine Linux
+===== Alpine Linux
     * apk add gcc clang cmake make nawk mandoc mandoc-dev mandoc-apropos
     * apk add gettext
     * setup-desktop
+===== gentoo
+===== Void Linux
+    * xbps-install gcc cmake make
+    * xbps-install -S
+    * xbps-install -Suy
+    * xbps-install -S gcc make dash
+    * xbps-query -s name
+===== NixOS
+    * nix-env -i nixos.gnumake nixos.gcc nixos.mksh nixos.ksh nixos.dash
+    * nix-env -i nixos.bash
+    * nix-env --set-flag priority 9 nixos.bash
+    * nix-env -i nixos.bash_5
+    * unknown how to get virtualbox guest additions working.
+===== NetBSD
+    * Turn on quotas:
+    <br>
+    reboot to single user mode
+    tunefs -q user -q group /
+    fsck -y /
+
+===== DragonFly BSD
+
+/etc/rc.conf:
+~~~
+    enable_quotas="YES"
+    vfs_quota_enable="YES"
+    mountd_enable="YES"
+    rpc_lockd_enable="YES"
+    rpc_statd_enable="YES"
+    rpcbind_enable="YES"
+    nfs_client_enable="YES"
+    nfs_server_enable="YES"
+~~~
+
+/etc/ssh/sshd_config:
+~~~
+    PermitRootLogin without-password
+    RSAAuthentication yes
+    PubkeyAuthentication yes
+    PasswordAuthentication yes
+~~~
+
+    * pkg search <name>
+    * pkg install <name>
+    * pkg install perl5 pdksh ksh93 mksh bash dash
+
+

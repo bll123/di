@@ -66,6 +66,7 @@
 
 #if _use_math == DI_GMP
 # pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wunknown-warning-option"
 # pragma clang diagnostic ignored "-Wsign-conversion"
 # pragma clang diagnostic ignored "-Wreserved-identifier"
 # pragma gcc diagnostic push

@@ -286,7 +286,7 @@ endif
 include
 
 #if ! defined (DI_PREFIX)
-# error "PREFIX is not set"
+# error "DI_PREFIX is not set"
 #endif
 
 #define DI_BUILD_SYS "mkconfig"
