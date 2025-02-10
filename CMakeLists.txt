@@ -75,11 +75,14 @@ include (CheckTypeSize)
 include (CheckVariableExists)
 include (CheckPrototypeDefinition)
 
-# /Library/Developer/CommandLineTools/usr/bin/cc
-# MacOS stupid cmake uses path for the compiler that doesn't
+# MacOS cmake uses a path for the compiler that doesn't
 # have the proper include paths built in.
+# /Library/Developer/CommandLineTools/usr/bin/cc
+# I consider this a bug.
 # I don't know what the path for the xcode compiler is, but it
 # probably starts with /Library/Developer
+# this is only used for getting the xdc member types, so
+# it doesn't matter much which compiler, just need one that works.
 set (MYCC ${CMAKE_C_COMPILER})
 if (APPLE AND ${CMAKE_C_COMPILER} MATCHES "^/Library/Developer/")
   set (MYCC /usr/bin/clang)
@@ -183,7 +186,7 @@ applygetconfflags ("LIBS")
 
 #### build compile options
 
-if (DI_BUILD STREQUAL "")
+if (NOT DEFINED DI_BUILD OR DI_BUILD STREQUAL "")
   set (DI_BUILD "Release")
 endif()
 
