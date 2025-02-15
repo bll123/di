@@ -2,8 +2,7 @@
 #
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
-# requirements: sshpass
-#
+
 
 tserver=frs.sourceforge.net
 echo -n "Server [$tserver]: "
@@ -29,18 +28,14 @@ esac
 ssh="ssh -p $port"
 export ssh
 
-echo -n "Remote Password: "
-read -s SSHPASS
-echo ""
-export SSHPASS
-
 . ./VERSION.txt
 ver=$DI_VERSION
 
 fn=di-${ver}.tar.gz
-sshpass -e rsync -e "$ssh" -aS \
-    $fn README.txt \
+fnbeta=di-${ver}-beta.tar.gz
+rsync -e "$ssh" -aS \
+    ${fn} ${remuser}@${server}:${wwwpath}/beta/${fnbeta}
+rsync -e "$ssh" -aS README.txt \
     ${remuser}@${server}:${wwwpath}/beta/
 
-unset SSHPASS
 exit 0

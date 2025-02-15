@@ -4,9 +4,22 @@
 
 <!--
 
-**5.0.6 2025-2-**
+**5.0.10 2025-2---**
 
 -->
+
+**5.0.9 2025-2-15**
+
+* Bug Fixes
+    * build: MacOS: Fix the pure cmake build when using Xcode/CLT.
+
+**5.0.8 2025-2-15**
+
+* beta: Not released.
+
+**5.0.7 2025-2-11**
+
+* beta: Not released.
 
 **5.0.6 2025-2-10**
 

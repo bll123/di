@@ -29,6 +29,9 @@
     tunefs -q user -q group /
     fsck -y /
 
+===== MacOS
+    * pkgutil --pkg-info=com.apple.pkg.CLTools_Executables
+
 ===== DragonFly BSD
 
 /etc/rc.conf:

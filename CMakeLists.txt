@@ -75,17 +75,22 @@ include (CheckTypeSize)
 include (CheckVariableExists)
 include (CheckPrototypeDefinition)
 
-# MacOS cmake uses a path for the compiler that doesn't
-# have the proper include paths built in.
-# /Library/Developer/CommandLineTools/usr/bin/cc
-# I consider this a bug.
-# I don't know what the path for the xcode compiler is, but it
-# probably starts with /Library/Developer
-# this is only used for getting the xdc member types, so
-# it doesn't matter much which compiler, just need one that works.
-set (MYCC ${CMAKE_C_COMPILER})
-if (APPLE AND ${CMAKE_C_COMPILER} MATCHES "^/Library/Developer/")
-  set (MYCC /usr/bin/clang)
+if (APPLE)
+  # MacOS cmake uses a path for the compiler that doesn't
+  # have the proper include paths built in.  /usr/bin/clang
+  # works with command line tools, but apparently not for xcode.
+  # if the SDKROOT environment variable is not set, set it.
+  if (NOT DEFINED ENV{SDKROOT})
+    execute_process (
+      OUTPUT_VARIABLE sdktemp
+      ERROR_QUIET
+      COMMAND xcrun --sdk macosx --show-sdk-path
+      COMMAND tr -d "\n"
+    )
+    if (DEFINED sdktemp AND NOT sdktemp STREQUAL "")
+      set (ENV{SDKROOT} ${sdktemp})
+    endif()
+  endif()
 endif()
 
 #### compile options
@@ -488,7 +493,9 @@ endmacro ()
 
 macro (memberxdr structnm membernm)
   message ("-- Determining ${structnm} ${membernm} xdr type")
-  file (WRITE ${membernm}.c "
+  set (txdrdir "${CMAKE_BINARY_DIR}/tmpxdr")
+  file (MAKE_DIRECTORY "${txdrdir}")
+  file (WRITE "${txdrdir}/${membernm}.c" "
 #include <rpcsvc/rquota.h>
 
 int
@@ -502,12 +509,13 @@ main (int argc, char *argv [])
     set (tinc ${TIRPC_INCLUDE_DIRS})
   endif()
   execute_process (
-    OUTPUT_FILE ${membernm}.out
+    OUTPUT_FILE "${txdrdir}/${membernm}.out"
     ERROR_QUIET
-    COMMAND ${MYCC} -I ${tinc} -E ${membernm}.c
+    COMMAND ${CMAKE_C_COMPILER} -I ${tinc} -E
+        "${txdrdir}/${membernm}.c"
   )
   unset (tinc)
-  if (EXISTS ${membernm}.out)
+  if (EXISTS "${txdrdir}/${membernm}.out")
     execute_process (
       OUTPUT_VARIABLE xdr_out
       # unfortunately, the sed command will find other matches
@@ -515,18 +523,18 @@ main (int argc, char *argv [])
       # possibly will switch to awk in the future.
       # Some headers have tabs, use the [^a-z0-9_] to avoid putting
       # them in here.
-      COMMAND sed -n -e "/struct *${structnm}/,/^ *};/ p" ${membernm}.out
+      COMMAND sed -n -e "/struct *${structnm}/,/^ *};/ p"
+          "${txdrdir}/${membernm}.out"
       COMMAND grep "^[^a-z0-9_]*[a-z0-9_][a-z0-9_]*[^a-z0-9_]*${membernm};"
       COMMAND sed -e "s,^[^a-z0-9_]*,," -e "s,[^a-z0-9_].*,,"
       COMMAND tr -d "\n"
     )
     set (xdr_${membernm} xdr_${xdr_out})
   endif()
-  file (REMOVE ${membernm}.c)
-  if (EXISTS ${membernm}.out)
-    file (REMOVE ${membernm}.out)
+  file (REMOVE "${txdrdir}/${membernm}.c")
+  if (EXISTS "${txdrdir}/${membernm}.out")
+    file (REMOVE "${txdrdir}/${membernm}.out")
   endif()
-  set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 endmacro()
 
 macro (checkIncludeConflict hdrvara hdra hdrvarb hdrb varnm)
