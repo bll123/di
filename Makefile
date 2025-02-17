@@ -116,7 +116,7 @@ clean:
 		*.o *.obj \
 		$(MKC_FILES)/mkc_compile.log \
 		tests.d/chksh* \
-		tests.d/test_order.tmp >/dev/null 2>&1; exit 0
+		>/dev/null 2>&1; exit 0
 	@-test -d $(BUILDDIR) && cmake --build $(BUILDDIR) --target clean
 
 .PHONY: realclean
@@ -307,8 +307,7 @@ mkc-install-all:
 
 .PHONY: mkc-install-po
 mkc-install-po:
-	test -d $(INST_LOCALEDIR) || mkdir -p $(INST_LOCALEDIR)
-	-./utils/instpo.sh $(INST_LOCALEDIR)
+	-./utils/instpo.sh "`pwd`/po" $(INST_LOCALEDIR) "`pwd`/tmp"
 
 .PHONY: mkc-install-pc
 mkc-install-pc: $(MKC_REQLIB)

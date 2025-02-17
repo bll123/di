@@ -1279,6 +1279,9 @@ install (FILES
 
 install (CODE
   "execute_process (
-    COMMAND utils/instpo.sh \"${CMAKE_INSTALL_FULL_LOCALEDIR}\"
+    COMMAND utils/instpo.sh
+        \"${PROJECT_SOURCE_DIR}/po\"
+        \"${CMAKE_INSTALL_FULL_LOCALEDIR}\"
+        \"${CMAKE_BINARY_DIR}/tmppo\"
   )"
 )
