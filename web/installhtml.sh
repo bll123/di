@@ -2,7 +2,7 @@
 #
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
-# requirements: sshpass, groff
+# requirements: groff
 #
 
 TMP=tmpweb
@@ -41,11 +41,6 @@ if [[ $ver == "" ]]; then
   ver=$tver
 fi
 
-echo -n "Remote Password: "
-read -s SSHPASS
-echo ""
-export SSHPASS
-
 if [[ $ver != "" ]] ; then
   cp -pf web/index.html web/di-ss.png web/hpux-di118.png $TMP
   sed -i -e "s/#VERSION#/${ver}/g" $TMP/index.html
@@ -55,11 +50,10 @@ if [[ $ver != "" ]] ; then
   done
 
   cd $TMP
-  sshpass -e rsync -e "$ssh" -aS --delete \
+  rsync -e "$ssh" -aS --delete \
       * ${remuser}@${server}:${wwwpath}
   cd ..
   rm -rf $TMP
 fi
 
-unset SSHPASS
 exit 0
