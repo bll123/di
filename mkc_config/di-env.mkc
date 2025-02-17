@@ -78,19 +78,31 @@ endif
 pkg cflags libtirpc
 pkg libs libtirpc
 
-pkg cflags gmp /opt/local/lib/pkgconfig
-pkg libs gmp /opt/local/lib/pkgconfig
-if nogmp ! _pkg_libs_gmp
- pkg cflags gmp /usr/pkg/lib/pkgconfig
- pkg libs gmp /usr/pkg/lib/pkgconfig
+env DI_USE_MATH
+
+if nousemath ! _env_DI_USE_MATH || == _env_DI_USE_MATH DI_GMP
+ pkg cflags gmp /opt/local/lib/pkgconfig
+ pkg libs gmp /opt/local/lib/pkgconfig
+ if nomath_g ! _pkg_libs_gmp
+  pkg cflags gmp /usr/pkg/lib/pkgconfig
+  pkg libs gmp /usr/pkg/lib/pkgconfig
+ endif
 endif
-if nogmp ! _pkg_libs_gmp
+if nomath_g ! _pkg_libs_gmp || == _env_DI_USE_MATH DI_TOMMATH
  pkg cflags libtommath /opt/local/lib/pkgconfig
  pkg libs libtommath /opt/local/lib/pkgconfig
+ if nomath_gt ! _pkg_libs_gmp && ! _pkg_libs_libtommath
+  pkg cflags libtommath /usr/pkg/lib/pkgconfig
+  pkg libs libtommath /usr/pkg/lib/pkgconfig
+ endif
 endif
-if nogmpnotommath ! _pkg_libs_gmp && ! _pkg_libs_libtommath
- pkg cflags libtommath /usr/pkg/lib/pkgconfig
- pkg libs libtommath /usr/pkg/lib/pkgconfig
+if nomath_gt ( ! _pkg_libs_gmp && ! _pkg_libs_libtommath ) || == _env_DI_USE_MATH DI_MPDECIMAL
+  pkg cflags libmpdec /opt/local/lib/pkgconfig
+  pkg libs libmpdec /opt/local/lib/pkgconfig
+  if nomath_gtm ( ! _pkg_libs_gmp && ! _pkg_libs_libtommath && ! _pkg_libs_libmpdec )
+   pkg cflags libmpdec /usr/pkg/lib/pkgconfig
+   pkg libs libmpdec /usr/pkg/lib/pkgconfig
+  endif
 endif
 
 libs

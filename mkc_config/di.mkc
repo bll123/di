@@ -29,6 +29,7 @@ hdr     math.h
 hdr     memory.h
 hdr     mntent.h
 hdr     mnttab.h
+hdr     mpdecimal.h
 # NetBSD
 hdr     quota.h
 hdr     rpc/rpc.h
@@ -275,8 +276,10 @@ if nousemath ! _env_DI_USE_MATH
    env DI_USE_MATH DI_GMP
  endif
  # at the moment, libtommath in macports has a broken pkg-config
- if havetommath _pkg_libs_libtommath && ! == _MKCONFIG_SYSTYPE Darwin
+ if havetommath _pkg_libs_libtommath && ! _pkg_libs_gmp && ! == _MKCONFIG_SYSTYPE Darwin
   env DI_USE_MATH DI_TOMMATH
+ endif
+ if havempdecimal _pkg_libs_mpdecimal && ! _pkg_libs_gmp && ! _pkg_libs_libtommath
  endif
  if nousemath ! _env_DI_USE_MATH
   env DI_USE_MATH DI_INTERNAL
@@ -295,6 +298,7 @@ include
 #define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
+#define DI_MPDECIMAL 3
 #define _use_math DI_USE_MATH
 
 #if _typ_statvfs_t

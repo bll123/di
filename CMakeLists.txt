@@ -27,7 +27,8 @@ if (DEFINED ENV{DI_USE_MATH})
   # these are the only supported values as of 2025-2-6
   if (NOT DI_USE_MATH STREQUAL "DI_INTERNAL" AND
       NOT DI_USE_MATH STREQUAL "DI_GMP" AND
-      NOT DI_USE_MATH STREQUAL "DI_TOMMATH")
+      NOT DI_USE_MATH STREQUAL "DI_TOMMATH" AND
+      NOT DI_USE_MATH STREQUAL "DI_MPDECIMAL")
     unset (DI_USE_MATH)
   endif()
 endif()
@@ -301,6 +302,7 @@ find_package (Iconv)
 
 pkg_check_modules (GMP gmp)
 pkg_check_modules (TOMMATH libtommath)
+pkg_check_modules (MPDECIMAL libmpdec)
 pkg_check_modules (TIRPC libtirpc)
 
 ###
@@ -585,6 +587,7 @@ check_include_file (math.h _hdr_math)
 check_include_file (memory.h _hdr_memory)
 check_include_file (mntent.h _hdr_mntent)
 check_include_file (mnttab.h _hdr_mnttab)
+check_include_file (mpdecimal.h _hdr_mpdecimal)
 # NetBSD
 check_include_file (quota.h _hdr_quota)
 
@@ -1048,21 +1051,25 @@ check_symbol_exists (MCTL_QUERY sys/mntctl.h _define_MCTL_QUERY)
 check_symbol_exists (S_ISLNK sys/stat.h _define_S_ISLNK)
 
 if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
-  if (_hdr_gmp AND GMP_LDFLAGS AND
-      NOT (_hdr_tommath OR _hdr_libtommath_tommath))
+  # GMP is the default, as it is more common
+  if (_hdr_gmp AND GMP_LDFLAGS)
     set (DI_USE_MATH DI_GMP)
   endif()
   # at the moment, libtommath in macports has a broken pkg-config
+  # hence the not-apple
   if ((_hdr_tommath OR _hdr_libtommath_tommath) AND
       TOMMATH_LDFLAGS AND
       NOT _hdr_gmp AND
       NOT APPLE)
     set (DI_USE_MATH DI_TOMMATH)
   endif()
-  if (_hdr_gmp AND GMP_LDFLAGS AND
-      (_hdr_tommath OR _hdr_libtommath_tommath))
-    # use the most common library
-    set (DI_USE_MATH DI_GMP)
+  # mpdecimal is yet another multi-precision library
+  if (_hdr_mpdecimal AND
+      MPDECIMAL_LDFLAGS AND
+      NOT (_hdr_tommath OR _hdr_libtommath_tommath) AND
+      NOT _hdr_gmp AND
+      NOT APPLE)
+    set (DI_USE_MATH DI_MPDECIMAL)
   endif()
 endif()
 if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
@@ -1095,7 +1102,8 @@ macro (addIntlLibrary name)
   endif()
 endmacro()
 
-#### libraries
+###
+# libraries
 
 add_library (objdistrutils OBJECT
   distrutils.c
@@ -1115,6 +1123,7 @@ target_include_directories (${DI_LIBNAME} PRIVATE
   ${TIRPC_INCLUDE_DIRS}
   ${GMP_INCLUDE_DIRS}
   ${TOMMATH_INCLUDE_DIRS}
+  ${MPDECIMAL_INCLUDE_DIRS}
 )
 
 target_link_libraries (${DI_LIBNAME} PRIVATE
@@ -1163,6 +1172,11 @@ if (_use_math STREQUAL "DI_TOMMATH")
     ${TOMMATH_LDFLAGS}
   )
 endif()
+if (_use_math STREQUAL "DI_MPDECIMAL")
+  target_link_libraries (${DI_LIBNAME} PRIVATE
+    ${MPDECIMAL_LDFLAGS}
+  )
+endif()
 set_target_properties (${DI_LIBNAME} PROPERTIES
   VERSION ${DI_LIBVERSION}
   SOVERSION ${DI_SOVERSION}
@@ -1203,6 +1217,11 @@ if (_use_math STREQUAL "DI_TOMMATH")
     ${TOMMATH_LDFLAGS}
   )
 endif()
+if (_use_math STREQUAL "DI_MPDECIMAL")
+  target_link_libraries (di PRIVATE
+    ${MPDECIMAL_LDFLAGS}
+  )
+endif()
 
 add_executable (dimathtest
   dimathtest.c
@@ -1210,6 +1229,7 @@ add_executable (dimathtest
 target_include_directories (dimathtest PRIVATE
   ${GMP_INCLUDE_DIRS}
   ${TOMMATH_INCLUDE_DIRS}
+  ${MPDECIMAL_INCLUDE_DIRS}
 )
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (dimathtest PRIVATE
@@ -1219,6 +1239,11 @@ endif()
 if (_use_math STREQUAL "DI_TOMMATH")
   target_link_libraries (dimathtest PRIVATE
     ${TOMMATH_LDFLAGS}
+  )
+endif()
+if (_use_math STREQUAL "DI_MPDECIMAL")
+  target_link_libraries (dimathtest PRIVATE
+    ${MPDECIMAL_LDFLAGS}
   )
 endif()
 
