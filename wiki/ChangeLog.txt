@@ -4,14 +4,16 @@
 
 <!--
 
-**5.0.11 2025-2---**
+**5.0.12 2025-2---**
+
+-->
+
+**5.0.11 2025-2-18**
 
 * Bug Fixes
     * build: cmake: Fix build of .mo files (macports).
     * build: mkconfig: Fix handling of optional libraries.
     * build: mkconfig: Update to version 2.6.6.
-
--->
 
 **5.0.10 2025-2-17**
 
