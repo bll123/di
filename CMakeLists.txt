@@ -277,6 +277,7 @@ include_directories (
   SYSTEM
   # for macos
   /opt/local/include
+  /opt/homebrew/include
   # for freebsd
   /usr/local/include
   "${CMAKE_BINARY_DIR}"
@@ -286,6 +287,7 @@ include_directories (
 set (required_includes
   # for macos
   /opt/local/include
+  /opt/homebrew/include
   # for freebsd
   /usr/local/include
 )
@@ -1245,8 +1247,6 @@ string (REPLACE "general" " " DI_REQUIRED_LIBS ${DI_REQUIRED_LIBS})
 
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 
-# need to build the .mo files
-
 #### install
 
 install (TARGETS ${DI_LIBNAME}
@@ -1279,7 +1279,7 @@ install (FILES
 
 install (CODE
   "execute_process (
-    COMMAND utils/instpo.sh
+    COMMAND \"${PROJECT_SOURCE_DIR}/utils/instpo.sh\"
         \"${PROJECT_SOURCE_DIR}/po\"
         \"${CMAKE_INSTALL_FULL_LOCALEDIR}\"
         \"${CMAKE_BINARY_DIR}/tmppo\"

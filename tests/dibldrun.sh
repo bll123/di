@@ -184,7 +184,7 @@ systype=`uname -s`
 
 havecmake=F
 # add paths for macos and *BSD
-PATH="$PATH:/opt/local/bin:/usr/local/bin"
+PATH="$PATH:/opt/local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/pkg/bin"
 if [ "${rempath}" != - ]; then
   PATH="${rempath}:${PATH}"
 fi

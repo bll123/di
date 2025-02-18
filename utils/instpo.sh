@@ -45,6 +45,9 @@ if [ $rc -ne 0 -o "x$msgfmtcmd" = x ]; then
     if [ "x$msgfmtcmd" = x -a -f /opt/local/bin/msgfmt ]; then
       msgfmtcmd=/opt/local/bin/msgfmt
     fi
+    if [ "x$msgfmtcmd" = x -a -f /opt/homebrew/bin/msgfmt ]; then
+      msgfmtcmd=/opt/homebrew/bin/msgfmt
+    fi
     if [ "x$msgfmtcmd" = x -a -f /usr/local/bin/msgfmt ]; then
       msgfmtcmd=/usr/local/bin/msgfmt
     fi

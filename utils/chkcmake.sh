@@ -22,7 +22,7 @@ if [ x"$cmvers" = x ]; then
   exit 0
 fi
 
-PATH=/opt/local/bin:/usr/local/bin:$PATH
+PATH=/opt/local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/pkg/bin:$PATH
 
 # need a more modern version of awk...
 awkcmd=`which gawk 2>/dev/null`

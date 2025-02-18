@@ -17,20 +17,20 @@ command-line-tools).
  -------- | ----- | -------- | --- | ---------- | ------ | ---------- | -----
  __BSD:__| | | | | | |
  DragonFly BSD 4.4 | - | 4.99.8<br>2025-2-3 | - | - | - | - | -
- DragonFly BSD 5.2.2 | - | 5.0.10<br>2025-2-16 | - | - | - | - | -
- DragonFly BSD 5.8.1 | - | 5.0.10<br>2025-2-16 | - | - | - | - | getfsstat
- DragonFly BSD 6.4 | - | 5.0.10<br>2025-2-16 | - | - | - | - | getfsstat
+ DragonFly BSD 5.2.2 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ DragonFly BSD 5.8.1 | - | 5.0.11<br>2025-2-18 | - | - | - | - | getfsstat
+ DragonFly BSD 6.4 | - | 5.0.11<br>2025-2-18 | - | - | - | - | getfsstat
  FreeBSD 1.3 | - | - | - | - | - | - | -
  FreeBSD 4.9 | - | - | - | - | - | - | -
  FreeBSD 5.1 | - | - | - | - | - | - | -
  FreeBSD 6.0 | - | - | - | - | - | - | -
- FreeBSD 7.2 | - | 5.0.6<br>2025-2-10 | - | - | - | - | -
- FreeBSD 8.2 | - | 5.0.6<br>2025-2-10 | - | - | - | - | -
- FreeBSD 9.1 | - | 5.0.6<br>2025-2-10 | - | - | - | - | -
- FreeBSD 10.3 | - | 5.0.10<br>2025-2-16 | - | - | - | - | -
- FreeBSD 11 | - | 5.0.10<br>2025-2-16 | - | - | - | - | -
- FreeBSD 13.4 | 5.0.10<br>2025-2-16 | 5.0.10<br>2025-2-16 | - | - | - | - | getfsstat
- FreeBSD 14.2 | 5.0.10<br>2025-2-16 | 5.0.10<br>2025-2-16 | - | - | - | - | getfsstat
+ FreeBSD 7.2 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ FreeBSD 8.2 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ FreeBSD 9.1 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ FreeBSD 10.3 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ FreeBSD 11 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ FreeBSD 13.4 | 5.0.11<br>2025-2-18 | 5.0.11<br>2025-2-18 | - | - | - | - | getfsstat
+ FreeBSD 14.2 | 5.0.11<br>2025-2-18 | 5.0.11<br>2025-2-18 | - | - | - | - | getfsstat
  NetBSD 1.62 | - | - | - | - | - | - | -
  NetBSD 2.0 | n/a | 4.99.3<br>2025-1-25 | - | - | - | - | many odd warnings
  NetBSD 3.0.1 | - | - | - | - | - | - | -
@@ -40,7 +40,7 @@ command-line-tools).
  NetBSD 6.0 | - | - | - | - | - | - | -
  NetBSD 7.0.1 | - | - | - | - | - | - | -
  NetBSD 9.0 | - | 5.0.0<br>2025-2-5 | - | - | - | - | -
- NetBSD 10.1 | 5.0.10<br>2025-2-16<br>gcc clang | 5.0.10<br>2025-2-16<br>gcc clang | - | - | - | - | getvfsstat<br>cfarm
+ NetBSD 10.1 | 5.0.11<br>2025-2-18<br>gcc clang | 5.0.11<br>2025-2-18<br>gcc clang | - | - | - | - | getvfsstat<br>cfarm
  NetBSD 10.1 | - | - | - | - | - | - | -
  OpenBSD 4.4 | - | - | - | - | - | - | -
  OpenBSD 4.5 | - | - | - | - | - | - | -
@@ -51,72 +51,72 @@ command-line-tools).
  OpenBSD 5.0 | - | - | - | - | - | - | -
  OpenBSD 5.2 | - | - | - | - | - | - | -
  OpenBSD 6.1 | - | - | - | - | - | - | -
- OpenBSD 6.3 | - | 5.0.10<br>2025-2-16 | - | - | - | - | -
- OpenBSD 7.6 | 5.0.10<br>2025-2-16 | 5.0.10<br>2025-2-16 | - | - | - | - | getfsstat<br>cfarm
+ OpenBSD 6.3 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ OpenBSD 7.6 | 5.0.11<br>2025-2-18 | 5.0.11<br>2025-2-18 | - | - | - | - | getfsstat<br>cfarm
  OpenBSD 7.6 | - | - | - | - | - | - | -
  __Linux: Arch Based__| | | | | | | -
- Manjaro 23 | 5.0.10<br>2025-2-9<br>gcc clang | 5.0.10<br>2025-2-9<br>gcc clang | - | - | - | - | -
+ Manjaro 23 | 5.0.11<br>2025-2-9<br>gcc clang | 5.0.11<br>2025-2-9<br>gcc clang | - | - | - | - | -
  __Linux: Debian Based__ | | | | | | |
  Debian 4 | - | 4.99.8<br>2025-2-3  | - | - | - | - | get/set/endmntent statvfs
  Debian 5 | - | 5.0.5<br>2025-2-8 | - | - | - | - | -
  Debian 6<br>(BSD kernel) | - | - | - | - | - | - | -
- Debian 8 | - | 5.0.6<br>2025-2-10 | - | - | - | - | -
- Debian 9.13 | - | 5.0.10<br>2025-2-16 | - | - | - | - | cfarm
+ Debian 8 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Debian 9.13 | - | 5.0.11<br>2025-2-18 | - | - | - | - | cfarm
  Debian 10 | - | - | - | - | - | - | -
  Devuan 2 | - | - | - | - | - | - | -
- Linux Mint 17 | - | 5.0.6<br>2025-2-10 | - | - | - | - | -
- Linux Mint 18.2 | - | 5.0.10<br>2025-2-16 | - | - | - | - | -
- Linux Mint 19 | - | 5.0.10<br>2025-2-16 | - | - | - | - | -
- Linux Mint 21 | - | 5.0.10<br>2025-2-16 | - | - | - | - | -
- MX Linux 21<br>(Debian 11)| 5.0.10<br>2025-2-16 | 5.0.10<br>2025-2-16 | - | - | - | - | get/set/endmntent statvfs
- MX Linux 23<br>(Debian 12)| 5.0.10<br>2025-2-16<br>gcc clang | 5.0.10<br>2025-2-16<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
- Ubuntu 14.04<br>(32-bit) | n/a | 5.0.6<br>2025-2-10 | - | - | - | - | -
- Ubuntu 14.04<br>(64-bit) | n/a | 5.0.6<br>2025-2-10 | - | - | - | - | -
- Ubuntu 16.04<br>(32-bit) | n/a | 5.0.10<br>2025-2-16 | - | - | - | - | -
- Ubuntu 16.04<br>(64-bit) | n/a | 5.0.10<br>2025-2-16 | - | - | - | - | -
- Ubuntu 18.04<br>(32-bit) | n/a | 5.0.10<br>2025-2-16 | - | - | - | - | -
- Ubuntu 18.04<br>(64-bit) | n/a | 5.0.10<br>2025-2-16 | - | - | - | - | -
- Ubuntu 20.04 | - | 5.0.10<br>2025-2-16 | - | - | - | - | -
- Ubuntu 22.04 | 5.0.10<br>2025-2-16 | 5.0.10<br>2025-2-16 | - | - | - | - | -
+ Linux Mint 17 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Linux Mint 18.2 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Linux Mint 19 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Linux Mint 21 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ MX Linux 21<br>(Debian 11)| 5.0.11<br>2025-2-18 | 5.0.11<br>2025-2-18 | - | - | - | - | get/set/endmntent statvfs
+ MX Linux 23<br>(Debian 12)| 5.0.11<br>2025-2-18<br>gcc clang | 5.0.11<br>2025-2-18<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
+ Ubuntu 14.04<br>(32-bit) | n/a | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Ubuntu 14.04<br>(64-bit) | n/a | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Ubuntu 16.04<br>(32-bit) | n/a | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Ubuntu 16.04<br>(64-bit) | n/a | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Ubuntu 18.04<br>(32-bit) | n/a | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Ubuntu 18.04<br>(64-bit) | n/a | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Ubuntu 20.04 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
+ Ubuntu 22.04 | 5.0.11<br>2025-2-18 | 5.0.11<br>2025-2-18 | - | - | - | - | -
  __Linux: Gentoo Based__| | | | | | | -
- Calculate 20250206 | 5.0.10<br>2025-2-9<br>gcc clang | 5.0.10<br>2025-2-9<br>gcc clang | - | - | - | - | -
+ Calculate 20250206 | 5.0.11<br>2025-2-9<br>gcc clang | 5.0.11<br>2025-2-9<br>gcc clang | - | - | - | - | -
  __Linux: Other__| | | | | | |
  Alpine 3.21.2 | 5.0.0<br>2025-2-5<br>gcc clang | 5.0.0<br>2025-2-5<br>gcc clang | - | - | - | - | -
  openSUSE Leap 15.1 | - | - | - | - | - | - | -
- openSUSE Leap 15.5 | 5.0.10<br>2025-2-16<br>gcc clang | 5.0.10<br>2025-2-16<br>gcc clang | - | - | - | - | get/set/endmntent statvfs<br>lib64<br>cfarm
+ openSUSE Leap 15.5 | 5.0.11<br>2025-2-18<br>gcc clang | 5.0.11<br>2025-2-18<br>gcc clang | - | - | - | - | get/set/endmntent statvfs<br>lib64<br>cfarm
  openSUSE Leap 15.6 | - | - | - | - | - | - | -
  Slackware 14.2 | - | - | - | - | - | - | -
  __Linux: Red Hat Based__| | | | | | |
  CentOS 3.9 | - | - | - | - | - | - | get/set/endmntent statvfs
  CentOS 5.5 | - | - | - | - | - | - | -
  CentOS 6.3 | - | - | - | - | - | - | -
- CentOS 7 | - | 5.0.10<br>2025-2-16 | - | - | - | - | get/set/endmntent statvfs<br>cfarm
+ CentOS 7 | - | 5.0.11<br>2025-2-18 | - | - | - | - | get/set/endmntent statvfs<br>cfarm
  CentOS 7 | - | - | - | - | - | - | -
- CentOS 8 | - | - | - | - | - | - | -
+ CentOS 8 | - | 5.0.11<br>2025-2-18 | - | - | - | - | -
  Fedora 7 | - | - | - | - | - | - | -
  Fedora 12 | - | - | - | - | - | - | -
  Fedora 16 | - | - | - | - | - | - | -
  Fedora 27 | - | - | - | - | - | - | -
- Fedora 38 | - | 5.0.10<br>2025-2-16 | - | - | - | - | get/set/endmntent statvfs
+ Fedora 38 | - | 5.0.11<br>2025-2-18 | - | - | - | - | get/set/endmntent statvfs
  Red Hat 7.1<br>(not RHEL)| - | - | - | - | - | - | -
  Red Hat 7.3<br>(not RHEL)| - | - | - | - | - | - | -
  __MacOS:__ | | | | | | | -
  MacOS Big Sur | - | 5.0.6<br>2025-2-9 | - | - | - | - | getfsstat
  MacOS Ventura | 5.0.2<br>2025-2-6 | 5.0.2<br>2025-2-6 | - | - | - | - | getfsstat
- MacOS Monterey | - | 5.0.10<br>2025-2-8 | - | - | - | - | getfsstat<br>cfarm
+ MacOS Monterey | - | 5.0.11<br>2025-2-8 | - | - | - | - | getfsstat<br>cfarm
  MacOS Sonoma | 5.0.0<br>2025-2-6 | 5.0.0<br>2025-2-6 | - | - | - | - | getfsstat
- MacOS Sequoia (intel) | 5.0.10<br>2025-2-16 | 5.0.10<br>2025-2-16 | - | - | - | - | getfsstat
- MacOS Sequoia (m1) | 5.0.10<br>2025-2-16 | 5.0.10<br>2025-2-16 | - | - | - | - | getfsstat
+ MacOS Sequoia (intel) | 5.0.11<br>2025-2-18 | 5.0.11<br>2025-2-18 | - | - | - | - | getfsstat
+ MacOS Sequoia (m1) | 5.0.11<br>2025-2-18 | 5.0.11<br>2025-2-18 | - | - | - | - | getfsstat
  __Other:__ | | | | | | |
- AIX 7.1 | - | 5.0.10<br>2025-2-16<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
- Haiku r1b5 | - | 5.0.6<br>2025-2-10 | - | - | - | - | fs_stat_dev<br>ramfs used value err
- SCO OpenServer 6.0.0 | - | 5.0.6<br>2025-2-10<br>cc gcc(fails test) | - | - | - | - | getmntent statvfs<br>polarhome
+ AIX 7.1 | - | 5.0.11<br>2025-2-18<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
+ Haiku r1b5 | - | 5.0.11<br>2025-2-18 | - | - | - | - | fs_stat_dev<br>ramfs used value err
+ SCO OpenServer 6.0.0 | - | 5.0.11<br>2025-2-18<br>cc gcc(fails test) | - | - | - | - | getmntent statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | polarhome
  QNX 6.5 | - | FAIL | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | | | |
- Solaris 10 | - | 5.0.6<br>2025-2-10 | - | - | - | - | getmntent statvfs
- Solaris 11.4 | 5.0.10<br>2025-2-16<br>gcc clang cc | 5.0.10<br>2025-2-16<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
- Solaris 11.4 (BE) | 5.0.5<br>2025-2-8<br>gcc clang cc | 5.0.9<br>2025-2-15<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 10 | - | 5.0.11<br>2025-2-18 | - | - | - | - | getmntent statvfs
+ Solaris 11.4 | 5.0.11<br>2025-2-18<br>gcc clang cc | 5.0.11<br>2025-2-18<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 (BE) | 5.0.11<br>2025-2-18<br>gcc clang cc | 5.0.11<br>2025-2-18<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
  __Windows:__| | | | | | | -
  Cygwin | 4.99.7<br>2025-1-31| - | - | - | - | - | get/set/endmntent statvfs?
  MSys 2| - | 4.99.7<br>2025-1-31 | - | - | - | - | - | -
