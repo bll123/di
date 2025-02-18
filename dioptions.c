@@ -443,6 +443,7 @@ processOptions (const char *arg, char *valptr)
     padata->diopts->optval [DI_OPT_DISP_JSON] = false;
   } else if (strcmp (arg, "--si") == 0) {
     stpecpy (padata->scalestr, padata->scalestr + padata->scalestrsz, "h");
+    padata->diopts->blockSize = DI_BLKSZ_1000;
   } else if (strcmp (arg, "--version") == 0) {
     setExitFlag (padata->diopts, DI_EXIT_VERS);
   } else {
@@ -470,8 +471,7 @@ processOptionsVal (const char *arg, void *valptr, char *value)
       }
     } else if (strcmp (value, "k") == 0) {
       padata->diopts->blockSize = DI_BLKSZ_1024;
-    }
-    else if (strcmp (value, "d") == 0 || strcmp (value, "si") == 0) {
+    } else if (strcmp (value, "d") == 0 || strcmp (value, "si") == 0) {
       padata->diopts->blockSize = DI_BLKSZ_1000;
     }
   } else if (strcmp (arg, "-I") == 0) {
