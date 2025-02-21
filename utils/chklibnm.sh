@@ -3,6 +3,8 @@
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
 
+libnm=lib
+
 rc=1
 if [ -f /etc/os-release ]; then
   grep -l openSUSE /etc/os-release > /dev/null 2>&1
@@ -20,8 +22,20 @@ if [ -f /etc/os-release ]; then
 fi
 
 if [ $rc -eq 0 ]; then
-  echo lib64
-else
-  echo lib
+  libnm=lib64
 fi
+
+# HP-UX ia64 uses lib/hpux64
+case `uname -s` in
+  HP-UX)
+    case `uname -m` in
+      ia64)
+        libnm=lib/hpux64
+        ;;
+    esac
+    ;;
+esac
+
+echo $libnm
+
 exit 0

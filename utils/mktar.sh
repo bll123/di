@@ -24,7 +24,7 @@ done
 
 chmod -R a+r $dir
 rm -f *.tar.gz
-tar cf - $dir |
+tar -c -f - $dir |
     gzip -9 > $dir.tar.gz
 
 rm -rf $dir > /dev/null 2>&1
