@@ -1264,12 +1264,11 @@ install (FILES di.h
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
-# gnu-install-dirs has an incorrect path for netbsd10
 install (FILES man/di.1
-  DESTINATION "${CMAKE_INSTALL_DATADIR}/man/man1"
+  DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
 )
 install (FILES man/libdi.3
-  DESTINATION "${CMAKE_INSTALL_DATADIR}/man/man3"
+  DESTINATION "${CMAKE_INSTALL_MANDIR}/man3"
 )
 
 install (FILES

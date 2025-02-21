@@ -143,6 +143,10 @@ distclean:
 tar:
 	./utils/mktar.sh
 
+.PHONY: betatar
+betatar:
+	./utils/mktar.sh beta
+
 ###
 # cmake
 
@@ -375,6 +379,7 @@ mkc-install-libdi:
 	  ) ; \
 	fi
 
+# incorrect for netbsd
 .PHONY: mkc-install-man
 mkc-install-man:
 	-test -d $(INST_MANDIR)/man1 || mkdir -p $(INST_MANDIR)/man1

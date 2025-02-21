@@ -28,6 +28,12 @@
     reboot to single user mode
     tunefs -q user -q group /
     fsck -y /
+    * export PKG_PATH=https://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname
+-p)/$(uname -r | cut -d_ -f1)/All
+    <br>
+    pkg_add pkgin
+    pkgin upgrade
+    pkgin install gettext pkgconf cmake
 
 ===== MacOS
     * pkgutil --pkg-info=com.apple.pkg.CLTools_Executables

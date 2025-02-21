@@ -3,12 +3,17 @@
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
 
+beta=""
+if [[ $1 == beta ]]; then
+  beta=-beta
+fi
+
 . ./VERSION.txt
 ver=$DI_VERSION
 
 PKG=di
 cwd=$(pwd)
-dir="${PKG}-${ver}"
+dir="${PKG}-${ver}${beta}"
 rm -rf $dir > /dev/null 2>&1
 mkdir $dir
 mkdir $dir/utils
