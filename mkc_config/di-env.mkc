@@ -103,6 +103,21 @@ if nomath_g ! _pkg_libs_gmp || == _env_DI_USE_MATH DI_TOMMATH
   pkg cflags libtommath /usr/pkg/lib/pkgconfig
   pkg libs libtommath /usr/pkg/lib/pkgconfig
  endif
+  pkg cflags libtommath /usr/pkg/lib/pkgconfig
+  pkg libs libtommath /usr/pkg/lib/pkgconfig
+ endif
+endif
+if nomath_gt ( ! _pkg_libs_gmp && ! _pkg_libs_libtommath ) || == _env_DI_USE_MATH DI_MPDECIMAL
+  pkg cflags libmpdec /opt/local/lib/pkgconfig
+  pkg libs libmpdec /opt/local/lib/pkgconfig
+  if nomath_gtm ( ! _pkg_libs_gmp && ! _pkg_libs_libtommath && ! _pkg_libs_libmpdec )
+   pkg cflags libmpdec /opt/homebrew/lib/pkgconfig
+   pkg libs libmpdec /opt/homebrew/lib/pkgconfig
+  endif
+  if nomath_gtm ( ! _pkg_libs_gmp && ! _pkg_libs_libtommath && ! _pkg_libs_libmpdec )
+   pkg cflags libmpdec /usr/pkg/lib/pkgconfig
+   pkg libs libmpdec /usr/pkg/lib/pkgconfig
+  endif
 endif
 
 libs
