@@ -357,12 +357,23 @@ check_addincpath () {
   fi
 }
 
+helper_pkg_path () {
+  for p in $HOME/local/lib /usr/local/lib \
+      /opt/local/lib /opt/homebrew/lib /usr/pkg/lib /usr/local/lib/hpux64; do
+    if [ -d $td ]; then
+      doappend PKG_CONFIG_PATH $p
+    fi
+  done
+}
+
+
 check_pkg_cflags () {
   name=$1
   pkgname=$2
   pkgpath=$3
 
   OPKG_CONFIG_PATH=$PKG_CONFIG_PATH
+  helper_pkg_path
   if [ "$pkgpath" != "" ]; then
     if [ "$PKG_CONFIG_PATH" != "" ]; then
       doappend PKG_CONFIG_PATH :
@@ -390,6 +401,7 @@ check_pkg_include () {
   pkgpath=$3
 
   OPKG_CONFIG_PATH=$PKG_CONFIG_PATH
+  helper_pkg_path
   if [ "$pkgpath" != "" ]; then
     if [ "$PKG_CONFIG_PATH" != "" ]; then
       doappend PKG_CONFIG_PATH :
@@ -417,6 +429,7 @@ check_pkg_libs () {
   pkgpath=$3
 
   OPKG_CONFIG_PATH=$PKG_CONFIG_PATH
+  helper_pkg_path
   if [ "$pkgpath" != "" ]; then
     if [ "$PKG_CONFIG_PATH" != "" ]; then
       doappend PKG_CONFIG_PATH :
@@ -920,41 +933,6 @@ check_addconfig () {
     _setflags $addto $ucaddto
   else
     printyesno_val $name no
-  fi
-}
-
-check_findconfig () {
-  name=$1
-  cfile=$2
-  printlabel FINDCONFIG "Search for: ${cfile}"
-  sp=
-  incchk=
-  pp=`puts $PATH | sed 's/:/ /g'`
-  for p in $pp $HOME/local/lib /usr/local/lib \
-      /opt/local/lib /opt/homebrew/lib /usr/pkg/lib /usr/local/lib/hpux64; do
-    td=$p
-    case $p in
-      */bin)
-        td=`puts $p | sed 's,/bin$,/lib,'`
-        ;;
-    esac
-    if [ -d $td ]; then
-      if [ -f "$td/$cfile.sh" ]; then
-        puts "found: ${td}" >&9
-        sp=$td
-        break
-      fi
-    fi
-  done
-
-  if [ z$sp != z ]; then
-    printyesno_val $name yes
-    setdata config_${cfile} Y
-    setdata config_path_${cfile} $sp/$cfile
-    . $sp/$cfile.sh ; # load the environment variables
-  else
-    printyesno_val $name no
-    setdata config_${cfile} N
   fi
 }
 

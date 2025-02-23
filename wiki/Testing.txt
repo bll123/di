@@ -5,7 +5,7 @@ that you want tested, please open a
 [ticket](https://sourceforge.net/p/diskinfo-di/tickets/) and let me
 know.
 
-I do not have access to any HP-UX machines.
+I do not have access to: HP-UX.
 <br>
 I do not have access to MacOS with Xcode (only MacOS with
 command-line-tools).

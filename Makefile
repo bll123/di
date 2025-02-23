@@ -344,49 +344,12 @@ mkc-install-include:
 .PHONY: mkc-install-libdi
 mkc-install-libdi:
 	test -d $(INST_LIBDIR) || mkdir -p $(INST_LIBDIR)
-	@sym=T ; \
-	instdest=$(INST_LIBDIR) ; \
-	case `uname -s` in \
-	  Darwin) \
-	    libnm=libdi.$(DI_LIBVERSION)$(SHLIB_EXT) ; \
-	    libnmso=libdi.$(DI_SOVERSION)$(SHLIB_EXT) ; \
-	    ;; \
-	  CYGWIN*|MSYS*|MINGW*) \
-	    instdest=$(INST_BINDIR) ; \
-	    libnm=libdi$(SHLIB_EXT) ; \
-	    sym=F ; \
-	    ;; \
-	  OpenBSD) \
-	    libnm=libdi$(SHLIB_EXT).$(DI_LIBVERSION) ; \
-	    libnmso=libdi$(SHLIB_EXT).$(DI_SOVERSION) ; \
-	    sym=O ; \
-	    ;; \
-	  *) \
-	    libnm=libdi$(SHLIB_EXT).$(DI_LIBVERSION) ; \
-	    libnmso=libdi$(SHLIB_EXT).$(DI_SOVERSION) ; \
-	    ;; \
-	esac ; \
-	cp -f libdi$(SHLIB_EXT) $${instdest}/$${libnm} ; \
-	if [ $$sym = T -o $$sym = O ]; then \
-	  ( \
-	    cd $(INST_LIBDIR) ; \
-	    ln -sf $${libnm} $${libnmso} ; \
-	  ) ; \
-	fi ; \
-	if [ $$sym = T ]; then \
-	  ( \
-	    cd $(INST_LIBDIR) ; \
-	    ln -sf $${libnmso} libdi$(SHLIB_EXT) ; \
-	  ) ; \
-	fi
+	./utils/instlibdi.sh "$(INST_LIBDIR)" "$(INST_BINDIR)" $(DI_LIBVERSION) $(DI_SOVERSION)
 
 # incorrect for netbsd
 .PHONY: mkc-install-man
 mkc-install-man:
-	-test -d $(INST_MANDIR)/man1 || mkdir -p $(INST_MANDIR)/man1
-	cp -f man/di.1 $(INST_MANDIR)/man1/$(MAN_TARGET)
-	-test -d $(INST_MANDIR)/man3 || mkdir -p $(INST_MANDIR)/man3
-	cp -f man/libdi.3 $(INST_MANDIR)/man3/$(MAN_TARGET)
+	./utils/instman.sh "$(PREFIX)" "$(MANDIR)"
 
 ###
 # mkc environment

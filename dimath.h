@@ -41,11 +41,6 @@
 #  include <libtommath/tommath.h>
 # endif
   typedef mp_int dinum_t;
-#elif _use_math == DI_MPDECIMAL
-# include <mpdecimal.h>
-  static mpd_context_t  mpdctx;
-  static int            mpdinitialized = 0;
-  typedef mpd_t   *dinum_t;
 # else /* DI_INTERNAL */
   typedef di_unum_t dinum_t;
 #endif
@@ -111,15 +106,6 @@ dinum_init (dinum_t *r)
   mpz_init_set_ui (*r, (unsigned long) 0);
 #elif _use_math == DI_TOMMATH
   mp_init_u64 (r, 0);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  if (mpdinitialized == 0) {
-    mpd_maxcontext (&mpdctx);
-    mpdinitialized = 1;
-  }
-  *r = mpd_qnew ();
-  mpd_qset_u64 (*r, 0, &mpdctx, &status);
 #else
   *r = 0;
 #endif
@@ -132,8 +118,6 @@ dinum_clear (dinum_t *r)
   mpz_clear (*r);
 #elif _use_math == DI_TOMMATH
   mp_clear (r);
-#elif _use_math == DI_MPDECIMAL
-  mpd_del (*r);
 #endif
 }
 
@@ -144,13 +128,6 @@ dinum_str (const dinum_t *r, char *str, Size_t sz)
   gmp_snprintf (str, sz, "%Zd", *r);
 #elif _use_math == DI_TOMMATH
   mp_to_decimal (r, str, sz);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t  status;
-  char      *tstr;
-
-  tstr = mpd_qformat (*r, ".0f", &mpdctx, &status);
-  snprintf (str, sz, "%s", tstr);
-  free (tstr);
 #else
 # if defined (DI_INTERNAL_DOUBLE)
 #  if _siz_long_double > 8
@@ -179,10 +156,6 @@ dinum_set (dinum_t *r, const dinum_t *val)
   mpz_set (*r, *val);
 #elif _use_math == DI_TOMMATH
   mp_copy (val, r);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qcopy (*r, *val, &status);
 #else
   *r = *val;
 #endif
@@ -195,10 +168,6 @@ dinum_set_u (dinum_t *r, di_ui_t val)
   mpz_set_ui (*r, (unsigned long) val);
 #elif _use_math == DI_TOMMATH
   mp_set_u64 (r, val);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qset_u64 (*r, val, &mpdctx, &status);
 #else
   *r = (dinum_t) val;
 #endif
@@ -211,10 +180,6 @@ dinum_set_s (dinum_t *r, di_si_t val)
   mpz_set_si (*r, (long) val);
 #elif _use_math == DI_TOMMATH
   mp_set_i64 (r, val);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qset_i64 (*r, val, &mpdctx, &status);
 #else
   *r = (dinum_t) val;
 #endif
@@ -239,10 +204,6 @@ dinum_add_u (dinum_t *r, di_ui_t val)
   mp_init_u64 (&v, val);
   mp_add (r, &v, r);
   mp_clear (&v);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qadd_u64 (*r, *r, val, &mpdctx, &status);
 #else
   *r += (dinum_t) val;
 #endif
@@ -267,10 +228,6 @@ dinum_sub_u (dinum_t *r, di_ui_t val)
   mp_init_u64 (&v, val);
   mp_sub (r, &v, r);
   mp_clear (&v);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qsub_u64 (*r, *r, val, &mpdctx, &status);
 #else
   *r -= (dinum_t) val;
 #endif
@@ -288,10 +245,6 @@ dinum_add (dinum_t *r, const dinum_t *val)
   mpz_clear (t);
 #elif _use_math == DI_TOMMATH
   mp_add (r, val, r);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qadd (*r, *r, *val, &mpdctx, &status);
 #else
   *r += *val;
 #endif
@@ -309,10 +262,6 @@ dinum_sub (dinum_t *r, const dinum_t *val)
   mpz_clear (t);
 #elif _use_math == DI_TOMMATH
   mp_sub (r, val, r);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qsub (*r, *r, *val, &mpdctx, &status);
 #else
   *r -= *val;
 #endif
@@ -325,10 +274,6 @@ dinum_cmp (const dinum_t *r, const dinum_t *val)
   return mpz_cmp (*r, *val);
 #elif _use_math == DI_TOMMATH
   return mp_cmp (r, val);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  return mpd_qcmp (*r, *val, &status);
 #else
   int     rc = 0;
 
@@ -355,16 +300,6 @@ dinum_cmp_s (const dinum_t *r, di_si_t val)
   rv = mp_cmp (r, &t);
   mp_clear (&t);
   return rv;
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-  mpd_t       *tval;
-  int         rc;
-
-  tval = mpd_qnew ();
-  mpd_qset_i64 (tval, val, &mpdctx, &status);
-  rc = mpd_qcmp (*r, tval, &status);
-  mpd_del (tval);
-  return rc;
 #else
   di_snum_t   t;
   int         rc = 0;
@@ -386,10 +321,6 @@ dinum_mul (dinum_t *r, const dinum_t *val)
   mpz_mul (*r, *r, *val);
 #elif _use_math == DI_TOMMATH
   mp_mul (r, (mp_int *) val, r);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qmul (*r, *r, *val, &mpdctx, &status);
 #else
   *r *= *val;
 #endif
@@ -407,10 +338,6 @@ dinum_mul_u (dinum_t *r, di_ui_t val)
   mp_set_u64 (&v, val);
   mp_mul (r, &v, r);
   mp_clear (&v);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qmul_u64 (*r, *r, val, &mpdctx, &status);
 #else
   *r *= (dinum_t) val;
 #endif
@@ -435,12 +362,6 @@ dinum_mul_uu (dinum_t *r, di_ui_t vala, di_ui_t valb)
   mp_mul (&t, &v, r);
   mp_clear (&t);
   mp_clear (&v);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-
-  mpd_qset_u64 (*r, 1, &mpdctx, &status);
-  mpd_qmul_u64 (*r, *r, vala, &mpdctx, &status);
-  mpd_qmul_u64 (*r, *r, valb, &mpdctx, &status);
 #else
   *r = (dinum_t) vala;
   *r *= (dinum_t) valb;
@@ -491,32 +412,6 @@ dinum_scale (dinum_t *r, dinum_t *val)
   mp_clear (&t);
   mp_clear (&rem);
   mp_clear (&result);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-  mpd_t       *result;
-  mpd_t       *rem;
-  mpd_t       *t;
-  int         rc;
-
-  t = mpd_qnew ();
-  mpd_qset_i64 (t, 0, &mpdctx, &status);
-  rc = mpd_qcmp (*r, t, &status);
-  if (rc == 0) {
-    mpd_del (t);
-    return 0.0;
-  }
-
-  result = mpd_qnew ();
-  rem = mpd_qnew ();
-  mpd_qset_u64 (t, DI_SCALE_PREC, &mpdctx, &status);
-  mpd_qmul (t, *r, t, &mpdctx, &status);
-
-  mpd_qdivmod (result, rem, t, *val, &mpdctx, &status);
-  dval = (double) mpd_qget_u64 (result, &status);
-  dval /= (double) DI_SCALE_PREC;
-  mpd_del (result);
-  mpd_del (rem);
-  mpd_del (t);
 #else
 # if defined (DI_INTERNAL_INT)
   dinum_t   t;
@@ -580,24 +475,6 @@ dinum_perc (dinum_t *r, dinum_t *val)
   mp_clear (&t);
   mp_clear (&quot);
   mp_clear (&rem);
-#elif _use_math == DI_MPDECIMAL
-  uint32_t    status;
-  mpd_t       *quot;
-  mpd_t       *rem;
-  mpd_t       *t;
-
-  quot = mpd_qnew ();
-  rem = mpd_qnew ();
-  t = mpd_qnew ();
-
-  mpd_qset_u64 (t, DI_PERC_PRECISION, &mpdctx, &status);
-  mpd_qmul (t, *r, t, &mpdctx, &status);
-  mpd_qdivmod (quot, rem, t, *val, &mpdctx, &status);
-  dval = (double) mpd_qget_u64 (quot, &status);
-  dval /= (double) DI_PERC_DIV;
-  mpd_del (quot);
-  mpd_del (rem);
-  mpd_del (t);
 #else
 # if defined (DI_INTERNAL_DOUBLE)
   dval = (double) (*r / *val);

@@ -63,6 +63,7 @@ bldrun () {
   # SCO OpenServer: stdint.h:252: warning: `WCHAR_MAX' redefined
   # SCO OpenServer: sys/mount.h:52: warning: `/*' within comment
   c=`${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
+      ${grepcmd} -v 'no-unknown-warning-option' |
       ${grepcmd} -v '(pragma|error[=,])' |
       ${grepcmd} -v 'BSHIFT has been redefined' |
       ${grepcmd} -v 'unrecognized command line option' |
@@ -73,6 +74,7 @@ bldrun () {
   if [ $c -gt 0 ]; then
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: warnings or errors found"
     ${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
+        ${grepcmd} -v 'no-unknown-warning-option' |
         ${grepcmd} -v '(pragma|error[=,])' |
         ${grepcmd} -v 'BSHIFT has been redefined' |
         ${grepcmd} -v 'unrecognized command line option' |
