@@ -157,8 +157,10 @@ bldrun () {
     for f in build/CMakeFiles/CMakeOutput.log \
         build/CMakeFiles/CMakeError.log \
         build/CMakeFiles/CMakeConfigureLog.yaml \
+        build/CMakeCache.txt \
         build/config.h \
         x/lib/pkgconfig/di.pc \
+        x/lib64/pkgconfig/di.pc \
         ; do
       if [ -f $f ]; then
         preserveoutput $f
@@ -173,6 +175,7 @@ bldrun () {
         di.env \
         di.reqlibs \
         x/lib/pkgconfig/di.pc \
+        x/lib64/pkgconfig/di.pc \
         ; do
       if [ -f $f ]; then
         preserveoutput $f

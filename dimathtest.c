@@ -29,8 +29,6 @@ main (int argc, char *argv [])
   fprintf (stdout, "GMP:\n");
 #elif _use_math == DI_TOMMATH
   fprintf (stdout, "TOMMATH:\n");
-#elif _use_math == DI_MPDECIMAL
-  fprintf (stdout, "MPDECIMAL:\n");
 #else
   fprintf (stdout, "INTERNAL: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long, _siz_long_long);
 #endif

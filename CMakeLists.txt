@@ -1202,6 +1202,12 @@ if (_use_math STREQUAL "DI_TOMMATH")
     ${TOMMATH_LDFLAGS}
   )
 endif()
+set (DI_LINK_EXTRA "")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD")
+  target_link_options (di PRIVATE
+    -Wl,-R/usr/pkg/lib
+  )
+endif()
 
 add_executable (dimathtest
   dimathtest.c
@@ -1233,15 +1239,6 @@ target_link_libraries (getoptn_test PRIVATE
 )
 
 # di.pc
-
-# cmake puts 'general' in front of every item, and semicolons
-# are treated specially... weird
-# list join does not work
-set (DI_REQUIRED_LIBS ${${DI_LIBNAME}_LIB_DEPENDS})
-if (NOT DEFINED DI_REQUIRED_LIBS OR DI_REQUIRED_LIBS STREQUAL "")
-  set (DI_REQUIRED_LIBS " ")
-endif()
-string (REPLACE "general" " " DI_REQUIRED_LIBS ${DI_REQUIRED_LIBS})
 
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 

@@ -176,7 +176,7 @@ for comp in ${complist}; do
     # check the installation dirs
     tcount=$(($tcount+1))
     trc=0
-    for d in bin include share pkgconfig man man1 man3; do
+    for d in bin include pkgconfig man man1 man3; do
       grep -l "^${d}$" ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
       rc=$?
       if [[ $rc -ne 0 ]]; then
@@ -212,7 +212,7 @@ for comp in ${complist}; do
         trc=1
       fi
     done
-    grep -l '^libdi\.[^3]' ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
+    grep -l '^libdi\.[dsa]' ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
     rc=$?
     if [[ $rc -ne 0 ]]; then
         echo "FAIL $(date '+%T') ${host}: ${bld}: ${comp}: missing libdi"

@@ -66,6 +66,10 @@ while test $# -gt 0; do
       flag=K
       shift
       ;;
+    --copy)
+      flag=P
+      shift
+      ;;
     --clean)
       flag=C
       bg=F
@@ -157,11 +161,11 @@ if [[ ${procnotvm} == T ]]; then
     if [[ $bg == T ]]; then
       nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
           ${ipaddr} ${remuser} ${remport} ${rempath} \
-          ${flag} ${complist} 2>&1 | tee ${rsltdir}/w &
+          ${flag} ${complist} 2>&1 | tee ${rsltdir}.w &
     else
       ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
           ${ipaddr} ${remuser} ${remport} ${rempath} \
-          ${flag} ${complist} 2>&1 | tee ${rsltdir}/w
+          ${flag} ${complist} 2>&1 | tee ${rsltdir}.w
     fi
   done
 fi

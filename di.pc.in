@@ -6,5 +6,5 @@ Name: libdi
 Description: Disk Information Library
 Version: @DI_VERSION@
 URL: https://sourceforge.net/project/di/
-Libs: -L${libdir} -ldi @DI_REQUIRED_LIBS@
+Libs: -L${libdir} -ldi
 Cflags: -I${includedir}

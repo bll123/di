@@ -54,7 +54,7 @@ INSTALLATION
         cmake --build build
         cmake --install build
 
-    If the GMP or libtommath or mpdecimal library is found, it will be used,
+    If the GMP or libtommath library is found, it will be used,
     otherwise the numerics will be handled using standard C data types
     (long double, double, etc.).
 
@@ -67,8 +67,6 @@ INSTALLATION
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_GMP
     To force libtommath:
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_TOMMATH
-    To force mpdecimal:
-      make -e PREFIX=$HOME/local DI_USE_MATH=DI_MPDECIMAL
 
     For OpenSUSE and others that use .../lib64, with mkconfig (cmake
     will generate the proper path):
@@ -96,7 +94,7 @@ REQUIREMENTS
     cat chmod ln mkdir mv rm sed test expr grep sort
   libraries:
     Linux: tirpc (nfs quotas)
-    MP Math: gmp or libtommath or mpdecimal (optional)
+    MP Math: gmp or libtommath (optional)
 
 BUG REPORTS
 

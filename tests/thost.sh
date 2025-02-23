@@ -15,7 +15,7 @@ remuser=$1
 remport=$2
 rempath=$3
 shift;shift;shift
-# flag is R (build and remove), K (build and keep), C (clean only)
+# flag is R (build and remove), K (build and keep), C (clean only), P (copy)
 flag=${1:-R}
 shift
 complist=$*
@@ -62,12 +62,16 @@ if [[ $flag != C ]]; then
       echo "-- $(date '+%T') ${host}: copying files"
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
-      remotebldrun $ipaddr
+      if [[ $flag != P ]]; then
+        remotebldrun $ipaddr
+      fi
     elif [[ ${type} == vm || ${type} == vmlocal ]]; then
       echo "-- $(date '+%T') ${host}: copying files"
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
-      remotebldrun $ipaddr
+      if [[ $flag != P ]]; then
+        remotebldrun $ipaddr
+      fi
     else
       echo "-- $(date '+%T') ${host}: unknown type ${type}"
     fi
@@ -87,8 +91,9 @@ if [[ $flag == R || $flag == C ]]; then
   done
 fi
 
-./tests/check.sh ${host} ${complist}
-
-echo "-- $(date '+%T') ${host}: finish"
+if [[ $flag != P ]]; then
+  ./tests/check.sh ${host} ${complist}
+  echo "-- $(date '+%T') ${host}: finish"
+fi
 
 exit 0

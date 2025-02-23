@@ -533,7 +533,7 @@ check_ldflags () {
         doappend ldflags_system " -L/usr/local/lib"
         ;;
       NetBSD)
-        doappend ldflags_system " -L/usr/pkg/lib"
+        doappend ldflags_system " -Wl,-R/usr/pkg/lib -L/usr/pkg/lib"
         ;;
       HP-UX)
         # check for libintl in other places...
@@ -893,7 +893,7 @@ check_sharerunpathflag () {
         LDFLAGS_RUNPATH="-rpath "
         ;;
       SCO_SV)
-        LDFLAGS_RUNPATH="-R "
+        LDFLAGS_RUNPATH="-Wl,-R"
         ;;
       SunOS)
         LDFLAGS_RUNPATH="-R"
@@ -905,13 +905,17 @@ check_sharerunpathflag () {
         LDFLAGS_RUNPATH=""
         ;;
     esac
-    if [ "$_MKCONFIG_USING_GCC" = Y -o "$_MKCONFIG_USING_CLANG" = Y ]; then
-      # the trailing space will be converted to ' -Wl,' and
-      # the library runpath will be appended by mkcl.sh
-      LDFLAGS_RUNPATH=`echo "$LDFLAGS_RUNPATH" |
-          sed -e 's/^-/-Wl,-/' -e 's/^\+/-Wl,+/' -e 's/  */ -Wl,/g'`
+    if [ "$_MKCONFIG_USING_GNU_LD" != Y -a "$_MKCONFIG_USING_CLANG" = Y ]; then
+      LDFLAGS_RUNPATH="-rpath "
     fi
+#    if [ "$_MKCONFIG_USING_GCC" = Y -o "$_MKCONFIG_USING_CLANG" = Y ]; then
+#      # the trailing space will be converted to ' -Wl,' and
+#      # the library runpath will be appended by mkcl.sh
+#      LDFLAGS_RUNPATH=`echo "$LDFLAGS_RUNPATH" |
+#          sed -e 's/^-/-Wl,-/' -e 's/^\+/-Wl,+/' -e 's/  */ -Wl,/g'`
+#    fi
   fi
+set +x
 
   printyesno_val LDFLAGS_RUNPATH "$LDFLAGS_RUNPATH"
   setdata LDFLAGS_RUNPATH "$LDFLAGS_RUNPATH"

@@ -13,7 +13,6 @@ DI_BUILD = Release
 
 # DI_USE_MATH = DI_GMP
 # DI_USE_MATH = DI_TOMMATH
-# DI_USE_MATH = DI_MPDECIMAL
 # DI_USE_MATH = DI_INTERNAL
 
 # for mkconfig
@@ -164,7 +163,7 @@ cmake-sanitize:
 #   (passing -j w/o arguments, and *BSD complains)
 .PHONY: cmake-all
 cmake-all:
-	@case $$(uname -s) in \
+	@case `uname -s` in \
 	  CYGWIN*) \
 	    COMP=$(CC) \
 	    $(MAKE) -e cmake-unix; \
@@ -189,7 +188,7 @@ cmake-all:
 
 .PHONY: cmakeclang
 cmakeclang:
-	case $$(uname -s) in \
+	case `uname -s` in \
 	  *BSD*) \
 	    COMP=$(CC) \
 	    $(MAKE) -e cmake-unix; \
@@ -314,19 +313,16 @@ mkc-install-all:
 mkc-install-po:
 	-./utils/instpo.sh "`pwd`/po" $(INST_LOCALEDIR) "`pwd`/tmp"
 
+# -lintl and -liconv are removed, as those libraries are only needed
+# for the main di program, not to link with the library.
 .PHONY: mkc-install-pc
 mkc-install-pc: $(MKC_REQLIB)
 	test -d $(INST_PKGCDIR) || mkdir -p $(INST_PKGCDIR)
-	@dilibs="$${LDFLAGS_LIBS_APPLICATION} `cat $(MKC_REQLIB)`" ; \
-	dilibs="`echo $${dilibs} | \
-	    sed -e 's,-lintl,,g' \
-	    -e 's,-liconv,,g'`" ; \
 	cat di.pc.in | \
 	  sed -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
 	      -e 's,@CMAKE_INSTALL_FULL_INCLUDEDIR@,$(INCDIR),g' \
 	      -e 's,@CMAKE_INSTALL_FULL_LIBDIR@,$(LIBDIR),g' \
 	      -e 's,@DI_VERSION@,$(DI_VERSION),g' \
-	      -e "s~@DI_REQUIRED_LIBS@~$${dilibs}~" \
 	  > $(INST_PKGCDIR)/di.pc
 
 .PHONY: mkc-install-di

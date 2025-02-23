@@ -21,34 +21,6 @@
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wbad-function-cast"
 
-#if _use_math == DI_GMP
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wunknown-warning-option"
-# pragma clang diagnostic ignored "-Wsign-conversion"
-# pragma clang diagnostic ignored "-Wreserved-identifier"
-# pragma gcc diagnostic push
-# pragma gcc diagnostic ignored "-Wsign-conversion"
-# include <gmp.h>
-# pragma clang diagnostic pop
-# pragma gcc diagnostic pop
-  typedef mpz_t dinum_t;
-#elif _use_math == DI_TOMMATH
-# define MP_WUR
-# if _hdr_tommath
-#  include <tommath.h>
-# endif
-# if _hdr_libtommath_tommath
-#  include <libtommath/tommath.h>
-# endif
-  typedef mp_int dinum_t;
-# else /* DI_INTERNAL */
-  typedef di_unum_t dinum_t;
-#endif
-
-# if defined (__cplusplus) || defined (c_plusplus)
-extern "C" {
-# endif
-
 /* a double has a longer mantissa than an unsigned int, */
 /* but the accuracy may be less. */
 #if _siz_long_double > 8
@@ -94,6 +66,34 @@ extern "C" {
 #else
 # error "unable to locate a valid type"
 #endif
+
+#if _use_math == DI_GMP
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wunknown-warning-option"
+# pragma clang diagnostic ignored "-Wsign-conversion"
+# pragma clang diagnostic ignored "-Wreserved-identifier"
+# pragma gcc diagnostic push
+# pragma gcc diagnostic ignored "-Wsign-conversion"
+# include <gmp.h>
+# pragma clang diagnostic pop
+# pragma gcc diagnostic pop
+  typedef mpz_t dinum_t;
+#elif _use_math == DI_TOMMATH
+# define MP_WUR
+# if _hdr_tommath
+#  include <tommath.h>
+# endif
+# if _hdr_libtommath_tommath
+#  include <libtommath/tommath.h>
+# endif
+  typedef mp_int dinum_t;
+# else /* DI_INTERNAL */
+  typedef di_unum_t dinum_t;
+#endif
+
+# if defined (__cplusplus) || defined (c_plusplus)
+extern "C" {
+# endif
 
 #define DI_PERC_PRECISION 1000000
 #define DI_PERC_DIV ( (double) (DI_PERC_PRECISION / 100));
