@@ -23,15 +23,18 @@
   </h1>
   <hr>
   <p><b>Current Version: #VERSION#</b></p>
-  <p>'di' is a disk information utility, displaying everything (and
-  more) that your 'df' command does. It features the ability to display
+  <p><i>di</i> is a disk information utility, displaying everything (and
+  more) that your <i>df</i> command does. It features the ability to display
   your disk usage in whatever format you prefer. It also
   checks the user and group quotas, so that the user
   sees the space available for their use, not the system wide
   disk space.</p>
   <p>It is designed to be portable across many platforms.
   Great for heterogenous networks.</p>
-  <p>'di' now includes a Tcl interface and a Perl interface.</p>
+  <p>With version 5, <i>di</i> now has a shared library that can be
+  used to retrieve the disk space information.
+  See the <a href="https://sourceforge.net/p/diskinfo-di/wiki/Home">wiki</a>
+  page for details on the API.</p>
   <a href="di.html">di Manual Page</a></p>
   <hr>
   <p>Submit bugs to <a
@@ -41,28 +44,12 @@
   <big><p><b>Downloading di:</b></p></big>
   <p>Source: <a href="https://sourceforge.net/projects/diskinfo-di/files/latest/download">di version #VERSION#</a> (sourceforge.net)</p>
   <p><b>Ports:</b></p>
-  <p>di is readily available for the following distributions:</p>
-  <dl>
-  <dd>BSD:
-    <a href="https://www.freebsd.org/">FreeBSD</a>
-    <a href="https://netbsd.org/">NetBSD</a>
-  </dd>
-  <dd>Linux:
-    <a href="https://www.archlinux.org/">Arch</a>
-    <a href="https://www.debian.org/">Debian</a>
-    <a href="https://www.crux.nu/">CRUX</a>
-    <a href="https://www.gentoo.org/">Gentoo</a>
-    <a href="https://linuxmint.com/">Linux Mint</a>
-    <a href="https://www.pld-linux.org/">PLD</a>
-    <a href="https://www.ubuntu.com/">Ubuntu</a>
-  </dd>
-  </dl>
+  <p><i>di</i> is readily available via many distribution's package management system.</p>
   <p>AIX: <a href="https://www.perzl.org/aix/index.php?n=Main.Di">https://www.perzl.org/aix/index.php?n=Main.Di</a></p>
-  <p>HP-UX Software Depots: <a href="http://hpux.connect.org.uk/hppd/hpux/Sysadmin/di-4.54.0.1/">http://hpux.connect.org.uk/hppd/hpux/Sysadmin/di-4.54.0.1/</a></p>
+  <p>HP-UX Software Depots: <a href="http://hpux.connect.org.uk/hppd/hpux/Sysadmin/di-5.0.6">http://hpux.connect.org.uk/hppd/hpux/Sysadmin/di-5.0.6/</a></p>
   <p>Linux Packages Search (pkgs.org) (Arch, CentOS, Debian, OpenSUSE, Slackware, Ubuntu): <a href="https://pkgs.org/download/di">https://pkgs.org/download/di</a></p>
   <p>Linux Search (rpmfind.net) (RedHat): <a href="https://rpmfind.net/linux/rpm2html/search.php?query=di&submit=Search+...&system=&arch=">rpmfind.net</a></p>
-  <p>Linux: Slackware (slackbuilds.org): <a href="https://slackbuilds.org/repository/13.37/system/di/">slackbuilds.org</a></p>
-  <p>MacOS X: <a href="https://ports.macports.org/port/di/">Available through macports.org</a>  <a href="https://formulae.brew.sh/formula/di">Available via Homebrew</a></p>
+  <p>MacOS: <a href="https://ports.macports.org/port/di/">Available through macports.org</a>  <a href="https://formulae.brew.sh/formula/di">Available via Homebrew</a></p>
   <p>Solaris: <a href="https://www.opencsw.org/packages/di/">https://www.opencsw.org/packages/di/</a> (4.35)</p>
   <hr>
   <p><img src="di-ss.png"></p>
@@ -71,62 +58,6 @@
   to test on.
   If you can supply secure-shell access to a standard shell account
   for occasional access, let me know (brad.lanam.di_at_gmail.com).
-  </p>
-  <p>di 4.53 has been tested on the following platforms:</p>
-  <p>
-  AIX 7.1 (gcc, xlc)
-  <br>
-  MacOS Sonoma (clang)
-  <br>
-  MX Linux 23 (gcc)
-  </p>
-  <p>di 4.47 has been tested on the following platforms:</p>
-  <p>
-  AIX 7.1 (gcc)
-  <br>
-  CentOS 3.9 (gcc)
-  <br>
-  DragonflyBSD 4.4 (gcc)
-  <br>
-  Fedora 27 (gcc)
-  <br>
-  Fedora 7 (gcc)
-  <br>
-  FreeBSD 11.0 (clang)
-  <br>
-  FreeBSD 7.0 (cc)
-  <br>
-  Mac OS X 10.12.6 (clang)
-  <br>
-  MX Linux 17.1 (gcc, clang)
-  <br>
-  NetBSD 1.62 (cc)
-  <br>
-  NetBSD 2.0 (cc)
-  <br>
-  NetBSD 7.0.1 (gcc)
-  <br>
-  OpenBSD 4.4 (gcc)
-  <br>
-  QNX 6.5 (cc)
-  <br>
-  RedHat 7.3 (gcc)
-  <br>
-  SCO SV 6.0.0 (cc)
-  <br>
-  Solaris 10/sparc (cc12.3)
-  <br>
-  Solaris 11/x86 (cc12.3)
-  <br>
-  Solaris 9/x86 (gcc3)
-  <br>
-  Tru64 5.1B (cc)
-  <br>
-  UnixWare 7.1.4 (cc)
-  <br>
-  Windows Cygwin (gcc)
-  <br>
-  Windows Msys2 (gcc)
   </p>
   <p>di has been ported to the following systems in the past:</p>
   <p>

@@ -4,15 +4,17 @@
 
 <!--
 
-**5.0.13 2025-2---**
+**5.0.13 2025-2-23**
+
+-->
+
+**5.0.13 2025-2-23**
 
 * Bug Fixes
     * build: updates for NetBSD.
 * Internal
     * build: cleanup.
     * build: mkconfig: Update to version 2.6.8 (netbsd, pkg-config).
-
--->
 
 **5.0.12 2025-2-21**
 
