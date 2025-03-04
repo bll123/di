@@ -140,8 +140,8 @@ static di_disp_text_t disptext [] =
   { "E", "Exa", "Ei", "Exbi" },
   { "Z", "Zetta", "Zi", "Zebi" },
   { "Y", "Yotta", "Yi", "Yobi" },
-  { "R", "Ronna", "Ri", "Ronni" },
-  { "Q", "Quetta", "Qi", "Quetti" }
+  { "R", "Ronna", "Ri", "Robi" },
+  { "Q", "Quetta", "Qi", "Quebi" }
 };
 
 static void di_display_data (void *);
@@ -624,7 +624,7 @@ di_display_data (void *di_data)
         fmtchar = 0;
       }
 
-      if (fmtchar) {
+      if (fmtchar && (csvout || jsonout)) {
         if (csvout) {
           if (csvtabs) {
             fprintf (stdout, "%s", tmp);
@@ -636,6 +636,7 @@ di_display_data (void *di_data)
               tmp, dispinfo.suffix [dataidx], comma);
         }
       }
+
       if (! csvout && ! jsonout) {
         int       len;
         int       printdiff;
@@ -737,6 +738,7 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
     const char  *temp;
     char        tbuff [2];
     int         dataidx;
+    int         fmtchar;
 
     temp = "";
     dataidx = fmtcount;
@@ -745,6 +747,8 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
       tbuff [1] = '\0';
       temp = tbuff;
     }
+
+    fmtchar = 1;
 
     if (! csvout) {
       switch (fmt) {
@@ -845,6 +849,7 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
           break;
         }
         default: {
+          fmtchar = 0;
           tbuff [0] = (char) fmt;
           tbuff [1] = '\0';
           temp = tbuff;
@@ -853,6 +858,11 @@ di_display_header (void *di_data, di_disp_info_t *dispinfo)
       }
     }
 
+    if (fmtchar) {
+      /* force proper display processing for heading */
+      /* the display loop checks for jsonident == null */
+      dispinfo->jsonident [fmtcount] = "header";
+    }
     strdata [dataidx] = strdup (temp);
     ++fmtcount;
   }
