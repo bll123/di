@@ -365,7 +365,7 @@ chkMountOptions (const char *mntopts, const char *str)
 {
   char    *ptr;
   char    *tstr;
-  char    *tokstr;
+  char    *tokstr = NULL;
 
   tstr = strdup (mntopts);
   if (tstr == (char *) NULL) {

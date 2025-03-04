@@ -148,7 +148,7 @@ processStringArgs (char *ptr, di_opt_t *diopts,
   }
   if (dptr != (char *) NULL) {
     int   optidx;
-    char  *tokstr;
+    char  *tokstr = NULL;
 
     tptr = di_strtok (dptr, DI_ARGV_SEP, &tokstr);
     nargc = 0;
@@ -517,7 +517,7 @@ parseList (di_strarr_t *list, char *str)
   Size_t        ocount;
   Size_t        ncount;
   Size_t        i;
-  char          *tokstr;
+  char          *tokstr = NULL;
 
   dstr = strdup (str);
   if (dstr == (char *) NULL) {
