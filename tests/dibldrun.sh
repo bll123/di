@@ -49,7 +49,7 @@ bldrun () {
 
   grc=0
 
-  echo "-- `date '+%T'` ${host}: ${tag}/${comp}"
+  echo "-- `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}"
   make distclean
   if [ $tag = pcmake ]; then
     # pure cmake
@@ -73,7 +73,7 @@ bldrun () {
       ${grepcmd} -v '^(COMPILE|LINK)' |
       wc -l`
   if [ $c -gt 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: warnings or errors found"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: warnings or errors found"
     ${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
         ${grepcmd} -v 'no-unknown-warning-option' |
         ${grepcmd} -v '_Werror_' |
@@ -98,13 +98,13 @@ bldrun () {
   ${mathtest} > di-${tag}-math.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: dimathtest failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: dimathtest failed"
     grc=1
   fi
   ${getoptntest} > di-${tag}-getoptn.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: getoptn_test failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: getoptn_test failed"
     grc=1
   fi
 
@@ -116,76 +116,84 @@ bldrun () {
 
   > di-${tag}-run.out
 
+  echo "-- RUN: -a -d g -f stbuf1cvpB2m -t" >> di-${tag}-run.out
   ./x/bin/di -a -d g -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
 
+  echo "-- RUN: -d h -f stbuf1cvpB2m -t" >> di-${tag}-run.out
   ./x/bin/di -d h -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
-  echo "-- end" >> di-${tag}-run.out
 
   # need a run with the basic debug info shown
+  echo "-- RUN: -X 1" >> di-${tag}-run.out
   ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
 
   # json output
+  echo "-- RUN: -j" >> di-${tag}-run.out
   ./x/bin/di -j >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
 
   # csv output, no headers
+  echo "-- RUN: -n -C" >> di-${tag}-run.out
   ./x/bin/di -n -C >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
 
   # -I flag with unknown fs
+  echo "-- RUN: -I something" >> di-${tag}-run.out
   ./x/bin/di -I something >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
 
   # -x flag with unknown fs
+  echo "-- RUN: -x something" >> di-${tag}-run.out
   ./x/bin/di -x something >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
 
   fs=`./x/bin/di -f t -n | head -1`
 
   # -I flag with known fs
+  echo "-- RUN: -I ${fs}" >> di-${tag}-run.out
   ./x/bin/di -I ${fs} >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
 
   # -x flag with known fs
+  echo "-- RUN: -x ${fs}" >> di-${tag}-run.out
   ./x/bin/di -x ${fs} >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
     grc=1
   fi
 

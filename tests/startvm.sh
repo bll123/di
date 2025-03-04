@@ -27,13 +27,13 @@ if [[ $chkc -eq 1 ]]; then
   (ssh -l bll ${ipaddr} "echo AAA" 2>&1 ) | grep '^AAA$' > /dev/null
   rc=$?
   if [[ $rc -eq 0 ]]; then
-    echo "-- $(date '+%T') ${host}: connected"
+    echo "-- $(TZ=PST8PDT date '+%T') ${host}: connected"
     # already running
     exit 255
   fi
 fi
 
-echo "-- $(date '+%T') ${host}: starting vm"
+echo "-- $(TZ=PST8PDT date '+%T') ${host}: starting vm"
 nohup VBoxManage startvm ${host} > /dev/null 2>&1 &
 sleep 5 # give time for vboxmanage to work...
 count=0
@@ -51,13 +51,13 @@ if [[ $validate == T ]]; then
     (ssh -l bll ${ipaddr} "echo AAA" 2>&1 ) | grep '^AAA$' > /dev/null
     rc=$?
     if [[ $rc -eq 0 ]]; then
-      echo "-- $(date '+%T') ${host}: connected"
+      echo "-- $(TZ=PST8PDT date '+%T') ${host}: connected"
       ok=T
       break
     fi
     count=$(($count + 1))
     if [[ $count -gt 40 ]]; then
-      echo "== $(date '+%T') ${host}: unable to connect"
+      echo "== $(TZ=PST8PDT date '+%T') ${host}: unable to connect"
       ./tests/stopvm.sh ${host}
       exit 1
     fi

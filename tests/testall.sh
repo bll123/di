@@ -80,6 +80,13 @@ while test $# -gt 0; do
       bg=F
       shift
       ;;
+    --checkvm)
+      flag=CHK
+      procnotvm=F
+      procvm=T
+      procvmlocal=T
+      shift
+      ;;
     --notvm)
       procvm=F
       procvmlocal=F

@@ -37,12 +37,12 @@ for comp in ${complist}; do
     tcount=$(($tcount+1))
     cdata=$(cat ${tfn})
     if [[ $cdata != cmake && $cdata != mkc ]]; then
-      echo "FAIL $(date '+%T') ${host}/${comp}: chkswitcher failed"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: chkswitcher failed"
       cat ${tfn}
       failcount=$(($failcount+1))
     fi
   else
-    echo "FAIL $(date '+%T') ${host}/${comp}: chkswitcher does not exist"
+    echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: chkswitcher does not exist"
     failcount=$(($failcount+1))
   fi
 done
@@ -51,7 +51,7 @@ for comp in ${complist}; do
   rsltdir=${topdir}/test_results/${host}_${comp}
   tcount=$(($tcount+1))
   if [[ ! -f ${rsltdir}/di-mkc-config.out ]]; then
-    echo "FAIL $(date '+%T') ${host}/${comp}: no mkc config"
+    echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: no mkc config"
     failcount=$(($failcount+1))
   fi
 done
@@ -68,7 +68,7 @@ for comp in ${complist}; do
         > ${rsltdir}/di-diff.out
     dlc=$(cat ${rsltdir}/di-diff.out | wc -l)
     if [[ $dlc != 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}/${comp}: config.h diff failed"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: config.h diff failed"
       failcount=$(($failcount+1))
     fi
 
@@ -79,7 +79,7 @@ for comp in ${complist}; do
         > ${rsltdir}/di-pdiff.out
     dlc=$(cat ${rsltdir}/di-pdiff.out | wc -l)
     if [[ $dlc != 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}/${comp}: config.h pure-cmake diff failed"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: config.h pure-cmake diff failed"
       failcount=$(($failcount+1))
     fi
 
@@ -87,7 +87,7 @@ for comp in ${complist}; do
     diff -q -b -B ${rsltdir}/di-mkc-math.out ${rsltdir}/di-cmake-math.out
     rc=$?
     if [[ $rc != 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}/${comp}: dimathtest diff failed"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: dimathtest diff failed"
       failcount=$(($failcount+1))
     fi
 
@@ -95,7 +95,7 @@ for comp in ${complist}; do
     diff -q -b -B ${rsltdir}/di-cmake-math.out ${rsltdir}/di-pcmake-math.out
     rc=$?
     if [[ $rc != 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}/${comp}: dimathtest pure-cmake diff failed"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: dimathtest pure-cmake diff failed"
       failcount=$(($failcount+1))
     fi
 
@@ -103,7 +103,7 @@ for comp in ${complist}; do
     diff -q -b -B ${rsltdir}/di-mkc-instdir.out ${rsltdir}/di-cmake-instdir.out
     rc=$?
     if [[ $rc != 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}/${comp}: installation dir diff failed"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: installation dir diff failed"
       failcount=$(($failcount+1))
     fi
 
@@ -111,7 +111,7 @@ for comp in ${complist}; do
     diff -q -b -B ${rsltdir}/di-cmake-instdir.out ${rsltdir}/di-pcmake-instdir.out
     rc=$?
     if [[ $rc != 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}/${comp}: installation dir pure-cmake diff failed"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: installation dir pure-cmake diff failed"
       failcount=$(($failcount+1))
     fi
 
@@ -139,7 +139,7 @@ for comp in ${complist}; do
           > ${rsltdir}/di-${bld}diff.out
       dlc=$(cat ${rsltdir}/di-${bld}diff.out | wc -l)
       if [[ $dlc != 0 ]]; then
-        echo "FAIL $(date '+%T') ${host}: ${bld} config.h diff failed"
+        echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld} config.h diff failed"
         failcount=$(($failcount+1))
       fi
 
@@ -147,7 +147,7 @@ for comp in ${complist}; do
       diff -b -B ${rsltdir}/di-${bld}-instdir.out ${rsltdirb}/di-${bld}-instdir.out
       rc=$?
       if [[ $rc != 0 ]]; then
-        echo "FAIL $(date '+%T') ${host}/${comp}: installation dir diff failed"
+        echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: installation dir diff failed"
         failcount=$(($failcount+1))
       fi
     done
@@ -169,7 +169,7 @@ for comp in ${complist}; do
     grep -l "^# BUILD: [cm]" ${rsltdir}/di-${bld}-run.out > /dev/null 2>&1
     rc=$?
     if [[ $rc != 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}: ${bld}: ${comp}: no debug output in run file"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: no debug output in run file"
       failcount=$(($failcount+1))
     fi
 
@@ -180,7 +180,7 @@ for comp in ${complist}; do
       grep -l "^${d}$" ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
       rc=$?
       if [[ $rc -ne 0 ]]; then
-        echo "FAIL $(date '+%T') ${host}: ${bld}: ${comp}: missing ${d}"
+        echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: missing ${d}"
         trc=1
       fi
     done
@@ -192,7 +192,7 @@ for comp in ${complist}; do
       grep -l "^${d}$" ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
       rc=$?
       if [[ $rc -ne 0 ]]; then
-        echo "WARN $(date '+%T') ${host}: ${bld}: ${comp}: missing ${d}"
+        echo "WARN $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: missing ${d}"
       fi
     done
 
@@ -200,7 +200,7 @@ for comp in ${complist}; do
     grep -E -l "^lib(64)?$" ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
     rc=$?
     if [[ $rc -ne 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}: ${bld}: ${comp}: missing lib dir"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: missing lib dir"
       trc=1
     fi
 
@@ -208,18 +208,18 @@ for comp in ${complist}; do
       grep -l "^${f}$" ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
       rc=$?
       if [[ $rc -ne 0 ]]; then
-        echo "FAIL $(date '+%T') ${host}: ${bld}: ${comp}: missing ${f}"
+        echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: missing ${f}"
         trc=1
       fi
     done
     grep -l '^libdi\.[dsa]' ${rsltdir}/di-${bld}-instdir.out > /dev/null 2>&1
     rc=$?
     if [[ $rc -ne 0 ]]; then
-        echo "FAIL $(date '+%T') ${host}: ${bld}: ${comp}: missing libdi"
+        echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: missing libdi"
       trc=1
     fi
     if [[ $trc != 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}: ${bld}: ${comp}: installation files not present"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: installation files not present"
       failcount=$(($failcount+1))
     fi
 
@@ -228,7 +228,7 @@ for comp in ${complist}; do
     grep -l '"blocksize"' ${rsltdir}/di-${bld}-run.out > /dev/null 2>&1
     rc=$?
     if [[ $rc != 0 ]]; then
-      echo "FAIL $(date '+%T') ${host}: ${bld}: ${comp}: no json output"
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: no json output"
       failcount=$(($failcount+1))
     fi
   done
@@ -240,6 +240,6 @@ if [[ $failcount -gt 0 ]]; then
   fflag="FAIL"
   grc=1
 fi
-echo "-- $(date '+%T') ${host}: ${havecmake} ${havemkc} ${complist} tests: $tcount failures: $failcount $fflag"
+echo "-- $(TZ=PST8PDT date '+%T') ${host}: ${havecmake} ${havemkc} ${complist} tests: $tcount failures: $failcount $fflag"
 
 exit $grc

@@ -47,7 +47,7 @@ if [[ $flag != C ]]; then
   fi
 
   for comp in ${complist}; do
-    echo "-- $(date '+%T') ${host}: start ${comp}"
+    echo "-- $(TZ=PST8PDT date '+%T') ${host}: start ${comp}"
     rsltdir=${topdir}/test_results/${host}_${comp}
     test -d ${rsltdir} && rm -rf ${rsltdir}
     mkdir -p ${rsltdir}
@@ -59,21 +59,21 @@ if [[ $flag != C ]]; then
       cp -f ${testdir}/*.out ${rsltdir}
       cd ..
     elif [[ ${type} = remote ]]; then
-      echo "-- $(date '+%T') ${host}: copying files"
+      echo "-- $(TZ=PST8PDT date '+%T') ${host}: copying files"
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
       if [[ $flag != P ]]; then
         remotebldrun $ipaddr
       fi
     elif [[ ${type} == vm || ${type} == vmlocal ]]; then
-      echo "-- $(date '+%T') ${host}: copying files"
+      echo "-- $(TZ=PST8PDT date '+%T') ${host}: copying files"
       scp ${rempscp} -q ${tarfn} tests/dibldrun.sh ${remuscp}${ipaddr}:
       ssh ${rempssh} ${remussh} ${ipaddr} "chmod a+rx dibldrun.sh"
       if [[ $flag != P ]]; then
         remotebldrun $ipaddr
       fi
     else
-      echo "-- $(date '+%T') ${host}: unknown type ${type}"
+      echo "-- $(TZ=PST8PDT date '+%T') ${host}: unknown type ${type}"
     fi
   done
 fi
@@ -93,7 +93,7 @@ fi
 
 if [[ $flag != P ]]; then
   ./tests/check.sh ${host} ${complist}
-  echo "-- $(date '+%T') ${host}: finish"
+  echo "-- $(TZ=PST8PDT date '+%T') ${host}: finish"
 fi
 
 exit 0
