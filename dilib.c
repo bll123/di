@@ -1048,6 +1048,10 @@ checkDiskQuotas (di_data_t *di_data)
   gid = getegid ();
 #endif
 
+  for (j = 0; j < DI_QVAL_MAX; ++j) {
+    dinum_init (&diqinfo.values [j]);
+  }
+
   if (diopts->optval [DI_OPT_DEBUG] > 0) {
     const char  *str;
     int         pos;
@@ -1078,7 +1082,7 @@ checkDiskQuotas (di_data_t *di_data)
     diqinfo.uid = uid;
     diqinfo.gid = gid;
     for (j = 0; j < DI_QVAL_MAX; ++j) {
-      dinum_init (&diqinfo.values [j]);
+      dinum_set_u (&diqinfo.values [j], (di_ui_t) 0);
     }
     diquota (di_data, &diqinfo);
 
@@ -1222,8 +1226,8 @@ preCheckDiskInfo (di_data_t *di_data)
 static void
 checkExcludeList (di_data_t *di_data, di_disk_info_t *dinfo, di_strarr_t *exclude_list)
 {
-  char            *ptr;
-  int             i;
+  char          *ptr;
+  Size_t        i;
   di_opt_t      *diopts;
 
   diopts = (di_opt_t *) di_data->options;
@@ -1254,8 +1258,8 @@ checkExcludeList (di_data_t *di_data, di_disk_info_t *dinfo, di_strarr_t *exclud
 static void
 checkIncludeList (di_data_t *di_data, di_disk_info_t *dinfo, di_strarr_t *include_list)
 {
-  char            *ptr;
-  int             i;
+  char          *ptr;
+  Size_t        i;
   di_opt_t      *diopts;
 
   diopts = (di_opt_t *) di_data->options;
