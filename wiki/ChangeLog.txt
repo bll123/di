@@ -4,9 +4,17 @@
 
 <!--
 
-**5.0.13 2025-2-23**
+**5.0.15 2025-3---**
 
 -->
+
+**5.0.14 2025-3-4**
+
+* Bug Fixes
+    * Fix -I, -x: incorrect parse issue left over from re-write.
+    * Fix crash with initialization and free of quota data.
+    * Environment variables: Also handle XiB scale sizes.
+    * Fix Robi and Quebi prefix names.
 
 **5.0.13 2025-2-23**
 

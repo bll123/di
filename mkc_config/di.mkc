@@ -150,6 +150,7 @@ lib     stpecpy
 lib     strcoll
 lib     strdup
 lib     strstr
+lib     strtok_r
 lib     sysfs
 lib     textdomain  -lintl, -lintl -liconv
 # dragonflybsd

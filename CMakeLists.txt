@@ -98,15 +98,19 @@ endif()
 macro (checkAddCompileFlag flag)
   # cmake caches every damned variable...
   # need a different variable for every test.
-  check_c_compiler_flag (${flag} cfchk${flag})
-  if (cfchk${flag})
+  string (REPLACE "-" "_" tflag ${flag})
+  string (REPLACE "=" "_" tflag ${tflag})
+  check_c_compiler_flag (${flag} cfchk${tflag})
+  if (cfchk${tflag})
     add_compile_options (${flag})
   endif()
 endmacro()
 
 macro (checkAddLinkFlag flag)
-  check_linker_flag ("C" ${flag} lfchk${flag})
-  if (lfchk${flag})
+  string (REPLACE "-" "_" tflag ${flag})
+  string (REPLACE "=" "_" tflag ${tflag})
+  check_linker_flag ("C" ${flag} lfchk${tflag})
+  if (lfchk${tflag})
     add_link_options (${flag})
   endif()
 endmacro()
@@ -293,7 +297,9 @@ set (required_includes
 )
 
 set (CMAKE_REQUIRED_INCLUDES ${required_includes})
-add_compile_options (-DWIN32_LEAN_AND_MEAN=1)
+if (WIN32)
+  add_compile_options (-DWIN32_LEAN_AND_MEAN=1)
+endif()
 
 #### configuration
 
@@ -770,6 +776,7 @@ check_symbol_exists (stpecpy string.h _lib_stpecpy)
 check_symbol_exists (strcoll string.h _lib_strcoll)
 check_symbol_exists (strdup string.h _lib_strdup)
 check_symbol_exists (strstr string.h _lib_strstr)
+check_symbol_exists (strtok_r string.h _lib_strtok_r)
 check_symbol_exists (sysfs sys/fstyp.h _lib_sysfs)  # solaris
 # dragonflybsd
 check_symbol_exists (vquotactl sys/vfs_quota.h _lib_vquotactl)
@@ -1075,7 +1082,7 @@ configure_file (config.h.in config.h)
 # macros for building
 
 macro (addIntlLibrary name)
-  if (Intl_LIBRARY AND NOT Intl_LIBRARY STREQUAL "NOTFOUND")
+  if (_enable_nls AND Intl_LIBRARY AND NOT Intl_LIBRARY STREQUAL "NOTFOUND")
     target_include_directories (${name} PRIVATE
       ${Intl_INCLUDE_DIRS}
     )
@@ -1083,7 +1090,7 @@ macro (addIntlLibrary name)
       ${Intl_LIBRARY}
     )
   endif()
-  if (Iconv_LIBRARY AND NOT Iconv_LIBRARY STREQUAL "NOTFOUND")
+  if (_enable_nls AND Iconv_LIBRARY AND NOT Iconv_LIBRARY STREQUAL "NOTFOUND")
     target_include_directories (${name} PRIVATE
       ${Iconv_INCLUDE_DIRS}
     )
@@ -1271,11 +1278,13 @@ install (FILES
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )
 
-install (CODE
-  "execute_process (
-    COMMAND \"${PROJECT_SOURCE_DIR}/utils/instpo.sh\"
-        \"${PROJECT_SOURCE_DIR}/po\"
-        \"${CMAKE_INSTALL_FULL_LOCALEDIR}\"
-        \"${CMAKE_BINARY_DIR}/tmppo\"
-  )"
-)
+if (_enable_nls)
+  install (CODE
+    "execute_process (
+      COMMAND \"${PROJECT_SOURCE_DIR}/utils/instpo.sh\"
+          \"${PROJECT_SOURCE_DIR}/po\"
+          \"${CMAKE_INSTALL_FULL_LOCALEDIR}\"
+          \"${CMAKE_BINARY_DIR}/tmppo\"
+    )"
+  )
+endif()

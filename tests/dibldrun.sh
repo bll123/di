@@ -64,6 +64,7 @@ bldrun () {
   # SCO OpenServer: sys/mount.h:52: warning: `/*' within comment
   c=`${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
       ${grepcmd} -v 'no-unknown-warning-option' |
+      ${grepcmd} -v '_Werror_' |
       ${grepcmd} -v '(pragma|error[=,])' |
       ${grepcmd} -v 'BSHIFT has been redefined' |
       ${grepcmd} -v 'unrecognized command line option' |
@@ -75,6 +76,7 @@ bldrun () {
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: warnings or errors found"
     ${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
         ${grepcmd} -v 'no-unknown-warning-option' |
+        ${grepcmd} -v '_Werror_' |
         ${grepcmd} -v '(pragma|error[=,])' |
         ${grepcmd} -v 'BSHIFT has been redefined' |
         ${grepcmd} -v 'unrecognized command line option' |
@@ -147,6 +149,40 @@ bldrun () {
 
   # csv output, no headers
   ./x/bin/di -n -C >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    grc=1
+  fi
+
+  # -I flag with unknown fs
+  ./x/bin/di -I something >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    grc=1
+  fi
+
+  # -x flag with unknown fs
+  ./x/bin/di -x something >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    grc=1
+  fi
+
+  fs=`./x/bin/di -f t -n | head -1`
+
+  # -I flag with known fs
+  ./x/bin/di -I ${fs} >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    grc=1
+  fi
+
+  # -x flag with known fs
+  ./x/bin/di -x ${fs} >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "== `date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"

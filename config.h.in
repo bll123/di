@@ -138,6 +138,7 @@
 #cmakedefine01 _lib_strcoll
 #cmakedefine01 _lib_strdup
 #cmakedefine01 _lib_strstr
+#cmakedefine01 _lib_strtok_r
 #cmakedefine01 _lib_sysfs
 #cmakedefine01 _lib_textdomain
 #cmakedefine01 _lib_vquotactl
