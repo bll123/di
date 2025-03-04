@@ -3,13 +3,17 @@
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
 
-SRCHOST=192.168.2.13
+SRCHOST=192.168.2.5
 SRCDIR=s/di
 PORT=166
 USER=bll
 comp=cc
 host=`uname -n`
 systype=`uname -s`
+
+if [ $# -gt 0 ]; then
+  SRCHOST=$1
+fi
 
 case ${systype} in
   CYGWIN*)
