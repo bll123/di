@@ -19,8 +19,8 @@ extern "C" {
 
 typedef struct
 {
-  int    count;
-  char   **list;
+  Size_t  count;
+  char    **list;
 } di_strarr_t;
 
 typedef struct di_opt {

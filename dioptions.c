@@ -147,16 +147,17 @@ processStringArgs (char *ptr, di_opt_t *diopts,
     return;
   }
   if (dptr != (char *) NULL) {
-    int optidx;
+    int   optidx;
+    char  *tokstr;
 
-    tptr = strtok (dptr, DI_ARGV_SEP);
+    tptr = di_strtok (dptr, DI_ARGV_SEP, &tokstr);
     nargc = 0;
     while (tptr != (char *) NULL) {
       if (nargc >= DI_MAX_ARGV) {
         break;
       }
       nargv [nargc++] = tptr;
-      tptr = strtok ( (char *) NULL, DI_ARGV_SEP);
+      tptr = di_strtok ((char *) NULL, DI_ARGV_SEP, &tokstr);
     }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-qual"
@@ -509,52 +510,55 @@ processOptionsVal (const char *arg, void *valptr, char *value)
 static int
 parseList (di_strarr_t *list, char *str)
 {
-  char        *dstr;
-  char        *ptr;
-  char        *lptr;
-  int         count;
-  int         ocount;
-  int         ncount;
-  int         i;
-  unsigned int len;
+  char          *dstr;
+  char          *ptr;
+  char          *lptr;
+  Size_t        count;
+  Size_t        ocount;
+  Size_t        ncount;
+  Size_t        i;
+  char          *tokstr;
 
   dstr = strdup (str);
-  if (dstr == (char *) NULL)
-  {
+  if (dstr == (char *) NULL) {
     fprintf (stderr, "strdup failed in parseList () (1).  errno %d\n", errno);
     return 1;
   }
 
-  ptr = strtok (dstr, DI_LIST_SEP);
+  ptr = di_strtok (dstr, DI_LIST_SEP, &tokstr);
   count = 0;
   while (ptr != (char *) NULL) {
     ++count;
-    ptr = strtok ( (char *) NULL, DI_LIST_SEP);
+// fprintf (stderr, "%ld : %s\n", count, ptr);
+    ptr = di_strtok ( (char *) NULL, DI_LIST_SEP, &tokstr);
   }
 
   ocount = list->count;
+// fprintf (stderr, "ocount: %ld\n", ocount);
   list->count += count;
   ncount = list->count;
+// fprintf (stderr, "ncount: %ld\n", ncount);
   list->list = (char **) di_realloc ( (char *) list->list,
-      (Size_t) list->count * sizeof (char *));
+      ncount * sizeof (char *));
   if (list->list == (char **) NULL) {
-    fprintf (stderr, "malloc failed in parseList () (2).  errno %d\n", errno);
+    fprintf (stderr, "realloc failed in parseList () (2).  errno %d\n", errno);
     free ( (char *) dstr);
     return 1;
   }
 
   ptr = dstr;
   for (i = ocount; i < ncount; ++i) {
-    len = (unsigned int) strlen (ptr);
-    lptr = (char *) malloc ( (Size_t) len + 1);
+    Size_t      len;
+
+    lptr = strdup (ptr);
     if (lptr == (char *) NULL) {
-      fprintf (stderr, "malloc failed in parseList () (3).  errno %d\n", errno);
+      fprintf (stderr, "strdup failed in parseList () (3).  errno %d\n", errno);
       free ( (char *) dstr);
       return 1;
     }
-    stpecpy (lptr, lptr + len, ptr);
-    lptr [len] = '\0';
     list->list [i] = lptr;
+// fprintf (stderr, "b: %ld : %s\n", i, lptr);
+    len = (unsigned int) strlen (ptr);
     ptr += len + 1;
   }
 
@@ -571,6 +575,8 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
   int             val;
   char            *tptr;
 
+  /* if a numeric value is specified, only 1, 1000 and 1024 are allowed */
+  /* bad values will default to 1024 */
   if (isdigit ((int) *ptr)) {
     val = atoi (ptr);
     if (val != DI_BLKSZ_1 &&
@@ -624,6 +630,10 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
     if (idx >= 0) {
       if (len > 1) {
         ++tptr;
+        if (*tptr == 'i') {
+          /* gnu df allows MiB, etc. */
+          diopts->blockSize = DI_BLKSZ_1024;
+        }
         if (*tptr == 'B') {
           diopts->blockSize = DI_BLKSZ_1000;
         }

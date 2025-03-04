@@ -365,19 +365,20 @@ chkMountOptions (const char *mntopts, const char *str)
 {
   char    *ptr;
   char    *tstr;
+  char    *tokstr;
 
   tstr = strdup (mntopts);
   if (tstr == (char *) NULL) {
     fprintf (stderr, "strdup failed in chkMountOptions (1).  errno %d\n", errno);
     exit (1);
   }
-  ptr = strtok (tstr, ",");
+  ptr = di_strtok (tstr, ",", &tokstr);
   while (ptr != (char *) NULL) {
     if (strcmp (ptr, str) == 0) {
       free (tstr);
       return ptr;
     }
-    ptr = strtok ((char *) NULL, ",");
+    ptr = di_strtok ((char *) NULL, ",", &tokstr);
   }
   free (tstr);
   return (char *) NULL;

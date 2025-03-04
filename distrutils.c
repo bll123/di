@@ -61,6 +61,20 @@ di_trimchar (char *str, int ch)
   }
 }
 
+char *
+di_strtok (char *str, const char *delim, char **tokstr)
+{
+  char    *ptr = NULL;
+
+#if _lib_strtok_r
+  ptr = strtok_r (str, delim, tokstr);
+#else
+  ptr = strtok_r (str, delim);
+#endif
+
+  return ptr;
+}
+
 #if ! _lib_stpecpy
 
 /* the following code is in the public domain */
