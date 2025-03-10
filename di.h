@@ -143,7 +143,7 @@ extern int di_check_option (void *di_data, int optidx);
 extern void di_format_iter_init (void *di_data);
 extern int di_format_iterate (void *di_data);
 
-extern void di_get_all_disk_info (void *di_data);
+extern int di_get_all_disk_info (void *di_data);
 extern int di_iterate_init (void *di_data, int itertype);
 extern const di_pub_disk_info_t *di_iterate (void *di_data);
 extern int di_get_scale_max (void *, int, int, int, int);

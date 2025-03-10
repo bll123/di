@@ -82,11 +82,11 @@ if [[ $flag == R || $flag == C ]]; then
   for comp in ${complist}; do
     if [[ $type == local ]]; then
       cd tmp
-      rm -rf di-[45].*.tar.gz di-[45].*.tar di-[45].*_${comp} dibldrun.sh
+      rm -rf di-[4-9].*.tar.gz di-[4-9].*.tar di-[4-9].*_${comp} dibldrun.sh
       cd ..
     fi
     if [[ $type == remote || $type == vm || $type == vmlocal ]]; then
-      ssh ${rempssh} ${remussh} ${ipaddr} "rm -rf di-[45].*.tar.gz di-[45].*.tar di-[45].*_${comp} dibldrun.sh"
+      ssh ${rempssh} ${remussh} ${ipaddr} "rm -rf di-[4-9].*.tar.gz di-[4-9].*.tar di-[4-9].*_${comp} dibldrun.sh"
     fi
   done
 fi

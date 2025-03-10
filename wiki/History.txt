@@ -111,14 +111,14 @@ Sequent Dynix and PT/x, SGI&nbsp;Irix, Solaris, SunOS, Syllable,
 System&nbsp;V.3, System&nbsp;V.4, Tru64, ULTRIX, UnixWare, VMS,
 Windows, Xenix
 
-###### Version 5.0.0
+###### Version 5/6
 
 _di_ has used either doubles or long doubles to hold the disk space
 values (as a long double has a mantissa of approximately 34 digits).
 
 In 2025, I decided that in order to support the very large disk sizes
 that modern systems have, and to future-proof _di_, _di_ should use
-one of the big number libraries.  Version&nbsp;5.0 supports either the
+one of the big number libraries.  Version&nbsp;5/6 supports either the
 use of GMP or libtommath for big number support.  If neither of these
 are available, the value is stored in the largest supported type: long
 double, double, uint64_t, long long, or long.

@@ -144,6 +144,7 @@ static di_disp_text_t disptext [] =
   { "Q", "Quetta", "Qi", "Quebi" }
 };
 
+static void processExitFlag (void *di_data, int exitflag);
 static void di_display_data (void *);
 static void di_display_header (void *, di_disp_info_t *);
 static void usage (void);
@@ -161,6 +162,17 @@ main (int argc, const char * argv [])
   initLocale ();
   di_data = di_initialize ();
   exitflag = di_process_options (di_data, argc, argv, 1);
+  processExitFlag (di_data, exitflag);
+  exitflag = di_get_all_disk_info (di_data);
+  processExitFlag (di_data, exitflag);
+  di_display_data (di_data);
+  di_cleanup (di_data);
+  return 0;
+}
+
+static void
+processExitFlag (void *di_data, int exitflag)
+{
   switch (exitflag) {
     case DI_EXIT_FAIL:
     case DI_EXIT_WARN: {
@@ -186,10 +198,6 @@ main (int argc, const char * argv [])
       break;
     }
   }
-  di_get_all_disk_info (di_data);
-  di_display_data (di_data);
-  di_cleanup (di_data);
-  return 0;
 }
 
 static void

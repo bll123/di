@@ -30,7 +30,7 @@ int \fBdi_format_iterate\fP (void *\fIdi_data\fP);
 .br
 .SS Getting data
 .PP
-void \fBdi_get_all_disk_info\fP (void *\fIdi_data\fP);
+int \fBdi_get_all_disk_info\fP (void *\fIdi_data\fP);
 .br
 int \fBdi_iterate_init\fP (void *\fIdi_data\fP, int \fIiteroption\fP);
 .br
@@ -42,7 +42,7 @@ int \fBdi_iterate_init\fP (void *\fIdi_data\fP, int \fIiteroption\fP);
     int          printFlag;         /* print result flag */
     int          isLocal;           /* filesystem is local */
     int          isReadOnly;        /* filesystem is read-only */
-    int          isLoopback;        /* filesystme is a loopback filesystem */
+    int          isLoopback;        /* filesystem is a loopback filesystem */
   } di_pub_disk_info_t;
 .EE
 .PP
@@ -86,6 +86,9 @@ These are passed as strings via an \fIargv\fP structure as if on the
 command line.  If no call to \fBdi_process_options\fP is made, \fIdi\fP
 will use the defaults and the \fIDI_ARGS\fP environment variable
 will not be processed.
+.PP
+If the return value from \fIdi_process_options\fP is not DI_EXIT_NORM,
+\fIdi_cleanup\fP should be called and processing stopped.
 .PP
 \fBdi_cleanup\fP frees all allocated data.
 .SS Options
@@ -133,6 +136,9 @@ main \fIdi\fP program, these are printed as-is.
 .SS Getting Data
 \fBdi_get_all_disk_info\fP retrieves and processes all of the disk
 information from the operating system.
+.PP
+If the return value from \fIdi_get_all_disk_info\fP is not DI_EXIT_NORM,
+\fIdi_cleanup\fP should be called and processing stopped.
 .PP
 \fBdi_iterate_init\fP initializes the disk information iterator.
 \fIiteroption\fP is one of DI_ITER_PRINTABLE or DI_ITER_ALL.
@@ -315,7 +321,13 @@ combinations.
         di_cleanup (di_data);
         exit (exitflag);
       }
-      di_get_all_disk_info (di_data);
+
+      exitflag = di_get_all_disk_info (di_data);
+      if (exitflag != DI_EXIT_NORM) {
+        di_cleanup (di_data);
+        exit (exitflag);
+      }
+
       count = di_iterate_init (di_data, DI_ITER_PRINTABLE);
       while ((pub = di_iterate (di_data)) != NULL) {
         double    dval;

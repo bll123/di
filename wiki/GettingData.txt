@@ -12,10 +12,17 @@ Fetches all of the disk information using the options specified.
     #include <di.h>
 
     void *di_data;
+    int   exitflag;
 
-    void di_get_all_disk_info (di_data);
+    exitflag = di_get_all_disk_info (di_data);
 
 __di_data__ : The di_data structure returned from `di_initialize`.
+
+Returns: A value indicating the status.
+
+    DI_EXIT_NORM  // normal exit
+    DI_EXIT_WARN  // invalid data was found in the arguments
+    DI_EXIT_FAIL  // a very serious error occurred.
 
 -------------
 ##### di_iterate_init

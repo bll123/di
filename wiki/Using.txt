@@ -42,12 +42,19 @@ location.
       targv [1] = NULL;
 
       di_data = di_initialize ();
+
       exitflag = di_process_options (di_data, targc, targv, 0);
       if (exitflag != DI_EXIT_NORM) {
         di_cleanup (di_data);
         exit (exitflag);
       }
-      di_get_all_disk_info (di_data);
+
+      exitflag = di_get_all_disk_info (di_data);
+      if (exitflag != DI_EXIT_NORM) {
+        di_cleanup (di_data);
+        exit (exitflag);
+      }
+
       count = di_iterate_init (di_data, DI_ITER_PRINTABLE);
       while ((pub = di_iterate (di_data)) != NULL) {
         double    dval;

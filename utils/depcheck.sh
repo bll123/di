@@ -84,6 +84,11 @@ if [[ $grc -ne 0 ]]; then
 fi
 
 # check to make sure the include files can be compiled w/o dependencies
+echo "## building"
+make distclean
+cmake -DCMAKE_INSTALL_PREFIX=$(pwd)/x -S . -B build > cmake.log 2>&1
+cmake --build build >> cmake.log 2>&1
+
 echo "## checking include file compilation"
 test -f $INCTOUT && rm -f $INCTOUT
 for fn in *.h; do
@@ -157,7 +162,7 @@ if [[ $rc -ne 0 ]]; then
 fi
 
 if [[ $keep == F ]]; then
-  rm -f $TIIN $TISORT $TOIN $TOSORT > /dev/null 2>&1
+  rm -f $TIIN $TISORT $TOIN $TOSORT cmake.log > /dev/null 2>&1
 fi
 rm -f $INCCT $INCTO $INCTOUT
 

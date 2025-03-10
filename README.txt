@@ -4,7 +4,7 @@ Website: https://diskinfo-di.sourceforge.io/
 SourceForge: https://sourceforge.net/projects/diskinfo-di/
 
 CONTENTS
-  Important Notes: Version 5
+  Important Notes: Version 5/6
   Description
   Documentation
   Installation
@@ -13,18 +13,16 @@ CONTENTS
   Acknowledgements
   Copyright
 
-IMPORTANT NOTES: VERSION 5  (2025-2-5)
+IMPORTANT NOTES: VERSION 5/6  (2025-3-10)
 
   Version 5's code base has changed.  The build process has changed and
   optionally uses cmake (3.13+). The display processing is entirely new code.
+  Version 6 had an ABI change to fix a crash.
 
-  Version 5 installs a shared library that can be used to get the disk
+  Version 5/6 installs a shared library that can be used to get the disk
   space or percentages.
 
-  Version 5.0.0 is very new, and there could still be errors.
-
-  2025-2-5 :  I will be working on testing quota operations and pooled
-              filesystem operations (zfs, advs).
+  Version 5/6 is very new, and there could still be errors.
 
 DESCRIPTION
 

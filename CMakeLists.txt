@@ -58,7 +58,6 @@ set (DI_LIBNAME libdi)
 
 SET (CMAKE_SKIP_BUILD_RPATH FALSE)
 SET (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-
 if (DEFINED ENV{CMAKE_SKIP_RPATH} AND NOT ENV{CMAKE_SKIP_RPATH} STREQUAL "")
   set (CMAKE_SKIP_RPATH "$ENV{CMAKE_SKIP_RPATH}")
 endif()
@@ -96,8 +95,6 @@ endif()
 #### compile options
 
 macro (checkAddCompileFlag flag)
-  # cmake caches every damned variable...
-  # need a different variable for every test.
   string (REPLACE "-" "_" tflag ${flag})
   string (REPLACE "=" "_" tflag ${tflag})
   check_c_compiler_flag (${flag} cfchk${tflag})

@@ -61,7 +61,7 @@ else
 fi
 
 if [ $flag = R -o $flag = C ]; then
-  rm -rf di-[45].*.tar.gz di-[45].*.tar ${testdir} dibldrun.sh
+  rm -rf di-[4-9].*.tar.gz di-[4-9].*.tar ${testdir} dibldrun.sh
 fi
 
 exit 0

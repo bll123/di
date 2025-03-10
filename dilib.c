@@ -267,7 +267,7 @@ di_format_iterate (void *tdi_data)
 
 /* data processing */
 
-void
+int
 di_get_all_disk_info (void *tdi_data)
 {
   di_data_t   *di_data = (di_data_t *) tdi_data;
@@ -275,7 +275,7 @@ di_get_all_disk_info (void *tdi_data)
   int         hasLoop;
 
   if (di_data == NULL) {
-    return;
+    return DI_EXIT_FAIL;
   }
 
   /* initialization */
@@ -290,8 +290,7 @@ di_get_all_disk_info (void *tdi_data)
   /* main processing */
 
   if (di_get_disk_entries (di_data, &di_data->fscount) < 0) {
-    di_cleanup (di_data);
-    return;
+    return DI_EXIT_FAIL;
   }
 
   di_data->dispcount = di_data->fscount;
@@ -311,11 +310,10 @@ di_get_all_disk_info (void *tdi_data)
 
     rc = checkFileInfo (di_data);
     if (rc < 0) {
-      di_cleanup (di_data);
-      diopts->exitFlag = DI_EXIT_WARN;
-      return;
+      return DI_EXIT_WARN;
     }
   }
+
   di_get_disk_info (di_data, &di_data->fscount);
 
   /* need the sort-by-filesystem before checkDiskInfo() is called */
@@ -343,6 +341,8 @@ di_get_all_disk_info (void *tdi_data)
   if (diopts->optval [DI_OPT_DISP_TOTALS]) {
     processTotals (di_data);
   }
+
+  return DI_EXIT_NORM;
 }
 
 int
@@ -577,8 +577,13 @@ checkFileInfo (di_data_t *di_data)
   diskInfo = di_data->diskInfo;
 
   for (i = diopts->optidx; i < diopts->argc; ++i) {
-    int fd;
-    int src = -1;
+    int     fd;
+    int     src = -1;
+    int     saveIdx;
+    int     found = false;
+    int     inpool = false;
+    Size_t  lastpoollen = 0;
+    char    lastpool [DI_FILESYSTEM_LEN];
 
     /* do this to automount devices.                    */
     /* stat () will not necessarily cause an automount.  */
@@ -588,113 +593,107 @@ checkFileInfo (di_data_t *di_data)
     } else {
       src = fstat (fd, &statBuf);
     }
+    if (fd >= 0) {
+      close (fd);
+    }
 
-    if (src == 0) {
-      int             saveIdx;
-      int             found = false;
-      int             inpool = false;
-      Size_t          lastpoollen = 0;
-      char            lastpool [DI_FILESYSTEM_LEN];
-
-      saveIdx = 0;  /* should get overridden below */
-      for (j = 0; j < di_data->fscount; ++j) {
-        di_disk_info_t  *dinfo;
-        int             startpool;
-        int             poolmain;
-
-        startpool = false;
-        poolmain = false;
-
-        dinfo = & (diskInfo [diskInfo [j].sortIndex [DI_SORT_TOTAL]]);
-
-        /* is it a pooled filesystem type? */
-        if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
-          if (lastpoollen == 0 ||
-              strncmp (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], lastpoollen) != 0) {
-            stpecpy (lastpool, lastpool + DI_FILESYSTEM_LEN, dinfo->strdata [DI_DISP_FILESYSTEM]);
-            lastpoollen = di_mungePoolName (lastpool);
-            inpool = false;
-          }
-
-          if (strncmp (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], lastpoollen) == 0) {
-            startpool = true;
-            if (inpool == false) {
-              poolmain = true;
-            }
-          }
-        } else {
-          inpool = false;
-        }
-
-        if (poolmain) {
-          saveIdx = j;
-        }
-
-        if (found && inpool) {
-          dinfo = & (diskInfo [diskInfo [j].sortIndex [DI_SORT_TOTAL]]);
-          dinfo->printFlag = DI_PRNT_SKIP;
-          if (diopts->optval [DI_OPT_DEBUG] > 2) {
-            printf ("  inpool B: also process %s %s\n",
-                    dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
-          }
-        }
-
-        /* when the filesystem name is specified on the command line */
-        /* report for that filesystem, not devfs or / */
-        if (strcmp (dinfo->strdata [DI_DISP_FILESYSTEM],
-                diopts->argv [i]) == 0 ||
-            (dinfo->st_dev != (unsigned long) DI_UNKNOWN_DEV &&
-            (unsigned long) statBuf.st_dev == dinfo->st_dev &&
-            ! dinfo->isLoopback)) {
-          int foundnew = 0;
-
-          ++foundnew;
-          if (dinfo->printFlag == DI_PRNT_OK) {
-            ++foundnew;
-          }
-          if (! isIgnoreFSType (dinfo->strdata [DI_DISP_FSTYPE])) {
-            ++foundnew;
-          }
-          if (foundnew == 3) {
-            dinfo->printFlag = DI_PRNT_FORCE;
-            found = true;
-          }
-
-          if (diopts->optval [DI_OPT_DEBUG] > 2) {
-            printf ("file %s: found device or fs-match %ld : %d (%s %s)\n",
-                diopts->argv [i], (long) dinfo->st_dev, foundnew,
-                dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
-          }
-
-          if (inpool) {
-            int   k;
-            for (k = saveIdx; k < j; ++k) {
-              dinfo = & (diskInfo [diskInfo [k].sortIndex [DI_SORT_TOTAL]]);
-              if (dinfo->printFlag != DI_PRNT_FORCE) {
-                dinfo->printFlag = DI_PRNT_SKIP;
-              }
-              if (diopts->optval [DI_OPT_DEBUG] > 2) {
-                printf ("  inpool A: also process %s %s\n",
-                        dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
-              }
-            }
-          }
-        }
-
-        if (startpool) {
-          inpool = true;
-        }
-      }
-      /* if stat ok */
-    } else {
+    if (src != 0) {
       if (errno != EACCES && errno != EPERM) {
-        fprintf (stderr, "stat: %s", diopts->argv [i]);
+        fprintf (stderr, "stat: %s ", diopts->argv [i]);
         perror ("");
       }
       rc = -1;
+      continue;
     }
-    if (fd >= 0) {
-      close (fd);
+
+    saveIdx = 0;  /* should get overridden below */
+    for (j = 0; j < di_data->fscount; ++j) {
+      di_disk_info_t  *dinfo;
+      int             startpool;
+      int             poolmain;
+
+      startpool = false;
+      poolmain = false;
+
+      dinfo = & (diskInfo [diskInfo [j].sortIndex [DI_SORT_TOTAL]]);
+
+      /* is it a pooled filesystem type? */
+      if (di_data->haspooledfs && di_isPooledFs (dinfo)) {
+        if (lastpoollen == 0 ||
+            strncmp (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], lastpoollen) != 0) {
+          stpecpy (lastpool, lastpool + DI_FILESYSTEM_LEN, dinfo->strdata [DI_DISP_FILESYSTEM]);
+          lastpoollen = di_mungePoolName (lastpool);
+          inpool = false;
+        }
+
+        if (strncmp (lastpool, dinfo->strdata [DI_DISP_FILESYSTEM], lastpoollen) == 0) {
+          startpool = true;
+          if (inpool == false) {
+            poolmain = true;
+          }
+        }
+      } else {
+        inpool = false;
+      }
+
+      if (poolmain) {
+        saveIdx = j;
+      }
+
+      if (found && inpool) {
+        dinfo = & (diskInfo [diskInfo [j].sortIndex [DI_SORT_TOTAL]]);
+        dinfo->printFlag = DI_PRNT_SKIP;
+        if (diopts->optval [DI_OPT_DEBUG] > 2) {
+          printf ("  inpool B: also process %s %s\n",
+                  dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
+        }
+      }
+
+      /* when the filesystem name is specified on the command line */
+      /* report for that filesystem, not devfs or / */
+      if (strcmp (dinfo->strdata [DI_DISP_FILESYSTEM],
+              diopts->argv [i]) == 0 ||
+          (dinfo->st_dev != (unsigned long) DI_UNKNOWN_DEV &&
+          (unsigned long) statBuf.st_dev == dinfo->st_dev &&
+          ! dinfo->isLoopback)) {
+        int foundnew = 0;
+
+        ++foundnew;
+        if (dinfo->printFlag == DI_PRNT_OK) {
+          ++foundnew;
+        }
+        if (! isIgnoreFSType (dinfo->strdata [DI_DISP_FSTYPE])) {
+          ++foundnew;
+        }
+        if (foundnew == 3) {
+          dinfo->printFlag = DI_PRNT_FORCE;
+          found = true;
+        }
+
+        if (diopts->optval [DI_OPT_DEBUG] > 2) {
+          printf ("file %s: found device or fs-match %ld : %d (%s %s)\n",
+              diopts->argv [i], (long) dinfo->st_dev, foundnew,
+              dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
+        }
+
+        if (inpool) {
+          int   k;
+          for (k = saveIdx; k < j; ++k) {
+            dinfo = & (diskInfo [diskInfo [k].sortIndex [DI_SORT_TOTAL]]);
+            if (dinfo->printFlag != DI_PRNT_FORCE) {
+              dinfo->printFlag = DI_PRNT_SKIP;
+            }
+            if (diopts->optval [DI_OPT_DEBUG] > 2) {
+              printf ("  inpool A: also process %s %s\n",
+                      dinfo->strdata [DI_DISP_FILESYSTEM], dinfo->strdata [DI_DISP_MOUNTPT]);
+            }
+          }
+        }
+      }
+
+      if (startpool) {
+        inpool = true;
+      }
     }
   } /* for each file specified on command line */
 
