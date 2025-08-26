@@ -7,8 +7,9 @@
 **6.0.0.1 2025----**
 
 * Internal
+    * Update mkconfig to version 2.6.9.
+    * utils/chklibnm.sh removed (functionality moved to mkconfig).
     * Update cmake checks for -Wno compile flags.
-    * Minor updates for the Linux library name check.
 
 -->
 

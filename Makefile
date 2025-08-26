@@ -38,8 +38,7 @@ EXE_EXT =
 #
 PREFIX =
 BINDIR = $(PREFIX)/bin
-LIBNM = lib
-LIBDIR = $(PREFIX)/$(LIBNM)
+LIBDIR = $(PREFIX)/$(_MKCONFIG_LIBNAME)
 INCDIR = $(PREFIX)/include
 PKGCDIR = $(LIBDIR)/pkgconfig
 SHAREDIR = $(PREFIX)/share
@@ -260,8 +259,7 @@ cmake-chkswitcher:
 .PHONY: mkc-all
 mkc-all:
 	@. ./VERSION.txt ; \
-	libnm=`./utils/chklibnm.sh` ; \
-	$(MAKE) -e LIBNM=$$libnm mkc-sh
+	$(MAKE) mkc-sh
 
 .PHONY: mkc-sh
 mkc-sh:	$(MKC_ENV)
@@ -293,9 +291,8 @@ mkc-chkswitcher:
 .PHONY: mkc-install
 mkc-install: $(MKC_ENV) mkc-all
 	@. ./VERSION.txt ; \
-	libnm=`./utils/chklibnm.sh` ; \
 	. ./$(MKC_ENV);$(MAKE) -e \
-	      PREFIX=$(PREFIX) LIBNM=$$libnm mkc-install-all
+	      PREFIX=$(PREFIX) mkc-install-all
 
 ###
 # installation

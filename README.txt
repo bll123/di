@@ -65,12 +65,9 @@ INSTALLATION
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_GMP
     To force libtommath:
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_TOMMATH
-
-    For OpenSUSE and others that use .../lib64, with mkconfig (cmake
-    will generate the proper path):
-
-      make -e PREFIX=$HOME/local LIBNM=lib64
-      make -e PREFIX=$HOME/local LIBNM=lib64 install
+    To force the use of mkconfig:
+      make -e PREFIX=$HOME/local mkc-all
+      make -e PREFIX=$HOME/local mkc-install
 
 REQUIREMENTS
 
