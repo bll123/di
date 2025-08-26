@@ -18,6 +18,7 @@
 ^mkconfig\.link$
 ^mkconfig\.old$
 ^mkc_files/
+^NetBSD/
 ^test_results/
 ^tests/hostlist\.txt$
 ^tests/hostlist\.txt\.bak$

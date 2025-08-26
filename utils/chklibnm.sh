@@ -19,10 +19,18 @@ if [ -f /etc/os-release ]; then
     grep -l 'Arch Linux' /etc/os-release > /dev/null 2>&1
     rc=$?
   fi
+  if [ $rc -ne 0 ]; then
+    grep -l '^ID_LIKE=arch' /etc/os-release > /dev/null 2>&1
+    rc=$?
+  fi
 fi
 
 if [ $rc -eq 0 ]; then
   libnm=lib64
+  if [ -h /usr/lib64 -a `readlink /usr/lib64` = lib ]; then
+    # possibly an arch system, and /usr/lib64 points to /usr/lib
+    libnm=lib
+  fi
 fi
 
 # HP-UX ia64 uses lib/hpux64
