@@ -52,7 +52,7 @@ INSTALLATION
         cmake --build build
         cmake --install build
 
-    If the GMP or libtommath library is found, it will be used,
+    If the GMP, mpdecimal or libtommath library is found, it will be used,
     otherwise the numerics will be handled using standard C data types
     (long double, double, etc.).
 
@@ -63,6 +63,8 @@ INSTALLATION
       building it this way (as of 2025).
     To force GMP:
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_GMP
+    To force MPDecimal:
+      make -e PREFIX=$HOME/local DI_USE_MATH=DI_MPDECIMAL
     To force libtommath:
       make -e PREFIX=$HOME/local DI_USE_MATH=DI_TOMMATH
     To force the use of mkconfig:

@@ -12,6 +12,7 @@ BUILDDIR = build
 DI_BUILD = Release
 
 # DI_USE_MATH = DI_GMP
+# DI_USE_MATH = DI_MPDECIMAL
 # DI_USE_MATH = DI_TOMMATH
 # DI_USE_MATH = DI_INTERNAL
 
@@ -89,8 +90,10 @@ switcher:
 	@bldval=`./utils/chkcmake.sh \
 	    $(CMAKE_REQ_MAJ_VERSION) $(CMAKE_REQ_MIN_VERSION)` ; \
 	if [ $$bldval = cmake ]; then \
+	  echo "## Building with cmake" ; \
 	  $(MAKE) -e cmake-$(TARGET) ; \
 	else \
+	  echo "## Building with mkconfig" ; \
 	  $(MAKE) -e mkc-$(TARGET) ; \
 	fi
 

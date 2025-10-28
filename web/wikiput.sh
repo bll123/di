@@ -13,6 +13,8 @@ bearer=""
 tmpfile=tmp/wiki-tmp.txt
 filelist=tmp/wiki-files.txt
 
+GITWIKIDIR=../di.wiki
+
 function gettitle {
   tfn=$1
   echo $tfn |
@@ -77,6 +79,18 @@ END {
 }
     ' \
     ${tfn} >> ${tmpfile}
+}
+
+function gitchanges {
+  tfn=$1
+
+  # remove toc (sourceforge only)
+  # remove all div's, they don't work
+  sed -e 's,\[TOC\],,' \
+      -e '/<div / d' \
+      -e '/<\/div>/ d' \
+      $tfn \
+      > ${tmpfile}
 }
 
 function getaccesstoken {
@@ -148,7 +162,17 @@ function put {
       --data-binary @${tmpfile} \
       '${baseurl}/${title}'"
   eval $cmd > /dev/null
-  echo "$tfn: updated"
+  echo "$tfn: sourceforge updated"
+
+  gitchanges $tfn
+  d=$(dirname $tfn | sed -e 's,^wiki,,' -e 's,^/,,')
+  # github wiki will preserve the directory layout, though it
+  # will not use it.
+  ttfn=$(echo $title | sed -e 's,%20, ,g' -e 's,^en-,,').md
+  mkdir -p ${GITWIKIDIR}/${d}
+  cp -pf ${tmpfile} "${GITWIKIDIR}/${d}/$ttfn"
+
+  echo "$tfn: git wiki updated"
 }
 
 function delete {

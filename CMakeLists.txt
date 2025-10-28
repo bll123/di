@@ -27,6 +27,7 @@ if (DEFINED ENV{DI_USE_MATH})
   # these are the only supported values as of 2025-2-6
   if (NOT DI_USE_MATH STREQUAL "DI_INTERNAL" AND
       NOT DI_USE_MATH STREQUAL "DI_GMP" AND
+      NOT DI_USE_MATH STREQUAL "DI_MPDECIMAL" AND
       NOT DI_USE_MATH STREQUAL "DI_TOMMATH")
     unset (DI_USE_MATH)
   endif()
@@ -317,6 +318,7 @@ find_package (Intl)
 find_package (Iconv)
 
 pkg_check_modules (GMP gmp)
+pkg_check_modules (MPDECIMAL libmpdec)
 pkg_check_modules (TOMMATH libtommath)
 pkg_check_modules (TIRPC libtirpc)
 
@@ -602,6 +604,7 @@ check_include_file (math.h _hdr_math)
 check_include_file (memory.h _hdr_memory)
 check_include_file (mntent.h _hdr_mntent)
 check_include_file (mnttab.h _hdr_mnttab)
+check_include_file (mpdecimal.h _hdr_mpdecimal)
 # NetBSD
 check_include_file (quota.h _hdr_quota)
 
@@ -1070,6 +1073,9 @@ if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
   if (_hdr_gmp AND GMP_LDFLAGS)
     set (DI_USE_MATH DI_GMP)
   endif()
+  if (_hdr_mpdecimal AND MPDECIMAL_LDFLAGS AND NOT _hdr_gmp)
+    set (DI_USE_MATH DI_MPDECIMAL)
+  endif()
   # at the moment, libtommath in macports has a broken pkg-config
   # hence the not-apple
   if ((_hdr_tommath OR _hdr_libtommath_tommath) AND
@@ -1173,6 +1179,11 @@ if (_use_math STREQUAL "DI_GMP")
     ${GMP_LDFLAGS}
   )
 endif()
+if (_use_math STREQUAL "DI_MPDECIMAL")
+  target_link_libraries (${DI_LIBNAME} PRIVATE
+    ${MPDECIMAL_LDFLAGS}
+  )
+endif()
 if (_use_math STREQUAL "DI_TOMMATH")
   target_link_libraries (${DI_LIBNAME} PRIVATE
     ${TOMMATH_LDFLAGS}
@@ -1213,6 +1224,11 @@ if (_use_math STREQUAL "DI_GMP")
     ${GMP_LDFLAGS}
   )
 endif()
+if (_use_math STREQUAL "DI_MPDECIMAL")
+  target_link_libraries (di PRIVATE
+    ${MPDECIMAL_LDFLAGS}
+  )
+endif()
 if (_use_math STREQUAL "DI_TOMMATH")
   target_link_libraries (di PRIVATE
     ${TOMMATH_LDFLAGS}
@@ -1235,6 +1251,11 @@ target_include_directories (dimathtest PRIVATE
 if (_use_math STREQUAL "DI_GMP")
   target_link_libraries (dimathtest PRIVATE
     ${GMP_LDFLAGS}
+  )
+endif()
+if (_use_math STREQUAL "DI_MPDECIMAL")
+  target_link_libraries (dimathtest PRIVATE
+    ${MPDECIMAL_LDFLAGS}
   )
 endif()
 if (_use_math STREQUAL "DI_TOMMATH")

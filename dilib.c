@@ -121,6 +121,8 @@ di_initialize (void)
 {
   di_data_t   *di_data;
 
+  dimath_initialize ();
+
   di_data = (di_data_t *) malloc (sizeof (di_data_t));
 
   di_data->scale_values_init = false;
@@ -181,6 +183,8 @@ di_cleanup (void *tdi_data)
   }
 
   free (di_data);
+
+  dimath_cleanup ();
 }
 
 const char *
@@ -209,6 +213,8 @@ di_process_options (void *tdi_data, int argc, const char * argv [], int offset)
     fprintf (stdout, "# MATH: GMP\n");
 #elif _use_math == DI_TOMMATH
     fprintf (stdout, "# MATH: TOMMATH\n");
+#elif _use_math == DI_MPDECIMAL
+    fprintf (stdout, "# MATH: MPDECIMAL\n");
 #else
     fprintf (stdout, "# MATH: INTERNAL: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long, _siz_long_long);
 #endif
@@ -1413,17 +1419,18 @@ static int
 isIgnoreFSType (const char *fstype)
 {
   /* solaris: swap */
-  /* linux: cgroup, tmpfs, squashfs, overlay */
+  /* linux: devtmpfs, cgroup, tmpfs, squashfs, overlay, efivarfs */
   if (strcmp (fstype, "rootfs") == 0 ||
       strcmp (fstype, "procfs") == 0 ||
       strcmp (fstype, "ptyfs") == 0 ||
       strcmp (fstype, "kernfs") == 0 ||
       strcmp (fstype, "devfs") == 0 ||
       strcmp (fstype, "tmpfs") == 0 ||
-      strcmp (fstype, "cgroup") == 0 ||
       strcmp (fstype, "swap") == 0 ||
+      strcmp (fstype, "cgroup") == 0 ||
       strcmp (fstype, "squashfs") == 0 ||
       strcmp (fstype, "overlay") == 0 ||
+      strcmp (fstype, "efivarfs") == 0 ||
       strcmp (fstype, "devtmpfs") == 0) {
     return true;
   }

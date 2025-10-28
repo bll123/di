@@ -224,6 +224,7 @@
 #define DI_INTERNAL 0
 #define DI_GMP 1
 #define DI_TOMMATH 2
+#define DI_MPDECIMAL 3
 #define DI_USE_MATH ${DI_USE_MATH}
 #define _use_math DI_USE_MATH
 

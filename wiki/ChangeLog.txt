@@ -4,12 +4,18 @@
 
 <!--
 
-**6.0.0.1 2025----**
+**6.0.1 2025-10-**
 
-* Internal
+* Bug Fixes:
+    * Fix manual page typo.
+* Changes:
+    * Linux: Add 'efivarfs' to the ignore list.
+* New Features:
+    * Added support for the mpdecimal library.
+* Internal:
     * Update mkconfig to version 2.6.9.
     * utils/chklibnm.sh removed (functionality moved to mkconfig).
-    * Update cmake checks for -Wno compile flags.
+    * Update cmake checks for -Wno- compile flags.
 
 -->
 

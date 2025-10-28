@@ -83,17 +83,19 @@ if [[ $grc -ne 0 ]]; then
   exit $grc
 fi
 
-# check to make sure the include files can be compiled w/o dependencies
-echo "## building"
-make distclean
-cmake -DCMAKE_INSTALL_PREFIX=$(pwd)/x -S . -B build > cmake.log 2>&1
-cmake --build build >> cmake.log 2>&1
+for mtype in DI_GMP DI_MPDECIMAL DI_TOMMATH DI_INTERNAL; do
+  # check to make sure the include files can be compiled w/o dependencies
+  make distclean
+  export DI_USE_MATH=${mtype}
+  echo "## configuring ${mtype}"
+  cmake -DCMAKE_INSTALL_PREFIX=$(pwd)/x -S . -B build > cmake.log 2>&1
+  # cmake --build build >> cmake.log 2>&1
 
-echo "## checking include file compilation"
-test -f $INCTOUT && rm -f $INCTOUT
-for fn in *.h; do
-  bfn=$(echo $fn | sed 's,include/,,')
-  cat > $INCTC << _HERE_
+  echo "## checking include file compilation"
+  test -f $INCTOUT && rm -f $INCTOUT
+  for fn in *.h; do
+    bfn=$(echo $fn | sed 's,include/,,')
+    cat > $INCTC << _HERE_
 #include "config.h"
 
 #include "${bfn}"
@@ -104,21 +106,22 @@ main (int argc, char *argv [])
   return 0;
 }
 _HERE_
-  cc -c -I build $INCTC >> $INCTOUT 2>&1
-  rc=$?
-  if [[ $rc -ne 0 ]]; then
-    echo "compile of $bfn failed"
+    cc -c -I build $INCTC >> $INCTOUT 2>&1
+    rc=$?
     if [[ $rc -ne 0 ]]; then
-      grc=$rc
+      echo "compile of $bfn failed"
+      if [[ $rc -ne 0 ]]; then
+        grc=$rc
+      fi
     fi
-  fi
+    rm -f $INCTC $INCTO
+  done
   rm -f $INCTC $INCTO
+  if [[ $grc -ne 0 ]]; then
+    exit $grc
+  fi
+  rm -f $INCTOUT
 done
-rm -f $INCTC $INCTO
-if [[ $grc -ne 0 ]]; then
-  exit $grc
-fi
-rm -f $INCTOUT
 
 # check the include file hierarchy for problems.
 echo "## checking include file hierarchy"

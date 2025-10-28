@@ -24,14 +24,17 @@ main (int argc, char *argv [])
   int       tcount = 0;
   int       ecount = 0;
 
-
 #if _use_math == DI_GMP
   fprintf (stdout, "GMP:\n");
 #elif _use_math == DI_TOMMATH
   fprintf (stdout, "TOMMATH:\n");
+#elif _use_math == DI_MPDECIMAL
+  fprintf (stdout, "MPDECIMAL:\n");
 #else
-  fprintf (stdout, "INTERNAL: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long, _siz_long_long);
+  fprintf (stdout, "INTERNAL: ld:%d d:%d u64:%d ll:%d l:%d\n", _siz_long_double, _siz_double, _siz_uint64_t, _siz_long_long, _siz_long);
 #endif
+
+  dimath_initialize ();
 
   dinum_init (&a);
   dinum_init (&b);
@@ -300,5 +303,8 @@ main (int argc, char *argv [])
   dinum_clear (&b);
   dinum_clear (&r);
   fprintf (stdout, "tests: %d errors: %d\n", tcount, ecount);
+
+  dimath_cleanup ();
+
   return ecount;
 }
