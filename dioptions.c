@@ -139,7 +139,6 @@ processStringArgs (char *ptr, di_opt_t *diopts,
     return;
   }
 
-  dptr = (char *) NULL;
   dptr = strdup (ptr);
   if (dptr == (char *) NULL) {
     fprintf (stderr, "strdup failed in main () (1).  errno %d\n", errno);
@@ -439,6 +438,7 @@ processOptions (const char *arg, char *valptr)
     /* always use -k option, 512 is not supported */
     stpecpy (padata->scalestr, padata->scalestr + padata->scalestrsz, "k");
     padata->diopts->formatString = DI_POSIX_FORMAT;
+    padata->diopts->formatLen = (int) strlen (padata->diopts->formatString);
     padata->diopts->optval [DI_OPT_POSIX_COMPAT] = true;
     padata->diopts->optval [DI_OPT_DISP_CSV] = false;
     padata->diopts->optval [DI_OPT_DISP_JSON] = false;

@@ -337,18 +337,19 @@ getoptn (int style, int argc, const char * argv [],
         continue;
       }
       i = find_option (&info, arg, arg, &info.argidx);
-      if (opts [i].option_type == GETOPTN_IGNORE) {
-        continue;
-      }
-      if (opts [i].option_type == GETOPTN_IGNORE_ARG) {
-        ignorenext = true;
-        continue;
-      }
       if (i == GETOPTN_NOTFOUND) {
         if (info.reprocess == false) {
           fprintf (stderr, "%s: unknown option %s\n", argv [0], arg);
           ++*errorCount;
         }
+        continue;
+      }
+
+      if (opts [i].option_type == GETOPTN_IGNORE) {
+        continue;
+      }
+      if (opts [i].option_type == GETOPTN_IGNORE_ARG) {
+        ignorenext = true;
         continue;
       }
 
@@ -740,7 +741,7 @@ main (int argc, char * argv [])
 
   /* test 20 */
   ++testno;
-  sp = NULL;
+  sp = "";
   ac = 3;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -757,7 +758,7 @@ main (int argc, char * argv [])
 
   /* test 21 */
   ++testno;
-  sp = NULL;
+  sp = "";
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -773,7 +774,7 @@ main (int argc, char * argv [])
 
   /* test 22 */
   ++testno;
-  sp = NULL;
+  sp = "";
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -789,7 +790,7 @@ main (int argc, char * argv [])
 
   /* test 23 */
   ++testno;
-  sp = NULL;
+  sp = "";
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -805,7 +806,7 @@ main (int argc, char * argv [])
 
   /* test 24 */
   ++testno;
-  sp = NULL;
+  sp = "";
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
