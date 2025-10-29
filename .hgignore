@@ -22,6 +22,7 @@
 ^test_results/
 ^tests/hostlist\.txt$
 ^tests/hostlist\.txt\.bak$
+^tests/vmlist\.txt$
 ^tmp/
 ^w$
 ^ww$

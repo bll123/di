@@ -5,6 +5,11 @@
 
 host=$1
 
+if [[ $host == "" ]]; then
+  echo "Usage: $0 <host>"
+  exit 1
+fi
+
 . ./tests/util.sh
 
 gethostdata ${host}

@@ -11,11 +11,13 @@
 * Changes:
     * Linux: Add 'efivarfs' to the ignore list.
 * New Features:
-    * Added support for the mpdecimal library.
+    * Added support for the mpdecimal multi-precision library.
 * Internal:
-    * Update mkconfig to version 2.6.9.
-    * utils/chklibnm.sh removed (functionality moved to mkconfig).
-    * Update cmake checks for -Wno- compile flags.
+    * Update mkconfig to version 2.6.10.
+    * Update checks for -Wno- compile flags.
+    * Minor code cleanup.
+    * Fix internal getoptn bug.
+    * Fix getoptn memory leak.
 
 -->
 

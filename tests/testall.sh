@@ -161,9 +161,11 @@ if [[ ${procnotvm} == T ]]; then
       continue
     fi
 
-    rsltdir=$(pwd)/test_results/${host}
-    test -d ${rsltdir} && rm -rf ${rsltdir}
-    mkdir -p ${rsltdir}
+    if [[ $flag != C ]]; then
+      rsltdir=$(pwd)/test_results/${host}
+      test -d ${rsltdir} && rm -rf ${rsltdir}
+      mkdir -p ${rsltdir}
+    fi
 
     if [[ $bg == T ]]; then
       nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \

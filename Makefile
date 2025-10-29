@@ -90,10 +90,8 @@ switcher:
 	@bldval=`./utils/chkcmake.sh \
 	    $(CMAKE_REQ_MAJ_VERSION) $(CMAKE_REQ_MIN_VERSION)` ; \
 	if [ $$bldval = cmake ]; then \
-	  echo "## Building with cmake" ; \
 	  $(MAKE) -e cmake-$(TARGET) ; \
 	else \
-	  echo "## Building with mkconfig" ; \
 	  $(MAKE) -e mkc-$(TARGET) ; \
 	fi
 
@@ -165,6 +163,7 @@ cmake-sanitize:
 #   (passing -j w/o arguments, and *BSD complains)
 .PHONY: cmake-all
 cmake-all:
+	echo "## Building with cmake"
 	@case `uname -s` in \
 	  CYGWIN*) \
 	    COMP=$(CC) \
@@ -261,6 +260,7 @@ cmake-chkswitcher:
 # don't know any good way to determine if lib64 is preferred
 .PHONY: mkc-all
 mkc-all:
+	echo "## Building with mkconfig"
 	@. ./VERSION.txt ; \
 	$(MAKE) mkc-sh
 

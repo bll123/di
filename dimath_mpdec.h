@@ -223,10 +223,7 @@ dimath_initialize (void)
 static inline void
 dimath_cleanup (void)
 {
-  if (mpdinitialized == 1) {
-//    mpd_maxcontext (&mpdctx);
-    mpdinitialized = 0;
-  }
+  return;
 }
 
 # pragma clang diagnostic pop

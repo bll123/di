@@ -62,6 +62,15 @@ bldrun () {
   # NetBSD: rpcsvc: deprecated and buggy (why do they complain when there is no alternative?)
   # SCO OpenServer: stdint.h:252: warning: `WCHAR_MAX' redefined
   # SCO OpenServer: sys/mount.h:52: warning: `/*' within comment
+  # CheriBSD:
+  #   clang-15: warning: ignoring 'fstack-protector-all' option
+  #   since stack protector is unnecessary when
+  #   using pure-capability CHERI compilation [-Wstack-protector-purecap-ignored]
+  # CheriBSD:
+  #   warning: 'struct (unnamed at ./diinternal.h:35:9)'
+  #   contains 12 bytes of padding in a 224 byte structure [-Wexcess-padding]
+  # clang:
+  #   1 warning generated.
   c=`${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
       ${grepcmd} -v 'no-unknown-warning-option' |
       ${grepcmd} -v '_Werror_' |
@@ -70,6 +79,9 @@ bldrun () {
       ${grepcmd} -v 'unrecognized command line option' |
       ${grepcmd} -v '/[^d][^i][^.]\.h:.*warning' |
       ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
+      ${grepcmd} -v 'unnecessary.*CHERI' |
+      ${grepcmd} -v 'Wexcess-padding' |
+      ${grepcmd} -v '[0-9] warning generated' |
       ${grepcmd} -v '^(COMPILE|LINK)' |
       wc -l`
   if [ $c -gt 0 ]; then
@@ -82,6 +94,9 @@ bldrun () {
         ${grepcmd} -v 'unrecognized command line option' |
         ${grepcmd} -v '/[^d][^i][^.]\.h:.*warning' |
         ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
+        ${grepcmd} -v 'unnecessary.*CHERI' |
+        ${grepcmd} -v 'Wexcess-padding' |
+        ${grepcmd} -v '[0-9] warning generated' |
         ${grepcmd} -v '^(COMPILE|LINK)'
     grc=1
   fi

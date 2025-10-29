@@ -30,6 +30,11 @@ export ssh
 . ./VERSION.txt
 ver=$DI_VERSION
 
+if [[ $DI_RELEASE_STATUS != "production" ]]; then
+  echo "not set for production"
+  exit 1
+fi
+
 fn=di-${ver}.tar.gz
 rsync -e "$ssh" -aS \
     $fn README.txt \

@@ -70,6 +70,7 @@ command-line-tools).
  Linux Mint 21 | - | 6.0.0<br>2025-3-10 | - | - | - | - | -
  MX Linux 21<br>(Debian 11)| 6.0.0<br>2025-3-10 | 6.0.0<br>2025-3-10 | - | - | - | - | get/set/endmntent statvfs
  MX Linux 23<br>(Debian 12)| 6.0.0<br>2025-3-10<br>gcc clang | 6.0.0<br>2025-3-10<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
+ MX Linux 25<br>(Debian 13)| 6.0.1<br>2025-10-29<br>gcc clang | 6.0.1<br>2025-10-29<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
  Ubuntu 14.04<br>(32-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | -
@@ -81,10 +82,10 @@ command-line-tools).
  __Linux: Gentoo Based__| | | | | | | -
  Calculate 20250206 | 6.0.0<br>2025-3-10<br>gcc clang | 6.0.0<br>2025-3-10<br>gcc clang | - | - | - | - | -
  __Linux: Other__| | | | | | |
- Alpine 3.21.2 | 6.0.0<br>2025-3-10<br>gcc clang | 6.0.0<br>2025-3-10<br>gcc clang | - | - | - | - | -
- openSUSE Leap 15.1 | - | - | - | - | - | - | -
+ Alpine 3.19.8 | 6.0.1<br>2025-10-29<br>gcc clang | 6.0.1<br>2025-10-29<br>gcc clang | - | - | - | - | -
  openSUSE Leap 15.5 | 6.0.0<br>2025-3-10<br>gcc clang | 6.0.0<br>2025-3-10<br>gcc clang | - | - | - | - | get/set/endmntent statvfs<br>lib64<br>cfarm
  openSUSE Leap 15.6 | - | - | - | - | - | - | -
+ openSUSE Leap 16.0 | - | - | - | - | - | - | -
  Slackware 14.2 | - | - | - | - | - | - | -
  __Linux: Red Hat Based__| | | | | | |
  CentOS 3.9 | - | - | - | - | - | - | get/set/endmntent statvfs
@@ -103,22 +104,22 @@ command-line-tools).
  __MacOS:__ | | | | | | | -
  MacOS Big Sur | - | 5.0.6<br>2025-2-9 | - | - | - | - | getfsstat
  MacOS Ventura | 5.0.2<br>2025-2-6 | 5.0.2<br>2025-2-6 | - | - | - | - | getfsstat
- MacOS Monterey | - | 6.0.0<br>2025-3-10 | - | - | - | - | getfsstat<br>cfarm
+ MacOS Monterey | - | 6.0.1<br>2025-3-10 | - | - | - | - | getfsstat<br>cfarm
  MacOS Sonoma | 5.0.0<br>2025-2-6 | 5.0.0<br>2025-2-6 | - | - | - | - | getfsstat
- MacOS Sequoia (intel) | 6.0.0<br>2025-3-10 | 6.0.0<br>2025-3-10 | - | - | - | - | getfsstat
- MacOS Sequoia (m1) | 6.0.0<br>2025-3-10 | 6.0.0<br>2025-3-10 | - | - | - | - | getfsstat
+ MacOS Sequoia (intel) | 6.0.1<br>2025-10-29 | 6.0.1<br>2025-10-29 | - | - | - | - | getfsstat
+ MacOS Tahoe (m1) | 6.0.1<br>2025-10-29 | 6.0.1<br>2025-10-29 | - | - | - | - | getfsstat
  __Other:__ | | | | | | |
- AIX 7.1 | - | 6.0.0<br>2025-3-10<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
+ AIX 7.1 | - | 6.0.1<br>2025-10-29<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
  Haiku r1b5 | - | 6.0.0<br>2025-3-10 | - | - | - | - | fs_stat_dev<br>ramfs used value err
  SCO OpenServer 6.0.0 | - | 6.0.0<br>2025-3-10<br>cc gcc(fails test) | - | - | - | - | getmntent statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | polarhome
  QNX 6.5 | - | FAIL | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | | | |
  Solaris 10 | - | 6.0.0<br>2025-3-10 | - | - | - | - | getmntent statvfs
- Solaris 11.4 | 6.0.0<br>2025-3-10<br>gcc clang cc | 6.0.0<br>2025-3-10<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
- Solaris 11.4 (BE) | 5.0.14<br>2025-3-4<br>gcc clang cc | 5.0.14<br>2025-3-4<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 | 6.0.1<br>2025-10-29<br>gcc clang cc | 6.0.1<br>2025-10-29<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 (BE) | 6.0.1<br>2025-10-29<br>gcc clang cc | 6.0.1<br>2025-10-29<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
  __Windows:__| | | | | | | -
  Cygwin | 4.99.7<br>2025-1-31| - | - | - | - | - | get/set/endmntent statvfs?
- MSys 2| - | 4.99.7<br>2025-1-31 | - | - | - | - | - | -
+ MSys2 | - | 4.99.7<br>2025-1-31 | - | - | - | - | - | -
 
 [Wiki Home](Home)

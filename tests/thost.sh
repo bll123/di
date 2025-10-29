@@ -91,7 +91,7 @@ if [[ $flag == R || $flag == C ]]; then
   done
 fi
 
-if [[ $flag != P ]]; then
+if [[ $flag != P && $flag != C ]]; then
   ./tests/check.sh ${host} ${complist}
   echo "-- $(TZ=PST8PDT date '+%T') ${host}: finish"
 fi
