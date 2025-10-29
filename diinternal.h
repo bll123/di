@@ -34,15 +34,15 @@ extern "C" {
 
 typedef struct
 {
-  int           sortIndex [DI_SORT_MAX];
-  dinum_t       values [DI_VALUE_MAX];
-  unsigned long st_dev;                     /* disk device number       */
-  unsigned long sp_dev;                     /* special device number    */
-  unsigned long sp_rdev;                    /* special rdev #           */
   char          *strdata [DI_DISP_MAX];     /* mount point           */
                                             /* special device name   */
                                             /* type of file system   */
                                             /* mount options         */
+  dinum_t       values [DI_VALUE_MAX];
+  unsigned long st_dev;                     /* disk device number       */
+  unsigned long sp_dev;                     /* special device number    */
+  unsigned long sp_rdev;                    /* special rdev #           */
+  int           sortIndex [DI_SORT_MAX];
   int           doPrint;                    /* should this entry        */
                                             /*   be printed?            */
   int           printFlag;                  /* print flags              */

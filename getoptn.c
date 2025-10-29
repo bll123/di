@@ -55,20 +55,20 @@ typedef struct {
 } getoptn_optinfo_t;
 
 typedef struct {
-  int                 style;
-  int                 optidx;
-  int                 optcount;
   getoptn_opt_t       *opts;
   getoptn_optinfo_t   *optinfo;
-  int                 argc;
   const char          **argv;
   const char          *arg;       /* current arg we're processing         */
   Size_t              arglen;     /* and the length of it                 */
-  int                 hasvalue;   /* does this arg have a value attached? */
   Size_t              argidx;     /* index to the value                   */
   Size_t              optionlen;  /* length of the option for this arg    */
   Size_t              reprocess;  /* -ab legacy form? must be 0 or 1      */
   Size_t              offset;     /* reprocessing offset                  */
+  int                 style;
+  int                 optidx;
+  int                 optcount;
+  int                 argc;
+  int                 hasvalue;   /* does this arg have a value attached? */
 } getoptn_info_t;
 
 typedef void (*getoptn_func_bool_t) (const char *option, void * valptr);
@@ -242,7 +242,9 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
       return 1;
     }
     v = (const char **) opt->valptr;
-    *v = strdup (ptr); /* memory leak (one time) */
+    if (v != NULL && ptr != NULL) {
+      *v = ptr;
+    }
   } else if (opt->option_type == GETOPTN_FUNC_BOOL) {
     getoptn_func_bool_t f;
     if (opt->value2 == (void * ) NULL) {
@@ -372,7 +374,7 @@ main (int argc, char * argv [])
   char        tmp [40];
   char        s [40];
   char        s2 [5];
-  const char  *sp;
+  char        *sp = NULL;
   long        l;
   double      d;
   int         i;
@@ -387,35 +389,35 @@ main (int argc, char * argv [])
   int  testno = 0;
 
   getoptn_opt_t opts [] = {
-    { "-D",  GETOPTN_STRING,     &s, sizeof (s), (void * ) "abc123" },
-    { "-b",  GETOPTN_BOOL,       &i, sizeof (i), NULL },
-    { "--b", GETOPTN_BOOL,       &i, sizeof (i), NULL },
-    { "-c",  GETOPTN_BOOL,       &j, sizeof (j), NULL },
-    { "--c", GETOPTN_ALIAS,      (void * ) "-c", 0, NULL },
-    { "-bc", GETOPTN_BOOL,       &k, sizeof (k), NULL },
-    { "-d",  GETOPTN_DOUBLE,     &d, sizeof (d), NULL },
-    { "-f1",  GETOPTN_INT,       &i, 8, NULL },
-    { "-f2",  GETOPTN_LONG,      &i, 2, NULL },
-    { "-f3",  GETOPTN_LONG,      &l, 12, NULL },
-    { "--i", GETOPTN_INT,        &i, sizeof (i), NULL },
-    { "-i",  GETOPTN_INT,        &i, sizeof (i), NULL },
-    { "-i15",GETOPTN_INT,        &j, sizeof (j), NULL },
-    { "-i17",GETOPTN_INT,        &j, sizeof (j), NULL },
-    { "-l",  GETOPTN_LONG,       &l, sizeof (l), NULL },
-    { "-s",  GETOPTN_STRING,     &s, sizeof (s), NULL },
-    { "-sabcd", GETOPTN_BOOL,    &i, sizeof (i), NULL },
-    { "-sp",  GETOPTN_STRPTR,    &sp, 0, NULL },
-    { "-p",  GETOPTN_STRPTR,     &sp, 0, NULL },
-    { "-S",  GETOPTN_STRPTR,     &sp, 0, (void * ) "abc1234" },
-    { "-s2",  GETOPTN_STRING,    &s2, sizeof (s2), NULL },
-    { "-np1",  GETOPTN_STRING,   NULL, sizeof (s2), NULL },
-    { "-np2",  GETOPTN_FUNC_BOOL, NULL, sizeof (s2), NULL },
-    { "-np3",  GETOPTN_FUNC_VALUE, NULL, sizeof (s2), NULL },
-    { "-z1", GETOPTN_ALIAS,      (void * ) "--c", 0, NULL },
-    { "-z2", GETOPTN_ALIAS,      (void * ) "-z1", 0, NULL },
-    { "-z3", GETOPTN_ALIAS,      (void * ) "-z2", 0, NULL },
-    { "-w", GETOPTN_IGNORE,      NULL, 0, NULL },
-    { "-W", GETOPTN_IGNORE_ARG, NULL, 0, NULL }
+    { "-D",     &s, (void * ) "abc123",   sizeof (s),   GETOPTN_STRING },
+    { "-b",     &i, NULL,                 sizeof (i),   GETOPTN_BOOL },
+    { "--b",    &i, NULL,                 sizeof (i),   GETOPTN_BOOL },
+    { "-c",     &j, NULL,                 sizeof (j),   GETOPTN_BOOL },
+    { "--c",    (void * ) "-c", NULL,     0,            GETOPTN_ALIAS },
+    { "-bc",    &k, NULL,                 sizeof (k),   GETOPTN_BOOL },
+    { "-d",     &d, NULL,                 sizeof (d),   GETOPTN_DOUBLE },
+    { "-f1",    &i, NULL,                 8,            GETOPTN_INT },
+    { "-f2",    &i, NULL,                 2,            GETOPTN_LONG },
+    { "-f3",    &l, NULL,                 12,           GETOPTN_LONG },
+    { "--i",    &i, NULL,                 sizeof (i),   GETOPTN_INT },
+    { "-i",     &i, NULL,                 sizeof (i),   GETOPTN_INT },
+    { "-i15",   &j, NULL,                 sizeof (j),   GETOPTN_INT },
+    { "-i17",   &j, NULL,                 sizeof (j),   GETOPTN_INT },
+    { "-l",     &l, NULL,                 sizeof (l),   GETOPTN_LONG },
+    { "-s",     &s, NULL,                 sizeof (s),   GETOPTN_STRING },
+    { "-sabcd", &i, NULL,                 sizeof (i),   GETOPTN_BOOL },
+    { "-sp",    &sp, NULL,                0,            GETOPTN_STRPTR },
+    { "-p",     &sp, NULL,                0,            GETOPTN_STRPTR },
+    { "-S",     &sp, (void * ) "abc1234", 0,            GETOPTN_STRPTR },
+    { "-s2",    &s2, NULL,                sizeof (s2),  GETOPTN_STRING },
+    { "-np1",   NULL, NULL,               sizeof (s2),  GETOPTN_STRING },
+    { "-np2",   NULL, NULL,               sizeof (s2),  GETOPTN_FUNC_BOOL },
+    { "-np3",   NULL, NULL,               sizeof (s2),  GETOPTN_FUNC_VALUE },
+    { "-w",     NULL, NULL,               0,            GETOPTN_IGNORE },
+    { "-W",     NULL, NULL,               0,            GETOPTN_IGNORE_ARG },
+    { "-z1",    (void * ) "--c", NULL,    0,            GETOPTN_ALIAS },
+    { "-z2",    (void * ) "-z1", NULL,    0,            GETOPTN_ALIAS },
+    { "-z3",    (void * ) "-z2", NULL,    0,            GETOPTN_ALIAS }
   };
 
   /* test 1 */
@@ -738,7 +740,7 @@ main (int argc, char * argv [])
 
   /* test 20 */
   ++testno;
-  sp = "";
+  sp = NULL;
   ac = 3;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -755,7 +757,7 @@ main (int argc, char * argv [])
 
   /* test 21 */
   ++testno;
-  sp = "";
+  sp = NULL;
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -771,7 +773,7 @@ main (int argc, char * argv [])
 
   /* test 22 */
   ++testno;
-  sp = "";
+  sp = NULL;
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -787,7 +789,7 @@ main (int argc, char * argv [])
 
   /* test 23 */
   ++testno;
-  sp = "";
+  sp = NULL;
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -803,7 +805,7 @@ main (int argc, char * argv [])
 
   /* test 24 */
   ++testno;
-  sp = "";
+  sp = NULL;
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;

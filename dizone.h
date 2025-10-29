@@ -31,9 +31,9 @@ typedef struct {
 } di_zone_summ_t;
 
 typedef struct {
+  di_zone_summ_t  *zones;
   Uid_t           uid;
   zoneid_t        myzoneid;
-  di_zone_summ_t  *zones;
   unsigned int    zoneCount;
   int             globalIdx;
 } di_zone_info_t;

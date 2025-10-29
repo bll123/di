@@ -49,10 +49,10 @@ extern "C" {
 
 typedef struct {
   const char    *option;
-  int           option_type;
   void *        valptr;
-  Size_t        valsiz;
   void          *value2;
+  Size_t        valsiz;
+  int           option_type;
 } getoptn_opt_t;
 
 extern int getoptn (int style, int argc, const char * argv [],
