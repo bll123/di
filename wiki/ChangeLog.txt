@@ -4,10 +4,14 @@
 
 <!--
 
-**6.0.1 2025-10-**
+**6.1.0 2025-10---**
 
 * Bug Fixes:
+    * Fix cmake version check.
+    * Fix getoptn memory leak.
+    * Fix internal getoptn bug.
     * Fix manual page typo.
+    * Windows: fix build (cygwin, msys2).
 * Changes:
     * Linux: Add 'efivarfs' to the ignore list.
 * New Features:
@@ -16,8 +20,6 @@
     * Update mkconfig to version 2.6.10.
     * Update checks for -Wno- compile flags.
     * Minor code cleanup.
-    * Fix internal getoptn bug.
-    * Fix getoptn memory leak.
 
 -->
 

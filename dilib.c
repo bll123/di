@@ -604,7 +604,7 @@ checkFileInfo (di_data_t *di_data)
     }
 
     if (src != 0) {
-      if (errno != EACCES && errno != EPERM) {
+      if (errno != ENOENT && errno != EACCES && errno != EPERM) {
         fprintf (stderr, "stat: %s ", diopts->argv [i]);
         perror ("");
       }
@@ -757,7 +757,7 @@ getDiskStatInfo (di_data_t *di_data)
             (long) dinfo->st_dev);
       }
     } else {
-      if (errno != EACCES && errno != EPERM) {
+      if (errno != ENOENT && errno != EACCES && errno != EPERM) {
         fprintf (stderr, "stat: %s ", dinfo->strdata [DI_DISP_MOUNTPT]);
         perror ("");
       }

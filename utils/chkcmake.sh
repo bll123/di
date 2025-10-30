@@ -71,7 +71,8 @@ BEGIN {
   gsub (/\..*$/, "", min);
   rc = 1;
   # have to make sure it is a numeric comparison
-  if (maj+0 >= reqmaj+0 && min+0 >= reqmin+0) {
+  if ((maj+0 == reqmaj+0 && min+0 >= reqmin+0) ||
+      maj+0 >= reqmaj+0) {
     rc = 0;
   }
   exit rc;

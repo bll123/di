@@ -90,12 +90,12 @@ extern "C" {
 }
 #endif
 
+/* prefer this over GetVolumeInformation (cygwin) */
 #if _lib_statvfs \
     && ! _lib_fs_stat_dev \
     && ! _lib_getmntinfo \
     && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
-    && ! _lib_getvfsstat \
-    && ! _lib_GetVolumeInformation
+    && ! _lib_getvfsstat
 
 /*
  * di_get_disk_info
@@ -182,7 +182,7 @@ di_get_disk_info (di_data_t *di_data, int *diCount)
       else
       {
         diptr->printFlag = DI_PRNT_BAD;
-        if (errno != EACCES && errno != EPERM) {
+        if (errno != ENOENT && errno != EACCES && errno != EPERM) {
           fprintf (stderr, "statvfs: %s ", diptr->strdata [DI_DISP_MOUNTPT]);
           perror ("");
         }
@@ -277,7 +277,7 @@ di_get_disk_info (di_data_t *di_data, int *diCount)
       else
       {
         diptr->printFlag = DI_PRNT_BAD;
-        if (errno != EACCES && errno != EPERM) {
+        if (errno != ENOENT && errno != EACCES && errno != EPERM) {
           fprintf (stderr, "statfs: %s ", diptr->strdata [DI_DISP_MOUNTPT]);
           perror ("");
         }
@@ -288,13 +288,12 @@ di_get_disk_info (di_data_t *di_data, int *diCount)
 
 #endif /* _args_statfs == 4 */
 
+/* prefer this over GetDiskFreeSpaceEx (cygwin) */
 #if _lib_statfs && (_args_statfs == 2 || _args_statfs == 3) \
     && ! _lib_statvfs \
     && ! _lib_getmntinfo \
     && ! (_lib_getfsstat && (_getfsstat_type_int || _getfsstat_type_long)) \
-    && ! _lib_getmnt \
-    && ! _lib_GetDiskFreeSpace \
-    && ! _lib_GetDiskFreeSpaceEx
+    && ! _lib_getmnt
 
 /*
  * di_get_disk_info
@@ -345,7 +344,7 @@ di_get_disk_info (di_data_t *di_data, int *diCount)
       else
       {
         diptr->printFlag = DI_PRNT_BAD;
-        if (errno != EACCES && errno != EPERM) {
+        if (errno != ENOENT && errno != EACCES && errno != EPERM) {
           fprintf (stderr, "statfs: %s ", diptr->strdata [DI_DISP_MOUNTPT]);
           perror ("");
         }
@@ -357,7 +356,10 @@ di_get_disk_info (di_data_t *di_data, int *diCount)
 #endif /* _args_statfs == 2 or 3 */
 
 
-#if _lib_GetVolumeInformation
+/* prefer statvfs (cygwin) */
+#if _lib_GetVolumeInformation \
+    && ! _lib_statvfs \
+    && ! _lib_statfs
 
 /*
  * di_get_disk_info

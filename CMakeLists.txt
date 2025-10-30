@@ -292,7 +292,7 @@ include_directories (
   # for macos
   /opt/local/include
   /opt/homebrew/include
-  # for freebsd
+  # for freebsd, netbsd
   /usr/local/include
   "${CMAKE_BINARY_DIR}"
   "${PROJECT_SOURCE_DIR}/include"
@@ -637,7 +637,7 @@ check_include_files ("sys/types.h;ufs/ufs/quota.h" _hdr_ufs_ufs_quota)
 check_include_file (unistd.h _hdr_unistd)
 check_include_file (wchar.h _hdr_wchar)
 check_include_file (windows.h _hdr_windows)
-check_include_file (winioctl.h _hdr_winioctl)
+check_include_files ("windows.h;winioctl.h" _hdr_winioctl)
 check_include_file (zone.h _hdr_zone)
 
 check_include_file (sys/dcmd_blk.h _sys_dcmd_blk)
@@ -830,12 +830,6 @@ check_symbol_exists (GetDriveType windows.h _lib_GetDriveType)
 check_symbol_exists (GetLogicalDriveStrings windows.h _lib_GetLogicalDriveStrings)
 check_symbol_exists (GetVolumeInformation windows.h _lib_GetVolumeInformation)
 
-if (Intl_LIBRARY AND NOT Intl_LIBRARY STREQUAL "NOTFOUND")
-  set (CMAKE_REQUIRED_LIBRARIES ${Intl_LIBRARY})
-endif()
-if (Iconv_LIBRARY AND NOT Iconv_LIBRARY STREQUAL "NOTFOUND")
- set (CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES};${Iconv_LIBRARY}")
-endif()
 check_symbol_exists (bindtextdomain libintl.h _lib_bindtextdomain)
 check_symbol_exists (gettext libintl.h _lib_gettext)
 check_symbol_exists (textdomain libintl.h _lib_textdomain)
@@ -1063,7 +1057,7 @@ checkIncludeConflict (_sys_quota sys/quota.h _linux_quota linux/quota.h
 
 check_symbol_exists (O_NOCTTY fcntl.h _const_O_NOCTTY)
 
-check_symbol_exists (IOCTL_STORAGE_CHECK_VERIFY2 winioctl.h
+check_symbol_exists (IOCTL_STORAGE_CHECK_VERIFY2 "windows.h;winioctl.h"
     _define_IOCTL_STORAGE_CHECK_VERIFY2)
 check_symbol_exists (MCTL_QUERY sys/mntctl.h _define_MCTL_QUERY)
 check_symbol_exists (S_ISLNK sys/stat.h _define_S_ISLNK)
@@ -1141,6 +1135,7 @@ target_include_directories (${DI_LIBNAME} PRIVATE
 target_link_libraries (${DI_LIBNAME} PRIVATE
   objdistrutils
 )
+addIntlLibrary (${DI_LIBNAME})
 # cmake's auto prefixing is annoying
 set_target_properties (${DI_LIBNAME} PROPERTIES PREFIX "")
 if (WIN32)
@@ -1275,7 +1270,7 @@ target_link_libraries (getoptn_test PRIVATE
   objdistrutils
 )
 
-# di.pc
+#### di.pc
 
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 

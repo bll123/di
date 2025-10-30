@@ -1,7 +1,7 @@
 [Wiki Home](Home)
 
-If there is a particular platform/build method/compiler combination
-that you want tested, please open a
+If there is a particular platform / build&nbsp;method / compiler /
+MP&nbsp;library combination that you want tested, please open a
 [ticket](https://sourceforge.net/p/diskinfo-di/tickets/) and let me
 know.
 
@@ -124,7 +124,7 @@ AIX: Only access to version 7.1 via the compiler farm.
  Solaris 11.4 | 6.1.0<br>2025-10-29<br>gcc clang cc | 6.1.0<br>2025-10-29<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
  Solaris 11.4 (BE) | 6.1.0<br>2025-10-29<br>gcc clang cc | 6.1.0<br>2025-10-29<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
  __Windows:__| | | | | | | -
- Cygwin | 4.99.7<br>2025-1-31| - | - | - | - | - | get/set/endmntent statvfs?
- MSys2 | - | 4.99.7<br>2025-1-31 | - | - | - | - | - | -
+ Windows 10<br>Cygwin | 6.1.0<br>2025-10-30 | 6.1.0<br>2025-10-30 | - | - | - | - | get/set/endmntent<br>statvfs
+ Windows 10<br>MSys2 | 6.1.0<br>2025-10-30 | 6.1.0<br>2025-10-30 | - | - | - | - | - | GetLogicalVolumes<br>GetDiskFreeSpaceEx
 
 [Wiki Home](Home)
