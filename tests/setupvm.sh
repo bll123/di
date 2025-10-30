@@ -32,14 +32,18 @@ case $answer in
     ;;
 esac
 
-if [[ x${ipaddr} == x ]]; then
+if [[ x${ipaddr} == x || ${ipaddr} == - || ${ipaddr} == 192.168.2.x ]]; then
   echo "${host}: no host ip"
   exit 1
 fi
 
+echo "-- create .ssh dir"
 ssh ${ipaddr} "test -d .ssh || mkdir .ssh; chmod 700 .ssh"
+echo "-- copy auth-keys"
 scp $HOME/.ssh/authorized_keys ${ipaddr}:.ssh
+echo "-- create root .ssh dir"
 ssh -l root ${ipaddr} "test -d .ssh || mkdir .ssh; chmod 700 .ssh"
+echo "-- copy auth-keys for root"
 scp $HOME/.ssh/authorized_keys root@${ipaddr}:.ssh
 if [[ $stop == T ]]; then
   ./tests/stopvm.sh ${host}

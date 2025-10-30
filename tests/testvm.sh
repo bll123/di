@@ -15,6 +15,11 @@ if [[ ${type} != vm && $type != vmlocal ]]; then
   exit 1
 fi
 
+if [[ $ipaddr == 192.168.2.x ]]; then
+  echo "-- $(TZ=PST8PDT date '+%T') ${host}: IP address not set"
+  exit 1
+fi
+
 already=F
 ./tests/startvm.sh ${host} T
 rc=$?
@@ -30,7 +35,7 @@ fi
 if [[ $ipaddr == "-" ]]; then
   gethostip ${host}
 fi
-if [[ x${ipaddr} == "-" ]]; then
+if [[ x${ipaddr} == x || ${ipaddr} == - ]]; then
   echo "${host}: Unable to get host ip"
   ./tests/stopvm.sh ${host}
   exit 1

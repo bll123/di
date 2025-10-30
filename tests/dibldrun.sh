@@ -53,7 +53,7 @@ bldrun () {
   make distclean
   if [ $tag = pcmake ]; then
     # pure cmake
-    cmake -DCMAKE_INSTALL_PREFIX=${loc}/x -S . -B build > di-${tag}-bld.out 2>&1
+    cmake -DCMAKE_C_COMPILER=${comp} -DCMAKE_INSTALL_PREFIX=${loc}/x -S . -B build > di-${tag}-bld.out 2>&1
     cmake --build build >> di-${tag}-bld.out 2>&1
   else
     make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1

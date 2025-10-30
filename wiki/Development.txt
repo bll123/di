@@ -9,6 +9,37 @@
     * apk add gcc clang cmake make nawk mandoc mandoc-dev mandoc-apropos
     * apk add gettext
     * setup-desktop
+===== debian
+    * apt install gcc clang cmake make ksh mksh openssh-server
+    * old: apt install gcc clang cmake make ksh mksh ash yash openssh-server
+    * make sure root has a password set.
+
+/etc/ssh/sshd_config
+~~~
+    PermitRootLogin yes
+~~~
+
+~~~
+  ufw status
+  ufw allow ssh   # if ufw is enabled...
+  ufw reload
+~~~
+
+
+===== opensuse
+    * zypper install gcc clang cmake make ksh mksh
+
+/etc/ssh/sshd_config
+~~~
+    PermitRootLogin yes
+~~~
+
+~~~
+  firewall-cmd --state
+  firewall-cmd --zone=public --add-service=ssh
+  firewall-cmd --reload
+~~~
+
 ===== gentoo
 ===== Void Linux
     * xbps-install gcc cmake make
@@ -63,5 +94,3 @@
     * pkg search <name>
     * pkg install <name>
     * pkg install perl5 pdksh ksh93 mksh bash dash
-
-

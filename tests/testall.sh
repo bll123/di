@@ -94,6 +94,8 @@ while test $# -gt 0; do
       ;;
     --vm)
       procnotvm=F
+      procvm=T
+      procvmlocal=F
       shift
       ;;
     --vmlocal)

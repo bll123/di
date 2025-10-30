@@ -38,7 +38,7 @@ if [[ $ipaddr == "-" ]]; then
   gethostip ${host}
 fi
 
-if [[ x${ipaddr} != "-" ]]; then
+if [[ x${ipaddr} != x && ${ipaddr} != - && ${ipaddr} != 192.168.2.x ]]; then
   cmd="shutdown -h now"
   case ${host} in
     *[sS]olaris*)

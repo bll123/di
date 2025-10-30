@@ -23,6 +23,7 @@
 ^tests/hostlist\.txt$
 ^tests/hostlist\.txt\.bak$
 ^tests/vmlist\.txt$
+^tests/vmlocallist\.txt$
 ^tmp/
 ^w$
 ^ww$

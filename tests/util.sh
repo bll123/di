@@ -48,7 +48,7 @@ function gethostdata {
       \#*)
         break
         ;;
-      cc|xlc|gcc|clang|c++)
+      cc|xlc|gcc*|clang*|c++)
         if [[ $complist == cc ]]; then
           complist=""
         fi

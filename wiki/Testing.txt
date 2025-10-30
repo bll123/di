@@ -5,11 +5,13 @@ that you want tested, please open a
 [ticket](https://sourceforge.net/p/diskinfo-di/tickets/) and let me
 know.
 
-I do not have access to: HP-UX.
+HP-UX: I have no access to HP-UX.
 <br>
-I do not have access to MacOS with Xcode (only MacOS with
-command-line-tools).
-
+MacOS: I do not have access to MacOS with XCode (only MacOS with
+command line tools). I no longer keep older MacOS partitions, I only
+have Sonoma, Sequoia, Tahoe (m1).
+<br>
+AIX: Only access to version 7.1 via the compiler farm.
 
 ### Testing
 
@@ -31,6 +33,7 @@ command-line-tools).
  FreeBSD 11 | - | 6.0.0<br>2025-3-10 | - | - | - | - | -
  FreeBSD 13.4 | 6.0.0<br>2025-3-10 | 6.0.0<br>2025-3-10 | - | - | - | - | getfsstat
  FreeBSD 14.2 | 6.0.0<br>2025-3-10 | 6.0.0<br>2025-3-10 | - | - | - | - | getfsstat
+ FreeBSD 15<br>(CHERI-BSD) | 6.1.0<br>2025-10-29 | 6.1.0<br>2025-10-29 | - | - | - | - | getfsstat
  NetBSD 1.62 | - | - | - | - | - | - | -
  NetBSD 2.0 | n/a | 4.99.3<br>2025-1-25 | - | - | - | - | many odd warnings
  NetBSD 3.0.1 | - | - | - | - | - | - | -
@@ -63,14 +66,15 @@ command-line-tools).
  Debian 8 | - | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Debian 9.13 | - | 6.0.0<br>2025-3-10 | - | - | - | - | cfarm
  Debian 10 | - | - | - | - | - | - | -
+ Debian 13 | 6.1.0<br>2025-10-30 | - | - | - | - | - | -
  Devuan 2 | - | - | - | - | - | - | -
  Linux Mint 17 | - | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Linux Mint 18.2 | - | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Linux Mint 19 | - | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Linux Mint 21 | - | 6.0.0<br>2025-3-10 | - | - | - | - | -
  MX Linux 21<br>(Debian 11)| 6.0.0<br>2025-3-10 | 6.0.0<br>2025-3-10 | - | - | - | - | get/set/endmntent statvfs
- MX Linux 23<br>(Debian 12)| 6.0.0<br>2025-3-10<br>gcc clang | 6.0.0<br>2025-3-10<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
- MX Linux 25<br>(Debian 13)| 6.0.1<br>2025-10-29<br>gcc clang | 6.0.1<br>2025-10-29<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
+ MX Linux 23<br>(Debian 12)| 6.1.0<br>2025-10-30 | 6.1.0<br>2025-3-10 | ok | ok | - | - | get/set/endmntent statvfs
+ MX Linux 25<br>(Debian 13)| 6.1.0<br>2025-10-29<br>gcc clang | 6.1.0<br>2025-10-29<br>gcc clang | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
  Ubuntu 14.04<br>(32-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | -
@@ -79,10 +83,11 @@ command-line-tools).
  Ubuntu 18.04<br>(64-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Ubuntu 20.04 | - | 6.0.0<br>2025-3-10 | - | - | - | - | -
  Ubuntu 22.04 | 6.0.0<br>2025-3-10 | 6.0.0<br>2025-3-10 | - | - | - | - | -
+ Ubuntu 24.04 | 6.1.0<br>2025-10-30 | 6.1.0<br>2025-10-30 | - | - | - | - | -
  __Linux: Gentoo Based__| | | | | | | -
  Calculate 20250206 | 6.0.0<br>2025-3-10<br>gcc clang | 6.0.0<br>2025-3-10<br>gcc clang | - | - | - | - | -
  __Linux: Other__| | | | | | |
- Alpine 3.19.8 | 6.0.1<br>2025-10-29<br>gcc clang | 6.0.1<br>2025-10-29<br>gcc clang | - | - | - | - | -
+ Alpine 3.19.8 | 6.1.0<br>2025-10-29<br>gcc clang | 6.1.0<br>2025-10-29<br>gcc clang | - | - | - | - | -
  openSUSE Leap 15.5 | 6.0.0<br>2025-3-10<br>gcc clang | 6.0.0<br>2025-3-10<br>gcc clang | - | - | - | - | get/set/endmntent statvfs<br>lib64<br>cfarm
  openSUSE Leap 15.6 | - | - | - | - | - | - | -
  openSUSE Leap 16.0 | - | - | - | - | - | - | -
@@ -104,20 +109,20 @@ command-line-tools).
  __MacOS:__ | | | | | | | -
  MacOS Big Sur | - | 5.0.6<br>2025-2-9 | - | - | - | - | getfsstat
  MacOS Ventura | 5.0.2<br>2025-2-6 | 5.0.2<br>2025-2-6 | - | - | - | - | getfsstat
- MacOS Monterey | - | 6.0.1<br>2025-3-10 | - | - | - | - | getfsstat<br>cfarm
+ MacOS Monterey<br>(12.6, m1) | - | 6.1.0<br>2025-3-10 | - | - | - | - | getfsstat<br>cfarm
  MacOS Sonoma | 5.0.0<br>2025-2-6 | 5.0.0<br>2025-2-6 | - | - | - | - | getfsstat
- MacOS Sequoia (intel) | 6.0.1<br>2025-10-29 | 6.0.1<br>2025-10-29 | - | - | - | - | getfsstat
- MacOS Tahoe (m1) | 6.0.1<br>2025-10-29 | 6.0.1<br>2025-10-29 | - | - | - | - | getfsstat
+ MacOS Sequoia (intel) | 6.1.0<br>2025-10-29 | 6.1.0<br>2025-10-29 | - | - | - | - | getfsstat
+ MacOS Tahoe (m1) | 6.1.0<br>2025-10-29 | 6.1.0<br>2025-10-29 | - | - | - | - | getfsstat
  __Other:__ | | | | | | |
- AIX 7.1 | - | 6.0.1<br>2025-10-29<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
+ AIX 7.1 | - | 6.1.0<br>2025-10-29<br>gcc xlc  | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
  Haiku r1b5 | - | 6.0.0<br>2025-3-10 | - | - | - | - | fs_stat_dev<br>ramfs used value err
  SCO OpenServer 6.0.0 | - | 6.0.0<br>2025-3-10<br>cc gcc(fails test) | - | - | - | - | getmntent statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | polarhome
  QNX 6.5 | - | FAIL | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | | | |
  Solaris 10 | - | 6.0.0<br>2025-3-10 | - | - | - | - | getmntent statvfs
- Solaris 11.4 | 6.0.1<br>2025-10-29<br>gcc clang cc | 6.0.1<br>2025-10-29<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
- Solaris 11.4 (BE) | 6.0.1<br>2025-10-29<br>gcc clang cc | 6.0.1<br>2025-10-29<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 | 6.1.0<br>2025-10-29<br>gcc clang cc | 6.1.0<br>2025-10-29<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 (BE) | 6.1.0<br>2025-10-29<br>gcc clang cc | 6.1.0<br>2025-10-29<br>gcc clang cc | FAILS with cc | - | - | - | getmntent statvfs<br>cfarm
  __Windows:__| | | | | | | -
  Cygwin | 4.99.7<br>2025-1-31| - | - | - | - | - | get/set/endmntent statvfs?
  MSys2 | - | 4.99.7<br>2025-1-31 | - | - | - | - | - | -

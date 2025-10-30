@@ -1,3 +1,5 @@
+Setting up a VM:
+  See wiki/Development.txt
 
 hostlist.txt:
 
@@ -30,11 +32,15 @@ testall.sh:
 
   ./tests/testall.sh --vm
 
-      check VM hosts
+      check external-drive VM hosts
 
   ./tests/testall.sh --notvm
 
       check local and remote hosts
+
+  ./tests/testall.sh --checkvm
+
+      does connect and copy, but not build and test
 
   ./tests/testall.sh --clean
 
@@ -43,10 +49,6 @@ testall.sh:
   ./tests/testall.sh --fg
 
       run the tests in the foreground
-
-  ./tests/testall.sh --checkvm
-
-      check to make sure the VM(s) are set up properly
 
   ./tests/testall.sh --list
 

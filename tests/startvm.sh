@@ -14,12 +14,12 @@ fi
 . ./tests/util.sh
 
 gethostdata ${host}
-if [[ ${ipaddr} == "-" ]]; then
+if [[ ${ipaddr} == - ]]; then
   gethostip ${host}
 fi
-if [[ x${ipaddr} == "-" ]]; then
+if [[ x${ipaddr} == x ]]; then
   echo "${host}: Unable to get ip address"
-  exti 1
+  exit 1
 fi
 
 chkc=$(ps -ef | grep "[c]omment ${host}" | wc -l)
@@ -35,13 +35,16 @@ fi
 
 echo "-- $(TZ=PST8PDT date '+%T') ${host}: starting vm"
 nohup VBoxManage startvm ${host} > /dev/null 2>&1 &
-sleep 5 # give time for vboxmanage to work...
+
+# give time for vboxmanage to work and the host to start...
+sleep 7
+
 count=0
 ok=F
 if [[ $validate == T ]]; then
   if [[ ${ipaddr} == "-" ]]; then
     gethostip ${host}
-    if [[ x${ipaddr} == "-" ]]; then
+    if [[ x${ipaddr} == x || ${ipaddr} == - || ${ipaddr} == 192.168.2.x ]]; then
       echo "${host}: Unable to get host ip"
       ./tests/stopvm.sh ${host}
       exit 1

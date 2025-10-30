@@ -18,7 +18,7 @@ gethostdata ${host}
 if [[ ${ipaddr} == "-" ]]; then
   gethostip ${host}
 fi
-if [[ x${ipaddr} == "-" ]]; then
+if [[ x${ipaddr} == x || ${ipaddr} == - || ${ipaddr} == 192.168.2.x ]]; then
   echo "${host}: Unable to get host ip"
   exit 1
 fi
