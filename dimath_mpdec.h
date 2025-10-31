@@ -11,7 +11,7 @@
 
 #include "dimath.h"
 
-#define DIMATH_MPD_DEBUG 1
+#define DIMATH_MPD_DEBUG 0
 // # pragma clang diagnostic push
 // # pragma clang diagnostic ignored "-Wbad-function-cast"
 
@@ -93,16 +93,11 @@ static inline void
 dinum_set_u (dinum_t *r, di_ui_t val)
 {
   uint32_t    status = 0;
-char      *tstr;
 
 #if DIMATH_MPD_DEBUG
   dimath_mpd_init_chk ("set_u");
 #endif
   mpd_qset_u64 (*r, val, &mpdctx, &status);
-dimath_mpd_errprint ("set-u", status);
-tstr = mpd_qformat (*r, ".0f", &mpdctx, &status);
-fprintf (stderr, "set-u: %s %ld\n", tstr, (long) val);
-free (tstr);
 }
 
 static inline void
@@ -214,26 +209,13 @@ static inline void
 dinum_mul_uu (dinum_t *r, di_ui_t vala, di_ui_t valb)
 {
   uint32_t    status = 0;
-char      *tstr;
 
 #if DIMATH_MPD_DEBUG
   dimath_mpd_init_chk ("mul_uu");
 #endif
   mpd_qset_u64 (*r, (di_ui_t) 1, &mpdctx, &status);
-dimath_mpd_errprint ("mul-uu-init", status);
-tstr = mpd_qformat (*r, ".0f", &mpdctx, &status);
-fprintf (stderr, "mul-uu: init: %s\n", tstr);
-free (tstr);
   mpd_qmul_u64 (*r, *r, vala, &mpdctx, &status);
-dimath_mpd_errprint ("mul-uu-vala", status);
-tstr = mpd_qformat (*r, ".0f", &mpdctx, &status);
-fprintf (stderr, "mul-uu: vala: %s %ld\n", tstr, (long) vala);
-free (tstr);
   mpd_qmul_u64 (*r, *r, valb, &mpdctx, &status);
-dimath_mpd_errprint ("mul-uu-valb", status);
-tstr = mpd_qformat (*r, ".0f", &mpdctx, &status);
-fprintf (stderr, "mul-uu: valb: %s %ld\n", tstr, (long) valb);
-free (tstr);
 }
 
 static inline double
@@ -300,7 +282,7 @@ dinum_perc (dinum_t *r, dinum_t *val)
   return dval;
 }
 
-# pragma clang diagnostic pop
+// # pragma clang diagnostic pop
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }
