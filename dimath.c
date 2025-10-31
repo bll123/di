@@ -1,5 +1,8 @@
 /* Copyright 2025 Brad Lanam Pleasant Hill CA */
 
+/* This file exists to hold any extra variables that the MP */
+/* routines may need */
+
 #include "config.h"
 
 #if _hdr_stdio
@@ -10,10 +13,6 @@
 #endif
 
 #include "dimath.h"
-
-#if defined (__cplusplus) || defined (c_plusplus)
-extern "C" {
-#endif
 
 #if _use_math == DI_MPDECIMAL
 mpd_context_t  mpdctx;
@@ -37,7 +36,3 @@ dimath_cleanup (void)
 {
   return;
 }
-
-# if defined (__cplusplus) || defined (c_plusplus)
-}
-# endif

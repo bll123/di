@@ -5,6 +5,9 @@
 
 #include "config.h"
 
+#if _hdr_stddef
+# include <stddef.h>
+#endif
 #if _hdr_stdint
 # include <stdint.h>
 #endif
