@@ -1121,6 +1121,7 @@ add_library (${DI_LIBNAME}
   digetentries.c
   digetinfo.c
   dilib.c
+  dimath.c
   diquota.c
   dizone.c
   getoptn.c
@@ -1238,6 +1239,7 @@ endif()
 
 add_executable (dimathtest
   dimathtest.c
+  dimath.c
 )
 target_include_directories (dimathtest PRIVATE
   ${GMP_INCLUDE_DIRS}

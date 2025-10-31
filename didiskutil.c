@@ -35,6 +35,7 @@
 #include "diinternal.h"
 #include "distrutils.h"
 #include "dimath.h"
+#include "dimath_mp.h"
 #include "dimntopt.h"
 
 /*

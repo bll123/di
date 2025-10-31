@@ -12,7 +12,7 @@
 # include <stddef.h>
 #endif
 
-#include "dimath_def.h"
+#include "dimath.h"
 
 // # pragma clang diagnostic push
 // # pragma clang diagnostic ignored "-Wbad-function-cast"
@@ -111,15 +111,15 @@ dinum_add_u (dinum_t *r, di_ui_t val)
 }
 
 static inline void
-dinum_sub_u (dinum_t *r, di_ui_t val)
-{
-  *r -= (dinum_t) val;
-}
-
-static inline void
 dinum_add (dinum_t *r, const dinum_t *val)
 {
   *r += *val;
+}
+
+static inline void
+dinum_sub_u (dinum_t *r, di_ui_t val)
+{
+  *r -= (dinum_t) val;
 }
 
 static inline void
@@ -215,18 +215,6 @@ dinum_perc (dinum_t *r, dinum_t *val)
   dval *= 100.0;
 
   return dval;
-}
-
-static inline void
-dimath_initialize (void)
-{
-  return;
-}
-
-static inline void
-dimath_cleanup (void)
-{
-  return;
 }
 
 // # pragma clang diagnostic pop

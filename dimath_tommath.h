@@ -5,7 +5,11 @@
 
 #include "config.h"
 
-#include "dimath_def.h"
+#if _hdr_stdio
+# include <stdio.h>
+#endif
+
+#include "dimath.h"
 
 // # pragma clang diagnostic push
 // # pragma clang diagnostic ignored "-Wbad-function-cast"
@@ -71,6 +75,12 @@ dinum_add_u (dinum_t *r, di_ui_t val)
 }
 
 static inline void
+dinum_add (dinum_t *r, const dinum_t *val)
+{
+  mp_add (r, val, r);
+}
+
+static inline void
 dinum_sub_u (dinum_t *r, di_ui_t val)
 {
   mp_int    v;
@@ -78,12 +88,6 @@ dinum_sub_u (dinum_t *r, di_ui_t val)
   mp_init_u64 (&v, val);
   mp_sub (r, &v, r);
   mp_clear (&v);
-}
-
-static inline void
-dinum_add (dinum_t *r, const dinum_t *val)
-{
-  mp_add (r, val, r);
 }
 
 static inline void
@@ -201,18 +205,6 @@ dinum_perc (dinum_t *r, dinum_t *val)
   mp_clear (&rem);
 
   return dval;
-}
-
-static inline void
-dimath_initialize (void)
-{
-  return;
-}
-
-static inline void
-dimath_cleanup (void)
-{
-  return;
 }
 
 // # pragma clang diagnostic pop

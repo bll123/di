@@ -67,6 +67,7 @@
 #include "diinternal.h"
 #include "dimntopt.h"
 #include "distrutils.h"
+#include "dioptions.h"
 
 #if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {

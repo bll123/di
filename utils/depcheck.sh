@@ -89,7 +89,6 @@ for mtype in DI_GMP DI_MPDECIMAL DI_TOMMATH DI_INTERNAL; do
   export DI_USE_MATH=${mtype}
   echo "## configuring ${mtype}"
   cmake -DCMAKE_INSTALL_PREFIX=$(pwd)/x -S . -B build > cmake.log 2>&1
-  # cmake --build build >> cmake.log 2>&1
 
   echo "## checking include file compilation"
   test -f $INCTOUT && rm -f $INCTOUT
@@ -149,6 +148,9 @@ if [[ $rc -ne 0 ]]; then
   grc=$rc
   exit $grc
 fi
+
+echo "## building"
+cmake --build build >> cmake.log 2>&1
 
 # check the object file hierarchy for problems.
 echo "## checking object file hierarchy"

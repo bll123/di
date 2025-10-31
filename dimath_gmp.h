@@ -3,7 +3,13 @@
 #ifndef INC_DIMATH_GMP_H
 #define INC_DIMATH_GMP_H
 
-#include "dimath_def.h"
+#include "config.h"
+
+#if _hdr_stdio
+# include <stdio.h>
+#endif
+
+#include "dimath.h"
 
 // # pragma clang diagnostic push
 // # pragma clang diagnostic ignored "-Wbad-function-cast"
@@ -75,6 +81,17 @@ dinum_add_u (dinum_t *r, di_ui_t val)
 }
 
 static inline void
+dinum_add (dinum_t *r, const dinum_t *val)
+{
+  mpz_t     t;
+
+  mpz_init (t);
+  mpz_set (t, *r);
+  mpz_add (*r, t, *val);
+  mpz_clear (t);
+}
+
+static inline void
 dinum_sub_u (dinum_t *r, di_ui_t val)
 {
   mpz_t     v;
@@ -86,17 +103,6 @@ dinum_sub_u (dinum_t *r, di_ui_t val)
   mpz_sub (*r, t, v);
   mpz_clear (t);
   mpz_clear (v);
-}
-
-static inline void
-dinum_add (dinum_t *r, const dinum_t *val)
-{
-  mpz_t     t;
-
-  mpz_init (t);
-  mpz_set (t, *r);
-  mpz_add (*r, t, *val);
-  mpz_clear (t);
 }
 
 static inline void
@@ -188,18 +194,6 @@ dinum_perc (dinum_t *r, dinum_t *val)
   mpz_clear (t);
 
   return dval;
-}
-
-static inline void
-dimath_initialize (void)
-{
-  return;
-}
-
-static inline void
-dimath_cleanup (void)
-{
-  return;
 }
 
 // # pragma clang diagnostic pop

@@ -5,14 +5,41 @@
 
 #include "config.h"
 
-#if _use_math == DI_GMP
-# include "dimath_gmp.h"
-#elif _use_math == DI_MPDECIMAL
-# include "dimath_mpdec.h"
-#elif _use_math == DI_TOMMATH
-# include "dimath_tommath.h"
-#else
-# include "dimath_internal.h"
+#if _hdr_stdint
+# include <stdint.h>
 #endif
+
+#if _siz_uint64_t == 8
+  typedef uint64_t di_ui_t;
+  typedef int64_t di_si_t;
+#elif _siz_long == 8
+  typedef unsigned long di_ui_t;
+  typedef long di_si_t;
+#elif _siz_long_long == 8
+  typedef unsigned long long di_ui_t;
+  typedef long long di_si_t;
+#elif _siz_long == 4
+  typedef unsigned long di_ui_t;
+  typedef long di_si_t;
+#else
+# error "unable to locate a valid type"
+#endif
+
+#define DI_PERC_PRECISION 1000000
+#define DI_PERC_DIV ( (double) (DI_PERC_PRECISION / 100));
+#define DI_SCALE_PREC 1000
+
+#if defined (__cplusplus) || defined (c_plusplus)
+extern "C" {
+#endif
+
+extern int            dimathinitialized;
+
+void dimath_initialize (void);
+void dimath_cleanup (void);
+
+# if defined (__cplusplus) || defined (c_plusplus)
+}
+# endif
 
 #endif /* INC_DIMATH_H */

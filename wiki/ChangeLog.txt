@@ -8,7 +8,7 @@
 
 * Bug Fixes:
     * Fix cmake version check.
-    * Fix getoptn memory leak.
+    * Fix memory leaks (getoptn, di_get_scaled).
     * Fix internal getoptn bug.
     * Fix manual page typo.
     * Windows: fix build (cygwin, msys2).

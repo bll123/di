@@ -63,6 +63,7 @@
 #include "di.h"
 #include "disystem.h"
 #include "dimath.h"
+#include "dimath_mp.h"
 #include "diinternal.h"
 #include "dizone.h"
 #include "diquota.h"
@@ -495,6 +496,7 @@ di_get_scaled (void *tdi_data, int infoidx,
   dinum_init (&val);
   di_calc_space (di_data, infoidx, validxA, validxB, validxC, &val);
   dval = dinum_scale (&val, &di_data->scale_values [scaleidx]);
+  dinum_clear (&val);
   return dval;
 }
 
@@ -946,7 +948,7 @@ checkDiskInfo (di_data_t *di_data, int hasLoop)
         }
       }
 
-      /* Some systems return a -1 or -2 as an indicator.    */
+      /* Some systems return a -1 or -2 as an indicator */
       if (dinum_cmp_s (&dinfo->values [DI_SPACE_TOTAL], (di_si_t) 0) == 0 ||
           dinum_cmp_s (&dinfo->values [DI_SPACE_TOTAL], (di_si_t) -1) == 0 ||
           dinum_cmp_s (&dinfo->values [DI_SPACE_TOTAL], (di_si_t) -2L) == 0) {

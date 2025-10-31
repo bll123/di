@@ -101,7 +101,7 @@ switcher:
 # clean temporary files
 .PHONY: tclean
 tclean:
-	@-rm -f w ww asan.* *.orig \
+	@-rm -f w ww asan.* *.orig comparemath.log \
 		dep-*.txt >/dev/null 2>&1; exit 0
 	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 	@-find . -name '*.orig' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
@@ -131,7 +131,7 @@ realclean:
 distclean:
 	@$(MAKE) realclean >/dev/null 2>&1
 	@-rm -rf test_di _mkconfig_runtests \
-		test_results x \
+		test_results x x.m x.g x.t x.i \
 		$(MKC_FILES) \
 		$(BUILDDIR) \
 		>/dev/null 2>&1; exit 0
@@ -245,8 +245,8 @@ cmake-install:
 
 .PHONY: cmake-test
 cmake-test:
-	./build/dimathtest
-	./build/getoptn_test
+	LD_LIBRARY_PATH=$$(pwd)/build ./build/dimathtest
+	LD_LIBRARY_PATH=$$(pwd)/build ./build/getoptn_test
 
 .PHONY: cmake-chkswitcher
 cmake-chkswitcher:
@@ -284,8 +284,8 @@ mkc-perl:	$(MKC_ENV)
 .PHONY: mkc-test
 mkc-test:
 	. ./$(MKC_ENV); \
-	    ./dimathtest$(EXE_EXT); \
-	    ./getoptn_test$(EXE_EXT)
+	    LD_LIBRARY_PATH=$$(pwd) ./dimathtest$(EXE_EXT); \
+	    LD_LIBRARY_PATH=$$(pwd) ./getoptn_test$(EXE_EXT)
 
 .PHONY: mkc-chkswitcher
 mkc-chkswitcher:

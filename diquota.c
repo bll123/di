@@ -95,6 +95,7 @@
 #include "di.h"
 #include "disystem.h"
 #include "dimath.h"
+#include "dimath_mp.h"
 #include "diquota.h"
 #include "diinternal.h"
 #include "distrutils.h"

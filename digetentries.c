@@ -119,6 +119,7 @@
 #include "diinternal.h"
 #include "distrutils.h"
 #include "dimntopt.h"
+#include "dioptions.h"
 
 #if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
@@ -197,7 +198,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
 
   while (getmntent (f, &mntEntry) == 0) {
     idx = *diCount;
-    ++*diCount;
+    *diCount += 1;
     di_data->diskInfo = (di_disk_info_t *) di_realloc (
         (char *) di_data->diskInfo,
         sizeof (di_disk_info_t) * (Size_t) (*diCount + 1));
@@ -301,7 +302,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
 
   while ( (mntEntry = getmntent (f)) != (struct mntent *) NULL) {
     idx = *diCount;
-    ++*diCount;
+    *diCount += 1;
     di_data->diskInfo = (di_disk_info_t *) di_realloc (
         (char *) di_data->diskInfo,
         sizeof (di_disk_info_t) * (Size_t) (*diCount + 1));
@@ -476,7 +477,7 @@ di_getQNXDiskEntries (di_data_t *di_data, char *ipath, int *diCount)
     }
 
     idx = *diCount;
-    ++*diCount;
+    *diCount += 1;
     di_data->diskInfo = (di_disk_info_t *) di_realloc (
         (char *) di_data->diskInfo,
         sizeof (di_disk_info_t) * (Size_t) (*diCount + 1));
@@ -550,7 +551,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
     if (mntEntry.mt_filsys [0] &&
         strcmp (mntEntry.mt_filsys, "nothing") != 0) {
       idx = *diCount;
-      ++*diCount;
+      *diCount += 1;
       di_data->diskInfo = (di_disk_info_t *) di_realloc (
           (char *) di_data->diskInfo,
           sizeof (di_disk_info_t) * (Size_t) (*diCount + 1));
@@ -1562,7 +1563,7 @@ di_get_disk_entries (di_data_t *di_data, int *diCount)
     }
 
     idx = *diCount;
-    ++*diCount;
+    *diCount += 1;
     di_data->diskInfo = (di_disk_info_t *) di_realloc (
         (char *) di_data->diskInfo,
         sizeof (di_disk_info_t) * (*diCount + 1));

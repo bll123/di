@@ -6,8 +6,8 @@
 #include "config.h"
 #include "disystem.h"
 #include "di.h"
-#include "dimath.h"
-#include "dioptions.h"    // ### temporary
+#include "dimath_mp.h"
+// #include "dioptions.h"    // ### temporary
 
 # if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
