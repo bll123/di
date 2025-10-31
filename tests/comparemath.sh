@@ -5,6 +5,7 @@
 
 LOG=comparemath.log
 TMP=comparemath.tmp
+grc=0
 
 > $LOG
 
@@ -79,10 +80,19 @@ for mlib in ${!m[@]}; do
   rm -f $TMP
   if [[ $dlc -ne 0 ]]; then
     echo "${fmlib}, ${mlib} differ ${dlc}"
+    grc=1
   fi
 
   count=$(($count+1))
 done
+
+if [[ $grc -eq 0 ]]; then
+  for mlib in ${!m[@]}; do
+    tag=${m[$mlib]}
+    dir=./x.${tag}
+    test -d ${dir} && rm -rf ${dir}
+  done
+fi
 
 rm -f $LOG > /dev/null 2>&1
 rm -f $TMP > /dev/null 2>&1

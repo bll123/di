@@ -13,6 +13,7 @@
     * Fix manual page typo.
     * Windows: fix build (cygwin, msys2).
 * Changes:
+    * Build with unspecified MP library now uses mpdecimal by preference (was gmp).
     * Linux: Add 'efivarfs' to the ignore list.
 * New Features:
     * Added support for the mpdecimal multi-precision library.

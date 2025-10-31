@@ -1063,12 +1063,12 @@ check_symbol_exists (MCTL_QUERY sys/mntctl.h _define_MCTL_QUERY)
 check_symbol_exists (S_ISLNK sys/stat.h _define_S_ISLNK)
 
 if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
-  # GMP is the default, as it is more common
-  if (_hdr_gmp AND GMP_LDFLAGS)
-    set (DI_USE_MATH DI_GMP)
-  endif()
-  if (_hdr_mpdecimal AND MPDECIMAL_LDFLAGS AND NOT _hdr_gmp)
+  # MPDECIMAL is the default, as it supports uint64_t.
+  if (_hdr_mpdecimal AND MPDECIMAL_LDFLAGS)
     set (DI_USE_MATH DI_MPDECIMAL)
+  endif()
+  if (_hdr_tmp AND GMPT_LDFLAGS AND NOT _hdr_mpdecimal)
+    set (DI_USE_MATH DI_GMP)
   endif()
   # at the moment, libtommath in macports has a broken pkg-config
   # hence the not-apple

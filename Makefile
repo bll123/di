@@ -383,7 +383,7 @@ $(MKC_REQLIB):	config.h
 # executables
 
 LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
-		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) \
+		digetentries$(OBJ_EXT) digetinfo$(OBJ_EXT) dimath$(OBJ_EXT) \
 		diquota$(OBJ_EXT) dizone$(OBJ_EXT) getoptn$(OBJ_EXT) \
 		dioptions$(OBJ_EXT) distrutils$(OBJ_EXT)
 
@@ -405,11 +405,11 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 		-L . -ldi \
 		-R $(LIBDIR)
 
-dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT)
+dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT) dimath$(OBJ_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
 		-o dimathtest$(EXE_EXT) \
-		dimathtest$(OBJ_EXT) \
+		dimathtest$(OBJ_EXT) dimath$(OBJ_EXT) \
 		-l m
 
 getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT) distrutils$(OBJ_EXT)
@@ -435,6 +435,8 @@ digetentries$(OBJ_EXT):	digetentries.c
 digetinfo$(OBJ_EXT):	digetinfo.c
 
 dilib$(OBJ_EXT):	dilib.c
+
+dimath$(OBJ_EXT):	dimath.c
 
 dimathtest$(OBJ_EXT):	dimathtest.c
 
