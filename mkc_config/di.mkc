@@ -272,14 +272,14 @@ env DI_RELEASE_STATUS quote
 env DI_USE_MATH
 
 if nousemath ! _env_DI_USE_MATH
- if havegmp _pkg_libs_gmp
-   env DI_USE_MATH DI_GMP
- endif
- if havempdecimal _pkg_libs_mpdecimal && ! _pkg_libs_gmp
+ if havempdecimal _pkg_libs_libmpdec
   env DI_USE_MATH DI_MPDECIMAL
  endif
+ if havegmp _pkg_libs_gmp && ! _pkg_libs_libmpdec
+   env DI_USE_MATH DI_GMP
+ endif
  # at the moment, libtommath in macports has a broken pkg-config
- if havetommath _pkg_libs_libtommath && ! _pkg_libs_gmp && ! _pkg_libs_mpdecimal && ! == _MKCONFIG_SYSTYPE Darwin
+ if havetommath _pkg_libs_libtommath && ! _pkg_libs_gmp && ! _pkg_libs_libmpdec && ! == _MKCONFIG_SYSTYPE Darwin
   env DI_USE_MATH DI_TOMMATH
  endif
  if nousemath ! _env_DI_USE_MATH

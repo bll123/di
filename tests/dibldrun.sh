@@ -53,10 +53,13 @@ bldrun () {
   make distclean
   if [ $tag = pcmake ]; then
     # pure cmake
-    cmake -DCMAKE_C_COMPILER=${comp} -DCMAKE_INSTALL_PREFIX=${loc}/x -S . -B build > di-${tag}-bld.out 2>&1
+    cmake -DCMAKE_C_COMPILER=${comp} -DCMAKE_INSTALL_PREFIX=${loc}/x \
+        -S . -B build > di-${tag}-bld.out 2>&1
     cmake --build build >> di-${tag}-bld.out 2>&1
   else
-    make -e CC=${comp} PREFIX=${loc}/x ${tag}-all > di-${tag}-bld.out 2>&1
+    # not all platforms support cmake --parallel
+    make -e PMODE="" CC=${comp} PREFIX=${loc}/x ${tag}-all \
+        > di-${tag}-bld.out 2>&1
   fi
   # AIX: BSHIFT: nothing i can do about system headers
   # NetBSD: rpcsvc: deprecated and buggy (why do they complain when there is no alternative?)

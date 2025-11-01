@@ -85,11 +85,11 @@ if nousemath ! _env_DI_USE_MATH || == _env_DI_USE_MATH DI_MPDECIMAL
  pkg cflags libmpdec
  pkg libs libmpdec
 endif
-if nomath_g ! _pkg_libs_mpdec || == _env_DI_USE_MATH DI_GMP
+if nomath_g ! _pkg_libs_libmpdec || == _env_DI_USE_MATH DI_GMP
  pkg cflags gmp
  pkg libs gmp
 endif
-if nomath_t ( ! _pkg_libs_gmp && ! _pkg_libs_mpdecimal ) || == _env_DI_USE_MATH DI_TOMMATH
+if nomath_t ( ! _pkg_libs_gmp && ! _pkg_libs_libmpdec ) || == _env_DI_USE_MATH DI_TOMMATH
  pkg cflags libtommath
  pkg libs libtommath
 endif

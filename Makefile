@@ -11,6 +11,9 @@ CMAKE_REQ_MIN_VERSION = 13
 BUILDDIR = build
 DI_BUILD = Release
 
+# need to turn off for testing
+PMODE=--parallel
+
 # DI_USE_MATH = DI_GMP
 # DI_USE_MATH = DI_MPDECIMAL
 # DI_USE_MATH = DI_TOMMATH
@@ -183,7 +186,7 @@ cmake-all:
 	  *) \
 	    COMP=$(CC) \
 	    $(MAKE) -e cmake-unix; \
-	    pmode=--parallel $(MAKE) -e cmake-build; \
+	    pmode=$(PMODE) $(MAKE) -e cmake-build; \
 	    ;; \
 	esac
 
@@ -202,7 +205,7 @@ cmakeclang:
 	    ;; \
 	  *) \
 	    $(MAKE) -e cmake-unix; \
-	    pmode=--parallel $(MAKE) -e cmake-build; \
+	    pmode=$(PMODE) $(MAKE) -e cmake-build; \
 	    ;; \
 	esac
 
@@ -459,45 +462,51 @@ getoptn_test$(OBJ_EXT):	getoptn.c
 # DO NOT DELETE
 
 di.o: config.h
-di.o: di.h
 di.o: disystem.h distrutils.h
 didiskutil.o: config.h
 didiskutil.o: di.h disystem.h
 didiskutil.o: diinternal.h
-didiskutil.o: dimath.h dioptions.h getoptn.h
-didiskutil.o: distrutils.h dimntopt.h
+didiskutil.o: dimath_mp.h
+didiskutil.o: dimath_mpdec.h dimath_gmp.h dimath_tommath.h dimath_internal.h
+didiskutil.o: dimath.h distrutils.h dimntopt.h
 digetentries.o: config.h
-digetentries.o: di.h disystem.h
-digetentries.o: diinternal.h dimath.h
-digetentries.o: dioptions.h getoptn.h distrutils.h
-digetentries.o: dimntopt.h
+digetentries.o:  di.h disystem.h
+digetentries.o:  diinternal.h dimath_mp.h
+digetentries.o: dimath_mpdec.h dimath_gmp.h dimath_tommath.h dimath_internal.h
+digetentries.o: dimath.h distrutils.h dimntopt.h dioptions.h getoptn.h
 digetinfo.o: config.h
-digetinfo.o: di.h disystem.h
-digetinfo.o: diinternal.h
-digetinfo.o: dimath.h dioptions.h getoptn.h
-digetinfo.o: dimntopt.h
-digetinfo.o: distrutils.h
+digetinfo.o:   di.h disystem.h
+digetinfo.o:   diinternal.h
+digetinfo.o: dimath_mp.h
+digetinfo.o: dimath_mpdec.h dimath_gmp.h dimath_tommath.h dimath_internal.h
+digetinfo.o: dimath.h dimntopt.h
+digetinfo.o:   distrutils.h
+digetinfo.o: dioptions.h getoptn.h
 dilib.o: config.h
-dilib.o: di.h disystem.h
-dilib.o: dimath.h diinternal.h
-dilib.o: dioptions.h getoptn.h dizone.h diquota.h distrutils.h
+dilib.o:  di.h disystem.h
+dilib.o:  dimath.h dimath_mp.h
+dilib.o: dimath_mpdec.h dimath_gmp.h dimath_tommath.h dimath_internal.h
+dilib.o: diinternal.h dizone.h dioptions.h getoptn.h diquota.h distrutils.h
+dimath.o: config.h  dimath.h
 dimathtest.o: config.h
-dimathtest.o: dimath.h
+dimathtest.o:   dimath.h dimath_mp.h
+dimathtest.o: dimath_mpdec.h dimath_gmp.h dimath_tommath.h dimath_internal.h
 dioptions.o: config.h
-dioptions.o: di.h disystem.h
-dioptions.o: diinternal.h
-dioptions.o: dimath.h dioptions.h getoptn.h
-dioptions.o: distrutils.h
+dioptions.o:   di.h disystem.h
+dioptions.o:   diinternal.h
+dioptions.o: dimath_mp.h dimath_mpdec.h dimath_gmp.h dimath_tommath.h dimath_internal.h
+dioptions.o: dimath.h distrutils.h getoptn.h
+dioptions.o: dioptions.h
 diquota.o: config.h
-diquota.o: di.h
-diquota.o: disystem.h dimath.h
-diquota.o: diquota.h diinternal.h dioptions.h
-diquota.o: getoptn.h distrutils.h
+diquota.o:  di.h disystem.h
+diquota.o:  dimath.h dimath_mp.h
+diquota.o: dimath_mpdec.h dimath_gmp.h dimath_tommath.h dimath_internal.h
+diquota.o: diquota.h diinternal.h distrutils.h dioptions.h getoptn.h
 distrutils.o: config.h
-distrutils.o: distrutils.h
+distrutils.o:  distrutils.h
 dizone.o: config.h
 dizone.o: di.h dizone.h disystem.h
-dizone.o: dioptions.h getoptn.h distrutils.h
+dizone.o:  dioptions.h getoptn.h distrutils.h
 getoptn.o: config.h
-getoptn.o: disystem.h
-getoptn.o: distrutils.h getoptn.h
+getoptn.o:  disystem.h
+getoptn.o:  distrutils.h getoptn.h
