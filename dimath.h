@@ -11,6 +11,9 @@
 #if _hdr_stdint
 # include <stdint.h>
 #endif
+#if _use_math == DI_MPDECIMAL
+# include <mpdecimal.h>
+#endif
 
 #if _siz_uint64_t == 8
   typedef uint64_t di_ui_t;
@@ -36,7 +39,11 @@
 extern "C" {
 #endif
 
-extern int            dimathinitialized;
+#if _use_math == DI_MPDECIMAL
+extern mpd_context_t  mpdctx;
+#endif
+
+extern int  dimathinitialized;
 
 void dimath_initialize (void);
 void dimath_cleanup (void);

@@ -24,7 +24,7 @@ endforeach()
 # also set DI_USE_MATH from the environment if there
 if (DEFINED ENV{DI_USE_MATH})
   set (DI_USE_MATH $ENV{DI_USE_MATH})
-  # these are the only supported values as of 2025-2-6
+  # these are the only supported values as of 2025-11-1
   if (NOT DI_USE_MATH STREQUAL "DI_INTERNAL" AND
       NOT DI_USE_MATH STREQUAL "DI_GMP" AND
       NOT DI_USE_MATH STREQUAL "DI_MPDECIMAL" AND
@@ -1064,16 +1064,16 @@ check_symbol_exists (S_ISLNK sys/stat.h _define_S_ISLNK)
 
 if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
   # MPDECIMAL is the default, as it supports uint64_t.
-  if (_hdr_mpdecimal AND MPDECIMAL_LDFLAGS)
+  if (_hdr_mpdecimal AND MPDECIMAL_FOUND)
     set (DI_USE_MATH DI_MPDECIMAL)
   endif()
-  if (_hdr_tmp AND GMPT_LDFLAGS AND NOT _hdr_mpdecimal)
+  if (_hdr_gmp AND GMP_FOUND AND NOT _hdr_mpdecimal)
     set (DI_USE_MATH DI_GMP)
   endif()
   # at the moment, libtommath in macports has a broken pkg-config
   # hence the not-apple
   if ((_hdr_tommath OR _hdr_libtommath_tommath) AND
-      TOMMATH_LDFLAGS AND
+      TOMMATH_FOUND AND
       NOT _hdr_gmp AND
       NOT APPLE)
     set (DI_USE_MATH DI_TOMMATH)

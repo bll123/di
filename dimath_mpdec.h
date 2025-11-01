@@ -5,6 +5,8 @@
 
 #include "config.h"
 
+#if _use_math == DI_MPDECIMAL
+
 #if _hdr_stdio
 # include <stdio.h>
 #endif
@@ -12,16 +14,14 @@
 #include "dimath.h"
 
 #define DIMATH_MPD_DEBUG 0
-// # pragma clang diagnostic push
-// # pragma clang diagnostic ignored "-Wbad-function-cast"
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wbad-function-cast"
 
 #include <mpdecimal.h>
 
 #if defined (__cplusplus) || defined (c_plusplus)
 extern "C" {
 #endif
-
-extern mpd_context_t  mpdctx;
 
 typedef mpd_t   *dinum_t;
 
@@ -282,10 +282,12 @@ dinum_perc (dinum_t *r, dinum_t *val)
   return dval;
 }
 
-// # pragma clang diagnostic pop
+# pragma clang diagnostic pop
 
 # if defined (__cplusplus) || defined (c_plusplus)
 }
 # endif
+
+#endif /* _use_math == DI_MPDECIMAL */
 
 #endif /* INC_DIMATH_MPDEC_H */
