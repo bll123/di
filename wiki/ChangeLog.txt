@@ -6,6 +6,10 @@
 
 **6.1.0 2025-10---**
 
+-->
+
+**6.1.0 2025-10---**
+
 * Bug Fixes:
     * Fix cmake version check.
     * Fix memory leaks (getoptn, di_get_scaled).
@@ -22,8 +26,6 @@
     * Update mkconfig to version 2.6.10.
     * Update checks for -Wno- compile flags.
     * Minor code cleanup.
-
--->
 
 **6.0.0 2025-3-10**
 
