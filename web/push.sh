@@ -37,7 +37,7 @@ fi
 
 fn=di-${ver}.tar.gz
 rsync -e "$ssh" -aS \
-    $fn README.txt \
+    $fn README.md \
     ${remuser}@${server}:${wwwpath}
 
 exit 0
