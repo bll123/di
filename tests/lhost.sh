@@ -7,6 +7,7 @@ SRCHOST=192.168.2.5
 SRCDIR=s/di
 PORT=166
 USER=bll
+math=-
 comp=cc
 host=`uname -n`
 systype=`uname -s`
@@ -44,7 +45,7 @@ if [ $flag != C ]; then
   chmod a+rx dibldrun.sh
   tarfn=`echo di-*.tar.gz`
   didir=`echo ${tarfn} | sed 's,\.tar.gz$,,'`
-  ./dibldrun.sh ${host} ${tarfn} ${didir} ${comp}
+  ./dibldrun.sh ${host} ${tarfn} ${didir} ${math} ${comp}
 fi
 
 rsltdir=test_results/${host}_${comp}

@@ -22,7 +22,7 @@ havecmake=""
 havemkc="mkc"
 
 ok=0
-for comp in cc gcc clang; do
+for comp in ${complist}; do
   if [[ -d ${topdir}/test_results/${host}_${comp} ]]; then
     ok=1
     break

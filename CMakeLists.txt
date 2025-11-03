@@ -817,6 +817,7 @@ if (NOT _lib_xdr_int)
   endif()
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
+
 set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 
 # solaris
@@ -830,6 +831,12 @@ check_symbol_exists (GetDriveType windows.h _lib_GetDriveType)
 check_symbol_exists (GetLogicalDriveStrings windows.h _lib_GetLogicalDriveStrings)
 check_symbol_exists (GetVolumeInformation windows.h _lib_GetVolumeInformation)
 
+if (Intl_LIBRARY AND NOT Intl_LIBRARY STREQUAL "NOTFOUND")
+  set (CMAKE_REQUIRED_LIBRARIES ${Intl_LIBRARY})
+endif()
+if (Iconv_LIBRARY AND NOT Iconv_LIBRARY STREQUAL "NOTFOUND")
+  set (CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES} ${Iconv_LIBRARY}")
+endif()
 check_symbol_exists (bindtextdomain libintl.h _lib_bindtextdomain)
 check_symbol_exists (gettext libintl.h _lib_gettext)
 check_symbol_exists (textdomain libintl.h _lib_textdomain)

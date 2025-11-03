@@ -20,6 +20,7 @@ echo "  type: ${type}"
 echo "  ipaddr: ${ipaddr}"
 echo "  remuser: ${remuser}"
 echo "  rempath: ${remport}"
+echo "  remmath: ${remmath}"
 echo "  complist: ${complist}"
 
 exit 0

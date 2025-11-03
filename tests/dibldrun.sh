@@ -11,6 +11,7 @@ tarfn=$2
 didir=$3
 comp=$4
 rempath=$5
+math=$6
 
 # snarfed from mkconfig
 test_egrep () {
@@ -51,14 +52,21 @@ bldrun () {
 
   echo "-- `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}"
   make distclean
+  if [ $math != - ]; then
+    DI_USE_MATH=${math}
+    export DI_USE_MATH
+  fi
+
   if [ $tag = pcmake ]; then
     # pure cmake
-    cmake -DCMAKE_C_COMPILER=${comp} -DCMAKE_INSTALL_PREFIX=${loc}/x \
+    cmake -DCMAKE_C_COMPILER=${comp} \
+        -DCMAKE_INSTALL_PREFIX=${loc}/x \
         -S . -B build > di-${tag}-bld.out 2>&1
     cmake --build build >> di-${tag}-bld.out 2>&1
   else
     # not all platforms support cmake --parallel
-    make -e PMODE="" CC=${comp} PREFIX=${loc}/x ${tag}-all \
+    make -e PMODE="" CC=${comp} \
+        PREFIX=${loc}/x ${tag}-all \
         > di-${tag}-bld.out 2>&1
   fi
   # AIX: BSHIFT: nothing i can do about system headers
@@ -105,24 +113,26 @@ bldrun () {
   fi
 
   if [ $tag = cmake -o $tag = pcmake ]; then
-    mathtest=./build/dimathtest
-    getoptntest=./build/getoptn_test
+    testpfx=./build
   fi
   if [ $tag = mkc ]; then
-    mathtest=./dimathtest
-    getoptntest=./getoptn_test
+    testpfx=.
   fi
+  mathtest=${testpfx}/dimathtest
+  getoptntest=${testpfx}/getoptn_test
 
-  ${mathtest} > di-${tag}-math.out 2>&1
+  LD_LIBRARY_PATH=`pwd`/${testpfx} ${mathtest} > di-${tag}-math.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: dimathtest failed"
+    echo "FAIL ${host}: ${tag}/${comp}: dimathtest failed"
     grc=1
   fi
-  ${getoptntest} > di-${tag}-getoptn.out 2>&1
+  LD_LIBRARY_PATH=`pwd`/${testpfx} ${getoptntest} > di-${tag}-getoptn.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
     echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: getoptn_test failed"
+    echo "FAIL ${host}: ${tag}/${comp}: getoptn_test failed"
     grc=1
   fi
 
@@ -138,7 +148,8 @@ bldrun () {
   ./x/bin/di -a -d g -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-a)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-a)"
     grc=1
   fi
 
@@ -146,7 +157,8 @@ bldrun () {
   ./x/bin/di -d h -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-d h)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-d h)"
     grc=1
   fi
 
@@ -155,7 +167,8 @@ bldrun () {
   ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-X 1)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-X 1)"
     grc=1
   fi
 
@@ -164,7 +177,8 @@ bldrun () {
   ./x/bin/di -j >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-j)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-j)"
     grc=1
   fi
 
@@ -173,7 +187,8 @@ bldrun () {
   ./x/bin/di -n -C >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-n -C)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-n -C)"
     grc=1
   fi
 
@@ -182,7 +197,8 @@ bldrun () {
   ./x/bin/di -I something >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-I unk)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-I unk)"
     grc=1
   fi
 
@@ -191,7 +207,8 @@ bldrun () {
   ./x/bin/di -x something >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-x unk)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-x unk)"
     grc=1
   fi
 
@@ -202,7 +219,8 @@ bldrun () {
   ./x/bin/di -I ${fs} >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-I known)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-I known)"
     grc=1
   fi
 
@@ -211,7 +229,8 @@ bldrun () {
   ./x/bin/di -x ${fs} >> di-${tag}-run.out 2>&1
   rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-x known)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-x known)"
     grc=1
   fi
 

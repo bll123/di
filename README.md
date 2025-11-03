@@ -64,9 +64,10 @@ To select one of the multi-precision libraries when using cmake:
 Where DI_USE_MATH can be set to one of DI_GMP, DI_MPDECIMAL,
 DI_TOMMATH or DI_INTERNAL.
 
-If the GMP, mpdecimal or libtommath library is found, it will be used,
-otherwise the numerics will be handled using standard C data types
-(long double, double, etc.).
+If no multi-precision library is specified and the GMP, mpdecimal
+(preferred) or libtommath library is found, it will be used, otherwise
+the numerics will be handled using standard C data types (long double,
+double, etc.).
 
 To turn off the use of the multi-precision libraries;
 

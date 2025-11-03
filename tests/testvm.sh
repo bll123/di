@@ -46,12 +46,10 @@ if [[ $flag != "CHK" ]]; then
   didir=$(echo ${tarfn} | sed 's,\.tar.gz$,,')
 
   rsltdir=$(pwd)/test_results/${host}
-  test -d ${rsltdir} && rm -rf ${rsltdir}
-  mkdir -p ${rsltdir}
 
   ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
-      ${ipaddr} ${remuser} ${remport} ${rempath} \
-      ${flag} ${complist} 2>&1 | tee ${rsltdir}/w
+      ${ipaddr} ${remuser} ${remport} ${rempath} ${remmath} \
+      ${flag} ${complist} 2>&1 | tee ${rsltdir}.w
 fi
 
 if [[ $already == F ]]; then

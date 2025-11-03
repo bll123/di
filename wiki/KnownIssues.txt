@@ -12,19 +12,19 @@ issues (see: https://trac.macports.org/ticket/71791 )
 into _di_.
 * Quotas:
     * Solaris ufs requires the quotas file to be readable or make the
-_di_ program setuid.  Neither is recommended.
+      _di_ program setuid.  Neither is recommended.
     * Linux 2.4: not working
     * HP-UX: quotactl isn't declared (some versions of HP-UX).
-Quota support may need to be turned on manually.
+      Quota support may need to be turned on manually.
     * NetBSD 6: group quotas can't be fetched by ordinary users (EPERM).
-If the account is limited by a group quota, it will not be reported.
+      If the account is limited by a group quota, it will not be reported.
     * AIX 7: Unlike AIX 5, AIX 7 gives a permission denied error when
-the user tries to get their quota.  Could make _di_ suid, but that's
-not a good idea.
+      the user tries to get their quota.  Could make _di_ suid, but that's
+      not a good idea.
 * Pooled Filesystems
     * HAMMER2: The usage reported for pseudo-filesystems is the usage
-for the main pool.  Therefore the total used and total size will be
-wrong.
+      for the main pool.  Therefore the total used and total size will be
+      wrong.
     * BTRFS: There is no way to identify the pools.
 
 [Wiki Home](Home)

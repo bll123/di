@@ -7,8 +7,8 @@ hostlist.txt:
 
   each entry has:
 
-  # name {local|vm|remote} host/ip-addr {user|-} {port|-} {path|-}
-  #     [compiler ...] [# comment]
+      name {local|vm|remote|off} host/ip-addr {user|-} {port|-} {path|-}
+          {math|-} [compiler ...] [# comment]
 
 hostip.sh:
 
@@ -18,53 +18,44 @@ testall.sh:
 
   tests all hosts listed in hostlist.txt
 
-  ./tests/testall.sh --newtar
+  ./tests/testall.sh [<host> ...]
+      check particular host(s)
 
+  --distclean
+      clean before creation of a new tar file
+  --newtar
       forces creation of a new tar file
 
-  ./tests/testall.sh [<host> ...]
-
-      check particular hosts
-
-  ./tests/testall.sh --vmlocal
-
+  --vmlocal
       check local VM hosts
-
-  ./tests/testall.sh --vm
-
+  --vm
       check external-drive VM hosts
-
-  ./tests/testall.sh --notvm
-
+  --notvm
       check local and remote hosts
+  --local
+      check local hosts
+  --remote
+      check remote hosts
 
-  ./tests/testall.sh --checkvm
+  If none of --vmlocal, --vm, --local, --remote are specified, then all
+  types will be tested.
 
+  --checkvm
       does connect and copy, but not build and test
-
-  ./tests/testall.sh --clean
-
+  --clean
       clean up all the stuff left behind
-
-  ./tests/testall.sh --fg
-
+  --fg
       run the tests in the foreground
-
-  ./tests/testall.sh --list
-
+  --list
       list the hosts
-
-  ./tests/testall.sh --copy
-
+  --copy
       copy the test files to the host
-
-  ./tests/testall.sh --keep
-
+  --keep
       do not remove the files from the host afterwards
 
 
 lhost.sh:
 
   Run locally on a test host.  Used when no connection can be made
-  to the host.
+  to the host, but there is way to copy the data to the host.
 

@@ -56,9 +56,12 @@ done
 
 flag=R
 bg=T
+distclean=F
 newtar=F
-procvm=T
-procvmlocal=T
+proclocal=F
+procremote=F
+procvm=F
+procvmlocal=F
 procnotvm=T
 while test $# -gt 0; do
   case $1 in
@@ -87,25 +90,33 @@ while test $# -gt 0; do
       procvmlocal=T
       shift
       ;;
+    --local)
+      proclocal=T
+      shift
+      ;;
+    --remote)
+      procremote=T
+      shift
+      ;;
     --notvm)
-      procvm=F
-      procvmlocal=F
+      proclocal=T
+      procremote=T
       shift
       ;;
     --vm)
-      procnotvm=F
       procvm=T
-      procvmlocal=F
       shift
       ;;
     --vmlocal)
-      procnotvm=F
-      procvm=F
       procvmlocal=T
       shift
       ;;
     --newtar)
       newtar=T
+      shift
+      ;;
+    --distclean)
+      distclean=T
       shift
       ;;
     --fg)
@@ -118,6 +129,13 @@ while test $# -gt 0; do
       ;;
   esac
 done
+if [[ ${proclocal} == F && ${procremote} == F && \
+    ${procvm} == F && ${procvmlocal} == F ]]; then
+  proclocal=T
+  procremote=T
+  procvm=T
+  procvmlocal=T
+fi
 
 if [[ "x$hostlist" == x ]]; then
   while read line ; do
@@ -146,36 +164,45 @@ if [[ $flag == L ]]; then
   exit 0
 fi
 
-if [[ $newtar == T ]]; then
+if [[ $distclean == T ]]; then
   make distclean
+fi
+if [[ $newtar == T ]]; then
   rm -f *.tar.gz
   make tar
 fi
 tarfn=$(echo di-*.tar.gz)
 didir=$(echo ${tarfn} | sed 's,\.tar.gz$,,')
 
-if [[ ${procnotvm} == T ]]; then
-  # start all the non-vms
+rsltdir=$(pwd)/test_results
+test -d ${rsltdir} || mkdir ${rsltdir}
+
+if [[ ${proclocal} == T || ${procremote} == T ]]; then
   for host in ${hostlist}; do
     gethostdata ${host}
 
-    if [[ ${type} == vm || $type == vmlocal ]]; then
+    ok=F
+    if [[ ${proclocal} == T && $type == local ]]; then
+      ok=T
+    fi
+    if [[ ${procremote} == T && $type == remote ]]; then
+      ok=T
+    fi
+    if [[ $ok == F ]]; then
       continue
     fi
 
     if [[ $flag != C ]]; then
       rsltdir=$(pwd)/test_results/${host}
-      test -d ${rsltdir} && rm -rf ${rsltdir}
-      mkdir -p ${rsltdir}
     fi
 
     if [[ $bg == T ]]; then
       nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
-          ${ipaddr} ${remuser} ${remport} ${rempath} \
+          ${ipaddr} ${remuser} ${remport} ${rempath} ${remmath} \
           ${flag} ${complist} 2>&1 | tee ${rsltdir}.w &
     else
       ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
-          ${ipaddr} ${remuser} ${remport} ${rempath} \
+          ${ipaddr} ${remuser} ${remport} ${rempath} ${remmath} \
           ${flag} ${complist} 2>&1 | tee ${rsltdir}.w
     fi
   done
@@ -186,13 +213,14 @@ if [[ ${procvm} == T || ${procvmlocal} == T ]]; then
   for host in ${hostlist}; do
     gethostdata ${host}
 
-    if [[ ${type} != vm && $type != vmlocal ]]; then
-      continue
+    ok=F
+    if [[ ${procvm} == T && ${type} == vm ]]; then
+      ok=T
     fi
-    if [[ ${type} == vm && ${procvm} == F ]]; then
-      continue
+    if [[ ${procvmlocal} == T && ${type} == vmlocal ]]; then
+      ok=T
     fi
-    if [[ ${type} == vmlocal && ${procvmlocal} == F ]]; then
+    if [[ ${ok} == F ]]; then
       continue
     fi
 

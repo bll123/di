@@ -41,8 +41,9 @@ function gethostdata {
   remuser=$4
   remport=$5
   rempath=$6
+  remmath=$7
   complist=cc
-  shift; shift; shift; shift; shift; shift
+  shift; shift; shift; shift; shift; shift; shift
   while test $# -gt 0; do
     case $1 in
       \#*)

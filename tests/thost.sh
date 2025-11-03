@@ -14,14 +14,15 @@ shift
 remuser=$1
 remport=$2
 rempath=$3
-shift;shift;shift
+remmath=$4
+shift;shift;shift;shift
 # flag is R (build and remove), K (build and keep), C (clean only), P (copy)
 flag=${1:-R}
 shift
 complist=$*
 
 function remotebldrun  {
-  ssh ${rempssh} ${remussh} ${ipaddr} "./dibldrun.sh ${host} ${tarfn} ${didir} ${comp} ${rempath}"
+  ssh ${rempssh} ${remussh} ${ipaddr} "./dibldrun.sh ${host} ${tarfn} ${didir} ${comp} ${rempath} ${remmath}"
   testdir=${didir}_${comp}
   scp ${rempscp} -q ${remuscp}${ipaddr}:${testdir}/*.out ${rsltdir}
 }
@@ -54,7 +55,7 @@ if [[ $flag != C ]]; then
 
     if [[ ${type} == local ]]; then
       cd tmp
-      ./dibldrun.sh ${host} ${tarfn} ${didir} ${comp} ${rempath}
+      ./dibldrun.sh ${host} ${tarfn} ${didir} ${comp} ${rempath} ${remmath}
       testdir=${didir}_${comp}
       cp -f ${testdir}/*.out ${rsltdir}
       cd ..
