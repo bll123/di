@@ -1,7 +1,7 @@
 #
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
-cmake_minimum_required (VERSION 3.13)
+cmake_minimum_required (VERSION 3.18)
 
 # avoid msys2/windows issue
 set (CMAKE_C_COMPILER_WORKS 1)

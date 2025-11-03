@@ -18,7 +18,7 @@ di - disk information utility
 ### IMPORTANT NOTES: VERSION 5/6  (2025-3-10)
 
 Version 5's code base has changed.  The build process has changed and
-optionally uses cmake (3.13+). The display processing is entirely new code.
+optionally uses cmake (3.18+). The display processing is entirely new code.
 Version 6 had an ABI change to fix a crash.
 
 Version 5/6 installs a shared library that can be used to get the disk
@@ -47,7 +47,7 @@ To build:
 make -e PREFIX=$HOME/local
 make -e PREFIX=$HOME/local install
 
-The build will use cmake if it is available and recent enough (3.13),
+The build will use cmake if it is available and recent enough (3.18+),
 otherwise the mkconfig configuration tool will be used.
 
 To use cmake in a stand-alone fashion (as of version 5.0.4):
@@ -97,7 +97,7 @@ To force the use of mkconfig:
 
 - cmake build
     - make
-    - cmake (3.13+)
+    - cmake (3.18+)
     - pkg-config
     - msgfmt
     - C compiler

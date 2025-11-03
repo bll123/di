@@ -14,6 +14,7 @@
     * Windows: fix build (cygwin, msys2).
 * Changes:
     * Building with an unspecified MP library now uses mpdecimal by preference (was gmp).
+    * Required cmake version is now 3.18.
     * Linux: Add 'efivarfs' to the ignore list.
 * New Features:
     * Added support for the mpdecimal multi-precision library.

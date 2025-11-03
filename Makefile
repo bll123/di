@@ -7,7 +7,7 @@
 
 # for checking cmake
 CMAKE_REQ_MAJ_VERSION = 3
-CMAKE_REQ_MIN_VERSION = 13
+CMAKE_REQ_MIN_VERSION = 18
 BUILDDIR = build
 DI_BUILD = Release
 
