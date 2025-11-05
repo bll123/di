@@ -41,6 +41,11 @@ if [[ $ver == "" ]]; then
   ver=$tver
 fi
 
+if [[ $DI_RELEASE_STATUS != "production" ]]; then
+  echo "not set for production"
+  exit 1
+fi
+
 if [[ $ver != "" ]] ; then
   cp -pf web/index.html web/di-ss.png web/hpux-di118.png $TMP
   sed -i -e "s/#VERSION#/${ver}/g" $TMP/index.html

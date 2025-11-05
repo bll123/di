@@ -4,9 +4,14 @@
 
 <!--
 
-**6.1.0 2025-10--**
+**6.1.0.1 2025-11---**
 
 -->
+
+**6.1.0.1 2025-11-5**
+
+* Bug Fixes:
+    * Fix build where both libintl and libiconv are present (cmake).
 
 **6.1.0 2025-11-3**
 
