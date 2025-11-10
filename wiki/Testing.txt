@@ -35,8 +35,8 @@ AIX: Only access to version 7.1 via the compiler farm.
  FreeBSD 10.3 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
  FreeBSD 11 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
  FreeBSD 13.4 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | getfsstat
- FreeBSD 14.2 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | getfsstat
- FreeBSD 15<br>(CHERI-BSD) | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | getfsstat
+ FreeBSD 14.2 | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | getfsstat
+ FreeBSD 15<br>(CHERI-BSD) | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | getfsstat
  NetBSD 1.62 | - | - | - | - | - | - | - | -
  NetBSD 2.0 | n/a | 4.99.3<br>2025-1-25 | - | - | - | - | - | many odd warnings
  NetBSD 3.0.1 | - | - | - | - | - | - | - | -
@@ -69,18 +69,18 @@ AIX: Only access to version 7.1 via the compiler farm.
  Debian 8 | - | 6.0.0<br>2025-3-10 | - | - | - | - | - | -
  Debian 9.13 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | cfarm
  Debian 10 | - | - | - | - | - | - | - | -
- Debian 11 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | cfarm
- Debian 12 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | cfarm
- Debian 13 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | cfarm
- Debian 13 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - |
+ Debian 11 | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | cfarm
+ Debian 12 | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | cfarm
+ Debian 13 | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | cfarm
+ Debian 13 | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - |
  Devuan 2 | - | - | - | - | - | - | - | -
  Linux Mint 17 | - | 6.0.0<br>2025-3-10 | - | - | - | - | - | -
  Linux Mint 18.2 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
  Linux Mint 19 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
  Linux Mint 21 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
  MX Linux 21<br>(Debian 11)| 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | get/set/endmntent statvfs
- MX Linux 23<br>(Debian 12)| 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | ok | - | ok | - | - | get/set/endmntent statvfs
- MX Linux 25<br>(Debian 13)| 6.1.0<br>2025-11-3<br>gcc clang | 6.1.0<br>2025-11-3<br>gcc clang | ok | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
+ MX Linux 23<br>(Debian 12)| 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | ok | - | ok | - | - | get/set/endmntent statvfs
+ MX Linux 25<br>(Debian 13)| 6.2.0<br>2025-11-10<br>gcc clang | 6.2.0<br>2025-11-10<br>gcc clang | ok | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
  Ubuntu 14.04<br>(32-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | n/a | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
@@ -89,22 +89,22 @@ AIX: Only access to version 7.1 via the compiler farm.
  Ubuntu 18.04<br>(64-bit) | n/a | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
  Ubuntu 20.04 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
  Ubuntu 22.04 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
- Ubuntu 24.04 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
+ Ubuntu 24.04 | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | -
  __Linux: Gentoo Based__| | | | | | | |
  Calculate 20250206 | 6.1.0<br>2025-11-3<br>gcc clang | 6.1.0<br>2025-11-3<br>gcc clang | - | - | - | - | - | -
  __Linux: Other__| | | | | | | |
- Alpine 3.19.8 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | FAIL | - | - | - | - | set/get/endmntent statvfs<br>cfarm
+ Alpine 3.19.8 | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | FAIL | - | - | - | - | set/get/endmntent statvfs<br>cfarm
  Alpine 3.21.2 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | set/get/endmntent statvfs
- Alpine 3.22.0 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | ok | - | - | - | - | set/get/endmntent statvfs<br>cfarm<br>riscv64
- openSUSE Leap 15.5 | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | get/set/endmntent statvfs<br>lib64<br>cfarm
- openSUSE Leap 15.6 | 6.1.0<br>2025-11-3<br>gcc-13 | 6.1.0<br>2025-11-3<br>gcc-13 | - | - | - | - | - | -
+ Alpine 3.22.0 | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | ok | - | - | - | - | set/get/endmntent statvfs<br>cfarm<br>riscv64
+ openSUSE Leap 15.5 | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | get/set/endmntent statvfs<br>lib64<br>cfarm
+ openSUSE Leap 15.6 | 6.2.0<br>2025-11-10<br>gcc-13 | 6.2.0<br>2025-11-10<br>gcc-13 | - | - | - | - | - | -
  openSUSE Leap 16.0 | - | - | - | - | - | - | - | -
  Slackware 14.2 | - | - | - | - | - | - | - | -
  __Linux: Red Hat Based__| | | | | | | |
  CentOS 3.9 | - | - | - | - | - | - | - | get/set/endmntent statvfs
  CentOS 5.5 | - | - | - | - | - | - | - | -
  CentOS 6.3 | - | - | - | - | - | - | - | -
- CentOS 7 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | get/set/endmntent statvfs<br>cfarm
+ CentOS 7 | - | 6.2.0<br>2025-11-10 | - | - | - | - | - | get/set/endmntent statvfs<br>cfarm
  CentOS 8 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | -
  Fedora 7 | - | - | - | - | - | - | - | -
  Fedora 12 | - | - | - | - | - | - | - | -
@@ -116,20 +116,20 @@ AIX: Only access to version 7.1 via the compiler farm.
  __MacOS:__ | | | | | | | |
  MacOS Big Sur | - | 5.0.6<br>2025-2-9 | - | - | - | - | - | getfsstat
  MacOS Ventura | 5.0.2<br>2025-2-6 | 5.0.2<br>2025-2-6 | - | - | - | - | - | getfsstat
- MacOS Monterey<br>(12.6, m1) | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | getfsstat<br>cfarm
+ MacOS Monterey<br>(12.6, m1) | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | getfsstat<br>cfarm
  MacOS Sonoma | 5.0.0<br>2025-2-6 | 5.0.0<br>2025-2-6 | - | - | - | - | - | getfsstat
- MacOS Sequoia (intel) | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | getfsstat
- MacOS Tahoe (m1) | 6.1.0<br>2025-11-3 | 6.1.0<br>2025-11-3 | - | - | - | - | - | getfsstat
+ MacOS Sequoia (intel) | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | getfsstat
+ MacOS Tahoe (m1) | 6.2.0<br>2025-11-10 | 6.2.0<br>2025-11-10 | - | - | - | - | - | getfsstat
  __Other:__ | | | | | | | |
- AIX 7.1 | - | 6.1.0<br>2025-11-3<br>gcc xlc  | - | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
+ AIX 7.1 | - | 6.2.0<br>2025-11-10<br>gcc xlc  | - | - | - | - | - | mntctl statvfs<br>cfarm<br>gcc link warning
  Haiku r1b5 | - | 6.0.0<br>2025-3-10 | - | - | - | - | - | fs_stat_dev<br>ramfs used value err
  SCO OpenServer 6.0.0 | - | 6.1.0<br>2025-11-3<br>cc gcc(fails test) | - | - | - | - | - | getmntent statvfs<br>polarhome
  Tru64 5.1B | - | - | - | - | - | - | - | polarhome
  QNX 6.5 | - | FAIL | - | - | - | - | - | qnx statvfs<br>polarhome
  __Solaris:__ | | | | - | | | |
  Solaris 10 | - | 6.0.0<br>2025-3-10 | - | - | - | - | - | getmntent statvfs
- Solaris 11.4 | 6.1.0<br>2025-11-3<br>gcc clang cc | 6.1.0<br>2025-11-3<br>gcc clang cc | FAIL with cc | - | - | - | - | getmntent statvfs<br>cfarm
- Solaris 11.4 (BE) | 6.1.0<br>2025-11-3<br>gcc clang cc | 6.1.0<br>2025-11-3<br>gcc clang cc | FAILS with cc | - | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 | 6.2.0<br>2025-11-10<br>gcc clang cc | 6.2.0<br>2025-11-10<br>gcc clang cc | FAIL with cc | - | - | - | - | getmntent statvfs<br>cfarm
+ Solaris 11.4 (BE) | 6.2.0<br>2025-11-10<br>gcc clang cc | 6.2.0<br>2025-11-10<br>gcc clang cc | FAILS with cc | - | - | - | - | getmntent statvfs<br>cfarm
  __Windows:__| | | | | | | |
  Windows 10<br>Cygwin | 6.1.0<br>2025-10-30 | 6.1.0<br>2025-10-30 | - | - | - | - | - | get/set/endmntent<br>statvfs
  Windows 10<br>MSys2 | 6.1.0<br>2025-10-30 | 6.1.0<br>2025-10-30 | - | - | - | - | - | - | GetLogicalVolumes<br>GetDiskFreeSpaceEx

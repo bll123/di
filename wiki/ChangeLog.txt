@@ -6,14 +6,18 @@
 
 **6.2.0 2025-11---**
 
+-->
+
+**6.2.0 2025-11-10**
+
 * Bug Fixes:
     * Fix DI_ARGS processing (introduced in 6.1.0).
-    * Normalize -B (--block-size) argument processing to match environment variable processing.
-    * When the display size is set to bytes, ensure the value is correctly printed.
-    * Use BLOCK_SIZE environment variable if present.
     * Manual page updates and fixes.
-
--->
+    * Normalize -B (--block-size) argument processing to match environment variable processing.
+    * Use BLOCK_SIZE environment variable if present.
+    * When the display size is set to bytes, ensure the value is correctly printed.
+* Changes:
+    * Added a test target for local testing.
 
 **6.1.0.1 2025-11-5**
 
