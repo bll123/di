@@ -16,6 +16,7 @@ for mlib in ${!m[@]}; do
   tag=${m[$mlib]}
 
   test -d x.${tag} && rm -rf x.${tag}
+  echo "## building with ${mlib}"
   make -e DI_USE_MATH=${mlib} PREFIX=$(pwd)/x.${tag} >> $LOG 2>&1
   rc=$?
   if [[ $rc -ne 0 ]]; then

@@ -45,6 +45,7 @@ heterogenous networks.
 To build:
 
 make -e PREFIX=$HOME/local
+make -e PREFIX=$HOME/local test
 make -e PREFIX=$HOME/local install
 
 The build will use cmake if it is available and recent enough (3.18+),
@@ -54,6 +55,7 @@ To use cmake in a stand-alone fashion (as of version 5.0.4):
 
     cmake -DCMAKE_INSTALL_PREFIX=$HOME/local -S . -B build
     cmake --build build
+    cmake --build build --target test
     cmake --install build
 
 To select one of the multi-precision libraries when using cmake:

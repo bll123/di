@@ -63,8 +63,12 @@ are not printed e.g. \fB/dev/proc\fP, \fB/dev/fd\fP).
 .br
 Change the base block size from 1024 (default) to the size specified.
 \fIblock\-size\fP may be either: k\ \-\ 1024 bytes or si\ \-\ 1000 bytes.
-.PP
-Use the \fI\-d\fP option to change the scaling display.
+.IP
+Use the \fI\-d\fP option to change the display size.
+.IP
+.I block\-size
+may be specified in the same manner as the BLOCK_SIZE environment
+variable, and will set both the block size and the display size.
 .TP
 .B \-c
 (alias: \fB\-\-csv\-output\fP)
@@ -88,7 +92,7 @@ The display size is calculated based on the block size (\-B).
 may be one of: k\ \-\ kilobytes (POSIX),
 m\ \-\ megabytes, g\ \-\ gigabytes, t\ \-\ terabytes, p\ \-\ petabytes,
 e\ \-\ exabytes, z\ \-\ zettabytes, y\ \-\ yottabytes, r\ \-\ ronnabytes,
-q\ \-\ quetta,
+q\ \-\ quettabytes,
 h\ \-\ human readable, H\ \-\ human readable alternative.
 .IP
 The human readable format scales the sizes displayed and
@@ -98,7 +102,7 @@ line may scale to different units.
 The human readable alternative scales all the sizes in each individual line
 to the same unit size (the largest needed).
 .IP
-If \fIdi\fP is compiled without large number support, the larger
+If \fIdi\fP is compiled without multi-precision support, the larger
 units may not work correctly or may be inaccurate.
 .TP
 .B \-f
@@ -485,8 +489,11 @@ line arguments.  e.g. If you always want gigabytes displayed, set
 DI_ARGS equal to "\-dg".  Any command line arguments specified
 will override the DI_ARGS environment variable.
 .PP
-The GNU df POSIXLY_CORRECT, and DF_BLOCK_SIZE and the BSD BLOCKSIZE
+The POSIXLY_CORRECT, BLOCKSIZE, BLOCK_SIZE and DF_BLOCK_SIZE
 environment variables are honored when possible.
+.PP
+Environment variables are processed in the order: POSIXLY_CORRECT,
+BLOCKSIZE, BLOCK_SIZE, DF_BLOCK_SIZE, DI_ARGS.
 .SH See Also
 df(1), libdi(3)
 .SH Bugs

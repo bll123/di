@@ -49,7 +49,7 @@ if [[ $flag != C ]]; then
 
   for comp in ${complist}; do
     echo "-- $(TZ=PST8PDT date '+%T') ${host}: start ${comp}"
-    rsltdir=${topdir}/test_results/${host}_${comp}
+    rsltdir=${topdir}/results/${host}_${comp}
     test -d ${rsltdir} && rm -rf ${rsltdir}
     mkdir -p ${rsltdir}
 

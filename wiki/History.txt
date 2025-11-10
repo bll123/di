@@ -123,12 +123,12 @@ either the use of GMP or libtommath for multi precision support.  If
 neither of these are available, the value is stored in the largest
 supported type: long double, double, uint64_t, long long, or long.
 
-Big number support will ensure that _di_ works with very large disks
-in the future, and will also ensure that the number calculations are
-accurate.
+Multi precision support will ensure that _di_ works with very large
+disks in the future, and will also ensure that the number calculations
+are accurate.
 
-Use of the big number libraries is optional, as long doubles are quite
-capable (as of 2025).
+Use of the multi precision libraries is optional, as long doubles are
+quite capable (as of 2025).
 
 At the same time, there has been something I've been wanting to do
 with _di_ for a long time.  Create a proper library and API.  The main

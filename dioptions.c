@@ -54,7 +54,8 @@ typedef struct
   const char      lc;
 } di_valid_scale_t;
 
-static di_valid_scale_t validscale [] =
+/* these must match the DI_SCALE* defines in di.h */
+static di_valid_scale_t validscale [DI_SCALE_MAX] =
 {
   { 'B', 'b' },  /* "Byte", "Byte" */
   { 'K', 'k' },  /* "Kilo", "Kibi" */
@@ -68,7 +69,6 @@ static di_valid_scale_t validscale [] =
   { 'R', 'r' },  /* "Ronna", "Ronni" */
   { 'Q', 'q' }   /* "Quetta", "Quetti" */
 };
-#define DI_VALID_SCALE_SZ ((int) (sizeof (validscale) / sizeof (di_valid_scale_t)))
 
 #define OPT_IDX_A         0
 #define OPT_IDX_a         1
@@ -134,6 +134,9 @@ processStringArgs (char *ptr, di_opt_t *diopts,
   char        *tptr;
   int         nargc;
   char        *nargv [DI_MAX_ARGV];
+  int         optidx;
+  char        *tokstr = NULL;
+
 
   if (ptr == (char *) NULL || strcmp (ptr, "") == 0) {
     return;
@@ -145,34 +148,32 @@ processStringArgs (char *ptr, di_opt_t *diopts,
     setExitFlag (diopts, DI_EXIT_FAIL);
     return;
   }
-  if (dptr != (char *) NULL) {
-    int   optidx;
-    char  *tokstr = NULL;
 
-    tptr = di_strtok (dptr, DI_ARGV_SEP, &tokstr);
-    nargc = 0;
-    while (tptr != (char *) NULL) {
-      if (nargc >= DI_MAX_ARGV) {
-        break;
-      }
-      nargv [nargc++] = tptr;
-      tptr = di_strtok ((char *) NULL, DI_ARGV_SEP, &tokstr);
+  tptr = di_strtok (dptr, DI_ARGV_SEP, &tokstr);
+  nargc = 0;
+  while (tptr != (char *) NULL) {
+    if (nargc >= DI_MAX_ARGV) {
+      break;
     }
+    nargv [nargc++] = tptr;
+    tptr = di_strtok ((char *) NULL, DI_ARGV_SEP, &tokstr);
+  }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-qual"
-    optidx = processArgs (nargc, (const char **) nargv,
-        diopts, 0, scalestr, scalestrsz);
+  optidx = processArgs (nargc, (const char **) nargv,
+      diopts, 0, scalestr, scalestrsz);
 #pragma clang diagnostic pop
-    if (optidx < nargc) {
-      fprintf (stderr, "unknown data found in DI_ARGS %s\n",
-          nargv [optidx]);
-      diopts->errorCount += 1;
-      if (diopts->errorCount > 0) {
-        setExitFlag (diopts, DI_EXIT_WARN);
-      }
+  if (optidx < nargc) {
+    fprintf (stderr, "unknown data found in DI_ARGS %s\n",
+        nargv [optidx]);
+    diopts->errorCount += 1;
+    if (diopts->errorCount > 0) {
+      setExitFlag (diopts, DI_EXIT_WARN);
     }
-    free ((char *) dptr);
   }
+
+  /* the tokenized DI_ARGS data must be preserved so it can be used */
+  diopts->diargsptr = dptr;
 }
 
 di_opt_t *
@@ -210,6 +211,7 @@ di_init_options (void)
   stpecpy (diopts->sortType, diopts->sortType + sizeof (diopts->sortType), "m");
   diopts->exitFlag = DI_EXIT_NORM;
   diopts->errorCount = 0;
+  diopts->diargsptr = NULL;
 
   return diopts;
 }
@@ -231,6 +233,10 @@ di_opt_cleanup (di_opt_t *diopts)
       diopts->include_list.list != (char **) NULL) {
     free (diopts->include_list.list);
     diopts->include_list.count = 0;
+  }
+
+  if (diopts->diargsptr != NULL) {
+    free (diopts->diargsptr);
   }
 
   if (diopts->opts != NULL) {
@@ -264,12 +270,19 @@ di_get_options (int argc, const char * argv [], di_opt_t *diopts, int offset)
     diopts->optval [DI_OPT_DISP_JSON] = false;
   }
 
+  /* gnu-utils processes in BLOCKSIZE, BLOCK_SIZE, DF_BLOCK_SIZE order */
+
   /* bsd df */
   if ( (ptr = getenv ("BLOCKSIZE")) != (char *) NULL) {
     stpecpy (scalestr, scalestr + sizeof (scalestr), ptr);
   }
 
-  /* gnu df */
+  /* gnu utils */
+  if ( (ptr = getenv ("BLOCK_SIZE")) != (char *) NULL) {
+    stpecpy (scalestr, scalestr + sizeof (scalestr), ptr);
+  }
+
+  /* gnu df, overrides BLOCK_SIZE */
   if ( (ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL) {
     stpecpy (scalestr, scalestr + sizeof (scalestr), ptr);
   }
@@ -279,6 +292,8 @@ di_get_options (int argc, const char * argv [], di_opt_t *diopts, int offset)
   }
 
   optidx = processArgs (argc, argv, diopts, offset, scalestr, sizeof (scalestr));
+
+  parseScaleValue (diopts, scalestr);
 
   if (diopts->optval [DI_OPT_DEBUG] > 0) {
     int j;
@@ -297,6 +312,9 @@ di_get_options (int argc, const char * argv [], di_opt_t *diopts, int offset)
     if ( (ptr = getenv ("BLOCKSIZE")) != (char *) NULL) {
       printf ("# BLOCKSIZE: %s\n", ptr);
     }
+    if ( (ptr = getenv ("BLOCK_SIZE")) != (char *) NULL) {
+      printf ("# BLOCK_SIZE: %s\n", ptr);
+    }
     if ( (ptr = getenv ("DF_BLOCK_SIZE")) != (char *) NULL) {
       printf ("# DF_BLOCK_SIZE: %s\n", ptr);
     }
@@ -304,8 +322,6 @@ di_get_options (int argc, const char * argv [], di_opt_t *diopts, int offset)
       printf ("# DI_ARGS: %s\n", ptr);
     }
   }
-
-  parseScaleValue (diopts, scalestr);
 
   diopts->formatLen = (int) strlen (diopts->formatString);
   diopts->optidx = optidx;
@@ -463,18 +479,7 @@ processOptionsVal (const char *arg, void *valptr, char *value)
   padata = (struct pa_tmp *) valptr;
 
   if (strcmp (arg, "-B") == 0) {
-    if (isdigit ((int) (*value))) {
-      int     val;
-
-      val = atoi (value);
-      if (val == DI_BLKSZ_1000 || val == DI_BLKSZ_1024 ) {
-        padata->diopts->blockSize = val;
-      }
-    } else if (strcmp (value, "k") == 0) {
-      padata->diopts->blockSize = DI_BLKSZ_1024;
-    } else if (strcmp (value, "d") == 0 || strcmp (value, "si") == 0) {
-      padata->diopts->blockSize = DI_BLKSZ_1000;
-    }
+    parseScaleValue (padata->diopts, value);
   } else if (strcmp (arg, "-I") == 0) {
     rc = parseList (&padata->diopts->include_list, value);
     if (rc != 0) {
@@ -570,13 +575,23 @@ parseList (di_strarr_t *list, char *str)
 static void
 parseScaleValue (di_opt_t *diopts, char *ptr)
 {
-  unsigned int    len;
   int             i;
   int             val;
-  char            *tptr;
+
+  if (*ptr == '\'') {
+    /* gnu-utils leading ' indicates separator printing */
+    /* ignore this */
+    ++ptr;
+  }
+
+  /* the environment variables that bsd-df and gnu-utils use specify */
+  /* both the block size and the scaling value in a single string */
+  /* https://man.freebsd.org/cgi/man.cgi?query=environ&sektion=7&manpath=freebsd-release-ports */
+  /* https://www.gnu.org/software/coreutils/manual/html_node/Block-size.html */
 
   /* if a numeric value is specified, only 1, 1000 and 1024 are allowed */
-  /* bad values will default to 1024 */
+  /* bad values will default to 1024 (..ibi-bytes) */
+  /* di does not support the 512 byte blocksize */
   if (isdigit ((int) *ptr)) {
     val = atoi (ptr);
     if (val != DI_BLKSZ_1 &&
@@ -596,47 +611,66 @@ parseScaleValue (di_opt_t *diopts, char *ptr)
     }
   }
 
-  tptr = ptr;
-  len = (unsigned int) strlen (ptr);
-  if (! isdigit ((int) *tptr)) {
+  while (isdigit ((int) *ptr)) {
+    ++ptr;
+  }
+
+  /* at this point, ptr will be pointing at the string modifier, */
+  /* or at a null byte */
+  if (*ptr != '\0' && ! isdigit ((int) *ptr)) {
     int             idx;
 
     idx = -1;
-    for (i = 0; i < DI_VALID_SCALE_SZ; ++i) {
-      if (*tptr == validscale [i].uc || *tptr == validscale [i].lc) {
+    for (i = 0; i < DI_SCALE_MAX; ++i) {
+      if (*ptr == validscale [i].uc || *ptr == validscale [i].lc) {
         idx = i;
         break;
       }
     }
 
     if (idx == -1) {
-      if (*tptr == 'h') {
+      if (*ptr == 'h') {
+        /* gnu-utils: "human-readable" */
         idx = DI_SCALE_HR;
       }
-      if (*tptr == 'H') {
+      if (*ptr == 'H') {
         idx = DI_SCALE_HR_ALT;
+      }
+      /* 'd' is for old di compatibility -B d */
+      /* it did not set the scaling */
+      if (*ptr == 'd') {
+        diopts->blockSize = DI_BLKSZ_1000;
+      }
+      if (*ptr == 's') {
+        /* gnu-utils: si */
+        idx = DI_SCALE_HR;
+        diopts->blockSize = DI_BLKSZ_1000;
       }
     }
 
     if (idx == -1) {
+      /* BSD uses 'HUMAN' */
       if (strncmp (ptr, "HUMAN", (Size_t) 5) == 0) {
         idx = DI_SCALE_HR;
       } else {
-        /* some unknown string value */
+        /* some unknown string value, this is the default */
         idx = DI_SCALE_GIGA;
       }
     }
 
     if (idx >= 0) {
-      if (len > 1) {
-        ++tptr;
-        if (*tptr == 'i') {
-          /* gnu df allows MiB, etc. */
-          diopts->blockSize = DI_BLKSZ_1024;
-        }
-        if (*tptr == 'B') {
-          diopts->blockSize = DI_BLKSZ_1000;
-        }
+      ++ptr;
+      if (*ptr == '\0') {
+        /* a string without a following i or B has a block size of 1024 */
+        /* this is a historical default */
+        diopts->blockSize = DI_BLKSZ_1024;
+      }
+      if (*ptr == 'i') {
+        /* gnu df allows MiB, etc. */
+        diopts->blockSize = DI_BLKSZ_1024;
+      }
+      if (*ptr == 'B') {
+        diopts->blockSize = DI_BLKSZ_1000;
       }
     } /* known size multiplier */
 

@@ -45,7 +45,7 @@ if [[ $flag != "CHK" ]]; then
   tarfn=$(echo di-*.tar.gz)
   didir=$(echo ${tarfn} | sed 's,\.tar.gz$,,')
 
-  rsltdir=$(pwd)/test_results/${host}
+  rsltdir=$(pwd)/results/${host}
 
   ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
       ${ipaddr} ${remuser} ${remport} ${rempath} ${remmath} \

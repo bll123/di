@@ -11,7 +11,6 @@
  *
  *  Display sizes:
  *      1 - bytes
- *      512 - posix (512 bytes)
  *      k - kilo
  *      m - mega
  *      g - giga
@@ -70,10 +69,11 @@
  *  The default format string for this program is: smbuvpT
  *
  *  Environment variables:
- *      DI_ARGS:            specifies any arguments to di.
  *      POSIXLY_CORRECT:    forces posix mode.
- *      BLOCKSIZE:          BSD df block size.
+ *      BLOCKSIZE:          BSD block size.
+ *      BLOCK_SIZE:         GNU utils block size.
  *      DF_BLOCK_SIZE:      GNU df block size.
+ *      DI_ARGS:            specifies any arguments to di.
  *
  *  Note that for filesystems that do not have, or systems (SysV.3)
  *  that do not report, available space, the amount of available space is
@@ -129,19 +129,19 @@ typedef struct {
   const char    *name;
 } di_disp_text_t;
 
-static di_disp_text_t disptext [] =
+static di_disp_text_t disptext [DI_SCALE_MAX] =
 {
-  { "",  "Byte", "",  "Byte" },
-  { "k", "Kilo", "ki", "Kibi" },
-  { "M", "Mega", "Mi", "Mebi" },
-  { "G", "Giga", "Gi", "Gibi" },
-  { "T", "Tera", "Ti", "Tebi" },
-  { "P", "Peta", "Pi", "Pebi" },
-  { "E", "Exa", "Ei", "Exbi" },
-  { "Z", "Zetta", "Zi", "Zebi" },
-  { "Y", "Yotta", "Yi", "Yobi" },
-  { "R", "Ronna", "Ri", "Robi" },
-  { "Q", "Quetta", "Qi", "Quebi" }
+  { "",  "Byte",    "",   "Byte" },
+  { "k", "Kilo",    "ki", "Kibi" },
+  { "M", "Mega",    "Mi", "Mebi" },
+  { "G", "Giga",    "Gi", "Gibi" },
+  { "T", "Tera",    "Ti", "Tebi" },
+  { "P", "Peta",    "Pi", "Pebi" },
+  { "E", "Exa",     "Ei", "Exbi" },
+  { "Z", "Zetta",   "Zi", "Zebi" },
+  { "Y", "Yotta",   "Yi", "Yobi" },
+  { "R", "Ronna",   "Ri", "Robi" },
+  { "Q", "Quetta",  "Qi", "Quebi" }
 };
 
 static void processExitFlag (void *di_data, int exitflag);
@@ -975,7 +975,6 @@ updateScaleValues (void *di_data, int iterval,
 
     ++dispcount;
   }
-
 }
 
 static void

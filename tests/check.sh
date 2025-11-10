@@ -21,10 +21,12 @@ failcount=0
 havecmake=""
 havemkc="mkc"
 
-ok=0
+toprsltdir=${topdir}/results
+
+ok=1
 for comp in ${complist}; do
-  if [[ -d ${topdir}/test_results/${host}_${comp} ]]; then
-    ok=1
+  if [[ ! -d ${toprsltdir}/${host}_${comp} ]]; then
+    ok=0
     break
   fi
 done
@@ -35,7 +37,7 @@ fi
 
 # chkswitcher
 for comp in ${complist}; do
-  rsltdir=${topdir}/test_results/${host}_${comp}
+  rsltdir=${toprsltdir}/${host}_${comp}
   tcount=$(($tcount+1))
   tfn=${rsltdir}/di-chkswitcher.out
   if [[ -f ${tfn} ]]; then
@@ -53,7 +55,7 @@ for comp in ${complist}; do
 done
 
 for comp in ${complist}; do
-  rsltdir=${topdir}/test_results/${host}_${comp}
+  rsltdir=${toprsltdir}/${host}_${comp}
   tcount=$(($tcount+1))
   if [[ ! -f ${rsltdir}/di-mkc-config.out ]]; then
     echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: no mkc config"
@@ -63,7 +65,8 @@ done
 
 # cmake/mkc comparison
 for comp in ${complist}; do
-  rsltdir=${topdir}/test_results/${host}_${comp}
+  rsltdir=${toprsltdir}/${host}_${comp}
+
   if [[ -f ${rsltdir}/di-cmake-config.out &&
       -f ${rsltdir}/di-mkc-config.out ]]; then
     tcount=$(($tcount+1))
@@ -85,22 +88,6 @@ for comp in ${complist}; do
     dlc=$(cat ${rsltdir}/di-pdiff.out | wc -l)
     if [[ $dlc != 0 ]]; then
       echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: config.h pure-cmake diff failed"
-      failcount=$(($failcount+1))
-    fi
-
-    tcount=$(($tcount+1))
-    diff -q -b -B ${rsltdir}/di-mkc-math.out ${rsltdir}/di-cmake-math.out
-    rc=$?
-    if [[ $rc != 0 ]]; then
-      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: dimathtest diff failed"
-      failcount=$(($failcount+1))
-    fi
-
-    tcount=$(($tcount+1))
-    diff -q -b -B ${rsltdir}/di-cmake-math.out ${rsltdir}/di-pcmake-math.out
-    rc=$?
-    if [[ $rc != 0 ]]; then
-      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: dimathtest pure-cmake diff failed"
       failcount=$(($failcount+1))
     fi
 
@@ -128,7 +115,7 @@ done
 rsltdir=""
 for comp in ${complist}; do
   if [[ x$rsltdir != x ]]; then
-    rsltdirb=${topdir}/test_results/${host}_${comp}
+    rsltdirb=${toprsltdir}/${host}_${comp}
 
     # do mkc first, always there
     for bld in mkc cmake pcmake; do
@@ -158,11 +145,11 @@ for comp in ${complist}; do
     done
   fi
 
-  rsltdir=${topdir}/test_results/${host}_${comp}
+  rsltdir=${toprsltdir}/${host}_${comp}
 done
 
 for comp in ${complist}; do
-  rsltdir=${topdir}/test_results/${host}_${comp}
+  rsltdir=${toprsltdir}/${host}_${comp}
 
   for bld in mkc cmake pcmake; do
     if [[ ! -f ${rsltdir}/di-${bld}-run.out ]]; then
@@ -175,6 +162,21 @@ for comp in ${complist}; do
     rc=$?
     if [[ $rc != 0 ]]; then
       echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: no debug output in run file"
+      failcount=$(($failcount+1))
+    fi
+
+    tcount=$(($tcount+1))
+    twc=$(grep "^# blocksize: 1000" ${rsltdir}/di-${bld}-run.out | wc -l)
+    rc=$?
+    if [[ $rc != 0 || $twc != 1 ]]; then
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: incorrect blocksize/1000 count ($twc)"
+      failcount=$(($failcount+1))
+    fi
+    tcount=$(($tcount+1))
+    twc=$(grep "^# blocksize: 1024" ${rsltdir}/di-${bld}-run.out | wc -l)
+    rc=$?
+    if [[ $rc != 0 || $twc != 5 ]]; then
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}: ${bld}: ${comp}: incorrect blocksize/1024 count ($twc)"
       failcount=$(($failcount+1))
     fi
 

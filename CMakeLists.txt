@@ -1283,6 +1283,14 @@ target_link_libraries (getoptn_test PRIVATE
 
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 
+#### test
+
+enable_testing ()
+add_test (
+  NAME localtest
+  COMMAND ${PROJECT_SOURCE_DIR}/tests/localtest.sh ${DI_BINARY_DIR} ${PROJECT_SOURCE_DIR}
+)
+
 #### install
 
 install (TARGETS ${DI_LIBNAME}

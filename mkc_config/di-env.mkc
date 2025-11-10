@@ -102,4 +102,3 @@ extension exe
 extension shlib
 
 cmd_msgfmt
-

@@ -174,7 +174,7 @@ fi
 tarfn=$(echo di-*.tar.gz)
 didir=$(echo ${tarfn} | sed 's,\.tar.gz$,,')
 
-rsltdir=$(pwd)/test_results
+rsltdir=$(pwd)/results
 test -d ${rsltdir} || mkdir ${rsltdir}
 
 if [[ ${proclocal} == T || ${procremote} == T ]]; then
@@ -192,18 +192,16 @@ if [[ ${proclocal} == T || ${procremote} == T ]]; then
       continue
     fi
 
-    if [[ $flag != C ]]; then
-      rsltdir=$(pwd)/test_results/${host}
-    fi
+    trsltdir=${rsltdir}/${host}
 
     if [[ $bg == T ]]; then
       nohup ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
           ${ipaddr} ${remuser} ${remport} ${rempath} ${remmath} \
-          ${flag} ${complist} 2>&1 | tee ${rsltdir}.w &
+          ${flag} ${complist} 2>&1 | tee ${trsltdir}.w &
     else
       ./tests/thost.sh ${tarfn} ${didir} ${host} ${type} \
           ${ipaddr} ${remuser} ${remport} ${rempath} ${remmath} \
-          ${flag} ${complist} 2>&1 | tee ${rsltdir}.w
+          ${flag} ${complist} 2>&1 | tee ${trsltdir}.w
     fi
   done
 fi

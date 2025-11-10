@@ -112,27 +112,23 @@ bldrun () {
     grc=1
   fi
 
-  if [ $tag = cmake -o $tag = pcmake ]; then
-    testpfx=./build
-  fi
-  if [ $tag = mkc ]; then
-    testpfx=.
-  fi
-  mathtest=${testpfx}/dimathtest
-  getoptntest=${testpfx}/getoptn_test
+  unset POSIXLY_CORRECT
+  unset BLOCKSIZE
+  unset BLOCK_SIZE
+  unset DF_BLOCK_SIZE
+  unset DI_ARGS
 
-  LD_LIBRARY_PATH=`pwd`/${testpfx} ${mathtest} > di-${tag}-math.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: dimathtest failed"
-    echo "FAIL ${host}: ${tag}/${comp}: dimathtest failed"
-    grc=1
+  if [ $tag = pcmake ]; then
+    cmake --build build --target test >> di-${tag}-test.out 2>&1
+    rc=$?
+  else
+    make -e PMODE="" CC=${comp} \
+        PREFIX=${loc}/x ${tag}-test \
+        > di-${tag}-test.out 2>&1
+    rc=$?
   fi
-  LD_LIBRARY_PATH=`pwd`/${testpfx} ${getoptntest} > di-${tag}-getoptn.out 2>&1
-  rc=$?
   if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: getoptn_test failed"
-    echo "FAIL ${host}: ${tag}/${comp}: getoptn_test failed"
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: test failed"
     grc=1
   fi
 
@@ -231,6 +227,66 @@ bldrun () {
   if [ $rc -ne 0 ]; then
     echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-x known)"
     echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-x known)"
+    grc=1
+  fi
+
+  # BLOCK_SIZE env var
+  echo "-- RUN: BLOCK_SIZE=k" >> di-${tag}-run.out
+  BLOCK_SIZE=k ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=k)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=k)"
+    grc=1
+  fi
+
+  # BLOCK_SIZE env var
+  echo "-- RUN: BLOCK_SIZE=M" >> di-${tag}-run.out
+  BLOCK_SIZE=M ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=M)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=M)"
+    grc=1
+  fi
+
+  # BLOCK_SIZE env var
+  echo "-- RUN: BLOCK_SIZE=MB" >> di-${tag}-run.out
+  BLOCK_SIZE=MB ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MB)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MB)"
+    grc=1
+  fi
+
+  # BLOCK_SIZE env var
+  echo "-- RUN: BLOCK_SIZE=MiB" >> di-${tag}-run.out
+  BLOCK_SIZE=MiB ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MiB)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MiB)"
+    grc=1
+  fi
+
+  # BLOCK_SIZE env var
+  echo "-- RUN: BLOCK_SIZE='MiB" >> di-${tag}-run.out
+  BLOCK_SIZE="'MiB" ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE='MiB)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE='MiB)"
+    grc=1
+  fi
+
+  # DI_ARGS env var
+  echo "-- RUN: DI_ARGS=-f SMbuvp" >> di-${tag}-run.out
+  DI_ARGS="-f SMbuvp" ./x/bin/di >> di-${tag}-run.out 2>&1
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (DI_ARGS=-f SMbuvp)"
+    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (DI_ARGS=-f SMbuvp)"
     grc=1
   fi
 

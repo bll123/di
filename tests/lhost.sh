@@ -48,7 +48,7 @@ if [ $flag != C ]; then
   ./dibldrun.sh ${host} ${tarfn} ${didir} ${math} ${comp}
 fi
 
-rsltdir=test_results/${host}_${comp}
+rsltdir=results/${host}_${comp}
 testdir=${didir}_${comp}
 
 if [ x$localdir != x ]; then

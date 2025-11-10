@@ -134,7 +134,7 @@ realclean:
 distclean:
 	@$(MAKE) realclean >/dev/null 2>&1
 	@-rm -rf test_di _mkconfig_runtests \
-		test_results x x.m x.g x.t x.i \
+		results x x.m x.g x.t x.i \
 		$(MKC_FILES) \
 		$(BUILDDIR) \
 		>/dev/null 2>&1; exit 0
@@ -248,8 +248,7 @@ cmake-install:
 
 .PHONY: cmake-test
 cmake-test:
-	LD_LIBRARY_PATH=$$(pwd)/build ./build/dimathtest
-	LD_LIBRARY_PATH=$$(pwd)/build ./build/getoptn_test
+	cmake --build $(BUILDDIR) --target test
 
 .PHONY: cmake-chkswitcher
 cmake-chkswitcher:
@@ -286,9 +285,7 @@ mkc-perl:	$(MKC_ENV)
 
 .PHONY: mkc-test
 mkc-test:
-	. ./$(MKC_ENV); \
-	    LD_LIBRARY_PATH=$$(pwd) ./dimathtest$(EXE_EXT); \
-	    LD_LIBRARY_PATH=$$(pwd) ./getoptn_test$(EXE_EXT)
+	./tests/localtest.sh mkc
 
 .PHONY: mkc-chkswitcher
 mkc-chkswitcher:

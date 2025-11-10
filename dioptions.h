@@ -27,6 +27,7 @@ typedef struct di_opt {
   getoptn_opt_t   *opts;
   const char      ** argv;
   const char      *formatString;
+  char            *diargsptr;
   di_strarr_t     exclude_list;
   di_strarr_t     include_list;
   char            zoneDisplay [MAXPATHLEN];

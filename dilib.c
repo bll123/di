@@ -209,6 +209,7 @@ di_process_options (void *tdi_data, int argc, const char * argv [], int offset)
   exitflag = di_get_options (argc, argv, diopts, offset);
 
   if (diopts->optval [DI_OPT_DEBUG] > 0) {
+    fprintf (stdout, "# version: %s\n", di_version ());
     fprintf (stdout, "# BUILD: %s\n", DI_BUILD_SYS);
 #if _use_math == DI_GMP
     fprintf (stdout, "# MATH: GMP\n");
@@ -505,7 +506,7 @@ di_disp_scaled (void *tdi_data, char *buff, long sz, int infoidx,
     int scaleidx, int validxA, int validxB, int validxC)
 {
   di_data_t   *di_data = (di_data_t *) tdi_data;
-  double      dval;
+  di_opt_t    *diopts;
 
   *buff = '\0';
   if (di_data == NULL) {
@@ -516,10 +517,21 @@ di_disp_scaled (void *tdi_data, char *buff, long sz, int infoidx,
     return;
   }
 
-  dval = di_get_scaled (di_data, infoidx, scaleidx, validxA, validxB, validxC);
+  diopts = (di_opt_t *) di_data->options;
+
   if (scaleidx == DI_SCALE_BYTE) {
-    Snprintf1 (buff, (Size_t) sz, "%.0f", dval);
+    dinum_t     val;
+
+    dinum_init (&val);
+    di_calc_space (di_data, infoidx, validxA, validxB, validxC, &val);
+    dinum_str (&val, buff, (Size_t) sz);
+    dinum_clear (&val);
   } else {
+    double      dval;
+
+    /* note that for large values and small display scaling, */
+    /* this could overflow */
+    dval = di_get_scaled (di_data, infoidx, scaleidx, validxA, validxB, validxC);
     Snprintf1 (buff, (Size_t) sz, "%.1f", dval);
   }
 }
@@ -1095,6 +1107,7 @@ checkDiskQuotas (di_data_t *di_data)
 
     if (diopts->optval [DI_OPT_DEBUG] > 2) {
       char    tbuff [100];
+
       dinum_str (&diqinfo.values [DI_QUOTA_LIMIT], tbuff, sizeof (tbuff));
       printf ("quota: %s limit: %s\n", dinfo->strdata [DI_DISP_MOUNTPT], tbuff);
       dinum_str (&dinfo->values [DI_SPACE_TOTAL], tbuff, sizeof (tbuff));
