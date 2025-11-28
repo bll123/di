@@ -700,7 +700,7 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
   diopts->opts = (getoptn_opt_t *) malloc (sizeof (getoptn_opt_t) * OPT_IDX_MAX);
   if (diopts->opts == NULL) {
     fprintf (stderr, "malloc failed in diopt_init.  errno %d\n", errno);
-    exit (1);
+    return;
   }
   for (i = 0; i < OPT_IDX_MAX; ++i) {
     diopts->opts [i].option = NULL;
@@ -980,7 +980,7 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
   if (c != OPT_IDX_MAX) {
     fprintf (stderr, "incorrect option initialization %d/%d\n",
         c, OPT_IDX_MAX);
-    exit (1);
+    return;
   }
   diopts->optinit = true;
 }

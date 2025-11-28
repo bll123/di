@@ -119,12 +119,13 @@ values (as a long double has a mantissa of approximately 34 digits).
 In 2025, I decided that in order to support the very large disk sizes
 that modern systems have, and to future-proof _di_, _di_ should use
 one of the multi precision libraries.  Version&nbsp;5/6 supports
-either the use of GMP or libtommath for multi precision support.  If
-neither of these are available, the value is stored in the largest
-supported type: long double, double, uint64_t, long long, or long.
+either the use of MPDecimal, GMP or libtommath for multi precision
+support.  If none of these are available, the value is stored in the
+largest supported type: long double, double, uint64_t, long long, or
+long.
 
 Multi precision support will ensure that _di_ works with very large
-disks in the future, and will also ensure that the number calculations
+disks in the future, and will also ensure that the numeric calculations
 are accurate.
 
 Use of the multi precision libraries is optional, as long doubles are

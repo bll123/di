@@ -371,7 +371,7 @@ chkMountOptions (const char *mntopts, const char *str)
   tstr = strdup (mntopts);
   if (tstr == (char *) NULL) {
     fprintf (stderr, "strdup failed in chkMountOptions (1).  errno %d\n", errno);
-    exit (1);
+    return (char *) NULL;
   }
   ptr = di_strtok (tstr, ",", &tokstr);
   while (ptr != (char *) NULL) {

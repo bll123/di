@@ -299,7 +299,7 @@ getoptn (int style, int argc, const char * argv [],
     for (i = 0; i < info.optcount; ++i) {
       if (info.opts [i].option == NULL) {
         fprintf (stderr, "fatal error: null option\n");
-        exit (1);
+        return -1;
       }
       info.optinfo [i].optionlen = strlen (info.opts [i].option);
       info.optinfo [i].idx = i;
