@@ -1,0 +1,63 @@
+# 2025-12-19
+name: di-msys2-pure-cmake
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  msys2-build:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        build_type: [Release]
+        c_compiler: [gcc, clang]
+        include:
+          - { sys: mingw64, env: x86_64 }
+          - { sys: ucrt64, env: ucrt-x86_64 }
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    env:
+      INSTDIR: ${{ github.workspace }}/di-install
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.sys }}
+          update: true
+          install: >
+            git
+            gettext
+            gettext-devel
+            mingw-w64-${{ matrix.env }}-cmake
+            mingw-w64-${{ matrix.env }}-pkgconf
+            mingw-w64-${{ matrix.env }}-gcc
+            mingw-w64-${{ matrix.env }}-clang
+
+      - name: Set reusable strings
+        # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+        id: strings
+        run: |
+          echo "inst-dir=$(cygpath -u $INSTDIR)" >> "$GITHUB_OUTPUT"
+
+      - name: Configure / Build
+        run: >
+          make PREFIX=${{ steps.strings.outputs.inst-dir }} mkc-all
+
+      - name: Test
+        run: >
+          make PREFIX=${{ steps.strings.outputs.inst-dir }} mkc-test
+
+      - name: Install
+        run: >
+          make PREFIX=${{ steps.strings.outputs.inst-dir }} mkc-install
+
