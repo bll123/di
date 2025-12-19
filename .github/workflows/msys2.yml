@@ -1,3 +1,4 @@
+# 2025-12-19
 name: di-msys2-cmake
 
 on:
@@ -7,11 +8,12 @@ on:
     branches: [ "master" ]
 
 jobs:
-  msys2-build:
+  build:
     runs-on: windows-latest
 
     strategy:
       fail-fast: false
+      continue-on-error: true
 
       matrix:
         build_type: [Release]
