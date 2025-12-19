@@ -43,8 +43,8 @@ jobs:
       - name: Configure / Build
         run: >
           make PREFIX=${{ runner.temp }}/di-install
-            CC=${{ matrix.c_compiler }}
-            mkc-all
+          CC=${{ matrix.c_compiler }}
+          mkc-all
 
       - name: Test
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
@@ -52,11 +52,11 @@ jobs:
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: >
           make PREFIX=${{ runner.temp }}/di-install
-            CC=${{ matrix.c_compiler }}
-            mkc-test
+          CC=${{ matrix.c_compiler }}
+          mkc-test
 
       - name: Install
         run: >
           make PREFIX=${{ runner.temp }}/di-install
-            CC=${{ matrix.c_compiler }}
-            mkc-install
+          CC=${{ matrix.c_compiler }}
+          mkc-install
