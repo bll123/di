@@ -1,0 +1,62 @@
+# 2025-12-19
+name: di-make-mkc
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-latest, macos-15-intel, macos-14, macos-15, macos-latest]
+        build_type: [Release]
+        c_compiler: [gcc, clang]
+        include:
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+        exclude:
+          - os: ubuntu-latest
+            c_compiler: cl
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set reusable strings
+        # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+      - name: Configure / Build
+        run: >
+          make PREFIX=${{ runner.temp }}/di-install
+            CC=${{ matrix.c_compiler }}
+            mkc-all
+
+      - name: Test
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: >
+          make PREFIX=${{ runner.temp }}/di-install
+            CC=${{ matrix.c_compiler }}
+            mkc-test
+
+      - name: Install
+        run: >
+          make PREFIX=${{ runner.temp }}/di-install
+            CC=${{ matrix.c_compiler }}
+            mkc-install
