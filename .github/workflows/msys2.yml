@@ -1,5 +1,5 @@
 # 2025-12-19
-name: di-msys2-cmake
+name: di-msys2-pure-cmake
 
 on:
   push:
