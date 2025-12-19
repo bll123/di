@@ -28,6 +28,7 @@ jobs:
     env:
       BLDDIR: ${{ github.workspace }}/build
       INSTDIR: ${{ github.workspace }}/di-install
+      WSDIR: ${{ github.workspace }}
 
     steps:
       - uses: actions/checkout@v4
@@ -50,6 +51,7 @@ jobs:
         run: |
           echo "build-output-dir=$(cygpath -u $BLDDIR)" >> "$GITHUB_OUTPUT"
           echo "inst-dir=$(cygpath -u $INSTDIR)" >> "$GITHUB_OUTPUT"
+          echo "ws-dir=$(cygpath -u $WSDIR)" >> "$GITHUB_OUTPUT"
 
       - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -59,7 +61,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -S ${{ github.workspace }}
+          -S ${{ steps.strings.outputs.ws-dir }}
           -DCMAKE_INSTALL_PREFIX=${{ steps.strings.outputs.inst-dir }}
 
       - name: Build
