@@ -38,8 +38,8 @@ jobs:
         id: strings
         shell: bash
         run: |
-          echo "build-output-dir=$(cygpath -u ${{ github.workspace }})/build" >> "$GITHUB_OUTPUT"
-          echo "inst-dir=$(cygpath -u ${{ runner.temp }})/di-install" >> "$GITHUB_OUTPUT"
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+          echo "inst-dir=${{ runner.temp }}/di-install" >> "$GITHUB_OUTPUT"
 
       - name: Configure / Build
         run: >
