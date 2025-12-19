@@ -44,6 +44,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-pkgconf
             mingw-w64-${{ matrix.env }}-gcc
             mingw-w64-${{ matrix.env }}-clang
+            mingw-w64-${{ matrix.env }}-make
 
       - name: Set reusable strings
         # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
