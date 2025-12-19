@@ -20,7 +20,6 @@ jobs:
         include:
           - { sys: mingw64, env: x86_64 }
           - { sys: ucrt64, env: ucrt-x86_64 }
-          - { sys: clang64, env: clang-x86_64 }
 
     defaults:
       run:
@@ -37,7 +36,6 @@ jobs:
             gettext
             gettext-devel
             mingw-w64-${{ matrix.env }}-pkgconf
-            mingw-w64-${{ matrix.env }}-x86_64-clang
             mingw-w64-${{ matrix.env }}-gcc
             mingw-w64-${{ matrix.env }}-clang
 
