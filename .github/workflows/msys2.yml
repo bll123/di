@@ -36,7 +36,7 @@ jobs:
             git
             gettext
             gettext-devel
-            mingw-w64-${{ matric.env }}-pkgconf
+            mingw-w64-${{ matrix.env }}-pkgconf
             mingw-w64-${{ matrix.env }}-x86_64-clang
             mingw-w64-${{ matrix.env }}-gcc
             mingw-w64-${{ matrix.env }}-clang
