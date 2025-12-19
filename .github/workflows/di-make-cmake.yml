@@ -38,28 +38,26 @@ jobs:
         id: strings
         shell: bash
         run: |
-          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+          echo "build-output-dir=$(cygpath -u ${{ github.workspace }})/build" >> "$GITHUB_OUTPUT"
+          echo "inst-dir=$(cygpath -u ${{ runner.temp }})/di-install" >> "$GITHUB_OUTPUT"
 
       - name: Configure / Build
         run: >
-          make PREFIX=${{ runner.temp }}/di-install
+          make PREFIX=${{ steps.strings.outputs.inst-dir }}
           BUILDDIR=${{ steps.strings.outputs.build-output-dir }}
           CC=${{ matrix.c_compiler }}
           cmake-all
 
       - name: Test
-        working-directory: ${{ steps.strings.outputs.build-output-dir }}
-        # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: >
-          make PREFIX=${{ runner.temp }}/di-install
+          make PREFIX=${{ steps.strings.outputs.inst-dir }}
           BUILDDIR=${{ steps.strings.outputs.build-output-dir }}
           CC=${{ matrix.c_compiler }}
           cmake-test
 
       - name: Install
         run: >
-          make PREFIX=${{ runner.temp }}/di-install
+          make PREFIX=${{ steps.strings.outputs.inst-dir }}
           BUILDDIR=${{ steps.strings.outputs.build-output-dir }}
           CC=${{ matrix.c_compiler }}
           cmake-install
