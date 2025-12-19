@@ -27,7 +27,7 @@ jobs:
 
     env:
       BLDDIR: ${{ github.workspace }}/build
-      INSTDIR: ${{ runner.temp }}/di-install
+      INSTDIR: ${{ github.workspace }}/di-install
 
     steps:
       - uses: actions/checkout@v4
