@@ -47,7 +47,7 @@
 #endif
 
 #if ! defined (MAXPATHLEN)
-# define MAXPATHLEN         255
+# define MAXPATHLEN         1024
 #endif
 
 #if _sys_fstyp                          /* HP-UX, Solaris */
