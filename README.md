@@ -82,6 +82,8 @@ To force GMP:
 
     make -e PREFIX=$HOME/local DI_USE_MATH=DI_GMP
 
+    GMP does not work on windows/msys2.
+
 To force MPDecimal:
 
     make -e PREFIX=$HOME/local DI_USE_MATH=DI_MPDECIMAL
