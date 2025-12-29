@@ -132,6 +132,7 @@ di_initialize (void)
   di_data->haspooledfs = false;
   di_data->disppooledfs = false;
   di_data->totsorted = false;
+  di_data->zoneInfo = (di_zone_info_t *) NULL;
 
   di_data->diskInfo = (di_disk_info_t *) NULL;
 
@@ -150,7 +151,7 @@ di_cleanup (void *tdi_data)
   di_data_t       *di_data = (di_data_t *) tdi_data;
   int             i;
   di_opt_t        *diopts;
-  di_zone_info_t  *zinfo;
+  di_zone_info_t  *zinfo = NULL;
 
   if (di_data == NULL) {
     return;

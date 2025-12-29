@@ -5,6 +5,9 @@
 #if _hdr_stdlib
 # include <stdlib.h>
 #endif
+#if _hdr_stdio
+# include <stdio.h>
+#endif
 #if _hdr_string
 # include <string.h>
 #endif
@@ -116,7 +119,7 @@ di_initialize_zones (di_opt_t *diopts)
 void
 di_free_zones (di_zone_info_t *zinfo)
 {
-  if (zinfo == NULL) {
+  if (zinfo == (di_zone_info_t *) NULL) {
     return;
   }
 
