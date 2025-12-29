@@ -1288,7 +1288,7 @@ configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 enable_testing ()
 add_test (
   NAME localtest
-  COMMAND ${PROJECT_SOURCE_DIR}/tests/localtest.sh ${DI_BINARY_DIR} ${PROJECT_SOURCE_DIR}
+  COMMAND sh ${PROJECT_SOURCE_DIR}/tests/localtest.sh ${DI_BINARY_DIR} ${PROJECT_SOURCE_DIR}
 )
 
 #### install
