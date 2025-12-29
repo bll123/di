@@ -18,7 +18,9 @@ jobs:
         os: [ubuntu-latest, macos-15-intel, macos-14, macos-15, macos-latest]
         build_type: [Release]
         c_compiler: [gcc, clang]
-        math: [DI_INTERNAL, DI_GMP, DI_MPDECIMAL, DI_TOMMATH]
+        # DI_MPDECIMAL depends on libmpdec-dev,
+        # which seems to be not available on ubuntu 24.04 !!
+        math: [DI_INTERNAL, DI_GMP, DI_TOMMATH]
         include:
           - os: ubuntu-latest
             c_compiler: gcc
@@ -39,7 +41,7 @@ jobs:
         shell: bash
         run: |
           if [[ $RUNNER_OS == Linux ]]; then
-            sudo apt -y install libgmp-dev libmpdec-dev libtommath-dev
+            sudo apt -y install libgmp-dev libtommath-dev
           fi
 
       - name: Set reusable strings
