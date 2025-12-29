@@ -31,7 +31,13 @@ jobs:
         exclude:
           - os: ubuntu-latest
             c_compiler: cl
-          - os: macos-15-intel, macos-14, macos-15, macos-latest
+          - os: macos-15-intel
+            math: DI_TOMMATH
+          - os: macos-14
+            math: DI_TOMMATH
+          - os: macos-15
+            math: DI_TOMMATH
+          - os: macos-latest
             math: DI_TOMMATH
 
     steps:
