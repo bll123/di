@@ -12,8 +12,11 @@ systype=`uname -s`
 
 if [ $# -gt 0 -a $1 = mkc ]; then
   runpath=.
+  . ./VERSION.txt
 elif [ $# -gt 0 ]; then
   runpath=${1}
+  SRC=${2}
+  . ${SRC}/VERSION.txt
 else
   echo "## unknown path"
   exit 2
@@ -25,8 +28,6 @@ case ${systype} in
       LD_LIBRARY_PATH=`pwd`
     elif [ $# -gt 0 ]; then
       LD_LIBRARY_PATH=${1}
-      SRC=${2}
-      . ${SRC}/VERSION.txt
     else
       echo "## unknown path"
       exit 2
@@ -34,7 +35,14 @@ case ${systype} in
     export LD_LIBRARY_PATH
     ;;
   Darwin)
-    DYLD_FALLBACK_LIBRARY_PATH=${LD_LIBRARY_PATH}
+    if [ $# -gt 0 -a $1 = mkc ]; then
+      DYLD_FALLBACK_LIBRARY_PATH=`pwd`
+    elif [ $# -gt 0 ]; then
+      DYLD_FALLBACK_LIBRARY_PATH=${1}
+    else
+      echo "## unknown path"
+      exit 2
+    fi
     export DYLD_FALLBACK_LIBRARY_PATH
     ;;
   MINGW64*)
