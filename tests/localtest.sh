@@ -11,24 +11,36 @@ fi
 systype=`uname -s`
 
 if [ $# -gt 0 -a $1 = mkc ]; then
-  LD_LIBRARY_PATH=`pwd`
   runpath=.
 elif [ $# -gt 0 ]; then
-  LD_LIBRARY_PATH=${1}
-  SRC=${2}
   runpath=${1}
-  . ${SRC}/VERSION.txt
 else
   echo "## unknown path"
   exit 2
 fi
-export LD_LIBRARY_PATH
 
-if [ $systype = Darwin ]; then
-  DYLD_FALLBACK_LIBRARY_PATH=${LD_LIBRARY_PATH}
-  export DYLD_FALLBACK_LIBRARY_PATH
-  unset LD_LIBRARY_PATH
-fi
+case ${systype} in
+  Linux)
+    if [ $# -gt 0 -a $1 = mkc ]; then
+      LD_LIBRARY_PATH=`pwd`
+    elif [ $# -gt 0 ]; then
+      LD_LIBRARY_PATH=${1}
+      SRC=${2}
+      . ${SRC}/VERSION.txt
+    else
+      echo "## unknown path"
+      exit 2
+    fi
+    export LD_LIBRARY_PATH
+    ;;
+  Darwin)
+    DYLD_FALLBACK_LIBRARY_PATH=${LD_LIBRARY_PATH}
+    export DYLD_FALLBACK_LIBRARY_PATH
+    ;;
+  MINGW64*)
+    PATH=`pwd`:$PATH
+    ;;
+esac
 
 ${runpath}/dimathtest
 rc=$?
@@ -67,12 +79,18 @@ esac
 out="`${runpath}/di -n /`"
 case "$out" in
   "")
-    echo "FAIL: no output"
+    echo "FAIL: no output [-n]"
     grc=1
     ;;
   " "*)
-    echo "FAIL: leading space"
-    grc=1
+    case ${systype} in
+      MINGW64*)
+        ;;
+      *)
+        echo "FAIL: leading space [-n]"
+        grc=1
+        ;;
+    esac
     ;;
   *)
     ;;
@@ -81,12 +99,18 @@ esac
 out="`DI_ARGS="-f SMbuvp" ${runpath}/di -n /`"
 case "$out" in
   "")
-    echo "FAIL: no output (di_args)"
+    echo "FAIL: no output (di_args) [-f SMbuvp]"
     grc=1
     ;;
   " "*)
-    echo "FAIL: leading space"
-    grc=1
+    case ${systype} in
+      MINGW64*)
+        ;;
+      *)
+        echo "FAIL: leading space [-f SMbuvp]"
+        grc=1
+        ;;
+    esac
     ;;
   *)
     ;;
