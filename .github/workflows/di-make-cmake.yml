@@ -49,6 +49,8 @@ jobs:
           cmake-all
 
       - name: Test
+        # github cmake really wants to use ctest
+        # changed to use our own target
         run: >
           make PREFIX=${{ steps.strings.outputs.inst-dir }}
           BUILDDIR=${{ steps.strings.outputs.build-output-dir }}

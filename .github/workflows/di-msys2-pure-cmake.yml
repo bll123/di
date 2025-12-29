@@ -72,9 +72,11 @@ jobs:
           --config ${{ matrix.build_type }}
 
       - name: Test
+        # github cmake really wants to use ctest
+        # changed to use our own target
         run: >
           cmake --build ${{ steps.strings.outputs.build-output-dir }}
-          --target test
+          --target ditest
 
       - name: Install
         run: cmake --install ${{ steps.strings.outputs.build-output-dir }}

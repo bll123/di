@@ -55,7 +55,7 @@ To use cmake in a stand-alone fashion (as of version 5.0.4):
 
     cmake -DCMAKE_INSTALL_PREFIX=$HOME/local -S . -B build
     cmake --build build
-    cmake --build build --target test
+    cmake --build build --target ditest
     cmake --install build
 
 To select one of the multi-precision libraries when using cmake:

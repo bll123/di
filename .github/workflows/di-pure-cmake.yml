@@ -52,16 +52,17 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=${{ runner.temp }}/di-install
 
       - name: Build
-        # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
         run: >
           cmake --build ${{ steps.strings.outputs.build-output-dir }}
           --config ${{ matrix.build_type }}
 
       - name: Test
+        # github cmake really wants to use ctest
+        # changed to use our own target
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
         run: >
           cmake --build ${{ steps.strings.outputs.build-output-dir }}
-          --target test
+          --target ditest
 
       - name: Install
         run: cmake --install ${{ steps.strings.outputs.build-output-dir }}

@@ -1284,12 +1284,14 @@ target_link_libraries (getoptn_test PRIVATE
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 
 #### test
+# even though this had worked manually,
+# using the standard cmake test target runs into github workflow trying
+# to use ctest.
 
-enable_testing ()
-add_test (
-  NAME localtest
+add_custom_target (ditest
   COMMAND sh ${PROJECT_SOURCE_DIR}/tests/localtest.sh ${DI_BINARY_DIR} ${PROJECT_SOURCE_DIR}
 )
+add_dependencies (ditest ${DI_LIBNAME} di)
 
 #### install
 

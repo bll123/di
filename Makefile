@@ -248,7 +248,7 @@ cmake-install:
 
 .PHONY: cmake-test
 cmake-test:
-	cmake --build $(BUILDDIR) --target test
+	cmake --build $(BUILDDIR) --target ditest
 
 .PHONY: cmake-chkswitcher
 cmake-chkswitcher:
