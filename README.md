@@ -83,6 +83,8 @@ building it this way (as of 2025).
 
 MacOS Apple Silicon does not support long doubles.
 
+Windows: GMP does not appear to work when building with Msys2.
+
 To force GMP:
 
     make -e PREFIX=$HOME/local DI_USE_MATH=DI_GMP
