@@ -8,6 +8,10 @@
 
 * Bug Fixes:
     * Fix a crash (uninitialized variable).
+    * Fix windows build (long double handling).
+* Internal:
+    * Added some github workflows.
+    * Changed the cmake 'test' target to 'ditest'.
 
 -->
 

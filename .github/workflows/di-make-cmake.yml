@@ -60,7 +60,7 @@ jobs:
 
       - name: Configure / Build
         run: >
-          make PREFIX=${{ steps.strings.outputs.inst-dir }}
+          make -e PREFIX=${{ steps.strings.outputs.inst-dir }}
           DI_USE_MATH=${{ matrix.math }}
           BUILDDIR=${{ steps.strings.outputs.build-output-dir }}
           CC=${{ matrix.c_compiler }}
@@ -70,14 +70,14 @@ jobs:
         # github cmake really wants to use ctest
         # changed to use our own target
         run: >
-          make PREFIX=${{ steps.strings.outputs.inst-dir }}
+          make -e PREFIX=${{ steps.strings.outputs.inst-dir }}
           BUILDDIR=${{ steps.strings.outputs.build-output-dir }}
           CC=${{ matrix.c_compiler }}
           cmake-test
 
       - name: Install
         run: >
-          make PREFIX=${{ steps.strings.outputs.inst-dir }}
+          make -e PREFIX=${{ steps.strings.outputs.inst-dir }}
           BUILDDIR=${{ steps.strings.outputs.build-output-dir }}
           CC=${{ matrix.c_compiler }}
           cmake-install

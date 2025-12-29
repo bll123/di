@@ -66,6 +66,9 @@ To select one of the multi-precision libraries when using cmake:
 Where DI_USE_MATH can be set to one of DI_GMP, DI_MPDECIMAL,
 DI_TOMMATH or DI_INTERNAL.
 
+MacOS Apple Silicon does not support long doubles, so the use of
+DI_MPDECIMAL is recommended.
+
 If no multi-precision library is specified and the GMP, mpdecimal
 (preferred) or libtommath library is found, it will be used, otherwise
 the numerics will be handled using standard C data types (long double,
@@ -78,11 +81,11 @@ To turn off the use of the multi-precision libraries;
 Long doubles are quite capable, there's nothing wrong with
 building it this way (as of 2025).
 
+MacOS Apple Silicon does not support long doubles.
+
 To force GMP:
 
     make -e PREFIX=$HOME/local DI_USE_MATH=DI_GMP
-
-    GMP does not work on windows/msys2.
 
 To force MPDecimal:
 

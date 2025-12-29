@@ -23,17 +23,6 @@ else
 fi
 
 case ${systype} in
-  Linux)
-    if [ $# -gt 0 -a $1 = mkc ]; then
-      LD_LIBRARY_PATH=`pwd`
-    elif [ $# -gt 0 ]; then
-      LD_LIBRARY_PATH=${1}
-    else
-      echo "## unknown path"
-      exit 2
-    fi
-    export LD_LIBRARY_PATH
-    ;;
   Darwin)
     if [ $# -gt 0 -a $1 = mkc ]; then
       DYLD_FALLBACK_LIBRARY_PATH=`pwd`
@@ -47,6 +36,17 @@ case ${systype} in
     ;;
   MINGW64*)
     PATH=`pwd`:$PATH
+    ;;
+  *)
+    if [ $# -gt 0 -a $1 = mkc ]; then
+      LD_LIBRARY_PATH=`pwd`
+    elif [ $# -gt 0 ]; then
+      LD_LIBRARY_PATH=${1}
+    else
+      echo "## unknown path"
+      exit 2
+    fi
+    export LD_LIBRARY_PATH
     ;;
 esac
 

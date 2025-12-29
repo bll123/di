@@ -119,7 +119,7 @@ bldrun () {
   unset DI_ARGS
 
   if [ $tag = pcmake ]; then
-    cmake --build build --target test >> di-${tag}-test.out 2>&1
+    cmake --build build --target ditest >> di-${tag}-test.out 2>&1
     rc=$?
   else
     make -e PMODE="" CC=${comp} \

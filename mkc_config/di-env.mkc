@@ -76,6 +76,12 @@ if UsingCLANG == DI_FORTIFY Y && == _MKCONFIG_USING_CLANG Y
  addldflag -fstack-protector-all
 endif
 
+# _mkconfig_systype may have MINGW* stuff in it.
+# check if the windows.h header is here
+if windows _hdr_windows
+ addcflag -D__USE_MINGW_ANSI_STDIO
+endif
+
 pkg cflags libtirpc
 pkg libs libtirpc
 

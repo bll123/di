@@ -59,19 +59,19 @@ jobs:
 
       - name: Configure / Build
         run: >
-          make PREFIX=${{ steps.strings.outputs.inst-dir }}
+          make -e PREFIX=${{ steps.strings.outputs.inst-dir }}
           DI_USE_MATH=${{ matrix.math }}
           CC=${{ matrix.c_compiler }}
           mkc-all
 
       - name: Test
         run: >
-          make PREFIX=${{ steps.strings.outputs.inst-dir }}
+          make -e PREFIX=${{ steps.strings.outputs.inst-dir }}
           CC=${{ matrix.c_compiler }}
           mkc-test
 
       - name: Install
         run: >
-          make PREFIX=${{ steps.strings.outputs.inst-dir }}
+          make -e PREFIX=${{ steps.strings.outputs.inst-dir }}
           CC=${{ matrix.c_compiler }}
           mkc-install

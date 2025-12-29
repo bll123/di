@@ -285,6 +285,10 @@ else()
   add_link_options (-static-libstdc++)
 endif()
 
+if (WIN32)
+  add_compile_options ("-D__USE_MINGW_ANSI_STDIO")
+endif()
+
 #### include paths
 
 include_directories (
