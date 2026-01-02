@@ -128,6 +128,7 @@ endmacro()
 checkAddCompileFlag ("-fPIC")
 checkAddLinkFlag ("-fPIC")
 
+# checkAddCompileFlag ("-pedantic-errors")
 checkAddCompileFlag ("-Wall")
 checkAddCompileFlag ("-Wextra")
 checkAddCompileFlag ("-Wconversion")
@@ -324,7 +325,26 @@ find_package (Iconv)
 pkg_check_modules (GMP gmp)
 pkg_check_modules (MPDECIMAL libmpdec)
 pkg_check_modules (TOMMATH libtommath)
+
+# libntirpc is not ready (as of version 6.3 on Debian)
+# many many issues
+# pkg_check_modules (NTIRPC libntirpc)
+# CMakeLists.txt has been updated to handle ntirpc,
+# but the mkconfig build has not.
 pkg_check_modules (TIRPC libtirpc)
+
+# use libntirpc by preference
+unset (useRPC)
+if (DEFINED NTIRPC_INCLUDE_DIRS AND NOT ${NTIRPC_INCLUDE_DIRS} STREQUAL "")
+  set (useRPC "NTIRPC")
+endif()
+if (NOT DEFINED useRPC AND
+    DEFINED TIRPC_INCLUDE_DIRS AND NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
+  set (useRPC "TIRPC")
+endif()
+if (DEFINED useRPC)
+  message ("-- RPC: ${useRPC}")
+endif()
 
 ###
 # macros for capability testing
@@ -527,17 +547,16 @@ main (int argc, char *argv [])
   return 0;
 }
 ")
-  set (tinc ".")
-  if (NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
-    set (tinc ${TIRPC_INCLUDE_DIRS})
+  set (rpcinc ".")
+  if (DEFINED useRPC)
+    set (rpcinc ${${useRPC}_INCLUDE_DIRS})
   endif()
   execute_process (
     OUTPUT_FILE "${txdrdir}/${membernm}.out"
     ERROR_QUIET
-    COMMAND ${CMAKE_C_COMPILER} -I ${tinc} -E
+    COMMAND ${CMAKE_C_COMPILER} -I ${rpcinc} -E
         "${txdrdir}/${membernm}.c"
   )
-  unset (tinc)
   if (EXISTS "${txdrdir}/${membernm}.out")
     execute_process (
       OUTPUT_VARIABLE xdr_out
@@ -612,13 +631,47 @@ check_include_file (mpdecimal.h _hdr_mpdecimal)
 # NetBSD
 check_include_file (quota.h _hdr_quota)
 
-set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${TIRPC_INCLUDE_DIRS})
-# OpenBSD rpc/auth requires rpc/rpc
-check_include_files ("rpc/rpc.h;rpc/auth.h" _hdr_rpc_auth)
-check_include_file (rpc/rpc.h _hdr_rpc_rpc)
+if (DEFINED useRPC)
+  set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${${useRPC}_INCLUDE_DIRS})
+  message ("-- check RPC with ${useRPC}")
+endif()
+# OpenBSD rpc/auth.h requires rpc/rpc.h
+check_include_files ("rpc/rpc.h;rpc/auth.h" _hdr_rpc_auth_a)
+check_include_file (rpc/rpc.h _hdr_rpc_rpc_a)
 # Linux: rquota.h includes rpc/rpc.h
-check_include_file (rpcsvc/rquota.h _hdr_rpcsvc_rquota)
+check_include_file (rpcsvc/rquota.h _hdr_rpcsvc_rquota_a)
 set (CMAKE_REQUIRED_INCLUDES ${required_includes})
+
+# Linux: lttng/ntirpc_traces.h is buggy, has '#include "config.h"'
+if (NOT _hdr_rpc_auth_a AND DEFINED useRPC AND ${useRPC} STREQUAL "NTIRPC" AND
+    DEFINED TIRPC_INCLUDE_DIRS AND NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
+  set (useRPC "TIRPC")
+  set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${${useRPC}_INCLUDE_DIRS})
+  message ("-- check RPC with ${useRPC}")
+  # OpenBSD rpc/auth requires rpc/rpc (bad header)
+  check_include_files ("rpc/rpc.h;rpc/auth.h" _hdr_rpc_auth_b)
+  check_include_file (rpc/rpc.h _hdr_rpc_rpc_b)
+  # Linux: rquota.h includes rpc/rpc.h
+  check_include_file (rpcsvc/rquota.h _hdr_rpcsvc_rquota_b)
+  set (CMAKE_REQUIRED_INCLUDES ${required_includes})
+  if (DEFINED useRPC)
+    message ("-- switch RPC: ${useRPC}")
+  endif()
+endif()
+
+if (_hdr_rpc_rpc_a OR _hdr_rpc_rpc_b)
+  set (_hdr_rpc_rpc 1)
+endif()
+if (_hdr_rpc_auth_a OR _hdr_rpc_auth_b)
+  set (_hdr_rpc_auth 1)
+endif()
+if (_hdr_rpcsvc_rquota_a OR _hdr_rpcsvc_rquota_b)
+  set (_hdr_rpcsvc_rquota 1)
+endif()
+if (NOT _hdr_rpc_rpc)
+  unset (useRPC)
+  message ("-- turn off RPC")
+endif()
 
 check_include_file (storage/Directory.h _hdr_storage_Directory)
 check_include_file (storage/Entry.h _hdr_storage_Entry)
@@ -797,9 +850,12 @@ check_symbol_exists (sysfs sys/fstyp.h _lib_sysfs)  # solaris
 # dragonflybsd
 check_symbol_exists (vquotactl sys/vfs_quota.h _lib_vquotactl)
 
-set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${TIRPC_INCLUDE_DIRS})
+if (DEFINED useRPC)
+  set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${${useRPC}_INCLUDE_DIRS})
+endif()
 check_symbol_exists (xdr_int rpc/rpc.h _lib_xdr_int)
 set (LIBNSL_REQUIRED 0)
+set (LIBNTIRPC_REQUIRED 0)
 set (LIBTIRPC_REQUIRED 0)
 if (NOT _lib_xdr_int)
   # check with nsl library (solaris 10)
@@ -812,12 +868,12 @@ if (NOT _lib_xdr_int)
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
 if (NOT _lib_xdr_int)
-  # check with tirpc library
+  # check with ntirpc/tirpc library
   set (CMAKE_REQUIRED_LIBRARIES tirpc)
   check_symbol_exists (xdr_int rpc/rpc.h _lib_xdr_int_tirpc)
   if (_lib_xdr_int_tirpc)
     set (_lib_xdr_int 1)
-    set (LIBTIRPC_REQUIRED 1)
+    set (LIB${useRPC}_REQUIRED 1)
   endif()
   unset (CMAKE_REQUIRED_LIBRARIES)
 endif()
@@ -926,7 +982,9 @@ endif()
 
 if (_hdr_rpcsvc_rquota)
   # linux rpcsvc/rquota.h includes rpc/rpc.h
-  set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${TIRPC_INCLUDE_DIRS})
+  if (DEFINED useRPC)
+    set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${${useRPC}_INCLUDE_DIRS})
+  endif()
   check_struct_has_member ("struct getquota_rslt" gqr_status
       rpcsvc/rquota.h _mem_struct_getquota_rslt_gqr_status)
   check_struct_has_member ("struct getquota_rslt" gqr_rquota
@@ -1094,7 +1152,7 @@ if (NOT DEFINED DI_USE_MATH OR DI_USE_MATH STREQUAL "")
   set (DI_USE_MATH DI_INTERNAL)
 endif()
 set (_use_math ${DI_USE_MATH})
-message ("math-library: ${_use_math}")
+message ("-- math-library: ${_use_math}")
 
 configure_file (config.h.in config.h)
 
@@ -1138,8 +1196,12 @@ add_library (${DI_LIBNAME}
   getoptn.c
   dioptions.c
 )
+if (DEFINED useRPC)
+  target_include_directories (${DI_LIBNAME} PRIVATE
+    ${${useRPC}_INCLUDE_DIRS}
+  )
+endif()
 target_include_directories (${DI_LIBNAME} PRIVATE
-  ${TIRPC_INCLUDE_DIRS}
   ${GMP_INCLUDE_DIRS}
   ${TOMMATH_INCLUDE_DIRS}
 )
@@ -1171,9 +1233,9 @@ if (LIBNSL_REQUIRED)
     -lnsl
   )
 endif()
-if (LIBTIRPC_REQUIRED)
+if (DEFINED useRPC)
   target_link_libraries (${DI_LIBNAME} PRIVATE
-    ${TIRPC_LDFLAGS}
+    ${${useRPC}_LDFLAGS}
   )
 endif()
 if (LIBSNPRINTF_REQUIRED)
@@ -1212,17 +1274,11 @@ add_executable (di
   di.c
 )
 addIntlLibrary (di)
-target_include_directories (di PRIVATE
-  ${TIRPC_INCLUDE_DIRS}
-)
 if (CMAKE_HOST_SOLARIS)
   target_link_options (di PRIVATE
     "-Wl,-R${CMAKE_INSTALL_FULL_LIBDIR}"
   )
 endif()
-target_link_libraries (di PRIVATE
-  ${TIRPC_LDFLAGS}
-)
 target_link_libraries (di PRIVATE
   ${DI_LIBNAME}
 )

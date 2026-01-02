@@ -401,14 +401,14 @@ processArgs (int argc, const char * argv [], di_opt_t *diopts,
       break;
     }
     diopts->opts [paidb [i]].valptr = (void *) &padata;
-    diopts->opts [paidb [i]].value2 = (void *) processOptions;
+    diopts->opts [paidb [i]].funcptr = (genfuncptr) processOptions;
   }
   for (i = 0; i < (int) (sizeof (paidv) / sizeof (int)); ++i) {
     if (diopts->exitFlag != DI_EXIT_NORM) {
       break;
     }
     diopts->opts [paidv [i]].valptr = (void *) &padata;
-    diopts->opts [paidv [i]].value2 = (void *) processOptionsVal;
+    diopts->opts [paidv [i]].funcptr = (genfuncptr) processOptionsVal;
   }
 
   optidx = -1;
@@ -708,6 +708,7 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
     diopts->opts [i].valptr = NULL;
     diopts->opts [i].valsiz = 0;
     diopts->opts [i].value2 = NULL;
+    diopts->opts [i].funcptr = (genfuncptr) NULL;
   }
 
   diopts->opts [OPT_IDX_A].option = "-A";

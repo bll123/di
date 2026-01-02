@@ -6,7 +6,7 @@ di - disk information utility
 
 ### CONTENTS
 
--  Important Notes: Version 5/6
+-  Release Notes
 -  Description
 -  Documentation
 -  Installation
@@ -15,7 +15,9 @@ di - disk information utility
 -  Acknowledgements
 -  Copyright
 
-### IMPORTANT NOTES: VERSION 5/6  (2025-3-10)
+### RELEASE NOTES
+
+##### VERSION 5/6  (2025-3-10)
 
 Version 5's code base has changed.  The build process has changed and
 optionally uses cmake (3.18+). The display processing is entirely new code.
