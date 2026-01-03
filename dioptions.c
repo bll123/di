@@ -119,10 +119,10 @@ static int paidv [] =
 
 static void processStringArgs (char *, di_opt_t *, int offset, char *, Size_t);
 static int  processArgs (int, const char * argv [], di_opt_t *, int offset, char *, Size_t);
-static int  parseList (di_strarr_t *, char *);
-static void parseScaleValue (di_opt_t *diopts, char *ptr);
-static void processOptions (const char *, char *);
-static void processOptionsVal (const char *, void *, char *);
+static int  parseList (di_strarr_t *, const char *);
+static void parseScaleValue (di_opt_t *diopts, const char *ptr);
+static void processOptions (const char *, void *);
+static void processOptionsVal (const char *, void *, const char *);
 static void setExitFlag (di_opt_t *, int);
 static void diopt_init (di_opt_t *diopts, struct pa_tmp *);
 
@@ -401,14 +401,14 @@ processArgs (int argc, const char * argv [], di_opt_t *diopts,
       break;
     }
     diopts->opts [paidb [i]].valptr = (void *) &padata;
-    diopts->opts [paidb [i]].funcptr = (genfuncptr_t) processOptions;
+    diopts->opts [paidb [i]].boolfunc = processOptions;
   }
   for (i = 0; i < (int) (sizeof (paidv) / sizeof (int)); ++i) {
     if (diopts->exitFlag != DI_EXIT_NORM) {
       break;
     }
     diopts->opts [paidv [i]].valptr = (void *) &padata;
-    diopts->opts [paidv [i]].funcptr = (genfuncptr_t) processOptionsVal;
+    diopts->opts [paidv [i]].valfunc = processOptionsVal;
   }
 
   optidx = -1;
@@ -438,7 +438,7 @@ processArgs (int argc, const char * argv [], di_opt_t *diopts,
 }
 
 static void
-processOptions (const char *arg, char *valptr)
+processOptions (const char *arg, void *valptr)
 {
   struct pa_tmp     *padata;
 
@@ -471,7 +471,7 @@ processOptions (const char *arg, char *valptr)
 }
 
 static void
-processOptionsVal (const char *arg, void *valptr, char *value)
+processOptionsVal (const char *arg, void *valptr, const char *value)
 {
   struct pa_tmp     *padata;
   int               rc;
@@ -513,7 +513,7 @@ processOptionsVal (const char *arg, void *valptr, char *value)
 }
 
 static int
-parseList (di_strarr_t *list, char *str)
+parseList (di_strarr_t *list, const char *str)
 {
   char          *dstr;
   char          *ptr;
@@ -573,7 +573,7 @@ parseList (di_strarr_t *list, char *str)
 
 
 static void
-parseScaleValue (di_opt_t *diopts, char *ptr)
+parseScaleValue (di_opt_t *diopts, const char *ptr)
 {
   int             i;
   int             val;
@@ -704,11 +704,12 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
   }
   for (i = 0; i < OPT_IDX_MAX; ++i) {
     diopts->opts [i].option = (const char *) NULL;
-    diopts->opts [i].option_type = GETOPTN_BOOL;
     diopts->opts [i].valptr = (void *) NULL;
-    diopts->opts [i].valsiz = 0;
     diopts->opts [i].value2 = (void *) NULL;
-    diopts->opts [i].funcptr = (genfuncptr_t) NULL;
+    diopts->opts [i].boolfunc = (getoptn_func_bool_t) NULL;
+    diopts->opts [i].valfunc = (getoptn_func_value_t) NULL;
+    diopts->opts [i].valsiz = 0;
+    diopts->opts [i].option_type = GETOPTN_BOOL;
   }
 
   diopts->opts [OPT_IDX_A].option = "-A";
@@ -719,12 +720,12 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
   diopts->opts [OPT_IDX_a].option = "-a";
   diopts->opts [OPT_IDX_a].option_type = GETOPTN_FUNC_BOOL;
   /* valptr : padata */
-  /* value2 : processOptions */
+  /* boolfunc : processOptions */
 
   diopts->opts [OPT_IDX_B].option = "-B";
   diopts->opts [OPT_IDX_B].option_type = GETOPTN_FUNC_VALUE;
   /* valptr : padata */
-  /* value2 : processOptionsVal */
+  /* valfunc : processOptionsVal */
 
   diopts->opts [OPT_IDX_c].option = "-c";
   diopts->opts [OPT_IDX_c].option_type = GETOPTN_BOOL;
@@ -765,12 +766,12 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
 
   diopts->opts [OPT_IDX_help].option = "--help";
   diopts->opts [OPT_IDX_help].option_type = GETOPTN_FUNC_BOOL;
-  /* value2 : processOptions */
+  /* boolfunc : processOptions */
 
   diopts->opts [OPT_IDX_I].option = "-I";
   diopts->opts [OPT_IDX_I].option_type = GETOPTN_FUNC_VALUE;
   /* valptr : padata */
-  /* value2 : processOptionsVal */
+  /* valfunc : processOptionsVal */
 
   diopts->opts [OPT_IDX_j].option = "-j";
   diopts->opts [OPT_IDX_j].option_type = GETOPTN_BOOL;
@@ -807,7 +808,7 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
   diopts->opts [OPT_IDX_P].option = "-P";
   diopts->opts [OPT_IDX_P].option_type = GETOPTN_FUNC_BOOL;
   /* valptr : padata */
-  /* value2 : processOptions */
+  /* boolfunc : processOptions */
 
   diopts->opts [OPT_IDX_q].option = "-q";
   diopts->opts [OPT_IDX_q].option_type = GETOPTN_BOOL;
@@ -822,12 +823,12 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
   diopts->opts [OPT_IDX_s].option = "-s";
   diopts->opts [OPT_IDX_s].option_type = GETOPTN_FUNC_VALUE;
   /* valptr : padata */
-  /* value2 : processOptionsVal */
+  /* valfunc : processOptionsVal */
 
   diopts->opts [OPT_IDX_si].option = "--si";
   diopts->opts [OPT_IDX_si].option_type = GETOPTN_FUNC_BOOL;
   /* valptr : padata */
-  /* value2 : processOptions */
+  /* boolfunc : processOptions */
 
   diopts->opts [OPT_IDX_t].option = "-t";
   diopts->opts [OPT_IDX_t].option_type = GETOPTN_BOOL;
@@ -836,12 +837,12 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
 
   diopts->opts [OPT_IDX_version].option = "--version";
   diopts->opts [OPT_IDX_version].option_type = GETOPTN_FUNC_BOOL;
-  /* value2 : processOptions */
+  /* boolfunc : processOptions */
 
   diopts->opts [OPT_IDX_x].option = "-x";
   diopts->opts [OPT_IDX_x].option_type = GETOPTN_FUNC_VALUE;
   /* valptr : padata */
-  /* value2 : processOptionsVal */
+  /* valfunc : processOptionsVal */
 
   diopts->opts [50].option = "--exclude-type";
   diopts->opts [50].option_type = GETOPTN_ALIAS;
@@ -850,7 +851,7 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
   diopts->opts [OPT_IDX_X].option = "-X";
   diopts->opts [OPT_IDX_X].option_type = GETOPTN_FUNC_VALUE;
   /* valptr : padata */
-  /* value2 : processOptionsVal */
+  /* valfunc : processOptionsVal */
 
   diopts->opts [OPT_IDX_z].option = "-z";
   diopts->opts [OPT_IDX_z].option_type = GETOPTN_STRING;

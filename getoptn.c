@@ -71,9 +71,6 @@ typedef struct {
   int                 hasvalue;   /* does this arg have a value attached? */
 } getoptn_info_t;
 
-typedef void (*getoptn_func_bool_t) (const char *option, void * valptr);
-typedef void (*getoptn_func_value_t) (const char *option, void * valptr, const char *value);
-
 static int
 find_option (getoptn_info_t *info, const char *arg, const char *oarg, Size_t *argidx)
 {
@@ -246,21 +243,17 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
       *v = ptr;
     }
   } else if (opt->option_type == GETOPTN_FUNC_BOOL) {
-    getoptn_func_bool_t f;
-    if (opt->funcptr == (genfuncptr_t) NULL) {
+    if (opt->boolfunc == (getoptn_func_bool_t) NULL) {
       fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv [0], "func_bool", optinfo->idx);
       return 1;
     }
-    f = (getoptn_func_bool_t) opt->funcptr;
-    (f) (opt->option, opt->valptr);
+    opt->boolfunc (opt->option, opt->valptr);
   } else if (opt->option_type == GETOPTN_FUNC_VALUE) {
-    getoptn_func_value_t f;
-    if (opt->funcptr == (genfuncptr_t) NULL) {
+    if (opt->valfunc == (getoptn_func_value_t) NULL) {
       fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv [0], "func_val", optinfo->idx);
       return 1;
     }
-    f = (getoptn_func_value_t) opt->funcptr;
-    (f) (opt->option, opt->valptr, ptr);
+    opt->valfunc (opt->option, opt->valptr, ptr);
   } else {
     info->reprocess = false;
     info->offset = 0;
@@ -390,35 +383,35 @@ main (int argc, char * argv [])
   int  testno = 0;
 
   getoptn_opt_t opts [] = {
-    { "-D",     &s, (void * ) "abc123",   NULL, sizeof (s),   GETOPTN_STRING },
-    { "-b",     &i, NULL,                 NULL, sizeof (i),   GETOPTN_BOOL },
-    { "--b",    &i, NULL,                 NULL, sizeof (i),   GETOPTN_BOOL },
-    { "-c",     &j, NULL,                 NULL, sizeof (j),   GETOPTN_BOOL },
-    { "--c",    (void * ) "-c", NULL,     NULL, 0,            GETOPTN_ALIAS },
-    { "-bc",    &k, NULL,                 NULL, sizeof (k),   GETOPTN_BOOL },
-    { "-d",     &d, NULL,                 NULL, sizeof (d),   GETOPTN_DOUBLE },
-    { "-f1",    &i, NULL,                 NULL, 8,            GETOPTN_INT },
-    { "-f2",    &i, NULL,                 NULL, 2,            GETOPTN_LONG },
-    { "-f3",    &l, NULL,                 NULL, 12,           GETOPTN_LONG },
-    { "--i",    &i, NULL,                 NULL, sizeof (i),   GETOPTN_INT },
-    { "-i",     &i, NULL,                 NULL, sizeof (i),   GETOPTN_INT },
-    { "-i15",   &j, NULL,                 NULL, sizeof (j),   GETOPTN_INT },
-    { "-i17",   &j, NULL,                 NULL, sizeof (j),   GETOPTN_INT },
-    { "-l",     &l, NULL,                 NULL, sizeof (l),   GETOPTN_LONG },
-    { "-s",     &s, NULL,                 NULL, sizeof (s),   GETOPTN_STRING },
-    { "-sabcd", &i, NULL,                 NULL, sizeof (i),   GETOPTN_BOOL },
-    { "-sp",    &sp, NULL,                NULL, 0,            GETOPTN_STRPTR },
-    { "-p",     &sp, NULL,                NULL, 0,            GETOPTN_STRPTR },
-    { "-S",     &sp, (void * ) "abc1234", NULL, 0,            GETOPTN_STRPTR },
-    { "-s2",    &s2, NULL,                NULL, sizeof (s2),  GETOPTN_STRING },
-    { "-np1",   NULL, NULL,               NULL, sizeof (s2),  GETOPTN_STRING },
-    { "-np2",   NULL, NULL,               NULL, sizeof (s2),  GETOPTN_FUNC_BOOL },
-    { "-np3",   NULL, NULL,               NULL, sizeof (s2),  GETOPTN_FUNC_VALUE },
-    { "-w",     NULL, NULL,               NULL, 0,            GETOPTN_IGNORE },
-    { "-W",     NULL, NULL,               NULL, 0,            GETOPTN_IGNORE_ARG },
-    { "-z1",    (void * ) "--c", NULL,    NULL, 0,            GETOPTN_ALIAS },
-    { "-z2",    (void * ) "-z1", NULL,    NULL, 0,            GETOPTN_ALIAS },
-    { "-z3",    (void * ) "-z2", NULL,    NULL, 0,            GETOPTN_ALIAS }
+    { "-D",     &s, (void * ) "abc123",   NULL, NULL, sizeof (s),   GETOPTN_STRING },
+    { "-b",     &i, NULL,                 NULL, NULL, sizeof (i),   GETOPTN_BOOL },
+    { "--b",    &i, NULL,                 NULL, NULL, sizeof (i),   GETOPTN_BOOL },
+    { "-c",     &j, NULL,                 NULL, NULL, sizeof (j),   GETOPTN_BOOL },
+    { "--c",    (void * ) "-c", NULL,     NULL, NULL, 0,            GETOPTN_ALIAS },
+    { "-bc",    &k, NULL,                 NULL, NULL, sizeof (k),   GETOPTN_BOOL },
+    { "-d",     &d, NULL,                 NULL, NULL, sizeof (d),   GETOPTN_DOUBLE },
+    { "-f1",    &i, NULL,                 NULL, NULL, 8,            GETOPTN_INT },
+    { "-f2",    &i, NULL,                 NULL, NULL, 2,            GETOPTN_LONG },
+    { "-f3",    &l, NULL,                 NULL, NULL, 12,           GETOPTN_LONG },
+    { "--i",    &i, NULL,                 NULL, NULL, sizeof (i),   GETOPTN_INT },
+    { "-i",     &i, NULL,                 NULL, NULL, sizeof (i),   GETOPTN_INT },
+    { "-i15",   &j, NULL,                 NULL, NULL, sizeof (j),   GETOPTN_INT },
+    { "-i17",   &j, NULL,                 NULL, NULL, sizeof (j),   GETOPTN_INT },
+    { "-l",     &l, NULL,                 NULL, NULL, sizeof (l),   GETOPTN_LONG },
+    { "-s",     &s, NULL,                 NULL, NULL, sizeof (s),   GETOPTN_STRING },
+    { "-sabcd", &i, NULL,                 NULL, NULL, sizeof (i),   GETOPTN_BOOL },
+    { "-sp",    &sp, NULL,                NULL, NULL, 0,            GETOPTN_STRPTR },
+    { "-p",     &sp, NULL,                NULL, NULL, 0,            GETOPTN_STRPTR },
+    { "-S",     &sp, (void * ) "abc1234", NULL, NULL, 0,            GETOPTN_STRPTR },
+    { "-s2",    &s2, NULL,                NULL, NULL, sizeof (s2),  GETOPTN_STRING },
+    { "-np1",   NULL, NULL,               NULL, NULL, sizeof (s2),  GETOPTN_STRING },
+    { "-np2",   NULL, NULL,               NULL, NULL, sizeof (s2),  GETOPTN_FUNC_BOOL },
+    { "-np3",   NULL, NULL,               NULL, NULL, sizeof (s2),  GETOPTN_FUNC_VALUE },
+    { "-w",     NULL, NULL,               NULL, NULL, 0,            GETOPTN_IGNORE },
+    { "-W",     NULL, NULL,               NULL, NULL, 0,            GETOPTN_IGNORE_ARG },
+    { "-z1",    (void * ) "--c", NULL,    NULL, NULL, 0,            GETOPTN_ALIAS },
+    { "-z2",    (void * ) "-z1", NULL,    NULL, NULL, 0,            GETOPTN_ALIAS },
+    { "-z3",    (void * ) "-z2", NULL,    NULL, NULL, 0,            GETOPTN_ALIAS }
   };
 
   /* test 1 */

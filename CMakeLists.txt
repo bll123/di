@@ -287,6 +287,8 @@ else()
 endif()
 
 if (WIN32)
+  # this is necessary for Msys2, otherwise the %Lf format specifier
+  # does not work (long double difference between Msys2 and Windows).
   add_compile_options ("-D__USE_MINGW_ANSI_STDIO")
 endif()
 
@@ -331,15 +333,15 @@ pkg_check_modules (TOMMATH libtommath)
 # pkg_check_modules (NTIRPC libntirpc)
 # CMakeLists.txt has been updated to handle ntirpc,
 # but the mkconfig build has not.
+
 pkg_check_modules (TIRPC libtirpc)
 
 # use libntirpc by preference
 unset (useRPC)
-if (DEFINED NTIRPC_INCLUDE_DIRS AND NOT ${NTIRPC_INCLUDE_DIRS} STREQUAL "")
+if (NOT ${NTIRPC_INCLUDE_DIRS} STREQUAL "")
   set (useRPC "NTIRPC")
 endif()
-if (NOT DEFINED useRPC AND
-    DEFINED TIRPC_INCLUDE_DIRS AND NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
+if (NOT DEFINED useRPC AND NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
   set (useRPC "TIRPC")
 endif()
 if (DEFINED useRPC)
@@ -642,9 +644,10 @@ check_include_file (rpc/rpc.h _hdr_rpc_rpc_a)
 check_include_file (rpcsvc/rquota.h _hdr_rpcsvc_rquota_a)
 set (CMAKE_REQUIRED_INCLUDES ${required_includes})
 
-# Linux: lttng/ntirpc_traces.h is buggy, has '#include "config.h"'
-if (NOT _hdr_rpc_auth_a AND DEFINED useRPC AND ${useRPC} STREQUAL "NTIRPC" AND
-    DEFINED TIRPC_INCLUDE_DIRS AND NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
+# Linux: re-check in case the libntirpc check failed
+if (DEFINED useRPC AND "${useRPC}" STREQUAL "NTIRPC" AND
+    NOT _hdr_rpc_auth_a AND
+    NOT ${TIRPC_INCLUDE_DIRS} STREQUAL "")
   set (useRPC "TIRPC")
   set (CMAKE_REQUIRED_INCLUDES ${required_includes} ${${useRPC}_INCLUDE_DIRS})
   message ("-- check RPC with ${useRPC}")

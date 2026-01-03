@@ -47,15 +47,17 @@ extern "C" {
 #define GETOPTN_IGNORE_ARG 10
 #define GETOPTN_SIZET      11
 
-typedef void (*genfuncptr_t)(void);
+typedef void (*getoptn_func_bool_t) (const char *option, void * valptr);
+typedef void (*getoptn_func_value_t) (const char *option, void * valptr, const char *value);
 
 typedef struct {
-  const char    *option;
-  void          *valptr;
-  void          *value2;
-  genfuncptr_t  funcptr;
-  Size_t        valsiz;
-  int           option_type;
+  const char            *option;
+  void                  *valptr;
+  void                  *value2;
+  getoptn_func_bool_t   boolfunc;
+  getoptn_func_value_t  valfunc;
+  Size_t                valsiz;
+  int                   option_type;
 } getoptn_opt_t;
 
 extern int getoptn (int style, int argc, const char * argv [],

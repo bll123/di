@@ -83,8 +83,6 @@ To turn off the use of the multi-precision libraries;
 Long doubles are quite capable, there's nothing wrong with
 building it this way (as of 2025).
 
-MacOS Apple Silicon does not support long doubles.
-
 Windows: GMP does not appear to work when building with Msys2.
 
 To force GMP:
