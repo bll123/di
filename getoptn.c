@@ -1,6 +1,6 @@
 /*
- * Copyright 2011-2018 Brad Lanam, Walnut Creek, CA
- * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
+ * Copyright 2011-2026 Brad Lanam, Walnut Creek, CA
+ * Copyright 2023-2026 Brad Lanam, Pleasant Hill, CA
  */
 
 /*
@@ -247,7 +247,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
     }
   } else if (opt->option_type == GETOPTN_FUNC_BOOL) {
     getoptn_func_bool_t f;
-    if (opt->funcptr == (genfuncptr) NULL) {
+    if (opt->funcptr == (genfuncptr_t) NULL) {
       fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv [0], "func_bool", optinfo->idx);
       return 1;
     }
@@ -255,7 +255,7 @@ process_opt (getoptn_info_t *info, getoptn_opt_t *opt, getoptn_optinfo_t *optinf
     (f) (opt->option, opt->valptr);
   } else if (opt->option_type == GETOPTN_FUNC_VALUE) {
     getoptn_func_value_t f;
-    if (opt->funcptr == (genfuncptr) NULL) {
+    if (opt->funcptr == (genfuncptr_t) NULL) {
       fprintf (stderr, "%s: %s: invalid function ptr (line %d)\n", info->argv [0], "func_val", optinfo->idx);
       return 1;
     }

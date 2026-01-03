@@ -1,6 +1,6 @@
 /*
- * Copyright 2011-2018 Brad Lanam, Walnut Creek, CA
- * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
+ * Copyright 2011-2026 Brad Lanam, Walnut Creek, CA
+ * Copyright 2023-2026 Brad Lanam, Pleasant Hill, CA
  */
 
 #include "config.h"

@@ -1,4 +1,4 @@
-/* Copyright 2025 Brad Lanam Pleasant Hill CA */
+/* Copyright 2025-2026 Brad Lanam Pleasant Hill CA */
 
 /* This file exists to hold any extra variables that the MP */
 /* routines may need */

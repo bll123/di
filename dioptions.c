@@ -1,6 +1,6 @@
 /*
- * Copyright 1994-2018 Brad Lanam, Walnut Creek, CA
- * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
+ * Copyright 1994-2026 Brad Lanam, Walnut Creek, CA
+ * Copyright 2023-2026 Brad Lanam, Pleasant Hill, CA
  */
 
 #include "config.h"
@@ -401,14 +401,14 @@ processArgs (int argc, const char * argv [], di_opt_t *diopts,
       break;
     }
     diopts->opts [paidb [i]].valptr = (void *) &padata;
-    diopts->opts [paidb [i]].funcptr = (genfuncptr) processOptions;
+    diopts->opts [paidb [i]].funcptr = (genfuncptr_t) processOptions;
   }
   for (i = 0; i < (int) (sizeof (paidv) / sizeof (int)); ++i) {
     if (diopts->exitFlag != DI_EXIT_NORM) {
       break;
     }
     diopts->opts [paidv [i]].valptr = (void *) &padata;
-    diopts->opts [paidv [i]].funcptr = (genfuncptr) processOptionsVal;
+    diopts->opts [paidv [i]].funcptr = (genfuncptr_t) processOptionsVal;
   }
 
   optidx = -1;
@@ -703,12 +703,12 @@ diopt_init (di_opt_t *diopts, struct pa_tmp *padata)
     return;
   }
   for (i = 0; i < OPT_IDX_MAX; ++i) {
-    diopts->opts [i].option = NULL;
+    diopts->opts [i].option = (const char *) NULL;
     diopts->opts [i].option_type = GETOPTN_BOOL;
-    diopts->opts [i].valptr = NULL;
+    diopts->opts [i].valptr = (void *) NULL;
     diopts->opts [i].valsiz = 0;
-    diopts->opts [i].value2 = NULL;
-    diopts->opts [i].funcptr = (genfuncptr) NULL;
+    diopts->opts [i].value2 = (void *) NULL;
+    diopts->opts [i].funcptr = (genfuncptr_t) NULL;
   }
 
   diopts->opts [OPT_IDX_A].option = "-A";

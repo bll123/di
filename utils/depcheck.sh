@@ -44,6 +44,9 @@ for fn in *.c *.h */*.sh CMakeLists.txt Makefile config.h.in; do
       # most of this can be skipped
       continue
       ;;
+    mkconfig*)
+      continue
+      ;;
   esac
   grep "Copyright" $fn > /dev/null 2>&1
   rc=$?

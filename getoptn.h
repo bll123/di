@@ -1,6 +1,6 @@
 /*
- * Copyright 2011-2018 Brad Lanam, Walnut Creek, CA
- * Copyright 2023-2025 Brad Lanam, Pleasant Hill, CA
+ * Copyright 2011-2026 Brad Lanam, Walnut Creek, CA
+ * Copyright 2023-2026 Brad Lanam, Pleasant Hill, CA
  */
 
 #ifndef INC_GETOPTN_H
@@ -47,13 +47,13 @@ extern "C" {
 #define GETOPTN_IGNORE_ARG 10
 #define GETOPTN_SIZET      11
 
-typedef void (*genfuncptr)(void);
+typedef void (*genfuncptr_t)(void);
 
 typedef struct {
   const char    *option;
-  void *        valptr;
+  void          *valptr;
   void          *value2;
-  genfuncptr    funcptr;
+  genfuncptr_t  funcptr;
   Size_t        valsiz;
   int           option_type;
 } getoptn_opt_t;
