@@ -299,7 +299,7 @@ include_directories (
   # for macos
   /opt/local/include
   /opt/homebrew/include
-  # for freebsd, netbsd
+  # for freebsd, netbsd, intel homebrew
   /usr/local/include
   "${CMAKE_BINARY_DIR}"
   "${PROJECT_SOURCE_DIR}/include"
@@ -309,7 +309,7 @@ set (required_includes
   # for macos
   /opt/local/include
   /opt/homebrew/include
-  # for freebsd
+  # for freebsd, intel homebrew
   /usr/local/include
 )
 
@@ -1158,6 +1158,7 @@ set (_use_math ${DI_USE_MATH})
 message ("-- math-library: ${_use_math}")
 
 configure_file (config.h.in config.h)
+configure_file (diconfig.h.in diconfig.h)
 
 ###
 # macros for building
@@ -1212,7 +1213,6 @@ target_include_directories (${DI_LIBNAME} PRIVATE
 target_link_libraries (${DI_LIBNAME} PRIVATE
   objdistrutils
 )
-addIntlLibrary (${DI_LIBNAME})
 # cmake's auto prefixing is annoying
 set_target_properties (${DI_LIBNAME} PROPERTIES PREFIX "")
 if (WIN32)
@@ -1302,7 +1302,9 @@ if (_use_math STREQUAL "DI_TOMMATH")
 endif()
 set (DI_LINK_EXTRA "")
 if (${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD")
-  target_link_options (di PRIVATE
+  # target_link_options prepends
+  # target_link_libraries appends
+  target_link_libraries (di PRIVATE
     -Wl,-R/usr/pkg/lib
   )
 endif()
@@ -1344,6 +1346,19 @@ target_link_libraries (getoptn_test PRIVATE
 
 #### di.pc
 
+include (CMakePackageConfigHelpers)
+
+set (prefix "${CMAKE_INSTALL_PREFIX}")
+set (includedir "${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+set (libdir "${prefix}/${CMAKE_INSTALL_LIBDIR}")
+set (addtllibargs "")
+#if (CMAKE_HOST_SOLARIS OR ${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD")
+#  set (addtllibargs "-Wl,-R${libdir}")
+#endif()
+#if (APPLE)
+#  set (addtllibargs "-Wl,-rpath,${libdir}")
+#endif()
+
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 
 #### test
@@ -1358,6 +1373,8 @@ add_dependencies (ditest ${DI_LIBNAME} di)
 
 #### install
 
+# library
+
 install (TARGETS ${DI_LIBNAME}
   ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
@@ -1365,13 +1382,19 @@ install (TARGETS ${DI_LIBNAME}
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 
+# executables
+
 install (TARGETS di
   RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 
+# include files
+
 install (FILES di.h
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
+
+# manual pages
 
 install (FILES man/di.1
   DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
@@ -1380,10 +1403,22 @@ install (FILES man/libdi.3
   DESTINATION "${CMAKE_INSTALL_MANDIR}/man3"
 )
 
+# pkgconfig files
+
 install (FILES
   ${CMAKE_BINARY_DIR}/di.pc
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 )
+
+# examples
+
+install (FILES
+  examples/diex.c
+  examples/build.sh
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/di/examples"
+)
+
+# .po files
 
 if (_enable_nls)
   install (CODE

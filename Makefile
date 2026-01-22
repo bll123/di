@@ -5,6 +5,9 @@
 #  Copyright 2023-2026 Brad Lanam, Pleasant Hill, CA
 #
 
+# does not work on many systems
+# MAKEFLAGS += --no-print-directory
+
 # for checking cmake
 CMAKE_REQ_MAJ_VERSION = 3
 CMAKE_REQ_MIN_VERSION = 18
@@ -22,9 +25,12 @@ PMODE=--parallel
 # for mkconfig
 MKC_CONFDIR = mkc_config
 MKC_FILES = mkc_files
-MKC_ENV = di.env
-MKC_CONF = $(MKC_CONFDIR)/di.mkc
-MKC_ENV_CONF = $(MKC_CONFDIR)/di-env.mkc
+MKC_DI_ENV = di.env
+MKC_LIBDI_ENV = libdi.env
+MKC_DI_CONF = $(MKC_CONFDIR)/di.mkc
+MKC_LIBDI_CONF = $(MKC_CONFDIR)/libdi.mkc
+MKC_DI_ENV_CONF = $(MKC_CONFDIR)/di-env.mkc
+MKC_LIBDI_ENV_CONF = $(MKC_CONFDIR)/libdi-env.mkc
 #
 #    To turn off stack fortification:
 #
@@ -63,7 +69,8 @@ INST_LOCALEDIR = $(DESTDIR)$(LOCALEDIR)
 
 MKC_DIR = mkconfig
 MKCONFIG_TYPE = sh
-MKC_REQLIB = di.reqlibs
+MKC_DI_REQLIB = di.reqlibs
+MKC_LIBDI_REQLIB = libdi.reqlibs
 MKC_ECHO =
 #MKC_ECHO = -e
 
@@ -105,17 +112,18 @@ switcher:
 .PHONY: tclean
 tclean:
 	@-rm -f w ww asan.* *.orig comparemath.log \
-		dep-*.txt >/dev/null 2>&1; exit 0
+		dep-*.txt examples/diex \
+		>/dev/null 2>&1; exit 0
 	@-find . -name '*~' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 	@-find . -name '*.orig' -print0 | xargs -0 rm > /dev/null 2>&1; exit 0
 
-# leaves config.h
+# leaves config.h diconfig.h
 .PHONY: clean
 clean:
 	@$(MAKE) tclean
 	@-rm -f \
 		di libdi.* dimathtest getoptn_test \
-		di.exe libdi.dll dimathtest.exe getoptn_test.exe \
+		di.exe dimathtest.exe getoptn_test.exe \
 		*.o *.obj \
 		$(MKC_FILES)/mkc_compile.log \
 		tests.d/chksh* \
@@ -125,8 +133,9 @@ clean:
 .PHONY: realclean
 realclean:
 	@$(MAKE) clean >/dev/null 2>&1
-	@-rm -rf config.h \
-		$(MKC_ENV) $(MKC_REQLIB) \
+	@-rm -rf config.h diconfig.h \
+		$(MKC_DI_ENV) $(MKC_LIBDI_ENV) \
+                $(MKC_DI_REQLIB) $(MKC_LIBDI_REQLIB) \
 		_mkconfig_runtests \
 		>/dev/null 2>&1; exit 0
 
@@ -264,24 +273,23 @@ cmake-chkswitcher:
 mkc-all:
 	echo "## Building with mkconfig"
 	@. ./VERSION.txt ; \
-	$(MAKE) mkc-sh
+	$(MAKE) -e mkc-sh
 
 .PHONY: mkc-sh
-mkc-sh:	$(MKC_ENV)
-	. ./$(MKC_ENV);$(MAKE) -e MKCONFIG_TYPE=sh \
+mkc-sh:
+	$(MAKE) -e MKCONFIG_TYPE=sh \
 		DI_PREFIX=$(PREFIX) \
-		mkc-di-programs
+		mkc-di-all
 
 .PHONY: mkc-perl
-mkc-perl:	$(MKC_ENV)
-	. ./$(MKC_ENV) ; \
-		DI_PREFIX=$(PREFIX) \
+mkc-perl:
+	DI_PREFIX=$(PREFIX) \
 		DI_VERSION=$(DI_VERSION) \
 		DI_LIBVERSION=$(DI_LIBVERSION) \
 		DI_SOVERSION=$(DI_SOVERSION) \
 		DI_RELEASE_STATUS=$(DI_RELEASE_STATUS) \
 		$(MAKE) -e MKCONFIG_TYPE=perl \
-		mkc-di-programs
+		mkc-di-all
 
 .PHONY: mkc-test
 mkc-test:
@@ -292,9 +300,9 @@ mkc-chkswitcher:
 	@echo "mkc"
 
 .PHONY: mkc-install
-mkc-install: $(MKC_ENV) mkc-all
+mkc-install: $(MKC_DI_ENV)
 	@. ./VERSION.txt ; \
-	. ./$(MKC_ENV);$(MAKE) -e \
+	. ./$(MKC_DI_ENV);$(MAKE) -e \
 	      PREFIX=$(PREFIX) mkc-install-all
 
 ###
@@ -308,6 +316,12 @@ mkc-install-all:
 	-$(MAKE) -e mkc-install-po
 	$(MAKE) -e mkc-install-man
 	$(MAKE) -e mkc-install-pc
+	$(MAKE) -e mkc-install-examples
+
+.PHONY: mkc-install-examples
+mkc-install-examples:
+	test -d $(INST_SHAREDIR)/di || mkdir -p $(INST_SHAREDIR)/di
+	cp -rf examples $(INST_SHAREDIR)/di
 
 .PHONY: mkc-install-po
 mkc-install-po:
@@ -315,15 +329,10 @@ mkc-install-po:
 
 # -lintl and -liconv are removed, as those libraries are only needed
 # for the main di program, not to link with the library.
+# just use a modern version of runpath for gcc/clang
 .PHONY: mkc-install-pc
-mkc-install-pc: $(MKC_REQLIB)
-	test -d $(INST_PKGCDIR) || mkdir -p $(INST_PKGCDIR)
-	cat di.pc.in | \
-	  sed -e 's,@CMAKE_INSTALL_PREFIX@,$(PREFIX),g' \
-	      -e 's,@CMAKE_INSTALL_FULL_INCLUDEDIR@,$(INCDIR),g' \
-	      -e 's,@CMAKE_INSTALL_FULL_LIBDIR@,$(LIBDIR),g' \
-	      -e 's,@DI_VERSION@,$(DI_VERSION),g' \
-	  > $(INST_PKGCDIR)/di.pc
+mkc-install-pc: $(MKC_LIBDI_REQLIB)
+	-./utils/instpc.sh "$(INST_PKGCDIR)" "$(PREFIX)" "$(INCDIR)" "$(LIBDIR)"
 
 .PHONY: mkc-install-di
 mkc-install-di:
@@ -350,34 +359,62 @@ mkc-install-man:
 ###
 # mkc environment
 
-$(MKC_ENV):	$(MKC_ENV_CONF)
-	@-rm -f $(MKC_ENV)
+$(MKC_DI_ENV):	$(MKC_DI_ENV_CONF)
+	@-rm -f $(MKC_DI_ENV)
 	CC=$(CC) DI_FORTIFY=$(DI_FORTIFY) \
-	    $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_ENV_CONF)
+	    $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_DI_ENV_CONF)
+
+$(MKC_LIBDI_ENV):	$(MKC_LIBDI_ENV_CONF)
+	@-rm -f $(MKC_LIBDI_ENV)
+	CC=$(CC) DI_FORTIFY=$(DI_FORTIFY) \
+	    $(_MKCONFIG_SHELL) $(MKC_DIR)/mkconfig.sh $(MKC_LIBDI_ENV_CONF)
 
 ###
 # programs
 
+.PHONY: mkc-di-all
+mkc-di-all: $(MKC_LIBDI_ENV) $(MKC_DI_ENV)
+	@. ./$(MKC_DI_ENV);. ./$(MKC_LIBDI_ENV);$(MAKE) -e mkc-di-lib
+	@. ./$(MKC_DI_ENV);$(MAKE) -e mkc-di-programs
+
 .PHONY: mkc-di-programs
-mkc-di-programs:	di$(EXE_EXT) dimathtest$(EXE_EXT) getoptn_test$(EXE_EXT)
+mkc-di-programs:	di$(EXE_EXT) getoptn_test$(EXE_EXT)
+
+.PHONY: mkc-di-lib
+mkc-di-lib: 	libdi$(SHLIB_EXT) dimathtest$(EXE_EXT)
 
 ###
 # configuration file
 
-config.h:	$(MKC_ENV) $(MKC_CONF)
+config.h:	$(MKC_DI_ENV) $(MKC_LIBDI_ENV) $(MKC_LIBDI_CONF)
 	@-rm -f config.h
 	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
-		. ./$(MKC_ENV);$(_MKCONFIG_SHELL) \
+		. ./$(MKC_DI_ENV);. ./$(MKC_LIBDI_ENV);$(_MKCONFIG_SHELL) \
 		$(MKC_DIR)/mkconfig.sh \
-		$(MKC_CONF); fi
+		$(MKC_LIBDI_CONF); fi
 	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
-		. ./$(MKC_ENV);perl \
+		. ./$(MKC_DI_ENV);. ./$(MKC_LIBDI_ENV);perl \
 		$(MKC_DIR)/mkconfig.pl \
-		$(MKC_CONF); fi
+		$(MKC_LIBDI_CONF); fi
 
-$(MKC_REQLIB):	config.h
+diconfig.h:	$(MKC_DI_ENV) $(MKC_DI_CONF)
+	@-rm -f diconfig.h
+	@if [ "$(MKCONFIG_TYPE)" = "sh" -o "$(MKCONFIG_TYPE)" = "" ]; then \
+		. ./$(MKC_DI_ENV);$(_MKCONFIG_SHELL) \
+		$(MKC_DIR)/mkconfig.sh \
+		$(MKC_DI_CONF); fi
+	@if [ "$(MKCONFIG_TYPE)" = "perl" ]; then \
+		. ./$(MKC_DI_ENV);perl \
+		$(MKC_DIR)/mkconfig.pl \
+		$(MKC_DI_CONF); fi
+
+$(MKC_DI_REQLIB):	diconfig.h
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
-		-o $(MKC_REQLIB) config.h
+		-o $(MKC_DI_REQLIB) diconfig.h
+
+$(MKC_LIBDI_REQLIB):	config.h
+	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh -reqlib \
+		-o $(MKC_LIBDI_REQLIB) config.h
 
 ###
 # executables
@@ -389,17 +426,18 @@ LIBOBJECTS = dilib$(OBJ_EXT) didiskutil$(OBJ_EXT) \
 
 MAINOBJECTS = di$(OBJ_EXT)
 
-libdi$(SHLIB_EXT):	$(MKC_REQLIB) $(LIBOBJECTS)
+libdi$(SHLIB_EXT):	$(MKC_LIBDI_REQLIB) $(LIBOBJECTS)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -shared $(MKC_ECHO) \
-		-r $(MKC_REQLIB) \
+		-r $(MKC_LIBDI_REQLIB) \
 		-o libdi$(SHLIB_EXT) \
-		$(LIBOBJECTS)
+		$(LIBOBJECTS) \
+		-R $(LIBDIR)
 
-di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
+di$(EXE_EXT):	$(MKC_DI_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
-		-r $(MKC_REQLIB) \
+		-r $(MKC_DI_REQLIB) \
 		-o di$(EXE_EXT) \
 		$(MAINOBJECTS) \
 		-L . -ldi \
@@ -408,17 +446,17 @@ di$(EXE_EXT):	$(MKC_REQLIB) $(MAINOBJECTS) libdi$(SHLIB_EXT)
 dimathtest$(EXE_EXT):	dimathtest$(OBJ_EXT) dimath$(OBJ_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
+		-r $(MKC_LIBDI_REQLIB) \
 		-o dimathtest$(EXE_EXT) \
 		dimathtest$(OBJ_EXT) dimath$(OBJ_EXT) \
-		-l m
+		-R $(LIBDIR)
 
 getoptn_test$(EXE_EXT):	getoptn_test$(OBJ_EXT) distrutils$(OBJ_EXT)
 	@$(_MKCONFIG_SHELL) $(MKC_DIR)/mkc.sh \
 		-link -exec $(MKC_ECHO) \
 		-o getoptn_test$(EXE_EXT) \
 		getoptn_test$(OBJ_EXT) \
-		distrutils$(OBJ_EXT) \
-		-l m
+		distrutils$(OBJ_EXT)
 
 ###
 # objects
@@ -458,8 +496,7 @@ getoptn_test$(OBJ_EXT):	getoptn.c
 
 # DO NOT DELETE
 
-di.o: config.h
-di.o: disystem.h distrutils.h
+di.o: diconfig.h
 didiskutil.o: config.h
 didiskutil.o: di.h disystem.h
 didiskutil.o: diinternal.h

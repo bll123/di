@@ -369,6 +369,7 @@ main (int argc, char * argv [])
   char        s [40];
   char        s2 [5];
   char        *sp = NULL;
+  char        spempty [10] = { "" };
   long        l;
   double      d;
   int         i;
@@ -734,7 +735,7 @@ main (int argc, char * argv [])
 
   /* test 20 */
   ++testno;
-  sp = "";
+  sp = spempty;
   ac = 3;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -751,7 +752,7 @@ main (int argc, char * argv [])
 
   /* test 21 */
   ++testno;
-  sp = "";
+  sp = spempty;
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -767,7 +768,7 @@ main (int argc, char * argv [])
 
   /* test 22 */
   ++testno;
-  sp = "";
+  sp = spempty;
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -783,7 +784,7 @@ main (int argc, char * argv [])
 
   /* test 23 */
   ++testno;
-  sp = "";
+  sp = spempty;
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;
@@ -799,7 +800,7 @@ main (int argc, char * argv [])
 
   /* test 24 */
   ++testno;
-  sp = "";
+  sp = spempty;
   ac = 2;
   Snprintf1 (tmp, sizeof (tmp), "test %d", testno);
   av [0] = tmp;

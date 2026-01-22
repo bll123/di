@@ -75,14 +75,14 @@ di_initialize_zones (di_opt_t *diopts)
 
       zinfo->zones [i].zoneid = zids [i];
       len = (int) zone_getattr (zids [i], ZONE_ATTR_ROOT,
-          zinfo->zones [i].rootpath, MAXPATHLEN);
+          zinfo->zones [i].rootpath, DI_MAXPATH);
       /* solaris: the length returned includes the null byte */
       if (len >= 0) {
         len -= 1;
         zinfo->zones [i].rootpathlen = (Size_t) len;
         if (zinfo->zones [i].zoneid != 0) {
           rpp = zinfo->zones [i].rootpath + len;
-          rpend = zinfo->zones [i].rootpath + MAXPATHLEN;
+          rpend = zinfo->zones [i].rootpath + DI_MAXPATH;
           rpp = stpecpy (rpp, rpend, "/");
         }
         if (zinfo->zones [i].zoneid == 0) {
@@ -94,7 +94,7 @@ di_initialize_zones (di_opt_t *diopts)
         if (*diopts->zoneDisplay == '\0' &&
             zinfo->myzoneid == zinfo->zones [i].zoneid) {
           stpecpy (diopts->zoneDisplay,
-              diopts->zoneDisplay + MAXPATHLEN, zinfo->zones [i].name);
+              diopts->zoneDisplay + DI_MAXPATH, zinfo->zones [i].name);
         }
         if (diopts->optval [DI_OPT_DEBUG] > 4) {
           printf ("zone:%d:%s:%s:%d\n", (int) zinfo->zones [i].zoneid,

@@ -1,263 +1,30 @@
 #
-# Copyright 2006-2018 Brad Lanam, Walnut Creek, California USA
-# Copyright 2025 Brad Lanam, Pleasnt Hill, California USA
+# Copyright 2026 Brad Lanam, Pleasnt Hill, California USA
 #
 loadunit c-main
 loadunit c-include-conflict
 
-output  config.h
+output  diconfig.h
 
 standard
 
-hdr     ctype.h
-hdr     dirent.h
-hdr     errno.h
-hdr     fcntl.h
-hdr     fshelp.h
-hdr     inttypes.h
-hdr     jfs/quota.h
-hdr     kernel/fs_info.h
-hdr     limits.h
-hdr     linux/dqblk_xfs.h
-# aix 5 doesn't declare their own, use the compatibility version
-hdr     linux/quota.h
 hdr     libintl.h
-hdr     libprop/proplib.h
+hdr     limits.h
 hdr     locale.h
-hdr     malloc.h
-hdr     math.h
-hdr     memory.h
-hdr     mntent.h
-hdr     mnttab.h
-# NetBSD
-hdr     quota.h
-hdr     rpc/rpc.h
-# SCO OpenServer and OpenBSD requires rpc.h first
-hdr     rpc/auth.h rpc/rpc.h
-# Linux rquota.h includes rpc/rpc.h which is in the tirpc dir
-hdr     rpcsvc/rquota.h rpc/rpc.h
 hdr     stdbool.h
 hdr     stddef.h
 hdr     stdint.h
-hdr     storage/Directory.h
-hdr     storage/Entry.h
-hdr     storage/Path.h
 hdr     string.h
 hdr     strings.h
-hdr     time.h
-hdr     tommath.h
-hdr     libtommath/tommath.h
-hdr     ufs/quota.h
-hdr     ufs/ufs/quota.h sys/types.h
-hdr     unistd.h
 hdr     wchar.h
-hdr     windows.h
-hdr     winioctl.h windows.h
-hdr     zone.h
-sys     dcmd_blk.h
-sys     file.h
-sys     fs_types.h
-sys     fs/ufs_quota.h sys/types.h
-sys     fstyp.h
-sys     fstypes.h
-sys     ftype.h
-sys     io.h
-sys     mntctl.h
-# SCO OpenServer/UnixWare require sys/mnttab.h for struct mnttab declaration.
-sys     mntent.h sys/mnttab.h
-sys     mnttab.h
-sys     mount.h
-sys     quota.h
-sys     stat.h
-sys     statfs.h
-sys     statvfs.h
-sys     time.h
-sys     vfs.h
-sys     vfs_quota.h
-sys     vfstab.h
-sys     vmount.h
 
-include_conflict time.h sys/time.h
-include_conflict sys/quota.h linux/quota.h
-
-const   O_NOCTTY
-
-define  IOCTL_STORAGE_CHECK_VERIFY2
-define  MCTL_QUERY
-define  QCMD
-define  S_ISLNK
-
-typ     struct dqblk
-typ     struct quotaval
-typ     struct ufs_dqblk
-typ     fs_disk_quota_t
-typ     gid_t
-typ     statvfs_t
 typ     size_t
-typ     uid_t
 
-size    long double
-size    double
-size    uint64_t
-size    long long
-size    long
-
-lib     bcopy
 lib     bindtextdomain -lintl, -lintl -liconv
-lib     bzero
-lib     CreateFile
-lib     DeviceIoControl
-# unknown if -lsun, -lseq are needed (old irix, sequent)
-lib     endmntent -lsun, -lseq
-lib     fs_stat_dev
-lib     fshelp
-lib     GetDiskFreeSpace
-lib     GetDiskFreeSpaceEx
-lib     GetDriveType
-lib     getfsstat
-lib     GetLogicalDriveStrings
-lib     GetVolumeInformation
-lib     getmnt
-# unixware put getmntent into libgen for some reason
-# -lsun, -lseq are untested (old irix, sequent)
-lib     getmntent -lgen, -lsun, -lseq
-lib     getmntinfo
 lib     gettext -lintl, -lintl -liconv
-lib     getvfsstat
-lib     getzoneid
-lib     hasmntopt
-lib     lstat
 lib     mbrlen
-lib     memcpy
-lib     memset
-# AIX doesn't declare this :(
-# Look for MCTL_QUERY (see below)
-lib     mntctl
-lib     next_dev
-# dragonflybsd; need this to get the library
-lib     prop_dictionary_create -lprop
-# quota_open is a new interface from NetBSD
-lib     quota_open -lquota
-lib     quotactl
-lib     realpath
 lib     setlocale  -lintl, -lintl -liconv
-# unknown if -lsun, -lseq are needed (old irix, sequent)
-lib     setmntent -lsun, -lseq
-lib     snprintf -lsnprintf
-lib     statfs
-lib     statvfs
-lib     stpecpy
-lib     strcoll
-lib     strdup
-lib     strstr
-lib     strtok_r
-lib     sysfs
 lib     textdomain  -lintl, -lintl -liconv
-# dragonflybsd
-lib     vquotactl
-# need this to get the optional library
-lib     xdr_int -ltirpc, -lnsl
-lib     zone_getattr
-lib     zone_list
-
-# check for basic existence...
-member struct rquota rq_bhardlimit
-member struct getquota_args gqa_uid
-# check for the correct xdr types...
-memberxdr rquota rq_bhardlimit
-memberxdr rquota rq_bsoftlimit
-memberxdr rquota rq_curblocks
-memberxdr rquota rq_fhardlimit
-memberxdr rquota rq_fsoftlimit
-memberxdr rquota rq_curfiles
-memberxdr getquota_args gqa_uid
-
-# to prevent warnings
-# some systems are u_int, size_t, u_long
-args getfsstat
-args getvfsstat
-args quotactl
-
-setint _quotactl_pos_1 0
-setint _quotactl_pos_2 0
-
-if quotactl_pos_1 == _c_arg_1_quotactl 'char *'
- setint _quotactl_pos_1 1
-endif
-if quotactl_pos_1 == _c_arg_1_quotactl 'const char *'
- setint _quotactl_pos_1 1
-endif
-
-if quotactl_pos_2 == _c_arg_2_quotactl 'char *'
- setint _quotactl_pos_2 1
-endif
-if quotactl_pos_2 == _c_arg_2_quotactl 'const char *'
- setint _quotactl_pos_2 1
-endif
-if quotactl_pos_2 == _c_arg_2_quotactl 'caddr_t'
- setint _quotactl_pos_2 1
-endif
-
-args setmntent
-args statfs
-
-npt     getenv
-npt     mntctl
-npt     quotactl
-npt     statfs _lib_statfs
-
-dcl     int  errno
-dcl     ptr  mnt_names
-
-member  struct dqblk dqb_curspace
-member  struct dqblk dqb_curblocks
-member  struct dqblk dqb_fhardlimit
-member  struct dqblk dqb_fsoftlimit
-member  struct dqblk dqb_curfiles
-member  struct getquota_rslt gqr_status
-member  struct getquota_rslt gqr_rquota
-member  struct mnttab mt_mntopts
-member  struct statfs f_bsize
-member  struct statfs f_fsize
-member  struct statfs f_fstyp
-member  struct statfs f_iosize
-member  struct statfs f_frsize
-member  struct statfs f_fstypename
-member  struct statfs mount_info
-member  struct statfs f_type
-member  struct statvfs f_basetype
-
-# workaround for AIX
-# mntctl() is not declared
-if AIX_mntctl _sys_vmount && _define_MCTL_QUERY
-  set _lib_mntctl 1
-endif
-
-# dragonflybsd may have vquotactl, but it may not be turned on.
-if DFLYBSD_vquotactl _lib_vquotactl
-  grep DFLYBSD_vquota vfs.quota_enabled=.*1 /boot/loader.conf
-  if DFLYBSD_vquota_chk ! _grep_DFLYBSD_vquota
-    set _lib_vquotactl 0
-    set _lib_prop_dictionary_create 0
-  endif
-endif
-
-if stdquotas ( _lib_quotactl || _lib_quota_open || _lib_vquotactl || \
-    _typ_struct_dqblk || _typ_struct_ufs_dqblk )
-  setint _has_std_quotas 1
-else
-  setint _has_std_quotas 0
-endif
-
-if stdnfsquotas _hdr_rpc_rpc && \
-    _hdr_rpcsvc_rquota && \
-    _lib_xdr_int && \
-    _mem_struct_rquota_rq_bhardlimit && \
-    _mem_struct_getquota_args_gqa_uid
-  setint _has_std_nfs_quotas 1
-else
-  setint _has_std_nfs_quotas 0
-endif
 
 if hasnls _lib_bindtextdomain && _lib_gettext && _lib_setlocale && \
     _lib_textdomain && _hdr_libintl && _hdr_locale
@@ -269,23 +36,6 @@ endif
 env DI_PREFIX quote
 env DI_VERSION quote
 env DI_RELEASE_STATUS quote
-env DI_USE_MATH
-
-if nousemath ! _env_DI_USE_MATH
- if havempdecimal _pkg_libs_libmpdec
-  env DI_USE_MATH DI_MPDECIMAL
- endif
- if havegmp _pkg_libs_gmp && ! _pkg_libs_libmpdec
-   env DI_USE_MATH DI_GMP
- endif
- # at the moment, libtommath in macports has a broken pkg-config
- if havetommath _pkg_libs_libtommath && ! _pkg_libs_gmp && ! _pkg_libs_libmpdec && ! == _MKCONFIG_SYSTYPE Darwin
-  env DI_USE_MATH DI_TOMMATH
- endif
- if nousemath ! _env_DI_USE_MATH
-  env DI_USE_MATH DI_INTERNAL
- endif
-endif
 
 include
 
@@ -296,60 +46,10 @@ include
 #define DI_BUILD_SYS "mkconfig"
 #define DI_LOCALE_DIR DI_PREFIX "/share/locale"
 
-#define DI_INTERNAL 0
-#define DI_GMP 1
-#define DI_TOMMATH 2
-#define DI_MPDECIMAL 3
-#define _use_math DI_USE_MATH
-
-#if _typ_statvfs_t
-# define Statvfs_t statvfs_t
-#else
-# define Statvfs_t struct statvfs
-#endif
-
 #if _typ_size_t
 # define Size_t size_t
 #else
 # define Size_t unsigned long
-#endif
-
-#if _typ_uid_t
-# define Uid_t uid_t
-#else
-# define Uid_t int
-#endif
-
-#if _typ_gid_t
-# define Gid_t gid_t
-#else
-# define Gid_t int
-#endif
-
-/* Do this the old-fashioned way for old compilers */
-/* Have to work around MacOSX's snprintf macro.    */
-#if _lib_snprintf
-# define Snprintf1 snprintf
-# define Snprintf2 snprintf
-# define Snprintf3 snprintf
-# define Snprintf4 snprintf
-#else
-# define Snprintf1(a1,a2,a3,a4) sprintf(a1,a3,a4)
-# define Snprintf2(a1,a2,a3,a4,a5) sprintf(a1,a3,a4,a5)
-# define Snprintf3(a1,a2,a3,a4,a5,a6) sprintf(a1,a3,a4,a5,a6)
-# define Snprintf4(a1,a2,a3,a4,a5,a6,a7) sprintf(a1,a3,a4,a5,a6,a7)
-#endif
-
-#if ! _lib_strcoll
-# define strcoll strcmp
-#endif
-
-#if ! _dcl_errno
-  extern int errno;
-#endif
-
-#if ! _const_O_NOCTTY
-# define O_NOCTTY 0
 #endif
 
 /* macro for gettext() */

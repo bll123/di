@@ -30,7 +30,7 @@ typedef struct di_opt {
   char            *diargsptr;
   di_strarr_t     exclude_list;
   di_strarr_t     include_list;
-  char            zoneDisplay [MAXPATHLEN];
+  char            zoneDisplay [DI_MAXPATH];
   int             optinit;
   /* will be either 1000 or 1024 */
   int             blockSize;

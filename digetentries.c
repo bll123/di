@@ -394,7 +394,7 @@ di_getQNXDiskEntries (di_data_t *di_data, char *ipath, int *diCount)
 {
   di_disk_info_t  *diptr;
   int             idx;
-  char            path [MAXPATHLEN];
+  char            path [DI_MAXPATH];
   char            *p;
   char            *pathend;
   int             len;   /* current length of path */
@@ -418,7 +418,7 @@ di_getQNXDiskEntries (di_data_t *di_data, char *ipath, int *diCount)
   }
 
   p = path;
-  pathend = path + MAXPATHLEN;
+  pathend = path + DI_MAXPATH;
   p = stpecpy (p, pathend, ipath);
   len = (int) strlen (path);
 
@@ -433,7 +433,7 @@ di_getQNXDiskEntries (di_data_t *di_data, char *ipath, int *diCount)
     ret = sscanf (dent->d_name, "%d,%d,%d,%d,%d",
         &nodeid, &pid, &chid, &handle, &ftype);
 
-    if (len + (int) strlen (dent->d_name) + 1 > MAXPATHLEN) {
+    if (len + (int) strlen (dent->d_name) + 1 > DI_MAXPATH) {
       continue;
     }
 

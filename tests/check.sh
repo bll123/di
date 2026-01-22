@@ -73,10 +73,21 @@ for comp in ${complist}; do
     diff -b -B ${rsltdir}/di-mkc-config.out ${rsltdir}/di-cmake-config.out \
         > ${rsltdir}/di-tmpdiff.out
     awk -f ./tests/chkdiff.awk ${rsltdir}/di-tmpdiff.out \
-        > ${rsltdir}/di-diff.out
-    dlc=$(cat ${rsltdir}/di-diff.out | wc -l)
+        > ${rsltdir}/di-diff-config.out
+    dlc=$(cat ${rsltdir}/di-diff-config.out | wc -l)
     if [[ $dlc != 0 ]]; then
       echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: config.h diff failed"
+      failcount=$(($failcount+1))
+    fi
+
+    tcount=$(($tcount+1))
+    diff -b -B ${rsltdir}/di-mkc-diconfig.out ${rsltdir}/di-cmake-diconfig.out \
+        > ${rsltdir}/di-tmpdiff.out
+    awk -f ./tests/chkdiff.awk ${rsltdir}/di-tmpdiff.out \
+        > ${rsltdir}/di-diff-diconfig.out
+    dlc=$(cat ${rsltdir}/di-diff-diconfig.out | wc -l)
+    if [[ $dlc != 0 ]]; then
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: diconfig.h diff failed"
       failcount=$(($failcount+1))
     fi
 
@@ -84,10 +95,21 @@ for comp in ${complist}; do
     diff -b -B ${rsltdir}/di-cmake-config.out ${rsltdir}/di-pcmake-config.out \
         > ${rsltdir}/di-tmppdiff.out
     awk -f ./tests/chkdiff.awk ${rsltdir}/di-tmppdiff.out \
-        > ${rsltdir}/di-pdiff.out
-    dlc=$(cat ${rsltdir}/di-pdiff.out | wc -l)
+        > ${rsltdir}/di-pdiff-config.out
+    dlc=$(cat ${rsltdir}/di-pdiff-config.out | wc -l)
     if [[ $dlc != 0 ]]; then
       echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: config.h pure-cmake diff failed"
+      failcount=$(($failcount+1))
+    fi
+
+    tcount=$(($tcount+1))
+    diff -b -B ${rsltdir}/di-cmake-diconfig.out ${rsltdir}/di-pcmake-diconfig.out \
+        > ${rsltdir}/di-tmppdiff.out
+    awk -f ./tests/chkdiff.awk ${rsltdir}/di-tmppdiff.out \
+        > ${rsltdir}/di-pdiff-diconfig.out
+    dlc=$(cat ${rsltdir}/di-pdiff-diconfig.out | wc -l)
+    if [[ $dlc != 0 ]]; then
+      echo "FAIL $(TZ=PST8PDT date '+%T') ${host}/${comp}: diconfig.h pure-cmake diff failed"
       failcount=$(($failcount+1))
     fi
 

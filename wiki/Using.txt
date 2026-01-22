@@ -14,6 +14,8 @@ resides.  This works when your system administrator has moved a
 directory to a different partition and created a symlink to the new
 location.
 
+This code can be found in the examples directory (.../share/di/examples)
+
     /* this code is in the public domain */
     #include <stdio.h>
     #include <stdlib.h>
@@ -73,13 +75,18 @@ location.
 
     int
     main (int argc, char *argv []) {
-      const char  *fn = "/home/bll/s/di";
+      const char  *fn = NULL;
       double      spwant = 0.2;   /* terabytes */
       bool        rval;
 
       if (argc > 1) {
         fn = argv [1];
       }
+      if (fn == NULL) {
+        fprintf (stderr, "Usage: %s <path> [<space-wanted>]\n", argv [0]);
+        exit (1);
+      }
+
       if (argc > 2) {
         spwant = atof (argv [2]);
       }
@@ -101,14 +108,13 @@ Compile and Link:
     pcpath=${dilibd}/pkgconfig
     diinc=$(PKG_CONFIG_PATH=${pcpath} pkg-config --cflags di)
     dilibs=$(PKG_CONFIG_PATH=${pcpath} pkg-config --libs di)
-    cc -o tt ${diinc} tt.c -Wl,-rpath=${dilibd} ${dilibs}     # gcc
-    cc -o tt ${diinc} tt.c -rpath ${dilibd} ${dilibs}         # clang
+    cc -o diex ${diinc} diex.c ${dilibs}
 
 Example run:
 
-    bll-g7:bll$ ./tt /home/bll 0.5
+    bll-g7:bll$ ./diex /home/bll 2.0
     Not enough disk space
-    bll-g7:bll$ ./tt /home/bll 0.1
+    bll-g7:bll$ ./diex /home/bll 0.1
     Enough disk space
     bll-g7:bll$
 

@@ -2,6 +2,7 @@
 #
 # Copyright 2001-2018 Brad Lanam, Walnut Creek, California USA
 # Copyright 2020 Brad Lanam Pleasant Hill CA
+# Copyright 2026 Brad Lanam Pleasant Hill CA
 #
 
 #
@@ -189,6 +190,7 @@ check_cflags () {
   cflags_user=${CFLAGS_USER}
   cflags_compiler=${CFLAGS_COMPILER}
   cflags_system=${CFLAGS_SYSTEM}
+  cflags_compiler_app=${CFLAGS_COMPILER_APP}
   cflags_application=${CFLAGS_APPLICATION}
 
   if [ "${_MKCONFIG_USING_GCC}" = Y ]; then
@@ -311,6 +313,7 @@ check_cflags () {
   puts "cflags_user:${cflags_user}" >&9
   puts "cflags_compiler:${cflags_compiler}" >&9
   puts "cflags_system:${cflags_system}" >&9
+  puts "cflags_compiler_app:${cflags_compiler_app}" >&9
   puts "cflags_application:${cflags_application}" >&9
 
   _setflags \
@@ -320,6 +323,7 @@ check_cflags () {
       cflags_include CFLAGS_INCLUDE \
       cflags_compiler CFLAGS_COMPILER  \
       cflags_system CFLAGS_SYSTEM \
+      cflags_compiler_app CFLAGS_COMPILER_APP \
       cflags_application CFLAGS_APPLICATION
 }
 
@@ -328,13 +332,13 @@ check_addcflag () {
   shift
   flag=$*
 
-  printlabel CFLAGS_APPLICATION "Add C flag: ${flag}"
+  printlabel CFLAGS_COMPILER_APP "Add C flag: ${flag}"
 
   test_cflag "${flag}"
   printyesno $name "${flag}"
   if [ "$flag" != 0 ]; then
-    doappend CFLAGS_APPLICATION " $flag"
-    setdata CFLAGS_APPLICATION "$CFLAGS_APPLICATION"
+    doappend CFLAGS_COMPILER_APP " $flag"
+    setdata CFLAGS_COMPILER_APP "$CFLAGS_COMPILER_APP"
   fi
 }
 
@@ -457,14 +461,14 @@ check_addldflag () {
   shift
   flag=$*
 
-  printlabel LDFLAGS_APPLICATION "Add LD flag: ${flag}"
+  printlabel LDFLAGS_COMPILER_APP "Add LD flag: ${flag}"
 
   test_ldflags "$flag"
   printyesno $name "$flag"
   if [ "$flag" != 0 ]; then
-    doappend ldflags_application " "
-    doappend ldflags_application "\"$flag\""
-    _setflags ldflags_application LDFLAGS_APPLICATION
+    doappend ldflags_compiler_app " "
+    doappend ldflags_compiler_app "\"$flag\""
+    _setflags ldflags_compiler_app LDFLAGS_COMPILER_APP
   fi
 }
 
@@ -513,6 +517,7 @@ check_ldflags () {
   ldflags_user=${LDFLAGS_USER:-}
   ldflags_compiler=${LDFLAGS_COMPILER:-}
   ldflags_system=${LDFLAGS_SYSTEM:-}
+  ldflags_compiler_app=${LDFLAGS_COMPILER_APP:-}
   ldflags_application=${LDFLAGS_APPLICATION:-}
 
   doappend ldflags_system " "
@@ -526,7 +531,9 @@ check_ldflags () {
         if [ -d /opt/homebrew/include ]; then
           doappend ldflags_system " -L/opt/homebrew/lib"
         fi
-        doappend ldflags_system " -L/usr/local/lib"
+        if [ -d /opt/homebrew/lib ]; then
+          doappend ldflags_system " -L/usr/local/lib"
+        fi
         ;;
       DragonFly|FreeBSD|OpenBSD)
         # *BSD has many packages that get installed in /usr/local
@@ -597,6 +604,7 @@ check_ldflags () {
   puts "ldflags_user:${ldflags_user}" >&9
   puts "ldflags_compiler:${ldflags_compiler}" >&9
   puts "ldflags_system:${ldflags_system}" >&9
+  puts "ldflags_compiler_app:${ldflags_compiler_app}" >&9
   puts "ldflags_application:${ldflags_application}" >&9
 
   _setflags \
@@ -605,6 +613,7 @@ check_ldflags () {
       ldflags_user LDFLAGS_USER \
       ldflags_compiler LDFLAGS_COMPILER \
       ldflags_system LDFLAGS_SYSTEM \
+      ldflags_compiler_app LDFLAGS_COMPILER_APP \
       ldflags_application LDFLAGS_APPLICATION
 }
 
@@ -803,7 +812,8 @@ check_sharedliblinkflag () {
         LDFLAGS_SHARED_LIB_LINK=""
         ;;
     esac
-    if [ "$_MKCONFIG_USING_GCC" = Y -o "$_MKCONFIG_USING_CLANG" = Y ]; then
+    if [ \( "$_MKCONFIG_USING_GCC" = Y \) -o \
+        \( "$_MKCONFIG_USING_CLANG" = Y \) ]; then
       LDFLAGS_SHARED_LIB_LINK=`echo "$LDFLAGS_SHARED_LIB_LINK" |
           sed -e 's/^-/-Wl,-/' -e 's/^\+/-Wl,+/' -e 's/  */ -Wl,/g'`
     fi
@@ -880,7 +890,7 @@ check_shareexeclinkflag () {
 check_sharerunpathflag () {
   printlabel LDFLAGS_RUNPATH "shared run path flag "
 
-  LDFLAGS_RUNPATH="-Wl,-rpath="
+  LDFLAGS_RUNPATH=""
   if [ "$_MKCONFIG_USING_GNU_LD" != Y ]; then
     case ${_MKCONFIG_SYSTYPE} in
       HP-UX)
@@ -905,15 +915,9 @@ check_sharerunpathflag () {
         LDFLAGS_RUNPATH=""
         ;;
     esac
-    if [ "$_MKCONFIG_USING_GNU_LD" != Y -a "$_MKCONFIG_USING_CLANG" = Y ]; then
-      LDFLAGS_RUNPATH="-rpath "
-    fi
-#    if [ "$_MKCONFIG_USING_GCC" = Y -o "$_MKCONFIG_USING_CLANG" = Y ]; then
-#      # the trailing space will be converted to ' -Wl,' and
-#      # the library runpath will be appended by mkcl.sh
-#      LDFLAGS_RUNPATH=`echo "$LDFLAGS_RUNPATH" |
-#          sed -e 's/^-/-Wl,-/' -e 's/^\+/-Wl,+/' -e 's/  */ -Wl,/g'`
-#    fi
+  fi
+  if [ "$_MKCONFIG_USING_GNU_LD" = Y -o "$_MKCONFIG_USING_CLANG" = Y ]; then
+    LDFLAGS_RUNPATH="-Wl,-rpath,"
   fi
 
   printyesno_val LDFLAGS_RUNPATH "$LDFLAGS_RUNPATH"

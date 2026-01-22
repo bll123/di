@@ -2,6 +2,7 @@
 #
 # Copyright 2010-2018 Brad Lanam Walnut Creek, CA USA
 # Copyright 2020 Brad Lanam Pleasant Hill CA
+# Copyright 2026 Brad Lanam Pleasant Hill CA
 #
 
 unset CDPATH
@@ -18,16 +19,16 @@ addlib () {
   lfn=$1
 
   found=F
-  nlibnames=
   for tf in $libnames; do
     if [ $lfn = $tf ]; then
       found=T   # a match will be moved to the end of the list
-    else
-      doappend nlibnames " $tf"
+      break
     fi
   done
-  doappend nlibnames " ${lfn}"
-  libnames=${nlibnames}
+  if [ $found = F ]; then
+    doappend ldflags_shared_libs " ${lfn}"
+    doappend libnames " ${lfn}"
+  fi
 }
 
 addlibpath () {
@@ -41,6 +42,7 @@ addlibpath () {
     fi
   done
   if [ $found = F ]; then
+    doappend ldflags_shared_libs " -L${lp}"
     doappend libpathnames " ${lp}"
   fi
 }
@@ -172,6 +174,12 @@ isrpath=0
 olibs=
 havesource=F
 
+allcflags=
+allldflags=
+ldflags_runpath=
+ldflags_shared_libs=
+ldflags_exec_link=
+
 if [ "$reqlibfiles" != "" ]; then
   for rf in $reqlibfiles; do
     doappend olibs "`cat $rf` "
@@ -216,8 +224,13 @@ for f in $@ $olibs; do
     -Wl*)
       addlib $f
       ;;
-    lib*)
-      addlib $f
+    */lib*|lib*)
+      if [ $isrpath -eq 1 ]; then
+        addrunpath $f
+        isrpath=0
+      else
+        addlib $f
+      fi
       ;;
     *${OBJ_EXT})
       if [ ! -f "$f" ]; then
@@ -262,17 +275,6 @@ for f in $@ $olibs; do
   esac
 done
 
-libs=
-for lfn in $libnames; do
-  doappend libs " ${lfn}"
-done
-
-LDFLAGS_LIBPATH=-L
-libpath=
-for lp in $libpathnames; do
-  doappend libpath " ${LDFLAGS_LIBPATH}${lp}"
-done
-
 runpath=
 for lp in $runpathnames; do
   doappend runpath " ${LDFLAGS_RUNPATH}${lp}"
@@ -290,7 +292,6 @@ else
   esac
 fi
 
-allcflags=
 if [ $havesource = T ]; then
   if [ $c = T ];then
     if [ "$CFLAGS_ALL" != "" ]; then
@@ -306,16 +307,11 @@ if [ $havesource = T ]; then
       fi
       doappend allcflags " ${CFLAGS_APPLICATION}"  # added by the config process
       doappend allcflags " ${CFLAGS_COMPILER}"     # compiler flags
+      doappend allcflags " ${CFLAGS_COMPILER_APP}" # added by the config process
       doappend allcflags " ${CFLAGS_SYSTEM}"       # needed for this system
     fi
   fi
 fi
-
-allldflags=
-ldflags_libpath=
-ldflags_runpath=
-ldflags_shared_libs=
-ldflags_exec_link=
 
 if [ $link = T ]; then
   if [ "$LDFLAGS_ALL" != "" ]; then
@@ -324,6 +320,7 @@ if [ $link = T ]; then
     doappend allldflags " ${LDFLAGS_OPTIMIZE}"     # optimization flags
     doappend allldflags " ${LDFLAGS_DEBUG}"        # debug flags
     doappend allldflags " ${LDFLAGS_USER}"         # specified by the user
+    doappend allldflags " ${LDFLAGS_COMPILER_APP}" # added by the config process
     doappend allldflags " ${LDFLAGS_APPLICATION}"  # added by the config process
     doappend allldflags " ${LDFLAGS_COMPILER}"     # link flags
   fi
@@ -333,18 +330,9 @@ if [ $link = T -a $shared = T ]; then
   doappend allldflags " ${LDFLAGS_SHARED_USER}"
 fi
 if [ \( $shared = T \) -o \( $mkexec = T \) ]; then
-  ldflags_libpath=""
-  if [ "${libpath}" != "" -a "${LDFLAGS_LIBPATH}" != "" ]; then
-    ldflags_libpath="${libpath}"
-  fi
   ldflags_runpath=""
   if [ "${runpath}" != "" -a "${LDFLAGS_RUNPATH}" != "" ]; then
     ldflags_runpath="${runpath}"
-  fi
-
-  ldflags_shared_libs=""
-  if [ "${libs}" != "" -a "${libpath}" != "" ]; then
-    ldflags_shared_libs="${libpath}"
   fi
 
   ldflags_exec_link=""
@@ -372,8 +360,9 @@ LDFLAGS=
 LIBS=
 cmd="${comp} ${allcflags} ${flags} ${allldflags} ${ldflags_exec_link} \
     $outflags $objects \
-    ${files} ${ldflags_libpath} ${ldflags_runpath} \
-    ${ldflags_shared_libs} ${alllibs} ${libs}"
+    ${files} ${ldflags_runpath} \
+    ${ldflags_shared_libs} ${alllibs}"
+
 disp=""
 if [ $compile = T ]; then
   disp="${disp}COMPILE ${files} ... "
@@ -399,6 +388,10 @@ if [ "$logfile" != "" ]; then
   out=`eval $cmd 2>&1`
   rc=$?
   puts "$out" >&9
+  # i don't know if there's a way to do this via the linker
+  if [ $link = T -a $shared = T -a $rc -eq 0 -a ${_MKCONFIG_SYSTYPE} = Darwin ]; then
+    install_name_tool -id @rpath/${outfile} ${outfile}
+  fi
   if [ $doecho = F -a $rc -ne 0 ]; then
     puts ""
     puts "    $cmd"

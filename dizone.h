@@ -26,7 +26,7 @@ extern "C" {
 typedef struct {
   zoneid_t    zoneid;
   char        name [ZONENAME_MAX];
-  char        rootpath [MAXPATHLEN];
+  char        rootpath [DI_MAXPATH];
   Size_t      rootpathlen;
 } di_zone_summ_t;
 

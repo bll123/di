@@ -81,7 +81,7 @@
  *
  */
 
-#include "config.h"
+#include "diconfig.h"
 
 #if _hdr_stdio
 # include <stdio.h>
@@ -107,10 +107,31 @@
 #if _hdr_wchar
 # include <wchar.h>
 #endif
+#if _hdr_limits
+# include <limits.h>        /* PATH_MAX */
+#endif
+#if _sys_param
+# include <sys/param.h>     /* MAXPATHLEN */
+#endif
 
 #include "di.h"
-#include "disystem.h"
-#include "distrutils.h"
+
+#if ! defined (DI_MAXPATH) && defined (PATH_MAX)
+# define DI_MAXPATH       PATH_MAX
+#endif
+#if ! defined (DI_MAXPATH) && defined (_POSIX_PATH_MAX)
+# define DI_MAXPATH       _POSIX_PATH_MAX
+#endif
+#if ! defined (DI_MAXPATH) && defined (LPNMAX)
+# define DI_MAXPATH       LPNMAX
+#endif
+#if ! defined (DI_MAXPATH) && defined (MAXPATHLEN)
+# define DI_MAXPATH       MAXPATHLEN
+#endif
+
+#if ! defined (DI_MAXPATH)
+# define DI_MAXPATH       1024
+#endif
 
 typedef struct {
   int             *maxlen;
@@ -159,6 +180,10 @@ main (int argc, const char * argv [])
   void      *di_data;
   int       exitflag;
 
+  if (strcmp (DI_VERSION, di_version ()) != 0) {
+    fprintf (stderr, "version mismatch %s %s\n", DI_VERSION, di_version ());
+    return 1;
+  }
   initLocale ();
   di_data = di_initialize ();
   exitflag = di_process_options (di_data, argc, argv, 1);
@@ -186,7 +211,7 @@ processExitFlag (void *di_data, int exitflag)
       }
       if (exitflag == DI_EXIT_VERS) {
         fprintf (stdout, "%s %s %s\n", DI_GT ("di version"),
-            DI_VERSION, DI_RELEASE_STATUS);
+            di_version (), DI_RELEASE_STATUS);
       }
       di_cleanup (di_data);
       exit (0);
@@ -204,7 +229,7 @@ static void
 usage (void)
 {
   fprintf (stdout, "%s %s\n",
-      DI_GT ("di version"), DI_VERSION);
+      DI_GT ("di version"), di_version ());
           /*  12345678901234567890123456789012345678901234567890123456789012345678901234567890 */
   fprintf (stdout, "%s\n",
       DI_GT ("Usage: di [-ajnt] [-d display-size] [-f format] [-x exclude-fstype-list]"));
@@ -272,7 +297,7 @@ di_display_data (void *di_data)
   int                 scaleidx;
   int                 scalehr;
   int                 blksz;
-  char                temp [MAXPATHLEN * 2];
+  char                temp [DI_MAXPATH * 2];
   di_disp_info_t      dispinfo;
   char                **strdata;
 

@@ -15,9 +15,9 @@ extern "C" {
 
 /* di defines */
 
-#define DI_MOUNTPT_LEN         MAXPATHLEN
-#define DI_FILESYSTEM_LEN         MAXPATHLEN
-#define DI_MOUNTOPT_LEN             MAXPATHLEN
+#define DI_MOUNTPT_LEN         DI_MAXPATH
+#define DI_FILESYSTEM_LEN         DI_MAXPATH
+#define DI_MOUNTOPT_LEN             DI_MAXPATH
 #define DI_MNT_TIME_LEN        24
 #ifndef DI_DEFAULT_DISP_SIZE
 # define DI_DEFAULT_DISP_SIZE "h"

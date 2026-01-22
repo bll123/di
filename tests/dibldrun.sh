@@ -35,11 +35,11 @@ preserveoutput () {
 
   bnm=`basename ${fn}`
   case $bnm in
-    di*)
-      bnm=`echo ${bnm} | sed 's,^di\.,,'`
+    di\.*)
+      bnm=`echo ${bnm} | sed -e 's,^di\.,,'`
       ;;
     *)
-      bnm=`echo ${bnm} | sed 's,\.[a-z]*,,'`
+      bnm=`echo ${bnm} | sed -e 's,\.[a-z]*,,'`
       ;;
   esac
   cp $f di-${tag}-${bnm}.out
@@ -82,6 +82,11 @@ bldrun () {
   #   contains 12 bytes of padding in a 224 byte structure [-Wexcess-padding]
   # clang:
   #   1 warning generated.
+  # Solaris:
+  #   diquota.c:654:7: warning: cast between incompatible function types
+  #   from ‘bool_t (*)(XDR *, struct getquota_args *)’
+  #   {aka ‘int (*)(XDR *, struct getquota_args *)’} to
+  #   ‘bool_t (*)(void)’ {aka ‘int (*)(void)’} [-Wcast-function-type]
   c=`${grepcmd} '(\([WE]\)|warning|error)' di-${tag}-bld.out |
       ${grepcmd} -v 'no-unknown-warning-option' |
       ${grepcmd} -v '_Werror_' |
@@ -91,6 +96,7 @@ bldrun () {
       ${grepcmd} -v '/[^d][^i][^.]\.h:.*warning' |
       ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
       ${grepcmd} -v 'unnecessary.*CHERI' |
+      ${grepcmd} -v 'cast between incompatible function types.*XDR' |
       ${grepcmd} -v 'Wexcess-padding' |
       ${grepcmd} -v '[0-9] warning generated' |
       ${grepcmd} -v '^(COMPILE|LINK)' |
@@ -106,6 +112,7 @@ bldrun () {
         ${grepcmd} -v '/[^d][^i][^.]\.h:.*warning' |
         ${grepcmd} -v 'rpcsvc.*deprecated and buggy' |
         ${grepcmd} -v 'unnecessary.*CHERI' |
+        ${grepcmd} -v 'cast between incompatible function types.*XDR' |
         ${grepcmd} -v 'Wexcess-padding' |
         ${grepcmd} -v '[0-9] warning generated' |
         ${grepcmd} -v '^(COMPILE|LINK)'
@@ -140,155 +147,283 @@ bldrun () {
 
   > di-${tag}-run.out
 
-  echo "-- RUN: -a -d g -f stbuf1cvpB2m -t" >> di-${tag}-run.out
-  ./x/bin/di -a -d g -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-a)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-a)"
+  pkgconfdir=""
+  if [ -d x/lib/pkgconfig ]; then
+    libsfx=""
+    pkgconfdir=x/lib/pkgconfig
+  fi
+  if [ -d x/lib64/pkgconfig ]; then
+    libsfx=64
+    pkgconfdir=x/lib64/pkgconfig
+  fi
+  if [ "$pkgconfdir" = "" ]; then
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: no pkgconfig dir"
+    echo "FAIL ${host}: ${tag}/${comp}: no pkgconfig dir"
     grc=1
+  else
+    # check installation of di.pc file
+    grep "^libdir=${loc}/x/lib${libsfx}" ${pkgconfdir}/di.pc >/dev/null 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: di.pc incorrect libdir"
+      echo "FAIL ${host}: ${tag}/${comp}: di.pc incorrect libdir"
+      grc=1
+    fi
+
+    grep "^includedir=${loc}/x/include" ${pkgconfdir}/di.pc >/dev/null 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: di.pc incorrect includedir"
+      echo "FAIL ${host}: ${tag}/${comp}: di.pc incorrect includedir"
+      grc=1
+    fi
   fi
 
-  echo "-- RUN: -d h -f stbuf1cvpB2m -t" >> di-${tag}-run.out
-  ./x/bin/di -d h -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-d h)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-d h)"
+  . ./VERSION.txt
+
+  # simple test to make sure the executable works...
+
+  echo "-- RUN: --version" >> di-${tag}-run.out
+  vers=`./x/bin/di --version` 2>di-${tag}-run.out
+  case ${vers} in
+    "di version ${DI_VERSION} ${DI_RELEASE_STATUS}")
+      ;;
+    *)
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: version mismatch /${vers}/${DI_VERSION}/"
+      echo "FAIL: ${host}: ${tag}/${comp}: version mismatch /${vers}/${DI_VERSION}/"
+      grc=1
+      ;;
+  esac
+
+  if [ $rc -eq 0 ]; then
+    echo "-- RUN: -a -d g -f stbuf1cvpB2m -t" >> di-${tag}-run.out
+    ./x/bin/di -a -d g -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-a)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-a)"
+      grc=1
+    fi
+
+    echo "-- RUN: -d h -f stbuf1cvpB2m -t" >> di-${tag}-run.out
+    ./x/bin/di -d h -f stbuf1cvpB2m -t >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-d h)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-d h)"
+      grc=1
+    fi
+
+    # need a run with the basic debug info shown
+    echo "-- RUN: -X 1" >> di-${tag}-run.out
+    ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-X 1)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-X 1)"
+      grc=1
+    fi
+
+    # json output
+    echo "-- RUN: -j" >> di-${tag}-run.out
+    ./x/bin/di -j >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-j)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-j)"
+      grc=1
+    fi
+
+    # csv output, no headers
+    echo "-- RUN: -n -C" >> di-${tag}-run.out
+    ./x/bin/di -n -C >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-n -C)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-n -C)"
+      grc=1
+    fi
+
+    # -I flag with unknown fs
+    echo "-- RUN: -I something" >> di-${tag}-run.out
+    ./x/bin/di -I something >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-I unk)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-I unk)"
+      grc=1
+    fi
+
+    # -x flag with unknown fs
+    echo "-- RUN: -x something" >> di-${tag}-run.out
+    ./x/bin/di -x something >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-x unk)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-x unk)"
+      grc=1
+    fi
+
+    fs=`./x/bin/di -f t -n | head -1`
+
+    # -I flag with known fs
+    echo "-- RUN: -I ${fs}" >> di-${tag}-run.out
+    ./x/bin/di -I ${fs} >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-I known)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-I known)"
+      grc=1
+    fi
+
+    # -x flag with known fs
+    echo "-- RUN: -x ${fs}" >> di-${tag}-run.out
+    ./x/bin/di -x ${fs} >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-x known)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-x known)"
+      grc=1
+    fi
+
+    # BLOCK_SIZE env var
+    echo "-- RUN: BLOCK_SIZE=k" >> di-${tag}-run.out
+    BLOCK_SIZE=k ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=k)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=k)"
+      grc=1
+    fi
+
+    # BLOCK_SIZE env var
+    echo "-- RUN: BLOCK_SIZE=M" >> di-${tag}-run.out
+    BLOCK_SIZE=M ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=M)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=M)"
+      grc=1
+    fi
+
+    # BLOCK_SIZE env var
+    echo "-- RUN: BLOCK_SIZE=MB" >> di-${tag}-run.out
+    BLOCK_SIZE=MB ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MB)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MB)"
+      grc=1
+    fi
+
+    # BLOCK_SIZE env var
+    echo "-- RUN: BLOCK_SIZE=MiB" >> di-${tag}-run.out
+    BLOCK_SIZE=MiB ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MiB)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MiB)"
+      grc=1
+    fi
+
+    # BLOCK_SIZE env var
+    echo "-- RUN: BLOCK_SIZE='MiB" >> di-${tag}-run.out
+    BLOCK_SIZE="'MiB" ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE='MiB)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE='MiB)"
+      grc=1
+    fi
+
+    # DI_ARGS env var
+    echo "-- RUN: DI_ARGS=-f SMbuvp" >> di-${tag}-run.out
+    DI_ARGS="-f SMbuvp" ./x/bin/di >> di-${tag}-run.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (DI_ARGS=-f SMbuvp)"
+      echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (DI_ARGS=-f SMbuvp)"
+      grc=1
+    fi
+  fi    # grc is 0
+
+  # try building and running the example file using the build script
+
+  exrc=0
+  pkgconfcmd=""
+  if [ ! -d x/share/di/examples ]; then
+    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: no example dir"
+    echo "FAIL ${host}: ${tag}/${comp}: no example dir"
     grc=1
+    exrc=1
+  fi
+  pkgconfcmd=`which pkg-config 2>/dev/null`
+  rc=$?
+  if [ $rc -ne 0 -o "x$pkgconfcmd" = x ]; then
+    echo "-- `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: no pkg-config"
+    exrc=1
   fi
 
-  # need a run with the basic debug info shown
-  echo "-- RUN: -X 1" >> di-${tag}-run.out
-  ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-X 1)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-X 1)"
-    grc=1
+  currloc=`pwd`
+  if [ $exrc -eq 0 ]; then
+    pcarg=${pkgconfdir}/di.pc
+    dilibd=`${pkgconfcmd} --libs-only-L ${pcarg}`
+    dilibd=`echo ${dilibd} | sed -e 's,^-L,,'`
+
+    case ${systype} in
+      Darwin)
+        DYLD_FALLBACK_LIBRARY_PATH=${dilibd}
+        export DYLD_FALLBACK_LIBRARY_PATH
+        ;;
+      MINGW64*)
+        PATH=${dilibd}:$PATH
+        ;;
+      OpenBSD)
+        # openbsd doesn't have a .so symlink, not sure how to link
+        # to local libraries.
+        exrc=1
+        ;;
+      *)
+        LD_LIBRARY_PATH=${dilibd}
+        export LD_LIBRARY_PATH
+        ;;
+    esac
   fi
 
-  # json output
-  echo "-- RUN: -j" >> di-${tag}-run.out
-  ./x/bin/di -j >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-j)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-j)"
-    grc=1
+  if [ $exrc -eq 0 ]; then
+    cd x/share/di/examples
+    CC=${comp} sh ./build.sh ${loc}/x > ${currloc}/di-${tag}-ex.out 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: build of example failed"
+      echo "FAIL ${host}: ${tag}/${comp}: build of example failed"
+      grc=1
+    fi
+
+    if [ $rc -eq 0 ]; then
+      ./diex . 0.0000001 >> ${currloc}/di-${tag}-ex.out 2>&1
+      rc=$?
+      if [ $rc -ne 0 ]; then
+        echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: run of diex failed (enough)"
+        echo "FAIL ${host}: ${tag}/${comp}: run of diex failed (enough)"
+        grc=1
+      fi
+
+      ./diex . 5000.0  >> ${currloc}/di-${tag}-ex.out 2>&1
+      rc=$?
+      if [ $rc -ne 1 ]; then
+        echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: run of diex failed (not enough)"
+        echo "FAIL ${host}: ${tag}/${comp}: run of diex failed (not enough)"
+        grc=1
+      fi
+
+      rm -f diex
+    fi
   fi
 
-  # csv output, no headers
-  echo "-- RUN: -n -C" >> di-${tag}-run.out
-  ./x/bin/di -n -C >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-n -C)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-n -C)"
-    grc=1
-  fi
+  cd $currloc
 
-  # -I flag with unknown fs
-  echo "-- RUN: -I something" >> di-${tag}-run.out
-  ./x/bin/di -I something >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-I unk)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-I unk)"
-    grc=1
-  fi
-
-  # -x flag with unknown fs
-  echo "-- RUN: -x something" >> di-${tag}-run.out
-  ./x/bin/di -x something >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-x unk)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-x unk)"
-    grc=1
-  fi
-
-  fs=`./x/bin/di -f t -n | head -1`
-
-  # -I flag with known fs
-  echo "-- RUN: -I ${fs}" >> di-${tag}-run.out
-  ./x/bin/di -I ${fs} >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-I known)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-I known)"
-    grc=1
-  fi
-
-  # -x flag with known fs
-  echo "-- RUN: -x ${fs}" >> di-${tag}-run.out
-  ./x/bin/di -x ${fs} >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (-x known)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (-x known)"
-    grc=1
-  fi
-
-  # BLOCK_SIZE env var
-  echo "-- RUN: BLOCK_SIZE=k" >> di-${tag}-run.out
-  BLOCK_SIZE=k ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=k)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=k)"
-    grc=1
-  fi
-
-  # BLOCK_SIZE env var
-  echo "-- RUN: BLOCK_SIZE=M" >> di-${tag}-run.out
-  BLOCK_SIZE=M ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=M)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=M)"
-    grc=1
-  fi
-
-  # BLOCK_SIZE env var
-  echo "-- RUN: BLOCK_SIZE=MB" >> di-${tag}-run.out
-  BLOCK_SIZE=MB ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MB)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MB)"
-    grc=1
-  fi
-
-  # BLOCK_SIZE env var
-  echo "-- RUN: BLOCK_SIZE=MiB" >> di-${tag}-run.out
-  BLOCK_SIZE=MiB ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MiB)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE=MiB)"
-    grc=1
-  fi
-
-  # BLOCK_SIZE env var
-  echo "-- RUN: BLOCK_SIZE='MiB" >> di-${tag}-run.out
-  BLOCK_SIZE="'MiB" ./x/bin/di -X 1 >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE='MiB)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (BLOCK_SIZE='MiB)"
-    grc=1
-  fi
-
-  # DI_ARGS env var
-  echo "-- RUN: DI_ARGS=-f SMbuvp" >> di-${tag}-run.out
-  DI_ARGS="-f SMbuvp" ./x/bin/di >> di-${tag}-run.out 2>&1
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "== `TZ=PST8PDT date '+%T'` ${host}: ${tag}/${comp}: execution of di failed (DI_ARGS=-f SMbuvp)"
-    echo "FAIL ${host}: ${tag}/${comp}: execution of di failed (DI_ARGS=-f SMbuvp)"
-    grc=1
-  fi
+  # fin
 
   if [ $tag = cmake -o $tag = pcmake ]; then
     for f in build/CMakeFiles/CMakeOutput.log \
@@ -296,8 +431,8 @@ bldrun () {
         build/CMakeFiles/CMakeConfigureLog.yaml \
         build/CMakeCache.txt \
         build/config.h \
-        x/lib/pkgconfig/di.pc \
-        x/lib64/pkgconfig/di.pc \
+        build/diconfig.h \
+        x/lib${libsfx}/pkgconfig/di.pc \
         ; do
       if [ -f $f ]; then
         preserveoutput $f
@@ -309,10 +444,12 @@ bldrun () {
         mkc_files/mkconfig.log \
         mkc_files/mkconfig_env.log \
         config.h \
+        diconfig.h \
         di.env \
         di.reqlibs \
-        x/lib/pkgconfig/di.pc \
-        x/lib64/pkgconfig/di.pc \
+        libdi.env \
+        libdi.reqlibs \
+        x/lib${libsfx}/pkgconfig/di.pc \
         ; do
       if [ -f $f ]; then
         preserveoutput $f

@@ -10,7 +10,7 @@ if [ -f VERSION.txt ]; then
 fi
 systype=`uname -s`
 
-if [ $# -gt 0 -a $1 = mkc ]; then
+if [ $# -gt 0 -a "$1" = mkc ]; then
   runpath=.
   . ./VERSION.txt
 elif [ $# -gt 0 ]; then
@@ -24,7 +24,7 @@ fi
 
 case ${systype} in
   Darwin)
-    if [ $# -gt 0 -a $1 = mkc ]; then
+    if [ $# -gt 0 -a "$1" = mkc ]; then
       DYLD_FALLBACK_LIBRARY_PATH=`pwd`
     elif [ $# -gt 0 ]; then
       DYLD_FALLBACK_LIBRARY_PATH=${1}
@@ -38,7 +38,7 @@ case ${systype} in
     PATH=`pwd`:$PATH
     ;;
   *)
-    if [ $# -gt 0 -a $1 = mkc ]; then
+    if [ $# -gt 0 -a "$1" = mkc ]; then
       LD_LIBRARY_PATH=`pwd`
     elif [ $# -gt 0 ]; then
       LD_LIBRARY_PATH=${1}

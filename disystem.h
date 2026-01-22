@@ -33,21 +33,21 @@
 # include <sys/param.h>     /* MAXPATHLEN */
 #endif
 
-#if ! defined (MAXPATHLEN)
-# if defined (_POSIX_PATH_MAX)
-#  define MAXPATHLEN        _POSIX_PATH_MAX
-# else
-#  if defined (PATH_MAX)
-#   define MAXPATHLEN       PATH_MAX
-#  endif
-#  if defined (LPNMAX)
-#   define MAXPATHLEN       LPNMAX
-#  endif
-# endif
+#if ! defined (DI_MAXPATH) && defined (PATH_MAX)
+# define DI_MAXPATH       PATH_MAX
+#endif
+#if ! defined (DI_MAXPATH) && defined (_POSIX_PATH_MAX)
+# define DI_MAXPATH       _POSIX_PATH_MAX
+#endif
+#if ! defined (DI_MAXPATH) && defined (LPNMAX)
+# define DI_MAXPATH       LPNMAX
+#endif
+#if ! defined (DI_MAXPATH) && defined (MAXPATHLEN)
+# define DI_MAXPATH       MAXPATHLEN
 #endif
 
-#if ! defined (MAXPATHLEN)
-# define MAXPATHLEN         1024
+#if ! defined (DI_MAXPATH)
+# define DI_MAXPATH       1024
 #endif
 
 #if _sys_fstyp                          /* HP-UX, Solaris */

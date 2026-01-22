@@ -1,10 +1,10 @@
-prefix=@CMAKE_INSTALL_PREFIX@
-includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
-libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+prefix=@prefix@
+includedir=@includedir@
+libdir=@libdir@
 
 Name: libdi
 Description: Disk Information Library
 Version: @DI_VERSION@
-URL: https://sourceforge.net/project/di/
-Libs: -L${libdir} -ldi
+URL: https://sourceforge.net/project/diskinfo-di/
+Libs: @addtllibargs@ -L${libdir} -ldi
 Cflags: -I${includedir}

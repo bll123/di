@@ -141,13 +141,17 @@ Files to include in your report:
 
 - cmake:
     - build/config.h
+    - build/diconfig.h
     - build/CMakeOutput.log
     - build/CMakeError.log
     - build/CMakeFiles/CMakeConfigureLog.yaml
 - mkconfig:
     - config.h
+    - idconfig.h
     - di.env
+    - libdi.env
     - di.reqlibs
+    - libdi.reqlibs
     - mkc_files/mkconfig.log
     - mkc_files/mkconfig_env.log
     - mkc_files/mkc_compile.log

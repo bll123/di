@@ -1,0 +1,23 @@
+loadunit env-main
+loadunit env-cc
+
+output  libdi.env
+
+pkg cflags libtirpc
+pkg libs libtirpc
+
+env DI_USE_MATH
+
+if nousemath ! _env_DI_USE_MATH || == _env_DI_USE_MATH DI_MPDECIMAL
+ pkg cflags libmpdec
+ pkg libs libmpdec
+endif
+if nomath_g ! _pkg_libs_libmpdec || == _env_DI_USE_MATH DI_GMP
+ pkg cflags gmp
+ pkg libs gmp
+endif
+if nomath_t ( ! _pkg_libs_gmp && ! _pkg_libs_libmpdec ) || == _env_DI_USE_MATH DI_TOMMATH
+ pkg cflags libtommath
+ pkg libs libtommath
+endif
+

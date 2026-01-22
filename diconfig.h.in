@@ -1,0 +1,74 @@
+/* Copyright 2025-2026 Brad Lanam Pleasant Hill CA */
+
+#ifndef INC_DICONFIG_H
+#define INC_DICONFIG_H 1
+
+#cmakedefine01 _hdr_stdio
+#cmakedefine01 _hdr_stdlib
+#cmakedefine01 _sys_types
+#cmakedefine01 _sys_param
+#define _key_void 1
+#define _key_const 1
+#define _param_void_star 1
+#cmakedefine01 _hdr_libintl
+#cmakedefine01 _hdr_limits
+#cmakedefine01 _hdr_locale
+#cmakedefine01 _hdr_stdbool
+#cmakedefine01 _hdr_stddef
+#cmakedefine01 _hdr_stdint
+#cmakedefine01 _hdr_string
+#cmakedefine01 _hdr_strings
+#cmakedefine01 _hdr_wchar
+
+#cmakedefine01 _typ_size_t
+
+#cmakedefine01 _lib_bindtextdomain
+#cmakedefine01 _lib_gettext
+#cmakedefine01 _lib_mbrlen
+#cmakedefine01 _lib_setlocale
+#cmakedefine01 _lib_textdomain
+
+#cmakedefine01 _enable_nls
+
+#define DI_PREFIX "${CMAKE_INSTALL_PREFIX}"
+#define DI_VERSION "${DI_VERSION}"
+#define DI_RELEASE_STATUS "${DI_RELEASE_STATUS}"
+
+#ifndef MKC_STANDARD_DEFS
+# define MKC_STANDARD_DEFS 1
+# if ! _key_void
+#  define void int
+# endif
+# if ! _key_void || ! _param_void_star
+   typedef char *pvoid;
+# else
+   typedef void *pvoid;
+# endif
+# if ! _key_const
+#  define const
+# endif
+#endif /* MKC_STANDARD_DEFS */
+
+#if ! defined (DI_PREFIX)
+# error "DI_PREFIX is not set"
+#endif
+
+#define DI_BUILD_SYS "${DI_BUILD_SYS}"
+#define DI_LOCALE_DIR DI_PREFIX "/share/locale"
+
+#if _typ_size_t
+# define Size_t size_t
+#else
+# define Size_t unsigned long
+#endif
+
+/* macro for gettext() */
+#ifndef DI_GT
+# if _enable_nls
+#  define DI_GT(args) gettext(args)
+# else
+#  define DI_GT(args) (args)
+# endif
+#endif
+
+#endif /* INC_DICONFIG_H */
