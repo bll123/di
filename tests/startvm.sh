@@ -6,6 +6,14 @@
 host=$1
 validate=${2:-T}
 
+dodisp=F
+case $1 in
+  --display|--disp)
+    dodisp=T
+    shift
+    ;;
+esac
+
 if [[ x$host == x ]]; then
   echo "host must be specified."
   exit 1
@@ -29,7 +37,11 @@ if [[ ${ipaddr} != "" && ${ipaddr} != - ]]; then
 fi
 
 echo "-- $(TZ=PST8PDT date '+%T') ${host}: starting vm"
-nohup VBoxManage startvm ${host} > /dev/null 2>&1 &
+args=""
+if [[ $dodisp == F ]]; then
+  args="--type=headless"
+fi
+nohup VBoxManage startvm ${host} ${args} > /dev/null 2>&1 &
 
 # give time for vboxmanage to work and the host to start...
 if [[ $validate == T ]]; then

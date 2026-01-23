@@ -30,17 +30,11 @@ fi
 
 . ./VERSION.txt
 
-libargs=""
-#if [ "${LDFLAGS_RUNPATH}" != "" ]; then
-#  libargs="${LDFLAGS_RUNPATH}${LIBDIR}"
-#fi
-
 test -d ${INST_PKGCDIR} || mkdir -p ${INST_PKGCDIR}
 cat di.pc.in | \
 sed -e "s,@prefix@,${PREFIX},g" \
   -e "s,@includedir@,${INCDIR},g" \
   -e "s,@libdir@,${LIBDIR},g" \
-  -e "s|@addtllibargs@|${libargs}|g" \
   -e "s,@DI_VERSION@,${DI_VERSION},g" \
   > ${INST_PKGCDIR}/di.pc
 

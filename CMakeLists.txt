@@ -1351,13 +1351,6 @@ include (CMakePackageConfigHelpers)
 set (prefix "${CMAKE_INSTALL_PREFIX}")
 set (includedir "${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
 set (libdir "${prefix}/${CMAKE_INSTALL_LIBDIR}")
-set (addtllibargs "")
-#if (CMAKE_HOST_SOLARIS OR ${CMAKE_SYSTEM_NAME} STREQUAL "NetBSD")
-#  set (addtllibargs "-Wl,-R${libdir}")
-#endif()
-#if (APPLE)
-#  set (addtllibargs "-Wl,-rpath,${libdir}")
-#endif()
 
 configure_file (${CMAKE_SOURCE_DIR}/di.pc.in di.pc @ONLY)
 

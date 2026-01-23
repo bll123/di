@@ -1,5 +1,10 @@
 CHANGES
 
+    2.6.12 2026-1-23
+      Link: fix runpath.
+      Link: MacOS: set shared library id with @rpath.
+      Split application compiler flags from application flags.
+
     2.6.11 2025-11-10
       Link: move system libraries to late in the link.
 

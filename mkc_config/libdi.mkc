@@ -21,7 +21,6 @@ hdr     limits.h
 hdr     linux/dqblk_xfs.h
 # aix 5 doesn't declare their own, use the compatibility version
 hdr     linux/quota.h
-hdr     libintl.h
 hdr     libprop/proplib.h
 hdr     malloc.h
 hdr     math.h

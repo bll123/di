@@ -7,13 +7,17 @@
 **6.2.2 2026-1---**
 
 * Bug Fixes:
+    * Fix build on NetBSD.
     * Fix pkg-config .pc file.
-    * Fix various linkage errors when using mkconfig.
+    * Fix staging process when building with mkconfig.
+    * Fix various link issues.
 * Changes:
     * Add examples directory with build script.
+* Internal:
+    * Minor code cleanup.
+    * Update mkconfig to version 2.6.12.
 
 -->
-
 
 **6.2.1 2026-1-3**
 

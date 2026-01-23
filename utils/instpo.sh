@@ -3,6 +3,8 @@
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
 
+set -x
+
 PODIR=$1
 INST_LOCALEDIR=$2
 TMPPODIR=$3
@@ -25,10 +27,6 @@ fi
 if [ "x${TMPPODIR}" = x ]; then
   echo "instpo.sh: No temporary dir specified"
   exit 1
-fi
-
-if [ ! "x${DESTDIR}" = x ]; then
-  INST_LOCALEDIR="${DESTDIR}/${INST_LOCALEDIR}"
 fi
 
 msgfmtcmd=`which gmsgfmt 2>/dev/null`

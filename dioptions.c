@@ -31,9 +31,6 @@
 #if _hdr_strings
 # include <strings.h>
 #endif
-#if _hdr_libintl
-# include <libintl.h>
-#endif
 
 #include "di.h"
 #include "disystem.h"
