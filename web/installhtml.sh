@@ -47,7 +47,8 @@ if [[ $DI_RELEASE_STATUS != "production" ]]; then
 fi
 
 if [[ $ver != "" ]] ; then
-  cp -pf web/index.html web/di-ss.png web/hpux-di118.png $TMP
+  cp -pf web/index.html web/di-ss.png \
+      web/hpux-di118.png web/dilogo-145.png web/dilogo-64.png $TMP
   sed -i -e "s/#VERSION#/${ver}/g" $TMP/index.html
 
   for f in man/*.1; do
