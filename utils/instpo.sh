@@ -3,8 +3,6 @@
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
 
-set -x
-
 PODIR=$1
 INST_LOCALEDIR=$2
 TMPPODIR=$3

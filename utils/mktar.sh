@@ -11,9 +11,14 @@ fi
 . ./VERSION.txt
 ver=$DI_VERSION
 
+tag=""
+if [[ $DI_RELEASE_STATUS != production ]]; then
+  tag="-$DI_RELEASE_STATUS"
+fi
+
 PKG=di
 cwd=$(pwd)
-dir="${PKG}-${ver}${beta}"
+dir="${PKG}-${ver}${tag}"
 rm -rf $dir > /dev/null 2>&1
 mkdir $dir
 mkdir $dir/utils

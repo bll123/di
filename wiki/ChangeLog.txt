@@ -4,11 +4,15 @@
 
 <!--
 
-**6.2.2 2026-1---**
+**6.2.2.1 2026-1-23**
+
+-->
+
+**6.2.2.1 2026-1-23**
 
 * Bug Fixes:
     * Fix build on NetBSD.
-    * Fix pkg-config .pc file.
+    * Fixes for pkg-config .pc file.
     * Fix staging process when building with mkconfig.
     * Fix various link issues.
 * Changes:
@@ -16,8 +20,6 @@
 * Internal:
     * Minor code cleanup.
     * Update mkconfig to version 2.6.12.
-
--->
 
 **6.2.1 2026-1-3**
 

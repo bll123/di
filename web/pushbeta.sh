@@ -32,7 +32,7 @@ export ssh
 ver=$DI_VERSION
 
 fn=di-${ver}-beta.tar.gz
-rsync -e "$ssh" -aS ${fn} README.txt \
-    ${remuser}@${server}:${wwwpath}/beta
+rsync -e "$ssh" -aS ${fn} \
+    ${remuser}@${server}:${wwwpath}/beta/
 
 exit 0
