@@ -1413,13 +1413,13 @@ install (FILES
 
 # .po files
 
-if (_enable_nls)
-  install (CODE
-    "execute_process (
-      COMMAND \"${PROJECT_SOURCE_DIR}/utils/instpo.sh\"
-          \"${PROJECT_SOURCE_DIR}/po\"
-          \"${CMAKE_INSTALL_FULL_LOCALEDIR}\"
-          \"${CMAKE_BINARY_DIR}/tmppo\"
-    )"
-  )
-endif()
+install (CODE
+  "execute_process (
+    COMMAND \"echo install-po\"
+    COMMAND \"${PROJECT_SOURCE_DIR}/utils/instpo.sh\"
+        \"${CMAKE_BINARY_DIR}\"
+        \"${PROJECT_SOURCE_DIR}/po\"
+        \"${CMAKE_INSTALL_FULL_LOCALEDIR}\"
+        \"${CMAKE_BINARY_DIR}/tmppo\"
+  )"
+)

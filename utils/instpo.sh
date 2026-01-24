@@ -3,9 +3,30 @@
 # Copyright 2025 Brad Lanam Pleasant Hill CA
 #
 
-PODIR=$1
-INST_LOCALEDIR=$2
-TMPPODIR=$3
+BUILDDIR=$1
+PODIR=$2
+INST_LOCALEDIR=$3
+TMPPODIR=$4
+
+DEST_LOCALEDIR="${DESTDIR}${INST_LOCALEDIR}"
+
+if [ "x${BUILDDIR}" = x ]; then
+  echo "instpo.sh: No build dir specified"
+  exit 1
+fi
+
+if [ ! -f "${BUILDDIR}/diconfig.h" ]; then
+  echo "instpo.sh: Could not locate diconfig.h"
+  exit 1
+fi
+
+#   diconfig.h:
+#   #define _enable_nls 1
+grep -l '^#define _enable_nls 1' ${BUILDDIR}/diconfig.h >/dev/null 2>&1
+rc=$?
+if [ $rc -ne 0 ]; then
+  exit 0
+fi
 
 if [ "x${PODIR}" = x ]; then
   echo "instpo.sh: No po/ dir specified"
@@ -62,7 +83,7 @@ if [ $rc -ne 0 ]; then
   exit 0
 fi
 
-test -d "${INST_LOCALEDIR}" || mkdir -p "${INST_LOCALEDIR}"
+test -d "${DEST_LOCALEDIR}" || mkdir -p "${DEST_LOCALEDIR}"
 test -d "${TMPPODIR}" || mkdir -p "${TMPPODIR}"
 
 for i in *.po; do
@@ -76,10 +97,11 @@ for i in *.po; do
   if [ ! -f "${TMPPODIR}/$j.mo" ]; then
     continue
   fi
-  test -d ${INST_LOCALEDIR}/$j/LC_MESSAGES ||
-      mkdir -p ${INST_LOCALEDIR}/$j/LC_MESSAGES
-  cp -pf "${TMPPODIR}/$j.mo" ${INST_LOCALEDIR}/$j/LC_MESSAGES/di.mo
+  test -d "${DEST_LOCALEDIR}/$j/LC_MESSAGES" ||
+      mkdir -p "${DEST_LOCALEDIR}/$j/LC_MESSAGES"
+  cp -pf "${TMPPODIR}/$j.mo" "${DEST_LOCALEDIR}/$j/LC_MESSAGES/di.mo"
   rm -f "${TMPPODIR}/$j.mo"
+  echo "-- Installing: ${DEST_LOCALEDIR}/$j/LC_MESSAGES/di.mo"
 done
 
 exit 0

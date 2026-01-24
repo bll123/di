@@ -325,7 +325,7 @@ mkc-install-examples:
 
 .PHONY: mkc-install-po
 mkc-install-po:
-	-./utils/instpo.sh "`pwd`/po" $(INST_LOCALEDIR) "`pwd`/tmp"
+	-./utils/instpo.sh . "`pwd`/po" "$(INST_LOCALEDIR)" "`pwd`/tmp"
 
 # -lintl and -liconv are removed, as those libraries are only needed
 # for the main di program, not to link with the library.

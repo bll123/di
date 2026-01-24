@@ -4,9 +4,15 @@
 
 <!--
 
-**6.2.2.1 2026-1-23**
+**6.2.2.3 2026-1---**
 
 -->
+
+**6.2.2.2 2026-1-23**
+
+* Bug Fixes:
+    * Fix install of .po files when staging.
+    * Fix install of .po files via cmake.
 
 **6.2.2.1 2026-1-23**
 
