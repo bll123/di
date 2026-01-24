@@ -35,8 +35,8 @@ AIX: Only access to version 7.1 via the compiler farm.
  FreeBSD 10.3 | - | 6.2.2<br>2026-1-23 | - | - | - | - | - | -
  FreeBSD 11 | - | 6.2.2<br>2026-1-23 | - | - | - | - | - | -
  FreeBSD 13.4 | 6.2.2<br>2026-1-23 | 6.2.2<br>2026-1-23 | - | - | - | - | - | getfsstat
- FreeBSD 14.3 | 6.2.2<br>2026-1-23 | 6.2.2<br>2026-1-23 | - | - | - | - | - | getfsstat
- FreeBSD 15<br>(CHERI-BSD) | 6.2.2<br>2026-1-23 | 6.2.2<br>2026-1-23 | - | - | - | - | - | getfsstat cfarm
+ FreeBSD 14.3 | 6.2.2.2<br>2026-1-24 | 6.2.2.2<br>2026-1-24 | - | - | - | - | - | getfsstat
+ FreeBSD 15<br>(CHERI-BSD) | 6.2.2<br>2026-1-23 | 6.2.2.2<br>2026-1-24 | - | - | - | - | - | getfsstat cfarm
  NetBSD 1.62 | - | - | - | - | - | - | - | -
  NetBSD 2.0 | n/a | 4.99.3<br>2025-1-25 | - | - | - | - | - | many odd warnings
  NetBSD 3.0.1 | - | - | - | - | - | - | - | -
@@ -70,8 +70,8 @@ AIX: Only access to version 7.1 via the compiler farm.
  Debian 9.13 | - | 6.1.0<br>2025-11-3 | - | - | - | - | - | cfarm
  Debian 10 | - | - | - | - | - | - | - | -
  Debian 11 | 6.2.2<br>2026-1-23 | 6.2.2<br>2026-1-23 | - | - | - | - | - | cfarm
- Debian 12 | 6.2.2<br>2026-1-23 | 6.2.2<br>2026-1-23 | - | - | - | - | - | cfarm
- Debian 13 | 6.2.2<br>2026-1-23 | 6.2.2<br>2026-1-23 | - | - | - | - | - | cfarm
+ Debian 12 | 6.2.2<br>2026-1-23 | 6.2.2.2<br>2026-1-24 | - | - | - | - | - | cfarm
+ Debian 13 | 6.2.2.2<br>2026-1-24 | 6.2.2.2<br>2026-1-24 | - | - | - | - | - | cfarm
  Debian 13 | 6.2.2<br>2026-1-23 | 6.2.2<br>2026-1-23 | - | - | - | - | - |
  Devuan 2 | - | - | - | - | - | - | - | -
  Linux Mint 17 | - | 6.0.0<br>2025-3-10 | - | - | - | - | - | -
@@ -80,7 +80,7 @@ AIX: Only access to version 7.1 via the compiler farm.
  Linux Mint 21 | - | 6.2.2<br>2026-1-23 | - | - | - | - | - | -
  MX Linux 21<br>(Debian 11)| 6.2.2<br>2026-1-23 | 6.2.2<br>2026-1-23 | - | - | - | - | - | get/set/endmntent statvfs
  MX Linux 23<br>(Debian 12)| 6.2.2<br>2026-1-23 | 6.2.2<br>2026-1-23 | ok | - | ok | - | - | get/set/endmntent statvfs
- MX Linux 25<br>(Debian 13)| 6.2.2<br>2026-1-23<br>gcc clang | 6.2.2<br>2026-1-23<br>gcc clang | ok | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
+ MX Linux 25<br>(Debian 13)| 6.2.2.2<br>2026-1-24<br>gcc clang | 6.2.2.2<br>2026-1-24<br>gcc clang | ok | ok | ok | - | - | get/set/endmntent statvfs<br>Primary Development
  Ubuntu 14.04<br>(32-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | - | -
  Ubuntu 14.04<br>(64-bit) | n/a | 6.0.0<br>2025-3-10 | - | - | - | - | - | -
  Ubuntu 16.04<br>(32-bit) | n/a | 6.2.2<br>2026-1-23 | - | - | - | - | - | -

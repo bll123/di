@@ -1415,7 +1415,6 @@ install (FILES
 
 install (CODE
   "execute_process (
-    COMMAND \"echo install-po\"
     COMMAND \"${PROJECT_SOURCE_DIR}/utils/instpo.sh\"
         \"${CMAKE_BINARY_DIR}\"
         \"${PROJECT_SOURCE_DIR}/po\"
